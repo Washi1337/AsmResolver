@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
@@ -15,7 +16,7 @@ namespace AsmResolver.DotNet.Tests
             {
                 var stream = new MemoryStream();
                 module.Write(stream);
-                module = ModuleDefinition.FromReader(new ByteArrayReader(stream.ToArray()));
+                module = ModuleDefinition.FromReader(ByteArrayReaderFactory.CreateReader(stream.ToArray()));
             }
 
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SecurityAttributes));
@@ -40,7 +41,7 @@ namespace AsmResolver.DotNet.Tests
 
             var declaration = method.SecurityDeclarations[0];
             Assert.Single(declaration.PermissionSet.Attributes);
-            
+
             var attribute = declaration.PermissionSet.Attributes[0];
             Assert.Equal(nameof(CustomCodeAccessSecurityAttribute), attribute.AttributeType.Name);
             Assert.Empty(attribute.NamedArguments);

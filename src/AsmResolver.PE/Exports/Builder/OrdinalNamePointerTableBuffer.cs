@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Exports.Builder
 {
@@ -10,8 +11,8 @@ namespace AsmResolver.PE.Exports.Builder
     public class OrdinalNamePointerTableBuffer : SegmentBase
     {
         private readonly NameTableBuffer _nameTableBuffer;
-        private readonly List<ushort> _ordinals = new List<ushort>();
-        private readonly List<ExportedSymbol> _namedEntries = new List<ExportedSymbol>();
+        private readonly List<ushort> _ordinals = new();
+        private readonly List<ExportedSymbol> _namedEntries = new();
 
         /// <summary>
         /// Creates a new empty ordinal and name-pointer table buffer.
@@ -35,13 +36,13 @@ namespace AsmResolver.PE.Exports.Builder
         /// <summary>
         /// Gets the relative virtual address (RVA) to the name pointer table.
         /// </summary>
-        public uint NamePointerTableRva => Rva + OrdinalTableSize; 
-        
+        public uint NamePointerTableRva => Rva + OrdinalTableSize;
+
         /// <summary>
         /// Gets the raw size in bytes of the name pointer.
         /// </summary>
         public uint NamePointerTableSize => (uint) (_namedEntries.Count * sizeof(uint));
-        
+
         /// <summary>
         /// When the symbol is exported by name, adds the ordinal and name pointer pair to the buffer.
         /// </summary>
@@ -53,8 +54,8 @@ namespace AsmResolver.PE.Exports.Builder
                 _namedEntries.Add(symbol);
                 _ordinals.Add((ushort) (symbol.Ordinal - symbol.ParentDirectory.BaseOrdinal));
             }
-        } 
-        
+        }
+
         /// <inheritdoc />
         public override uint GetPhysicalSize() => OrdinalTableSize + NamePointerTableSize;
 

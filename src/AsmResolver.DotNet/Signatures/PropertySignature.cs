@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -18,7 +19,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The property signature.</returns>
-        public static PropertySignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
+        public static PropertySignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
             var attributes = (CallingConventionAttributes) reader.ReadByte();
             if ((attributes & CallingConventionAttributes.Property) == 0)
@@ -28,7 +29,7 @@ namespace AsmResolver.DotNet.Signatures
             }
 
             var result = new PropertySignature(attributes);
-            result.ReadParametersAndReturnType(context, reader);
+            result.ReadParametersAndReturnType(context, ref reader);
             return result;
         }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.PE.DotNet.Cil
@@ -9,17 +10,17 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public class CilDisassembler
     {
-        private readonly IBinaryStreamReader _reader;
         private readonly ICilOperandResolver _operandResolver;
+        private BinaryStreamReader _reader;
         private int _currentOffset;
 
         /// <summary>
         /// Creates a new CIL disassembler using the provided input stream.
         /// </summary>
         /// <param name="reader">The input stream to read the code from.</param>
-        public CilDisassembler(IBinaryStreamReader reader)
+        public CilDisassembler(in BinaryStreamReader reader)
         {
-            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            _reader = reader;
         }
 
         /// <summary>
@@ -27,9 +28,9 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="reader">The input stream to read the code from.</param>
         /// <param name="operandResolver">The object responsible for resolving operands.</param>
-        public CilDisassembler(IBinaryStreamReader reader, ICilOperandResolver operandResolver)
+        public CilDisassembler(in BinaryStreamReader reader, ICilOperandResolver operandResolver)
         {
-            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            _reader = reader;
             _operandResolver = operandResolver ?? throw new ArgumentNullException(nameof(operandResolver));
         }
 

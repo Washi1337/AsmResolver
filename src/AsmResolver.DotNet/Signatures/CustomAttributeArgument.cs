@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -18,19 +19,19 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="reader">The input stream.</param>
         /// <returns>The argument.</returns>
         public static CustomAttributeArgument FromReader(in BlobReadContext context, TypeSignature argumentType,
-            IBinaryStreamReader reader)
+            ref BinaryStreamReader reader)
         {
-            var elementReader = new CustomAttributeArgumentReader(context, reader);
-            elementReader.ReadValue(argumentType);
-            
+            var elementReader = CustomAttributeArgumentReader.Create();
+            elementReader.ReadValue(context, ref reader, argumentType);
+
             return new CustomAttributeArgument(argumentType, elementReader.Elements)
             {
                 IsNullArray = elementReader.IsNullArray
             };
         }
-        
+
         /// <summary>
-        /// Creates a new empty custom attribute argument. 
+        /// Creates a new empty custom attribute argument.
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
         public CustomAttributeArgument(TypeSignature argumentType)
@@ -40,7 +41,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
-        /// Creates a new custom attribute argument. 
+        /// Creates a new custom attribute argument.
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
         /// <param name="value">The value of the argument.</param>
@@ -49,9 +50,9 @@ namespace AsmResolver.DotNet.Signatures
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
             Elements = new List<object>(1) {value};
         }
-        
+
         /// <summary>
-        /// Creates a new custom attribute array argument. 
+        /// Creates a new custom attribute array argument.
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
         /// <param name="elements">The value making up the elements of the array argument.</param>
@@ -62,7 +63,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
-        /// Creates a new custom attribute array argument. 
+        /// Creates a new custom attribute array argument.
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
         /// <param name="elements">The value making up the elements of the array argument.</param>

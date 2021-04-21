@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="ManifestResource"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedManifestResource : ManifestResource
     {
@@ -63,14 +63,17 @@ namespace AsmResolver.DotNet.Serialized
             if (_row.Implementation != 0)
                 return null;
 
-            var reader = _context.Image.DotNetDirectory.DotNetResources.CreateManifestResourceReader(_row.Offset);
-            return reader is null 
-                ? null 
-                : DataSegment.FromReader(reader);
+            if (!_context.Image.DotNetDirectory.DotNetResources
+                .TryCreateManifestResourceReader(_row.Offset, out var reader))
+            {
+                return null;
+            }
+
+            return DataSegment.FromReader(ref reader);
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

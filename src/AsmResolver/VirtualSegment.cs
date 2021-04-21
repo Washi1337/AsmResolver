@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver
 {
@@ -42,10 +43,10 @@ namespace AsmResolver
             get => _rva;
             set
             {
-                _rva = value;                
+                _rva = value;
                 PhysicalContents?.UpdateOffsets(Offset, value);
             }
-        } 
+        }
 
         /// <inheritdoc />
         public bool CanUpdateOffsets => PhysicalContents?.CanUpdateOffsets ?? false;
@@ -69,7 +70,7 @@ namespace AsmResolver
         public uint GetVirtualSize() => VirtualSize;
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReader(ulong fileOffset, uint size)
+        public BinaryStreamReader CreateReader(ulong fileOffset, uint size)
         {
             return PhysicalContents is IReadableSegment readableSegment
                 ? readableSegment.CreateReader(fileOffset, size)

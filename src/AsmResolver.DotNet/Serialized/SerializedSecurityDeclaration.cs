@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="SecurityDeclaration"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedSecurityDeclaration : SecurityDeclaration
     {
@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet.Serialized
         protected override IHasSecurityDeclaration GetParent()
         {
             var module = _context.ParentModule;
-            
+
             var ownerToken = module.GetSecurityDeclarationOwner(MetadataToken.Rid);
             return module.TryLookupMember(ownerToken, out var member)
                 ? member as IHasSecurityDeclaration
@@ -48,13 +48,15 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override PermissionSetSignature GetPermissionSet()
         {
-            var reader = _context.Image.DotNetDirectory.Metadata
+            if (!_context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.PermissionSet);
-            
-            return reader is {} ? 
-                PermissionSetSignature.FromReader(new BlobReadContext(_context), reader) 
-                : null;
+                .TryGetBlobReaderByIndex(_row.PermissionSet, out var reader))
+            {
+                return _context.BadImageAndReturn<PermissionSetSignature>(
+                    $"Invalid permission set blob index in security declaration {MetadataToken}.");
+            }
+
+            return PermissionSetSignature.FromReader(new BlobReadContext(_context), ref reader);
         }
     }
 }

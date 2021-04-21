@@ -2,12 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     // TODO: Implement a more granular lazy initialization.
-    
+
     /// <summary>
     /// Provides a base implementation of a metadata table in the table stream of a managed executable file.
     /// </summary>
@@ -29,13 +30,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
-        /// Gets the index of the table in the tables stream. 
+        /// Gets the index of the table in the tables stream.
         /// </summary>
         public TableIndex TableIndex
         {
             get;
         }
-        
+
         /// <inheritdoc />
         public TableLayout Layout
         {
@@ -80,7 +81,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         /// <inheritdoc cref="ICollection{T}.Count" />
         public virtual int Count => Rows.Count;
-        
+
         /// <inheritdoc />
         public bool IsReadOnly => false; // TODO: it might be necessary later to make this configurable.
 
@@ -101,7 +102,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         /// <inheritdoc />
         public bool Contains(TRow item) =>  Rows.Contains(item);
-        
+
         /// <inheritdoc />
         public void CopyTo(TRow[] array, int arrayIndex) => Rows.CopyTo(array, arrayIndex);
 
@@ -176,7 +177,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
             int left = 0;
             int right = Count - 1;
-           
+
             while (left <= right)
             {
                 int m = (left + right) / 2;
@@ -236,9 +237,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
-            foreach (var row in Rows) 
-                row.Write(writer, Layout);
+            for (int i = 0; i < Rows.Count; i++)
+                Rows[i].Write(writer, Layout);
         }
-        
+
     }
 }

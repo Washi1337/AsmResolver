@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -19,7 +20,7 @@ namespace AsmResolver.DotNet.Signatures
             IndexProvider = indexProvider ?? throw new ArgumentNullException(nameof(indexProvider));
             DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
         }
-        
+
         /// <summary>
         /// Gets the output stream to write the raw data to.
         /// </summary>

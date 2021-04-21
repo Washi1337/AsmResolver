@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the assembly definition table.</param>
         /// <returns>The row.</returns>
-        public static AssemblyReferenceRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static AssemblyReferenceRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new AssemblyReferenceRow(
                 reader.ReadUInt16(),
@@ -42,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="name">The index into the #Strings stream referencing the name of the assembly.</param>
         /// <param name="culture">The index into the #Strings stream referencing the locale string of the assembly.</param>
         /// <param name="hashValue">The index into the #Blob stream referencing the hash value of the assembly reference.</param>
-        public AssemblyReferenceRow(ushort majorVersion, ushort minorVersion, ushort buildNumber, ushort revisionNumber, 
+        public AssemblyReferenceRow(ushort majorVersion, ushort minorVersion, ushort buildNumber, ushort revisionNumber,
             AssemblyAttributes attributes, uint publicKeyOrToken, uint name, uint culture, uint hashValue)
         {
             MajorVersion = majorVersion;
@@ -55,7 +56,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             Culture = culture;
             HashValue = hashValue;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.Assembly;
 
@@ -76,7 +77,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             8 => HashValue,
             _ => throw new IndexOutOfRangeException()
         };
-        
+
         /// <summary>
         /// Gets the major version number of the assembly.
         /// </summary>
@@ -92,7 +93,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets the build number of the assembly.
         /// </summary>
@@ -180,9 +181,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return MajorVersion == other.MajorVersion
                    && MinorVersion == other.MinorVersion
                    && BuildNumber == other.BuildNumber
-                   && RevisionNumber == other.RevisionNumber 
+                   && RevisionNumber == other.RevisionNumber
                    && Attributes == other.Attributes
-                   && PublicKeyOrToken == other.PublicKeyOrToken 
+                   && PublicKeyOrToken == other.PublicKeyOrToken
                    && Name == other.Name
                    && Culture == other.Culture
                    && HashValue == other.HashValue;
@@ -211,7 +212,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 return hashCode;
             }
         }
-        
+
         /// <inheritdoc />
         public override string ToString()
         {

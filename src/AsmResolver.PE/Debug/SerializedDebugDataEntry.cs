@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Debug
 {
@@ -20,15 +21,15 @@ namespace AsmResolver.PE.Debug
         /// <param name="directoryReader">The input stream.</param>
         public SerializedDebugDataEntry(
             PEReaderContext context,
-            IBinaryStreamReader directoryReader)
+            ref BinaryStreamReader directoryReader)
         {
-            if (directoryReader == null)
+            if (!directoryReader.IsValid)
                 throw new ArgumentNullException(nameof(directoryReader));
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            
+
             Offset = directoryReader.Offset;
             Rva = directoryReader.Rva;
-            
+
             Characteristics = directoryReader.ReadUInt32();
             TimeDateStamp = directoryReader.ReadUInt32();
             MajorVersion = directoryReader.ReadUInt16();
@@ -38,13 +39,13 @@ namespace AsmResolver.PE.Debug
             _addressOfRawData = directoryReader.ReadUInt32();
             _pointerToRawData = directoryReader.ReadUInt32();
         }
-        
+
         /// <inheritdoc />
         protected override IDebugDataSegment GetContents()
         {
             if (_sizeOfData == 0)
                 return null;
-            
+
             var reference = _context.File.GetReferenceToRva(_addressOfRawData);
             if (reference is null || !reference.CanRead)
             {
@@ -60,7 +61,7 @@ namespace AsmResolver.PE.Debug
             }
 
             reader.ChangeSize(_sizeOfData);
-            return _context.Parameters.DebugDataReader.ReadDebugData(_context, _type, reader);
+            return _context.Parameters.DebugDataReader.ReadDebugData(_context, _type, ref reader);
         }
     }
 }

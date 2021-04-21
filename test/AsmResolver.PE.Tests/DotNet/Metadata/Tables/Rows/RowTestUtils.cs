@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
@@ -11,7 +12,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
     internal static class RowTestUtils
     {
         public static void AssertWriteThenReadIsSame<TRow>(TRow expected,
-            SerializedMetadataTable<TRow>.ReadRowDelegate readRow) 
+            SerializedMetadataTable<TRow>.ReadRowDelegate readRow)
             where TRow : struct, IMetadataRow
         {
             var tablesStream = new TablesStream();
@@ -19,13 +20,14 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
 
             using var tempStream = new MemoryStream();
             expected.Write(new BinaryStreamWriter(tempStream), table.Layout);
-            var newRow = readRow(new ByteArrayReader(tempStream.ToArray()), table.Layout);
-            
+            var reader = ByteArrayReaderFactory.CreateReader(tempStream.ToArray());
+            var newRow = readRow(ref reader, table.Layout);
+
             Assert.Equal(expected, newRow);
         }
-        
+
         public static void AssertWriteThenReadIsSame<TRow>(TRow expected,
-            SerializedMetadataTable<TRow>.ReadRowExtendedDelegate readRow) 
+            SerializedMetadataTable<TRow>.ReadRowExtendedDelegate readRow)
             where TRow : struct, IMetadataRow
         {
             var tablesStream = new TablesStream();
@@ -33,8 +35,9 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
 
             using var tempStream = new MemoryStream();
             expected.Write(new BinaryStreamWriter(tempStream), table.Layout);
-            var newRow = readRow(new PEReaderContext(new PEFile()), new ByteArrayReader(tempStream.ToArray()), table.Layout);
-            
+            var reader = ByteArrayReaderFactory.CreateReader(tempStream.ToArray());
+            var newRow = readRow(new PEReaderContext(new PEFile()), ref reader, table.Layout);
+
             Assert.Equal(expected, newRow);
         }
 

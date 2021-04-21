@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the security declaration table.</param>
         /// <returns>The row.</returns>
-        public static SecurityDeclarationRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static SecurityDeclarationRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new SecurityDeclarationRow(
                 (SecurityAction) reader.ReadUInt16(),

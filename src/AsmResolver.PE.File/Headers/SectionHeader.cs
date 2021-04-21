@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.File.Headers
 {
@@ -23,7 +24,7 @@ namespace AsmResolver.PE.File.Headers
         /// </summary>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns>The section header that was read.</returns>
-        public static SectionHeader FromReader(IBinaryStreamReader reader)
+        public static SectionHeader FromReader(ref BinaryStreamReader reader)
         {
             ulong offset = reader.Offset;
             uint rva = reader.Rva;
@@ -66,7 +67,7 @@ namespace AsmResolver.PE.File.Headers
         {
             Offset = value.Offset;
             Rva = value.Rva;
-            
+
             VirtualSize = value.VirtualSize;
             VirtualAddress = value.VirtualAddress;
             SizeOfRawData = value.SizeOfRawData;
@@ -77,7 +78,7 @@ namespace AsmResolver.PE.File.Headers
             NumberOfLineNumbers = value.NumberOfLineNumbers;
             Characteristics = value.Characteristics;
         }
-        
+
         /// <summary>
         /// Gets or sets the name of the section.
         /// </summary>
@@ -135,10 +136,10 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Gets or sets the file offset to the beginning of the relocations table for the section. 
+        /// Gets or sets the file offset to the beginning of the relocations table for the section.
         /// </summary>
         /// <remarks>
-        /// This field is set to zero in a normal PE image. 
+        /// This field is set to zero in a normal PE image.
         /// </remarks>
         public uint PointerToRelocations
         {
@@ -147,7 +148,7 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Gets or sets the file offset to the beginning of the line numbers table for the section. 
+        /// Gets or sets the file offset to the beginning of the line numbers table for the section.
         /// </summary>
         /// <remarks>
         /// This field is set to zero in a normal PE image.
@@ -162,7 +163,7 @@ namespace AsmResolver.PE.File.Headers
         /// Gets or sets the number of relocations in the relocation table of the section.
         /// </summary>
         /// <remarks>
-        /// This field is set to zero for executable files. 
+        /// This field is set to zero for executable files.
         /// </remarks>
         public ushort NumberOfRelocations
         {
@@ -171,7 +172,7 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Gets or sets the total amount of line numbers table referenced by <see cref="PointerToLineNumbers" /> for the section. 
+        /// Gets or sets the total amount of line numbers table referenced by <see cref="PointerToLineNumbers" /> for the section.
         /// </summary>
         /// <remarks>
         /// This field is not used in a normal PE image.
@@ -190,12 +191,12 @@ namespace AsmResolver.PE.File.Headers
             get;
             set;
         }
-        
+
         /// <inheritdoc />
         public override uint GetPhysicalSize() => SectionHeaderSize;
 
         /// <summary>
-        /// Determines whether the provided file offset falls within the section that the header describes. 
+        /// Determines whether the provided file offset falls within the section that the header describes.
         /// </summary>
         /// <param name="fileOffset">The offset to check.</param>
         /// <returns><c>true</c> if the file offset falls within the section, <c>false</c> otherwise.</returns>
@@ -205,7 +206,7 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Determines whether the provided virtual address falls within the section that the header describes. 
+        /// Determines whether the provided virtual address falls within the section that the header describes.
         /// </summary>
         /// <param name="rva">The virtual address to check.</param>
         /// <returns><c>true</c> if the virtual address falls within the section, <c>false</c> otherwise.</returns>
@@ -260,4 +261,3 @@ namespace AsmResolver.PE.File.Headers
 
     }
 }
-

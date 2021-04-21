@@ -1,4 +1,5 @@
 using System.Text;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources.Builder
 {
@@ -11,7 +12,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// Creates a new name table buffer.
         /// </summary>
         /// <param name="parentBuffer">The resource directory segment that contains the name table buffer.</param>
-        public ResourceNameTableBuffer(ISegment parentBuffer) 
+        public ResourceNameTableBuffer(ISegment parentBuffer)
             : base(parentBuffer)
         {
         }
@@ -25,7 +26,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
             foreach (string name in Entries)
             {;
                 writer.WriteUInt16((ushort) name.Length);
-                var buffer = Encoding.Unicode.GetBytes(name);
+                byte[] buffer = Encoding.Unicode.GetBytes(name);
                 writer.WriteBytes(buffer, 0, buffer.Length);
             }
         }

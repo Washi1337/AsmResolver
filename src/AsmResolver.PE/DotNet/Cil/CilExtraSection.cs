@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -99,7 +100,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns>The extra section that was read.</returns>
-        public static CilExtraSection FromReader(IBinaryStreamReader reader)
+        public static CilExtraSection FromReader(ref BinaryStreamReader reader)
         {
             var section = new CilExtraSection
             {

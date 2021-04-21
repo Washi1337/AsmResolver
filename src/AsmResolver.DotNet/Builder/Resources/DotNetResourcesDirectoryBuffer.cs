@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Resources;
 
 namespace AsmResolver.DotNet.Builder.Resources
@@ -11,7 +12,7 @@ namespace AsmResolver.DotNet.Builder.Resources
     public class DotNetResourcesDirectoryBuffer
     {
         private readonly MemoryStream _rawStream = new();
-        private readonly BinaryStreamWriter _writer;
+        private readonly IBinaryStreamWriter _writer;
         private readonly Dictionary<byte[], uint> _dataOffsets = new(ByteArrayEqualityComparer.Instance);
 
         /// <summary>

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Exports.Builder
 {
@@ -8,14 +9,14 @@ namespace AsmResolver.PE.Exports.Builder
     /// </summary>
     public class ExportAddressTableBuffer : SegmentBase
     {
-        private readonly List<ExportedSymbol> _entries = new List<ExportedSymbol>();
+        private readonly List<ExportedSymbol> _entries = new();
 
         /// <summary>
         /// Adds a single symbol to the address table buffer.
         /// </summary>
         /// <param name="symbol">The symbol to add.</param>
         public void AddSymbol(ExportedSymbol symbol) => _entries.Add(symbol);
-        
+
         /// <inheritdoc />
         public override uint GetPhysicalSize() => (uint) (_entries.Count * sizeof(uint));
 

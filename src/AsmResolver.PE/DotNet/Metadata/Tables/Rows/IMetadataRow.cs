@@ -1,16 +1,17 @@
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in a metadata table.
     /// </summary>
-    public interface IMetadataRow 
+    public interface IMetadataRow
         // .NET 4.5+ and any .NET standard compatible framework define IReadOnlyList<T>, which defines Count and the
         // indexer property.
         #if NET20 || NET35 || NET40
         : IEnumerable<uint>
-        #else 
+        #else
         : IReadOnlyList<uint>
         #endif
     {
@@ -26,16 +27,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <summary>
         /// Gets the number of columns that the metadata row defines.
         /// </summary>
-        int Count 
+        int Count
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets the value of a column, zero-extended to an unsigned int32.
         /// </summary>
         /// <param name="index">The column index.</param>
-        uint this[int index] 
+        uint this[int index]
         {
             get;
         }

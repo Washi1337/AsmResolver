@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="TypeSpecification"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedTypeSpecification : TypeSpecification
     {
@@ -34,17 +34,21 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override TypeSignature GetSignature()
         {
-            var reader = _context.Image.DotNetDirectory.Metadata
+            if (!_context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.Signature);
+                .TryGetBlobReaderByIndex(_row.Signature, out var reader))
+            {
+                return _context.BadImageAndReturn<TypeSignature>(
+                    $"Invalid blob signature for type specification {MetadataToken.ToString()}");
+            }
 
             var context = new BlobReadContext(_context);
             context.TraversedTokens.Add(MetadataToken);
-            return TypeSignature.FromReader(context, reader);
+            return TypeSignature.FromReader(context, ref reader);
         }
-        
+
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

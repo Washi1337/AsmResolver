@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -38,7 +39,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The raw method body.</returns>
         /// <exception cref="FormatException">Occurs when the method header indicates an method body that is not in the
         /// tiny format.</exception>
-        public new static CilRawTinyMethodBody FromReader(IErrorListener errorListener, IBinaryStreamReader reader)
+        public new static CilRawTinyMethodBody FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
         {
             ulong fileOffset = reader.Offset;
             uint rva = reader.Rva;

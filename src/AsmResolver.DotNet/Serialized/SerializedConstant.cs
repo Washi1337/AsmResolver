@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="Constant"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedConstant : Constant
     {
@@ -45,13 +45,15 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override DataBlobSignature GetValue()
         {
-            var reader = _context.Image.DotNetDirectory.Metadata
+            if (!_context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.Value);
-            
-            return reader is null
-                ? null
-                : DataBlobSignature.FromReader(reader);
+                .TryGetBlobReaderByIndex(_row.Value, out var reader))
+            {
+                // Don't report error. null constants are allowed (e.g. null strings).
+                return null;
+            }
+
+            return DataBlobSignature.FromReader(ref reader);
         }
     }
 }

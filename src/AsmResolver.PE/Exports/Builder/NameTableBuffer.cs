@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Exports.Builder
 {
@@ -8,8 +9,8 @@ namespace AsmResolver.PE.Exports.Builder
     /// </summary>
     public class NameTableBuffer : SegmentBase
     {
-        private readonly List<string> _entries = new List<string>();
-        private readonly IDictionary<string, uint> _nameOffsets = new Dictionary<string, uint>();
+        private readonly List<string> _entries = new();
+        private readonly Dictionary<string, uint> _nameOffsets = new();
         private uint _length;
 
         /// <summary>
@@ -20,13 +21,13 @@ namespace AsmResolver.PE.Exports.Builder
         {
             if (string.IsNullOrEmpty(name))
                 return;
-            
+
             if (!_nameOffsets.ContainsKey(name))
             {
                 // Register string.
                 _entries.Add(name);
                 _nameOffsets.Add(name, _length);
-                
+
                 // Calculate length + zero terminator.
                 _length += (uint) Encoding.ASCII.GetByteCount(name) + 1u;
             }
@@ -36,7 +37,7 @@ namespace AsmResolver.PE.Exports.Builder
         /// When the name was registered in the buffer, obtains the relative virtual address (RVA) to the name.
         /// </summary>
         /// <param name="name">The name.</param>
-        /// <returns>The RVA.</returns> 
+        /// <returns>The RVA.</returns>
         /// <remarks>
         /// This method should only be used after the hint-name table has been relocated to the right location in the
         /// PE file.
@@ -55,6 +56,6 @@ namespace AsmResolver.PE.Exports.Builder
                 writer.WriteByte(0);
             }
         }
-        
+
     }
 }

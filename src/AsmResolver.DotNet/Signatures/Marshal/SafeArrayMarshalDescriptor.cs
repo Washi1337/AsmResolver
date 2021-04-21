@@ -1,5 +1,6 @@
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures.Marshal
 {
@@ -15,7 +16,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <param name="parentModule">The module defining the descriptor.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The descriptor.</returns>
-        public new static SafeArrayMarshalDescriptor FromReader(ModuleDefinition parentModule, IBinaryStreamReader reader)
+        public new static SafeArrayMarshalDescriptor FromReader(ModuleDefinition parentModule, ref BinaryStreamReader reader)
         {
             if (!reader.TryReadCompressedUInt32(out uint type))
                 return new SafeArrayMarshalDescriptor(SafeArrayVariantType.NotSet);
@@ -24,7 +25,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
             var flags = (SafeArrayTypeFlags) type & ~ SafeArrayTypeFlags.Mask;
 
             var result = new SafeArrayMarshalDescriptor(variantType, flags);
-            
+
             if (reader.CanRead(1))
             {
                 string typeName = reader.ReadSerString();
@@ -67,7 +68,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
             VariantTypeFlags = flags;
             UserDefinedSubType = subType;
         }
-        
+
         /// <inheritdoc />
         public override NativeType NativeType => NativeType.SafeArray;
 
@@ -120,7 +121,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         }
 
         /// <summary>
-        /// Gets or sets the user defined element type of the safe array. 
+        /// Gets or sets the user defined element type of the safe array.
         /// </summary>
         /// <remarks>
         /// This value is usually <c>null</c>. Valid .NET assemblies require <see cref="VariantType"/> to be set to
@@ -132,12 +133,12 @@ namespace AsmResolver.DotNet.Signatures.Marshal
             get;
             set;
         }
-        
+
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) NativeType);
             if (VariantType != SafeArrayVariantType.NotSet)
             {

@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.Imports.Builder
 {
     /// <summary>
@@ -30,12 +32,12 @@ namespace AsmResolver.PE.Imports.Builder
         {
             if (_entriesLength == 0)
                 _entriesLength = SerializedImportedModule.ModuleImportSize;
-            
+
             _entriesLength += SerializedImportedModule.ModuleImportSize;
-            
+
             ImportAddressDirectory.AddModule(module);
             base.AddModule(module);
-            
+
             HintNameTable.AddModule(module);
         }
 
@@ -46,7 +48,7 @@ namespace AsmResolver.PE.Imports.Builder
 
             newOffset += _entriesLength;
             newRva += _entriesLength;
-            
+
             foreach (var module in Modules)
             {
                 var thunkTable = GetModuleThunkTable(module);
@@ -79,11 +81,11 @@ namespace AsmResolver.PE.Imports.Builder
 
         private void WriteModuleImportEntry(IBinaryStreamWriter writer, IImportedModule module)
         {
-            WriteModuleImportEntry(writer, 
-                GetModuleThunkTable(module).Rva, 
-                module.TimeDateStamp, 
-                module.ForwarderChain, 
-                HintNameTable.GetModuleNameRva(module), 
+            WriteModuleImportEntry(writer,
+                GetModuleThunkTable(module).Rva,
+                module.TimeDateStamp,
+                module.ForwarderChain,
+                HintNameTable.GetModuleNameRva(module),
                 ImportAddressDirectory.GetModuleThunkTable(module).Rva);
         }
 
@@ -96,6 +98,6 @@ namespace AsmResolver.PE.Imports.Builder
             writer.WriteUInt32(moduleNameRva);
             writer.WriteUInt32(ft);
         }
-        
+
     }
 }

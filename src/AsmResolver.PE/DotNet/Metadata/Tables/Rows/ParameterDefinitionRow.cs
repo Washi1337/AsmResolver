@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the parameter definition table.</param>
         /// <returns>The row.</returns>
-        public static ParameterDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static ParameterDefinitionRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new ParameterDefinitionRow(
                 (ParameterAttributes) reader.ReadUInt16(),
@@ -24,7 +25,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Creates a new row for the parameter definition metadata table. 
+        /// Creates a new row for the parameter definition metadata table.
         /// </summary>
         /// <param name="attributes">The attributes associated to the parameter.</param>
         /// <param name="sequence">The index of the parameter definition.</param>

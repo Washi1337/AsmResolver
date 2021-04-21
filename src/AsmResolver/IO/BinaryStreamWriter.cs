@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace AsmResolver
+namespace AsmResolver.IO
 {
     /// <summary>
     /// Provides a default implementation of a binary writer that writes the data to an output stream.
@@ -116,6 +116,6 @@ namespace AsmResolver
         {
             WriteUInt64(*(ulong*) &value);
         }
-        
+
     }
 }

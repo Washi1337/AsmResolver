@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
@@ -13,7 +15,7 @@ namespace AsmResolver.DotNet.Signatures
             get;
             set;
         }
-        
+
         /// <inheritdoc />
         public sealed override void Write(BlobSerializationContext context)
         {

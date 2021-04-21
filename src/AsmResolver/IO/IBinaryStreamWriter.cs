@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace AsmResolver
+namespace AsmResolver.IO
 {
     /// <summary>
     /// Provides methods for writing data to a binary stream.
@@ -92,10 +92,12 @@ namespace AsmResolver
         /// </summary>
         /// <param name="value">The 64-bit floating point number to write.</param>
         void WriteDouble(double value);
-
     }
 
-    public static partial class Extensions
+    /// <summary>
+    /// Provides extension methods to implementations of the <see cref="IBinaryStreamWriter"/> interface.
+    /// </summary>
+    public static class BinaryStreamWriterExtensions
     {
         /// <summary>
         /// Writes a buffer of data to the stream.
@@ -119,13 +121,13 @@ namespace AsmResolver
                 writer.WriteUInt64(0);
                 count -= sizeof(ulong);
             }
-            
+
             while (count >= sizeof(uint))
             {
                 writer.WriteUInt32(0);
                 count -= sizeof(uint);
             }
-            
+
             while (count >= sizeof(ushort))
             {
                 writer.WriteUInt16(0);
@@ -181,7 +183,7 @@ namespace AsmResolver
                     throw new ArgumentOutOfRangeException(nameof(size), size, null);
             }
         }
-        
+
         /// <summary>
         /// Compresses and writes an unsigned integer to the stream.
         /// </summary>

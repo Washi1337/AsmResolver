@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -21,7 +22,6 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<IImplementation> _implementation;
         private readonly LazyVariable<ISegment> _embeddedData;
         private IList<CustomAttribute> _customAttributes;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes the <see cref="ManifestResource"/> with a metadata token.
@@ -30,7 +30,6 @@ namespace AsmResolver.DotNet
         protected ManifestResource(MetadataToken token)
             : base(token)
         {
-            _token = token;
             _name = new LazyVariable<string>(GetName);
             _implementation = new LazyVariable<IImplementation>(GetImplementation);
             _embeddedData = new LazyVariable<ISegment>(GetEmbeddedDataSegment);
@@ -177,7 +176,7 @@ namespace AsmResolver.DotNet
         /// Gets the reader of stored data in the manifest resource.
         /// </summary>
         /// <returns>The reader, or <c>null</c> if no data was stored or if the external resource was not found.</returns>
-        public IBinaryStreamReader GetReader()
+        public BinaryStreamReader? GetReader()
         {
             // TODO: resolve external resources.
 

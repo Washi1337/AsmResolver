@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -155,7 +156,7 @@ namespace AsmResolver.DotNet.Code.Cil
             DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
 
             // Read raw instructions.
-            var reader = new ByteArrayReader(code);
+            var reader = ByteArrayReaderFactory.CreateReader(code);
             var disassembler = new CilDisassembler(reader, new DynamicCilOperandResolver(module, result, tokenList));
             result.Instructions.AddRange(disassembler.ReadInstructions());
 
@@ -228,7 +229,7 @@ namespace AsmResolver.DotNet.Code.Cil
             ICilOperandResolver operandResolver,
             CilRawMethodBody rawBody)
         {
-            var reader = new ByteArrayReader(rawBody.Code);
+            var reader = ByteArrayReaderFactory.CreateReader(rawBody.Code);
             var disassembler = new CilDisassembler(reader, operandResolver);
             result.Instructions.AddRange(disassembler.ReadInstructions());
         }
@@ -240,13 +241,13 @@ namespace AsmResolver.DotNet.Code.Cil
                 var section = fatBody.ExtraSections[i];
                 if (section.IsEHTable)
                 {
-                    var reader = new ByteArrayReader(section.Data);
-                    int size = section.IsFat
+                    var reader = ByteArrayReaderFactory.CreateReader(section.Data);
+                    uint size = section.IsFat
                         ? CilExceptionHandler.FatExceptionHandlerSize
                         : CilExceptionHandler.TinyExceptionHandlerSize;
 
                     while (reader.CanRead(size))
-                        result.ExceptionHandlers.Add(CilExceptionHandler.FromReader(result, reader, section.IsFat));
+                        result.ExceptionHandlers.Add(CilExceptionHandler.FromReader(result, ref reader, section.IsFat));
                 }
             }
         }

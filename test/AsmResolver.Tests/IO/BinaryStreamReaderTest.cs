@@ -1,15 +1,16 @@
 using System;
 using System.IO;
+using AsmResolver.IO;
 using Xunit;
 
-namespace AsmResolver.Tests
+namespace AsmResolver.Tests.IO
 {
-    public class ByteArrayReaderTest
+    public class BinaryStreamReaderTest
     {
         [Fact]
         public void EmptyArray()
         {
-            var reader = new ByteArrayReader(new byte[0]);
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[0]);
             Assert.Equal(0u, reader.Length);
 
             Assert.Throws<EndOfStreamException>(() => reader.ReadByte());
@@ -19,7 +20,7 @@ namespace AsmResolver.Tests
         [Fact]
         public void ReadByte()
         {
-            var reader = new ByteArrayReader(new byte[]
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[]
             {
                 0x80,
                 0x80
@@ -35,7 +36,7 @@ namespace AsmResolver.Tests
         [Fact]
         public void ReadInt16()
         {
-            var reader = new ByteArrayReader(new byte[]
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[]
             {
                 0x01, 0x80,
                 0x02, 0x80
@@ -50,7 +51,7 @@ namespace AsmResolver.Tests
         [Fact]
         public void ReadInt32()
         {
-            var reader = new ByteArrayReader(new byte[]
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[]
             {
                 0x04, 0x03, 0x02, 0x81,
                 0x08, 0x07, 0x06, 0x85
@@ -66,7 +67,7 @@ namespace AsmResolver.Tests
         [Fact]
         public void ReadInt64()
         {
-            var reader = new ByteArrayReader(new byte[]
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[]
             {
                 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x80,
                 0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x88,
@@ -81,12 +82,12 @@ namespace AsmResolver.Tests
         [Fact]
         public void NewForkSubRange()
         {
-            var reader = new ByteArrayReader(new byte[]
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
 
-            var fork = reader.Fork(2, 3);
+            var fork = reader.ForkAbsolute(2, 3);
 
             Assert.Equal(2u, fork.StartOffset);
             Assert.Equal(2u, fork.Offset);
@@ -96,46 +97,46 @@ namespace AsmResolver.Tests
         [Fact]
         public void NewForkInvalidStart()
         {
-            var reader = new ByteArrayReader(new byte[]
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => reader.Fork(9, 3));
+            Assert.Throws<ArgumentOutOfRangeException>(() => reader.ForkAbsolute(9, 3));
         }
 
         [Fact]
         public void NewForkTooLong()
         {
-            var reader = new ByteArrayReader(new byte[]
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
 
-            Assert.Throws<EndOfStreamException>(() => reader.Fork(6, 4));
+            Assert.Throws<EndOfStreamException>(() => reader.ForkAbsolute(6, 4));
         }
 
         [Fact]
         public void ForkReadsSameData()
         {
-            var reader = new ByteArrayReader(new byte[]
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
 
-            var fork = reader.Fork(0, 2);
+            var fork = reader.ForkAbsolute(0, 2);
             Assert.Equal(0x0201, fork.ReadUInt16());
         }
 
         [Fact]
         public void ForkMovesIndependentOfOriginal()
         {
-            var reader = new ByteArrayReader(new byte[]
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
 
-            var fork = reader.Fork(0, 2);
+            var fork = reader.ForkAbsolute(0, 2);
             fork.ReadUInt16();
 
             Assert.Equal(0u, reader.Offset);
@@ -145,25 +146,25 @@ namespace AsmResolver.Tests
         [Fact]
         public void ForkStartAtMiddle()
         {
-            var reader = new ByteArrayReader(new byte[]
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
 
-            var fork = reader.Fork(4, 2);
+            var fork = reader.ForkAbsolute(4, 2);
             Assert.Equal(0x0605, fork.ReadUInt16());
         }
 
         [Fact]
         public void ForkOfFork()
         {
-            var reader = new ByteArrayReader(new byte[]
+            var reader = ByteArrayReaderFactory.CreateReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
 
-            var fork = reader.Fork(2, 4);
-            var fork2 = fork.Fork(3, 2);
+            var fork = reader.ForkAbsolute(2, 4);
+            var fork2 = fork.ForkAbsolute(3, 2);
             Assert.Equal(0x04, fork2.ReadByte());
         }
     }

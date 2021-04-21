@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Relocations.Builder
 {
@@ -32,7 +33,7 @@ namespace AsmResolver.PE.Relocations.Builder
                 throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be negative.");
             if (offset > 0xFFF)
                 throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be larger than 0xFFF.");
-            
+
             _value = (ushort) (((byte) type << 12) | (offset & 0xFFF));
         }
 

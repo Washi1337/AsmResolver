@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
-using AsmResolver.Tests;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -45,7 +45,7 @@ namespace AsmResolver.PE.File.Tests
             var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
             Assert.Throws<ArgumentOutOfRangeException>(() => peFile.FileOffsetToRva(0x2000));
         }
-        
+
         [Fact]
         public void RebuildNetPENoChange()
         {
@@ -61,9 +61,9 @@ namespace AsmResolver.PE.File.Tests
             const string fileName = "HelloWorld";
             const string sectionName = ".test";
             var sectionData = new byte[] {1, 3, 3, 7};
-            
+
             var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
-            
+
             // Add a new section.
             peFile.Sections.Add(new PESection(sectionName, SectionFlags.MemoryRead | SectionFlags.ContentInitializedData)
             {
@@ -83,7 +83,7 @@ namespace AsmResolver.PE.File.Tests
             // Verify the section and its data is present:
             var newSection = newPEFile.Sections.First(s => s.Name == sectionName);
             var newData = new byte[sectionData.Length];
-            
+
             Assert.Equal(sectionData.Length, newSection
                 .CreateReader()
                 .ReadBytes(newData, 0, newData.Length));
@@ -105,8 +105,43 @@ namespace AsmResolver.PE.File.Tests
                 var newSection = new PESection(section);
                 output.Sections.Add(newSection);
             }
-            output.Write(new BinaryStreamWriter(msOutput));            
+            output.Write(new BinaryStreamWriter(msOutput));
+
             Assert.Equal(originalBytes, msOutput.ToArray());
+        }
+
+        [Fact]
+        public void InsertSectionShouldPersistOtherSectionContents()
+        {
+            var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
+
+            var section = peFile.Sections[0];
+            byte[] contents = ((IReadableSegment) section.Contents).ToArray();
+
+            peFile.Sections.Insert(0, new PESection(".test",
+                SectionFlags.MemoryRead | SectionFlags.MemoryWrite | SectionFlags.ContentInitializedData,
+                new DataSegment(new byte[] {1, 2, 3, 4})));
+
+            peFile.UpdateHeaders();
+
+            byte[] contents2 = ((IReadableSegment) section.Contents).ToArray();
+            Assert.Equal(contents, contents2);
+        }
+
+        [Fact]
+        public void RemoveSectionShouldPersistOtherSectionContents()
+        {
+            var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
+
+            var section = peFile.Sections[1];
+            byte[] contents = ((IReadableSegment) section.Contents).ToArray();
+
+            peFile.Sections.RemoveAt(0);
+
+            peFile.UpdateHeaders();
+
+            byte[] contents2 = ((IReadableSegment) section.Contents).ToArray();
+            Assert.Equal(contents, contents2);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
@@ -42,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="rid">The row identifier.</param>
         /// <returns>The row.</returns>
         IMetadataRow GetByRid(uint rid);
-        
+
         /// <summary>
         /// Attempts to get the contents of a row by its row identifier.
         /// </summary>
@@ -50,7 +51,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="row">When successful, the read row.</param>
         /// <returns><c>true</c> if the RID existed an the row was obtained successfully, <c>false</c> otherwise.</returns>
         bool TryGetByRid(uint rid, out IMetadataRow row);
-        
+
         /// <summary>
         /// Gets a single row in a table by a key. This requires the table to be sorted.
         /// </summary>
@@ -60,7 +61,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// contains the given key.</param>
         /// <returns><c>true</c> if the row was found, <c>false</c> otherwise.</returns>
         bool TryGetRowByKey(int keyColumnIndex, uint key, out IMetadataRow row);
-        
+
         /// <summary>
         /// Sets the contents of a row by its row identifier.
         /// </summary>

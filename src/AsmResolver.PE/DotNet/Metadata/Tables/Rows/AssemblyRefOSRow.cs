@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the assembly reference operating system table.</param>
         /// <returns>The row.</returns>
-        public static AssemblyRefOSRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static AssemblyRefOSRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new AssemblyRefOSRow(
                 reader.ReadUInt32(),
@@ -23,7 +24,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadUInt32(),
                 reader.ReadIndex((IndexSize) layout.Columns[3].Size));
         }
-        
+
         /// <summary>
         /// Creates a new row for the assembly reference operating system metadata table.
         /// </summary>
@@ -39,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             MinorVersion = minorVersion;
             AssemblyReference = assemblyReference;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.AssemblyRefOS;
 
@@ -55,7 +56,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             3 => AssemblyReference,
             _ => throw new IndexOutOfRangeException()
         };
-        
+
         /// <summary>
         /// Gets the identifier of the platform the assembly is targeting.
         /// </summary>
@@ -129,7 +130,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 return hashCode;
             }
         }
-        
+
         /// <inheritdoc />
         public override string ToString()
         {

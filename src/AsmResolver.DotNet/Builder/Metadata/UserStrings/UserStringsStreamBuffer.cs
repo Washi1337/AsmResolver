@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
@@ -13,7 +14,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
     public class UserStringsStreamBuffer : IMetadataStreamBuffer
     {
         private readonly MemoryStream _rawStream = new();
-        private readonly BinaryStreamWriter _writer;
+        private readonly IBinaryStreamWriter _writer;
         private readonly Dictionary<string, uint> _strings = new();
 
         /// <summary>

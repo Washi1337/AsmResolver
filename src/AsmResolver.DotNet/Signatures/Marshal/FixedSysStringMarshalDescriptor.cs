@@ -1,8 +1,10 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.DotNet.Signatures.Marshal
 {
     /// <summary>
     /// Represents a description of a marshaller that marshals a given value to a fixed-length string using the system
-    /// defined string encoding. 
+    /// defined string encoding.
     /// </summary>
     public class FixedSysStringMarshalDescriptor : MarshalDescriptor
     {
@@ -11,12 +13,12 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The descriptor.</returns>
-        public static FixedSysStringMarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static FixedSysStringMarshalDescriptor FromReader(ref BinaryStreamReader reader)
         {
             reader.TryReadCompressedUInt32(out uint size);
             return new FixedSysStringMarshalDescriptor((int) size);
         }
-        
+
         /// <summary>
         /// Creates a new instance of the <see cref="FixedSysStringMarshalDescriptor"/> class.
         /// </summary>
@@ -25,7 +27,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         {
             Size = size;
         }
-        
+
         /// <inheritdoc />
         public override NativeType NativeType => NativeType.FixedSysString;
 
@@ -42,7 +44,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) NativeType);
             writer.WriteCompressedUInt32((uint) Size);
         }

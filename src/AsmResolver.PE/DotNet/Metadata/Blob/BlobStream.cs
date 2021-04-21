@@ -1,7 +1,9 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.DotNet.Metadata.Blob
 {
     /// <summary>
-    /// Represents the metadata stream containing blob signatures referenced by entries in the tables stream. 
+    /// Represents the metadata stream containing blob signatures referenced by entries in the tables stream.
     /// </summary>
     /// <remarks>
     /// Like most metadata streams, the blob stream does not necessarily contain just valid blobs. It can contain
@@ -46,10 +48,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// Gets a blob binary reader by its blob index.
         /// </summary>
         /// <param name="index">The offset into the heap to start reading.</param>
+        /// <param name="reader">When this method returns <c>true</c>, this parameter contains the created binary reader.</param>
         /// <returns>
-        /// The blob reader, starting at the first byte after the length of the blob, or <c>null</c> if the index
-        /// was invalid.
+        /// <c>true</c> if a blob reader could be created at the provided index, <c>false</c> otherwise.
         /// </returns>
-        public abstract IBinaryStreamReader GetBlobReaderByIndex(uint index);
+        public abstract bool TryGetBlobReaderByIndex(uint index, out BinaryStreamReader reader);
     }
 }

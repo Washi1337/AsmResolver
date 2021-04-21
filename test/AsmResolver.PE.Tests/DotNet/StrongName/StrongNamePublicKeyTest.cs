@@ -1,5 +1,6 @@
 using System.IO;
 using System.Security.Cryptography;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.StrongName;
 using Xunit;
 
@@ -17,8 +18,9 @@ namespace AsmResolver.PE.Tests.DotNet.StrongName
             using var tempStream = new MemoryStream();
             publicKey.Write(new BinaryStreamWriter(tempStream));
 
-            var newPublicKey = StrongNamePublicKey.FromReader(new ByteArrayReader(tempStream.ToArray()));
-            
+            var reader = ByteArrayReaderFactory.CreateReader(tempStream.ToArray());
+            var newPublicKey = StrongNamePublicKey.FromReader(ref reader);
+
             Assert.Equal(publicKey.Modulus, newPublicKey.Modulus);
             Assert.Equal(publicKey.PublicExponent, newPublicKey.PublicExponent);
         }

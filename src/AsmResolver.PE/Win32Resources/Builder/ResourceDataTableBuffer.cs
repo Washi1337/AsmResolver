@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.Win32Resources.Builder
 {
     /// <summary>
@@ -31,6 +33,6 @@ namespace AsmResolver.PE.Win32Resources.Builder
             writer.WriteUInt32(entry.CodePage);
             writer.WriteUInt32(0);
         }
-        
+
     }
 }

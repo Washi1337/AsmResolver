@@ -20,7 +20,7 @@ namespace AsmResolver.PE.Imports.Builder
         public override void UpdateOffsets(ulong newOffset, uint newRva)
         {
             base.UpdateOffsets(newOffset, newRva);
-            
+
             foreach (var module in Modules)
             {
                 var thunkTable = GetModuleThunkTable(module);
@@ -30,9 +30,8 @@ namespace AsmResolver.PE.Imports.Builder
                 newRva += size;
             }
         }
-        
+
         /// <inheritdoc />
-        protected override ThunkTableBuffer CreateThunkTable() => 
-            new ThunkTableBuffer(HintNameTable, Is32Bit, true);
+        protected override ThunkTableBuffer CreateThunkTable() => new(HintNameTable, Is32Bit, true);
     }
 }

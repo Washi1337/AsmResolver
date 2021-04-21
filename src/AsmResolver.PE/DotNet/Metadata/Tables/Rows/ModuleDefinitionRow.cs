@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the module definition table.</param>
         /// <returns>The row.</returns>
-        public static ModuleDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static ModuleDefinitionRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new ModuleDefinitionRow(
                 reader.ReadUInt16(),
@@ -61,7 +62,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
     /// <summary>
-        /// Gets the generation number of the module.  
+        /// Gets the generation number of the module.
         /// </summary>
         /// <remarks>
         /// This value is reserved and should be set to zero.
@@ -72,7 +73,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the name of the module. 
+        /// Gets an index into the #Strings heap containing the name of the module.
         /// </summary>
         public uint Name
         {

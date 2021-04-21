@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="MemberReference"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedMemberReference : MemberReference
     {
@@ -40,13 +40,13 @@ namespace AsmResolver.DotNet.Serialized
             var encoder =  _context.Image.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.MemberRefParent);
-            
+
             var parentToken = encoder.DecodeIndex(_row.Parent);
             return _context.ParentModule.TryLookupMember(parentToken, out var member)
                 ? member as IMemberRefParent
                 : null;
         }
-        
+
         /// <inheritdoc />
         protected override string GetName() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()
@@ -55,15 +55,19 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override CallingConventionSignature GetSignature()
         {
-            var reader =  _context.Image.DotNetDirectory.Metadata
+            if (!_context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.Signature);
-            
-            return CallingConventionSignature.FromReader(new BlobReadContext(_context), reader, true);
+                .TryGetBlobReaderByIndex(_row.Signature, out var reader))
+            {
+                return _context.BadImageAndReturn<CallingConventionSignature>(
+                    $"Invalid signature blob index in member reference {MetadataToken}.");
+            }
+
+            return CallingConventionSignature.FromReader(new BlobReadContext(_context), ref reader, true);
         }
-        
+
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

@@ -1,4 +1,5 @@
 using AsmResolver.DotNet.Signatures.Marshal;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures.Marshal
 {
@@ -12,7 +13,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The descriptor.</returns>
-        public static FixedArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static FixedArrayMarshalDescriptor FromReader(ref BinaryStreamReader reader)
         {
             var result = new FixedArrayMarshalDescriptor();
 
@@ -25,14 +26,14 @@ namespace AsmResolver.DotNet.Signatures.Marshal
 
             return result;
         }
-        
+
         /// <summary>
         /// Creates a new instance of the <see cref="FixedArrayMarshalDescriptor"/> class.
         /// </summary>
         public FixedArrayMarshalDescriptor()
         {
         }
-        
+
         /// <summary>
         /// Creates a new instance of the <see cref="FixedArrayMarshalDescriptor"/> class.
         /// </summary>
@@ -52,7 +53,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
             Size = size;
             ArrayElementType = arrayElementType;
         }
-        
+
         /// <inheritdoc />
         public override NativeType NativeType => NativeType.FixedArray;
 
@@ -78,7 +79,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) NativeType);
             if (Size.HasValue)
             {

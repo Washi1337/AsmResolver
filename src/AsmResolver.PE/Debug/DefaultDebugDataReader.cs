@@ -1,3 +1,4 @@
+using AsmResolver.IO;
 using AsmResolver.PE.Debug.CodeView;
 
 namespace AsmResolver.PE.Debug
@@ -9,12 +10,12 @@ namespace AsmResolver.PE.Debug
     {
         /// <inheritdoc />
         public IDebugDataSegment ReadDebugData(PEReaderContext context, DebugDataType type,
-            IBinaryStreamReader reader)
+            ref BinaryStreamReader reader)
         {
             return type switch
             {
-                DebugDataType.CodeView => CodeViewDataSegment.FromReader(context, reader),
-                _ => new CustomDebugDataSegment(type, DataSegment.FromReader(reader))
+                DebugDataType.CodeView => CodeViewDataSegment.FromReader(context, ref reader),
+                _ => new CustomDebugDataSegment(type, DataSegment.FromReader(ref reader))
             };
         }
     }

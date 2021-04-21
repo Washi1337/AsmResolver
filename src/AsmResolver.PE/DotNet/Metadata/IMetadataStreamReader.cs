@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.DotNet.Metadata
 {
     /// <summary>
@@ -12,6 +14,6 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="header">The header of the metadata stream.</param>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns>The read metadata stream.</returns>
-        IMetadataStream ReadStream(PEReaderContext context, MetadataStreamHeader header, IBinaryStreamReader reader);
+        IMetadataStream ReadStream(PEReaderContext context, MetadataStreamHeader header, ref BinaryStreamReader reader);
     }
 }

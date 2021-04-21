@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -34,15 +35,15 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The raw method body.</returns>
         /// <exception cref="NotSupportedException">Occurs when the method header indicates an invalid or unsupported
         /// method body format.</exception>
-        public static CilRawMethodBody FromReader(IErrorListener errorListener, IBinaryStreamReader reader)
+        public static CilRawMethodBody FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
         {
             var flag = (CilMethodBodyAttributes) reader.ReadByte();
             reader.Offset--;
 
             if ((flag & CilMethodBodyAttributes.Fat) == CilMethodBodyAttributes.Fat)
-                return CilRawFatMethodBody.FromReader(errorListener, reader);
+                return CilRawFatMethodBody.FromReader(errorListener, ref reader);
             if ((flag & CilMethodBodyAttributes.Tiny) == CilMethodBodyAttributes.Tiny)
-                return CilRawTinyMethodBody.FromReader(errorListener, reader);
+                return CilRawTinyMethodBody.FromReader(errorListener, ref reader);
 
             throw new NotSupportedException("Invalid or unsupported method body format.");
         }

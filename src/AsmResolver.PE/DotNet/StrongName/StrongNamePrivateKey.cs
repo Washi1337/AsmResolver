@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.StrongName
 {
     // Reference:
     // https://docs.microsoft.com/en-us/windows/win32/seccrypto/rsa-schannel-key-blobs
-    
+
     /// <summary>
     /// Represents a public/private key pair in the RSA crypto system.
     /// </summary>
@@ -19,8 +20,11 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <returns>The private key.</returns>
         /// <exception cref="FormatException">Occurs when the input stream is not in the correct format.</exception>
         /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported algorithm is specified.</exception>
-        public new static StrongNamePrivateKey FromFile(string path) => 
-            FromReader(new ByteArrayReader(System.IO.File.ReadAllBytes(path)));
+        public new static StrongNamePrivateKey FromFile(string path)
+        {
+            var reader = ByteArrayReaderFactory.CreateReader(System.IO.File.ReadAllBytes(path));
+            return FromReader(ref reader);
+        }
 
         /// <summary>
         /// Reads a private key from an input stream.
@@ -29,15 +33,15 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <returns>The private key.</returns>
         /// <exception cref="FormatException">Occurs when the input stream is not in the correct format.</exception>
         /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported algorithm is specified.</exception>
-        public new static StrongNamePrivateKey FromReader(IBinaryStreamReader reader)
+        public new static StrongNamePrivateKey FromReader(ref BinaryStreamReader reader)
         {
             // Read BLOBHEADER
-            ReadBlobHeader(reader, StrongNameKeyStructureType.PrivateKeyBlob, 2, SignatureAlgorithm.RsaSign);
+            ReadBlobHeader(ref reader, StrongNameKeyStructureType.PrivateKeyBlob, 2, SignatureAlgorithm.RsaSign);
 
             // Read RSAPUBKEY
             if ((RsaPublicKeyMagic) reader.ReadUInt32() != RsaPublicKeyMagic.Rsa2)
                 throw new FormatException("Input stream does not contain a valid RSA private key header magic.");
-            
+
             uint bitLength = reader.ReadUInt32();
             uint length8 = bitLength / 8;
             uint length16 = bitLength / 16;
@@ -53,7 +57,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                 InverseQ = new byte[length16],
                 PrivateExponent = new byte[length8]
             };
-            
+
             reader.ReadBytes(result.Modulus, 0, result.Modulus.Length);
 
             // Read private data.
@@ -71,7 +75,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             Array.Reverse(result.DQ);
             Array.Reverse(result.InverseQ);
             Array.Reverse(result.PrivateExponent);
-            
+
             return result;
         }
 
@@ -81,7 +85,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         public StrongNamePrivateKey()
         {
         }
-        
+
         /// <summary>
         /// Imports a public/private key pair from an instance of <see cref="RSAParameters"/>.
         /// </summary>
@@ -156,7 +160,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the private exponent used in the RSA crypto system.
         /// </summary>
@@ -176,7 +180,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                 (byte) ((PublicExponent >> 16) & 0xFF),
                 (byte) ((PublicExponent >> 24) & 0xFF),
             };
-            
+
             for (int i = exponentBytes.Count - 1; i >= 0 && exponentBytes[i] == 0; i--)
                 exponentBytes.RemoveAt(i);
 
