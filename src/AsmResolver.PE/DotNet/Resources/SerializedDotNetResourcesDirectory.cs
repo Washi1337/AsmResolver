@@ -8,18 +8,18 @@ namespace AsmResolver.PE.DotNet.Resources
     /// </summary>
     public class SerializedDotNetResourcesDirectory : DotNetResourcesDirectory
     {
-        private readonly IReadableSegment _contents;
+        private readonly BinaryStreamReader _reader;
 
         /// <summary>
         /// Creates a new instance of the <see cref="SerializedDotNetResourcesDirectory"/> using an input stream as
         /// raw contents of the directory.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        public SerializedDotNetResourcesDirectory(ref BinaryStreamReader reader)
+        public SerializedDotNetResourcesDirectory(in BinaryStreamReader reader)
         {
             if (!reader.IsValid)
                 throw new ArgumentNullException(nameof(reader));
-            _contents = DataSegment.FromReader(ref reader);
+            _reader = reader;
         }
 
         /// <summary>
@@ -29,14 +29,14 @@ namespace AsmResolver.PE.DotNet.Resources
         /// <param name="contents">The input stream.</param>
         public SerializedDotNetResourcesDirectory(IReadableSegment contents)
         {
-            _contents = contents ?? throw new ArgumentNullException(nameof(contents));
+            _reader = contents.CreateReader();
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => _contents.GetPhysicalSize();
+        public override uint GetPhysicalSize() => _reader.Length;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer) => _contents.Write(writer);
+        public override void Write(IBinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
 
         /// <inheritdoc />
         public override byte[] GetManifestResourceData(uint offset)
@@ -52,13 +52,13 @@ namespace AsmResolver.PE.DotNet.Resources
         /// <inheritdoc />
         public override bool TryCreateManifestResourceReader(uint offset, out BinaryStreamReader reader)
         {
-            if (offset >= _contents.GetPhysicalSize() - sizeof(uint))
+            if (offset >= _reader.Length - sizeof(uint))
             {
                 reader = default;
                 return false;
             }
 
-            reader = _contents.CreateReader(_contents.Offset + offset);
+            reader = _reader.ForkRelative(offset);
             uint length = reader.ReadUInt32();
             reader = reader.ForkAbsolute(reader.Offset, length);
             return true;

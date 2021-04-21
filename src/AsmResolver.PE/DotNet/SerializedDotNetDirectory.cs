@@ -74,7 +74,7 @@ namespace AsmResolver.PE.DotNet
                 return null;
             }
 
-            return new SerializedDotNetResourcesDirectory(ref directoryReader);
+            return new SerializedDotNetResourcesDirectory(directoryReader);
 
         }
 
