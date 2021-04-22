@@ -57,7 +57,7 @@ Some .NET obfuscators insert custom metadata streams in the .NET metadata direct
         public override IMetadataStream ReadStream(
             PEReaderContext context, 
             MetadataStreamHeader header,
-            IBinaryStreamReader reader)
+            ref BinaryStreamReader reader)
         {
             if (header.Name == "#CustomStream")
             {
@@ -97,7 +97,7 @@ Debug data directories can have arbitrary data stored in the PE image. By defaul
         public override IDebugDataSegment ReadDebugData(
             PEReaderContext context, 
             DebugDataType type, 
-            IBinaryStreamReader reader)
+            ref BinaryStreamReader reader)
         {
             if (type == DebugDataType.Coff)
             {

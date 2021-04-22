@@ -24,14 +24,14 @@ Opening a file can be done through one of the `FromXXX` methods:
 
 .. code-block:: csharp
 
-    IBinaryStreamReader reader = ...
+    BinaryStreamReader reader = ...
     var peFile = PEFile.FromReader(reader);
 
 By default, AsmResolver assumes the PE file is in its unmapped form. This is usually the case when files are read directly from the file system. For memory mapped PE files, use the overload of the ``FromReader`` method, which allows for specifying the memory layout of the input.
 
 .. code-block:: csharp
 
-    IBinaryStreamReader reader = ...
+    BinaryStreamReader reader = ...
     var peFile = PEFile.FromReader(reader, PEMappingMode.Mapped);
 
 

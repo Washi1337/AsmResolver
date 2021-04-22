@@ -44,7 +44,7 @@ Opening a .NET module can be done through one of the `FromXXX` methods from the 
 
 .. code-block:: csharp
 
-    IBinaryStreamReader reader = ...
+    BinaryStreamReader reader = ...
     ModuleDefinition module = ModuleDefinition.FromReader(reader);
 
 .. code-block:: csharp
@@ -91,7 +91,7 @@ Opening (multi-module) .NET assemblies can be done in a very similar fashion as 
 
 .. code-block:: csharp
 
-    PEFile peFile = ...
+    IPEFile peFile = ...
     AssemblyDefinition assembly = AssemblyDefinition.FromFile(peFile);
 
 .. code-block:: csharp
@@ -101,7 +101,7 @@ Opening (multi-module) .NET assemblies can be done in a very similar fashion as 
 
 .. code-block:: csharp
 
-    IBinaryStreamReader reader = ...
+    BinaryStreamReader reader = ...
     AssemblyDefinition assembly = AssemblyDefinition.FromReader(reader);
 
 .. code-block:: csharp

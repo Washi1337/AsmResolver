@@ -28,7 +28,7 @@ Opening an image can be done through one of the `FromXXX` methods from the ``PEI
 
 .. code-block:: csharp
 
-    PEFile peFile = ...
+    IPEFile peFile = ...
     IPEImage peImage = PEImage.FromFile(peFile);
 
 .. code-block:: csharp
@@ -38,7 +38,7 @@ Opening an image can be done through one of the `FromXXX` methods from the ``PEI
 
 .. code-block:: csharp
 
-    IBinaryStreamReader reader = ...
+    BinaryStreamReader reader = ...
     IPEImage peImage = PEImage.FromReader(reader);
 
 
