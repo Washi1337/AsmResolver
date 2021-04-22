@@ -129,7 +129,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                     return GenericInstanceTypeSignature.FromReader(context, ref reader);
 
                 case ElementType.FnPtr:
-                    throw new NotImplementedException();
+                    return new FunctionPointerTypeSignature(MethodSignature.FromReader(context, ref reader));
 
                 case ElementType.SzArray:
                     return new SzArrayTypeSignature(FromReader(context, ref reader));

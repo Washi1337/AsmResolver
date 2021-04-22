@@ -174,5 +174,14 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             return signature;
         }
+
+        /// <inheritdoc />
+        public TypeSignature VisitFunctionPointerType(FunctionPointerTypeSignature signature, GenericContext context)
+        {
+            var instantiatedSignature = InstantiateMethodSignature(signature.Signature, context);
+            return !ReferenceEquals(instantiatedSignature, signature.Signature)
+                ? new FunctionPointerTypeSignature(instantiatedSignature)
+                : signature;
+        }
     }
 }

@@ -25,6 +25,8 @@ Basic leaf type signatures:
 +----------------------------------+----------------------------------------------------------------------+
 | ``GenericInstanceTypeSignature`` | ``System.Collections.Generic.IList`1<System.Int32>``                 |
 +----------------------------------+----------------------------------------------------------------------+
+| ``FunctionPointerTypeSignature`` | ``method void *(int32, int64)``                                      |
++----------------------------------+----------------------------------------------------------------------+
 | ``SentinelTypeSignature``        | (Used as a delimeter for vararg method signatures)                   |
 +----------------------------------+----------------------------------------------------------------------+
 
@@ -105,6 +107,24 @@ The ``GenericInstanceTypeSignature`` class is used to instantiate generic types 
         typeArguments: new[] { module.CorLibTypeFactory.String });
 
     // listOfString now contains a reference to List<string>.
+
+
+FunctionPointerTypeSignature
+----------------------------
+
+Function pointer signatures are strongly-typed pointer types used to describe addresses to functions or methods. In AsmResolver, they are represented using a ``MethodSignature``:
+
+.. code-block:: csharp
+
+    var factory = module.CorLibTypeFactory;
+    var signature = MethodSignature.CreateStatic(
+        factory.Void,
+        factory.Int32,
+        factory.Int32);
+
+    var type = new FunctionPointerTypeSignature(signature);
+
+    // type now contains a reference to `method void *(int32, int32)`.
 
 
 Shortcuts
