@@ -19,6 +19,9 @@ namespace AsmResolver.IO
             _dataSource = new ByteArrayDataSource(data, baseAddress);
         }
 
+        /// <inheritdoc />
+        public uint MaxLength => (uint) _dataSource.Length;
+
         /// <summary>
         /// Constructs a new binary stream reader on the provided byte array.
         /// </summary>
