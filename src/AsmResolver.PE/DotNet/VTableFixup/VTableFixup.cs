@@ -37,7 +37,8 @@ namespace AsmResolver.PE.DotNet.VTableFixup
         public static VTableFixup FromReader(IPEFile file, ref BinaryStreamReader reader)
         {
             var tableReader = file.CreateReaderAtRva(reader.ReadUInt32());
-            ushort entries = tableReader.ReadUInt16();
+            ushort entries = reader.ReadUInt16();
+
             var vtable = new VTableFixup
             {
                 Rva = tableReader.StartRva,
