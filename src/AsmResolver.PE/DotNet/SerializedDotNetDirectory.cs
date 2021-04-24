@@ -2,6 +2,7 @@ using System;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Resources;
+using AsmResolver.PE.DotNet.VTableFixup;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.DotNet
@@ -112,7 +113,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetVTableFixups()
+        protected override VTableFixupDirectory GetVTableFixups()
         {
             if (!_vtableFixupsDirectory.IsPresentInPE)
                 return null;
@@ -123,8 +124,7 @@ namespace AsmResolver.PE.DotNet
                 return null;
             }
 
-            // TODO: interpretation instead of raw contents.
-            return DataSegment.FromReader(ref directoryReader);
+            return VTableFixupDirectory.FromReader(_context.File, ref directoryReader);
         }
 
         /// <inheritdoc />
