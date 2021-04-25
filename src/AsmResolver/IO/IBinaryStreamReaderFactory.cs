@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace AsmResolver.IO
 {
@@ -22,6 +23,8 @@ namespace AsmResolver.IO
         /// <param name="rva">The virtual address (relative to the image base) that is associated to the raw address.</param>
         /// <param name="length">The number of bytes to read.</param>
         /// <returns>The created reader.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs if <paramref name="address"/> is not a valid address.</exception>
+        /// <exception cref="EndOfStreamException">Occurs if <paramref name="length"/> is too long.</exception>
         BinaryStreamReader CreateReader(ulong address, uint rva, uint length);
     }
 
