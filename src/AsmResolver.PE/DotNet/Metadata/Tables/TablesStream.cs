@@ -742,7 +742,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Owner", ColumnType.TypeOrMethodDef, GetColumnSize(ColumnType.TypeOrMethodDef)),
                     new ColumnLayout("EnclosingClass", ColumnType.String, StringIndexSize)),
                 new TableLayout(
-                    new ColumnLayout("Method", ColumnType.Method, GetColumnSize(ColumnType.Method)),
+                    new ColumnLayout("Method", ColumnType.Method, GetColumnSize(ColumnType.MethodDefOrRef)),
                     new ColumnLayout("Instantiation", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
                     new ColumnLayout("Owner", ColumnType.GenericParam, GetColumnSize(ColumnType.GenericParam)),
