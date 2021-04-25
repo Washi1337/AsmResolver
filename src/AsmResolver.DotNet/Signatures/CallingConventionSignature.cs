@@ -44,6 +44,7 @@ namespace AsmResolver.DotNet.Signatures
                 case CallingConventionAttributes.StdCall:
                 case CallingConventionAttributes.ThisCall:
                 case CallingConventionAttributes.VarArg:
+                case CallingConventionAttributes.Unmanaged:
                     return MethodSignature.FromReader(context, ref reader);
 
                 case CallingConventionAttributes.Property:
@@ -59,7 +60,7 @@ namespace AsmResolver.DotNet.Signatures
                     return FieldSignature.FromReader(context, ref reader);
             }
 
-            throw new NotSupportedException();
+            throw new NotSupportedException($"Invalid or unsupported calling convention signature header {flag:X2}.");
         }
 
         /// <summary>
