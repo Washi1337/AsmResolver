@@ -25,8 +25,13 @@ namespace AsmResolver.IO
         BinaryStreamReader CreateReader(ulong address, uint rva, uint length);
     }
 
-    public static class BinaryStreamReaderFactoryExtensions
+    public static partial class IOExtensions
     {
+        /// <summary>
+        /// Creates a binary reader for the entire address space.
+        /// </summary>
+        /// <param name="factory">The factory to use.</param>
+        /// <returns>The constructed reader.</returns>
         public static BinaryStreamReader CreateReader(this IBinaryStreamReaderFactory factory)
             => factory.CreateReader(0, 0, factory.MaxLength);
     }
