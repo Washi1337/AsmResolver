@@ -23,9 +23,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var flags = hasThis
                 ? MethodAttributes.Public
                 : MethodAttributes.Public | MethodAttributes.Static;
-            
+
             var parameterTypes = Enumerable.Repeat<TypeSignature>(_module.CorLibTypeFactory.Object, paramCount);
-            
+
             var signature = hasThis
                 ? MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void, parameterTypes)
                 : MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void, parameterTypes);
@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
                 body.LocalVariables.Add(new CilLocalVariable(_module.CorLibTypeFactory.Object));
 
             method.MethodBody = body;
-            
+
             return body.Instructions;
         }
 
@@ -51,9 +51,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var instructions = CreateDummyMethod(false, 4, 0);
             instructions.Add(CilOpCodes.Ldarg, instructions.Owner.Owner.Parameters[index]);
             instructions.Add(CilOpCodes.Ret);
-            
+
             instructions.OptimizeMacros();
-            
+
             Assert.Equal(expectedMacro.ToOpCode(), instructions[0].OpCode);
             Assert.Null(instructions[0].Operand);
         }
@@ -62,11 +62,11 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void OptimizeHiddenThisToLdarg0()
         {
             var instructions = CreateDummyMethod(true, 0, 0);
-            instructions.Add(CilOpCodes.Ldarg, instructions.Owner.Owner.Parameters.ThisParameter); 
-            instructions.Add(CilOpCodes.Ret); 
-            
+            instructions.Add(CilOpCodes.Ldarg, instructions.Owner.Owner.Parameters.ThisParameter);
+            instructions.Add(CilOpCodes.Ret);
+
             instructions.OptimizeMacros();
-            
+
             Assert.Equal(CilOpCodes.Ldarg_0, instructions[0].OpCode);
             Assert.Null(instructions[0].Operand);
         }
@@ -76,15 +76,15 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var instructions = CreateDummyMethod(false, 0, 0);
             var target = new CilInstructionLabel();
-            
+
             instructions.Add(CilOpCodes.Br, target);
             instructions.Add(CilOpCodes.Nop);
             instructions.Add(CilOpCodes.Nop);
             target.Instruction = instructions.Add(CilOpCodes.Nop);
             instructions.Add(CilOpCodes.Ret);
-            
+
             instructions.OptimizeMacros();
-            
+
             Assert.Equal(CilOpCodes.Br_S, instructions[0].OpCode);
         }
 
@@ -98,9 +98,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             instructions.Add(CilOpCodes.Nop);
             instructions.Add(CilOpCodes.Nop);
             instructions.Add(CilOpCodes.Br, target);
-            
+
             instructions.OptimizeMacros();
-            
+
             Assert.Equal(CilOpCodes.Br_S, instructions[3].OpCode);
         }
 
@@ -109,7 +109,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var instructions = CreateDummyMethod(false, 0, 0);
             var target = new CilInstructionLabel();
-            
+
             instructions.Add(CilOpCodes.Br, target);
 
             for (int i = 0; i < 255; i++)
@@ -117,9 +117,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             target.Instruction = instructions.Add(CilOpCodes.Nop);
             instructions.Add(CilOpCodes.Ret);
-            
+
             instructions.OptimizeMacros();
-            
+
             Assert.Equal(CilOpCodes.Br, instructions[0].OpCode);
         }
 
@@ -128,14 +128,14 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var instructions = CreateDummyMethod(false, 0, 0);
             var target = new CilInstructionLabel();
-            
+
             target.Instruction = instructions.Add(CilOpCodes.Nop);
 
             for (int i = 0; i < 255; i++)
                 instructions.Add(CilOpCodes.Nop);
 
             instructions.Add(CilOpCodes.Br, target);
-            
+
             instructions.OptimizeMacros();
 
             Assert.Equal(CilOpCodes.Br, instructions[^1].OpCode);
@@ -157,9 +157,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             target.Instruction = instructions.Add(CilOpCodes.Nop);
             instructions.Add(CilOpCodes.Ret);
-            
+
             instructions.OptimizeMacros();
-            
+
             Assert.Equal(CilOpCodes.Br_S, instructions[0].OpCode);
         }
 
@@ -179,10 +179,10 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             instructions.Add(CilOpCodes.Ret);
 
             instructions.OptimizeMacros();
-            
+
             Assert.Equal(expected, instructions[0].OpCode.Code);
         }
-        
+
         [Theory]
         [InlineData(0, CilCode.Stloc_0)]
         [InlineData(1, CilCode.Stloc_1)]
@@ -198,9 +198,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             instructions.Add(CilOpCodes.Ldnull);
             instructions.Add(CilOpCodes.Stloc, instructions.Owner.LocalVariables[index]);
             instructions.Add(CilOpCodes.Ret);
-            
+
             instructions.OptimizeMacros();
-            
+
             Assert.Equal(expected, instructions[1].OpCode.Code);
         }
 
@@ -219,9 +219,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             instructions.Add(CilOpCodes.Ldarg, method.Parameters[index]);
             instructions.Add(CilOpCodes.Ret);
-            
+
             instructions.OptimizeMacros();
-            
+
             Assert.Equal(expected, instructions[0].OpCode.Code);
         }
 
@@ -237,9 +237,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             instructions.Add(CilOpCodes.Ldnull);
             instructions.Add(CilOpCodes.Starg, method.Parameters[index]);
             instructions.Add(CilOpCodes.Ret);
-            
+
             instructions.OptimizeMacros();
-            
+
             Assert.Equal(expected, instructions[1].OpCode.Code);
         }
 
@@ -259,15 +259,31 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [InlineData(sbyte.MaxValue + 1, CilCode.Ldc_I4)]
         [InlineData(sbyte.MinValue - 1, CilCode.Ldc_I4)]
         public void OptimizeLdcI4(int operand, CilCode expected)
-        {     
+        {
             var instructions = CreateDummyMethod(false, 0, 0);
 
             instructions.Add(CilOpCodes.Ldc_I4, operand);
             instructions.Add(CilOpCodes.Ret);
-            
+
             instructions.OptimizeMacros();
-            
+
             Assert.Equal(expected, instructions[0].OpCode.Code);
+        }
+
+        [Fact]
+        public void UnalignedShouldNotOptimize()
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+
+            instructions.Add(CilOpCodes.Ldnull);
+            instructions.Add(CilOpCodes.Unaligned, 4);
+            instructions.Add(CilOpCodes.Ldind_I);
+            instructions.Add(CilOpCodes.Ret);
+
+            instructions.OptimizeMacros();
+
+            Assert.Equal(CilCode.Unaligned, instructions[1].OpCode.Code);
+            Assert.Equal((sbyte) 4, instructions[1].Operand);
         }
 
         [Fact]
@@ -281,7 +297,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             instructions.Add(CilOpCodes.Nop);
             instructions.Add(CilOpCodes.Nop);
             instructions.Add(CilOpCodes.Ret);
-            
+
             var expected = new[]
             {
                 instructions[0],
@@ -290,7 +306,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
                 instructions[5],
                 instructions[6],
             };
-            
+
             instructions.RemoveAt(2, -1, 1);
             Assert.Equal(expected, instructions);
         }
@@ -333,7 +349,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
                 instructions[4],
                 instructions[6],
             };
-            
+
             instructions.RemoveRange(new []
             {
                 instructions[1],
@@ -356,7 +372,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             instructions.Add(CilOpCodes.Ret);
 
             instructions.OptimizeMacros();
-            
+
             int[] offsets = instructions.Select(i => i.Offset).ToArray();
             Assert.NotEqual(offsets, instructions.Select(i => 0));
             instructions.CalculateOffsets();
