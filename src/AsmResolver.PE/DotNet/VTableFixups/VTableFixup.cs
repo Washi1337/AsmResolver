@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.DotNet.VTableFixups
 {
@@ -30,14 +29,18 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         /// <summary>
         /// Reads a single vtable from the provided input stream.
         /// </summary>
-        /// <param name="file">The original PE file that is currently being parsed.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns></returns>
-        public static VTableFixup FromReader(IPEFile file, ref BinaryStreamReader reader)
+        public static VTableFixup FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
-            var tableReader = file.CreateReaderAtRva(reader.ReadUInt32());
-            ushort entries = reader.ReadUInt16();
+            if (!context.File.TryCreateReaderAtRva(reader.ReadUInt32(), out var tableReader))
+            {
+                context.BadImage(".NET data directory contains an invalid VTable fixups directory RVA and/or size.");
+                return null;
+            }
 
+            ushort entries = reader.ReadUInt16();
             var vtable = new VTableFixup
             {
                 Type = (VTableType) reader.ReadUInt16()
