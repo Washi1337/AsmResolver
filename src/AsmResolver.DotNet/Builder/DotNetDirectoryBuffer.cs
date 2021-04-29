@@ -130,7 +130,7 @@ namespace AsmResolver.DotNet.Builder
                 Entrypoint = GetEntrypoint(),
                 Flags = Module.Attributes,
                 StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null,
-                VTableFixups = Module.DotNetDirectory.VTableFixups
+                VTableFixups = Module.DotNetDirectory?.VTableFixups
             };
 
             return new DotNetDirectoryBuildResult(directory, _tokenMapping);
