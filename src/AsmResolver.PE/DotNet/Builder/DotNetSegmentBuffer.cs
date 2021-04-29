@@ -1,8 +1,5 @@
-using System;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.VTableFixups.Builder;
 
 namespace AsmResolver.PE.DotNet.Builder
 {
@@ -30,6 +27,11 @@ namespace AsmResolver.PE.DotNet.Builder
             AddIfPresent(dotNetDirectory.DotNetResources);
             AddIfPresent(dotNetDirectory.StrongName);
             AddIfPresent(dotNetDirectory.VTableFixups);
+            if (dotNetDirectory.VTableFixups.Count > 0)
+            {
+                var buffer = new VTableEntriesBuffer(dotNetDirectory.VTableFixups);
+                AddIfPresent(buffer);
+            }
             AddIfPresent(dotNetDirectory.ExportAddressTable);
             AddIfPresent(dotNetDirectory.ManagedNativeHeader);
         }
