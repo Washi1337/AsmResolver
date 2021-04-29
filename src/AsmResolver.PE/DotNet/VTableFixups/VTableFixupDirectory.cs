@@ -1,52 +1,71 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using AsmResolver.IO;
-using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.DotNet.VTableFixups
 {
     /// <summary>
     /// Represents the VTable Fixup Directory in the Cor20 header.
     /// </summary>
-    public class VTableFixupDirectory : SegmentBase
+    public class VTableFixupDirectory : Collection<VTableFixup>, ISegment
     {
-        /// <summary>
-        /// Gets the list of VTable fixups declared
-        /// </summary>
-        public List<VTableFixup> VTables
+        private readonly Dictionary<VTableFixup, uint> _tableRvas = new();
+
+        /// <inheritdoc />
+        public ulong Offset
         {
             get;
-        } = new();
+            private set;
+        }
 
-        /// <summary>
-        /// Reads the vtable fixup directive from the provided input stream.
-        /// </summary>
-        /// <param name="file">The original PE file that is currently being parsed.</param>
-        /// <param name="reader">The input stream.</param>
-        /// <returns>The VTable Fixup Directory.</returns>
-        public static VTableFixupDirectory FromReader(IPEFile file, ref BinaryStreamReader reader)
+        /// <inheritdoc />
+        public uint Rva
         {
-            var directory = new VTableFixupDirectory
+            get;
+            private set;
+        }
+
+        /// <inheritdoc />
+        public bool CanUpdateOffsets => true;
+
+        /// <inheritdoc />
+        public void UpdateOffsets(ulong newOffset, uint newRva)
+        {
+            Offset = newOffset;
+            Rva = newRva;
+            uint endRvaForDirectory = newRva + GetPhysicalSize();
+            foreach (var vTable in Items)
             {
-                Rva = reader.Rva,
-                Offset = reader.Offset,
-            };
-            for (int i = 0; i < reader.Length / 8; i++)
-            {
-                directory.VTables.Add(VTableFixup.FromReader(file, ref reader));
+                _tableRvas[vTable] = endRvaForDirectory;
+                endRvaForDirectory += GetEntriesSize(vTable);
             }
-            return directory;
-        }
-        /// <inheritdoc />
-        public override uint GetPhysicalSize()
-        {
-            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public uint GetPhysicalSize() =>
+            (uint) Items.Count *
+            (sizeof(uint) //rva
+             + sizeof(ushort) //entries
+             + sizeof(ushort)); //type
+
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer)
         {
-            throw new NotImplementedException();
+            foreach (var vTable in Items)
+            {
+                writer.WriteUInt32(_tableRvas[vTable]);
+                writer.WriteUInt16((ushort) vTable.Tokens.Count);
+                writer.WriteUInt16((ushort) vTable.Type);
+            }
         }
+
+        /// <inheritdoc />
+        public uint GetVirtualSize() => GetPhysicalSize();
+
+        private static uint GetEntriesSize(VTableFixup vTableFixup) =>
+            (uint) vTableFixup.Tokens.Count *
+            (uint) (vTableFixup.Type.HasFlag(VTableType.VTable32Bit)
+                ? 4
+                : 8);
     }
 }
