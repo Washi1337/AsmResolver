@@ -38,7 +38,7 @@ namespace AsmResolver.PE.DotNet.VTableFixups.Builder
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => (uint)_vtables.Sum(v => GetEntriesSize(v));
+        public override uint GetPhysicalSize() => (uint)_vtables.Sum(v => v.GetEntriesSize());
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
@@ -54,11 +54,5 @@ namespace AsmResolver.PE.DotNet.VTableFixups.Builder
                 }
             }
         }
-
-        private static uint GetEntriesSize(VTableFixup vTableFixup) =>
-            (uint)vTableFixup.Tokens.Count *
-            (uint)(vTableFixup.Type.HasFlag(VTableType.VTable32Bit)
-                ? 4
-                : 8);
     }
 }

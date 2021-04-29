@@ -21,10 +21,10 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         /// <summary>
         /// Gets a list of the MetadataTokens in the VTable
         /// </summary>
-        public List<MetadataToken> Tokens
+        public IList<MetadataToken> Tokens
         {
             get;
-        } = new();
+        } = new List<MetadataToken>();
 
         /// <summary>
         /// Reads a single vtable from the provided input stream.
@@ -36,7 +36,7 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         {
             if (!context.File.TryCreateReaderAtRva(reader.ReadUInt32(), out var tableReader))
             {
-                context.BadImage(".NET data directory contains an invalid VTable fixups directory RVA and/or size.");
+                context.BadImage("VTable fixups directory contains an invalid RVA for the entries of a vtable.");
                 return null;
             }
 
@@ -55,5 +55,11 @@ namespace AsmResolver.PE.DotNet.VTableFixups
 
             return vtable;
         }
+
+        internal uint GetEntriesSize() =>
+            (uint) Tokens.Count *
+            (uint) (Type.HasFlag(VTableType.VTable32Bit)
+                ? 4
+                : 8);
     }
 }

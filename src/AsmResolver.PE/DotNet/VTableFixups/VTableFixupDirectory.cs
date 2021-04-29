@@ -37,7 +37,7 @@ namespace AsmResolver.PE.DotNet.VTableFixups
             foreach (var vTable in Items)
             {
                 _tableRvas[vTable] = endRvaForDirectory;
-                endRvaForDirectory += GetEntriesSize(vTable);
+                endRvaForDirectory += vTable.GetEntriesSize();
             }
         }
 
@@ -61,11 +61,5 @@ namespace AsmResolver.PE.DotNet.VTableFixups
 
         /// <inheritdoc />
         public uint GetVirtualSize() => GetPhysicalSize();
-
-        private static uint GetEntriesSize(VTableFixup vTableFixup) =>
-            (uint) vTableFixup.Tokens.Count *
-            (uint) (vTableFixup.Type.HasFlag(VTableType.VTable32Bit)
-                ? 4
-                : 8);
     }
 }

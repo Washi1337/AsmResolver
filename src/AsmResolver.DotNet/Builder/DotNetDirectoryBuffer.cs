@@ -129,8 +129,7 @@ namespace AsmResolver.DotNet.Builder
                 DotNetResources = Resources.Size > 0 ? Resources.CreateDirectory() : null,
                 Entrypoint = GetEntrypoint(),
                 Flags = Module.Attributes,
-                StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null,
-                VTableFixups = Module.DotNetDirectory?.VTableFixups
+                StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null
             };
 
             return new DotNetDirectoryBuildResult(directory, _tokenMapping);

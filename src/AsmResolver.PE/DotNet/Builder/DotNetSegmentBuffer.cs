@@ -30,7 +30,7 @@ namespace AsmResolver.PE.DotNet.Builder
             if (dotNetDirectory.VTableFixups?.Count > 0)
             {
                 var buffer = new VTableEntriesBuffer(dotNetDirectory.VTableFixups);
-                AddIfPresent(buffer);
+                _segments.Add(buffer);
             }
             AddIfPresent(dotNetDirectory.ExportAddressTable);
             AddIfPresent(dotNetDirectory.ManagedNativeHeader);
