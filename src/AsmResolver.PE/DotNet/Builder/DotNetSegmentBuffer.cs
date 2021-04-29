@@ -27,7 +27,7 @@ namespace AsmResolver.PE.DotNet.Builder
             AddIfPresent(dotNetDirectory.DotNetResources);
             AddIfPresent(dotNetDirectory.StrongName);
             AddIfPresent(dotNetDirectory.VTableFixups);
-            if (dotNetDirectory.VTableFixups.Count > 0)
+            if (dotNetDirectory.VTableFixups?.Count > 0)
             {
                 var buffer = new VTableEntriesBuffer(dotNetDirectory.VTableFixups);
                 AddIfPresent(buffer);
