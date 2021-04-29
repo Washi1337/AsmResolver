@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using AsmResolver.IO;
 using AsmResolver.PE.File;
 
-namespace AsmResolver.PE.DotNet.VTableFixup
+namespace AsmResolver.PE.DotNet.VTableFixups
 {
     /// <summary>
     /// Represents the VTable Fixup Directory in the Cor20 header.

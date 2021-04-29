@@ -1,6 +1,6 @@
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Resources;
-using AsmResolver.PE.DotNet.VTableFixup;
+using AsmResolver.PE.DotNet.VTableFixups;
 
 namespace AsmResolver.PE.DotNet
 {
