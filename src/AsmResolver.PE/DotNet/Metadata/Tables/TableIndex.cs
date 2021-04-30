@@ -53,5 +53,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         GenericParam = 42,
         MethodSpec = 43,
         GenericParamConstraint = 44,
+        Max = GenericParamConstraint + 1
     }
 }

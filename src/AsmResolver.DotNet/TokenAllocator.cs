@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class TokenAllocator
     {
-        private readonly Dictionary<TableIndex, TokenBucket> _buckets = new();
+        private readonly TokenBucket[] _buckets = new TokenBucket[(int) TableIndex.Max];
 
         internal TokenAllocator(ModuleDefinition module)
         {
@@ -23,25 +23,24 @@ namespace AsmResolver.DotNet
         {
             var tableIndexes = Enum.GetValues(typeof(TableIndex));
             if (netDirectory is null)
-                InitializeDefault(tableIndexes);
+                InitializeDefault();
             else
                 InitializeTable(netDirectory, tableIndexes);
         }
 
-        private void InitializeDefault(Array tableIndexes)
+        private void InitializeDefault()
         {
-            foreach (TableIndex index in tableIndexes)
-                _buckets[index] = new TokenBucket(new MetadataToken(index, 1));
+            for (TableIndex index = 0; index < TableIndex.Max; index++)
+                _buckets[(int) index] = new TokenBucket(new MetadataToken(index, 1));
         }
 
         private void InitializeTable(IDotNetDirectory netDirectory, Array tableIndexes)
         {
             var tableStream = netDirectory.Metadata.GetStream<TablesStream>();
-            foreach (TableIndex index in tableIndexes)
+            for (TableIndex index = 0; index < TableIndex.Max; index++)
             {
                 var table = tableStream.GetTable(index);
-                var rid = (uint)table.Count + 1;
-                _buckets[index] = new TokenBucket(new MetadataToken(index, rid));
+                _buckets[(int) index] = new TokenBucket(new MetadataToken(index, (uint) table.Count + 1));
             }
         }
 
@@ -54,9 +53,7 @@ namespace AsmResolver.DotNet
         /// <returns>The next unused <see cref="MetadataToken"/></returns>
         public MetadataToken GetNextAvailableToken(TableIndex index)
         {
-            if (!_buckets.ContainsKey(index))
-                throw new ArgumentOutOfRangeException(nameof(index));
-            return _buckets[index].GetNextAvailableToken();
+            return _buckets[(int) index].GetNextAvailableToken();
         }
 
         /// <summary>
@@ -74,11 +71,17 @@ namespace AsmResolver.DotNet
                 throw new ArgumentException("Only new members can be assigned a new metadata token");
 
             var index = member.MetadataToken.Table;
-            var token = GetNextAvailableToken(index);
-            member.MetadataToken = token;
+            member.MetadataToken = GetNextAvailableToken(index);
 
-            _buckets[index].AssignedMembers.Add(member);
+            _buckets[(int) index].AssignedMembers.Add(member);
         }
+
+        /// <summary>
+        /// Obtains the members that are manually assigned a new metadata token using this token allocator.
+        /// </summary>
+        /// <param name="table">The table for which to get the assignees from.</param>
+        /// <returns>The assignees.</returns>
+        public IEnumerable<IMetadataMember> GetAssignees(TableIndex table) => _buckets[(int) table].AssignedMembers;
 
         private readonly struct TokenBucket
         {
