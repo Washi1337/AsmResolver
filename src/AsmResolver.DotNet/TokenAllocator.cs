@@ -21,11 +21,10 @@ namespace AsmResolver.DotNet
 
         private void Initialize(IDotNetDirectory netDirectory)
         {
-            var tableIndexes = Enum.GetValues(typeof(TableIndex));
             if (netDirectory is null)
                 InitializeDefault();
             else
-                InitializeTable(netDirectory, tableIndexes);
+                InitializeTable(netDirectory);
         }
 
         private void InitializeDefault()
@@ -34,7 +33,7 @@ namespace AsmResolver.DotNet
                 _buckets[(int) index] = new TokenBucket(new MetadataToken(index, 1));
         }
 
-        private void InitializeTable(IDotNetDirectory netDirectory, Array tableIndexes)
+        private void InitializeTable(IDotNetDirectory netDirectory)
         {
             var tableStream = netDirectory.Metadata.GetStream<TablesStream>();
             for (TableIndex index = 0; index < TableIndex.Max; index++)
