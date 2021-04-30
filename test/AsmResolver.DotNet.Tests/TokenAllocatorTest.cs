@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet.Tests
             var reference = new TypeReference(module, module, "SomeNamespace", "SomeType");
             module.TokenAllocator.AssignNextAvailableToken(reference);
 
-            var image = module.ToPEImage();
+            var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveTypeReferenceIndices));
             var newModule = ModuleDefinition.FromImage(image);
 
             var newReference = (TypeReference) newModule.LookupMember(reference.MetadataToken);
@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet.Tests
 
             module.TokenAllocator.AssignNextAvailableToken(reference);
 
-            var image = module.ToPEImage();
+            var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveMemberReferenceIndices));
             var newModule = ModuleDefinition.FromImage(image);
 
             var newReference = (MemberReference) newModule.LookupMember(reference.MetadataToken);

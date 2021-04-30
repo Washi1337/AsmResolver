@@ -77,7 +77,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Obtains the members that are manually assigned a new metadata token using this token allocator.
+        /// Obtains the members that were manually assigned a new metadata token using this token allocator.
         /// </summary>
         /// <param name="table">The table for which to get the assignees from.</param>
         /// <returns>The assignees.</returns>
