@@ -10,7 +10,8 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class TokenAllocator
     {
-        private readonly Dictionary<TableIndex, MetadataToken> _nextTokens = new Dictionary<TableIndex, MetadataToken>();
+        private readonly Dictionary<TableIndex, TokenBucket> _buckets = new();
+
         internal TokenAllocator(ModuleDefinition module)
         {
             if (module is null)
@@ -22,15 +23,17 @@ namespace AsmResolver.DotNet
         {
             var tableIndexes = Enum.GetValues(typeof(TableIndex));
             if (netDirectory is null)
-                InitailizeDefault(tableIndexes);
+                InitializeDefault(tableIndexes);
             else
                 InitializeTable(netDirectory, tableIndexes);
         }
-        private void InitailizeDefault(Array tableIndexes)
+
+        private void InitializeDefault(Array tableIndexes)
         {
             foreach (TableIndex index in tableIndexes)
-                _nextTokens[index] = new MetadataToken(index, 1);
+                _buckets[index] = new TokenBucket(new MetadataToken(index, 1));
         }
+
         private void InitializeTable(IDotNetDirectory netDirectory, Array tableIndexes)
         {
             var tableStream = netDirectory.Metadata.GetStream<TablesStream>();
@@ -38,7 +41,7 @@ namespace AsmResolver.DotNet
             {
                 var table = tableStream.GetTable(index);
                 var rid = (uint)table.Count + 1;
-                _nextTokens[index] = new MetadataToken(index, rid);
+                _buckets[index] = new TokenBucket(new MetadataToken(index, rid));
             }
         }
 
@@ -51,28 +54,52 @@ namespace AsmResolver.DotNet
         /// <returns>The next unused <see cref="MetadataToken"/></returns>
         public MetadataToken GetNextAvailableToken(TableIndex index)
         {
-            if (!_nextTokens.ContainsKey(index))
+            if (!_buckets.ContainsKey(index))
                 throw new ArgumentOutOfRangeException(nameof(index));
-            return _nextTokens[index];
+            return _buckets[index].GetNextAvailableToken();
         }
+
         /// <summary>
-        /// Determines the next metadata token for provided member and asigns it
+        /// Determines the next metadata token for provided member and assigns it
         /// </summary>
-        /// <remarks>This method only succeeds when new or copied memeber is provided</remarks>
+        /// <remarks>This method only succeeds when new or copied member is provided</remarks>
         /// <exception cref="ArgumentNullException">Occurs when <paramref name="member"/> is null</exception>
         /// <exception cref="ArgumentException">Occurs when <paramref name="member"/> is already assigned a <see cref="MetadataToken"/></exception>
-        /// <param name="member"></param>
+        /// <param name="member">The member to assign a new metadata token.</param>
         public void AssignNextAvailableToken(MetadataMember member)
         {
             if (member is null)
                 throw new ArgumentNullException(nameof(member));
             if (member.MetadataToken.Rid != 0)
                 throw new ArgumentException("Only new members can be assigned a new metadata token");
+
             var index = member.MetadataToken.Table;
             var token = GetNextAvailableToken(index);
             member.MetadataToken = token;
-            var nextToken = new MetadataToken(index, token.Rid + 1);
-            _nextTokens[index] = nextToken;
+
+            _buckets[index].AssignedMembers.Add(member);
+        }
+
+        private readonly struct TokenBucket
+        {
+            public TokenBucket(MetadataToken baseToken)
+            {
+                BaseToken = baseToken;
+                AssignedMembers = new List<IMetadataMember>();
+            }
+
+            public MetadataToken BaseToken
+            {
+                get;
+            }
+
+            public List<IMetadataMember> AssignedMembers
+            {
+                get;
+            }
+
+            public MetadataToken GetNextAvailableToken() =>
+                new(BaseToken.Table, (uint) (BaseToken.Rid + AssignedMembers.Count));
         }
     }
-} 
+}
