@@ -20,6 +20,15 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
+        /// Creates a new file for the provided raw contents.
+        /// </summary>
+        /// <param name="contents">The raw contents of the file.</param>
+        public ByteArrayInputFile(byte[] contents)
+            : this(null, contents, 0)
+        {
+        }
+
+        /// <summary>
         /// Creates a new file for the provided file path and raw contents.
         /// </summary>
         /// <param name="filePath">The file path.</param>

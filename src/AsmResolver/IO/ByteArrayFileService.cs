@@ -21,7 +21,7 @@ namespace AsmResolver.IO
         {
             if (!_files.TryGetValue(filePath, out var file))
             {
-                file = new ByteArrayInputFile(filePath, File.ReadAllBytes(filePath), 0);
+                file = new ByteArrayInputFile(filePath);
                 _files.Add(filePath, file);
             }
 

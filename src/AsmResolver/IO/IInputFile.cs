@@ -8,6 +8,9 @@ namespace AsmResolver.IO
     /// </summary>
     public interface IInputFile : IDisposable
     {
+        /// <summary>
+        /// Gets the path to the file on the disk, or null if this file was created from memory.
+        /// </summary>
         string FilePath
         {
             get;
