@@ -27,7 +27,7 @@ namespace AsmResolver.IO
         /// <param name="baseAddress">The base address to use.</param>
         public ByteArrayInputFile(string filePath, byte[] data, ulong baseAddress)
         {
-            FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
+            FilePath = filePath;
             _dataSource = new ByteArrayDataSource(data, baseAddress);
         }
 
