@@ -1,11 +1,12 @@
 using System;
+using AsmResolver.IO;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet.Metadata;
 
 namespace AsmResolver.PE
 {
     /// <summary>
-    /// Provides parameters for the reading process of a PE image. 
+    /// Provides parameters for the reading process of a PE image.
     /// </summary>
     public class PEReaderParameters
     {
@@ -54,5 +55,11 @@ namespace AsmResolver.PE
             get;
             set;
         }
+
+        public IFileService FileService
+        {
+            get;
+            set;
+        } = new ByteArrayFileService();
     }
 }
