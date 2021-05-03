@@ -56,10 +56,13 @@ namespace AsmResolver.PE
             set;
         }
 
+        /// <summary>
+        /// Gets the service to use for reading any additional files from the disk while reading the portable executable.
+        /// </summary>
         public IFileService FileService
         {
             get;
             set;
-        } = new ByteArrayFileService();
+        } = UncachedFileService.Instance;
     }
 }
