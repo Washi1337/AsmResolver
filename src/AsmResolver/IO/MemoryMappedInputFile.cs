@@ -5,7 +5,7 @@ using System.IO.MemoryMappedFiles;
 namespace AsmResolver.IO
 {
     /// <summary>
-    /// Provides a factory for binary stream readers that operate on a memory mapped file.
+    /// Represents an input file that is mapped in memory.
     /// </summary>
     public sealed class MemoryMappedInputFile : IInputFile
     {

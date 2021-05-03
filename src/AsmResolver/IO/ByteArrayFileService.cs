@@ -4,6 +4,11 @@ using System.IO;
 
 namespace AsmResolver.IO
 {
+    /// <summary>
+    /// Provides an implementation of a <see cref="IFileService"/> that uses instances of
+    /// <see cref="ByteArrayInputFile"/> to represent opened files, and keeps track of any of the instances
+    /// it creates.
+    /// </summary>
     public class ByteArrayFileService : IFileService
     {
         private readonly Dictionary<string, ByteArrayInputFile> _files = new();

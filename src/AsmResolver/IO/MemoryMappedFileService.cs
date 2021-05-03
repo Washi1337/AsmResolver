@@ -2,6 +2,10 @@ using System.Collections.Generic;
 
 namespace AsmResolver.IO
 {
+    /// <summary>
+    /// Provides an implementation of the <see cref="IFileService"/> interface, which maps any requested file into
+    /// memory, and keeps track of any of the instances it creates.
+    /// </summary>
     public class MemoryMappedFileService : IFileService
     {
         private readonly Dictionary<string, MemoryMappedInputFile> _files = new();

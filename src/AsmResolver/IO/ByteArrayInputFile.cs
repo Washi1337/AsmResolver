@@ -1,17 +1,28 @@
 using System;
+using System.IO;
 
 namespace AsmResolver.IO
 {
     /// <summary>
-    /// Provides a mechanism to build binary stream readers from byte arrays.
+    /// Represents a file for which the data is represented by a byte array.
     /// </summary>
     public sealed class ByteArrayInputFile : IInputFile
     {
         private readonly ByteArrayDataSource _dataSource;
 
         /// <summary>
-        /// Creates a new reader factory for the provided byte array.
+        /// Creates a new file for the provided file path.
         /// </summary>
+        /// <param name="filePath">The file path.</param>
+        public ByteArrayInputFile(string filePath)
+            : this(filePath, File.ReadAllBytes(filePath), 0)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new file for the provided file path and raw contents.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
         /// <param name="data">The byte array to read from.</param>
         /// <param name="baseAddress">The base address to use.</param>
         public ByteArrayInputFile(string filePath, byte[] data, ulong baseAddress)
