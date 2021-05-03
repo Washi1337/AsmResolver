@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Tests
     public class TokenAllocatorTest
     {
         [Fact]
-        public void AsigningAvailableTokenShouldSetMetadataToken()
+        public void AssigningAvailableTokenShouldSetMetadataToken()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var typeRef = new TypeReference(module, "", "");
@@ -50,6 +50,39 @@ namespace AsmResolver.DotNet.Tests
             module.TokenAllocator.AssignNextAvailableToken(typeRef2);
 
             Assert.Equal(nextToken.Rid + 1, typeRef2.MetadataToken.Rid);
+        }
+
+        [Fact]
+        public void AssignTokenToNewUnusedTypeReferenceShouldPreserveAfterBuild()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var reference = new TypeReference(module, module, "SomeNamespace", "SomeType");
+            module.TokenAllocator.AssignNextAvailableToken(reference);
+
+            var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveTypeReferenceIndices));
+            var newModule = ModuleDefinition.FromImage(image);
+
+            var newReference = (TypeReference) newModule.LookupMember(reference.MetadataToken);
+            Assert.Equal(reference.Namespace, newReference.Namespace);
+            Assert.Equal(reference.Name, newReference.Name);
+        }
+
+        [Fact]
+        public void AssignTokenToNewUnusedMemberReferenceShouldPreserveAfterBuild()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var reference = new MemberReference(
+                new TypeReference(module, module, "SomeNamespace", "SomeType"),
+                "SomeMethod",
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
+
+            module.TokenAllocator.AssignNextAvailableToken(reference);
+
+            var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveMemberReferenceIndices));
+            var newModule = ModuleDefinition.FromImage(image);
+
+            var newReference = (MemberReference) newModule.LookupMember(reference.MetadataToken);
+            Assert.Equal(reference.Name, newReference.Name);
         }
     }
 }

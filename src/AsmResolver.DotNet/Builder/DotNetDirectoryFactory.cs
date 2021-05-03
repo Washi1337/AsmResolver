@@ -251,6 +251,9 @@ namespace AsmResolver.DotNet.Builder
 
             for (uint rid = 1; rid <= count; rid++)
                 importAction((TMember) module.LookupMember(new MetadataToken(tableIndex, rid)));
+
+            foreach (var member in module.TokenAllocator.GetAssignees(tableIndex))
+                importAction((TMember) member);
         }
     }
 }
