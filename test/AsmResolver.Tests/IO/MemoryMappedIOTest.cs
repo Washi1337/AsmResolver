@@ -21,8 +21,8 @@ namespace AsmResolver.Tests.IO
             string tempPath = Path.Combine(_fixture.BasePath, "MemoryMappedIOTest_ReadShouldReturnFileContents.bin");
             File.WriteAllBytes(tempPath, contents);
 
-            using var factory = new MemoryMappedInputFile(tempPath);
-            var reader = factory.CreateReader();
+            using var service = new MemoryMappedFileService();
+            var reader = service.OpenFile(tempPath).CreateReader();
             Assert.Equal(contents, reader.ReadToEnd());
         }
 
@@ -33,8 +33,9 @@ namespace AsmResolver.Tests.IO
             string tempPath = Path.Combine(_fixture.BasePath, "MemoryMappedIOTest_ReadPastStreamShouldThrow.bin");
             File.WriteAllBytes(tempPath, contents);
 
-            using var factory = new MemoryMappedInputFile(tempPath);
-            Assert.Throws<EndOfStreamException>(() => factory.CreateReader(0, 0, (uint) (contents.Length + 1)));
+            using var service = new MemoryMappedFileService();
+            Assert.Throws<EndOfStreamException>(() =>
+                service.OpenFile(tempPath).CreateReader(0, 0, (uint) (contents.Length + 1)));
         }
     }
 }
