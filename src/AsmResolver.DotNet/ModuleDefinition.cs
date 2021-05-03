@@ -213,7 +213,7 @@ namespace AsmResolver.DotNet
             AssemblyReferences.Add(corLib);
 
             OriginalTargetRuntime = DetectTargetRuntime();
-            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver());
+            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver(UncachedFileService.Instance));
 
             TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
         }
@@ -969,7 +969,7 @@ namespace AsmResolver.DotNet
         /// Creates an assembly resolver based on the corlib reference.
         /// </summary>
         /// <returns>The resolver.</returns>
-        protected IAssemblyResolver CreateAssemblyResolver()
+        protected IAssemblyResolver CreateAssemblyResolver(IFileService fileService)
         {
             string fullPath = FilePath;
             (string directory, string name) = !string.IsNullOrEmpty(fullPath)
@@ -984,18 +984,18 @@ namespace AsmResolver.DotNet
                 case DotNetRuntimeInfo.NetFramework:
                 case DotNetRuntimeInfo.NetStandard
                     when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
-                    resolver = new DotNetFrameworkAssemblyResolver();
+                    resolver = new DotNetFrameworkAssemblyResolver(fileService);
                     break;
                 case DotNetRuntimeInfo.NetStandard
                     when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(
                         runtime.Version, out var coreVersion):
-                    resolver = new DotNetCoreAssemblyResolver(coreVersion);
+                    resolver = new DotNetCoreAssemblyResolver(fileService, coreVersion);
                     break;
                 case DotNetRuntimeInfo.NetCoreApp:
-                    resolver = new DotNetCoreAssemblyResolver(runtime.Version);
+                    resolver = new DotNetCoreAssemblyResolver(fileService, runtime.Version);
                     break;
                 default:
-                    resolver = new DotNetFrameworkAssemblyResolver();
+                    resolver = new DotNetFrameworkAssemblyResolver(fileService);
                     break;
             }
 

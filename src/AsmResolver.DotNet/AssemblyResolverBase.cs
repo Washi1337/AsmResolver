@@ -2,6 +2,7 @@ using AsmResolver.DotNet.Signatures;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet
 {
@@ -18,6 +19,23 @@ namespace AsmResolver.DotNet
         };
 
         private readonly Dictionary<AssemblyDescriptor, AssemblyDefinition> _cache = new(new SignatureComparer());
+
+        /// <summary>
+        /// Initializes the base of an assembly resolver.
+        /// </summary>
+        /// <param name="fileService">The service to use for reading files from the disk.</param>
+        protected AssemblyResolverBase(IFileService fileService)
+        {
+            FileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
+        }
+
+        /// <summary>
+        /// Gets the file service that is used for reading files from the disk.
+        /// </summary>
+        public IFileService FileService
+        {
+            get;
+        }
 
         /// <summary>
         /// Gets a collection of custom search directories that are probed upon resolving a reference
@@ -108,7 +126,7 @@ namespace AsmResolver.DotNet
         /// <returns>The assembly.</returns>
         protected virtual AssemblyDefinition LoadAssemblyFromFile(string path)
         {
-            return AssemblyDefinition.FromFile(path);
+            return AssemblyDefinition.FromFile(FileService.OpenFile(path));
         }
 
         /// <summary>
