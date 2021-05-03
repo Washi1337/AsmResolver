@@ -114,6 +114,19 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
+        /// Reads an unmapped PE file.
+        /// </summary>
+        /// <param name="file">The file representing the PE.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static PEFile FromFile(IInputFile file)
+        {
+            var result = FromReader(file.CreateReader());
+            result.FilePath = file.FilePath;
+            return result;
+        }
+
+        /// <summary>
         /// Reads an unmapped PE file from memory.
         /// </summary>
         /// <param name="raw">The raw bytes representing the contents of the PE file to read.</param>
