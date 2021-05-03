@@ -24,6 +24,11 @@ Opening an image can be done through one of the `FromXXX` methods from the ``PEI
 
 .. code-block:: csharp
 
+    byte[] raw = ...
+    IPEImage peImage = PEImage.FromBytes(raw);
+
+.. code-block:: csharp
+
     IPEImage peImage = PEImage.FromFile(@"C:\myfile.exe");
 
 .. code-block:: csharp
@@ -33,13 +38,17 @@ Opening an image can be done through one of the `FromXXX` methods from the ``PEI
 
 .. code-block:: csharp
 
-    byte[] raw = ...
-    IPEImage peImage = PEImage.FromBytes(raw);
+    BinaryStreamReader reader = ...
+    IPEImage peImage = PEImage.FromReader(reader);
+
+
+If you want to read large files (+100MB), consider using memory mapped I/O instead:
 
 .. code-block:: csharp
 
-    BinaryStreamReader reader = ...
-    IPEImage peImage = PEImage.FromReader(reader);
+    using var service = new MemoryMappedFileService();
+    IPEImage peImage = PEImage.FromFile(service.OpenFile(@"C:\myfile.exe"));
+
 
 
 Writing a PE image

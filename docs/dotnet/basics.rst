@@ -30,17 +30,17 @@ Opening a .NET module can be done through one of the `FromXXX` methods from the 
 
 .. code-block:: csharp
 
+    byte[] raw = ...
+    ModuleDefinition module = ModuleDefinition.FromBytes(raw);
+    
+.. code-block:: csharp
+
     ModuleDefinition module = ModuleDefinition.FromFile(@"C:\myfile.exe");
 
 .. code-block:: csharp
 
     PEFile peFile = ...
     ModuleDefinition module = ModuleDefinition.FromFile(peFile);
-
-.. code-block:: csharp
-
-    byte[] raw = ...
-    ModuleDefinition module = ModuleDefinition.FromBytes(raw);
 
 .. code-block:: csharp
 
@@ -51,6 +51,14 @@ Opening a .NET module can be done through one of the `FromXXX` methods from the 
 
     IPEImage peImage = ...
     ModuleDefinition module = ModuleDefinition.FromImage(peImage);
+
+
+If you want to read large files (+100MB), consider using memory mapped I/O instead:
+
+.. code-block:: csharp
+
+    using var service = new MemoryMappedFileService();
+    ModuleDefinition module = ModuleDefinition.FromFile(service.OpenFile(@"C:\myfile.exe"));
 
 
 Writing a .NET module
@@ -87,17 +95,17 @@ Opening (multi-module) .NET assemblies can be done in a very similar fashion as 
 
 .. code-block:: csharp
 
+    byte[] raw = ...
+    AssemblyDefinition assembly = AssemblyDefinition.FromBytes(raw);
+
+.. code-block:: csharp
+
     AssemblyDefinition assembly = AssemblyDefinition.FromFile(@"C:\myfile.exe");
 
 .. code-block:: csharp
 
     IPEFile peFile = ...
     AssemblyDefinition assembly = AssemblyDefinition.FromFile(peFile);
-
-.. code-block:: csharp
-
-    byte[] raw = ...
-    AssemblyDefinition assembly = AssemblyDefinition.FromBytes(raw);
 
 .. code-block:: csharp
 
@@ -108,6 +116,14 @@ Opening (multi-module) .NET assemblies can be done in a very similar fashion as 
 
     IPEImage peImage = ...
     AssemblyDefinition assembly = AssemblyDefinition.FromImage(peImage);
+
+    
+If you want to read large files (+100MB), consider using memory mapped I/O instead:
+
+.. code-block:: csharp
+
+    using var service = new MemoryMappedFileService();
+    AssemblyDefinition assembly = AssemblyDefinition.FromFile(service.OpenFile(@"C:\myfile.exe"));
 
 
 Writing a .NET assembly
