@@ -5,7 +5,7 @@ namespace AsmResolver.IO
     /// <summary>
     /// Provides a mechanism to build binary stream readers from byte arrays.
     /// </summary>
-    public sealed class ByteArrayReaderFactory : IBinaryStreamReaderFactory
+    public sealed class ByteArrayInputFile : IInputFile
     {
         private readonly ByteArrayDataSource _dataSource;
 
@@ -14,13 +14,20 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="data">The byte array to read from.</param>
         /// <param name="baseAddress">The base address to use.</param>
-        public ByteArrayReaderFactory(byte[] data, ulong baseAddress)
+        public ByteArrayInputFile(string filePath, byte[] data, ulong baseAddress)
         {
+            FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
             _dataSource = new ByteArrayDataSource(data, baseAddress);
         }
 
         /// <inheritdoc />
-        public uint MaxLength => (uint) _dataSource.Length;
+        public string FilePath
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public uint Length => (uint) _dataSource.Length;
 
         /// <summary>
         /// Constructs a new binary stream reader on the provided byte array.

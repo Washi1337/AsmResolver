@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Tests
         {
             using var stream = new MemoryStream();
             assembly.ManifestModule.Write(stream);
-            return AssemblyDefinition.FromReader(ByteArrayReaderFactory.CreateReader(stream.ToArray()));
+            return AssemblyDefinition.FromReader(ByteArrayInputFile.CreateReader(stream.ToArray()));
         }
 
         [Fact]

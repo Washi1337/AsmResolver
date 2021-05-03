@@ -19,7 +19,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedStringsStream(string name, byte[] rawData)
-            : this(name, ByteArrayReaderFactory.CreateReader(rawData))
+            : this(name, ByteArrayInputFile.CreateReader(rawData))
         {
         }
 

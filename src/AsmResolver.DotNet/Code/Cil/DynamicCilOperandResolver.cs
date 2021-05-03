@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     break;
 
                 case TableIndex.StandAloneSig:
-                    var reader = ByteArrayReaderFactory.CreateReader((byte[]) _tokens[(int) token.Rid]);
+                    var reader = ByteArrayInputFile.CreateReader((byte[]) _tokens[(int) token.Rid]);
                     return CallingConventionSignature.FromReader(new BlobReadContext(_readerContext), ref reader);
             }
 

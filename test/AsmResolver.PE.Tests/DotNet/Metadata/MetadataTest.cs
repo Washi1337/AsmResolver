@@ -103,7 +103,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             using var tempStream = new MemoryStream();
             metadata.Write(new BinaryStreamWriter(tempStream));
 
-            var reader = ByteArrayReaderFactory.CreateReader(tempStream.ToArray());
+            var reader = ByteArrayInputFile.CreateReader(tempStream.ToArray());
             var newMetadata = new SerializedMetadata(new PEReaderContext(peFile), ref reader);
 
             Assert.Equal(metadata.MajorVersion, newMetadata.MajorVersion);

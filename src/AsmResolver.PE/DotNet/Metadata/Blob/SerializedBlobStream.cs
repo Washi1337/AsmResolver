@@ -16,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedBlobStream(string name, byte[] rawData)
-            : this(name, ByteArrayReaderFactory.CreateReader(rawData))
+            : this(name, ByteArrayInputFile.CreateReader(rawData))
         {
         }
 

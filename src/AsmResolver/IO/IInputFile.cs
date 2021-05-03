@@ -6,12 +6,17 @@ namespace AsmResolver.IO
     /// <summary>
     /// Provides members for creating new binary streams.
     /// </summary>
-    public interface IBinaryStreamReaderFactory : IDisposable
+    public interface IInputFile : IDisposable
     {
+        string FilePath
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets the maximum length a single binary stream reader produced by this factory can have.
         /// </summary>
-        uint MaxLength
+        uint Length
         {
             get;
         }
@@ -35,7 +40,7 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="factory">The factory to use.</param>
         /// <returns>The constructed reader.</returns>
-        public static BinaryStreamReader CreateReader(this IBinaryStreamReaderFactory factory)
-            => factory.CreateReader(0, 0, factory.MaxLength);
+        public static BinaryStreamReader CreateReader(this IInputFile factory)
+            => factory.CreateReader(0, 0, factory.Length);
     }
 }
