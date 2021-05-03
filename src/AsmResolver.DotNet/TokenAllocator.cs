@@ -44,23 +44,30 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Obtains next unused <see cref="MetadataToken"/>
+        /// Obtains the next unused <see cref="MetadataToken"/> for the provided table.
         /// </summary>
         /// <param name="index">Type of <see cref="MetadataToken"/></param>
-        /// <remarks>This method is pure. That is, it only returns the next available metadata token and does not claim any metadata token</remarks>
-        /// <exception cref="ArgumentOutOfRangeException">Occurs when an invalid <see cref="TableIndex"/> is provided</exception>
-        /// <returns>The next unused <see cref="MetadataToken"/></returns>
+        /// <remarks>
+        /// This method is pure. That is, it only returns the next available metadata token and does not claim
+        /// any metadata token.
+        /// </remarks>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when an invalid <see cref="TableIndex"/> is provided.
+        /// </exception>
+        /// <returns>The next unused <see cref="MetadataToken"/>.</returns>
         public MetadataToken GetNextAvailableToken(TableIndex index)
         {
             return _buckets[(int) index].GetNextAvailableToken();
         }
 
         /// <summary>
-        /// Determines the next metadata token for provided member and assigns it
+        /// Determines the next metadata token for provided member and assigns it.
         /// </summary>
         /// <remarks>This method only succeeds when new or copied member is provided</remarks>
         /// <exception cref="ArgumentNullException">Occurs when <paramref name="member"/> is null</exception>
-        /// <exception cref="ArgumentException">Occurs when <paramref name="member"/> is already assigned a <see cref="MetadataToken"/></exception>
+        /// <exception cref="ArgumentException">
+        /// Occurs when <paramref name="member"/> is already assigned a <see cref="MetadataToken"/>
+        /// </exception>
         /// <param name="member">The member to assign a new metadata token.</param>
         public void AssignNextAvailableToken(MetadataMember member)
         {
