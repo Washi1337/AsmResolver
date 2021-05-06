@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Config.Json;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
+using AsmResolver.IO;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -30,6 +31,24 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(assemblyDef);
             Assert.Equal(assemblyName.Name, assemblyDef.Name);
             Assert.NotNull(assemblyDef.ManifestModule.FilePath);
+        }
+
+        [Fact]
+        public void ResolveCorLibUsingFileService()
+        {
+            using var service = new ByteArrayFileService();
+
+            var assemblyName = typeof(object).Assembly.GetName();
+            var assemblyRef = new AssemblyReference(
+                assemblyName.Name,
+                assemblyName.Version,
+                false,
+                assemblyName.GetPublicKeyToken());
+
+            var resolver = new DotNetCoreAssemblyResolver(service, new Version(3, 1, 0));
+            Assert.Empty(service.GetOpenedFiles());
+            Assert.NotNull(resolver.Resolve(assemblyRef));
+            Assert.NotEmpty(service.GetOpenedFiles());
         }
 
         [Fact]

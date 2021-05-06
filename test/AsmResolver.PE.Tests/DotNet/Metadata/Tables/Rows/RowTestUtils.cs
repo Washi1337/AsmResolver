@@ -20,7 +20,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
 
             using var tempStream = new MemoryStream();
             expected.Write(new BinaryStreamWriter(tempStream), table.Layout);
-            var reader = ByteArrayReaderFactory.CreateReader(tempStream.ToArray());
+            var reader = ByteArrayDataSource.CreateReader(tempStream.ToArray());
             var newRow = readRow(ref reader, table.Layout);
 
             Assert.Equal(expected, newRow);
@@ -35,7 +35,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
 
             using var tempStream = new MemoryStream();
             expected.Write(new BinaryStreamWriter(tempStream), table.Layout);
-            var reader = ByteArrayReaderFactory.CreateReader(tempStream.ToArray());
+            var reader = ByteArrayDataSource.CreateReader(tempStream.ToArray());
             var newRow = readRow(new PEReaderContext(new PEFile()), ref reader, table.Layout);
 
             Assert.Equal(expected, newRow);

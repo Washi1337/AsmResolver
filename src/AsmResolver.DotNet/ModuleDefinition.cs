@@ -67,7 +67,7 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromBytes(byte[] buffer, ModuleReaderParameters readerParameters) =>
-            FromImage(PEImage.FromBytes(buffer), readerParameters);
+            FromImage(PEImage.FromBytes(buffer, readerParameters.PEReaderParameters));
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -86,7 +86,7 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromFile(string filePath, ModuleReaderParameters readerParameters) =>
-            FromImage(PEImage.FromFile(filePath), readerParameters);
+            FromImage(PEImage.FromFile(filePath, readerParameters.PEReaderParameters), readerParameters);
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -94,8 +94,15 @@ namespace AsmResolver.DotNet
         /// <param name="file">The portable executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IPEFile file) =>
-            FromImage(PEImage.FromFile(file));
+        public static ModuleDefinition FromFile(IInputFile file) => FromImage(PEImage.FromFile(file));
+
+        /// <summary>
+        /// Reads a .NET module from the provided input file.
+        /// </summary>
+        /// <param name="file">The portable executable file to load.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromFile(IPEFile file) => FromImage(PEImage.FromFile(file));
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -105,7 +112,7 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromFile(IPEFile file, ModuleReaderParameters readerParameters) =>
-            FromImage(PEImage.FromFile(file), readerParameters);
+            FromImage(PEImage.FromFile(file, readerParameters.PEReaderParameters), readerParameters);
 
         /// <summary>
         /// Reads a .NET module from an input stream.
@@ -126,7 +133,7 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromReader(in BinaryStreamReader reader, PEMappingMode mode, ModuleReaderParameters readerParameters) =>
-            FromFile(PEFile.FromReader(reader, mode));
+            FromImage(PEImage.FromReader(reader, mode, readerParameters.PEReaderParameters), readerParameters);
 
         /// <summary>
         /// Initializes a .NET module from a PE image.
@@ -134,8 +141,17 @@ namespace AsmResolver.DotNet
         /// <param name="peImage">The image containing the .NET metadata.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage) => FromImage(peImage,
-            new ModuleReaderParameters(Path.GetDirectoryName(peImage.FilePath)));
+        public static ModuleDefinition FromImage(IPEImage peImage)
+        {
+            var moduleParameters = new ModuleReaderParameters(Path.GetDirectoryName(peImage.FilePath))
+            {
+                PEReaderParameters = peImage is SerializedPEImage serializedImage
+                    ? serializedImage.ReaderContext.Parameters
+                    : new PEReaderParameters()
+            };
+
+            return FromImage(peImage, moduleParameters);
+        }
 
         /// <summary>
         /// Initializes a .NET module from a PE image.
@@ -197,7 +213,7 @@ namespace AsmResolver.DotNet
             AssemblyReferences.Add(corLib);
 
             OriginalTargetRuntime = DetectTargetRuntime();
-            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver());
+            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver(UncachedFileService.Instance));
 
             TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
         }
@@ -953,7 +969,7 @@ namespace AsmResolver.DotNet
         /// Creates an assembly resolver based on the corlib reference.
         /// </summary>
         /// <returns>The resolver.</returns>
-        protected IAssemblyResolver CreateAssemblyResolver()
+        protected IAssemblyResolver CreateAssemblyResolver(IFileService fileService)
         {
             string fullPath = FilePath;
             (string directory, string name) = !string.IsNullOrEmpty(fullPath)
@@ -968,18 +984,18 @@ namespace AsmResolver.DotNet
                 case DotNetRuntimeInfo.NetFramework:
                 case DotNetRuntimeInfo.NetStandard
                     when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
-                    resolver = new DotNetFrameworkAssemblyResolver();
+                    resolver = new DotNetFrameworkAssemblyResolver(fileService);
                     break;
                 case DotNetRuntimeInfo.NetStandard
                     when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(
                         runtime.Version, out var coreVersion):
-                    resolver = new DotNetCoreAssemblyResolver(coreVersion);
+                    resolver = new DotNetCoreAssemblyResolver(fileService, coreVersion);
                     break;
                 case DotNetRuntimeInfo.NetCoreApp:
-                    resolver = new DotNetCoreAssemblyResolver(runtime.Version);
+                    resolver = new DotNetCoreAssemblyResolver(fileService, runtime.Version);
                     break;
                 default:
-                    resolver = new DotNetFrameworkAssemblyResolver();
+                    resolver = new DotNetFrameworkAssemblyResolver(fileService);
                     break;
             }
 

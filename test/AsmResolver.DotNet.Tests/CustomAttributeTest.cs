@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Tests
             using var stream = new MemoryStream();
             module.Write(stream);
 
-            module = ModuleDefinition.FromReader(ByteArrayReaderFactory.CreateReader(stream.ToArray()));
+            module = ModuleDefinition.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
 
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
             Assert.All(type.CustomAttributes, a =>

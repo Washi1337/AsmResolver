@@ -1,11 +1,12 @@
 using System;
+using AsmResolver.IO;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet.Metadata;
 
 namespace AsmResolver.PE
 {
     /// <summary>
-    /// Provides parameters for the reading process of a PE image. 
+    /// Provides parameters for the reading process of a PE image.
     /// </summary>
     public class PEReaderParameters
     {
@@ -54,5 +55,14 @@ namespace AsmResolver.PE
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets the service to use for reading any additional files from the disk while reading the portable executable.
+        /// </summary>
+        public IFileService FileService
+        {
+            get;
+            set;
+        } = UncachedFileService.Instance;
     }
 }

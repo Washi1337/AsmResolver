@@ -95,9 +95,9 @@ namespace AsmResolver.IO
     }
 
     /// <summary>
-    /// Provides extension methods to implementations of the <see cref="IBinaryStreamWriter"/> interface.
+    /// Provides extension methods to various I/O interfaces in AsmResolver.
     /// </summary>
-    public static class BinaryStreamWriterExtensions
+    public static partial class IOExtensions
     {
         /// <summary>
         /// Writes a buffer of data to the stream.

@@ -15,17 +15,18 @@ Opening a file can be done through one of the `FromXXX` methods:
 
 .. code-block:: csharp
 
-    var peFile = PEFile.FromFile(@"C:\myfile.exe");
-
-.. code-block:: csharp
-
     byte[] raw = ...
     var peFile = PEFile.FromBytes(raw);
+    
+.. code-block:: csharp
+
+    var peFile = PEFile.FromFile(@"C:\myfile.exe");
 
 .. code-block:: csharp
 
     BinaryStreamReader reader = ...
     var peFile = PEFile.FromReader(reader);
+
 
 By default, AsmResolver assumes the PE file is in its unmapped form. This is usually the case when files are read directly from the file system. For memory mapped PE files, use the overload of the ``FromReader`` method, which allows for specifying the memory layout of the input.
 
@@ -33,6 +34,14 @@ By default, AsmResolver assumes the PE file is in its unmapped form. This is usu
 
     BinaryStreamReader reader = ...
     var peFile = PEFile.FromReader(reader, PEMappingMode.Mapped);
+
+
+If you want to read large files (+100MB), consider using memory mapped I/O instead:
+
+.. code-block:: csharp
+
+    using var service = new MemoryMappedFileService();
+    var peFile = PEFile.FromFile(service.OpenFile(@"C:\myfile.exe"));
 
 
 Writing PE files

@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet
             if (!(method.Module is SerializedModuleDefinition module))
                 throw new ArgumentException("Method body should reference a serialized module.");
 
-            var reader = ByteArrayReaderFactory.CreateReader(localSig);
+            var reader = ByteArrayDataSource.CreateReader(localSig);
             var localsSignature = (LocalVariablesSignature) CallingConventionSignature.FromReader(
                 new BlobReadContext(module.ReaderContext),
                 ref reader);

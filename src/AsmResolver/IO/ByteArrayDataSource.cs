@@ -36,6 +36,14 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public ulong Length => (ulong) _data.Length;
 
+        /// <summary>
+        /// Constructs a new binary stream reader on the provided byte array.
+        /// </summary>
+        /// <param name="data">The byte array to read.</param>
+        /// <returns>The stream reader.</returns>
+        public static BinaryStreamReader CreateReader(byte[] data) =>
+            new(new ByteArrayDataSource(data), 0, 0, (uint) data.Length);
+
         /// <inheritdoc />
         public bool IsValidAddress(ulong address) => address - _baseAddress < (ulong) _data.Length;
 

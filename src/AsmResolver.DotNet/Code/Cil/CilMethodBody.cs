@@ -156,7 +156,7 @@ namespace AsmResolver.DotNet.Code.Cil
             DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
 
             // Read raw instructions.
-            var reader = ByteArrayReaderFactory.CreateReader(code);
+            var reader = ByteArrayDataSource.CreateReader(code);
             var disassembler = new CilDisassembler(reader, new DynamicCilOperandResolver(module, result, tokenList));
             result.Instructions.AddRange(disassembler.ReadInstructions());
 
@@ -229,7 +229,7 @@ namespace AsmResolver.DotNet.Code.Cil
             ICilOperandResolver operandResolver,
             CilRawMethodBody rawBody)
         {
-            var reader = ByteArrayReaderFactory.CreateReader(rawBody.Code);
+            var reader = ByteArrayDataSource.CreateReader(rawBody.Code);
             var disassembler = new CilDisassembler(reader, operandResolver);
             result.Instructions.AddRange(disassembler.ReadInstructions());
         }
@@ -241,7 +241,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 var section = fatBody.ExtraSections[i];
                 if (section.IsEHTable)
                 {
-                    var reader = ByteArrayReaderFactory.CreateReader(section.Data);
+                    var reader = ByteArrayDataSource.CreateReader(section.Data);
                     uint size = section.IsFat
                         ? CilExceptionHandler.FatExceptionHandlerSize
                         : CilExceptionHandler.TinyExceptionHandlerSize;

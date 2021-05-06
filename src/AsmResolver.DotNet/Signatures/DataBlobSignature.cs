@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The deserialized literal.</returns>
         public object InterpretData(ElementType elementType)
         {
-            var reader = ByteArrayReaderFactory.CreateReader(Data);
+            var reader = ByteArrayDataSource.CreateReader(Data);
 
             return elementType switch
             {
