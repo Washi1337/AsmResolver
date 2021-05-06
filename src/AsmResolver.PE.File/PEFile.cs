@@ -106,12 +106,7 @@ namespace AsmResolver.PE.File
         /// <param name="path">The file path to the PE file.</param>
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromFile(string path)
-        {
-            var result = FromReader(ByteArrayInputFile.CreateReader(System.IO.File.ReadAllBytes(path)));
-            result.FilePath = path;
-            return result;
-        }
+        public static PEFile FromFile(string path) => FromFile(UncachedFileService.Instance.OpenFile(path));
 
         /// <summary>
         /// Reads an unmapped PE file.
@@ -132,7 +127,7 @@ namespace AsmResolver.PE.File
         /// <param name="raw">The raw bytes representing the contents of the PE file to read.</param>
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromBytes(byte[] raw) => FromReader(ByteArrayInputFile.CreateReader(raw));
+        public static PEFile FromBytes(byte[] raw) => FromReader(ByteArrayDataSource.CreateReader(raw));
 
         /// <summary>
         /// Reads a PE file from the provided input stream.

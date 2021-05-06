@@ -19,7 +19,7 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedUserStringsStream(string name, byte[] rawData)
-            : this(name, ByteArrayInputFile.CreateReader(rawData))
+            : this(name, ByteArrayDataSource.CreateReader(rawData))
         {
         }
 

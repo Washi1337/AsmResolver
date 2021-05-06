@@ -18,7 +18,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
                 .Body.CreateReader();
 
             var body = CilRawMethodBody.FromReader(ThrowErrorListener.Instance, ref reader);
-            var disassembler = new CilDisassembler(ByteArrayInputFile.CreateReader(body.Code));
+            var disassembler = new CilDisassembler(ByteArrayDataSource.CreateReader(body.Code));
 
             var initialValueFieldToken = MetadataToken.Zero;
 

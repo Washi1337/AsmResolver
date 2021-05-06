@@ -49,14 +49,6 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public uint Length => (uint) _dataSource.Length;
 
-        /// <summary>
-        /// Constructs a new binary stream reader on the provided byte array.
-        /// </summary>
-        /// <param name="data">The byte array to read.</param>
-        /// <returns>The stream reader.</returns>
-        public static BinaryStreamReader CreateReader(byte[] data) =>
-            new(new ByteArrayDataSource(data), 0, 0, (uint) data.Length);
-
         /// <inheritdoc />
         public BinaryStreamReader CreateReader(ulong address, uint rva, uint length) =>
             new(_dataSource, address, rva, length);

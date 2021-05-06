@@ -532,5 +532,19 @@ namespace AsmResolver.DotNet.Tests
             var corlibType = Assert.IsAssignableFrom<CorLibTypeSignature>(signature);
             Assert.Equal(ElementType.Object, corlibType.ElementType);
         }
+
+        [Fact]
+        public void InvalidMetadataLoopInBaseTypeShouldNotCrashIsValueType()
+        {
+            var module = new ModuleDefinition("Test");
+            var typeA = new TypeDefinition(null, "A", TypeAttributes.Public);
+            var typeB = new TypeDefinition(null, "B", TypeAttributes.Public, typeA);
+            typeA.BaseType = typeB;
+            module.TopLevelTypes.Add(typeA);
+            module.TopLevelTypes.Add(typeB);
+
+            Assert.False(typeB.IsValueType);
+            Assert.False(typeB.IsEnum);
+        }
     }
 }

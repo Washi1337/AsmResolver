@@ -4,7 +4,7 @@ using System.IO;
 namespace AsmResolver.IO
 {
     /// <summary>
-    /// Provides members for creating new binary streams.
+    /// Represents a file from which binary data can be read.
     /// </summary>
     public interface IInputFile : IDisposable
     {

@@ -27,7 +27,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedTableStream(PEReaderContext context, string name, byte[] rawData)
-            : this(context, name, ByteArrayInputFile.CreateReader(rawData))
+            : this(context, name, ByteArrayDataSource.CreateReader(rawData))
         {
         }
 
