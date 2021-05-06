@@ -10,6 +10,21 @@ namespace AsmResolver.IO
     {
         private readonly void* _basePointer;
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="UnmanagedDataSource"/> class.
+        /// </summary>
+        /// <param name="basePointer">The base pointer to start reading from.</param>
+        /// <param name="length">The total length of the data source.</param>
+        public UnmanagedDataSource(IntPtr basePointer, ulong length)
+            : this(basePointer.ToPointer(), length)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="UnmanagedDataSource"/> class.
+        /// </summary>
+        /// <param name="basePointer">The base pointer to start reading from.</param>
+        /// <param name="length">The total length of the data source.</param>
         public UnmanagedDataSource(void* basePointer, ulong length)
         {
             _basePointer = basePointer;
