@@ -115,6 +115,27 @@ namespace AsmResolver.DotNet
             FromImage(PEImage.FromFile(file, readerParameters.PEReaderParameters), readerParameters);
 
         /// <summary>
+        /// Reads a .NET module from the provided data source.
+        /// </summary>
+        /// <param name="dataSource">The data source to read from.</param>
+        /// <param name="mode">Indicates how the input PE file is mapped.</param>
+        /// <returns>The module that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static ModuleDefinition FromDataSource(IDataSource dataSource, PEMappingMode mode = PEMappingMode.Unmapped) =>
+            FromReader(new BinaryStreamReader(dataSource, dataSource.BaseAddress, 0, (uint) dataSource.Length), mode);
+
+        /// <summary>
+        /// Reads a .NET module from the provided data source.
+        /// </summary>
+        /// <param name="dataSource">The data source to read from.</param>
+        /// <param name="mode">Indicates how the input PE file is mapped.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static ModuleDefinition FromDataSource(IDataSource dataSource, PEMappingMode mode, ModuleReaderParameters readerParameters) =>
+            FromReader(new BinaryStreamReader(dataSource, dataSource.BaseAddress, 0, (uint) dataSource.Length), mode);
+
+        /// <summary>
         /// Reads a .NET module from an input stream.
         /// </summary>
         /// <param name="reader">The input stream pointing at the beginning of the executable to load.</param>
