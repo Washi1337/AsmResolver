@@ -23,6 +23,9 @@ namespace AsmResolver.IO
         }
 
         /// <inheritdoc />
+        public ulong BaseAddress => _dataSource.BaseAddress + (ulong) _displacement;
+
+        /// <inheritdoc />
         public byte this[ulong address] => _dataSource[address - (ulong) _displacement];
 
         /// <inheritdoc />

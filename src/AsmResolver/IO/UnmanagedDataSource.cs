@@ -3,6 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace AsmResolver.IO
 {
+    /// <summary>
+    /// Represents a data source that obtains its data from a block of unmanaged memory.
+    /// </summary>
     public sealed unsafe class UnmanagedDataSource : IDataSource
     {
         private readonly void* _basePointer;
@@ -12,6 +15,9 @@ namespace AsmResolver.IO
             _basePointer = basePointer;
             Length = length;
         }
+
+        /// <inheritdoc />
+        public ulong BaseAddress => (ulong) _basePointer;
 
         /// <inheritdoc />
         public byte this[ulong address]

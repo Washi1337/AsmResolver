@@ -22,6 +22,9 @@ namespace AsmResolver.IO
         }
 
         /// <inheritdoc />
+        public ulong BaseAddress => 0;
+
+        /// <inheritdoc />
         public byte this[ulong address] => _accessor.ReadByte((long) address);
 
         /// <inheritdoc />

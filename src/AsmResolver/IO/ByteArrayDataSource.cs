@@ -8,7 +8,6 @@ namespace AsmResolver.IO
     public sealed class ByteArrayDataSource : IDataSource
     {
         private readonly byte[] _data;
-        private readonly ulong _baseAddress;
 
         /// <summary>
         /// Creates a new instance of the <see cref="ByteArrayDataSource"/> class.
@@ -27,11 +26,17 @@ namespace AsmResolver.IO
         public ByteArrayDataSource(byte[] data, ulong baseAddress)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
-            _baseAddress = baseAddress;
+            BaseAddress = baseAddress;
         }
 
         /// <inheritdoc />
-        public byte this[ulong address] => _data[address - _baseAddress];
+        public ulong BaseAddress
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public byte this[ulong address] => _data[address - BaseAddress];
 
         /// <inheritdoc />
         public ulong Length => (ulong) _data.Length;
@@ -45,11 +50,11 @@ namespace AsmResolver.IO
             new(new ByteArrayDataSource(data), 0, 0, (uint) data.Length);
 
         /// <inheritdoc />
-        public bool IsValidAddress(ulong address) => address - _baseAddress < (ulong) _data.Length;
+        public bool IsValidAddress(ulong address) => address - BaseAddress < (ulong) _data.Length;
 
         public int ReadBytes(ulong address, byte[] buffer, int index, int count)
         {
-            int relativeIndex = (int) (address - _baseAddress);
+            int relativeIndex = (int) (address - BaseAddress);
             int actualLength = Math.Min(count, _data.Length - relativeIndex);
             Buffer.BlockCopy(_data, relativeIndex, buffer, index, actualLength);
             return actualLength;
