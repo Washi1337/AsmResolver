@@ -61,6 +61,15 @@ If you want to read large files (+100MB), consider using memory mapped I/O inste
     ModuleDefinition module = ModuleDefinition.FromFile(service.OpenFile(@"C:\myfile.exe"));
 
 
+On Windows, if a module is loaded and mapped in memory (e.g. as a dependency defined in Metadata or by the means of `System.Reflection`), it is possible to load the module from memory by transforming the module into a `HINSTANCE` (a.k.a. module base address), and then providing it to AsmResolver:
+
+.. code-block:: csharp
+
+    Module module = ...;
+    IntPtr hInstance = Marshal.GetHINSTANCE(module);
+    ModuleDefinition module = ModuleDefinition.FromModuleBaseAddress(hInstance);
+    
+
 Writing a .NET module
 ---------------------
 
