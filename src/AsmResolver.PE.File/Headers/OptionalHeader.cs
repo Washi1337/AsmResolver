@@ -10,6 +10,11 @@ namespace AsmResolver.PE.File.Headers
     public class OptionalHeader : SegmentBase
     {
         /// <summary>
+        /// Indicates the offset of the SizeOfImage field in the optional header.
+        /// </summary>
+        public const uint OptionalHeaderSizeOfImageFieldOffset = 56;
+
+        /// <summary>
         /// Indicates the static size of an optional header in a 32-bit portable executable file, excluding the
         /// data directory entries.
         /// </summary>

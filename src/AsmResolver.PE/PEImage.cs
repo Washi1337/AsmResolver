@@ -64,6 +64,25 @@ namespace AsmResolver.PE
             FromFile(PEFile.FromBytes(bytes), readerParameters);
 
         /// <summary>
+        /// Reads a mapped PE image starting at the provided module base address (HINSTANCE).
+        /// </summary>
+        /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
+        /// <returns>The PE image that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static IPEImage FromModuleBaseAddress(IntPtr hInstance) =>
+            FromModuleBaseAddress(hInstance, new PEReaderParameters());
+
+        /// <summary>
+        /// Reads a mapped PE image starting at the provided module base address (HINSTANCE).
+        /// </summary>
+        /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
+        /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
+        /// <returns>The PE image that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static IPEImage FromModuleBaseAddress(IntPtr hInstance, PEReaderParameters readerParameters) =>
+            FromFile(PEFile.FromModuleBaseAddress(hInstance), readerParameters);
+
+        /// <summary>
         /// Reads a PE image from the provided data source.
         /// </summary>
         /// <param name="dataSource">The data source to read from.</param>

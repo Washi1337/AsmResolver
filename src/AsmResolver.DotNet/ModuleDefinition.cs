@@ -115,6 +115,25 @@ namespace AsmResolver.DotNet
             FromImage(PEImage.FromFile(file, readerParameters.PEReaderParameters), readerParameters);
 
         /// <summary>
+        /// Reads a mapped .NET module starting at the provided module base address (HINSTANCE).
+        /// </summary>
+        /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromModuleBaseAddress(IntPtr hInstance) =>
+            FromModuleBaseAddress(hInstance, new ModuleReaderParameters());
+
+        /// <summary>
+        /// Reads a mapped .NET module starting at the provided module base address (HINSTANCE).
+        /// </summary>
+        /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromModuleBaseAddress(IntPtr hInstance, ModuleReaderParameters readerParameters) =>
+            FromImage(PEImage.FromModuleBaseAddress(hInstance, readerParameters.PEReaderParameters), readerParameters);
+
+        /// <summary>
         /// Reads a .NET module from the provided data source.
         /// </summary>
         /// <param name="dataSource">The data source to read from.</param>
