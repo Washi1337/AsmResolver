@@ -143,5 +143,30 @@ namespace AsmResolver.PE.File.Tests
             byte[] contents2 = ((IReadableSegment) section.Contents).ToArray();
             Assert.Equal(contents, contents2);
         }
+
+        [Fact]
+        public void SectionsInMappedBinaryShouldUseVirtualAddressesAsOffset()
+        {
+            var physicalFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            var memoryFile = PEFile.FromDataSource(
+                new ByteArrayDataSource(Properties.Resources.HelloWorldDump),
+                PEMappingMode.Mapped);
+
+            Assert.Equal(physicalFile.Sections.Count, memoryFile.Sections.Count);
+            for (int i = 0; i < physicalFile.Sections.Count; i++)
+            {
+                var physicalSection = physicalFile.Sections[i];
+                var memorySection = memoryFile.Sections[i];
+
+                Assert.NotEqual(physicalSection.Offset, memorySection.Offset);
+                Assert.Equal(physicalSection.Rva, memorySection.Rva);
+
+                byte[] expected = new byte[20];
+                physicalSection.CreateReader().ReadBytes(expected, 0, expected.Length);
+                byte[] actual = new byte[20];
+                memorySection.CreateReader().ReadBytes(actual, 0, actual.Length);
+                Assert.Equal(expected, actual);
+            }
+        }
     }
 }
