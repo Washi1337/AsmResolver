@@ -6,6 +6,14 @@ namespace AsmResolver.IO
     public interface IDataSource
     {
         /// <summary>
+        /// Gets the first byte address of the data source that is accessible.
+        /// </summary>
+        ulong BaseAddress
+        {
+            get;
+        }
+
+        /// <summary>
         /// Reads a single byte at the provided address.
         /// </summary>
         /// <param name="address">The address to read from.</param>

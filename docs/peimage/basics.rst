@@ -50,6 +50,13 @@ If you want to read large files (+100MB), consider using memory mapped I/O inste
     IPEImage peImage = PEImage.FromFile(service.OpenFile(@"C:\myfile.exe"));
 
 
+On Windows, if a module is loaded and mapped in memory (e.g. as a native dependency or by the means of ``LoadLibrary``), it is possible to load the PE image from memory by providing the ``HINSTANCE`` (a.k.a. module base address):
+
+.. code-block:: csharp
+
+    IntPtr hInstance = ...
+    IPEImage peImage = PEImage.FromModuleBaseAddress(hInstance);
+
 
 Writing a PE image
 -------------------

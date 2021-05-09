@@ -130,6 +130,34 @@ namespace AsmResolver.PE.File
         public static PEFile FromBytes(byte[] raw) => FromReader(ByteArrayDataSource.CreateReader(raw));
 
         /// <summary>
+        /// Reads a mapped PE file starting at the provided module base address (HINSTANCE).
+        /// </summary>
+        /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static unsafe PEFile FromModuleBaseAddress(IntPtr hInstance)
+        {
+            // Perform some minimal parsing to get the size of the image from the optional header.
+            uint nextHeaderOffset = *(uint*) ((byte*) hInstance + DosHeader.NextHeaderFieldOffset);
+            uint sizeOfImage = *(uint*) ((byte*) hInstance
+                + nextHeaderOffset
+                + sizeof(uint)
+                + FileHeader.FileHeaderSize
+                + OptionalHeader.OptionalHeaderSizeOfImageFieldOffset);
+            return FromDataSource(new UnmanagedDataSource(hInstance, sizeOfImage), PEMappingMode.Mapped);
+        }
+
+        /// <summary>
+        /// Reads a PE file from the provided data source.
+        /// </summary>
+        /// <param name="dataSource">The data source to read from.</param>
+        /// <param name="mode">Indicates how the input PE file is mapped.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static PEFile FromDataSource(IDataSource dataSource, PEMappingMode mode = PEMappingMode.Unmapped) =>
+            FromReader(new BinaryStreamReader(dataSource, dataSource.BaseAddress, 0, (uint) dataSource.Length), mode);
+
+        /// <summary>
         /// Reads a PE file from the provided input stream.
         /// </summary>
         /// <param name="reader">The input stream to read from.</param>
