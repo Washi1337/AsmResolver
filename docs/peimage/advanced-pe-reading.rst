@@ -67,7 +67,7 @@ Some .NET obfuscators insert custom metadata streams in the .NET metadata direct
             else
             {
                 // Forward to default stream parser.
-                base.ReadStream(context, header, reader);
+                base.ReadStream(context, header, ref reader);
             }
         }
     }
@@ -107,7 +107,7 @@ Debug data directories can have arbitrary data stored in the PE image. By defaul
             else
             {
                 // Forward to default parser.
-                return base.ReadDebugData(context, type, reader);
+                return base.ReadDebugData(context, type, ref reader);
             }
         }
     }

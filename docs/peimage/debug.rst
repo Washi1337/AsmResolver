@@ -38,9 +38,7 @@ Depending on the type of the debug data entry, the ``Contents`` property will be
 CodeView Data
 -------------
 
-CodeView data is perhaps the most common form of debug data that can appear in a portable executable. It is emitted by a lot of compilers, such as the Visual C++ compiler, and also by many .NET languages. CodeView data is modelled using implementations of the ``CodeViewDataSegment`` abstract class.
-
-There are various formats used by CodeView data segments, and this format is decided by the ``Signature`` property of the ``CodeViewDataSegment`` class.
+CodeView data is perhaps the most common form of debug data that can appear in a portable executable. It is emitted by a lot of compilers, such as the Visual C++ compiler, and is also used by many .NET languages such as C# and VB.NET. CodeView data is modelled using implementations of the ``CodeViewDataSegment`` abstract class.
 
 .. code-block:: csharp
 
@@ -50,7 +48,7 @@ There are various formats used by CodeView data segments, and this format is dec
         ...
     }
 
-The most common format used in a CodeView segment, is the RSDS segment. This format stores a path to the Program Debug Database (``*.pdb``) file that is associated to the image.
+There are various formats used by CodeView data segments, and this format is decided by the ``Signature`` property of the ``CodeViewDataSegment`` class. The most common format used in a CodeView segment, is the RSDS segment. This format stores a path to the Program Debug Database (``*.pdb``) file that is associated to the image.
 
 .. code-block:: csharp
 
