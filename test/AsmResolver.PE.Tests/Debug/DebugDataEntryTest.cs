@@ -1,7 +1,9 @@
+using System;
 using System.IO;
 using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.Debug;
+using AsmResolver.PE.Debug.CodeView;
 using AsmResolver.PE.DotNet.Builder;
 using Xunit;
 
@@ -26,6 +28,19 @@ namespace AsmResolver.PE.Tests.Debug
         public void ReadEntries()
         {
             var image = PEImage.FromBytes(Properties.Resources.SimpleDll);
+
+            foreach (var entry in image.DebugData)
+            {
+                if (entry.Contents.Type == DebugDataType.CodeView)
+                {
+                    var data = (CodeViewDataSegment) entry.Contents;
+                    if (data.Signature == CodeViewSignature.Rsds)
+                    {
+                        var rsdsData = (RsdsDataSegment) data;
+                        Console.WriteLine("PDB Path: {0}", rsdsData.Path);
+                    }
+                }
+            }
             Assert.Equal(new[]
             {
                 DebugDataType.CodeView,
