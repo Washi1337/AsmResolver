@@ -37,6 +37,7 @@ Table of Contents:
    peimage/imports
    peimage/exports
    peimage/win32resources
+   peimage/exceptions
    peimage/dotnet
 
 
