@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides a mechanism to assign metadata tokens
     /// </summary>
-    public class TokenAllocator
+    public sealed class TokenAllocator
     {
         private readonly TokenBucket[] _buckets = new TokenBucket[(int) TableIndex.Max];
 
