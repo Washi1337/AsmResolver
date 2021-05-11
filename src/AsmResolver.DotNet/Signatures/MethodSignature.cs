@@ -132,6 +132,12 @@ namespace AsmResolver.DotNet.Signatures
         public MethodSignature InstantiateGenericTypes(GenericContext context)
             => GenericTypeActivator.Instance.InstantiateMethodSignature(this, context);
 
+        /// <summary>
+        /// Constructs a new function pointer type signature based on this method signature.
+        /// </summary>
+        /// <returns>The new type signature.</returns>
+        public FunctionPointerTypeSignature MakeFunctionPointerType() => new(this);
+
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {
