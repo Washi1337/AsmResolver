@@ -234,7 +234,8 @@ namespace AsmResolver.DotNet.Tests.Builder
             // Assert token resolves to the same method reference.
             var newModule = ModuleDefinition.FromImage(result.ConstructedImage);
             var newSignature = (StandAloneSignature) newModule.LookupMember(newToken);
-            Assert.Equal(signature.Signature, newSignature.Signature, new SignatureComparer());
+            Assert.Equal((CallingConventionSignature) signature.Signature,
+                newSignature.Signature as CallingConventionSignature, new SignatureComparer());
         }
     }
 }
