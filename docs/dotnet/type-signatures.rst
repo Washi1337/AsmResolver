@@ -134,8 +134,8 @@ To quickly transform any ``ITypeDescriptor`` into a ``TypeSignature``, it is pos
 
 .. code-block:: csharp
 
-    TypeReference streamTypeRef = new TypeReference(corlibScope, "System.IO", "Stream");
-    TypeSignature streamTypeSig = streamTypeRef.ToTypeSignature();
+    var streamTypeRef = new TypeReference(corlibScope, "System.IO", "Stream");
+    var streamTypeSig = streamTypeRef.ToTypeSignature();
 
 
 Likewise, a ``TypeSignature`` can also be converted back to a ``ITypeDefOrRef``, which can be referenced using a metadata token, using the ``TypeSignature.ToTypeDefOrRef()`` method.

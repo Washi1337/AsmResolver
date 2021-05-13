@@ -31,26 +31,26 @@ Opening a .NET module can be done through one of the `FromXXX` methods from the 
 .. code-block:: csharp
 
     byte[] raw = ...
-    ModuleDefinition module = ModuleDefinition.FromBytes(raw);
+    var module = ModuleDefinition.FromBytes(raw);
     
 .. code-block:: csharp
 
-    ModuleDefinition module = ModuleDefinition.FromFile(@"C:\myfile.exe");
+    var module = ModuleDefinition.FromFile(@"C:\myfile.exe");
 
 .. code-block:: csharp
 
     PEFile peFile = ...
-    ModuleDefinition module = ModuleDefinition.FromFile(peFile);
+    var module = ModuleDefinition.FromFile(peFile);
 
 .. code-block:: csharp
 
     BinaryStreamReader reader = ...
-    ModuleDefinition module = ModuleDefinition.FromReader(reader);
+    var module = ModuleDefinition.FromReader(reader);
 
 .. code-block:: csharp
 
     IPEImage peImage = ...
-    ModuleDefinition module = ModuleDefinition.FromImage(peImage);
+    var module = ModuleDefinition.FromImage(peImage);
 
 
 If you want to read large files (+100MB), consider using memory mapped I/O instead:
@@ -58,7 +58,7 @@ If you want to read large files (+100MB), consider using memory mapped I/O inste
 .. code-block:: csharp
 
     using var service = new MemoryMappedFileService();
-    ModuleDefinition module = ModuleDefinition.FromFile(service.OpenFile(@"C:\myfile.exe"));
+    var module = ModuleDefinition.FromFile(service.OpenFile(@"C:\myfile.exe"));
 
 
 On Windows, if a module is loaded and mapped in memory (e.g. as a dependency defined in Metadata or by the means of ``System.Reflection``), it is possible to load the module from memory by transforming the module into a ``HINSTANCE`` (a.k.a. module base address), and then providing it to AsmResolver:
@@ -67,7 +67,7 @@ On Windows, if a module is loaded and mapped in memory (e.g. as a dependency def
 
     Module module = ...;
     IntPtr hInstance = Marshal.GetHINSTANCE(module);
-    ModuleDefinition module = ModuleDefinition.FromModuleBaseAddress(hInstance);
+    var module = ModuleDefinition.FromModuleBaseAddress(hInstance);
     
 
 Writing a .NET module
@@ -105,26 +105,26 @@ Opening (multi-module) .NET assemblies can be done in a very similar fashion as 
 .. code-block:: csharp
 
     byte[] raw = ...
-    AssemblyDefinition assembly = AssemblyDefinition.FromBytes(raw);
+    var assembly = AssemblyDefinition.FromBytes(raw);
 
 .. code-block:: csharp
 
-    AssemblyDefinition assembly = AssemblyDefinition.FromFile(@"C:\myfile.exe");
+    var assembly = AssemblyDefinition.FromFile(@"C:\myfile.exe");
 
 .. code-block:: csharp
 
     IPEFile peFile = ...
-    AssemblyDefinition assembly = AssemblyDefinition.FromFile(peFile);
+    var assembly = AssemblyDefinition.FromFile(peFile);
 
 .. code-block:: csharp
 
     BinaryStreamReader reader = ...
-    AssemblyDefinition assembly = AssemblyDefinition.FromReader(reader);
+    var assembly = AssemblyDefinition.FromReader(reader);
 
 .. code-block:: csharp
 
     IPEImage peImage = ...
-    AssemblyDefinition assembly = AssemblyDefinition.FromImage(peImage);
+    var assembly = AssemblyDefinition.FromImage(peImage);
 
     
 If you want to read large files (+100MB), consider using memory mapped I/O instead:
@@ -132,7 +132,7 @@ If you want to read large files (+100MB), consider using memory mapped I/O inste
 .. code-block:: csharp
 
     using var service = new MemoryMappedFileService();
-    AssemblyDefinition assembly = AssemblyDefinition.FromFile(service.OpenFile(@"C:\myfile.exe"));
+    var assembly = AssemblyDefinition.FromFile(service.OpenFile(@"C:\myfile.exe"));
 
 
 Writing a .NET assembly
@@ -144,4 +144,4 @@ Writing a .NET assembly can be done through one of the `Write` method overloads.
 
     assembly.Write(@"C:\myfile.patched.exe");
 
-For more advanced options to write .NET modules, see Advanced PE Image building.
+For more advanced options to write .NET modules, see :ref:`dotnet-advanced-pe-image-building`.

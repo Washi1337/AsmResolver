@@ -24,10 +24,6 @@ In the snippet below, we define a new ``MemberCloner`` that is able to clone and
 
 In the remaining sections of this article, we assume that the ``MemberCloner`` is initialized using the code above.
 
-.. warning::
-
-    The ``MemberCloner`` heavily depends on the ``ReferenceImporter`` class for copying references into the destination module. This class has some limitations, in particular on importing / cloning from modules targeting different framework versions. See :ref:`dotnet-importer-common-caveats` for more information.
-
 
 Include members to clone
 ------------------------
@@ -113,6 +109,10 @@ When all members are included, it is possible to call ``MemberCloner.Clone`` to 
 The ``MemberCloner`` will automatically resolve any cross references between types, fields and methods that are included in the cloning process. 
 
 For instance, going with the example in the previous section, if both the ``Rectangle`` as well as the ``Vector2`` classes are included, any reference in ``Rectangle`` to ``Vector2`` will be replaced with a reference to the cloned ``Vector2``.  If not all members are included, the ``MemberCloner`` will assume that these are references to external libraries, and will use the ``ReferenceImporter`` to construct references to these members instead.
+
+.. warning::
+
+    The ``MemberCloner`` heavily depends on the ``ReferenceImporter`` class for copying references into the destination module. This class has some limitations, in particular on importing / cloning from modules targeting different framework versions. See :ref:`dotnet-importer-common-caveats` for more information.
 
 
 Injecting the cloned members 
