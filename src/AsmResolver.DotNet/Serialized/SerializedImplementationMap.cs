@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="ImplementationMap"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedImplementationMap : ImplementationMap
     {
@@ -38,7 +38,8 @@ namespace AsmResolver.DotNet.Serialized
             var ownerToken = _context.ParentModule.GetImplementationMapOwner(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)
                 ? member as IMemberForwarded
-                : null;
+                :  _context.BadImageAndReturn<IMemberForwarded>(
+                    $"Invalid forwarded member in implementation map {MetadataToken.ToString()}.");;
         }
 
         /// <inheritdoc />
@@ -52,7 +53,8 @@ namespace AsmResolver.DotNet.Serialized
             return _context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.ModuleRef, _row.ImportScope),
                 out var member)
                 ? member as ModuleReference
-                : null;
+                : _context.BadImageAndReturn<ModuleReference>(
+                    $"Invalid import scope in implementation map {MetadataToken.ToString()}.");
         }
     }
 }
