@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Serialized
             var token = _context.ParentModule.GetConstantOwner(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as IHasConstant
-                : null;
+                : _context.BadImageAndReturn<IHasConstant>($"Invalid parent member in constant {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
