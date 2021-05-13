@@ -84,7 +84,7 @@ Writing a .NET module can be done through one of the `Write` method overloads.
     Stream stream = ...;
     module.Write(stream);
 
-For more advanced options to write .NET modules, see Advanced PE Image building.
+For more advanced options to write .NET modules, see :ref:`dotnet-advanced-pe-image-building`.
 
 
 Creating a new .NET assembly
@@ -144,4 +144,4 @@ Writing a .NET assembly can be done through one of the `Write` method overloads.
 
     assembly.Write(@"C:\myfile.patched.exe");
 
-For more advanced options to write .NET modules, see :ref:`dotnet-advanced-pe-image-building`.
+For more advanced options to write .NET assemblies, see :ref:`dotnet-advanced-pe-image-building`.
