@@ -10,11 +10,12 @@ Below an example that enumerates all modules defined in an assembly.
 
 .. code-block:: csharp
 
-    AssemblyDefinition assembly = AssemblyDefinition.FromFile(...);
-    foreach (ModuleDefinition module in assembly.Modules)
+    var assembly = AssemblyDefinition.FromFile(...);
+    foreach (var module in assembly.Modules)
         Console.WriteLine(module.Name);
 
 Most .NET assemblies only have one module. This main module is also known as the manifest module, and can be accessed directly through the `AssemblyDefinition.ManifestModule` property.
+
 
 Obtaining types in a module
 ---------------------------
@@ -29,14 +30,14 @@ Below, an example program that iterates through all types recursively and prints
     
     private static void Main(string[] args)
     {
-        ModuleDefinition module = ModuleDefinition.FromFile(...);
+        var module = ModuleDefinition.FromFile(...);
         DumpTypes(module.TopLevelTypes);
     }
 
     private static void DumpTypes(IEnumerable<TypeDefinition> types, int indentationLevel = 0)
     {
         string indentation = new string(' ', indentationLevel * IndentationWidth);
-        foreach (TypeDefinition type in types)
+        foreach (var type in types)
         {
             // Print the name of the current type.
             Console.WriteLine("{0}- {1} : {2:X8}", indentation, type.Name, type.MetadataToken.ToInt32());
@@ -54,13 +55,13 @@ The ``TypeDefinition`` class exposes collections of methods and fields that the 
 
 .. code-block:: csharp
 
-    foreach (MethodDefinition method in type.Methods)
+    foreach (var method in type.Methods)
         Console.WriteLine("{0} : {1:X8}", method.Name, method.MetadataToken.ToInt32());
 
 
 .. code-block:: csharp
 
-    foreach (FieldDefinition field in type.Fields)
+    foreach (var field in type.Fields)
         Console.WriteLine("{0} : {1:X8}", field.Name, field.MetadataToken.ToInt32());
 
 Methods and fields have a ``Signature`` property, that contain the return and parameter types, or the field type respectively.
@@ -82,7 +83,7 @@ However, for reading parameters from a method definition, it is preferred to use
 
 .. code-block:: csharp
 
-    foreach (Parameter parameter in method.Parameters)
+    foreach (var parameter in method.Parameters)
         Console.WriteLine($"{parameter.Name} : {parameter.ParameterType}");
 
 
@@ -93,12 +94,12 @@ Obtaining properties and events is similar to obtaining methods and fields; ``Ty
 
 .. code-block:: csharp
 
-    foreach (EventDefinition @event in type.Events)
+    foreach (var @event in type.Events)
         Console.WriteLine("{0} : {1:X8}", @event.Name, @event.MetadataToken.ToInt32());
 
 .. code-block:: csharp
         
-    foreach (PropertyDefinition property in type.Properties)
+    foreach (var property in type.Properties)
         Console.WriteLine("{0} : {1:X8}", property.Name, property.MetadataToken.ToInt32());
 
 

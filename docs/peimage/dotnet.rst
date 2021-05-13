@@ -24,7 +24,7 @@ To access the metadata directory, access the ``IDotNetDirectory.Metadata`` prope
 
 .. code-block:: csharp
 
-    IMetadata metadata = peImage.DotNetDirectory.Metadata;
+    var metadata = peImage.DotNetDirectory.Metadata;
 
     Console.WriteLine("Metadata file format version: {0}.{1}", metadata.MajorVersion, metadata.MinorVersion);
     Console.WriteLine("Target .NET runtime version: " + metadata.VersionString);
@@ -256,8 +256,10 @@ Metadata tables are similar to normal ``ICollection<T>`` instances. They provide
 
     Console.WriteLine("Number of types: " + typeDefTable.Count);
 
-    TypeDefinitionRow firstType = typeDefTable[0];
+    // Get a single row.
+    TypeDefinitionRow firstTypeRow = typeDefTable[0];
 
+    // Iterate over all rows:
     foreach (var typeRow in typeDefTable)
     {
         // ...

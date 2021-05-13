@@ -17,7 +17,7 @@ The ``IPEImage`` exposes all debug information through the ``DebugData`` propert
 
 .. code-block:: csharp
 
-    foreach (DebugDataEntry entry in image.DebugData)
+    foreach (var entry in image.DebugData)
     {
         Console.WriteLine("Debug Data Type: {0}", entry.Contents.Type);
         Console.WriteLine("Version: {0}.{1}", entry.MajorVersion, entry.MinorVersion);

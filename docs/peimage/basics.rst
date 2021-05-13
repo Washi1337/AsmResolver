@@ -25,21 +25,21 @@ Opening an image can be done through one of the `FromXXX` methods from the ``PEI
 .. code-block:: csharp
 
     byte[] raw = ...
-    IPEImage peImage = PEImage.FromBytes(raw);
+    var peImage = PEImage.FromBytes(raw);
 
 .. code-block:: csharp
 
-    IPEImage peImage = PEImage.FromFile(@"C:\myfile.exe");
+    var peImage = PEImage.FromFile(@"C:\myfile.exe");
 
 .. code-block:: csharp
 
     IPEFile peFile = ...
-    IPEImage peImage = PEImage.FromFile(peFile);
+    var peImage = PEImage.FromFile(peFile);
 
 .. code-block:: csharp
 
     BinaryStreamReader reader = ...
-    IPEImage peImage = PEImage.FromReader(reader);
+    var peImage = PEImage.FromReader(reader);
 
 
 If you want to read large files (+100MB), consider using memory mapped I/O instead:
@@ -47,7 +47,7 @@ If you want to read large files (+100MB), consider using memory mapped I/O inste
 .. code-block:: csharp
 
     using var service = new MemoryMappedFileService();
-    IPEImage peImage = PEImage.FromFile(service.OpenFile(@"C:\myfile.exe"));
+    var peImage = PEImage.FromFile(service.OpenFile(@"C:\myfile.exe"));
 
 
 On Windows, if a module is loaded and mapped in memory (e.g. as a native dependency or by the means of ``LoadLibrary``), it is possible to load the PE image from memory by providing the ``HINSTANCE`` (a.k.a. module base address):
@@ -55,7 +55,7 @@ On Windows, if a module is loaded and mapped in memory (e.g. as a native depende
 .. code-block:: csharp
 
     IntPtr hInstance = ...
-    IPEImage peImage = PEImage.FromModuleBaseAddress(hInstance);
+    var peImage = PEImage.FromModuleBaseAddress(hInstance);
 
 
 Writing a PE image
