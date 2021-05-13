@@ -100,8 +100,10 @@ There is limited support for importing compound types. Types that can be importe
 Instantiations of generic methods are supported.
 
 
-Common Caveats
---------------
+.. _dotnet-importer-common-caveats
+
+Common Caveats using the Importer 
+---------------------------------
 
 **Caching and reuse of instances:**
 

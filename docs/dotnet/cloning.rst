@@ -3,7 +3,7 @@ Member Cloning
 
 When processing a .NET module, it often involves injecting additional code. Even though all models representing .NET metadata and CIL code are mutable, it might be very time consuming and error-prone to manually import and inject metadata members and/or CIL code into the target module.
 
-To mitigate this annoyance, ``AsmResolver.DotNet`` comes with a feature that involves cloning metadata members from one module and copying it over to another. All relevant classes are in the ``AsmResolver.DotNet.Cloning`` namespace:
+To help developers in injecting existing code into a module, ``AsmResolver.DotNet`` comes with a feature that involves cloning metadata members from one module and copying it over to another. All relevant classes are in the ``AsmResolver.DotNet.Cloning`` namespace:
 
 .. code-block:: csharp
 
@@ -15,14 +15,18 @@ The MemberCloner class
 
 The ``MemberCloner`` is the root object responsible for cloning members in a .NET module, and importing them into another. 
 
-In the snippet below, we define a new ``MemberCloner`` that is able to clone and import members into the module ``targetModule:``.
+In the snippet below, we define a new ``MemberCloner`` that is able to clone and import members into the module ``destinationModule:``.
 
 .. code-block:: csharp
 
-    ModuleDefinition targetModule = ...
-    MemberCloner cloner = new MemberCloner(targetModule);
+    ModuleDefinition destinationModule = ...
+    MemberCloner cloner = new MemberCloner(destinationModule);
 
 In the remaining sections of this article, we assume that the ``MemberCloner`` is initialized using the code above.
+
+.. warning::
+
+    The ``MemberCloner`` heavily depends on the ``ReferenceImporter`` class for copying references into the destination module. This class has some limitations, in particular on importing / cloning from modules targeting different framework versions. See :ref:`dotnet-importer-common-caveats` for more information.
 
 
 Include members to clone
@@ -30,7 +34,7 @@ Include members to clone
 
 The general idea of the ``MemberCloner`` is to first provide all the members to be cloned, and then clone everything all in one go. The reason why it is done like this, is to allow the ``MemberCloner`` to fix up any cross references to members within the to-be-cloned metadata and CIL code.
 
-For the sake of the example, we assume that the following two classes are to be injected in ``targetModule``:
+For the sake of the example, we assume that the following two classes are to be injected in ``destinationModule``:
 
 .. code-block:: csharp
 
@@ -137,4 +141,4 @@ It is important to note that the ``MemberCloner`` class itself does not inject a
 .. code-block:: csharp
 
     foreach (var clonedType in clonedTypes)
-        targetModule.TopLevelTypes.Add(clonedType);
+        destinationModule.TopLevelTypes.Add(clonedType);
