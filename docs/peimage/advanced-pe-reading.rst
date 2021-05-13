@@ -1,3 +1,5 @@
+.. _pe-advanced-image-reading:
+
 Advanced PE Image Reading
 =========================
 
@@ -19,7 +21,7 @@ These parameters can then be passed on to any of the ``PEImage.FromXXX`` methods
 Custom error handling
 ---------------------
 
-By default, AsmResolver throws exceptions To provide a custom method for handling parser errors, set the ``ErrorListener`` property. There are a couple of default implementations that AsmResolver provides.
+By default, AsmResolver throws exceptions upon encountering invalid data in the input file. To provide a custom method for handling parser errors, set the ``ErrorListener`` property. There are a couple of default implementations that AsmResolver provides.
 
 - ``ThrowErrorListener``: Throws the recorded parser exception. This is the default.
 - ``EmptyErrorListener``: Silently consumes any parser exception, and allows the reader to recover.

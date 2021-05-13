@@ -15,7 +15,7 @@ Why does AsmResolver throw so many errors on reading/writing?
 
 AsmResolver does verification of the input file, and if it finds anything that is out of place or not according to specification, it will report this to the ``IErrorListener`` passed onto the reader parameters. A similar thing happens when serializing the input application back to the disk. By default, this translates to an exception being thrown (e.g. you might have seen a ``System.AggregateException`` being thrown upon writing). 
 
-AsmResolver often can ignore and recover from kinds of errors, but this is not enabled by default. To enable these, refer to :ref:`pe-custom-error-handling` and :ref:`dotnet-image-builder-diagnostics`. Be careful with ignoring errors though. Especially for disabling writer verification can cause the output to not work anymore unless you know what you are doing.
+AsmResolver often can ignore and recover from kinds of errors, but this is not enabled by default. To enable these, please refer to :ref:`pe-custom-error-handling` (for .NET images: :ref:`dotnet-advanced-module-reading` and :ref:`dotnet-image-builder-diagnostics`). Be careful with ignoring errors though. Especially for disabling writer verification can cause the output to not work anymore unless you know what you are doing.
 
 If it still breaks and believe it is a bug, report it on the `issues board <https://github.com/Washi1337/AsmResolver/issues>`_.
 
