@@ -40,7 +40,8 @@ namespace AsmResolver.DotNet.Serialized
             var methodToken = encoder.DecodeIndex(_row.Method);
             return _context.ParentModule.TryLookupMember(methodToken, out var member)
                 ? member as IMethodDefOrRef
-                : null;
+                : _context.BadImageAndReturn<IMethodDefOrRef>(
+                    $"Invalid method in method specification {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />

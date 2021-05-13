@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IImplementation GetImplementation()
         {
-            if (_row.Implementation != 0)
+            if (_row.Implementation == 0)
                 return null;
 
             var encoder = _context.Image.DotNetDirectory.Metadata
@@ -54,7 +54,8 @@ namespace AsmResolver.DotNet.Serialized
             var token = encoder.DecodeIndex(_row.Implementation);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as IImplementation
-                : null;
+                : _context.BadImageAndReturn<IImplementation>(
+                    $"Invalid implementation in manifest resource {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
@@ -66,7 +67,7 @@ namespace AsmResolver.DotNet.Serialized
             if (!_context.Image.DotNetDirectory.DotNetResources
                 .TryCreateManifestResourceReader(_row.Offset, out var reader))
             {
-                return null;
+                return _context.BadImageAndReturn<ISegment>($"Invalid data offset in manifest resource {MetadataToken.ToString()}.");
             }
 
             return DataSegment.FromReader(ref reader);

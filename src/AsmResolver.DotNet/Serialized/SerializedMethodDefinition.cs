@@ -51,7 +51,7 @@ namespace AsmResolver.DotNet.Serialized
                 .TryGetBlobReaderByIndex(_row.Signature, out var reader))
             {
                 return _context.BadImageAndReturn<MethodSignature>(
-                    $"Invalid signature blob index in method {MetadataToken}.");
+                    $"Invalid signature blob index in method {MetadataToken.ToString()}.");
             }
 
             return MethodSignature.FromReader(new BlobReadContext(_context), ref reader);
@@ -71,7 +71,8 @@ namespace AsmResolver.DotNet.Serialized
             var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, _context.ParentModule.GetMethodDeclaringType(MetadataToken.Rid));
             return _context.ParentModule.TryLookupMember(declaringTypeToken, out var member)
                 ? member as TypeDefinition
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>(
+                    $"Method {MetadataToken.ToString()} is not in the range of a declaring type.");
         }
 
         /// <inheritdoc />

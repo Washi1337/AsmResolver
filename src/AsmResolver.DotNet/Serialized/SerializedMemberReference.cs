@@ -44,7 +44,8 @@ namespace AsmResolver.DotNet.Serialized
             var parentToken = encoder.DecodeIndex(_row.Parent);
             return _context.ParentModule.TryLookupMember(parentToken, out var member)
                 ? member as IMemberRefParent
-                : null;
+                : _context.BadImageAndReturn<IMemberRefParent>(
+                    $"Invalid parent in member reference {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />

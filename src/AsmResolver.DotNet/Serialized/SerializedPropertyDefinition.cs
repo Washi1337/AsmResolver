@@ -61,7 +61,8 @@ namespace AsmResolver.DotNet.Serialized
             var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, module.GetPropertyDeclaringType(MetadataToken.Rid));
             return module.TryLookupMember(declaringTypeToken, out var member)
                 ? member as TypeDefinition
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>(
+                    $"Property {MetadataToken.ToString()} is not in the range of a property map of a declaring type.");
         }
 
         /// <inheritdoc />
