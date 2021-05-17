@@ -44,7 +44,8 @@ namespace AsmResolver.DotNet.Serialized
             var parentToken = encoder.DecodeIndex(_row.Parent);
             return _context.ParentModule.TryLookupMember(parentToken, out var member)
                 ? member as IMemberRefParent
-                : null;
+                : _context.BadImageAndReturn<IMemberRefParent>(
+                    $"Invalid parent in member reference {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
@@ -60,7 +61,7 @@ namespace AsmResolver.DotNet.Serialized
                 .TryGetBlobReaderByIndex(_row.Signature, out var reader))
             {
                 return _context.BadImageAndReturn<CallingConventionSignature>(
-                    $"Invalid signature blob index in member reference {MetadataToken}.");
+                    $"Invalid signature blob index in member reference {MetadataToken.ToString()}.");
             }
 
             return CallingConventionSignature.FromReader(new BlobReadContext(_context), ref reader, true);

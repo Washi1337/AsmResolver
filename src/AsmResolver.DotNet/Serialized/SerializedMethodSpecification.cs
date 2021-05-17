@@ -40,7 +40,8 @@ namespace AsmResolver.DotNet.Serialized
             var methodToken = encoder.DecodeIndex(_row.Method);
             return _context.ParentModule.TryLookupMember(methodToken, out var member)
                 ? member as IMethodDefOrRef
-                : null;
+                : _context.BadImageAndReturn<IMethodDefOrRef>(
+                    $"Invalid method in method specification {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
@@ -51,7 +52,7 @@ namespace AsmResolver.DotNet.Serialized
                 .TryGetBlobReaderByIndex(_row.Instantiation, out var reader))
             {
                 return _context.BadImageAndReturn<GenericInstanceMethodSignature>(
-                    $"Invalid instantiation blob index in method specification {MetadataToken}.");
+                    $"Invalid instantiation blob index in method specification {MetadataToken.ToString()}.");
             }
 
             return GenericInstanceMethodSignature.FromReader(new BlobReadContext(_context), ref reader);

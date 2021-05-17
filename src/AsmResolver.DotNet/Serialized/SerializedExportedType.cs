@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="ExportedType"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedExportedType : ExportedType
     {
@@ -53,7 +53,8 @@ namespace AsmResolver.DotNet.Serialized
             var token = encoder.DecodeIndex(_row.Implementation);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as IImplementation
-                : null;
+                : _context.BadImageAndReturn<IImplementation>(
+                    $"Invalid implementation reference in exported type {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />

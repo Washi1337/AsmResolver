@@ -47,12 +47,10 @@ namespace AsmResolver.DotNet.Serialized
                 .TryGetBlobReaderByIndex(_row.Signature, out var reader))
             {
                 return _context.BadImageAndReturn<FieldSignature>(
-                    $"Invalid signature blob index in field {MetadataToken}.");
+                    $"Invalid signature blob index in field {MetadataToken.ToString()}.");
             }
 
-            return FieldSignature.FromReader(
-                new BlobReadContext(_context),
-                ref reader);
+            return FieldSignature.FromReader(new BlobReadContext(_context), ref reader);
         }
 
         /// <inheritdoc />
@@ -62,7 +60,8 @@ namespace AsmResolver.DotNet.Serialized
             var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, module.GetFieldDeclaringType(MetadataToken.Rid));
             return module.TryLookupMember(declaringTypeToken, out var member)
                 ? member as TypeDefinition
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>(
+                    $"Field {MetadataToken.ToString()} is not in the range of a declaring type.");
         }
 
         /// <inheritdoc />

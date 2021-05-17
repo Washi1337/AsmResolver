@@ -42,7 +42,8 @@ namespace AsmResolver.DotNet.Serialized
             var ownerToken = module.GetSecurityDeclarationOwner(MetadataToken.Rid);
             return module.TryLookupMember(ownerToken, out var member)
                 ? member as IHasSecurityDeclaration
-                : null;
+                : _context.BadImageAndReturn<IHasSecurityDeclaration>(
+                    $"Invalid parent of security declaration {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
@@ -53,7 +54,7 @@ namespace AsmResolver.DotNet.Serialized
                 .TryGetBlobReaderByIndex(_row.PermissionSet, out var reader))
             {
                 return _context.BadImageAndReturn<PermissionSetSignature>(
-                    $"Invalid permission set blob index in security declaration {MetadataToken}.");
+                    $"Invalid permission set blob index in security declaration {MetadataToken.ToString()}.");
             }
 
             return PermissionSetSignature.FromReader(new BlobReadContext(_context), ref reader);
