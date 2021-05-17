@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Serialized
             return module.TryLookupMember(token, out var member)
                 ? member as TypeDefinition
                 : _context.BadImageAndReturn<TypeDefinition>(
-                    $"Invalid class in interface implementation {MetadataToken.ToString()}.");
+                    $"Invalid parent class in interface implementation {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />

@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Serialized
                 .TryGetBlobReaderByIndex(_row.Signature, out var reader))
             {
                 return _context.BadImageAndReturn<CallingConventionSignature>(
-                    $"Invalid signature blob index in member reference {MetadataToken}.");
+                    $"Invalid signature blob index in member reference {MetadataToken.ToString()}.");
             }
 
             return CallingConventionSignature.FromReader(new BlobReadContext(_context), ref reader, true);
