@@ -150,7 +150,7 @@ namespace AsmResolver.DotNet.Builder
 
                 case TableIndex.File:
                     DiagnosticBag.Exceptions.Add(
-                        new NotImplementedException("Managed entrypoints defined in a sub module is not support."));
+                        new NotImplementedException("Managed entrypoints defined in a sub module is not supported."));
                     break;
             }
 
@@ -159,8 +159,8 @@ namespace AsmResolver.DotNet.Builder
 
         private void AddMethodSemantics(MetadataToken ownerToken, IHasSemantics provider)
         {
-            foreach (var semantics in provider.Semantics)
-                AddMethodSemantics(ownerToken, semantics);
+            for (int i = 0; i < provider.Semantics.Count; i++)
+                AddMethodSemantics(ownerToken, provider.Semantics[i]);
         }
 
         private void AddMethodSemantics(MetadataToken ownerToken, MethodSemantics semantics)

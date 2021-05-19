@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using AsmResolver.DotNet.Code;
 using AsmResolver.IO;
@@ -94,9 +95,17 @@ namespace AsmResolver.DotNet.Builder
             uint offset = resource.Offset;
             if (resource.IsEmbedded)
             {
-                using var stream = new MemoryStream();
-                resource.EmbeddedDataSegment.Write(new BinaryStreamWriter(stream));
-                offset = Resources.GetResourceDataOffset(stream.ToArray());
+                if (resource.EmbeddedDataSegment is {} segment)
+                {
+                    using var stream = new MemoryStream();
+                    segment.Write(new BinaryStreamWriter(stream));
+                    offset = Resources.GetResourceDataOffset(stream.ToArray());
+                }
+                else
+                {
+                    DiagnosticBag.MetadataBuilder($"Embedded resource {resource.SafeToString()} does not have any contents.");
+                    offset = 0;
+                }
             }
 
             var table = Metadata.TablesStream.GetTable<ManifestResourceRow>(TableIndex.ManifestResource);
@@ -149,8 +158,8 @@ namespace AsmResolver.DotNet.Builder
                     var enclosingTypeToken = GetTypeDefinitionToken(type.DeclaringType);
                     if (enclosingTypeToken.Rid == 0)
                     {
-                        DiagnosticBag.RegisterException(new MetadataBuilderException(
-                            $"Nested type {type.SafeToString()} is added before its enclosing class {type.DeclaringType.SafeToString()}."));
+                        DiagnosticBag.MetadataBuilder(
+                            $"Nested type {type.SafeToString()} is added before its enclosing class {type.DeclaringType.SafeToString()}.");
                     }
 
                     var nestedClassRow = new NestedClassRow(
@@ -347,8 +356,8 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetFieldDefinitionToken(field);
                 if (newToken == MetadataToken.Zero)
                 {
-                    DiagnosticBag.RegisterException(new MetadataBuilderException(
-                        $"An attempt was made to finalize field {field.SafeToString()}, which was not added to the .NET directory buffer yet."));
+                    DiagnosticBag.MetadataBuilder(
+                        $"An attempt was made to finalize field {field.SafeToString()}, which was not added to the .NET directory buffer yet.");
                 }
 
                 // Add field pointer row, making sure the RID is preserved.
@@ -378,8 +387,8 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetMethodDefinitionToken(method);
                 if (newToken == MetadataToken.Zero)
                 {
-                    DiagnosticBag.RegisterException(new MetadataBuilderException(
-                        $"An attempt was made to finalize method {method.SafeToString()}, which was not added to the .NET directory buffer yet."));
+                    DiagnosticBag.MetadataBuilder(
+                        $"An attempt was made to finalize method {method.SafeToString()}, which was not added to the .NET directory buffer yet.");
                 }
 
                 // Add method pointer row, making sure the RID is preserved.
@@ -436,8 +445,8 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetParameterDefinitionToken(parameter);
                 if (newToken == MetadataToken.Zero)
                 {
-                    DiagnosticBag.RegisterException(new MetadataBuilderException(
-                        $"An attempt was made to finalize parameter {parameter.SafeToString()} in {method.SafeToString()}, which was not added to the .NET directory buffer yet."));
+                    DiagnosticBag.MetadataBuilder(
+                        $"An attempt was made to finalize parameter {parameter.SafeToString()} in {method.SafeToString()}, which was not added to the .NET directory buffer yet.");
                 }
 
                 // Add parameter pointer row, making sure the RID is preserved.
@@ -473,8 +482,8 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetPropertyDefinitionToken(property);
                 if (newToken == MetadataToken.Zero)
                 {
-                    DiagnosticBag.RegisterException(new MetadataBuilderException(
-                        $"An attempt was made to finalize property {property.SafeToString()}, which was not added to the .NET directory buffer yet."));
+                    DiagnosticBag.MetadataBuilder(
+                        $"An attempt was made to finalize property {property.SafeToString()}, which was not added to the .NET directory buffer yet.");
                 }
 
                 // Add property pointer row, making sure the RID is preserved.
@@ -512,8 +521,8 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetEventDefinitionToken(@event);
                 if (newToken == MetadataToken.Zero)
                 {
-                    DiagnosticBag.RegisterException(new MetadataBuilderException(
-                        $"An attempt was made to finalize event {@event.SafeToString()}, which was not added to the .NET directory buffer yet."));
+                    DiagnosticBag.MetadataBuilder(
+                        $"An attempt was made to finalize event {@event.SafeToString()}, which was not added to the .NET directory buffer yet.");
                 }
 
                 // Add event pointer row, making sure the RID is preserved.
