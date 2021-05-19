@@ -174,8 +174,9 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetSortedTable<SecurityDeclaration, SecurityDeclarationRow>(TableIndex.DeclSecurity);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasDeclSecurity);
 
-            foreach (var declaration in provider.SecurityDeclarations)
+            for (int i = 0; i < provider.SecurityDeclarations.Count; i++)
             {
+                var declaration = provider.SecurityDeclarations[i];
                 var row = new SecurityDeclarationRow(
                     declaration.Action,
                     encoder.EncodeToken(ownerToken),
