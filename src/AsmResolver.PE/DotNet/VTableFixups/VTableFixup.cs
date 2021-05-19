@@ -1,30 +1,27 @@
-﻿using System.Collections.Generic;
-using AsmResolver.IO;
+﻿using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.PE.DotNet.VTableFixups
 {
     /// <summary>
-    /// Represents a VTable declared by the VTable Fixup Directory
+    /// Represents a VTable declared by the VTable fixup directory.
     /// </summary>
-    public class VTableFixup
+    public class VTableFixup : SegmentBase
     {
         /// <summary>
-        /// Gets or sets the type of the entries
+        /// Gets a list of the tokens added to this vtable.
         /// </summary>
-        public VTableType Type
+        public VTableTokenCollection Tokens
         {
             get;
-            set;
-        }
+        } = new ();
+
 
         /// <summary>
-        /// Gets a list of the MetadataTokens in the VTable
+        /// Creates a new VTable fixup.
         /// </summary>
-        public IList<MetadataToken> Tokens
-        {
-            get;
-        } = new List<MetadataToken>();
+        /// <param name="type"></param>
+        public VTableFixup(VTableType type) => Tokens.Type = type;
 
         /// <summary>
         /// Reads a single vtable from the provided input stream.
@@ -41,14 +38,11 @@ namespace AsmResolver.PE.DotNet.VTableFixups
             }
 
             ushort entries = reader.ReadUInt16();
-            var vtable = new VTableFixup
-            {
-                Type = (VTableType) reader.ReadUInt16()
-            };
+            var vtable = new VTableFixup((VTableType) reader.ReadUInt16());
 
             for (int i = 0; i < entries; i++)
             {
-                vtable.Tokens.Add(vtable.Type.HasFlag(VTableType.VTable32Bit)
+                vtable.Tokens.Add(vtable.Tokens.Type.HasFlag(VTableType.VTable32Bit)
                     ? new MetadataToken(tableReader.ReadUInt32())
                     : new MetadataToken((uint) tableReader.ReadInt64()));
             }
@@ -56,10 +50,18 @@ namespace AsmResolver.PE.DotNet.VTableFixups
             return vtable;
         }
 
-        internal uint GetEntriesSize() =>
-            (uint) Tokens.Count *
-            (uint) (Type.HasFlag(VTableType.VTable32Bit)
-                ? 4
-                : 8);
+        /// <inheritdoc />
+        public override uint GetPhysicalSize() =>
+            sizeof(uint)         // RVA
+             + sizeof(ushort)    // Entries Count
+             + sizeof(ushort);   // Type
+
+        /// <inheritdoc />
+        public override void Write(IBinaryStreamWriter writer)
+        {
+            writer.WriteUInt32(Tokens.Rva);
+            writer.WriteUInt16((ushort) Tokens.Count);
+            writer.WriteUInt16((ushort) Tokens.Type);
+        }
     }
 }

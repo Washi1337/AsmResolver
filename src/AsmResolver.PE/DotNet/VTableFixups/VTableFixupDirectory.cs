@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.VTableFixups
@@ -9,8 +9,6 @@ namespace AsmResolver.PE.DotNet.VTableFixups
     /// </summary>
     public class VTableFixupDirectory : Collection<VTableFixup>, ISegment
     {
-        private readonly Dictionary<VTableFixup, uint> _tableRvas = new();
-
         /// <inheritdoc />
         public ulong Offset
         {
@@ -33,33 +31,21 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         {
             Offset = newOffset;
             Rva = newRva;
-            uint endRvaForDirectory = newRva + GetPhysicalSize();
-            foreach (var vTable in Items)
-            {
-                _tableRvas[vTable] = endRvaForDirectory;
-                endRvaForDirectory += vTable.GetEntriesSize();
-            }
         }
 
         /// <inheritdoc />
-        public uint GetPhysicalSize() =>
-            (uint) Items.Count *
-            (sizeof(uint) //rva
-             + sizeof(ushort) //entries
-             + sizeof(ushort)); //type
+        public uint GetPhysicalSize() => (uint) this.Sum(v => v.GetPhysicalSize());
 
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
-            foreach (var vTable in Items)
+            foreach (var vtable in this)
             {
-                writer.WriteUInt32(_tableRvas[vTable]);
-                writer.WriteUInt16((ushort) vTable.Tokens.Count);
-                writer.WriteUInt16((ushort) vTable.Type);
+                vtable.Write(writer);
             }
         }
 
         /// <inheritdoc />
-        public uint GetVirtualSize() => GetPhysicalSize();
+        public uint GetVirtualSize() => (uint) this.Sum(v => v.GetVirtualSize());
     }
 }
