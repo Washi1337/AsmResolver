@@ -149,7 +149,11 @@ namespace AsmResolver.DotNet.Builder
                     break;
 
                 case TableIndex.File:
-                    ErrorListener.NotSupported("Managed entry points defined in a sub module is not supported.");
+                    entrypointToken = AddFileReference((FileReference) Module.ManagedEntrypoint);
+                    break;
+
+                default:
+                    ErrorListener.MetadataBuilder($"Invalid managed entrypoint {Module.ManagedEntrypoint.SafeToString()}.");
                     break;
             }
 

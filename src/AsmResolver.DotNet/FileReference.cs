@@ -10,10 +10,10 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to an external file that a .NET module depends on.
     /// </summary>
-    public class FileReference : 
-        MetadataMember, 
-        IImplementation, 
-        IHasCustomAttribute,
+    public class FileReference :
+        MetadataMember,
+        IImplementation,
+        IManagedEntrypoint,
         IOwnedCollectionElement<ModuleDefinition>
     {
         private readonly LazyVariable<string> _name;
@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Creates a new reference to an external file. 
+        /// Creates a new reference to an external file.
         /// </summary>
         /// <param name="name">The name of the file.</param>
         /// <param name="attributes">The attributes associated to the reference.</param>
