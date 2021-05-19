@@ -242,7 +242,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             if (type is null)
             {
-                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
+                context.ErrorListener.RegisterException(new InvalidBlobSignatureException(this,
                     $"{ElementType} blob signature {this.SafeToString()} is invalid or incomplete.",
                     new NullReferenceException($"{propertyName} is null.")));
             }

@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet.Builder
             var row = new MemberReferenceRow(
                 AddMemberRefParent(member.Parent),
                 Metadata.StringsStream.GetStringIndex(member.Name),
-                Metadata.BlobStream.GetBlobIndex(this, member.Signature, DiagnosticBag));
+                Metadata.BlobStream.GetBlobIndex(this, member.Signature, ErrorListener));
 
             var token = table.Add(row);
             _tokenMapping.Register(member, token);
@@ -111,7 +111,7 @@ namespace AsmResolver.DotNet.Builder
         {
             var table = Metadata.TablesStream.GetTable<StandAloneSignatureRow>(TableIndex.StandAloneSig);
             var row = new StandAloneSignatureRow(
-                Metadata.BlobStream.GetBlobIndex(this, signature.Signature, DiagnosticBag));
+                Metadata.BlobStream.GetBlobIndex(this, signature.Signature, ErrorListener));
 
             var token = table.Add(row);
             _tokenMapping.Register(signature, token);
@@ -167,7 +167,7 @@ namespace AsmResolver.DotNet.Builder
                 return MetadataToken.Zero;
 
             var table = Metadata.TablesStream.GetTable<TypeSpecificationRow>(TableIndex.TypeSpec);
-            var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(this, type.Signature, DiagnosticBag));
+            var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(this, type.Signature, ErrorListener));
 
             var token = table.Add(row);
             _tokenMapping.Register(type, token);
@@ -181,7 +181,7 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetTable<MethodSpecificationRow>(TableIndex.MethodSpec);
             var row = new MethodSpecificationRow(
                 AddMethodDefOrRef(method.Method),
-                Metadata.BlobStream.GetBlobIndex(this, method.Signature, DiagnosticBag));
+                Metadata.BlobStream.GetBlobIndex(this, method.Signature, ErrorListener));
 
             var token = table.Add(row);
             _tokenMapping.Register(method, token);

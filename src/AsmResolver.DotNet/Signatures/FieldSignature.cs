@@ -88,7 +88,7 @@ namespace AsmResolver.DotNet.Signatures
             context.Writer.WriteByte((byte) Attributes);
             if (FieldType is null)
             {
-                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
+                context.ErrorListener.RegisterException(new InvalidBlobSignatureException(this,
                     "The type referenced in the field signature is null."));
                 context.Writer.WriteByte((byte) ElementType.Object);
             }
