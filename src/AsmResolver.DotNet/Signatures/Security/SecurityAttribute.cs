@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet.Signatures.Security
             string attributeTypeString;
             if (AttributeType is null)
             {
-                context.DiagnosticBag.RegisterException(new NullReferenceException(
+                context.ErrorListener.RegisterException(new NullReferenceException(
                     "Attribute type of security attribute is null."));
                 attributeTypeString = null;
             }
@@ -101,7 +101,7 @@ namespace AsmResolver.DotNet.Signatures.Security
                 var subContext = new BlobSerializationContext(
                     new BinaryStreamWriter(subBlob),
                     context.IndexProvider,
-                    context.DiagnosticBag);
+                    context.ErrorListener);
 
                 subContext.Writer.WriteCompressedUInt32((uint) NamedArguments.Count);
                 foreach (var argument in NamedArguments)

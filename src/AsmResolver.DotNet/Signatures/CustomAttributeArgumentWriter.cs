@@ -122,7 +122,7 @@ namespace AsmResolver.DotNet.Signatures
                     }
                     else
                     {
-                        _context.DiagnosticBag.RegisterException(new NotSupportedException(
+                        _context.ErrorListener.RegisterException(new NotSupportedException(
                             $"Object elements in a custom attribute signature should be either 'null' or an instance of {nameof(BoxedArgument)}."));
 
                         // Write null as a recovery.
@@ -166,7 +166,7 @@ namespace AsmResolver.DotNet.Signatures
             // Enum arguments can never be null.
             if (element is null)
             {
-                _context.DiagnosticBag.RegisterException(
+                _context.ErrorListener.RegisterException(
                     new NotSupportedException($"The element of the enum-typed argument is null."));
 
                 // Assume 0 if it is.
@@ -187,7 +187,7 @@ namespace AsmResolver.DotNet.Signatures
                 TypeCode.UInt16 => corLibTypeFactory.UInt16,
                 TypeCode.UInt32 => corLibTypeFactory.UInt32,
                 TypeCode.UInt64 => corLibTypeFactory.UInt64,
-                _ => _context.DiagnosticBag.RegisterExceptionAndReturnDefault<TypeSignature>(
+                _ => _context.ErrorListener.RegisterExceptionAndReturnDefault<TypeSignature>(
                     new NotSupportedException($"The element of the enum-typed argument is not of an integral type."))
             };
 
@@ -197,7 +197,7 @@ namespace AsmResolver.DotNet.Signatures
 
         private void UnsupportedArgumentType(TypeSignature argumentType)
         {
-            _context.DiagnosticBag.RegisterException(
+            _context.ErrorListener.RegisterException(
                 new NotSupportedException($"Invalid or unsupported argument type {argumentType.FullName}."));
         }
     }

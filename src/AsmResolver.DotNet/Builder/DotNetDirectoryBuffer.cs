@@ -25,19 +25,19 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="methodBodySerializer">The method body serializer to use for constructing method bodies.</param>
         /// <param name="symbolsProvider">The object responsible for providing references to native symbols.</param>
         /// <param name="metadata">The metadata builder </param>
-        /// <param name="diagnosticBag">The bag that collects all diagnostic information during the building process.</param>
+        /// <param name="errorListener">The object responsible for collecting all diagnostic information during the building process.</param>
         public DotNetDirectoryBuffer(
             ModuleDefinition module,
             IMethodBodySerializer methodBodySerializer,
             INativeSymbolsProvider symbolsProvider,
             IMetadataBuffer metadata,
-            DiagnosticBag diagnosticBag)
+            IErrorListener errorListener)
         {
             Module = module ?? throw new ArgumentNullException(nameof(module));
             MethodBodySerializer = methodBodySerializer ?? throw new ArgumentNullException(nameof(methodBodySerializer));
             SymbolsProvider = symbolsProvider ?? throw new ArgumentNullException(nameof(symbolsProvider));
             Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
-            DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
+            ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
             Resources = new DotNetResourcesDirectoryBuffer();
         }
 
@@ -74,9 +74,9 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <summary>
-        /// Gets the bag that collects all diagnostic information during the building process.
+        /// Gets the object responsible for collecting all diagnostic information during the building process.
         /// </summary>
-        public DiagnosticBag DiagnosticBag
+        public IErrorListener ErrorListener
         {
             get;
         }
@@ -103,7 +103,7 @@ namespace AsmResolver.DotNet.Builder
         {
             if (member.Module != Module)
             {
-                DiagnosticBag.RegisterException(new MemberNotImportedException((IMetadataMember) member));
+                ErrorListener.RegisterException(new MemberNotImportedException((IMetadataMember) member));
                 return false;
             }
 
@@ -149,8 +149,11 @@ namespace AsmResolver.DotNet.Builder
                     break;
 
                 case TableIndex.File:
-                    DiagnosticBag.Exceptions.Add(
-                        new NotImplementedException("Managed entrypoints defined in a sub module is not support."));
+                    entrypointToken = AddFileReference((FileReference) Module.ManagedEntrypoint);
+                    break;
+
+                default:
+                    ErrorListener.MetadataBuilder($"Invalid managed entrypoint {Module.ManagedEntrypoint.SafeToString()}.");
                     break;
             }
 
@@ -159,8 +162,8 @@ namespace AsmResolver.DotNet.Builder
 
         private void AddMethodSemantics(MetadataToken ownerToken, IHasSemantics provider)
         {
-            foreach (var semantics in provider.Semantics)
-                AddMethodSemantics(ownerToken, semantics);
+            for (int i = 0; i < provider.Semantics.Count; i++)
+                AddMethodSemantics(ownerToken, provider.Semantics[i]);
         }
 
         private void AddMethodSemantics(MetadataToken ownerToken, MethodSemantics semantics)

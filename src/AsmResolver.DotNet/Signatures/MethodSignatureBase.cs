@@ -114,7 +114,7 @@ namespace AsmResolver.DotNet.Signatures
 
             if (ReturnType is null)
             {
-                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
+                context.ErrorListener.RegisterException(new InvalidBlobSignatureException(this,
                     new NullReferenceException("Return type is null.")));
                 context.Writer.WriteByte((byte) ElementType.Object);
             }

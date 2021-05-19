@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Builder;
 
 namespace AsmResolver.DotNet
 {
@@ -37,6 +38,11 @@ namespace AsmResolver.DotNet
             {
                 return self.GetType().ToString();
             }
+        }
+
+        public static void MetadataBuilder(this IErrorListener listener, string message)
+        {
+            listener.RegisterException(new MetadataBuilderException(message));
         }
     }
 }
