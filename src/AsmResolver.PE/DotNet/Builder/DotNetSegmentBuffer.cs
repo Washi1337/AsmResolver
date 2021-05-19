@@ -26,11 +26,9 @@ namespace AsmResolver.PE.DotNet.Builder
             AddIfPresent(dotNetDirectory.Metadata);
             AddIfPresent(dotNetDirectory.DotNetResources);
             AddIfPresent(dotNetDirectory.StrongName);
-            AddIfPresent(dotNetDirectory.VTableFixups);
             if (dotNetDirectory.VTableFixups?.Count > 0)
             {
-                var buffer = new VTableEntriesBuffer(dotNetDirectory.VTableFixups);
-                _segments.Add(buffer);
+                _segments.Add(new VTableDirectoryBuffer(dotNetDirectory.VTableFixups));
             }
             AddIfPresent(dotNetDirectory.ExportAddressTable);
             AddIfPresent(dotNetDirectory.ManagedNativeHeader);
