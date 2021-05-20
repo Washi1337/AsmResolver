@@ -113,7 +113,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override VTableFixupDirectory GetVTableFixups()
+        protected override VTableFixupsDirectory GetVTableFixups()
         {
             if (!_vtableFixupsDirectory.IsPresentInPE)
                 return null;
@@ -124,7 +124,7 @@ namespace AsmResolver.PE.DotNet
                 return null;
             }
 
-            var vtables = new VTableFixupDirectory();
+            var vtables = new VTableFixupsDirectory();
             for (int i = 0; i < directoryReader.Length / 8; i++)
             {
                 vtables.Add(VTableFixup.FromReader(_context, ref directoryReader));

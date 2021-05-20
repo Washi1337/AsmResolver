@@ -3,9 +3,9 @@
 namespace AsmResolver.PE.DotNet.VTableFixups.Builder
 {
     /// <summary>
-    /// Provides a mechanism for building the VTable Directory in a PE file.
+    /// Provides a mechanism for building the VTable fixups directory in a PE file.
     /// </summary>
-    public class VTableDirectoryBuffer : ISegment
+    public class VTableFixupsDirectoryBuffer : ISegment
     {
         private readonly SegmentBuilder _vtableDirectory = new();
         private readonly SegmentBuilder _vtableTokens = new();
@@ -20,13 +20,13 @@ namespace AsmResolver.PE.DotNet.VTableFixups.Builder
         public bool CanUpdateOffsets => true;
 
         /// <summary>
-        /// Creates a new VTable directory buffer.
+        /// Creates a new VTable fixups directory buffer.
         /// </summary>
-        /// <param name="vtableFixupDirectory"></param>
-        public VTableDirectoryBuffer(VTableFixupDirectory vtableFixupDirectory)
+        /// <param name="vtableFixupsDirectory"></param>
+        public VTableFixupsDirectoryBuffer(VTableFixupsDirectory vtableFixupsDirectory)
         {
-            _vtableDirectory.Add(vtableFixupDirectory);
-            foreach (var vtable in vtableFixupDirectory)
+            _vtableDirectory.Add(vtableFixupsDirectory);
+            foreach (var vtable in vtableFixupsDirectory)
             {
                 _vtableTokens.Add(vtable.Tokens);
             }

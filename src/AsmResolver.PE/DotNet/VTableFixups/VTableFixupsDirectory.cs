@@ -5,9 +5,9 @@ using AsmResolver.IO;
 namespace AsmResolver.PE.DotNet.VTableFixups
 {
     /// <summary>
-    /// Represents the VTable Fixup Directory in the Cor20 header.
+    /// Represents the VTable fixups directory in the Cor20 header.
     /// </summary>
-    public class VTableFixupDirectory : Collection<VTableFixup>, ISegment
+    public class VTableFixupsDirectory : Collection<VTableFixup>, ISegment
     {
         /// <inheritdoc />
         public ulong Offset

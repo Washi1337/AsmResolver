@@ -16,7 +16,7 @@ namespace AsmResolver.PE.DotNet
         private readonly LazyVariable<IReadableSegment> _strongName;
         private readonly LazyVariable<IReadableSegment> _codeManagerTable;
         private readonly LazyVariable<IReadableSegment> _exportAddressTable;
-        private readonly LazyVariable<VTableFixupDirectory> _vtableFixups;
+        private readonly LazyVariable<VTableFixupsDirectory> _vtableFixups;
         private readonly LazyVariable<IReadableSegment> _managedNativeHeader;
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace AsmResolver.PE.DotNet
             _strongName = new LazyVariable<IReadableSegment>(GetStrongName);
             _codeManagerTable = new LazyVariable<IReadableSegment>(GetCodeManagerTable);
             _exportAddressTable = new LazyVariable<IReadableSegment>(GetExportAddressTable);
-            _vtableFixups = new LazyVariable<VTableFixupDirectory>(GetVTableFixups);
+            _vtableFixups = new LazyVariable<VTableFixupsDirectory>(GetVTableFixups);
             _managedNativeHeader = new LazyVariable<IReadableSegment>(GetManagedNativeHeader);
         }
 
@@ -90,7 +90,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        public VTableFixupDirectory VTableFixups
+        public VTableFixupsDirectory VTableFixups
         {
             get => _vtableFixups.Value;
             set => _vtableFixups.Value = value;
@@ -193,7 +193,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="VTableFixups"/> property
         /// </remarks>
-        protected virtual VTableFixupDirectory GetVTableFixups() => null;
+        protected virtual VTableFixupsDirectory GetVTableFixups() => null;
 
         /// <summary>
         /// Obtains the data directory containing the managed native header of the .NET binary.

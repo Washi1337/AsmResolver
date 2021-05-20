@@ -92,7 +92,7 @@ namespace AsmResolver.PE.DotNet
         /// Gets or sets the data directory containing the VTable fixups that need to be applied when executing mixed
         /// mode applications (if available).
         /// </summary>
-        VTableFixupDirectory VTableFixups
+        VTableFixupsDirectory VTableFixups
         {
             get;
             set;

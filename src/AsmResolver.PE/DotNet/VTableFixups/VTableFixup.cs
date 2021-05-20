@@ -4,7 +4,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 namespace AsmResolver.PE.DotNet.VTableFixups
 {
     /// <summary>
-    /// Represents a VTable declared by the VTable fixup directory.
+    /// Represents a VTable declared by the VTable fixups directory.
     /// </summary>
     public class VTableFixup : SegmentBase
     {
