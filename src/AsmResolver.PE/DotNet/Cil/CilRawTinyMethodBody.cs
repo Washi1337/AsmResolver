@@ -24,8 +24,7 @@ namespace AsmResolver.PE.DotNet.Cil
             if (code == null)
                 throw new ArgumentNullException(nameof(code));
 
-            Code = new byte[code.Length];
-            Buffer.BlockCopy(code, 0, Code, 0, code.Length);
+            Code = new DataSegment(code);
         }
 
         /// <inheritdoc />
@@ -61,17 +60,17 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => (uint) (sizeof(byte) + Code.Length);
+        public override uint GetPhysicalSize() => (uint) (sizeof(byte) + Code.GetPhysicalSize());
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            if (Code.Length > 0x3F)
+            if (Code.GetPhysicalSize() > 0x3F)
                 throw new ArgumentException("Code of a tiny method body cannot be 64 bytes or larger.");
 
-            byte flag = (byte) ((byte) CilMethodBodyAttributes.Tiny | (Code.Length << 2));
+            byte flag = (byte) ((byte) CilMethodBodyAttributes.Tiny | (Code.GetPhysicalSize() << 2));
             writer.WriteByte(flag);
-            writer.WriteBytes(Code);
+            Code.Write(writer);
         }
     }
 }

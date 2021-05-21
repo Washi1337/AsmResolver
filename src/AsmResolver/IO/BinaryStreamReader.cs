@@ -282,6 +282,19 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
+        /// Creates a segment containing data from the input data source, starting at the current position of the input
+        /// stream. The reader then advances the current offset by the provided number of bytes.
+        /// </summary>
+        /// <param name="count">The number of bytes the segment should contain.</param>
+        /// <returns>The read segment.</returns>
+        public IReadableSegment ReadSegment(uint count)
+        {
+            var segment = new DataSourceSegment(DataSource, Offset, Rva, count);
+            Offset += count;
+            return segment;
+        }
+
+        /// <summary>
         /// Consumes the remainder of the input stream.
         /// </summary>
         /// <returns>The remaining bytes.</returns>

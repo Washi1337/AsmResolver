@@ -28,7 +28,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <param name="localVarSigToken">The metadata token that defines the local variables for the method body.</param>
         /// <param name="code">The raw code of the method.</param>
         public CilRawFatMethodBody(CilMethodBodyAttributes attributes, ushort maxStack,
-            MetadataToken localVarSigToken, byte[] code)
+            MetadataToken localVarSigToken, IReadableSegment code)
         {
             Attributes = attributes;
             MaxStack = maxStack;
@@ -146,8 +146,7 @@ namespace AsmResolver.PE.DotNet.Cil
             }
 
             // Read code.
-            byte[] code = new byte[codeSize];
-            reader.ReadBytes(code, 0, code.Length);
+            var code = reader.ReadSegment(codeSize);
 
             // Create body.
             var body = new CilRawFatMethodBody(flags, maxStack, localVarSigToken, code);
@@ -172,7 +171,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
-            uint length = (uint) (12 + Code.Length);
+            uint length = 12 + Code.GetPhysicalSize();
             ulong endOffset = Offset + length;
 
             ulong sectionsOffset = endOffset.Align(4);
@@ -188,9 +187,9 @@ namespace AsmResolver.PE.DotNet.Cil
         {
             writer.WriteUInt16((ushort) ((ushort) _attributes | 0x3000));
             writer.WriteUInt16(MaxStack);
-            writer.WriteInt32(Code.Length);
+            writer.WriteUInt32(Code.GetPhysicalSize());
             writer.WriteUInt32(LocalVarSigToken.ToUInt32());
-            writer.WriteBytes(Code);
+            Code.Write(writer);
 
             if (HasSections)
             {
