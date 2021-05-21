@@ -128,5 +128,19 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] UnmanagedExports_x64 {
+            get {
+                object obj = ResourceManager.GetObject("UnmanagedExports_x64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] UnmanagedExports_x32 {
+            get {
+                object obj = ResourceManager.GetObject("UnmanagedExports_x32", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
