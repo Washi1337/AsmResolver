@@ -79,5 +79,15 @@ namespace AsmResolver.Benchmarks.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] HelloWorld_Pumped {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_Pumped", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
