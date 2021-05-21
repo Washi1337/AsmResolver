@@ -9,19 +9,18 @@ namespace AsmResolver.PE.DotNet.VTableFixups
     public class VTableFixup : SegmentBase
     {
         /// <summary>
+        /// Creates a new VTable fixup.
+        /// </summary>
+        /// <param name="type"></param>
+        public VTableFixup(VTableType type) => Tokens.Type = type;
+
+        /// <summary>
         /// Gets a list of the tokens added to this vtable.
         /// </summary>
         public VTableTokenCollection Tokens
         {
             get;
         } = new ();
-
-
-        /// <summary>
-        /// Creates a new VTable fixup.
-        /// </summary>
-        /// <param name="type"></param>
-        public VTableFixup(VTableType type) => Tokens.Type = type;
 
         /// <summary>
         /// Reads a single vtable from the provided input stream.

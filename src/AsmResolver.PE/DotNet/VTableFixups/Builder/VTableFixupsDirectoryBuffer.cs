@@ -7,8 +7,21 @@ namespace AsmResolver.PE.DotNet.VTableFixups.Builder
     /// </summary>
     public class VTableFixupsDirectoryBuffer : ISegment
     {
-        private readonly SegmentBuilder _vtableDirectory = new();
+        private readonly VTableFixupsDirectory _vtableDirectory;
         private readonly SegmentBuilder _vtableTokens = new();
+
+        /// <summary>
+        /// Creates a new VTable fixups directory buffer.
+        /// </summary>
+        /// <param name="vtableFixupsDirectory"></param>
+        public VTableFixupsDirectoryBuffer(VTableFixupsDirectory vtableFixupsDirectory)
+        {
+            _vtableDirectory = vtableFixupsDirectory;
+            foreach (var vtable in vtableFixupsDirectory)
+            {
+                _vtableTokens.Add(vtable.Tokens);
+            }
+        }
 
         /// <inheritdoc />
         public ulong Offset => _vtableDirectory.Offset;
@@ -18,19 +31,6 @@ namespace AsmResolver.PE.DotNet.VTableFixups.Builder
 
         /// <inheritdoc />
         public bool CanUpdateOffsets => true;
-
-        /// <summary>
-        /// Creates a new VTable fixups directory buffer.
-        /// </summary>
-        /// <param name="vtableFixupsDirectory"></param>
-        public VTableFixupsDirectoryBuffer(VTableFixupsDirectory vtableFixupsDirectory)
-        {
-            _vtableDirectory.Add(vtableFixupsDirectory);
-            foreach (var vtable in vtableFixupsDirectory)
-            {
-                _vtableTokens.Add(vtable.Tokens);
-            }
-        }
 
         /// <inheritdoc />
         public void UpdateOffsets(ulong newOffset, uint newRva)
