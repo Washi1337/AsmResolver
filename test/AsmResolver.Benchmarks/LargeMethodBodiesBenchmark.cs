@@ -13,14 +13,19 @@ namespace AsmResolver.Benchmarks
 
         static LargeMethodBodiesBenchmark()
         {
-            using var compressed = new MemoryStream(Properties.Resources.HelloWorld_Pumped);
-            using var deflate = new DeflateStream(compressed, CompressionMode.Decompress);
+            HelloWorldPumped = DecompressDeflate(Properties.Resources.HelloWorld_Pumped);
+        }
 
+        private static byte[] DecompressDeflate(byte[] compressedData)
+        {
             using var decompressed = new MemoryStream();
-            deflate.CopyTo(decompressed);
+            using (var compressed = new MemoryStream(compressedData))
+            {
+                using var deflate = new DeflateStream(compressed, CompressionMode.Decompress);
+                deflate.CopyTo(decompressed);
+            }
 
-            decompressed.Position = 0;
-            HelloWorldPumped = decompressed.ToArray();
+            return decompressed.ToArray();
         }
 
         [Benchmark]
