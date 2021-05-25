@@ -65,10 +65,11 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            if (Code.GetPhysicalSize() > 0x3F)
+            uint codeSize = Code.GetPhysicalSize();
+            if (codeSize > 0x3F)
                 throw new ArgumentException("Code of a tiny method body cannot be 64 bytes or larger.");
 
-            byte flag = (byte) ((byte) CilMethodBodyAttributes.Tiny | (Code.GetPhysicalSize() << 2));
+            byte flag = (byte) ((byte) CilMethodBodyAttributes.Tiny | (codeSize << 2));
             writer.WriteByte(flag);
             Code.Write(writer);
         }
