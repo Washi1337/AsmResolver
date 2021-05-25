@@ -229,7 +229,7 @@ namespace AsmResolver.DotNet.Code.Cil
             ICilOperandResolver operandResolver,
             CilRawMethodBody rawBody)
         {
-            var reader = ByteArrayDataSource.CreateReader(rawBody.Code);
+            var reader = rawBody.Code.CreateReader();
             var disassembler = new CilDisassembler(reader, operandResolver);
             result.Instructions.AddRange(disassembler.ReadInstructions());
         }

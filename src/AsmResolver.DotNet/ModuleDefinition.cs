@@ -152,7 +152,7 @@ namespace AsmResolver.DotNet
         /// <returns>The module that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static ModuleDefinition FromDataSource(IDataSource dataSource, PEMappingMode mode, ModuleReaderParameters readerParameters) =>
-            FromReader(new BinaryStreamReader(dataSource, dataSource.BaseAddress, 0, (uint) dataSource.Length), mode);
+            FromReader(new BinaryStreamReader(dataSource, dataSource.BaseAddress, 0, (uint) dataSource.Length), mode, readerParameters);
 
         /// <summary>
         /// Reads a .NET module from an input stream.
