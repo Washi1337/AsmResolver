@@ -3,11 +3,14 @@ using BenchmarkDotNet.Running;
 
 namespace AsmResolver.Benchmarks
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            BenchmarkRunner.Run(typeof(Program).Assembly);
+            if (args.Length == 0)
+                BenchmarkRunner.Run(typeof(Program).Assembly);
+            else
+                BenchmarkRunner.Run(Type.GetType($"AsmResolver.Benchmarks.{args[0]}"));
         }
     }
 }

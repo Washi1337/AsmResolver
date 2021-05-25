@@ -25,6 +25,40 @@ namespace AsmResolver.DotNet.Builder.Discovery
 
         private const FieldAttributes FieldPlaceHolderAttributes = FieldAttributes.Public;
 
+        private readonly ModuleDefinition _module;
+        private readonly MemberDiscoveryFlags _flags;
+        private readonly MemberDiscoveryResult _result = new();
+
+        private readonly List<MethodDefinition> _allPlaceHolderMethods = new();
+        private int _placeHolderParameterCounter;
+
+        private readonly TypeReference _eventHandlerTypeRef;
+        private readonly TypeSignature _eventHandlerTypeSig;
+
+        private readonly IDictionary<TableIndex, IList<uint>> _freeRids= new Dictionary<TableIndex, IList<uint>>
+        {
+            [TableIndex.TypeDef] = new List<uint>(),
+            [TableIndex.Field] = new List<uint>(),
+            [TableIndex.Method] = new List<uint>(),
+            [TableIndex.Param] = new List<uint>(),
+            [TableIndex.Property] = new List<uint>(),
+            [TableIndex.Event] = new List<uint>(),
+        };
+
+        private MemberDiscoverer(ModuleDefinition module, MemberDiscoveryFlags flags)
+        {
+            _module = module ?? throw new ArgumentNullException(nameof(module));
+            _flags = flags;
+
+            _eventHandlerTypeRef = new TypeReference(
+                module,
+                module.CorLibTypeFactory.CorLibScope,
+                "System",
+                nameof(EventHandler));
+
+            _eventHandlerTypeSig = new TypeDefOrRefSignature(_eventHandlerTypeRef, false);
+        }
+
         /// <summary>
         /// Performs a traversal on the provided module and collects all member defined in it.
         /// </summary>
@@ -56,40 +90,6 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 context.StuffFreeMemberSlots();
 
             return context._result;
-        }
-
-        private readonly ModuleDefinition _module;
-        private readonly MemberDiscoveryFlags _flags;
-        private readonly MemberDiscoveryResult _result = new MemberDiscoveryResult();
-
-        private readonly IList<MethodDefinition> _allPlaceHolderMethods = new List<MethodDefinition>();
-        private int _placeHolderParameterCounter;
-
-        private readonly TypeReference _eventHandlerTypeRef;
-        private readonly TypeSignature _eventHandlerTypeSig;
-
-        private readonly IDictionary<TableIndex, IList<uint>> _freeRids= new Dictionary<TableIndex, IList<uint>>
-        {
-            [TableIndex.TypeDef] = new List<uint>(),
-            [TableIndex.Field] = new List<uint>(),
-            [TableIndex.Method] = new List<uint>(),
-            [TableIndex.Param] = new List<uint>(),
-            [TableIndex.Property] = new List<uint>(),
-            [TableIndex.Event] = new List<uint>(),
-        };
-
-        private MemberDiscoverer(ModuleDefinition module, MemberDiscoveryFlags flags)
-        {
-            _module = module ?? throw new ArgumentNullException(nameof(module));
-            _flags = flags;
-
-            _eventHandlerTypeRef = new TypeReference(
-                module,
-                module.CorLibTypeFactory.CorLibScope,
-                "System",
-                nameof(EventHandler));
-
-            _eventHandlerTypeSig = new TypeDefOrRefSignature(_eventHandlerTypeRef, false);
         }
 
         private IList<TMember> GetResultList<TMember>(TableIndex tableIndex)
@@ -193,54 +193,53 @@ namespace AsmResolver.DotNet.Builder.Discovery
             var memberType = member.MetadataToken.Table;
             var memberList = GetResultList<TMember>(memberType);
 
-            if (IsNewMember(memberList, member))
+            if (!IsNewMember(memberList, member))
+                return;
+
+            var freeRids = _freeRids[memberType];
+            var mask = member.MetadataToken.Table switch
             {
-                var freeRids = _freeRids[memberType];
+                TableIndex.TypeDef => MemberDiscoveryFlags.PreserveTypeOrder,
+                TableIndex.Field => MemberDiscoveryFlags.PreserveFieldOrder,
+                TableIndex.Method => MemberDiscoveryFlags.PreserveMethodOrder,
+                TableIndex.Param => MemberDiscoveryFlags.PreserveParameterOrder,
+                TableIndex.Property => MemberDiscoveryFlags.PreservePropertyOrder,
+                TableIndex.Event => MemberDiscoveryFlags.PreserveEventOrder,
+                _ => throw new ArgumentOutOfRangeException(nameof(member))
+            };
 
-                var mask = member.MetadataToken.Table switch
+            if (member.MetadataToken.Rid != 0 && (_flags & mask) == mask)
+            {
+                // Member is a new member but assigned a RID.
+                // Ensure enough rows are allocated, so that we can insert it in the right place.
+                while (memberList.Count < member.MetadataToken.Rid)
                 {
-                    TableIndex.TypeDef => MemberDiscoveryFlags.PreserveTypeOrder,
-                    TableIndex.Field => MemberDiscoveryFlags.PreserveFieldOrder,
-                    TableIndex.Method => MemberDiscoveryFlags.PreserveMethodOrder,
-                    TableIndex.Param => MemberDiscoveryFlags.PreserveParameterOrder,
-                    TableIndex.Property => MemberDiscoveryFlags.PreservePropertyOrder,
-                    TableIndex.Event => MemberDiscoveryFlags.PreserveEventOrder,
-                    _ => throw new ArgumentOutOfRangeException(nameof(member))
-                };
-                if (member.MetadataToken.Rid != 0 && (_flags & mask) == mask)
-                {
-                    // Member is a new member but assigned a RID.
-                    // Ensure enough rows are allocated, so that we can insert it in the right place.
-                    while (memberList.Count < member.MetadataToken.Rid)
-                    {
-                        memberList.Add(null);
-                        freeRids.Add((uint) memberList.Count);
-                    }
-
-                    // Check if the slot is available.
-                    var slot = memberList[(int) member.MetadataToken.Rid - 1];
-                    if (slot is {})
-                    {
-                        throw new ArgumentException(
-                            $"{slot} and {member} are assigned the same RID {member.MetadataToken.Rid}.");
-                    }
-
-                    memberList[(int) member.MetadataToken.Rid - 1] = member;
-                    freeRids.Remove(member.MetadataToken.Rid);
-
+                    memberList.Add(null);
+                    freeRids.Add((uint) memberList.Count);
                 }
-                else if (freeRids.Count > 0)
+
+                // Check if the slot is available.
+                if (memberList[(int) member.MetadataToken.Rid - 1] is { } slot)
                 {
-                    // Use any free RID if it is available.
-                    uint nextFreeRid = freeRids[0];
-                    freeRids.RemoveAt(0);
-                    memberList[(int) (nextFreeRid - 1)] = member;
+                    throw new ArgumentException(
+                        $"{slot.SafeToString()} and {member.SafeToString()} are assigned the same RID {member.MetadataToken.Rid}.");
                 }
-                else
-                {
-                    // Fallback method: Just append to the end of the table.
-                    memberList.Add(member);
-                }
+
+                memberList[(int) member.MetadataToken.Rid - 1] = member;
+                freeRids.Remove(member.MetadataToken.Rid);
+
+            }
+            else if (freeRids.Count > 0)
+            {
+                // Use any free RID if it is available.
+                uint nextFreeRid = freeRids[0];
+                freeRids.RemoveAt(0);
+                memberList[(int) (nextFreeRid - 1)] = member;
+            }
+            else
+            {
+                // Fallback method: Just append to the end of the table.
+                memberList.Add(member);
             }
         }
 
@@ -255,7 +254,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private void StuffFreeMemberSlots()
         {
             // Check if we need to do this at all.
-            if (_freeRids.Values.All(q => q.Count == 0))
+            if (_freeRids.Values.All(static q => q.Count == 0))
                 return;
 
             // Create a new randomly generated namespace.

@@ -144,7 +144,7 @@ namespace AsmResolver.PE.DotNet.Cil
                     return _reader.ReadSByte();
 
                 case CilOperandType.ShortInlineBrTarget:
-                    return new CilOffsetLabel(_reader.ReadSByte() + (int) (_reader.Offset - _reader.StartOffset));
+                    return new CilOffsetLabel(_reader.ReadSByte() + (int) _reader.RelativeOffset);
 
                 case CilOperandType.ShortInlineVar:
                     byte shortLocalIndex = _reader.ReadByte();
@@ -203,7 +203,7 @@ namespace AsmResolver.PE.DotNet.Cil
         private IList<ICilLabel> ReadSwitchTable()
         {
             int count = _reader.ReadInt32();
-            int nextOffset = (int) _reader.Offset + count * sizeof(int);
+            int nextOffset = (int) _reader.RelativeOffset + count * sizeof(int);
 
             var offsets = new List<ICilLabel>(count);
             for (int i = 0; i < count; i++)

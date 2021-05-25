@@ -116,7 +116,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 token = context.TokenProvider.GetStandAloneSignatureToken(standAloneSig);
             }
 
-            var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, code);
+            var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, new DataSegment(code));
             fatBody.InitLocals = body.InitializeLocals;
 
             // Build up EH table section.

@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public abstract class CilRawMethodBody : SegmentBase
     {
-        private byte[] _code;
+        private IReadableSegment _code;
 
         /// <summary>
         /// Gets a value indicating whether the method body is using the fat format.
@@ -21,7 +21,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// Gets or sets the raw bytes that make up the CIL code of the method body.
         /// </summary>
-        public byte[] Code
+        public IReadableSegment Code
         {
             get => _code;
             set => _code = value ?? throw new ArgumentNullException(nameof(value));
