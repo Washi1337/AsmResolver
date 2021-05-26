@@ -2,18 +2,18 @@
   branches:
     only:
       - master
-  
+
   image: Visual Studio 2019
-  version: 4.5.0-master-build.{build}
+  version: 4.6.0-master-build.{build}
   configuration: Release
 
   skip_commits:
     files:
       - docs/*
-      
+
   before_build:
     - dotnet restore
-    
+
   build:
     verbosity: minimal
 
@@ -23,7 +23,7 @@
   deploy:
     provider: NuGet
     api_key:
-      secure: +NAjxjewtZM6YJXeCJPMcy+/Hhon2o1sC3+DfAMbjUbQCdwUvgujce7V+MnLD89Q
+      secure: DCeHUu0aAsOjRnoi2DpcuXpj0apD7dxHzglSamP7LGzcZjhIvTBi1ONnjIa7L2zm
     skip_symbols: false
     artifact: /.*\.nupkg/
 
@@ -31,7 +31,7 @@
   branches:
     only:
       - development
-  
+
   image: Visual Studio 2019
   version: 4.6.0-dev-build.{build}
   configuration: Release
@@ -39,10 +39,10 @@
   skip_commits:
     files:
       - docs/*
-      
+
   before_build:
     - dotnet restore
-    
+
   build:
     verbosity: minimal
 

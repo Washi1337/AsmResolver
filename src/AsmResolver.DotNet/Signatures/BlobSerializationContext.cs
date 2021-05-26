@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -12,14 +13,14 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="writer">The output stream to write the raw data to.</param>
         /// <param name="indexProvider">The object responsible for obtaining coded indices to types.</param>
-        /// <param name="diagnosticBag">The bag used to collect diagnostic information during the serialization process.</param>
-        public BlobSerializationContext(IBinaryStreamWriter writer, ITypeCodedIndexProvider indexProvider, DiagnosticBag diagnosticBag)
+        /// <param name="errorListener">The object responsible for collecting diagnostic information during the serialization process.</param>
+        public BlobSerializationContext(IBinaryStreamWriter writer, ITypeCodedIndexProvider indexProvider, IErrorListener errorListener)
         {
             Writer = writer ?? throw new ArgumentNullException(nameof(writer));
             IndexProvider = indexProvider ?? throw new ArgumentNullException(nameof(indexProvider));
-            DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
+            ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
         }
-        
+
         /// <summary>
         /// Gets the output stream to write the raw data to.
         /// </summary>
@@ -39,7 +40,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Gets the bag used to collect diagnostic information during the serialization process.
         /// </summary>
-        public DiagnosticBag DiagnosticBag
+        public IErrorListener ErrorListener
         {
             get;
         }

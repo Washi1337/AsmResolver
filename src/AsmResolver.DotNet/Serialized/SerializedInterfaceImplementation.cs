@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="InterfaceImplementation"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedInterfaceImplementation : InterfaceImplementation
     {
@@ -38,7 +38,8 @@ namespace AsmResolver.DotNet.Serialized
             var token = module.GetInterfaceImplementationOwner(MetadataToken.Rid);
             return module.TryLookupMember(token, out var member)
                 ? member as TypeDefinition
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>(
+                    $"Invalid parent class in interface implementation {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
@@ -48,14 +49,15 @@ namespace AsmResolver.DotNet.Serialized
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef);
             var token = encoder.DecodeIndex(_row.Interface);
-            
+
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as ITypeDefOrRef
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>(
+                    $"Invalid interface in interface implementation {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

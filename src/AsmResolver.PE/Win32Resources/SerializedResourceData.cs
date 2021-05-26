@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Win32Resources
@@ -13,7 +14,7 @@ namespace AsmResolver.PE.Win32Resources
         /// Indicates the size of a single data entry in a resource directory.
         /// </summary>
         public const uint ResourceDataEntrySize = 4 * sizeof(uint);
-        
+
         private readonly PEReaderContext _context;
         private readonly uint _contentsRva;
         private readonly uint _contentsSize;
@@ -24,7 +25,7 @@ namespace AsmResolver.PE.Win32Resources
         /// <param name="context">The PE reader context.</param>
         /// <param name="entry">The entry to read.</param>
         /// <param name="entryReader">The input stream to read the data from.</param>
-        public SerializedResourceData(PEReaderContext context, ResourceDirectoryEntry entry, IBinaryStreamReader entryReader)
+        public SerializedResourceData(PEReaderContext context, ResourceDirectoryEntry entry, ref BinaryStreamReader entryReader)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
@@ -32,7 +33,7 @@ namespace AsmResolver.PE.Win32Resources
                 Name = entry.Name;
             else
                 Id = entry.IdOrNameOffset;
-            
+
             _contentsRva = entryReader.ReadUInt32();
             _contentsSize = entryReader.ReadUInt32();
             CodePage = entryReader.ReadUInt32();
@@ -46,9 +47,9 @@ namespace AsmResolver.PE.Win32Resources
                 _context.BadImage("Resource data entry contains an invalid RVA and/or size.");
                 return null;
             }
-            
-            return DataSegment.FromReader(reader);
+
+            return DataSegment.FromReader(ref reader);
         }
-        
+
     }
 }

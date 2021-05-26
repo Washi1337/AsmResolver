@@ -1,5 +1,7 @@
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Resources;
+using AsmResolver.PE.DotNet.VTableFixups;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.DotNet
@@ -14,7 +16,7 @@ namespace AsmResolver.PE.DotNet
         private readonly LazyVariable<IReadableSegment> _strongName;
         private readonly LazyVariable<IReadableSegment> _codeManagerTable;
         private readonly LazyVariable<IReadableSegment> _exportAddressTable;
-        private readonly LazyVariable<IReadableSegment> _vtableFixups;
+        private readonly LazyVariable<VTableFixupsDirectory> _vtableFixups;
         private readonly LazyVariable<IReadableSegment> _managedNativeHeader;
 
         /// <summary>
@@ -27,10 +29,10 @@ namespace AsmResolver.PE.DotNet
             _strongName = new LazyVariable<IReadableSegment>(GetStrongName);
             _codeManagerTable = new LazyVariable<IReadableSegment>(GetCodeManagerTable);
             _exportAddressTable = new LazyVariable<IReadableSegment>(GetExportAddressTable);
-            _vtableFixups = new LazyVariable<IReadableSegment>(GetVTableFixups);
+            _vtableFixups = new LazyVariable<VTableFixupsDirectory>(GetVTableFixups);
             _managedNativeHeader = new LazyVariable<IReadableSegment>(GetManagedNativeHeader);
         }
-        
+
         /// <inheritdoc />
         public ushort MajorRuntimeVersion
         {
@@ -88,7 +90,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        public IReadableSegment VTableFixups
+        public VTableFixupsDirectory VTableFixups
         {
             get => _vtableFixups.Value;
             set => _vtableFixups.Value = value;
@@ -135,12 +137,12 @@ namespace AsmResolver.PE.DotNet
         }
 
         private static DataDirectory CreateDataDirectoryHeader(ISegment directoryContents) =>
-            directoryContents != null 
+            directoryContents != null
                 ? new DataDirectory(directoryContents.Rva, directoryContents.GetPhysicalSize())
                 : new DataDirectory(0, 0);
 
         /// <summary>
-        /// Obtains the data directory containing the metadata of the .NET binary. 
+        /// Obtains the data directory containing the metadata of the .NET binary.
         /// </summary>
         /// <returns>The data directory.</returns>
         /// <remarks>
@@ -149,7 +151,7 @@ namespace AsmResolver.PE.DotNet
         protected virtual IMetadata GetMetadata() => null;
 
         /// <summary>
-        /// Obtains the data directory containing the embedded resources data of the .NET binary. 
+        /// Obtains the data directory containing the embedded resources data of the .NET binary.
         /// </summary>
         /// <returns>The data directory.</returns>
         /// <remarks>
@@ -158,7 +160,7 @@ namespace AsmResolver.PE.DotNet
         protected virtual DotNetResourcesDirectory GetResources() => null;
 
         /// <summary>
-        /// Obtains the data directory containing the strong name signature of the .NET binary. 
+        /// Obtains the data directory containing the strong name signature of the .NET binary.
         /// </summary>
         /// <returns>The data directory.</returns>
         /// <remarks>
@@ -167,7 +169,7 @@ namespace AsmResolver.PE.DotNet
         protected virtual IReadableSegment GetStrongName() => null;
 
         /// <summary>
-        /// Obtains the data directory containing the code manager table of the .NET binary. 
+        /// Obtains the data directory containing the code manager table of the .NET binary.
         /// </summary>
         /// <returns>The data directory.</returns>
         /// <remarks>
@@ -176,7 +178,7 @@ namespace AsmResolver.PE.DotNet
         protected virtual IReadableSegment GetCodeManagerTable() => null;
 
         /// <summary>
-        /// Obtains the data directory containing the export address table of the .NET binary. 
+        /// Obtains the data directory containing the export address table of the .NET binary.
         /// </summary>
         /// <returns>The data directory.</returns>
         /// <remarks>
@@ -185,16 +187,16 @@ namespace AsmResolver.PE.DotNet
         protected virtual IReadableSegment GetExportAddressTable() => null;
 
         /// <summary>
-        /// Obtains the data directory containing the VTable fixups of the .NET binary. 
+        /// Obtains the data directory containing the VTable fixups of the .NET binary.
         /// </summary>
         /// <returns>The data directory.</returns>
         /// <remarks>
         /// This method is called upon initialization of the <see cref="VTableFixups"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetVTableFixups() => null;
+        protected virtual VTableFixupsDirectory GetVTableFixups() => null;
 
         /// <summary>
-        /// Obtains the data directory containing the managed native header of the .NET binary. 
+        /// Obtains the data directory containing the managed native header of the .NET binary.
         /// </summary>
         /// <returns>The data directory.</returns>
         /// <remarks>

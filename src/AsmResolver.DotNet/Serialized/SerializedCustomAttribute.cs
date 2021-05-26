@@ -58,10 +58,16 @@ namespace AsmResolver.DotNet.Serialized
                 return null;
 
             var blobStream = _context.Image.DotNetDirectory.Metadata.GetStream<BlobStream>();
+            if (!blobStream.TryGetBlobReaderByIndex(_row.Value, out var reader))
+            {
+                _context.BadImageAndReturn<CallingConventionSignature>(
+                    $"Invalid signature blob index in custom attribute {MetadataToken}.");
+            }
+
             return CustomAttributeSignature.FromReader(
                 new BlobReadContext(_context),
                 Constructor,
-                blobStream.GetBlobReaderByIndex(_row.Value));
+                ref reader);
         }
     }
 }

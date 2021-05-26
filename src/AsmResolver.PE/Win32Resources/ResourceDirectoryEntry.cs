@@ -1,4 +1,5 @@
 using System.Text;
+using AsmResolver.IO;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
@@ -26,7 +27,7 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         /// <param name="context">The containing PE file.</param>
         /// <param name="reader">The input stream to read from.</param>
-        public ResourceDirectoryEntry(PEReaderContext context, IBinaryStreamReader reader)
+        public ResourceDirectoryEntry(PEReaderContext context, ref BinaryStreamReader reader)
         {
             _idOrNameOffset = reader.ReadUInt32();
             _dataOrSubDirOffset = reader.ReadUInt32();
@@ -61,7 +62,7 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <summary>
-        /// Gets either a 32-integer, or an offset to the name, that identifies the type, name or language ID. 
+        /// Gets either a 32-integer, or an offset to the name, that identifies the type, name or language ID.
         /// </summary>
         public uint IdOrNameOffset => _idOrNameOffset & 0x7FFFFFFF;
 
@@ -79,7 +80,7 @@ namespace AsmResolver.PE.Win32Resources
         /// Gets a value indicating whether the resource entry is a data entry or not.
         /// </summary>
         public bool IsData => (_dataOrSubDirOffset & 0x80000000) == 0;
-        
+
         /// <summary>
         /// Gets a value indicating whether the resource entry is a sub directory or not.
         /// </summary>
@@ -90,6 +91,6 @@ namespace AsmResolver.PE.Win32Resources
         {
             return $"Entry: {(IsByName ? Name : IdOrNameOffset.ToString())}, Offset: {DataOrSubDirOffset:X8}";
         }
-        
+
     }
 }

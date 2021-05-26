@@ -48,7 +48,8 @@ namespace AsmResolver.DotNet.Serialized
             var ownerToken = encoder.DecodeIndex(_row.Owner);
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)
                 ? member as IHasGenericParameters
-                : null;
+                : _context.BadImageAndReturn<IHasGenericParameters>(
+                    $"Invalid owner in generic parameter {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />

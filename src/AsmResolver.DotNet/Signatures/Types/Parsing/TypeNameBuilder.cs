@@ -140,6 +140,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
+        public object VisitFunctionPointerType(FunctionPointerTypeSignature signature) =>
+            throw new NotSupportedException("Function pointer type signatures are not supported in type name building.");
+
         private void WriteSimpleTypeName(ITypeDefOrRef type)
         {
             var ancestors = new List<ITypeDefOrRef>();

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet
 {
@@ -15,6 +16,16 @@ namespace AsmResolver.DotNet
         /// Creates a new default assembly resolver.
         /// </summary>
         public DotNetFrameworkAssemblyResolver()
+            : this(UncachedFileService.Instance)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new default assembly resolver.
+        /// </summary>
+        /// <param name="fileService">The service to use for reading files from the disk.</param>
+        public DotNetFrameworkAssemblyResolver(IFileService fileService)
+            : base(fileService)
         {
             DetectGacDirectories();
         }

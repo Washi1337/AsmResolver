@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="MethodSemantics"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedMethodSemantics : MethodSemantics
     {
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
-            
+
             Attributes = row.Attributes;
         }
 
@@ -35,7 +35,8 @@ namespace AsmResolver.DotNet.Serialized
             var token = new MetadataToken(TableIndex.Method, _row.Method);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as MethodDefinition
-                : null;
+                : _context.BadImageAndReturn<MethodDefinition>(
+                    $"Invalid method in method semantics {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
@@ -44,11 +45,12 @@ namespace AsmResolver.DotNet.Serialized
             var encoder = _context.Image.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.HasSemantics);
-            
+
             var token = encoder.DecodeIndex(_row.Association);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as IHasSemantics
-                : null;
+                : _context.BadImageAndReturn<IHasSemantics>(
+                    $"Invalid association in method semantics {MetadataToken.ToString()}.");
         }
     }
 }

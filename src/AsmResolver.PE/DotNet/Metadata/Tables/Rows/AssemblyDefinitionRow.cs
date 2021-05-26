@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the assembly definition table.</param>
         /// <returns>The row.</returns>
-        public static AssemblyDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static AssemblyDefinitionRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new AssemblyDefinitionRow(
                 (AssemblyHashAlgorithm) reader.ReadUInt32(),
@@ -42,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// for verification of a signature, or 0 if the assembly was not signed.</param>
         /// <param name="name">The index into the #Strings stream referencing the name of the assembly.</param>
         /// <param name="culture">The index into the #Strings stream referencing the locale string of the assembly.</param>
-        public AssemblyDefinitionRow(AssemblyHashAlgorithm hashAlgorithm, 
+        public AssemblyDefinitionRow(AssemblyHashAlgorithm hashAlgorithm,
             ushort majorVersion, ushort minorVersion, ushort buildNumber, ushort revisionNumber,
             AssemblyAttributes attributes, uint publicKey, uint name, uint culture)
         {
@@ -56,13 +57,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             Name = name;
             Culture = culture;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.Assembly;
 
         /// <inheritdoc />
         public int Count => 9;
-        
+
         /// <inheritdoc />
         public uint this[int index] => index switch
         {
@@ -178,9 +179,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
         public bool Equals(AssemblyDefinitionRow other)
         {
-            return HashAlgorithm == other.HashAlgorithm 
+            return HashAlgorithm == other.HashAlgorithm
                    && MajorVersion == other.MajorVersion
-                   && MinorVersion == other.MinorVersion 
+                   && MinorVersion == other.MinorVersion
                    && BuildNumber == other.BuildNumber
                    && RevisionNumber == other.RevisionNumber
                    && Attributes == other.Attributes

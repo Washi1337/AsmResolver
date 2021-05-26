@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Debug.CodeView
 {
@@ -24,7 +25,7 @@ namespace AsmResolver.PE.Debug.CodeView
         /// <param name="context">Context for the reader</param>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
-        public new static RsdsDataSegment FromReader(PEReaderContext context, IBinaryStreamReader reader)
+        public new static RsdsDataSegment FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             if (reader.Length < RsdsExpectedDataSize)
             {

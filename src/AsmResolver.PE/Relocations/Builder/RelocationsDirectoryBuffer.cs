@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Relocations.Builder
 {
@@ -10,7 +11,7 @@ namespace AsmResolver.PE.Relocations.Builder
     {
         private readonly IList<BaseRelocation> _relocations = new List<BaseRelocation>();
         private IList<RelocationBlock> _blocks = new List<RelocationBlock>();
-        
+
         /// <summary>
         /// Adds a single base relocation to the buffer.
         /// </summary>
@@ -46,7 +47,7 @@ namespace AsmResolver.PE.Relocations.Builder
         private static uint GetPageRva(BaseRelocation relocation) => (uint) (relocation.Location.Rva & ~0xFFF);
 
         private static RelocationEntry CreateEntry(BaseRelocation relocation) =>
-            new RelocationEntry(relocation.Type, (int) (relocation.Location.Rva & 0xFFF));
+            new(relocation.Type, (int) (relocation.Location.Rva & 0xFFF));
 
         private static RelocationBlock GetOrCreateBlock(IDictionary<uint, RelocationBlock> blocks, uint pageRva)
         {
@@ -58,7 +59,7 @@ namespace AsmResolver.PE.Relocations.Builder
 
             return block;
         }
-        
+
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
@@ -73,6 +74,6 @@ namespace AsmResolver.PE.Relocations.Builder
             foreach (var block in CreateBlocks())
                 block.Write(writer);
         }
-        
+
     }
 }

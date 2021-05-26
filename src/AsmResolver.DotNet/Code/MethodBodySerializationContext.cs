@@ -18,16 +18,16 @@ namespace AsmResolver.DotNet.Code
         /// <param name="symbolsProvider">
         /// The object responsible for providing symbols referenced by native method bodies.
         /// </param>
-        /// <param name="diagnosticBag">
-        /// The bag that is used to collect diagnostic information during the serialization process.
+        /// <param name="errorListener">
+        /// The object responsible for collecting diagnostic information during the serialization process.
         /// </param>
-        public MethodBodySerializationContext(IMetadataTokenProvider tokenProvider, INativeSymbolsProvider symbolsProvider, DiagnosticBag diagnosticBag)
+        public MethodBodySerializationContext(IMetadataTokenProvider tokenProvider, INativeSymbolsProvider symbolsProvider, IErrorListener errorListener)
         {
             TokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             SymbolsProvider = symbolsProvider ?? throw new ArgumentNullException(nameof(symbolsProvider));
-            DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
+            ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
         }
-        
+
         /// <summary>
         /// Gets the object responsible for providing new metadata tokens to members referenced by instructions.
         /// </summary>
@@ -45,9 +45,9 @@ namespace AsmResolver.DotNet.Code
         }
 
         /// <summary>
-        /// Gets the bag that is used to collect diagnostic information during the serialization process.
+        /// Gets the object responsible for collecting diagnostic information during the serialization process.
         /// </summary>
-        public DiagnosticBag DiagnosticBag
+        public IErrorListener ErrorListener
         {
             get;
         }

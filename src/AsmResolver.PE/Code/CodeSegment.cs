@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Code
 {
@@ -16,7 +17,7 @@ namespace AsmResolver.PE.Code
         {
             Code = code;
         }
-        
+
         /// <summary>
         /// Creates a new segment of native code.
         /// </summary>
@@ -54,7 +55,7 @@ namespace AsmResolver.PE.Code
         {
             get;
         } = new List<AddressFixup>();
-        
+
         /// <inheritdoc />
         public override uint GetPhysicalSize() => (uint) Code.Length;
 
@@ -87,6 +88,6 @@ namespace AsmResolver.PE.Code
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
+
     }
 }

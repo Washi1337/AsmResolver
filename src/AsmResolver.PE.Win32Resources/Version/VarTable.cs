@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources.Version
 {
@@ -22,16 +23,16 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <exception cref="FormatException">
         /// Occurs when the input stream does not point to a valid Var table structure.
         /// </exception>
-        public static VarTable FromReader(IBinaryStreamReader reader)
+        public static VarTable FromReader(ref BinaryStreamReader reader)
         {
-            var header = VersionTableEntryHeader.FromReader(reader);
+            var header = VersionTableEntryHeader.FromReader(ref reader);
             if (header.Key != TranslationKey)
                 throw new FormatException($"Expected a Var structure but got a {header.Key} structure.");
 
             reader.Align(4);
-            
+
             var result = new VarTable();
-            
+
             ulong start = reader.Offset;
             while (reader.Offset - start < header.ValueLength)
                 result.Values.Add(reader.ReadUInt32());
@@ -44,9 +45,9 @@ namespace AsmResolver.PE.Win32Resources.Version
 
         /// <inheritdoc />
         protected override VersionTableValueType ValueType => VersionTableValueType.Binary;
-        
+
         /// <summary>
-        /// Gets a collection of one or more values that are language and code page identifier pairs. 
+        /// Gets a collection of one or more values that are language and code page identifier pairs.
         /// </summary>
         public IList<uint> Values
         {

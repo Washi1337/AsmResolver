@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.StrongName
@@ -8,9 +9,9 @@ namespace AsmResolver.PE.DotNet.StrongName
     // Reference
     // https://docs.microsoft.com/en-us/windows/win32/seccrypto/rsa-schannel-key-blobs
     // https://docs.microsoft.com/en-us/windows/win32/api/wincrypt/ns-wincrypt-rsapubkey
-    
+
     /// <summary>
-    /// Represents the public key in a RSA crypto system. 
+    /// Represents the public key in a RSA crypto system.
     /// </summary>
     public class StrongNamePublicKey : StrongNameKeyStructure
     {
@@ -21,8 +22,11 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <returns>The private key.</returns>
         /// <exception cref="FormatException">Occurs when the input stream is not in the correct format.</exception>
         /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported algorithm is specified.</exception>
-        public static StrongNamePublicKey FromFile(string path) => 
-            FromReader(new ByteArrayReader(System.IO.File.ReadAllBytes(path)));
+        public static StrongNamePublicKey FromFile(string path)
+        {
+            var reader = ByteArrayDataSource.CreateReader(System.IO.File.ReadAllBytes(path));
+            return FromReader(ref reader);
+        }
 
         /// <summary>
         /// Reads a private key from an input stream.
@@ -31,15 +35,15 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <returns>The private key.</returns>
         /// <exception cref="FormatException">Occurs when the input stream is not in the correct format.</exception>
         /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported algorithm is specified.</exception>
-        public static StrongNamePublicKey FromReader(IBinaryStreamReader reader)
+        public static StrongNamePublicKey FromReader(ref BinaryStreamReader reader)
         {
             // Read BLOBHEADER
-            ReadBlobHeader(reader, StrongNameKeyStructureType.PublicKeyBlob, 2, SignatureAlgorithm.RsaSign);
-            
+            ReadBlobHeader(ref reader, StrongNameKeyStructureType.PublicKeyBlob, 2, SignatureAlgorithm.RsaSign);
+
             // Read RSAPUBKEY
             if ((RsaPublicKeyMagic) reader.ReadUInt32() != RsaPublicKeyMagic.Rsa1)
                 throw new FormatException("Input stream does not contain a valid RSA public key header magic.");
-            
+
             uint bitLength = reader.ReadUInt32();
 
             var result = new StrongNamePublicKey
@@ -47,7 +51,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                 PublicExponent = reader.ReadUInt32(),
                 Modulus = new byte[bitLength / 8]
             };
-            
+
             reader.ReadBytes(result.Modulus, 0, result.Modulus.Length);
 
             return result;
@@ -78,7 +82,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             Modulus = modulus ?? throw new ArgumentNullException(nameof(modulus));
             PublicExponent = publicExponent;
         }
-        
+
         /// <summary>
         /// Imports a public key from an instance of <see cref="RSAParameters"/>.
         /// </summary>
@@ -91,7 +95,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                 exponent |= (uint) (parameters.Exponent[i] << (8 * i));
             PublicExponent = exponent;
         }
-        
+
         /// <inheritdoc />
         public override StrongNameKeyStructureType Type => StrongNameKeyStructureType.PublicKeyBlob;
 
@@ -110,7 +114,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// Gets the number of bits used by the modulus parameter.
         /// </summary>
         public int BitLength => Modulus.Length * 8;
-        
+
         /// <summary>
         /// Gets or sets the public exponent used in the RSA crypto system.
         /// </summary>
@@ -130,7 +134,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         }
 
         /// <summary>
-        /// Prepares a blob signature containing the full public key of an assembly.  
+        /// Prepares a blob signature containing the full public key of an assembly.
         /// </summary>
         /// <param name="hashAlgorithm">The hash algorithm that is used to hash the PE file.</param>
         /// <returns>The blob signature.</returns>
@@ -164,7 +168,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                 Exponent = BitConverter.GetBytes(PublicExponent)
             };
         }
-        
+
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {

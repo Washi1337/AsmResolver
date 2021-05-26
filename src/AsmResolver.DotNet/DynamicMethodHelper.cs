@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -18,9 +19,10 @@ namespace AsmResolver.DotNet
             if (!(method.Module is SerializedModuleDefinition module))
                 throw new ArgumentException("Method body should reference a serialized module.");
 
+            var reader = ByteArrayDataSource.CreateReader(localSig);
             var localsSignature = (LocalVariablesSignature) CallingConventionSignature.FromReader(
                 new BlobReadContext(module.ReaderContext),
-                new ByteArrayReader(localSig));
+                ref reader);
 
             for (int i = 0; i < localsSignature?.VariableTypes.Count; i++)
                 methodBody.LocalVariables.Add(new CilLocalVariable(localsSignature.VariableTypes[i]));

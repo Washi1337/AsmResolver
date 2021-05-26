@@ -42,13 +42,13 @@ namespace AsmResolver.PE.DotNet.Builder
     /// compiler would emit. Almost everything is put into the .text section, including the import and debug directories.
     /// The win32 resources are put into .rsrc section, and this section will only be added if there is at least one entry
     /// in the root resource directory of the <see cref="IPEImage.Resources"/> property. Similarly, the .reloc section
-    /// is only added if at least one base relocation was put into the directory, or when the CLR bootstrapper required one. 
+    /// is only added if at least one base relocation was put into the directory, or when the CLR bootstrapper required one.
     /// </para>
     /// </remarks>
     public class ManagedPEFileBuilder : PEFileBuilderBase<ManagedPEFileBuilder.ManagedPEBuilderContext>
     {
         /// <summary>
-        /// Provides a working space for constructing a managed portable executable file. 
+        /// Provides a working space for constructing a managed portable executable file.
         /// </summary>
         public class ManagedPEBuilderContext
         {
@@ -69,7 +69,7 @@ namespace AsmResolver.PE.DotNet.Builder
             }
 
             /// <summary>
-            /// Gets the buffer that builds up a new import lookup and address directory. 
+            /// Gets the buffer that builds up a new import lookup and address directory.
             /// </summary>
             public ImportDirectoryBuffer ImportDirectory
             {
@@ -77,7 +77,7 @@ namespace AsmResolver.PE.DotNet.Builder
             }
 
             /// <summary>
-            /// Gets the buffer that builds up a new export directory. 
+            /// Gets the buffer that builds up a new export directory.
             /// </summary>
             public ExportDirectoryBuffer ExportDirectory
             {
@@ -123,7 +123,7 @@ namespace AsmResolver.PE.DotNet.Builder
             /// <remarks>
             /// This property might be <c>null</c> if no bootstrapper is to be emitted. For example, since the
             /// bootstrapper is a legacy feature from older versions of the CLR, we do not see this segment in
-            /// managed PE files targeting 64-bit architectures. 
+            /// managed PE files targeting 64-bit architectures.
             /// </remarks>
             public BootstrapperSegment Bootstrapper
             {
@@ -145,9 +145,9 @@ namespace AsmResolver.PE.DotNet.Builder
                     MachineType.I386 => new X86BootstrapperSegment(
                         (image.Characteristics & Characteristics.Dll) != 0,
                         (uint) image.ImageBase, ImportDirectory.ImportAddressDirectory),
-                    
+
                     MachineType.Amd64 => null,
-                    
+
                     _ => throw new NotSupportedException($"Machine type {image.MachineType} is not supported.")
                 };
             }
@@ -175,20 +175,20 @@ namespace AsmResolver.PE.DotNet.Builder
             var relocations = image.Relocations
                 .Where(r => !(r.Location is PESegmentReference))
                 .ToList();
-            
+
             // Add relocations of the bootstrapper stub if necessary.
             if (context.Bootstrapper != null)
                 relocations.AddRange(context.Bootstrapper.GetRelocations());
-                    
+
             // Add .reloc section when necessary.
             if (relocations.Count > 0)
                 sections.Add(CreateRelocSection(context, relocations));
-            
+
             return sections;
         }
 
         /// <summary>
-        /// Builds up the main text section (.text) of the new .NET PE file. 
+        /// Builds up the main text section (.text) of the new .NET PE file.
         /// </summary>
         /// <param name="image">The image to build.</param>
         /// <param name="context">The working space of the builder.</param>
@@ -203,12 +203,12 @@ namespace AsmResolver.PE.DotNet.Builder
             var contents = new SegmentBuilder();
             if (context.ImportDirectory.Count > 0)
                 contents.Add(context.ImportDirectory.ImportAddressDirectory);
-            
+
             contents.Add(context.DotNetSegment);
-            
+
             if (context.ImportDirectory.Count > 0)
                 contents.Add(context.ImportDirectory);
-            
+
             if (!context.ExportDirectory.IsEmpty)
                 contents.Add(context.ExportDirectory);
 
@@ -244,21 +244,21 @@ namespace AsmResolver.PE.DotNet.Builder
         private static List<IImportedModule> CollectImportedModules(IPEImage image, bool entryRequired, string mscoreeEntryName)
         {
             var modules = new List<IImportedModule>();
-            
+
             IImportedModule mscoreeModule = null;
             ImportedSymbol entrypointSymbol = null;
-            
+
             foreach (var module in image.Imports)
             {
                 // Check if the CLR entrypoint is already imported.
                 if (module.Name == "mscoree.dll")
                 {
                     mscoreeModule = module;
-                    
+
                     // Find entrypoint in this imported module.
                     if (entryRequired)
                         entrypointSymbol = mscoreeModule.Symbols.FirstOrDefault(s => s.Name == mscoreeEntryName);
-                    
+
                     // Only include mscoree.dll if necessary.
                     if (entryRequired || module.Symbols.Count > 1)
                         modules.Add(module);
@@ -303,7 +303,7 @@ namespace AsmResolver.PE.DotNet.Builder
         }
 
         /// <summary>
-        /// Creates the win32 resources section (.rsrc) of the new .NET PE file. 
+        /// Creates the win32 resources section (.rsrc) of the new .NET PE file.
         /// </summary>
         /// <param name="image">The image to build.</param>
         /// <param name="context">The working space of the builder.</param>
@@ -311,7 +311,7 @@ namespace AsmResolver.PE.DotNet.Builder
         protected virtual PESection CreateRsrcSection(IPEImage image, ManagedPEBuilderContext context)
         {
             context.ResourceDirectory.AddDirectory(image.Resources);
-            
+
             return new PESection(".rsrc", SectionFlags.MemoryRead | SectionFlags.ContentInitializedData)
             {
                 Contents = context.ResourceDirectory
@@ -328,7 +328,7 @@ namespace AsmResolver.PE.DotNet.Builder
         {
             foreach (var relocation in relocations)
                 context.RelocationsDirectory.Add(relocation);
-            
+
             return new PESection(".reloc", SectionFlags.MemoryRead | SectionFlags.ContentInitializedData)
             {
                 Contents =  context.RelocationsDirectory
@@ -350,7 +350,7 @@ namespace AsmResolver.PE.DotNet.Builder
             var debugDataDirectory = !context.DebugDirectory.IsEmpty
                 ? new DataDirectory(context.DebugDirectory.Rva, context.DebugDirectory.GetPhysicalSize())
                 : default;
-            
+
             return new[]
             {
                 exportDataDirectory,
@@ -386,7 +386,7 @@ namespace AsmResolver.PE.DotNet.Builder
         /// <inheritdoc />
         protected override uint GetImageBase(PEFile peFile, IPEImage image, ManagedPEBuilderContext context)
             => (uint) image.ImageBase;
-        
+
         private static void ProcessRvasInMetadataTables(ManagedPEBuilderContext context)
         {
             var dotNetSegment = context.DotNetSegment;
@@ -427,11 +427,15 @@ namespace AsmResolver.PE.DotNet.Builder
         {
             if (methodRow.Body.IsBounded)
                 return methodRow.Body.GetSegment();
-            
+
             if (methodRow.Body.CanRead)
             {
                 if ((methodRow.ImplAttributes & MethodImplAttributes.CodeTypeMask) == MethodImplAttributes.IL)
-                    return CilRawMethodBody.FromReader(ThrowErrorListener.Instance, methodRow.Body.CreateReader());
+                {
+                    var reader = methodRow.Body.CreateReader();
+                    return CilRawMethodBody.FromReader(ThrowErrorListener.Instance, ref reader);
+                }
+
                 throw new NotImplementedException("Native unbounded method bodies cannot be reassembled yet.");
             }
 
@@ -444,13 +448,13 @@ namespace AsmResolver.PE.DotNet.Builder
             var fieldRvaTable = metadata
                 .GetStream<TablesStream>()
                 .GetTable<FieldRvaRow>(TableIndex.FieldRva);
-            
+
             if (fieldRvaTable.Count == 0)
                 return;
-            
+
             var table = context.DotNetSegment.FieldRvaTable;
             var reader = context.FieldRvaDataReader;
-            
+
             foreach (var row in fieldRvaTable)
             {
                 var data = reader.ResolveFieldData(ThrowErrorListener.Instance, metadata, row);

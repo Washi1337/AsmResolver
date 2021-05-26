@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Exceptions.X64
 {
@@ -144,7 +145,7 @@ namespace AsmResolver.PE.Exceptions.X64
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The read unwind information.</returns>
-        public static X64UnwindInfo FromReader(PEReaderContext context, IBinaryStreamReader reader)
+        public static X64UnwindInfo FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             var result = new X64UnwindInfo();
             result.UpdateOffsets(reader.Offset, reader.Rva);
@@ -168,7 +169,7 @@ namespace AsmResolver.PE.Exceptions.X64
             }
             else if (result.IsChained)
             {
-                result.ChainedFunction = X64RuntimeFunction.FromReader(context, reader);
+                result.ChainedFunction = X64RuntimeFunction.FromReader(context, ref reader);
             }
 
             return result;

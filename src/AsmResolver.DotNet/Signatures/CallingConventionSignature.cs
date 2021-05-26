@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -19,17 +20,17 @@ namespace AsmResolver.DotNet.Signatures
         /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
         /// <returns>The read signature.</returns>
         public static CallingConventionSignature FromReader(
-            in BlobReadContext context, 
-            IBinaryStreamReader reader, 
+            in BlobReadContext context,
+            ref BinaryStreamReader reader,
             bool readToEnd = true)
         {
-            var signature = ReadSignature(context, reader);
+            var signature = ReadSignature(context, ref reader);
             if (readToEnd)
                 signature.ExtraData = reader.ReadToEnd();
             return signature;
         }
 
-        private static CallingConventionSignature ReadSignature(in BlobReadContext context, IBinaryStreamReader reader)
+        private static CallingConventionSignature ReadSignature(in BlobReadContext context, ref BinaryStreamReader reader)
         {
             byte flag = reader.ReadByte();
             reader.Offset--;
@@ -43,22 +44,23 @@ namespace AsmResolver.DotNet.Signatures
                 case CallingConventionAttributes.StdCall:
                 case CallingConventionAttributes.ThisCall:
                 case CallingConventionAttributes.VarArg:
-                    return MethodSignature.FromReader(context, reader);
-                
+                case CallingConventionAttributes.Unmanaged:
+                    return MethodSignature.FromReader(context, ref reader);
+
                 case CallingConventionAttributes.Property:
-                    return PropertySignature.FromReader(context, reader);
-                
+                    return PropertySignature.FromReader(context, ref reader);
+
                 case CallingConventionAttributes.Local:
-                    return LocalVariablesSignature.FromReader(context, reader);
-                    
+                    return LocalVariablesSignature.FromReader(context, ref reader);
+
                 case CallingConventionAttributes.GenericInstance:
-                    return GenericInstanceMethodSignature.FromReader(context, reader);
-                
+                    return GenericInstanceMethodSignature.FromReader(context, ref reader);
+
                 case CallingConventionAttributes.Field:
-                    return FieldSignature.FromReader(context, reader);
+                    return FieldSignature.FromReader(context, ref reader);
             }
 
-            throw new NotSupportedException();
+            throw new NotSupportedException($"Invalid or unsupported calling convention signature header {flag:X2}.");
         }
 
         /// <summary>
@@ -112,7 +114,7 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <summary>
         /// Gets or sets a value indicating whether the member is an instance member and an additional argument is
-        /// required to use this member. 
+        /// required to use this member.
         /// </summary>
         public bool HasThis
         {

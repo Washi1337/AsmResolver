@@ -53,34 +53,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
             _lexer.HasConsumedTypeName = lastHasConsumedTypeName;
 
-            // Find the top-most type.
-            var topLevelType = (TypeReference) typeSpec.GetUnderlyingTypeDefOrRef();
-            while (topLevelType.Scope is TypeReference declaringType)
-                topLevelType = declaringType;
-
-            // If the scope is null, it means it was omitted from the fully qualified type name.
-            // In this case, the CLR first looks into the current assembly, and then into corlib.
-            if (scope is not null)
-            {
-                // Update scope.
-                topLevelType.Scope = scope;
-            }
-            else
-            {
-                // First look into the current module.
-                topLevelType.Scope = _module;
-                var definition = topLevelType.Resolve();
-                if (definition is null)
-                {
-                    // If that fails, try corlib.
-                    topLevelType.Scope = _module.CorLibTypeFactory.CorLibScope;
-                    definition = topLevelType.Resolve();
-
-                    // If both lookups fail, revert to the normal module as scope as a fallback.
-                    if (definition is null)
-                        topLevelType.Scope = _module;
-                }
-            }
+            if (typeSpec.GetUnderlyingTypeDefOrRef() is TypeReference reference)
+                SetScope(reference, scope);
 
             // Ensure corlib type sigs are used.
             if (Comparer.Equals(scope, _module.CorLibTypeFactory.CorLibScope))
@@ -91,6 +65,37 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             }
 
             return typeSpec;
+        }
+
+        private void SetScope(TypeReference reference, IResolutionScope newScope)
+        {
+            // Find the top-most type.
+            while (reference.Scope is TypeReference declaringType)
+                reference = declaringType;
+
+            // If the scope is null, it means it was omitted from the fully qualified type name.
+            // In this case, the CLR first looks into the current assembly, and then into corlib.
+            if (newScope is not null)
+            {
+                // Update scope.
+                reference.Scope = newScope;
+            }
+            else
+            {
+                // First look into the current module.
+                reference.Scope = _module;
+                var definition = reference.Resolve();
+                if (definition is null)
+                {
+                    // If that fails, try corlib.
+                    reference.Scope = _module.CorLibTypeFactory.CorLibScope;
+                    definition = reference.Resolve();
+
+                    // If both lookups fail, revert to the normal module as scope as a fallback.
+                    if (definition is null)
+                        reference.Scope = _module;
+                }
+            }
         }
 
         private TypeSignature ParseSimpleTypeSpec()

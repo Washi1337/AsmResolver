@@ -7,6 +7,7 @@ using AsmResolver.DotNet.Cloning;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -22,7 +23,7 @@ namespace AsmResolver.DotNet.Tests
         {
             using var stream = new MemoryStream();
             module.Write(stream);
-            return ModuleDefinition.FromReader(new ByteArrayReader(stream.ToArray()));
+            return ModuleDefinition.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
         }
 
         [Fact]
@@ -241,7 +242,7 @@ namespace AsmResolver.DotNet.Tests
             // Write and rebuild.
             using var stream = new MemoryStream();
             module.Write(stream);
-            var newModule = ModuleDefinition.FromReader(new ByteArrayReader(stream.ToArray()));
+            var newModule = ModuleDefinition.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
 
             // Assert contents.
             var newDirectory = (IResourceDirectory) newModule.NativeResourceDirectory.Entries

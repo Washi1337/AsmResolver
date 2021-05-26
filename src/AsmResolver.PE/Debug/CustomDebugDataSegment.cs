@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Debug
 {
@@ -9,7 +10,7 @@ namespace AsmResolver.PE.Debug
     public class CustomDebugDataSegment : IDebugDataSegment
     {
         /// <summary>
-        /// Creates a new instance of the <see cref="CustomDebugDataSegment"/> class. 
+        /// Creates a new instance of the <see cref="CustomDebugDataSegment"/> class.
         /// </summary>
         /// <param name="type">The format of the data.</param>
         /// <param name="contents">The contents of the code.</param>
@@ -18,7 +19,7 @@ namespace AsmResolver.PE.Debug
             Type = type;
             Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
-        
+
         /// <inheritdoc />
         public DebugDataType Type
         {
@@ -51,13 +52,13 @@ namespace AsmResolver.PE.Debug
             else
                 throw new ArgumentNullException(nameof(Contents));
         }
-        
+
         /// <inheritdoc />
         public uint GetPhysicalSize() => Contents?.GetPhysicalSize() ?? 0;
 
         /// <inheritdoc />
         public uint GetVirtualSize() => Contents?.GetPhysicalSize() ?? 0;
-        
+
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer) => Contents?.Write(writer);
     }

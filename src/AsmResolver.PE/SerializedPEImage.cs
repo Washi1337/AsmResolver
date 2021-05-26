@@ -74,7 +74,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
-            return new SerializedExportDirectory(ReaderContext, reader);
+            return new SerializedExportDirectory(ReaderContext, ref reader);
         }
 
         /// <inheritdoc />
@@ -84,7 +84,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
-            return new SerializedResourceDirectory(ReaderContext, null, reader);
+            return new SerializedResourceDirectory(ReaderContext, null, ref reader);
         }
 
         /// <inheritdoc />
@@ -107,7 +107,7 @@ namespace AsmResolver.PE
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.BaseRelocationDirectory);
             return dataDirectory.IsPresentInPE
                 ? new SerializedRelocationList(ReaderContext, dataDirectory)
-                : (IList<BaseRelocation>) new List<BaseRelocation>();
+                : new List<BaseRelocation>();
         }
 
         /// <inheritdoc />
@@ -117,7 +117,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
-            return new SerializedDotNetDirectory(ReaderContext, reader);
+            return new SerializedDotNetDirectory(ReaderContext, ref reader);
         }
 
         /// <inheritdoc />
@@ -130,7 +130,7 @@ namespace AsmResolver.PE
             {
                 uint count = dataDirectory.Size / DebugDataEntry.DebugDataEntryHeaderSize;
                 for (int i = 0; i < count; i++)
-                    result.Add(new SerializedDebugDataEntry(ReaderContext, reader));
+                    result.Add(new SerializedDebugDataEntry(ReaderContext, ref reader));
             }
 
             return result;

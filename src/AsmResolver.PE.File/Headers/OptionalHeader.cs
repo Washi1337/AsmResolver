@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.File.Headers
 {
@@ -9,11 +10,16 @@ namespace AsmResolver.PE.File.Headers
     public class OptionalHeader : SegmentBase
     {
         /// <summary>
+        /// Indicates the offset of the SizeOfImage field in the optional header.
+        /// </summary>
+        public const uint OptionalHeaderSizeOfImageFieldOffset = 56;
+
+        /// <summary>
         /// Indicates the static size of an optional header in a 32-bit portable executable file, excluding the
         /// data directory entries.
         /// </summary>
         public const uint OptionalHeader32SizeExcludingDataDirectories = 0x60;
-        
+
         /// <summary>
         /// Indicates the static size of an optional header in a 64-bit portable executable file, excluding the
         /// data directory entries.
@@ -33,7 +39,7 @@ namespace AsmResolver.PE.File.Headers
         /// and <see cref="DefaultNumberOfRvasAndSizes"/> should be used instead.</param>
         /// <returns>The optional header.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the input stream is malformed.</exception>
-        public static OptionalHeader FromReader(IBinaryStreamReader reader, bool ignoreNumberOfRvasAndSizes = true)
+        public static OptionalHeader FromReader(ref BinaryStreamReader reader, bool ignoreNumberOfRvasAndSizes = true)
         {
             var header = new OptionalHeader
             {
@@ -100,7 +106,7 @@ namespace AsmResolver.PE.File.Headers
                 : (int) header.NumberOfRvaAndSizes;
 
             for (int i = 0; i < dataDirectories; i++)
-                header.DataDirectories.Add(DataDirectory.FromReader(reader));
+                header.DataDirectories.Add(DataDirectory.FromReader(ref reader));
 
             return header;
         }
@@ -149,7 +155,7 @@ namespace AsmResolver.PE.File.Headers
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the total amount of bytes the uninitialized data sections consist of.
         /// </summary>
@@ -240,7 +246,7 @@ namespace AsmResolver.PE.File.Headers
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the minor image version.
         /// </summary>
@@ -258,7 +264,7 @@ namespace AsmResolver.PE.File.Headers
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the minor version of the subsystem.
         /// </summary>
@@ -463,6 +469,6 @@ namespace AsmResolver.PE.File.Headers
 
             writer.WriteZeroes((int) (GetPhysicalSize() - (writer.Offset - start)));
         }
-        
+
     }
 }

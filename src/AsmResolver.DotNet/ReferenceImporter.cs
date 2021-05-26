@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet
                 return reference;
 
             reference = TargetModule.AssemblyReferences.FirstOrDefault(a => _comparer.Equals(a, assembly));
-            
+
             if (reference == null)
             {
                 reference = new AssemblyReference(assembly);
@@ -97,7 +97,7 @@ namespace AsmResolver.DotNet
 
             return reference;
         }
-        
+
         /// <summary>
         /// Imports a reference to a type into the module.
         /// </summary>
@@ -123,10 +123,10 @@ namespace AsmResolver.DotNet
         protected virtual ITypeDefOrRef ImportType(TypeDefinition type)
         {
             AssertTypeIsValid(type);
-            
+
             if (type.Module == TargetModule)
                 return type;
-            
+
             return new TypeReference(TargetModule, ImportScope(type.Module), type.Namespace, type.Name);
         }
 
@@ -138,13 +138,13 @@ namespace AsmResolver.DotNet
         protected virtual ITypeDefOrRef ImportType(TypeReference type)
         {
             AssertTypeIsValid(type);
-            
+
             if (type.Module == TargetModule)
                 return type;
-            
+
             return new TypeReference(TargetModule, ImportScope(type.Scope), type.Namespace, type.Name);
         }
-        
+
         /// <summary>
         /// Imports a reference to a type specification into the module.
         /// </summary>
@@ -153,10 +153,10 @@ namespace AsmResolver.DotNet
         protected virtual ITypeDefOrRef ImportType(TypeSpecification type)
         {
             AssertTypeIsValid(type);
-            
+
             if (type.Module == TargetModule)
                 return type;
-            
+
             return new TypeSpecification(ImportTypeSignature(type.Signature));
         }
 
@@ -192,14 +192,14 @@ namespace AsmResolver.DotNet
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
-            
+
             var importedTypeSig = ImportTypeSignature(type);
             if (importedTypeSig is TypeDefOrRefSignature
                 || importedTypeSig is CorLibTypeSignature)
             {
                 return importedTypeSig.GetUnderlyingTypeDefOrRef();
             }
-            
+
             return new TypeSpecification(importedTypeSig);
         }
 
@@ -233,14 +233,14 @@ namespace AsmResolver.DotNet
                 ImportAssembly(new ReflectionAssemblyDescriptor(TargetModule, type.Assembly.GetName())),
                 type.Namespace,
                 type.Name);
-            
+
             return new TypeDefOrRefSignature(reference, type.IsValueType);
         }
 
         private TypeSignature ImportArrayType(Type type)
         {
             var baseType = ImportTypeSignature(type.GetElementType());
-            
+
             int rank = type.GetArrayRank();
             if (rank == 1)
                 return new SzArrayTypeSignature(baseType);
@@ -258,7 +258,7 @@ namespace AsmResolver.DotNet
                 result.TypeArguments.Add(ImportTypeSignature(argument));
             return result;
         }
-        
+
         /// <summary>
         /// Imports a reference to- or an instantiation of a method into the module.
         /// </summary>
@@ -275,7 +275,7 @@ namespace AsmResolver.DotNet
                 _ => throw new ArgumentOutOfRangeException(nameof(method))
             };
         }
-        
+
         /// <summary>
         /// Imports a reference to a method into the module.
         /// </summary>
@@ -291,7 +291,7 @@ namespace AsmResolver.DotNet
 
             if (method.Module == TargetModule)
                 return method;
-           
+
             return new MemberReference(
                 ImportType(method.DeclaringType),
                 method.Name,
@@ -307,17 +307,17 @@ namespace AsmResolver.DotNet
         {
             if (signature is null)
                 throw new ArgumentNullException(nameof(signature));
-            
+
             var parameterTypes = new TypeSignature[signature.ParameterTypes.Count];
             for (int i = 0; i < parameterTypes.Length; i++)
                 parameterTypes[i] = ImportTypeSignature(signature.ParameterTypes[i]);
-            
+
             var result = new MethodSignature(signature.Attributes, ImportTypeSignature(signature.ReturnType), parameterTypes);
             result.GenericParameterCount = signature.GenericParameterCount;
-            
+
             for (int i = 0; i < signature.SentinelParameterTypes.Count; i++)
                 result.SentinelParameterTypes.Add(ImportTypeSignature(signature.SentinelParameterTypes[i]));
-            
+
             return result;
         }
 
@@ -373,7 +373,7 @@ namespace AsmResolver.DotNet
                 return method;
 
             var memberRef = ImportMethod(method.Method);
-            
+
             var instantiation = new GenericInstanceMethodSignature();
             foreach (var argument in method.Signature.TypeArguments)
                 instantiation.TypeArguments.Add(ImportTypeSignature(argument));
@@ -390,7 +390,7 @@ namespace AsmResolver.DotNet
         {
             if (method is null)
                 throw new ArgumentNullException(nameof(method));
-            
+
             if (method.IsGenericMethod && !method.IsGenericMethodDefinition)
                 return ImportGenericMethod((MethodInfo) method);
 
@@ -416,7 +416,7 @@ namespace AsmResolver.DotNet
         private IMethodDescriptor ImportGenericMethod(MethodInfo method)
         {
             var memberRef = (IMethodDefOrRef) ImportMethod(method.GetGenericMethodDefinition());
-            
+
             var instantiation = new GenericInstanceMethodSignature();
             foreach (var argument in method.GetGenericArguments())
                 instantiation.TypeArguments.Add(ImportTypeSignature(argument));
@@ -455,7 +455,7 @@ namespace AsmResolver.DotNet
         {
             if (signature is null)
                 throw new ArgumentNullException(nameof(signature));
-            
+
             return new FieldSignature(signature.Attributes, ImportTypeSignature(signature.FieldType));
         }
 
@@ -473,10 +473,10 @@ namespace AsmResolver.DotNet
             if (field.DeclaringType != null && field.DeclaringType.IsConstructedGenericType)
                 field = field.Module.ResolveField(field.MetadataToken);
 
-            var scope = field.DeclaringType != null 
-                ? ImportType(field.DeclaringType) 
+            var scope = field.DeclaringType != null
+                ? ImportType(field.DeclaringType)
                 : TargetModule.GetModuleType();
-            
+
             var signature = new FieldSignature(field.IsStatic ? 0 : CallingConventionAttributes.HasThis,
                 ImportTypeSignature(field.FieldType));
 
@@ -492,14 +492,14 @@ namespace AsmResolver.DotNet
         {
             if (signature is null)
                 throw new ArgumentNullException(nameof(signature));
-            
+
             var parameterTypes = new TypeSignature[signature.ParameterTypes.Count];
             for (int i = 0; i < parameterTypes.Length; i++)
                 parameterTypes[i] = ImportTypeSignature(signature.ParameterTypes[i]);
-            
+
             return new PropertySignature(
                 signature.Attributes,
-                ImportTypeSignature(signature.ReturnType), 
+                ImportTypeSignature(signature.ReturnType),
                 parameterTypes);
         }
 
@@ -568,6 +568,12 @@ namespace AsmResolver.DotNet
         TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitTypeDefOrRef(TypeDefOrRefSignature signature)
         {
             return new TypeDefOrRefSignature(ImportType(signature.Type), signature.IsValueType);
+        }
+
+        /// <inheritdoc />
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitFunctionPointerType(FunctionPointerTypeSignature signature)
+        {
+            return new FunctionPointerTypeSignature(ImportMethodSignature(signature.Signature));
         }
     }
 }

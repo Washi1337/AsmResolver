@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.IO;
 using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Exports
@@ -22,9 +23,9 @@ namespace AsmResolver.PE.Exports
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
-        public SerializedExportDirectory(PEReaderContext context, IBinaryStreamReader reader)
+        public SerializedExportDirectory(PEReaderContext context, ref BinaryStreamReader reader)
         {
-            if (reader == null)
+            if (!reader.IsValid)
                 throw new ArgumentNullException(nameof(reader));
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
@@ -49,7 +50,7 @@ namespace AsmResolver.PE.Exports
                 _context.BadImage("Export directory contains an invalid name RVA.");
                 return null;
             }
-            
+
             return reader.ReadAsciiString();
         }
 
@@ -60,17 +61,17 @@ namespace AsmResolver.PE.Exports
 
             if (!_context.File.TryCreateReaderAtRva(_addressTableRva, out var addressReader))
                 _context.BadImage("Export directory contains an invalid address table RVA.");
-            
+
             if (!_context.File.TryCreateReaderAtRva(_namePointerRva, out var namePointerReader))
                 _context.BadImage("Export directory contains an invalid name pointer table RVA.");
 
             if (!_context.File.TryCreateReaderAtRva(_ordinalTableRva, out var ordinalReader))
                 _context.BadImage("Export directory contains an invalid ordinal table RVA.");
-            
-            if (addressReader is null || namePointerReader is null || ordinalReader is null)
+
+            if (!addressReader.IsValid || !namePointerReader.IsValid || !ordinalReader.IsValid)
                 return result;
 
-            var ordinalNameTable = ReadOrdinalNameTable(namePointerReader, ordinalReader);
+            var ordinalNameTable = ReadOrdinalNameTable(ref namePointerReader, ref ordinalReader);
 
             for (uint i = 0; i < _numberOfFunctions; i++)
             {
@@ -83,10 +84,11 @@ namespace AsmResolver.PE.Exports
         }
 
         private IDictionary<uint, string> ReadOrdinalNameTable(
-            IBinaryStreamReader namePointerReader, IBinaryStreamReader ordinalReader)
+            ref BinaryStreamReader namePointerReader,
+            ref BinaryStreamReader ordinalReader)
         {
             var result = new Dictionary<uint, string>();
-            
+
             for (int i = 0; i < _numberOfNames; i++)
             {
                 uint ordinal = ordinalReader.ReadUInt16();
@@ -97,6 +99,6 @@ namespace AsmResolver.PE.Exports
             }
 
             return result;
-        } 
+        }
     }
 }

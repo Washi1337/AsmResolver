@@ -23,10 +23,10 @@ namespace AsmResolver.DotNet.Tests
         {
             string tempFile = Path.GetTempFileName();
             module.Write(tempFile);
-            
+
             var stream = new MemoryStream();
             module.Write(stream);
-            
+
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
             return GetFieldConstantInModule(newModule, name);
         }
@@ -88,18 +88,18 @@ namespace AsmResolver.DotNet.Tests
         public void WriteNullConstantValueShouldNotThrow()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.ConstantZeroValueColumn);
-            
+
             var stream = new MemoryStream();
             module.Write(stream);
-            
+
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
-            
+
             var constantValue = newModule
                 .TopLevelTypes.First(t => t.Name == "MyClass")
                 .Fields.First(f => f.Name == "MyIntegerConstant")
                 .Constant.Value;
             Assert.Null(constantValue);
         }
-        
+
     }
 }

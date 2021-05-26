@@ -529,15 +529,17 @@ namespace AsmResolver.DotNet.Serialized
 
             uint rid = GetFieldMarshalRid(ownerToken);
 
-            if (table.TryGetByRid(rid, out var row))
+            if (!table.TryGetByRid(rid, out var row))
+                return null;
+
+            if (!metadata
+                .GetStream<BlobStream>()
+                .TryGetBlobReaderByIndex(row.NativeType, out var reader))
             {
-                var reader = metadata
-                    .GetStream<BlobStream>()
-                    .GetBlobReaderByIndex(row.NativeType);
-                return MarshalDescriptor.FromReader(this, reader);
+                return null;
             }
 
-            return null;
+            return MarshalDescriptor.FromReader(this, ref reader);
         }
 
         private void EnsureFieldLayoutsInitialized()

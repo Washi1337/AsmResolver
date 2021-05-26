@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -69,24 +70,24 @@ namespace AsmResolver.PE.DotNet.Metadata
                            + sizeof(ushort)                          // Flags
                            + sizeof(ushort)                          // Stream count
                            + GetSizeOfStreamHeaders()                // Stream headers
-                           + Streams.Sum(s => s.GetPhysicalSize())); // Streams 
+                           + Streams.Sum(s => s.GetPhysicalSize())); // Streams
         }
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
             ulong start = writer.Offset;
-            
+
             writer.WriteUInt32((uint) MetadataSignature.Bsjb);
             writer.WriteUInt16(MajorVersion);
             writer.WriteUInt16(MinorVersion);
             writer.WriteUInt32(Reserved);
-            
+
             var versionBytes = new byte[((uint) VersionString.Length).Align(4)];
             Encoding.UTF8.GetBytes(VersionString, 0, VersionString.Length, versionBytes, 0);
             writer.WriteInt32(versionBytes.Length);
             writer.WriteBytes(versionBytes);
-            
+
             writer.WriteUInt16(Flags);
             writer.WriteUInt16((ushort) Streams.Count);
 
@@ -104,7 +105,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             uint sizeOfHeaders = GetSizeOfStreamHeaders();
             offset += sizeOfHeaders;
-            
+
             var result = new MetadataStreamHeader[Streams.Count];
             for (int i = 0; i < result.Length; i++)
             {
@@ -149,12 +150,12 @@ namespace AsmResolver.PE.DotNet.Metadata
             foreach (var stream in Streams)
                 stream.Write(writer);
         }
-        
+
         /// <inheritdoc />
         public virtual IMetadataStream GetStream(string name)
         {
             var streams = Streams;
-              
+
             for (int i = 0; i < streams.Count; i++)
             {
                 if (streams[i].Name == name)
@@ -169,7 +170,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             where TStream : IMetadataStream
         {
             var streams = Streams;
-            
+
             for (int i = 0; i < streams.Count; i++)
             {
                 if (streams[i] is TStream stream)

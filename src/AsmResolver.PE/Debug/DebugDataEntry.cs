@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.Debug
 {
     /// <summary>
@@ -40,7 +42,7 @@ namespace AsmResolver.PE.Debug
         }
 
         /// <summary>
-        /// Reserved, must be zero. 
+        /// Reserved, must be zero.
         /// </summary>
         public uint Characteristics
         {
@@ -49,7 +51,7 @@ namespace AsmResolver.PE.Debug
         }
 
         /// <summary>
-        /// Gets or sets the time and date that the debug data was created. 
+        /// Gets or sets the time and date that the debug data was created.
         /// </summary>
         public uint TimeDateStamp
         {
@@ -58,7 +60,7 @@ namespace AsmResolver.PE.Debug
         }
 
         /// <summary>
-        /// Gets or sets the major version number of the debug data format. 
+        /// Gets or sets the major version number of the debug data format.
         /// </summary>
         public ushort MajorVersion
         {
@@ -67,14 +69,14 @@ namespace AsmResolver.PE.Debug
         }
 
         /// <summary>
-        /// Gets or sets the minor version number of the debug data format. 
+        /// Gets or sets the minor version number of the debug data format.
         /// </summary>
         public ushort MinorVersion
         {
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the raw contents of the debug data entry.
         /// </summary>

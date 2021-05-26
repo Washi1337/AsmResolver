@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver
 {
@@ -8,30 +9,30 @@ namespace AsmResolver
     public readonly struct SegmentReference : ISegmentReference
     {
         /// <summary>
-        /// Represents the null reference. 
+        /// Represents the null reference.
         /// </summary>
         public static SegmentReference Null
         {
             get;
         } = new SegmentReference(null);
-        
+
         public SegmentReference(ISegment segment)
         {
             Segment = segment;
         }
-        
+
         /// <inheritdoc />
         public ulong Offset => Segment?.Offset ?? 0;
 
         /// <inheritdoc />
         public uint Rva => Segment?.Rva ?? 0;
-        
+
         /// <inheritdoc />
         public bool CanUpdateOffsets => Segment.CanUpdateOffsets;
-        
+
         /// <inheritdoc />
         public bool IsBounded => true;
-        
+
         /// <inheritdoc />
         public bool CanRead => Segment is IReadableSegment;
 
@@ -42,12 +43,12 @@ namespace AsmResolver
         {
             get;
         }
-        
+
         /// <inheritdoc />
         public void UpdateOffsets(ulong newOffset, uint newRva) => Segment.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReader()
+        public BinaryStreamReader CreateReader()
         {
             return CanRead
                 ? ((IReadableSegment) Segment).CreateReader()

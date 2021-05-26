@@ -20,7 +20,7 @@ namespace AsmResolver.PE.Imports
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="dataDirectory">The import data directory.</param>
-        public SerializedImportedModuleList(PEReaderContext context, DataDirectory dataDirectory)
+        public SerializedImportedModuleList(PEReaderContext context, in DataDirectory dataDirectory)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dataDirectory = dataDirectory;
@@ -37,12 +37,12 @@ namespace AsmResolver.PE.Imports
 
             while (true)
             {
-                var entry = ImportedModule.FromReader(_context, reader);
+                var entry = ImportedModule.FromReader(_context, ref reader);
                 if (entry == null)
                     break;
                 Items.Add(entry);
             }
         }
-        
+
     }
 }

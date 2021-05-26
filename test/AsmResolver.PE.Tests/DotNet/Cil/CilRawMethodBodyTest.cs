@@ -12,9 +12,10 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
             var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
-            
+
             var methodTable = tablesStream.GetTable<MethodDefinitionRow>();
-            var methodBody = CilRawMethodBody.FromReader(ThrowErrorListener.Instance, methodTable[0].Body.CreateReader());
+            var reader = methodTable[0].Body.CreateReader();
+            var methodBody = CilRawMethodBody.FromReader(ThrowErrorListener.Instance, ref reader);
 
             Assert.False(methodBody.IsFat);
             Assert.Equal(new byte[]
@@ -22,8 +23,8 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
                 0x72, 0x01, 0x00, 0x00, 0x70, // ldstr "Hello, world!"
                 0x28, 0x0B, 0x00, 0x00, 0x0A, // call void [mscorlib] System.Console::WriteLine(string)
                 0x2A                          // ret
-            }, methodBody.Code);
+            }, methodBody.Code.ToArray());
         }
-        
+
     }
 }

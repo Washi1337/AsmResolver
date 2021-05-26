@@ -368,7 +368,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 CilOperandType.InlineBrTarget => TryOptimizeBranch(instruction),
                 CilOperandType.ShortInlineBrTarget => TryOptimizeBranch(instruction),
                 CilOperandType.InlineI => TryOptimizeLdc(instruction),
-                CilOperandType.ShortInlineI => TryOptimizeLdc(instruction),
+                CilOperandType.ShortInlineI when instruction.IsLdcI4() =>  TryOptimizeLdc(instruction),
                 CilOperandType.InlineVar => TryOptimizeVariable(instruction),
                 CilOperandType.ShortInlineVar => TryOptimizeVariable(instruction),
                 CilOperandType.InlineArgument => TryOptimizeArgument(instruction),

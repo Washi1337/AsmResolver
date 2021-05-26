@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the implementation map table.</param>
         /// <returns>The row.</returns>
-        public static ImplementationMapRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static ImplementationMapRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new ImplementationMapRow(
                 (ImplementationMapAttributes) reader.ReadUInt16(),
@@ -39,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             ImportName = importName;
             ImportScope = importScope;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.ImplMap;
 
@@ -106,8 +107,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public bool Equals(ImplementationMapRow other)
         {
             return Attributes == other.Attributes
-                   && MemberForwarded == other.MemberForwarded 
-                   && ImportName == other.ImportName 
+                   && MemberForwarded == other.MemberForwarded
+                   && ImportName == other.ImportName
                    && ImportScope == other.ImportScope;
         }
 

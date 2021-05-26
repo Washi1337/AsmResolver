@@ -1,3 +1,5 @@
+.. _pe-advanced-image-reading:
+
 Advanced PE Image Reading
 =========================
 
@@ -14,10 +16,12 @@ These parameters can then be passed on to any of the ``PEImage.FromXXX`` methods
     var image = PEImage.FromFile(@"C:\Path\To\File.exe", parameters);
 
 
+.. _pe-custom-error-handling:
+
 Custom error handling
 ---------------------
 
-By default, AsmResolver throws exceptions To provide a custom method for handling parser errors, set the ``ErrorListener`` property. There are a couple of default implementations that AsmResolver provides.
+By default, AsmResolver throws exceptions upon encountering invalid data in the input file. To provide a custom method for handling parser errors, set the ``ErrorListener`` property. There are a couple of default implementations that AsmResolver provides.
 
 - ``ThrowErrorListener``: Throws the recorded parser exception. This is the default.
 - ``EmptyErrorListener``: Silently consumes any parser exception, and allows the reader to recover.
@@ -55,7 +59,7 @@ Some .NET obfuscators insert custom metadata streams in the .NET metadata direct
         public override IMetadataStream ReadStream(
             PEReaderContext context, 
             MetadataStreamHeader header,
-            IBinaryStreamReader reader)
+            ref BinaryStreamReader reader)
         {
             if (header.Name == "#CustomStream")
             {
@@ -65,7 +69,7 @@ Some .NET obfuscators insert custom metadata streams in the .NET metadata direct
             else
             {
                 // Forward to default stream parser.
-                base.ReadStream(context, header, reader);
+                base.ReadStream(context, header, ref reader);
             }
         }
     }
@@ -95,7 +99,7 @@ Debug data directories can have arbitrary data stored in the PE image. By defaul
         public override IDebugDataSegment ReadDebugData(
             PEReaderContext context, 
             DebugDataType type, 
-            IBinaryStreamReader reader)
+            ref BinaryStreamReader reader)
         {
             if (type == DebugDataType.Coff)
             {
@@ -105,7 +109,7 @@ Debug data directories can have arbitrary data stored in the PE image. By defaul
             else
             {
                 // Forward to default parser.
-                return base.ReadDebugData(context, type, reader);
+                return base.ReadDebugData(context, type, ref reader);
             }
         }
     }

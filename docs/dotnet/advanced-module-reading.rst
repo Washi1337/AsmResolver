@@ -1,3 +1,5 @@
+.. _dotnet-advanced-module-reading:
+
 Advanced Module Reading
 =======================
 
@@ -14,6 +16,34 @@ These parameters can then be passed on to any of the ``ModuleDefinition.FromXXX`
     var module = ModuleDefinition.FromFile(@"C:\Path\To\File.exe", parameters);
 
 
+PE image reading parameters
+---------------------------
+
+.NET modules are stored in a normal PE file. To customize the way AsmResolver reads the underlying PE image before it is being interpreted as a .NET image, ``ModuleReaderParameters`` provides a ``PEReaderParameters`` property that can be modified or replaced completely. 
+
+.. code-block:: csharp
+
+    parameters.PEReaderParameters = new PEReaderParameters 
+    {
+        ...
+    };
+
+For example, this can be in particular useful if you want to let AsmResolver ignore and recover from invalid data in the input file:
+
+.. code-block:: csharp
+
+    parameters.PEReaderParameters.ErrorListener = EmptyErrorListener.Instance;
+
+   
+Alternatively, this property can also be set through the constructor of the ``ModuleReaderParameters`` class directly:
+
+.. code-block:: csharp
+
+    var parameters = new ModuleReaderParameters(EmptyErrorListener.Instance);
+
+For more information on customizing the underlying PE image reading process, see :ref:`pe-advanced-image-reading`.
+
+
 Changing working directory
 --------------------------
 
@@ -22,6 +52,13 @@ Modules often depend on other assemblies. These assemblies often are placed in t
 .. code-block:: csharp
 
     parameters.WorkingDirectory = @"C:\Path\To\Different\Folder";
+
+   
+Alternatively, this property can also be set through the constructor of the ``ModuleReaderParameters`` class directly:
+
+.. code-block:: csharp
+
+    var parameters = new ModuleReaderParameters(@"C:\Path\To\Different\Folder");
 
 
 Custom .netmodule resolvers

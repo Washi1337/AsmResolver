@@ -55,7 +55,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             if (BaseType is null)
             {
-                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
+                context.ErrorListener.RegisterException(new InvalidBlobSignatureException(this,
                     $"{ElementType} blob signature {this.SafeToString()} is invalid or incomplete.",
                     new NullReferenceException("Base type is null.")));
                 context.Writer.WriteByte((byte) PE.DotNet.Metadata.Tables.Rows.ElementType.Object);

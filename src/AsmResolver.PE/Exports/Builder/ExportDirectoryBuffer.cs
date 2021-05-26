@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Exports.Builder
 {
@@ -24,12 +25,12 @@ namespace AsmResolver.PE.Exports.Builder
                 + sizeof(uint) // NamePointerRVA
                 + sizeof(uint) // OrdinalTableRVA
             ;
-        
+
         private readonly SegmentBuilder _contentsBuilder;
         private readonly ExportAddressTableBuffer _addressTableBuffer;
         private readonly OrdinalNamePointerTableBuffer _ordinalNamePointerTable;
         private readonly NameTableBuffer _nameTableBuffer;
-        
+
         private IExportDirectory _exportDirectory;
 
         /// <summary>
@@ -64,10 +65,10 @@ namespace AsmResolver.PE.Exports.Builder
         {
             if (!IsEmpty)
                 throw new InvalidProgramException("Cannot add a secondary export directory to the buffer.");
-            
+
             // Set header.
             _exportDirectory = exportDirectory;
-            
+
             // Add contents.
             _nameTableBuffer.AddName(exportDirectory.Name);
             foreach (var symbol in exportDirectory.Entries)
@@ -78,7 +79,7 @@ namespace AsmResolver.PE.Exports.Builder
                     _nameTableBuffer.AddName(symbol.Name);
             }
         }
-        
+
         /// <inheritdoc />
         public override void UpdateOffsets(ulong newOffset, uint newRva)
         {
@@ -95,7 +96,7 @@ namespace AsmResolver.PE.Exports.Builder
             WriteExportDirectoryHeader(writer);
             _contentsBuilder.Write(writer);
         }
-        
+
         private void WriteExportDirectoryHeader(IBinaryStreamWriter writer)
         {
             writer.WriteUInt32(_exportDirectory.ExportFlags);

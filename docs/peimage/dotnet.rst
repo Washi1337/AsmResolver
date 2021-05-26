@@ -24,7 +24,7 @@ To access the metadata directory, access the ``IDotNetDirectory.Metadata`` prope
 
 .. code-block:: csharp
 
-    IMetadata metadata = peImage.DotNetDirectory.Metadata;
+    var metadata = peImage.DotNetDirectory.Metadata;
 
     Console.WriteLine("Metadata file format version: {0}.{1}", metadata.MajorVersion, metadata.MinorVersion);
     Console.WriteLine("Target .NET runtime version: " + metadata.VersionString);
@@ -68,7 +68,7 @@ AsmResolver supports parsing streams using the names in the table below. Any str
 | ``#US``                   | ``UserStringsStream``  |
 +---------------------------+------------------------+
 
-Some streams support reading the raw contents using a ``IBinaryStreamReader``. Effectively, every stream that was read from the disk is readable in this way. Below an example of a program that dumps for each readable stream the contents to a file on the disk:
+Some streams support reading the raw contents using a ``BinaryStreamReader``. Effectively, every stream that was read from the disk is readable in this way. Below an example of a program that dumps for each readable stream the contents to a file on the disk:
 
 .. code-block:: csharp
 
@@ -122,15 +122,16 @@ Example:
     var stringsStream = metadata.GetStream<StringsStream>();
     string value = stringsStream.GetStringByIndex(0x1234);
 
-Since blobs in the blob stream have a specific format, just obtaining the `byte[]` of a blob might not be all that useful. Therefore, the ``BlobStream`` has an extra ``GetBlobReaderByIndex`` method, that allows for parsing each blob using an ``IBinaryStreamReader`` object instead:
+Since blobs in the blob stream have a specific format, just obtaining the `byte[]` of a blob might not be all that useful. Therefore, the ``BlobStream`` has an extra ``GetBlobReaderByIndex`` method, that allows for parsing each blob using an ``BinaryStreamReader`` object instead:
 
 
 .. code-block:: csharp
 
     var blobStream = metadata.GetStream<BlobStream>();
-    var reader = blobStream.GetBlobReaderByIndex(0x1234);
-
-    // Use reader to parse the blob signature ...
+    if (blobStream.TryGetBlobReaderByIndex(0x1234, out var reader))
+    {
+        // Use reader to parse the blob signature ...
+    }
 
 Tables stream
 -------------
@@ -255,8 +256,10 @@ Metadata tables are similar to normal ``ICollection<T>`` instances. They provide
 
     Console.WriteLine("Number of types: " + typeDefTable.Count);
 
-    TypeDefinitionRow firstType = typeDefTable[0];
+    // Get a single row.
+    TypeDefinitionRow firstTypeRow = typeDefTable[0];
 
+    // Iterate over all rows:
     foreach (var typeRow in typeDefTable)
     {
         // ...

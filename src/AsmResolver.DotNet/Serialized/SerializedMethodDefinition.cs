@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="MethodDefinition"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedMethodDefinition : MethodDefinition
     {
@@ -44,27 +44,35 @@ namespace AsmResolver.DotNet.Serialized
             .GetStream<StringsStream>().GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override MethodSignature GetSignature() => MethodSignature.FromReader(
-            new BlobReadContext(_context),
-            _context.ParentModule.DotNetDirectory.Metadata
+        protected override MethodSignature GetSignature()
+        {
+            if (!_context.ParentModule.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.Signature));
+                .TryGetBlobReaderByIndex(_row.Signature, out var reader))
+            {
+                return _context.BadImageAndReturn<MethodSignature>(
+                    $"Invalid signature blob index in method {MetadataToken.ToString()}.");
+            }
+
+            return MethodSignature.FromReader(new BlobReadContext(_context), ref reader);
+        }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
 
         /// <inheritdoc />
         protected override IList<SecurityDeclaration> GetSecurityDeclarations() =>
             _context.ParentModule.GetSecurityDeclarationCollection(this);
-        
+
         /// <inheritdoc />
         protected override TypeDefinition GetDeclaringType()
         {
             var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, _context.ParentModule.GetMethodDeclaringType(MetadataToken.Rid));
             return _context.ParentModule.TryLookupMember(declaringTypeToken, out var member)
                 ? member as TypeDefinition
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>(
+                    $"Method {MetadataToken.ToString()} is not in the range of a declaring type.");
         }
 
         /// <inheritdoc />
@@ -82,7 +90,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override MethodBody GetBody() => 
+        protected override MethodBody GetBody() =>
             _context.Parameters.MethodBodyReader.ReadMethodBody(_context, this, _row);
 
         /// <inheritdoc />
@@ -98,7 +106,7 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<GenericParameter> GetGenericParameters()
         {
             var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
-            
+
             foreach (uint rid in _context.ParentModule.GetGenericParameters(MetadataToken))
             {
                 if (_context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.GenericParam, rid), out var member)

@@ -1,5 +1,5 @@
-Inspecting the PE sections
-==========================
+PE sections
+===========
 
 Sections can be read and modified by accessing the ``PEFile.Sections`` property, which is a collection of ``PESection`` objects.
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -83,7 +84,7 @@ namespace AsmResolver.DotNet.Code.Cil
             }
             catch (Exception ex)
             {
-                context.DiagnosticBag.RegisterException(ex);
+                context.ErrorListener.RegisterException(ex);
             }
 
             // Serialize CIL stream.
@@ -115,7 +116,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 token = context.TokenProvider.GetStandAloneSignatureToken(standAloneSig);
             }
 
-            var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, code);
+            var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, new DataSegment(code));
             fatBody.InitLocals = body.InitializeLocals;
 
             // Build up EH table section.
@@ -139,7 +140,7 @@ namespace AsmResolver.DotNet.Code.Cil
         private static byte[] BuildRawCodeStream(MethodBodySerializationContext context, CilMethodBody body)
         {
             using var codeStream = new MemoryStream();
-            var bag = context.DiagnosticBag;
+            var bag = context.ErrorListener;
 
             var writer = new BinaryStreamWriter(codeStream);
             var assembler = new CilAssembler(
@@ -202,7 +203,7 @@ namespace AsmResolver.DotNet.Code.Cil
                         TypeReference typeReference => provider.GetTypeReferenceToken(typeReference),
                         TypeDefinition typeDefinition => provider.GetTypeDefinitionToken(typeDefinition),
                         TypeSpecification typeSpecification => provider.GetTypeSpecificationToken(typeSpecification),
-                        _ => context.DiagnosticBag.RegisterExceptionAndReturnDefault<MetadataToken>(
+                        _ => context.ErrorListener.RegisterExceptionAndReturnDefault<MetadataToken>(
                             new ArgumentOutOfRangeException(
                                 $"Invalid or unsupported exception type ({handler.ExceptionType.SafeToString()})"))
                     };
@@ -220,7 +221,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     break;
 
                 default:
-                    context.DiagnosticBag.RegisterException(new ArgumentOutOfRangeException(
+                    context.ErrorListener.RegisterException(new ArgumentOutOfRangeException(
                             $"Invalid or unsupported handler type ({handler.HandlerType.SafeToString()}"));
                     break;
             }

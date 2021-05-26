@@ -4,22 +4,23 @@ The Member Tree
 Assemblies and modules
 ----------------------
 
-The root of every .NET assembly is represented by the `AssemblyDefinition` class. This class exposes basic information such as name, version and public key token, but also a collection of all modules that are defined in the assembly. Modules are represented by the `ModuleDefinition` class.
+The root of every .NET assembly is represented by the ``AssemblyDefinition`` class. This class exposes basic information such as name, version and public key token, but also a collection of all modules that are defined in the assembly. Modules are represented by the `ModuleDefinition` class.
 
 Below an example that enumerates all modules defined in an assembly.
 
 .. code-block:: csharp
 
-    AssemblyDefinition assembly = AssemblyDefinition.FromFile(...);
-    foreach (ModuleDefinition module in assembly.Modules)
+    var assembly = AssemblyDefinition.FromFile(...);
+    foreach (var module in assembly.Modules)
         Console.WriteLine(module.Name);
 
 Most .NET assemblies only have one module. This main module is also known as the manifest module, and can be accessed directly through the `AssemblyDefinition.ManifestModule` property.
 
+
 Obtaining types in a module
 ---------------------------
 
-Types are represented by the `TypeDefinition` class. To get the types defined in a module, use the `ModuleDefinition.TopLevelTypes` property. A top level types is any non-nested type. Nested types are exposed through the `TypeDefinition.NestedTypes`. 
+Types are represented by the ``TypeDefinition`` class. To get the types defined in a module, use the ``ModuleDefinition.TopLevelTypes`` property. A top level types is any non-nested type. Nested types are exposed through the ``TypeDefinition.NestedTypes``. Alternatively, to get all types, including nested types, it is possible to call the ``ModuleDefinition.GetAllTypes`` method instead.
 
 Below, an example program that iterates through all types recursively and prints them:
 
@@ -29,14 +30,14 @@ Below, an example program that iterates through all types recursively and prints
     
     private static void Main(string[] args)
     {
-        ModuleDefinition module = ModuleDefinition.FromFile(...);
+        var module = ModuleDefinition.FromFile(...);
         DumpTypes(module.TopLevelTypes);
     }
 
     private static void DumpTypes(IEnumerable<TypeDefinition> types, int indentationLevel = 0)
     {
         string indentation = new string(' ', indentationLevel * IndentationWidth);
-        foreach (TypeDefinition type in types)
+        foreach (var type in types)
         {
             // Print the name of the current type.
             Console.WriteLine("{0}- {1} : {2:X8}", indentation, type.Name, type.MetadataToken.ToInt32());
@@ -50,20 +51,20 @@ Below, an example program that iterates through all types recursively and prints
 Obtaining methods and fields 
 ----------------------------
 
-The `TypeDefinition` class exposes collections of methods and fields that the type defines:
+The ``TypeDefinition`` class exposes collections of methods and fields that the type defines:
 
 .. code-block:: csharp
 
-    foreach (MethodDefinition method in type.Methods)
+    foreach (var method in type.Methods)
         Console.WriteLine("{0} : {1:X8}", method.Name, method.MetadataToken.ToInt32());
 
 
 .. code-block:: csharp
 
-    foreach (FieldDefinition field in type.Fields)
+    foreach (var field in type.Fields)
         Console.WriteLine("{0} : {1:X8}", field.Name, field.MetadataToken.ToInt32());
 
-Methods and fields have a `Signature` property, that contain the return and parameter types, or the field type respectively.
+Methods and fields have a ``Signature`` property, that contain the return and parameter types, or the field type respectively.
 
 .. code-block:: csharp
 
@@ -78,31 +79,31 @@ Methods and fields have a `Signature` property, that contain the return and para
     Console.WriteLine("Return type: " + field.Signature.FieldType);
 
 
-However, for reading parameters from a method definition, it is preferred to use the `Parameters` property instead of the `ParameterTypes` property stored in the signature. This is because the `Parameters` property automatically binds the types to the parameter definitions that are associated to these parameter types. This provides additional information, such as the name of the parameter:
+However, for reading parameters from a method definition, it is preferred to use the ``Parameters`` property instead of the ``ParameterTypes`` property stored in the signature. This is because the ``Parameters`` property automatically binds the types to the parameter definitions that are associated to these parameter types. This provides additional information, such as the name of the parameter:
 
 .. code-block:: csharp
 
-    foreach (Parameter parameter in method.Parameters)
+    foreach (var parameter in method.Parameters)
         Console.WriteLine($"{parameter.Name} : {parameter.ParameterType}");
 
 
 Obtaining properties and events
 -------------------------------
 
-Obtaining properties and events is similar to obtaining methods and fields; `TypeDefinition` exposes them in a list as well:
+Obtaining properties and events is similar to obtaining methods and fields; ``TypeDefinition`` exposes them in a list as well:
 
 .. code-block:: csharp
 
-    foreach (EventDefinition @event in type.Events)
+    foreach (var @event in type.Events)
         Console.WriteLine("{0} : {1:X8}", @event.Name, @event.MetadataToken.ToInt32());
 
 .. code-block:: csharp
         
-    foreach (PropertyDefinition property in type.Properties)
+    foreach (var property in type.Properties)
         Console.WriteLine("{0} : {1:X8}", property.Name, property.MetadataToken.ToInt32());
 
 
-Properties and events have methods associated to them. These are accessible through the `Semantics` property:
+Properties and events have methods associated to them. These are accessible through the ``Semantics`` property:
 
 .. code-block:: csharp
 

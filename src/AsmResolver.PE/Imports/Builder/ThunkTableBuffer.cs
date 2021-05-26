@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Imports.Builder
 {
@@ -8,8 +9,8 @@ namespace AsmResolver.PE.Imports.Builder
     /// </summary>
     public class ThunkTableBuffer : SegmentBase
     {
-        private readonly IList<ImportedSymbol> _members = new List<ImportedSymbol>();
-        private readonly IDictionary<ImportedSymbol, uint> _memberOffsets = new Dictionary<ImportedSymbol, uint>();
+        private readonly List<ImportedSymbol> _members = new();
+        private readonly Dictionary<ImportedSymbol, uint> _memberOffsets = new();
         private readonly HintNameTableBuffer _hintNameTable;
         private readonly bool _isIat;
 
@@ -28,7 +29,7 @@ namespace AsmResolver.PE.Imports.Builder
             Is32Bit = is32Bit;
             _length = ThunkSize;
         }
-        
+
         /// <summary>
         /// Gets a value indicating whether the thunk-table should use 32-bit addresses or 64-bit addresses.
         /// </summary>
@@ -93,6 +94,6 @@ namespace AsmResolver.PE.Imports.Builder
             else
                 writer.WriteUInt64(0);
         }
-        
+
     }
 }

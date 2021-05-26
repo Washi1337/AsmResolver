@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,14 +16,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the assembly operating system table.</param>
         /// <returns>The row.</returns>
-        public static AssemblyOSRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static AssemblyOSRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new AssemblyOSRow(
                 reader.ReadUInt32(),
                 reader.ReadUInt32(),
                 reader.ReadUInt32());
         }
-        
+
         /// <summary>
         /// Creates a new row for the assembly operating system metadata table.
         /// </summary>
@@ -35,7 +36,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             MajorVersion = majorVersion;
             MinorVersion = minorVersion;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.AssemblyOS;
 
@@ -50,7 +51,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             2 => MinorVersion,
             _ => throw new IndexOutOfRangeException()
         };
-        
+
         /// <summary>
         /// Gets the identifier of the platform the assembly is targeting.
         /// </summary>
@@ -90,7 +91,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
         public bool Equals(AssemblyOSRow other)
         {
-            return PlatformId == other.PlatformId 
+            return PlatformId == other.PlatformId
                    && MajorVersion == other.MajorVersion
                    && MinorVersion == other.MinorVersion;
         }

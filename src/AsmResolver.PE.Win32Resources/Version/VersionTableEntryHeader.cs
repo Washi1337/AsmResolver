@@ -1,4 +1,5 @@
 using System.Text;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources.Version
 {
@@ -12,7 +13,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         /// <param name="reader">The reader.</param>
         /// <returns>The table header.</returns>
-        public static VersionTableEntryHeader FromReader(IBinaryStreamReader reader)
+        public static VersionTableEntryHeader FromReader(ref BinaryStreamReader reader)
         {
             return new VersionTableEntryHeader
             {
@@ -39,7 +40,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         }
 
         /// <summary>
-        /// Gets or sets the raw length in bytes of the structure. 
+        /// Gets or sets the raw length in bytes of the structure.
         /// </summary>
         public ushort Length
         {

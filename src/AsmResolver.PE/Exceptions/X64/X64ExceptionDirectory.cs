@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Exceptions.X64
 {
     internal class X64ExceptionDirectory : ExceptionDirectory<X64RuntimeFunction>
     {
         private readonly PEReaderContext _context;
-        private readonly IBinaryStreamReader _reader;
+        private readonly BinaryStreamReader _reader;
 
-        public X64ExceptionDirectory(PEReaderContext context, IBinaryStreamReader reader)
+        public X64ExceptionDirectory(PEReaderContext context, in BinaryStreamReader reader)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            _reader = reader;
         }
 
         /// <inheritdoc />
@@ -21,7 +22,7 @@ namespace AsmResolver.PE.Exceptions.X64
             var result = new List<X64RuntimeFunction>();
 
             while (reader.CanRead(X64RuntimeFunction.EntrySize))
-                result.Add(X64RuntimeFunction.FromReader(_context, reader));
+                result.Add(X64RuntimeFunction.FromReader(_context, ref reader));
 
             return result;
         }

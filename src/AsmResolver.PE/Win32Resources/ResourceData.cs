@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.Collections;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources
 {
@@ -17,7 +18,7 @@ namespace AsmResolver.PE.Win32Resources
         {
             _contents = new LazyVariable<ISegment>(() => GetContents());
         }
-        
+
         /// <summary>
         /// Creates a new named data entry.
         /// </summary>
@@ -54,7 +55,7 @@ namespace AsmResolver.PE.Win32Resources
             get => ParentDirectory;
             set => ParentDirectory = value;
         }
-        
+
         /// <inheritdoc />
         public string Name
         {
@@ -74,14 +75,14 @@ namespace AsmResolver.PE.Win32Resources
 
         /// <inheritdoc />
         bool IResourceEntry.IsData => true;
-        
+
         /// <inheritdoc />
         public ISegment Contents
         {
             get => _contents.Value;
             set => _contents.Value = value;
         }
-        
+
         /// <inheritdoc />
         public uint CodePage
         {
@@ -93,7 +94,7 @@ namespace AsmResolver.PE.Win32Resources
         public bool CanRead => Contents is IReadableSegment;
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReader()
+        public BinaryStreamReader CreateReader()
         {
             return Contents is IReadableSegment readableSegment
                 ? readableSegment.CreateReader()

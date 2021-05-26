@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources.Icon
 {
@@ -12,7 +13,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// <summary>
         /// Used to keep track of all icon entries associated with this icon group.
         /// </summary>
-        private readonly IDictionary<ushort, (IconGroupDirectoryEntry, IconEntry)> _entries = new Dictionary<ushort, (IconGroupDirectoryEntry, IconEntry)>();
+        private readonly Dictionary<ushort, (IconGroupDirectoryEntry, IconEntry)> _entries = new();
 
         /// <summary>
         /// Reads a single icon group directory.
@@ -20,7 +21,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// <param name="reader">The reader.</param>
         /// <param name="iconResourceDirectory">The icon resource directory used to extract associated icon entries from.</param>
         /// <returns>The icon group directory.</returns>
-        public static IconGroupDirectory FromReader(IBinaryStreamReader reader, IResourceDirectory iconResourceDirectory)
+        public static IconGroupDirectory FromReader(ref BinaryStreamReader reader, IResourceDirectory iconResourceDirectory)
         {
             var result = new IconGroupDirectory
             {
@@ -33,16 +34,16 @@ namespace AsmResolver.PE.Win32Resources.Icon
 
             for (int i = 0; i < result.Count; i++)
             {
-                var (iconGroupDirectoryEntry, iconEntry) = ReadNextEntry(reader, iconResourceDirectory);
+                var (iconGroupDirectoryEntry, iconEntry) = ReadNextEntry(ref reader, iconResourceDirectory);
                 result.AddEntry(iconGroupDirectoryEntry, iconEntry);
             }
 
             return result;
         }
 
-        private static (IconGroupDirectoryEntry, IconEntry) ReadNextEntry(IBinaryStreamReader reader, IResourceDirectory iconResourceDirectory)
+        private static (IconGroupDirectoryEntry, IconEntry) ReadNextEntry(ref BinaryStreamReader reader, IResourceDirectory iconResourceDirectory)
         {
-            var entry = IconGroupDirectoryEntry.FromReader(reader);
+            var entry = IconGroupDirectoryEntry.FromReader(ref reader);
 
             // search for icon reference in icon resource directory
             var iconDirectory = iconResourceDirectory
@@ -58,7 +59,8 @@ namespace AsmResolver.PE.Win32Resources.Icon
             if (iconDataEntry is null)
                 throw new ArgumentException("Non-existent icon reference.");
 
-            var entry2 = IconEntry.FromReader(iconDataEntry.CreateReader());
+            var iconReader = iconDataEntry.CreateReader();
+            var entry2 = IconEntry.FromReader(ref iconReader);
 
             return (entry, entry2);
         }
@@ -80,7 +82,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         }
 
         /// <summary>
-        /// Adds or overrides the existing entry with the same id to the group icon resource. 
+        /// Adds or overrides the existing entry with the same id to the group icon resource.
         /// </summary>
         /// <param name="iconGroupDirectoryEntry">The icon group directory entry to add.</param>
         /// <param name="iconEntry">The icon entry to add.</param>
@@ -95,7 +97,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         public bool RemoveEntry(ushort id) => _entries.Remove(id);
 
         /// <summary>
-        /// Gets a collection of icon entries stored in the icon group. 
+        /// Gets a collection of icon entries stored in the icon group.
         /// </summary>
         public IEnumerable<(IconGroupDirectoryEntry, IconEntry)> GetIconEntries() => _entries.Values;
 
@@ -105,7 +107,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         public const uint HeaderSize = sizeof(ushort) // Reserved
                                           + sizeof(ushort) // Type
                                           + sizeof(ushort); // Count
-        
+
         /// <summary>
         /// Reserved field. Must be 0.
         /// </summary>

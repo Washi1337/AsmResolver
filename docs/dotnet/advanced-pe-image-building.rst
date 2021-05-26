@@ -1,3 +1,5 @@
+.. _dotnet-advanced-pe-image-building:
+
 Advanced PE Image Building
 ==========================
 
@@ -142,6 +144,8 @@ After writing the module to an output stream, use the ``StrongNameSigner`` class
     var signer = new StrongNameSigner(snk);
     signer.SignImage(outputStream, module.Assembly.HashAlgorithm);
 
+
+.. _dotnet-image-builder-diagnostics:
 
 Image Builder Diagnostics 
 -------------------------

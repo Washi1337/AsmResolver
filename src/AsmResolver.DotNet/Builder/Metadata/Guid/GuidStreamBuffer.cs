@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 
@@ -12,7 +13,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
     public class GuidStreamBuffer : IMetadataStreamBuffer
     {
         private readonly MemoryStream _rawStream = new();
-        private readonly BinaryStreamWriter _writer;
+        private readonly IBinaryStreamWriter _writer;
         private readonly Dictionary<System.Guid, uint> _guids = new();
 
         /// <summary>

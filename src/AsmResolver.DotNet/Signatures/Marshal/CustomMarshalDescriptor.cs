@@ -1,5 +1,6 @@
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures.Marshal
 {
@@ -14,17 +15,17 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <param name="parentModule">The module defining the descriptor.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The descriptor.</returns>
-        public new static CustomMarshalDescriptor FromReader(ModuleDefinition parentModule, IBinaryStreamReader reader)
+        public new static CustomMarshalDescriptor FromReader(ModuleDefinition parentModule, ref BinaryStreamReader reader)
         {
             string guid = reader.ReadSerString();
             string nativeTypeName = reader.ReadSerString();
             string marshalTypeName = reader.ReadSerString();
             string cookie = reader.ReadSerString();
-            
+
             return new CustomMarshalDescriptor(guid, nativeTypeName,
                 marshalTypeName is null ? null : TypeNameParser.Parse(parentModule, marshalTypeName), cookie);
         }
-        
+
         /// <summary>
         /// Creates a new instance of the <see cref="CustomMarshalDescriptor"/> class.
         /// </summary>
@@ -68,7 +69,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         }
 
         /// <summary>
-        /// Gets or sets the type used to marshal the value. 
+        /// Gets or sets the type used to marshal the value.
         /// </summary>
         public TypeSignature MarshalType
         {
@@ -77,7 +78,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         }
 
         /// <summary>
-        /// Gets or sets an additional value to be passed onto the custom marshaller. 
+        /// Gets or sets an additional value to be passed onto the custom marshaller.
         /// </summary>
         public string Cookie
         {
@@ -89,7 +90,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) NativeType);
             writer.WriteSerString(Guid ?? string.Empty);
             writer.WriteSerString(NativeTypeName ?? string.Empty);

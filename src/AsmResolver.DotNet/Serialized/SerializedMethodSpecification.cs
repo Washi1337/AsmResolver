@@ -10,13 +10,13 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="MethodSpecification"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedMethodSpecification : MethodSpecification
     {
         private readonly ModuleReaderContext _context;
         private readonly MethodSpecificationRow _row;
-        
+
         /// <summary>
         /// Creates a method specification from a method specification metadata row.
         /// </summary>
@@ -36,25 +36,30 @@ namespace AsmResolver.DotNet.Serialized
             var encoder = _context.Image.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.MethodDefOrRef);
-            
+
             var methodToken = encoder.DecodeIndex(_row.Method);
             return _context.ParentModule.TryLookupMember(methodToken, out var member)
                 ? member as IMethodDefOrRef
-                : null;
+                : _context.BadImageAndReturn<IMethodDefOrRef>(
+                    $"Invalid method in method specification {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
         protected override GenericInstanceMethodSignature GetSignature()
         {
-            var reader = _context.Image.DotNetDirectory.Metadata
+            if (!_context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.Instantiation);
-            
-            return GenericInstanceMethodSignature.FromReader(new BlobReadContext(_context), reader);
+                .TryGetBlobReaderByIndex(_row.Instantiation, out var reader))
+            {
+                return _context.BadImageAndReturn<GenericInstanceMethodSignature>(
+                    $"Invalid instantiation blob index in method specification {MetadataToken.ToString()}.");
+            }
+
+            return GenericInstanceMethodSignature.FromReader(new BlobReadContext(_context), ref reader);
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

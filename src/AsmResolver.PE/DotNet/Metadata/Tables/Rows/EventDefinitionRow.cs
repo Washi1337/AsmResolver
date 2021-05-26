@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,14 +16,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the event definition table.</param>
         /// <returns>The row.</returns>
-        public static EventDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static EventDefinitionRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new EventDefinitionRow(
                 (EventAttributes) reader.ReadUInt16(),
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size),
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
-        
+
         /// <summary>
         /// Creates a new row for the event definition metadata table.
         /// </summary>
@@ -53,7 +54,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the event definition. 
+        /// Gets the attributes associated to the event definition.
         /// </summary>
         public EventAttributes Attributes
         {

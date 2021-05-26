@@ -221,7 +221,7 @@ namespace AsmResolver.DotNet
         {
             using HashAlgorithm implementation = algorithm switch
             {
-                AssemblyHashAlgorithm.None => throw new ArgumentException("Attempted to compute a hashing algorithm without providing a hashing algorithm."),
+                AssemblyHashAlgorithm.None => SHA1.Create(), // Default algo is SHA-1.
                 AssemblyHashAlgorithm.Md5 => MD5.Create(),
                 AssemblyHashAlgorithm.Sha1 => SHA1.Create(),
                 AssemblyHashAlgorithm.Hmac => HMAC.Create(),

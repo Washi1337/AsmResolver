@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -16,7 +17,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the method definition table.</param>
         /// <returns>The row.</returns>
-        public static MethodDefinitionRow FromReader(PEReaderContext context, IBinaryStreamReader reader, TableLayout layout)
+        public static MethodDefinitionRow FromReader(PEReaderContext context, ref BinaryStreamReader reader, TableLayout layout)
         {
             return new MethodDefinitionRow(
                 context.File.GetReferenceToRva(reader.ReadUInt32()),
@@ -37,7 +38,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="signature">The index into the #Blob heap containing the signature of the method.</param>
         /// <param name="parameterList">The index into the Param (or ParamPtr) table, representing the first parameter
         /// that this method defines.</param>
-        public MethodDefinitionRow(ISegmentReference body, MethodImplAttributes implAttributes, MethodAttributes attributes, 
+        public MethodDefinitionRow(ISegmentReference body, MethodImplAttributes implAttributes, MethodAttributes attributes,
             uint name, uint signature, uint parameterList)
         {
             Body = body;
@@ -67,7 +68,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets a reference to the beginning of the method body. 
+        /// Gets a reference to the beginning of the method body.
         /// </summary>
         /// <remarks>
         /// This field deviates from the original specification as described in ECMA-335. It replaces the RVA column of
@@ -124,7 +125,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Gets an index into the Param (or ParamPtr) table, representing the first parameter that this method defines. 
+        /// Gets an index into the Param (or ParamPtr) table, representing the first parameter that this method defines.
         /// </summary>
         public uint ParameterList
         {
@@ -154,7 +155,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return Body?.Rva == other.Body?.Rva
                    && ImplAttributes == other.ImplAttributes
-                   && Attributes == other.Attributes 
+                   && Attributes == other.Attributes
                    && Name == other.Name
                    && Signature == other.Signature
                    && ParameterList == other.ParameterList;

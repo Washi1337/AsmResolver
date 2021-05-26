@@ -2,6 +2,7 @@
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -12,7 +13,7 @@ namespace AsmResolver.DotNet.Signatures
     {
         internal static GenericInstanceMethodSignature FromReader(
             in BlobReadContext context,
-            IBinaryStreamReader reader)
+            ref BinaryStreamReader reader)
         {
             if (!reader.CanRead(sizeof(byte)))
             {
@@ -30,7 +31,7 @@ namespace AsmResolver.DotNet.Signatures
             }
 
             for (int i = 0; i < count; i++)
-                result.TypeArguments.Add(TypeSignature.FromReader(context, reader));
+                result.TypeArguments.Add(TypeSignature.FromReader(context, ref reader));
 
             return result;
         }

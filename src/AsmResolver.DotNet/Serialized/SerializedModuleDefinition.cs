@@ -75,7 +75,8 @@ namespace AsmResolver.DotNet.Serialized
             CorLibTypeFactory = CreateCorLibTypeFactory();
 
             OriginalTargetRuntime = DetectTargetRuntime();
-            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver());
+            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver(
+                readerParameters.PEReaderParameters.FileService));
 
             // Prepare lazy RID lists.
             _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,

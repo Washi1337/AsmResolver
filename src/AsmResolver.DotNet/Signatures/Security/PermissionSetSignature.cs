@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures.Security
 {
     /// <summary>
-    /// Represents a blob signature containing a set of security attributes. 
+    /// Represents a blob signature containing a set of security attributes.
     /// </summary>
     public class PermissionSetSignature : ExtendableBlobSignature
     {
@@ -13,17 +14,17 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input blob stream.</param>
         /// <returns>The permission set.</returns>
-        public static PermissionSetSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
+        public static PermissionSetSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
             var result = new PermissionSetSignature();
             if (reader.ReadByte() != '.')
                 return result;
-            
+
             if (!reader.TryReadCompressedUInt32(out uint count))
                 return result;
 
             for (int i = 0; i < count && reader.CanRead(1); i++)
-                result.Attributes.Add(SecurityAttribute.FromReader(context, reader));
+                result.Attributes.Add(SecurityAttribute.FromReader(context, ref reader));
 
             return result;
         }
@@ -40,10 +41,10 @@ namespace AsmResolver.DotNet.Signatures.Security
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) '.');
             writer.WriteCompressedUInt32((uint) Attributes.Count);
-            
+
             for (int i = 0; i < Attributes.Count; i++)
                 Attributes[i].Write(context);
         }

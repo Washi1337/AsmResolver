@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="EventDefinition"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedEventDefinition : EventDefinition
     {
@@ -44,11 +44,11 @@ namespace AsmResolver.DotNet.Serialized
             var encoder =  _context.Image.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef);
-            
+
             var eventTypeToken = encoder.DecodeIndex(_row.EventType);
             return _context.ParentModule.TryLookupMember(eventTypeToken, out var member)
                 ? member as ITypeDefOrRef
-                : null;
+                : _context.BadImageAndReturn<ITypeDefOrRef>($"Invalid event type referenced by event {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
@@ -58,7 +58,8 @@ namespace AsmResolver.DotNet.Serialized
             var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, module.GetEventDeclaringType(MetadataToken.Rid));
             return module.TryLookupMember(declaringTypeToken, out var member)
                 ? member as TypeDefinition
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>(
+                    $"Event {MetadataToken.ToString()} is not added to an event map of a declaring type.");
         }
 
         /// <inheritdoc />
@@ -79,7 +80,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

@@ -1,4 +1,5 @@
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -30,11 +31,11 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The field signature.</returns>
-        public static FieldSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
+        public static FieldSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
             return new FieldSignature(
                 (CallingConventionAttributes) reader.ReadByte(),
-                TypeSignature.FromReader(context, reader));
+                TypeSignature.FromReader(context, ref reader));
         }
 
         /// <summary>
@@ -87,7 +88,7 @@ namespace AsmResolver.DotNet.Signatures
             context.Writer.WriteByte((byte) Attributes);
             if (FieldType is null)
             {
-                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
+                context.ErrorListener.RegisterException(new InvalidBlobSignatureException(this,
                     "The type referenced in the field signature is null."));
                 context.Writer.WriteByte((byte) ElementType.Object);
             }

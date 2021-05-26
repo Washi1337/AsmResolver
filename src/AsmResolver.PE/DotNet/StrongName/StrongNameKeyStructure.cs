@@ -1,10 +1,11 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.StrongName
 {
     // Reference:
     // https://docs.microsoft.com/en-us/windows/win32/api/wincrypt/ns-wincrypt-publickeystruc
-    
+
     /// <summary>
     /// Provides a base for strong name key structures.
     /// </summary>
@@ -19,9 +20,10 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <param name="expectedAlgorithm">The expected algorithm.</param>
         /// <exception cref="FormatException">Occurs when the input stream is not in the correct format.</exception>
         /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported algorithm is specified.</exception>
-        protected static void ReadBlobHeader(IBinaryStreamReader reader,
-            StrongNameKeyStructureType expectedType, 
-            byte expectedVersion, 
+        protected static void ReadBlobHeader(
+            ref BinaryStreamReader reader,
+            StrongNameKeyStructureType expectedType,
+            byte expectedVersion,
             SignatureAlgorithm expectedAlgorithm)
         {
             // Read RSAPUBKEY
@@ -34,7 +36,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                 throw new NotSupportedException("Invalid or unsupported public key algorithm.");
         }
 
-        
+
         /// <summary>
         /// Gets the type of structure that is encoded.
         /// </summary>

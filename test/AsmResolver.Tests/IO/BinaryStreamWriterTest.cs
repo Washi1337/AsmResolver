@@ -1,7 +1,8 @@
 using System.IO;
+using AsmResolver.IO;
 using Xunit;
 
-namespace AsmResolver.Tests
+namespace AsmResolver.Tests.IO
 {
     public class BinaryStreamWriterTest
     {
@@ -11,7 +12,7 @@ namespace AsmResolver.Tests
             using (var stream = new MemoryStream())
             {
                 var writer = new BinaryStreamWriter(stream);
-                
+
                 writer.WriteByte(0x80);
                 writer.WriteSByte(-1);
 
@@ -22,14 +23,14 @@ namespace AsmResolver.Tests
                 }, stream.ToArray());
             }
         }
-        
+
         [Fact]
         public void WriteInt16()
         {
             using (var stream = new MemoryStream())
             {
                 var writer = new BinaryStreamWriter(stream);
-                
+
                 writer.WriteUInt16(0x8001);
                 writer.WriteInt16(-32766);
 
@@ -47,7 +48,7 @@ namespace AsmResolver.Tests
             using (var stream = new MemoryStream())
             {
                 var writer = new BinaryStreamWriter(stream);
-                
+
                 writer.WriteUInt32(0x81020304u);
                 writer.WriteInt32(-2063202552);
 
@@ -65,7 +66,7 @@ namespace AsmResolver.Tests
             using (var stream = new MemoryStream())
             {
                 var writer = new BinaryStreamWriter(stream);
-                
+
                 writer.WriteUInt64(0x8001020304050607ul);
                 writer.WriteInt64(-8644366967197856241);
 
