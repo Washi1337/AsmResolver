@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet
 {
@@ -86,6 +88,11 @@ namespace AsmResolver.DotNet
                 return _customAttributes;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating if Signature ReturnType is not <see cref="Void"/>.
+        /// </summary>
+        public bool HasReturnType => Method?.Signature?.ReturnType?.ElementType != ElementType.Void;
 
         /// <inheritdoc />
         public MethodDefinition Resolve() => Method.Resolve();

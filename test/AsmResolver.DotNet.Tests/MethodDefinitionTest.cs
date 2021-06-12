@@ -31,6 +31,23 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ReadHasReturnTypeFalse() {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
+            var method = type.Methods.First(m => m.Name == nameof(MultipleMethods.VoidParameterlessMethod));
+            Assert.False(method.HasReturnType);
+        }
+
+        [Fact]
+        public void ReadHasReturnTypeTrue()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
+            var method = type.Methods.First(m => m.Name == nameof(MultipleMethods.IntParameterlessMethod));
+            Assert.True(method.HasReturnType);
+        }
+
+        [Fact]
         public void ReadDeclaringType()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);

@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.PE.DotNet.Cil;
@@ -42,6 +42,14 @@ namespace AsmResolver.DotNet.Tests
                     module.CorLibTypeFactory.Int32),
                 methodSpec.Signature,
                 _comparer);
+        }
+
+        [Fact]
+        public void HasReturnType() {
+            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);
+            var type = module.TopLevelTypes.First(x => x.Name == nameof(GenericsTestClass));
+            var method = type.Methods.First(x => x.Name == nameof(GenericsTestClass.TypeInstantiation));
+            Assert.True(method.HasReturnType);
         }
     }
 }

@@ -668,6 +668,11 @@ namespace AsmResolver.DotNet
         /// </summary>
         public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && (Name == ".cctor" || Name == ".ctor");
 
+        /// <summary>
+        /// Gets a value indicating if Signature ReturnType is not <see cref="Void"/>.
+        /// </summary>
+        public bool HasReturnType => Signature?.ReturnType?.ElementType != ElementType.Void;
+
         MethodDefinition IMethodDescriptor.Resolve() => this;
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;

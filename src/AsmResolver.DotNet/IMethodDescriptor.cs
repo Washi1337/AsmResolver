@@ -14,7 +14,13 @@ namespace AsmResolver.DotNet
         {
             get;
         }
-        
+        /// <summary>
+        /// Returns True If Signature ReturnType not <see cref="System.Void"/> Signature.
+        /// </summary>
+        bool HasReturnType
+        {
+            get;
+        }
         /// <summary>
         /// Resolves the reference to a method definition. 
         /// </summary>
