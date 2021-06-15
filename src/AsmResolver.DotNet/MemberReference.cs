@@ -131,11 +131,6 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets a value indicating if Signature ReturnType is not <see cref="Void"/>.
-        /// </summary>
-        public bool HasReturnType => IsMethod && HasReturnType;
-
-        /// <summary>
         /// Resolves the reference to a member definition.
         /// </summary>
         /// <returns>The resolved member definition, or <c>null</c> if the member could not be resolved.</returns>

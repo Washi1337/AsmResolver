@@ -89,11 +89,6 @@ namespace AsmResolver.DotNet
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating if Signature ReturnType is not <see cref="Void"/>.
-        /// </summary>
-        public bool HasReturnType => Method?.Signature?.ReturnType?.ElementType != ElementType.Void;
-
         /// <inheritdoc />
         public MethodDefinition Resolve() => Method.Resolve();
 
