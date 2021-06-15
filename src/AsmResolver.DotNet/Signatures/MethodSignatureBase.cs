@@ -52,7 +52,13 @@ namespace AsmResolver.DotNet.Signatures
             get;
             set;
         }
-
+        /// <summary>
+        /// Gets value indicating if method returns value or not.
+        /// </summary>
+        public bool ReturnsValue
+        {
+            get => ReturnType?.ElementType != ElementType.Void;
+        }
         /// <summary>
         /// Gets an ordered list of types indicating the types of the sentinel parameters that this member defines.
         /// </summary>

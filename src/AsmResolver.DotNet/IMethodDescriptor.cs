@@ -14,7 +14,6 @@ namespace AsmResolver.DotNet
         {
             get;
         }
-        
         /// <summary>
         /// Resolves the reference to a method definition. 
         /// </summary>
