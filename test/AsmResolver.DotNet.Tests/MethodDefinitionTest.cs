@@ -178,5 +178,25 @@ namespace AsmResolver.DotNet.Tests
             
             Assert.True(method.IsRemoveMethod);
         }
+
+        [Fact]
+        public void ReadSignatureIsReturnsValue()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var method = module.TopLevelTypes
+                .First(t => t.Name == nameof(MultipleMethods)).Methods
+                .First(m => m.Name == nameof(MultipleMethods.IntParameterlessMethod));
+            Assert.True(method.Signature.ReturnsValue);
+        }
+
+        [Fact]
+        public void ReadSignatureNotReturnsValue()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var method = module.TopLevelTypes
+                .First(t => t.Name == nameof(MultipleMethods)).Methods
+                .First(m => m.Name == nameof(MultipleMethods.VoidParameterlessMethod));
+            Assert.False(method.Signature.ReturnsValue);
+        }
     }
 }
