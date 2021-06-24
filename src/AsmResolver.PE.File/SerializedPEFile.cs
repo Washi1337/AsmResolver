@@ -65,7 +65,7 @@ namespace AsmResolver.PE.File
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
-                ISegment physicalContents = null;
+                ISegment? physicalContents = null;
                 if (size > 0)
                     physicalContents = new DataSourceSegment(_reader.DataSource, offset, header.VirtualAddress, size);
 

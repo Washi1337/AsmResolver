@@ -55,7 +55,8 @@ namespace AsmResolver.PE.File.Headers
         /// <param name="characteristics">The section flags to assign.</param>
         public SectionHeader(string name, SectionFlags characteristics)
         {
-            Name = name;
+            AssertIsValidName(name);
+            _name = name;
             Characteristics = characteristics;
         }
 
@@ -67,7 +68,8 @@ namespace AsmResolver.PE.File.Headers
         {
             Offset = value.Offset;
             Rva = value.Rva;
-
+            
+            _name = value.Name;
             VirtualSize = value.VirtualSize;
             VirtualAddress = value.VirtualAddress;
             SizeOfRawData = value.SizeOfRawData;
@@ -259,5 +261,10 @@ namespace AsmResolver.PE.File.Headers
                    $"{nameof(Characteristics)}: {Characteristics})";
         }
 
+        internal static void AssertIsValidName(string value)
+        {
+            if (Encoding.UTF8.GetByteCount(value) > 8)
+                throw new ArgumentException("Name is too long.");
+        }
     }
 }

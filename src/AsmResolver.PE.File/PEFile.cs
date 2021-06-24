@@ -20,7 +20,7 @@ namespace AsmResolver.PE.File
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
 
         private readonly LazyVariable<ISegment> _extraSectionData;
-        private IList<PESection> _sections;
+        private IList<PESection>? _sections;
 
         /// <summary>
         /// Creates a new empty portable executable file.
@@ -46,7 +46,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public string FilePath
+        public string? FilePath
         {
             get;
             protected set;
@@ -94,7 +94,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets or sets the padding data in between the last section header and the first section.
         /// </summary>
-        public ISegment ExtraSectionData
+        public ISegment? ExtraSectionData
         {
             get => _extraSectionData.Value;
             set => _extraSectionData.Value = value;
@@ -501,6 +501,6 @@ namespace AsmResolver.PE.File
         /// <remarks>
         /// This method is called upon the initialization of the <see cref="ExtraSectionData"/> property.
         /// </remarks>
-        protected virtual ISegment GetExtraSectionData() => null;
+        protected virtual ISegment? GetExtraSectionData() => null;
     }
 }

@@ -13,7 +13,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// When this PE file was read from the disk, gets the file path to the PE file.
         /// </summary>
-        string FilePath
+        string? FilePath
         {
             get;
         }
