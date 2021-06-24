@@ -19,7 +19,7 @@ namespace AsmResolver.PE.File
         /// </summary>
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
 
-        private readonly LazyVariable<ISegment> _extraSectionData;
+        private readonly LazyVariable<ISegment?> _extraSectionData;
         private IList<PESection>? _sections;
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace AsmResolver.PE.File
             DosHeader = dosHeader ?? throw new ArgumentNullException(nameof(dosHeader));
             FileHeader = fileHeader ?? throw new ArgumentNullException(nameof(fileHeader));
             OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
-            _extraSectionData = new LazyVariable<ISegment>(GetExtraSectionData);
+            _extraSectionData = new LazyVariable<ISegment?>(GetExtraSectionData);
             MappingMode = PEMappingMode.Unmapped;
         }
 
