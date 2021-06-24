@@ -118,7 +118,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             }
 
             // Exclude strong name directory.
-            var strongNameDirectory = image.DotNetDirectory.StrongName;
+            var strongNameDirectory = image.DotNetDirectory?.StrongName;
             if (strongNameDirectory is null)
                 throw new ArgumentException("PE image does not contain a strong name directory.");
 

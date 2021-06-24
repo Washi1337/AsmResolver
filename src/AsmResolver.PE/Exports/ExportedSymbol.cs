@@ -52,7 +52,7 @@ namespace AsmResolver.PE.Exports
         /// <summary>
         /// Gets the ordinal of the exported symbol.
         /// </summary>
-        public uint Ordinal => Index == -1 ? 0u : (uint) Index + ParentDirectory.BaseOrdinal;
+        public uint Ordinal => Index == -1 ? 0u : (uint) Index + (ParentDirectory?.BaseOrdinal ?? 0);
 
         /// <summary>
         /// Gets a value indicating whether the symbol is exported by ordinal number.
@@ -62,12 +62,12 @@ namespace AsmResolver.PE.Exports
         /// <summary>
         /// Gets a value indicating whether the symbol is exported by name.
         /// </summary>
-        public bool IsByName => Name is {};
+        public bool IsByName => Name is not null;
 
         /// <summary>
         /// Gets or sets the name of the exported symbol.
         /// </summary>
-        public string Name
+        public string? Name
         {
             get;
             set;
