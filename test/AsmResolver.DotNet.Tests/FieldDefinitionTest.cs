@@ -1,5 +1,7 @@
+using System;
 using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Types.Structs;
@@ -14,13 +16,13 @@ namespace AsmResolver.DotNet.Tests
         {
             var stream = new MemoryStream();
             field.Module.Write(stream);
-            
+
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
             return newModule
                 .TopLevelTypes.First(t => t.FullName == field.DeclaringType.FullName)
                 .Fields.First(f => f.Name == field.Name);
         }
-        
+
         [Fact]
         public void ReadName()
         {
@@ -33,13 +35,13 @@ namespace AsmResolver.DotNet.Tests
         public void PersistentName()
         {
             const string newName = "NewName";
-            
+
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleField));
             var field = type.Fields[0];
-            
+
             type.Fields[0].Name = newName;
-            
+
             var newField = RebuildAndLookup(field);
             Assert.Equal(newName, newField.Name);
         }
@@ -74,7 +76,7 @@ namespace AsmResolver.DotNet.Tests
             field.Signature = FieldSignature.CreateInstance(module.CorLibTypeFactory.Byte);
 
             var newField = RebuildAndLookup(field);
-            
+
             Assert.True(newField.Signature.FieldType.IsTypeOf("System", "Byte"), "Field type should be System.Byte");
         }
 
@@ -89,7 +91,7 @@ namespace AsmResolver.DotNet.Tests
             var initializer = field.FindInitializerField();
             Assert.NotNull(initializer.FieldRva);
             Assert.IsAssignableFrom<IReadableSegment>(initializer.FieldRva);
-            
+
             Assert.Equal(InitialValues.ByteArray, ((IReadableSegment) initializer.FieldRva).ToArray());
         }
 
@@ -102,19 +104,31 @@ namespace AsmResolver.DotNet.Tests
                 .Fields.First(f => f.Name == nameof(InitialValues.ByteArray));
 
             var initializer = field.FindInitializerField();
-            
+
             var data = new byte[]
             {
                 1, 2, 3, 4
             };
             initializer.FieldRva = new DataSegment(data);
             initializer.Signature.FieldType.Resolve().ClassLayout.ClassSize = (uint) data.Length;
-            
+
             var newInitializer = RebuildAndLookup(initializer);
-            
+
             Assert.NotNull(newInitializer.FieldRva);
             Assert.IsAssignableFrom<IReadableSegment>(newInitializer.FieldRva);
             Assert.Equal(data, ((IReadableSegment) newInitializer.FieldRva).ToArray());
+        }
+
+        [Fact]
+        public void ReadInvalidFieldRva()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.FieldRvaTest);
+            Assert.Throws<NotSupportedException>(() =>
+                module.GetModuleType().Fields.First(f => f.Name == "InvalidFieldRva").FieldRva);
+
+            module = ModuleDefinition.FromBytes(Properties.Resources.FieldRvaTest,
+                new ModuleReaderParameters(EmptyErrorListener.Instance));
+            Assert.Null(module.GetModuleType().Fields.First(f => f.Name == "InvalidFieldRva").FieldRva);
         }
 
         [Theory]
@@ -145,7 +159,7 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal(offset, newField.FieldOffset);
         }
-        
-        
+
+
     }
 }
