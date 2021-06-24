@@ -28,9 +28,9 @@ namespace AsmResolver.PE.DotNet.StrongName
         {
             get;
         }
-        
+
         /// <summary>
-        /// Finalizes a delay-signed PE image. 
+        /// Finalizes a delay-signed PE image.
         /// </summary>
         /// <param name="imageStream">The stream containing the image to sign.</param>
         /// <param name="hashAlgorithm">The hashing algorithm to use.</param>
@@ -42,19 +42,19 @@ namespace AsmResolver.PE.DotNet.StrongName
             using var streamCopy = new MemoryStream();
             imageStream.CopyTo(streamCopy);
             streamCopy.Position = 0;
-            
+
             var file = PEFile.FromBytes(streamCopy.ToArray());
             var image = PEImage.FromFile(file);
-            
+
             // Check existence of .NET metadata.
             if (image.DotNetDirectory is null)
                 throw new BadImageFormatException("Input image is not a .NET assembly.");
-            
+
             // Check existence of a valid sn directory.
             var strongNameDirectory = image.DotNetDirectory.StrongName;
             if (strongNameDirectory is null)
                 throw new ArgumentException("Cannot sign an image without a strong name directory.");
-            
+
             if (PrivateKey.Modulus.Length != strongNameDirectory.GetPhysicalSize())
             {
                 throw new ArgumentException(
@@ -74,12 +74,12 @@ namespace AsmResolver.PE.DotNet.StrongName
 
         private byte[] GetHashToSign(
             Stream imageStream,
-            IPEFile file, 
+            IPEFile file,
             IPEImage image,
             AssemblyHashAlgorithm hashAlgorithm)
         {
             var hashBuilder = new StrongNameDataHashBuilder(imageStream, hashAlgorithm);
-            
+
             // Include DOS, NT and section headers in the hash.
             hashBuilder.IncludeRange(new OffsetRange(0,
                 (uint) (file.DosHeader.GetPhysicalSize()
@@ -87,7 +87,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                         + file.FileHeader.GetPhysicalSize()
                         + file.OptionalHeader.GetPhysicalSize()
                         + file.Sections.Count * SectionHeader.SectionHeaderSize)));
-            
+
             // Include section data.
             foreach (var section in file.Sections)
             {
@@ -99,7 +99,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             // Zero checksum in optional header.
             ulong peChecksumOffset = file.OptionalHeader.Offset + 0x40;
             hashBuilder.ZeroRange(new OffsetRange(peChecksumOffset, peChecksumOffset + sizeof(uint)));
-            
+
             // Zero certificate directory entry.
             uint optionalHeaderSize = file.OptionalHeader.Magic == OptionalHeaderMagic.Pe32
                 ? OptionalHeader.OptionalHeader32SizeExcludingDataDirectories
@@ -108,7 +108,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                                           + optionalHeaderSize
                                           + (int) DataDirectoryIndex.CertificateDirectory * DataDirectory.DataDirectorySize;
             hashBuilder.ZeroRange(new OffsetRange(certificateEntryOffset, certificateEntryOffset + DataDirectory.DataDirectorySize));
-            
+
             // Exclude certificate directory contents.
             var certificateDirectory = file.OptionalHeader.GetDataDirectory(DataDirectoryIndex.CertificateDirectory);
             if (certificateDirectory.IsPresentInPE)
@@ -116,13 +116,16 @@ namespace AsmResolver.PE.DotNet.StrongName
                 ulong offset = file.RvaToFileOffset(certificateDirectory.VirtualAddress);
                 hashBuilder.ExcludeRange(new OffsetRange(offset, offset + certificateDirectory.Size));
             }
-            
+
             // Exclude strong name directory.
             var strongNameDirectory = image.DotNetDirectory.StrongName;
+            if (strongNameDirectory is null)
+                throw new ArgumentException("PE image does not contain a strong name directory.");
+
             hashBuilder.ExcludeRange(new OffsetRange(
                 strongNameDirectory.Offset,
                 strongNameDirectory.Offset + strongNameDirectory.GetPhysicalSize()));
-            
+
             return hashBuilder.ComputeHash();
         }
 
