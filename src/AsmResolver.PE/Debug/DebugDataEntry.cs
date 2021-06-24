@@ -80,7 +80,7 @@ namespace AsmResolver.PE.Debug
         /// <summary>
         /// Gets or sets the raw contents of the debug data entry.
         /// </summary>
-        public IDebugDataSegment Contents
+        public IDebugDataSegment? Contents
         {
             get => _contents.Value;
             set => _contents.Value = value;
@@ -93,7 +93,7 @@ namespace AsmResolver.PE.Debug
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Contents"/> property.
         /// </remarks>
-        protected virtual IDebugDataSegment GetContents() => null;
+        protected virtual IDebugDataSegment? GetContents() => null;
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => DebugDataEntryHeaderSize;

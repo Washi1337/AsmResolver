@@ -41,13 +41,13 @@ namespace AsmResolver.PE.Debug
         }
 
         /// <inheritdoc />
-        protected override IDebugDataSegment GetContents()
+        protected override IDebugDataSegment? GetContents()
         {
             if (_sizeOfData == 0)
                 return null;
 
             var reference = _context.File.GetReferenceToRva(_addressOfRawData);
-            if (reference is null || !reference.CanRead)
+            if (!reference.CanRead)
             {
                 _context.BadImage("Debug data entry contains an invalid RVA.");
                 return null;
