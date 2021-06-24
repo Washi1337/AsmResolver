@@ -16,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     public class MetadataTable<TRow> : IMetadataTable, ICollection<TRow>
         where TRow : struct, IMetadataRow
     {
-        private IList<TRow> _items;
+        private IList<TRow>? _items;
 
         /// <summary>
         /// Creates a new metadata table using the provided layout.
@@ -26,7 +26,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public MetadataTable(TableIndex tableIndex, TableLayout layout)
         {
             TableIndex = tableIndex;
-            Layout = layout ?? throw new ArgumentNullException(nameof(layout));
+            Layout = layout;
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         public virtual void UpdateTableLayout(TableLayout layout)
         {
-            for (int i = 0; i < Layout.Columns.Length; i++)
+            for (int i = 0; i < Layout.Columns.Count; i++)
             {
                 if (Layout.Columns[i].Name != layout.Columns[i].Name
                     || Layout.Columns[i].Type != layout.Columns[i].Type)
