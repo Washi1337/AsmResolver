@@ -40,7 +40,7 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <inheritdoc />
-        protected override ISegment GetContents()
+        protected override ISegment? GetContents()
         {
             if (!_context.File.TryCreateReaderAtRva(_contentsRva, _contentsSize, out var reader))
             {

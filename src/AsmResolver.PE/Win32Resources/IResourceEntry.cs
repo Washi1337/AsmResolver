@@ -10,15 +10,15 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Gets the parent directory the entry is stored in.
         /// </summary>
-        IResourceDirectory ParentDirectory
+        IResourceDirectory? ParentDirectory
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets or sets the name of the entry.
         /// </summary>
-        string Name
+        string? Name
         {
             get;
             set;

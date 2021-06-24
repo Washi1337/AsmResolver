@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources
@@ -10,7 +11,7 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Gets or sets the raw contents of the data entry.
         /// </summary>
-        ISegment Contents
+        ISegment? Contents
         {
             get;
             set;
@@ -31,6 +32,7 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Gets a value indicating whether the <see cref="Contents"/> is readable using a binary stream reader.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Contents))]
         bool CanRead
         {
             get;

@@ -16,7 +16,7 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         protected ResourceData()
         {
-            _contents = new LazyVariable<ISegment>(() => GetContents());
+            _contents = new LazyVariable<ISegment>(GetContents);
         }
 
         /// <summary>
@@ -44,20 +44,20 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <inheritdoc />
-        public IResourceDirectory ParentDirectory
+        public IResourceDirectory? ParentDirectory
         {
             get;
             private set;
         }
 
-        IResourceDirectory IOwnedCollectionElement<IResourceDirectory>.Owner
+        IResourceDirectory? IOwnedCollectionElement<IResourceDirectory>.Owner
         {
             get => ParentDirectory;
             set => ParentDirectory = value;
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get;
             set;
@@ -77,7 +77,7 @@ namespace AsmResolver.PE.Win32Resources
         bool IResourceEntry.IsData => true;
 
         /// <inheritdoc />
-        public ISegment Contents
+        public ISegment? Contents
         {
             get => _contents.Value;
             set => _contents.Value = value;
@@ -108,7 +108,7 @@ namespace AsmResolver.PE.Win32Resources
         /// <remarks>
         /// This method is called upon initializing the value for the <see cref="Contents"/> property.
         /// </remarks>
-        protected virtual ISegment GetContents() => null;
+        protected virtual ISegment? GetContents() => null;
 
         /// <inheritdoc />
         public override string ToString() => $"Data ({Name ?? Id.ToString()})";

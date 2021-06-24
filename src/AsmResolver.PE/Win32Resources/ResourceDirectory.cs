@@ -11,7 +11,7 @@ namespace AsmResolver.PE.Win32Resources
     /// </summary>
     public class ResourceDirectory : IResourceDirectory
     {
-        private IList<IResourceEntry> _entries;
+        private IList<IResourceEntry>? _entries;
 
         /// <summary>
         /// Initializes a new resource directory entry.
@@ -19,18 +19,18 @@ namespace AsmResolver.PE.Win32Resources
         protected ResourceDirectory()
         {
         }
-        
+
         /// <summary>
-        /// Creates a new named resource directory. 
+        /// Creates a new named resource directory.
         /// </summary>
         /// <param name="name">The name of the directory.</param>
         public ResourceDirectory(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
-        
+
         /// <summary>
-        /// Creates a new resource directory defined by a numeric identifier. 
+        /// Creates a new resource directory defined by a numeric identifier.
         /// </summary>
         /// <param name="id">The identifier.</param>
         public ResourceDirectory(uint id)
@@ -39,7 +39,7 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <summary>
-        /// Creates a new resource directory defined by its resource type. 
+        /// Creates a new resource directory defined by its resource type.
         /// </summary>
         /// <param name="type">The type.</param>
         public ResourceDirectory(ResourceType type)
@@ -48,20 +48,20 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <inheritdoc />
-        public IResourceDirectory ParentDirectory
+        public IResourceDirectory? ParentDirectory
         {
             get;
             private set;
         }
 
-        IResourceDirectory IOwnedCollectionElement<IResourceDirectory>.Owner
+        IResourceDirectory? IOwnedCollectionElement<IResourceDirectory>.Owner
         {
             get => ParentDirectory;
             set => ParentDirectory = value;
         }
-        
+
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get;
             set;
@@ -132,8 +132,8 @@ namespace AsmResolver.PE.Win32Resources
         /// <returns>The list of entries.</returns>
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Entries"/> property.
-        /// </remarks> 
-        protected virtual IList<IResourceEntry> GetEntries() => 
+        /// </remarks>
+        protected virtual IList<IResourceEntry> GetEntries() =>
             new OwnedCollection<IResourceDirectory, IResourceEntry>(this);
 
         /// <inheritdoc />
