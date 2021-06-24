@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Relocations.Builder
     public class RelocationsDirectoryBuffer : SegmentBase
     {
         private readonly IList<BaseRelocation> _relocations = new List<BaseRelocation>();
-        private IList<RelocationBlock> _blocks = new List<RelocationBlock>();
+        private IList<RelocationBlock>? _blocks = new List<RelocationBlock>();
 
         /// <summary>
         /// Adds a single base relocation to the buffer.
@@ -22,17 +22,14 @@ namespace AsmResolver.PE.Relocations.Builder
             _blocks = null;
         }
 
-        private void EnsureBlocksCreated()
-        {
-            if (_blocks == null)
-                _blocks = CreateBlocks();
-        }
+        private void EnsureBlocksCreated() => _blocks ??= CreateBlocks();
 
         private IList<RelocationBlock> CreateBlocks()
         {
             var blocks = new Dictionary<uint, RelocationBlock>();
-            foreach (var relocation in _relocations)
+            for (int i = 0; i < _relocations.Count; i++)
             {
+                var relocation = _relocations[i];
                 uint pageRva = GetPageRva(relocation);
                 var block = GetOrCreateBlock(blocks, pageRva);
                 block.Entries.Add(CreateEntry(relocation));
@@ -64,15 +61,15 @@ namespace AsmResolver.PE.Relocations.Builder
         public override uint GetPhysicalSize()
         {
             EnsureBlocksCreated();
-            return (uint) _blocks.Sum(b => b.GetPhysicalSize());
+            return (uint) _blocks!.Sum(b => b.GetPhysicalSize());
         }
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
             EnsureBlocksCreated();
-            foreach (var block in CreateBlocks())
-                block.Write(writer);
+            for (int i = 0; i < _blocks!.Count; i++)
+                _blocks![i].Write(writer);
         }
 
     }

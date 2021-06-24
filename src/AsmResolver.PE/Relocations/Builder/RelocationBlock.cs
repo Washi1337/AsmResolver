@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Relocations.Builder
     /// </summary>
     public class RelocationBlock : SegmentBase
     {
-        private IList<RelocationEntry> _entries;
+        private IList<RelocationEntry>? _entries;
 
         /// <summary>
         /// Initializes an empty relocation block.
@@ -27,14 +27,18 @@ namespace AsmResolver.PE.Relocations.Builder
             PageRva = pageRva;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the base RVA for this page.
+        /// </summary>
         public uint PageRva
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the list of entries added to this page.
+        /// </summary>
         public IList<RelocationEntry> Entries
         {
             get
@@ -64,8 +68,10 @@ namespace AsmResolver.PE.Relocations.Builder
         {
             writer.WriteUInt32(PageRva);
             writer.WriteUInt32(GetPhysicalSize());
-            foreach (var entry in _entries)
-                entry.Write(writer);
+
+            for (int i = 0; i < Entries.Count; i++)
+                Entries[i].Write(writer);
+
             new RelocationEntry(0).Write(writer);
         }
 
