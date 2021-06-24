@@ -10,7 +10,7 @@ namespace AsmResolver
         private readonly ulong _originalOffset;
         private readonly uint _originalSize;
 
-        private DisplacedDataSource _displacedDataSource;
+        private DisplacedDataSource? _displacedDataSource;
 
         /// <inheritdoc />
         public DataSourceSegment(IDataSource dataSource, ulong offset, uint rva, uint size)

@@ -12,7 +12,7 @@ namespace AsmResolver.Collections
         /// <remarks>
         /// This property should not be assigned directly.
         /// </remarks>
-        TOwner Owner
+        TOwner? Owner
         {
             get;
             set;

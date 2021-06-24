@@ -48,6 +48,6 @@ namespace AsmResolver.PE.File
         public BinaryStreamReader CreateReader() => _peFile.CreateReaderAtRva(Rva);
 
         /// <inheritdoc />
-        public ISegment GetSegment() => throw new InvalidOperationException();
+        public ISegment? GetSegment() => throw new InvalidOperationException();
     }
 }

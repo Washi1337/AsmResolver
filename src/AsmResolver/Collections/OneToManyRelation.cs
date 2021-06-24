@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace AsmResolver.Collections
 {
     /// <summary>
-    /// Represents a one-to-many relation, where an object is mapped to a collection of other objects.  
+    /// Represents a one-to-many relation, where an object is mapped to a collection of other objects.
     /// </summary>
     /// <typeparam name="TKey">The type of objects to map.</typeparam>
     /// <typeparam name="TValue">The type of objects to map to.</typeparam>
@@ -30,7 +30,7 @@ namespace AsmResolver.Collections
 
             return false;
         }
-        
+
         /// <summary>
         /// Gets a collection of values the provided key maps to.
         /// </summary>
@@ -43,7 +43,7 @@ namespace AsmResolver.Collections
                 items = new List<TValue>();
                 _memberLists.Add(key, items);
             }
-            
+
             return items;
         }
 
@@ -52,7 +52,7 @@ namespace AsmResolver.Collections
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The key.</returns>
-        public TKey GetKey(TValue value)
+        public TKey? GetKey(TValue value)
         {
             return _memberOwners.TryGetValue(value, out var key)
                 ? key
