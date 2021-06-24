@@ -58,6 +58,9 @@ namespace AsmResolver.PE.DotNet.Builder
             /// <param name="image">The image to build.</param>
             public ManagedPEBuilderContext(IPEImage image)
             {
+                if (image.DotNetDirectory == null)
+                    throw new ArgumentException("Image does not contain a .NET directory.");
+
                 ImportDirectory = new ImportDirectoryBuffer(image.PEKind == OptionalHeaderMagic.Pe32);
                 ExportDirectory = new ExportDirectoryBuffer();
                 DotNetSegment = new DotNetSegmentBuffer(image.DotNetDirectory);
@@ -125,7 +128,7 @@ namespace AsmResolver.PE.DotNet.Builder
             /// bootstrapper is a legacy feature from older versions of the CLR, we do not see this segment in
             /// managed PE files targeting 64-bit architectures.
             /// </remarks>
-            public BootstrapperSegment Bootstrapper
+            public BootstrapperSegment? Bootstrapper
             {
                 get;
             }
@@ -138,7 +141,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 get;
             }
 
-            private X86BootstrapperSegment CreateBootstrapper(IPEImage image)
+            private X86BootstrapperSegment? CreateBootstrapper(IPEImage image)
             {
                 return image.MachineType switch
                 {
@@ -166,7 +169,7 @@ namespace AsmResolver.PE.DotNet.Builder
             };
 
             // Add .rsrc section when necessary.
-            if (image.Resources != null && image.Resources.Entries.Count > 0)
+            if (image.Resources is not null && image.Resources.Entries.Count > 0)
                 sections.Add(CreateRsrcSection(image, context));
 
             // Collect all base relocations.
@@ -245,8 +248,8 @@ namespace AsmResolver.PE.DotNet.Builder
         {
             var modules = new List<IImportedModule>();
 
-            IImportedModule mscoreeModule = null;
-            ImportedSymbol entrypointSymbol = null;
+            IImportedModule? mscoreeModule = null;
+            ImportedSymbol? entrypointSymbol = null;
 
             foreach (var module in image.Imports)
             {
@@ -310,7 +313,7 @@ namespace AsmResolver.PE.DotNet.Builder
         /// <returns>The resources section.</returns>
         protected virtual PESection CreateRsrcSection(IPEImage image, ManagedPEBuilderContext context)
         {
-            context.ResourceDirectory.AddDirectory(image.Resources);
+            context.ResourceDirectory.AddDirectory(image.Resources!);
 
             return new PESection(".rsrc", SectionFlags.MemoryRead | SectionFlags.ContentInitializedData)
             {
@@ -324,10 +327,10 @@ namespace AsmResolver.PE.DotNet.Builder
         /// <param name="context">The working space of the builder.</param>
         /// <param name="relocations">The working space of the builder.</param>
         /// <returns>The base relocations section.</returns>
-        protected virtual PESection CreateRelocSection(ManagedPEBuilderContext context, IEnumerable<BaseRelocation> relocations)
+        protected virtual PESection CreateRelocSection(ManagedPEBuilderContext context, IReadOnlyList<BaseRelocation> relocations)
         {
-            foreach (var relocation in relocations)
-                context.RelocationsDirectory.Add(relocation);
+            for (int i = 0; i < relocations.Count; i++)
+                context.RelocationsDirectory.Add(relocations[i]);
 
             return new PESection(".reloc", SectionFlags.MemoryRead | SectionFlags.ContentInitializedData)
             {
@@ -390,7 +393,10 @@ namespace AsmResolver.PE.DotNet.Builder
         private static void ProcessRvasInMetadataTables(ManagedPEBuilderContext context)
         {
             var dotNetSegment = context.DotNetSegment;
-            var tablesStream = dotNetSegment.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = dotNetSegment.DotNetDirectory?.Metadata?.GetStream<TablesStream>();
+            if (tablesStream is null)
+                throw new ArgumentException("Image does not have a .NET metadata tables stream.");
+
             AddMethodBodiesToTable(dotNetSegment.MethodBodyTable, tablesStream);
             AddFieldRvasToTable(context);
         }
@@ -402,28 +408,25 @@ namespace AsmResolver.PE.DotNet.Builder
             {
                 var methodRow = methodTable[i];
 
-                if (methodRow.Body != null)
-                {
-                    var bodySegment = GetMethodBodySegment(methodRow, i);
-                    if (bodySegment is CilRawMethodBody cilBody)
-                        table.AddCilBody(cilBody);
-                    else if (bodySegment != null)
-                        table.AddNativeBody(bodySegment, 4); // TODO: maybe make customizable?
-                    else
-                        continue;
+                var bodySegment = GetMethodBodySegment(methodRow, i);
+                if (bodySegment is CilRawMethodBody cilBody)
+                    table.AddCilBody(cilBody);
+                else if (bodySegment is not null)
+                    table.AddNativeBody(bodySegment, 4); // TODO: maybe make customizable?
+                else
+                    continue;
 
-                    methodTable[i] = new MethodDefinitionRow(
-                        new SegmentReference(bodySegment),
-                        methodRow.ImplAttributes,
-                        methodRow.Attributes,
-                        methodRow.Name,
-                        methodRow.Signature,
-                        methodRow.ParameterList);
-                }
+                methodTable[i] = new MethodDefinitionRow(
+                    new SegmentReference(bodySegment),
+                    methodRow.ImplAttributes,
+                    methodRow.Attributes,
+                    methodRow.Name,
+                    methodRow.Signature,
+                    methodRow.ParameterList);
             }
         }
 
-        private static ISegment GetMethodBodySegment(MethodDefinitionRow methodRow, int i)
+        private static ISegment? GetMethodBodySegment(MethodDefinitionRow methodRow, int i)
         {
             if (methodRow.Body.IsBounded)
                 return methodRow.Body.GetSegment();
@@ -446,8 +449,8 @@ namespace AsmResolver.PE.DotNet.Builder
         {
             var metadata = context.DotNetSegment.DotNetDirectory.Metadata;
             var fieldRvaTable = metadata
-                .GetStream<TablesStream>()
-                .GetTable<FieldRvaRow>(TableIndex.FieldRva);
+                !.GetStream<TablesStream>()
+                !.GetTable<FieldRvaRow>(TableIndex.FieldRva);
 
             if (fieldRvaTable.Count == 0)
                 return;
@@ -455,9 +458,12 @@ namespace AsmResolver.PE.DotNet.Builder
             var table = context.DotNetSegment.FieldRvaTable;
             var reader = context.FieldRvaDataReader;
 
-            foreach (var row in fieldRvaTable)
+            for (int i = 0; i < fieldRvaTable.Count; i++)
             {
-                var data = reader.ResolveFieldData(ThrowErrorListener.Instance, metadata, row);
+                var data = reader.ResolveFieldData(ThrowErrorListener.Instance, metadata, fieldRvaTable[i]);
+                if (data is null)
+                    continue;
+
                 table.Add(data);
             }
         }
