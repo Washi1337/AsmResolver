@@ -44,7 +44,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         public override void Write(IBinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
 
         /// <inheritdoc />
-        public override byte[] GetBlobByIndex(uint index) => TryGetBlobReaderByIndex(index, out var reader)
+        public override byte[]? GetBlobByIndex(uint index) => TryGetBlobReaderByIndex(index, out var reader)
             ? reader.ReadToEnd()
             : null;
 

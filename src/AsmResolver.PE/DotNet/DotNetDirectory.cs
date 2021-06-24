@@ -11,26 +11,26 @@ namespace AsmResolver.PE.DotNet
     /// </summary>
     public class DotNetDirectory : SegmentBase, IDotNetDirectory
     {
-        private readonly LazyVariable<IMetadata> _metadata;
-        private readonly LazyVariable<DotNetResourcesDirectory> _resources;
-        private readonly LazyVariable<IReadableSegment> _strongName;
-        private readonly LazyVariable<IReadableSegment> _codeManagerTable;
-        private readonly LazyVariable<IReadableSegment> _exportAddressTable;
-        private readonly LazyVariable<VTableFixupsDirectory> _vtableFixups;
-        private readonly LazyVariable<IReadableSegment> _managedNativeHeader;
+        private readonly LazyVariable<IMetadata?> _metadata;
+        private readonly LazyVariable<DotNetResourcesDirectory?> _resources;
+        private readonly LazyVariable<IReadableSegment?> _strongName;
+        private readonly LazyVariable<IReadableSegment?> _codeManagerTable;
+        private readonly LazyVariable<IReadableSegment?> _exportAddressTable;
+        private readonly LazyVariable<VTableFixupsDirectory?> _vtableFixups;
+        private readonly LazyVariable<IReadableSegment?> _managedNativeHeader;
 
         /// <summary>
         /// Creates a new .NET data directory.
         /// </summary>
         public DotNetDirectory()
         {
-            _metadata = new LazyVariable<IMetadata>(GetMetadata);
-            _resources = new LazyVariable<DotNetResourcesDirectory>(GetResources);
-            _strongName = new LazyVariable<IReadableSegment>(GetStrongName);
-            _codeManagerTable = new LazyVariable<IReadableSegment>(GetCodeManagerTable);
-            _exportAddressTable = new LazyVariable<IReadableSegment>(GetExportAddressTable);
-            _vtableFixups = new LazyVariable<VTableFixupsDirectory>(GetVTableFixups);
-            _managedNativeHeader = new LazyVariable<IReadableSegment>(GetManagedNativeHeader);
+            _metadata = new LazyVariable<IMetadata?>(GetMetadata);
+            _resources = new LazyVariable<DotNetResourcesDirectory?>(GetResources);
+            _strongName = new LazyVariable<IReadableSegment?>(GetStrongName);
+            _codeManagerTable = new LazyVariable<IReadableSegment?>(GetCodeManagerTable);
+            _exportAddressTable = new LazyVariable<IReadableSegment?>(GetExportAddressTable);
+            _vtableFixups = new LazyVariable<VTableFixupsDirectory?>(GetVTableFixups);
+            _managedNativeHeader = new LazyVariable<IReadableSegment?>(GetManagedNativeHeader);
         }
 
         /// <inheritdoc />
