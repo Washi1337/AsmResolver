@@ -19,7 +19,7 @@ namespace AsmResolver.PE.Exceptions.X64
         /// <param name="begin">The reference to the beginning of the function. </param>
         /// <param name="end">The reference to the end of the function.</param>
         /// <param name="unwindInfo">The unwind information associated to the function.</param>
-        public X64RuntimeFunction(ISegmentReference begin, ISegmentReference end, X64UnwindInfo unwindInfo)
+        public X64RuntimeFunction(ISegmentReference begin, ISegmentReference end, X64UnwindInfo? unwindInfo)
         {
             Begin = begin;
             End = end;
@@ -43,7 +43,7 @@ namespace AsmResolver.PE.Exceptions.X64
         /// <summary>
         /// Gets or sets the unwind information associated to the function.
         /// </summary>
-        public X64UnwindInfo UnwindInfo
+        public X64UnwindInfo? UnwindInfo
         {
             get;
             set;
@@ -55,17 +55,15 @@ namespace AsmResolver.PE.Exceptions.X64
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The read function entry.</returns>
-        public static X64RuntimeFunction FromReader(PEReaderContext context, ref BinaryStreamReader reader)
+        public static X64RuntimeFunction? FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             uint begin = reader.ReadUInt32();
             uint end = reader.ReadUInt32();
             uint unwindInfoRva = reader.ReadUInt32();
 
-            X64UnwindInfo unwindInfo;
-            if (context.File.TryCreateReaderAtRva(unwindInfoRva, out var unwindReader))
-                unwindInfo = X64UnwindInfo.FromReader(context, ref unwindReader);
-            else
-                unwindInfo = context.BadImageAndReturn<X64UnwindInfo>($"Invalid UnwindInfo RVA {unwindInfoRva:X8}.");
+            var unwindInfo = context.File.TryCreateReaderAtRva(unwindInfoRva, out var unwindReader)
+                ? X64UnwindInfo.FromReader(context, ref unwindReader)
+                : context.BadImageAndReturn<X64UnwindInfo>($"Invalid UnwindInfo RVA {unwindInfoRva:X8}.");
 
             return new X64RuntimeFunction(
                 context.File.GetReferenceToRva(begin),
