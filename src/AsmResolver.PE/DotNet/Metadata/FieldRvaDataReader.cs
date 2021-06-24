@@ -12,11 +12,8 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class FieldRvaDataReader : IFieldRvaDataReader
     {
         /// <inheritdoc />
-        public ISegment ResolveFieldData(IErrorListener listener, IMetadata metadata, in FieldRvaRow fieldRvaRow)
+        public ISegment? ResolveFieldData(IErrorListener listener, IMetadata metadata, in FieldRvaRow fieldRvaRow)
         {
-            if (fieldRvaRow.Data is null)
-                return null;
-
             if (fieldRvaRow.Data.IsBounded)
                 return fieldRvaRow.Data.GetSegment();
 
@@ -24,7 +21,13 @@ namespace AsmResolver.PE.DotNet.Metadata
             {
                 var table = metadata
                     .GetStream<TablesStream>()
-                    .GetTable<FieldDefinitionRow>(TableIndex.Field);
+                    ?.GetTable<FieldDefinitionRow>(TableIndex.Field);
+
+                if (table is null)
+                {
+                    listener.BadImage("Metadata does not contain a tables stream.");
+                    return null;
+                }
 
                 if (fieldRvaRow.Field > table.Count)
                 {
@@ -45,7 +48,8 @@ namespace AsmResolver.PE.DotNet.Metadata
 
         private int DetermineFieldSize(IMetadata metadata, in FieldDefinitionRow field)
         {
-            if (!metadata.GetStream<BlobStream>().TryGetBlobReaderByIndex(field.Signature, out var reader))
+            var blobStream = metadata.GetStream<BlobStream>();
+            if (blobStream is null || !blobStream.TryGetBlobReaderByIndex(field.Signature, out var reader))
                 return 0;
 
             reader.ReadByte(); // calling convention attributes.
@@ -76,6 +80,8 @@ namespace AsmResolver.PE.DotNet.Metadata
                 return 0;
 
             var tablesStream = metadata.GetStream<TablesStream>();
+            if (tablesStream is null)
+                return 0;
 
             var typeToken = tablesStream
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef)

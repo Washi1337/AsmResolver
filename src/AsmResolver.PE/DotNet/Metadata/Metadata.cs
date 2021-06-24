@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class Metadata : SegmentBase, IMetadata
     {
-        private IList<IMetadataStream> _streams;
+        private IList<IMetadataStream>? _streams;
 
         /// <inheritdoc />
         public ushort MajorVersion
@@ -101,7 +101,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="offset">The offset of the first stream header.</param>
         /// <returns>A list of stream headers.</returns>
-        protected virtual IList<MetadataStreamHeader> GetStreamHeaders(uint offset)
+        protected virtual MetadataStreamHeader[] GetStreamHeaders(uint offset)
         {
             uint sizeOfHeaders = GetSizeOfStreamHeaders();
             offset += sizeOfHeaders;
@@ -129,10 +129,11 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="writer">The output stream to write to.</param>
         /// <param name="headers">The headers to write.</param>
-        protected virtual void WriteStreamHeaders(IBinaryStreamWriter writer, IEnumerable<MetadataStreamHeader> headers)
+        protected virtual void WriteStreamHeaders(IBinaryStreamWriter writer, MetadataStreamHeader[] headers)
         {
-            foreach (var header in headers)
+            for (int i = 0; i < headers.Length; i++)
             {
+                var header = headers[i];
                 writer.WriteUInt32(header.Offset);
                 writer.WriteUInt32(header.Size);
                 writer.WriteAsciiString(header.Name);
@@ -147,12 +148,12 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="writer">The output stream to write to.</param>
         protected virtual void WriteStreams(IBinaryStreamWriter writer)
         {
-            foreach (var stream in Streams)
-                stream.Write(writer);
+            for (int i = 0; i < Streams.Count; i++)
+                Streams[i].Write(writer);
         }
 
         /// <inheritdoc />
-        public virtual IMetadataStream GetStream(string name)
+        public virtual IMetadataStream? GetStream(string name)
         {
             var streams = Streams;
 
@@ -166,8 +167,8 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public TStream GetStream<TStream>()
-            where TStream : IMetadataStream
+        public TStream? GetStream<TStream>()
+            where TStream : class, IMetadataStream
         {
             var streams = Streams;
 

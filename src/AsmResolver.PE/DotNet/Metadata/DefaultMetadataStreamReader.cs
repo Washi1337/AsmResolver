@@ -16,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class DefaultMetadataStreamReader : IMetadataStreamReader
     {
         /// <inheritdoc />
-        public IMetadataStream ReadStream(PEReaderContext context, MetadataStreamHeader header,
+        public IMetadataStream? ReadStream(PEReaderContext context, MetadataStreamHeader header,
             ref BinaryStreamReader reader)
         {
             switch (header.Name)
