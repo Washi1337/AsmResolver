@@ -101,6 +101,7 @@ namespace AsmResolver.PE.Exports.Builder
 
         private void WriteExportDirectoryHeader(IBinaryStreamWriter writer)
         {
+            _exportDirectory ??= new ExportDirectory(string.Empty);
             writer.WriteUInt32(_exportDirectory.ExportFlags);
             writer.WriteUInt32(_exportDirectory.TimeDateStamp);
             writer.WriteUInt16(_exportDirectory.MajorVersion);

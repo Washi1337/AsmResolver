@@ -97,7 +97,7 @@ namespace AsmResolver.PE.Imports.Builder
 
         private static void WriteModuleName(IBinaryStreamWriter writer, IImportedModule module)
         {
-            writer.WriteAsciiString(module.Name);
+            writer.WriteAsciiString(module.Name ?? string.Empty);
             writer.WriteByte(0);
         }
 

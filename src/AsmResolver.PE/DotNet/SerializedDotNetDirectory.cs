@@ -127,7 +127,10 @@ namespace AsmResolver.PE.DotNet
             var vtables = new VTableFixupsDirectory();
             for (int i = 0; i < directoryReader.Length / 8; i++)
             {
-                vtables.Add(VTableFixup.FromReader(_context, ref directoryReader));
+                var entry = VTableFixup.FromReader(_context, ref directoryReader);
+                if (entry is null)
+                    break;
+                vtables.Add(entry);
             }
 
             return vtables;

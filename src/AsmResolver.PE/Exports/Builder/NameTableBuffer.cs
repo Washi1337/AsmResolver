@@ -42,7 +42,9 @@ namespace AsmResolver.PE.Exports.Builder
         /// This method should only be used after the hint-name table has been relocated to the right location in the
         /// PE file.
         /// </remarks>
-        public uint GetNameRva(string name) => Rva + _nameOffsets[name];
+        public uint GetNameRva(string? name) => name is not null
+            ? Rva + _nameOffsets[name]
+            : 0;
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => _length;

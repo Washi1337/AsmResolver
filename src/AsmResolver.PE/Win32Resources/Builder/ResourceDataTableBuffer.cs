@@ -22,14 +22,22 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            foreach (var entry in Entries)
-                WriteDataEntry(writer, entry);
+            for (int i = 0; i < Entries.Count; i++)
+                WriteDataEntry(writer, Entries[i]);
         }
 
         private static void WriteDataEntry(IBinaryStreamWriter writer, IResourceData entry)
         {
-            writer.WriteUInt32(entry.Contents.Rva);
-            writer.WriteUInt32(entry.Contents.GetPhysicalSize());
+            if (entry.Contents is null)
+            {
+                writer.WriteUInt64(0);
+            }
+            else
+            {
+                writer.WriteUInt32(entry.Contents.Rva);
+                writer.WriteUInt32(entry.Contents.GetPhysicalSize());
+            }
+
             writer.WriteUInt32(entry.CodePage);
             writer.WriteUInt32(0);
         }
