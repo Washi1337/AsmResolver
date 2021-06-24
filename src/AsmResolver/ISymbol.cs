@@ -9,6 +9,6 @@ namespace AsmResolver
         /// Gets a reference the object.
         /// </summary>
         /// <returns>The object.</returns>
-        ISegmentReference GetReference();
+        ISegmentReference? GetReference();
     }
 }
