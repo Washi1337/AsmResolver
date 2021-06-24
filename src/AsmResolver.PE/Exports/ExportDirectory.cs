@@ -11,7 +11,7 @@ namespace AsmResolver.PE.Exports
     public class ExportDirectory : IExportDirectory
     {
         private readonly LazyVariable<string> _name;
-        private IList<ExportedSymbol> _exports;
+        private IList<ExportedSymbol>? _exports;
 
         /// <summary>
         /// Initializes a new empty symbol export directory.
@@ -36,7 +36,7 @@ namespace AsmResolver.PE.Exports
         {
             get;
             set;
-        } = 0;
+        }
 
         /// <inheritdoc />
         public uint TimeDateStamp
@@ -60,7 +60,7 @@ namespace AsmResolver.PE.Exports
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -91,7 +91,7 @@ namespace AsmResolver.PE.Exports
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual string? GetName() => null;
 
         /// <summary>
         /// Obtains the list of exported symbols defined by the export directory.

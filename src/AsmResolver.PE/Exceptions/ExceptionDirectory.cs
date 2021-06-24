@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Exceptions
     public class ExceptionDirectory<TFunction> : IExceptionDirectory
         where TFunction : IRuntimeFunction
     {
-        private IList<TFunction> _entries;
+        private IList<TFunction>? _entries;
 
         /// <summary>
         /// Gets a collection of functions that are stored in the table.

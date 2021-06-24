@@ -17,7 +17,7 @@ namespace AsmResolver.PE.Exports.Builder
         /// Adds the provided name to the buffer if it does not exist yet.
         /// </summary>
         /// <param name="name">The name to add.</param>
-        public void AddName(string name)
+        public void AddName(string? name)
         {
             if (string.IsNullOrEmpty(name))
                 return;
