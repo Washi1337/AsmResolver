@@ -38,7 +38,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The raw method body.</returns>
         /// <exception cref="FormatException">Occurs when the method header indicates an method body that is not in the
         /// tiny format.</exception>
-        public new static CilRawTinyMethodBody FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
+        public new static CilRawTinyMethodBody? FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
         {
             ulong fileOffset = reader.Offset;
             uint rva = reader.Rva;
@@ -51,7 +51,7 @@ namespace AsmResolver.PE.DotNet.Cil
             }
 
             int codeSize = (byte) flag >> 2;
-            var code = new byte[codeSize];
+            byte[] code = new byte[codeSize];
             reader.ReadBytes(code, 0, codeSize);
 
             var methodBody = new CilRawTinyMethodBody(code);
@@ -60,18 +60,18 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => (uint) (sizeof(byte) + Code.GetPhysicalSize());
+        public override uint GetPhysicalSize() => sizeof(byte) + Code?.GetPhysicalSize() ?? 0;
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            uint codeSize = Code.GetPhysicalSize();
+            uint codeSize = Code?.GetPhysicalSize() ?? 0;
             if (codeSize > 0x3F)
                 throw new ArgumentException("Code of a tiny method body cannot be 64 bytes or larger.");
 
             byte flag = (byte) ((byte) CilMethodBodyAttributes.Tiny | (codeSize << 2));
             writer.WriteByte(flag);
-            Code.Write(writer);
+            Code?.Write(writer);
         }
     }
 }

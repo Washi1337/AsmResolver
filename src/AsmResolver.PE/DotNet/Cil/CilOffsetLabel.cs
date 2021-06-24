@@ -24,7 +24,7 @@ namespace AsmResolver.PE.DotNet.Cil
         public override string ToString() => $"IL_{Offset:X4}";
 
         /// <inheritdoc />
-        public bool Equals(ICilLabel other) => other != null && Offset == other.Offset;
+        public bool Equals(ICilLabel? other) => other is not null && Offset == other.Offset;
 
         /// <inheritdoc />
         public override bool Equals(object obj) => Equals(obj as ICilLabel);
