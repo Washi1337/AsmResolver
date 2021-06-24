@@ -45,13 +45,13 @@ namespace AsmResolver
         /// <summary>
         /// Gets or sets the value of the variable.
         /// </summary>
-        public T? Value
+        public T Value
         {
             get
             {
                 if (!IsInitialized)
                     InitializeValue();
-                return _value;
+                return _value!;
             }
             set
             {
