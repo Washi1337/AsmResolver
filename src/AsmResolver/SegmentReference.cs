@@ -15,8 +15,12 @@ namespace AsmResolver
         public static SegmentReference Null
         {
             get;
-        } = new SegmentReference(null);
+        } = new(null);
 
+        /// <summary>
+        /// Creates a new reference to the provided segment.
+        /// </summary>
+        /// <param name="segment">The segment to reference.</param>
         public SegmentReference(ISegment? segment)
         {
             Segment = segment;

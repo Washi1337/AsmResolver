@@ -10,6 +10,11 @@ namespace AsmResolver
     {
         private uint _rva;
 
+        /// <summary>
+        /// Creates a new segment that is expanded at runtime to the provided virtual size.
+        /// </summary>
+        /// <param name="physicalContents">The physical contents of the segment.</param>
+        /// <param name="virtualSize">The new size at runtime.</param>
         public VirtualSegment(ISegment? physicalContents, uint virtualSize)
         {
             PhysicalContents = physicalContents;

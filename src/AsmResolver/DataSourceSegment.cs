@@ -4,6 +4,9 @@ using AsmResolver.IO;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a segment that originates from a slice of a <see cref="IDataSource"/>.
+    /// </summary>
     public class DataSourceSegment : SegmentBase, IReadableSegment
     {
         private readonly IDataSource _dataSource;

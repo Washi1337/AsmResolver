@@ -21,6 +21,9 @@ namespace AsmResolver
 
     }
 
+    /// <summary>
+    /// Provides various extensions to AsmResolver related types.
+    /// </summary>
     public static partial class Extensions
     {
         /// <summary>

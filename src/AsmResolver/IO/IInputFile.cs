@@ -12,7 +12,7 @@ namespace AsmResolver.IO
         /// Gets the path to the file on the disk, or null if this file was created from memory.
         /// </summary>
         /// <remarks>
-        /// If this value is <c>null</>, then the file fully resides in memory.
+        /// If this value is <c>null</c>, then the file fully resides in memory.
         /// </remarks>
         string? FilePath
         {

@@ -2,13 +2,24 @@ using System.Collections.Generic;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Provides an implementation to compare byte arrays for equality.
+    /// </summary>
     public class ByteArrayEqualityComparer : IEqualityComparer<byte[]>
     {
+        /// <summary>
+        /// Gets the singleton instance of this comparer.
+        /// </summary>
         public static ByteArrayEqualityComparer Instance
         {
             get;
         } = new();
 
+        private ByteArrayEqualityComparer()
+        {
+        }
+
+        /// <inheritdoc />
         public unsafe bool Equals(byte[]? x, byte[]? y)
         {
             // Original code by Hafthor Stefansson
@@ -59,6 +70,7 @@ namespace AsmResolver
             }
         }
 
+        /// <inheritdoc />
         public int GetHashCode(byte[] obj)
         {
             unchecked
