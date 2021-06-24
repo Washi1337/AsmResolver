@@ -48,7 +48,7 @@ namespace AsmResolver.PE.DotNet
         } = 5;
 
         /// <inheritdoc />
-        public IMetadata Metadata
+        public IMetadata? Metadata
         {
             get => _metadata.Value;
             set => _metadata.Value = value;
@@ -69,42 +69,42 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        public DotNetResourcesDirectory DotNetResources
+        public DotNetResourcesDirectory? DotNetResources
         {
             get => _resources.Value;
             set => _resources.Value = value;
         }
 
         /// <inheritdoc />
-        public IReadableSegment StrongName
+        public IReadableSegment? StrongName
         {
             get => _strongName.Value;
             set => _strongName.Value = value;
         }
 
         /// <inheritdoc />
-        public IReadableSegment CodeManagerTable
+        public IReadableSegment? CodeManagerTable
         {
             get => _codeManagerTable.Value;
             set => _codeManagerTable.Value = value;
         }
 
         /// <inheritdoc />
-        public VTableFixupsDirectory VTableFixups
+        public VTableFixupsDirectory? VTableFixups
         {
             get => _vtableFixups.Value;
             set => _vtableFixups.Value = value;
         }
 
         /// <inheritdoc />
-        public IReadableSegment ExportAddressTable
+        public IReadableSegment? ExportAddressTable
         {
             get => _exportAddressTable.Value;
             set => _exportAddressTable.Value = value;
         }
 
         /// <inheritdoc />
-        public IReadableSegment ManagedNativeHeader
+        public IReadableSegment? ManagedNativeHeader
         {
             get => _managedNativeHeader.Value;
             set => _managedNativeHeader.Value = value;
@@ -136,8 +136,8 @@ namespace AsmResolver.PE.DotNet
             CreateDataDirectoryHeader(ManagedNativeHeader).Write(writer);
         }
 
-        private static DataDirectory CreateDataDirectoryHeader(ISegment directoryContents) =>
-            directoryContents != null
+        private static DataDirectory CreateDataDirectoryHeader(ISegment? directoryContents) =>
+            directoryContents is not null
                 ? new DataDirectory(directoryContents.Rva, directoryContents.GetPhysicalSize())
                 : new DataDirectory(0, 0);
 
@@ -148,7 +148,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Metadata"/> property
         /// </remarks>
-        protected virtual IMetadata GetMetadata() => null;
+        protected virtual IMetadata? GetMetadata() => null;
 
         /// <summary>
         /// Obtains the data directory containing the embedded resources data of the .NET binary.
@@ -157,7 +157,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="DotNetResources"/> property
         /// </remarks>
-        protected virtual DotNetResourcesDirectory GetResources() => null;
+        protected virtual DotNetResourcesDirectory? GetResources() => null;
 
         /// <summary>
         /// Obtains the data directory containing the strong name signature of the .NET binary.
@@ -166,7 +166,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="StrongName"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetStrongName() => null;
+        protected virtual IReadableSegment? GetStrongName() => null;
 
         /// <summary>
         /// Obtains the data directory containing the code manager table of the .NET binary.
@@ -175,7 +175,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="CodeManagerTable"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetCodeManagerTable() => null;
+        protected virtual IReadableSegment? GetCodeManagerTable() => null;
 
         /// <summary>
         /// Obtains the data directory containing the export address table of the .NET binary.
@@ -184,7 +184,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ExportAddressTable"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetExportAddressTable() => null;
+        protected virtual IReadableSegment? GetExportAddressTable() => null;
 
         /// <summary>
         /// Obtains the data directory containing the VTable fixups of the .NET binary.
@@ -193,7 +193,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="VTableFixups"/> property
         /// </remarks>
-        protected virtual VTableFixupsDirectory GetVTableFixups() => null;
+        protected virtual VTableFixupsDirectory? GetVTableFixups() => null;
 
         /// <summary>
         /// Obtains the data directory containing the managed native header of the .NET binary.
@@ -202,6 +202,6 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ManagedNativeHeader"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetManagedNativeHeader() => null;
+        protected virtual IReadableSegment? GetManagedNativeHeader() => null;
     }
 }
