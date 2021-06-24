@@ -39,10 +39,8 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
-            foreach (var vtable in this)
-            {
-                vtable.Write(writer);
-            }
+            for (int i = 0; i < Count; i++)
+                this[i].Write(writer);
         }
 
         /// <inheritdoc />
