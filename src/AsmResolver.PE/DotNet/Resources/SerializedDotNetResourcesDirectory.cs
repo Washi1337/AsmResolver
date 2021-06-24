@@ -39,12 +39,12 @@ namespace AsmResolver.PE.DotNet.Resources
         public override void Write(IBinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
 
         /// <inheritdoc />
-        public override byte[] GetManifestResourceData(uint offset)
+        public override byte[]? GetManifestResourceData(uint offset)
         {
             if (!TryCreateManifestResourceReader(offset, out var reader))
                 return null;
 
-            var buffer = new byte[reader.Length];
+            byte[] buffer = new byte[reader.Length];
             reader.ReadBytes(buffer, 0, buffer.Length);
             return buffer;
         }
