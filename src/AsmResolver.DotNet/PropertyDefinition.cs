@@ -94,14 +94,14 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetPropertyFullName(Name, DeclaringType, Signature);
+        public string? FullName => FullNameGenerator.GetPropertyFullName(Name, DeclaringType, Signature);
 
         /// <summary>
         /// Gets or sets the signature of the property. This includes the property type, as well as any parameters the

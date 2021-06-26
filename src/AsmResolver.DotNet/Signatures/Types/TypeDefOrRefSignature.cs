@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ElementType ElementType => IsValueType ? ElementType.ValueType : ElementType.Class;
 
         /// <inheritdoc />
-        public override string Name => Type?.Name ?? NullTypeToString;
+        public override string? Name => Type?.Name ?? NullTypeToString;
 
         /// <inheritdoc />
         public override string Namespace => Type?.Namespace;

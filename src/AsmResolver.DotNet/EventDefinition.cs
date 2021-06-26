@@ -79,14 +79,14 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetEventFullName(Name, DeclaringType, EventType);
+        public string? FullName => FullNameGenerator.GetEventFullName(Name, DeclaringType, EventType);
 
         /// <summary>
         /// Gets or sets the delegate type of the event.

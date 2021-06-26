@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName()
+        protected override string? GetName()
         {
             return _context.Image.DotNetDirectory.Metadata
                 .GetStream<StringsStream>()
@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override byte[] GetPublicKey()
+        protected override byte[]? GetPublicKey()
         {
             return _context.Image.DotNetDirectory.Metadata.TryGetStream(out BlobStream blobStream)
                 ? blobStream.GetBlobByIndex(_row.PublicKey)

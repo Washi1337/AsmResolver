@@ -48,11 +48,11 @@ namespace AsmResolver.DotNet
             get;
         }
 
-        string INameProvider.Name => $"<<<{Error}>>>".ToUpperInvariant();
+        string? INameProvider.Name => $"<<<{Error}>>>".ToUpperInvariant();
         
         string ITypeDescriptor.Namespace => null;
 
-        string IFullNameProvider.FullName => ((IFullNameProvider) this).Name;
+        string? IFullNameProvider.FullName => ((IFullNameProvider) this).Name;
 
         ModuleDefinition IModuleProvider.Module => null;
 

@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ElementType ElementType => ElementType.Sentinel;
 
         /// <inheritdoc />
-        public override string Name => "<<SENTINEL>>";
+        public override string? Name => "<<SENTINEL>>";
 
         /// <inheritdoc />
         public override string Namespace => null;

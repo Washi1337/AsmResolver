@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
+        protected override string? GetName() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />

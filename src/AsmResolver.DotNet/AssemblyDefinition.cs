@@ -21,10 +21,10 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class AssemblyDefinition : AssemblyDescriptor, IHasSecurityDeclaration
     {
-        private IList<ModuleDefinition> _modules;
-        private IList<SecurityDeclaration> _securityDeclarations;
-        private readonly LazyVariable<byte[]> _publicKey;
-        private byte[] _publicKeyToken;
+        private IList<ModuleDefinition>? _modules;
+        private IList<SecurityDeclaration>? _securityDeclarations;
+        private readonly LazyVariable<byte[]?> _publicKey;
+        private byte[]? _publicKeyToken;
 
         /// <summary>
         /// Reads a .NET assembly from the provided input buffer.
@@ -97,7 +97,7 @@ namespace AsmResolver.DotNet
         protected AssemblyDefinition(MetadataToken token)
             : base(token)
         {
-            _publicKey = new LazyVariable<byte[]>(GetPublicKey);
+            _publicKey = new LazyVariable<byte[]?>(GetPublicKey);
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the main module of the .NET assembly containing the assembly's manifest.
         /// </summary>
-        public ModuleDefinition ManifestModule => Modules.Count > 0 ? Modules[0] : null;
+        public ModuleDefinition? ManifestModule => Modules.Count > 0 ? Modules[0] : null;
 
         /// <summary>
         /// Gets a collection of modules that this .NET assembly defines.
@@ -158,7 +158,7 @@ namespace AsmResolver.DotNet
         /// <para>This property does not automatically update the <see cref="AssemblyDescriptor.HasPublicKey"/> property.</para>
         /// <para>This property corresponds to the Culture column in the assembly definition table.</para>
         /// </remarks>
-        public byte[] PublicKey
+        public byte[]? PublicKey
         {
             get => _publicKey.Value;
             set
@@ -167,6 +167,9 @@ namespace AsmResolver.DotNet
                 _publicKeyToken = null;
             }
         }
+
+        /// <inheritdoc />
+        public override bool IsCorLib => KnownCorLibs.KnownCorLibNames.Contains(Name);
 
         /// <summary>
         /// Obtains the list of defined modules in the .NET assembly.
@@ -195,13 +198,10 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="PublicKey"/> property.
         /// </remarks>
-        protected virtual byte[] GetPublicKey() => null;
+        protected virtual byte[]? GetPublicKey() => null;
 
         /// <inheritdoc />
-        public override bool IsCorLib => KnownCorLibs.KnownCorLibNames.Contains(Name);
-
-        /// <inheritdoc />
-        public override byte[] GetPublicKeyToken()
+        public override byte[]? GetPublicKeyToken()
         {
             if (!HasPublicKey)
                 return PublicKey;
@@ -214,7 +214,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public override AssemblyDefinition Resolve() => this;
+        public override AssemblyDefinition? Resolve() => this;
 
         /// <summary>
         /// Attempts to extract the target runtime from the <see cref="TryGetTargetFramework"/> attribute.
@@ -267,8 +267,8 @@ namespace AsmResolver.DotNet
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void Write(string filePath, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            string directory = Path.GetDirectoryName(filePath);
-            if (!Directory.Exists(directory))
+            string? directory = Path.GetDirectoryName(filePath);
+            if (directory is null || !Directory.Exists(directory))
                 throw new DirectoryNotFoundException();
 
             foreach (var module in Modules)
@@ -308,7 +308,7 @@ namespace AsmResolver.DotNet
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void WriteManifest(Stream stream, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            ManifestModule.Write(stream, imageBuilder, fileBuilder);
+            ManifestModule?.Write(stream, imageBuilder, fileBuilder);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ElementType ElementType => ElementType.Boxed;
 
         /// <inheritdoc />
-        public override string Name => BaseType.Name;
+        public override string? Name => BaseType.Name;
 
         /// <inheritdoc />
         public override bool IsValueType => false;

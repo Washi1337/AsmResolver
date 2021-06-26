@@ -14,9 +14,9 @@ namespace AsmResolver.DotNet
         IOwnedCollectionElement<ModuleDefinition>,
         IImplementation
     {
-        private readonly LazyVariable<byte[]> _publicKeyOrToken;
-        private readonly LazyVariable<byte[]> _hashValue;
-        private byte[] _publicKeyToken;
+        private readonly LazyVariable<byte[]?> _publicKeyOrToken;
+        private readonly LazyVariable<byte[]?> _hashValue;
+        private byte[]? _publicKeyToken;
 
         /// <summary>
         /// Initializes a new assembly reference.
@@ -25,8 +25,8 @@ namespace AsmResolver.DotNet
         protected AssemblyReference(MetadataToken token)
             : base(token)
         {
-            _publicKeyOrToken = new LazyVariable<byte[]>(GetPublicKeyOrToken);
-            _hashValue = new LazyVariable<byte[]>(GetHashValue);
+            _publicKeyOrToken = new LazyVariable<byte[]?>(GetPublicKeyOrToken);
+            _hashValue = new LazyVariable<byte[]?>(GetHashValue);
         }
 
         /// <summary>
@@ -75,14 +75,14 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ModuleDefinition Module
+        public ModuleDefinition? Module
         {
             get;
             private set;
         }
 
         /// <inheritdoc />
-        ModuleDefinition IOwnedCollectionElement<ModuleDefinition>.Owner
+        ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
             get => Module;
             set => Module = value;
@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet
         /// <see cref="AssemblyDescriptor.HasPublicKey"/> property.</para>
         /// <para>This property corresponds to the Culture column in the assembly definition table.</para>
         /// </remarks>
-        public byte[] PublicKeyOrToken
+        public byte[]? PublicKeyOrToken
         {
             get => _publicKeyOrToken.Value;
             set => _publicKeyOrToken.Value = value;
@@ -107,7 +107,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the hash value of the assembly reference.
         /// </summary>
-        public byte[] HashValue
+        public byte[]? HashValue
         {
             get => _hashValue.Value;
             set => _hashValue.Value = value;
@@ -117,7 +117,7 @@ namespace AsmResolver.DotNet
         public override bool IsCorLib => KnownCorLibs.KnownCorLibReferences.Contains(this);
 
         /// <inheritdoc />
-        public override byte[] GetPublicKeyToken()
+        public override byte[]? GetPublicKeyToken()
         {
             if (!HasPublicKey)
                 return PublicKeyOrToken;
@@ -136,7 +136,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="PublicKeyOrToken"/> property.
         /// </remarks>
-        protected virtual byte[] GetPublicKeyOrToken() => null;
+        protected virtual byte[]? GetPublicKeyOrToken() => null;
 
         /// <summary>
         /// Obtains the hash value of the assembly reference.
@@ -145,10 +145,10 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="HashValue"/> property.
         /// </remarks>
-        protected virtual byte[] GetHashValue() => null;
+        protected virtual byte[]? GetHashValue() => null;
 
         /// <inheritdoc />
-        public override AssemblyDefinition Resolve() => Module?.MetadataResolver?.AssemblyResolver.Resolve(this);
+        public override AssemblyDefinition? Resolve() => Module?.MetadataResolver.AssemblyResolver.Resolve(this);
 
         AssemblyDescriptor IResolutionScope.GetAssembly() => this;
     }

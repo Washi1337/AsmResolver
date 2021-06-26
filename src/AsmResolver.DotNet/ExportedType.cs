@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -83,7 +83,7 @@ namespace AsmResolver.DotNet
         }
         
         /// <inheritdoc />
-        public string FullName => this.GetTypeFullName();
+        public string? FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
         public ModuleDefinition Module

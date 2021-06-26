@@ -72,14 +72,14 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
 
         /// <inheritdoc />
-        public string FullName => Name;
+        public string? FullName => Name;
 
         /// <inheritdoc />
         public ModuleDefinition Module

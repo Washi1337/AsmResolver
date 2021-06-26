@@ -96,7 +96,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the name of the type.
         /// </summary>
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -105,7 +105,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the full name (including namespace or declaring type full name) of the type.
         /// </summary>
-        public string FullName => this.GetTypeFullName();
+        public string? FullName => this.GetTypeFullName();
 
         /// <summary>
         /// Gets or sets the attributes associated to the type.

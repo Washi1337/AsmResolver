@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -90,7 +90,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetMethodFullName(Name, DeclaringType, Signature);
+        public string? FullName => FullNameGenerator.GetMethodFullName(Name, DeclaringType, Signature);
 
         /// <summary>
         /// Gets or sets the attributes associated to the method.

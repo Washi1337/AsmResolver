@@ -58,7 +58,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the name of the referenced member.
         /// </summary>
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -91,7 +91,7 @@ namespace AsmResolver.DotNet
         public bool IsMethod => Signature is MethodSignature;
 
         /// <inheritdoc />
-        public string FullName
+        public string? FullName
         {
             get
             {

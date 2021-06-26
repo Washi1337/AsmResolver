@@ -48,13 +48,13 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string Name => Signature?.Name ?? TypeSignature.NullTypeToString;
+        public string? Name => Signature?.Name ?? TypeSignature.NullTypeToString;
 
         /// <inheritdoc />
         public string Namespace => Signature?.Namespace;
         
         /// <inheritdoc />
-        public string FullName => this.GetTypeFullName();
+        public string? FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
         public ModuleDefinition Module => Signature?.Module;

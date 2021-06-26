@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Serialized
         /// </summary>
         /// <param name="errorListener">The object responsible for recording parser errors.</param>
         public ModuleReaderParameters(IErrorListener errorListener)
-            : this(null,errorListener)
+            : this(null, errorListener)
         {
         }
 
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Serialized
         /// Initializes the module read parameters with a working directory.
         /// </summary>
         /// <param name="workingDirectory">The working directory of the modules to read.</param>
-        public ModuleReaderParameters(string workingDirectory)
+        public ModuleReaderParameters(string? workingDirectory)
             : this(workingDirectory, ThrowErrorListener.Instance)
         {
         }
@@ -39,9 +39,9 @@ namespace AsmResolver.DotNet.Serialized
         /// </summary>
         /// <param name="workingDirectory">The working directory of the modules to read.</param>
         /// <param name="errorListener">The object responsible for recording parser errors.</param>
-        public ModuleReaderParameters(string workingDirectory, IErrorListener errorListener)
+        public ModuleReaderParameters(string? workingDirectory, IErrorListener errorListener)
         {
-            if (workingDirectory != null)
+            if (workingDirectory is not null)
             {
                 WorkingDirectory = workingDirectory;
                 ModuleResolver = new DirectoryNetModuleResolver(workingDirectory, this);
@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <summary>
         /// Gets the working directory of the module to read.
         /// </summary>
-        public string WorkingDirectory
+        public string? WorkingDirectory
         {
             get;
         }

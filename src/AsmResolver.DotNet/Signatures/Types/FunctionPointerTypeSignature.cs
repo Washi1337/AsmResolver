@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string Name => $"method {Signature}";
+        public override string? Name => $"method {Signature}";
 
         /// <inheritdoc />
         public override string Namespace => null;

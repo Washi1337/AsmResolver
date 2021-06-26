@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Collections
         public ParameterDefinition Definition => _parentCollection.GetParameterDefinition(Sequence);
 
         /// <inheritdoc />
-        public string Name => Definition?.Name ?? "A_" + MethodSignatureIndex;
+        public string? Name => Definition?.Name ?? "A_" + MethodSignatureIndex;
 
         internal void Remove()
         {

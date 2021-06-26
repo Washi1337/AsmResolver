@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        protected override string GetName() =>
+        protected override string? GetName() =>
             _assemblyName.Name;
 
         /// <inheritdoc />
@@ -37,11 +37,11 @@ namespace AsmResolver.DotNet
         public override bool IsCorLib => KnownCorLibs.KnownCorLibNames.Contains(Name);
 
         /// <inheritdoc />
-        public override byte[] GetPublicKeyToken() =>
+        public override byte[]? GetPublicKeyToken() =>
             _assemblyName.GetPublicKeyToken();
 
         /// <inheritdoc />
-        public override AssemblyDefinition Resolve() =>
+        public override AssemblyDefinition? Resolve() =>
             _parentModule.MetadataResolver.AssemblyResolver.Resolve(this);
     }
 }

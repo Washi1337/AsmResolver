@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public abstract string Name
+        public abstract string? Name
         {
             get;
         }
@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public string FullName => this.GetTypeFullName();
+        public string? FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
         public abstract IResolutionScope Scope

@@ -312,7 +312,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the module definition table.
         /// </remarks>
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
