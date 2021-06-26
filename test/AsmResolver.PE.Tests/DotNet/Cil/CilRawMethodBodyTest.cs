@@ -11,13 +11,15 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
         public void DetectTinyMethodBody()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var methodTable = peImage.DotNetDirectory!.Metadata!
+                .GetStream<TablesStream>()
+                .GetTable<MethodDefinitionRow>();
 
-            var methodTable = tablesStream.GetTable<MethodDefinitionRow>();
             var reader = methodTable[0].Body.CreateReader();
             var methodBody = CilRawMethodBody.FromReader(ThrowErrorListener.Instance, ref reader);
 
-            Assert.False(methodBody.IsFat);
+            Assert.NotNull(methodBody);
+            Assert.False(methodBody!.IsFat);
             Assert.Equal(new byte[]
             {
                 0x72, 0x01, 0x00, 0x00, 0x70, // ldstr "Hello, world!"

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -71,15 +72,34 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// Gets a stream by its name.
         /// </summary>
         /// <param name="name">The name of the stream to search.</param>
-        /// <returns>The stream, or <c>null</c> if none was found.</returns>
-        IMetadataStream? GetStream(string name);
+        /// <returns>The stream</returns>
+        /// <exception cref="KeyNotFoundException">Occurs when the stream is not present in the metadata directory.</exception>
+        IMetadataStream GetStream(string name);
 
         /// <summary>
         /// Gets a stream by its type.
         /// </summary>
         /// <typeparam name="TStream">The type of the stream.</typeparam>
-        /// <returns>The stream, or <c>null</c> if none was found.</returns>
-        TStream? GetStream<TStream>()
+        /// <returns>The stream</returns>
+        /// <exception cref="KeyNotFoundException">Occurs when the stream is not present in the metadata directory.</exception>
+        TStream GetStream<TStream>()
+            where TStream : class, IMetadataStream;
+
+        /// <summary>
+        /// Gets a stream by its name.
+        /// </summary>
+        /// <param name="name">The name of the stream to search.</param>
+        /// <param name="stream">The found stream, or <c>null</c> if no match was found.</param>
+        /// <returns><c>true</c> if a match was found, <c>false</c> otherwise.</returns>
+        bool TryGetStream(string name, [NotNullWhen(true)] out IMetadataStream? stream);
+
+        /// <summary>
+        /// Gets a stream by its name.
+        /// </summary>
+        /// <typeparam name="TStream">The type of the stream.</typeparam>
+        /// <param name="stream">The found stream, or <c>null</c> if no match was found.</param>
+        /// <returns><c>true</c> if a match was found, <c>false</c> otherwise.</returns>
+        bool TryGetStream<TStream>([NotNullWhen(true)] out TStream? stream)
             where TStream : class, IMetadataStream;
     }
 }

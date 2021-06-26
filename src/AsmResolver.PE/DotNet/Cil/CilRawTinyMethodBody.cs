@@ -20,11 +20,8 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="code">The buffer containing the raw CIL instructions.</param>
         public CilRawTinyMethodBody(byte[] code)
+            : base(new DataSegment(code))
         {
-            if (code == null)
-                throw new ArgumentNullException(nameof(code));
-
-            Code = new DataSegment(code);
         }
 
         /// <inheritdoc />

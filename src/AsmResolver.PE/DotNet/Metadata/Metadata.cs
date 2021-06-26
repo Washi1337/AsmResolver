@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -153,32 +154,58 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public virtual IMetadataStream? GetStream(string name)
+        public virtual IMetadataStream GetStream(string name)
+        {
+            return TryGetStream(name, out var stream)
+                ? stream
+                : throw new KeyNotFoundException($"Metadata directory does not contain a stream called {name}.");
+        }
+
+        /// <inheritdoc />
+        public TStream GetStream<TStream>()
+            where TStream : class, IMetadataStream
+        {
+            return TryGetStream(out TStream? stream)
+                ? stream
+                : throw new KeyNotFoundException(
+                    $"Metadata directory does not contain a stream of type {typeof(TStream).FullName}.");
+        }
+
+        /// <inheritdoc />
+        public bool TryGetStream(string name, [NotNullWhen(true)] out IMetadataStream? stream)
         {
             var streams = Streams;
 
             for (int i = 0; i < streams.Count; i++)
             {
                 if (streams[i].Name == name)
-                    return streams[i];
+                {
+                    stream = streams[i];
+                    return true;
+                }
             }
 
-            return null;
+            stream = null;
+            return false;
         }
 
         /// <inheritdoc />
-        public TStream? GetStream<TStream>()
+        public bool TryGetStream<TStream>([NotNullWhen(true)] out TStream? stream)
             where TStream : class, IMetadataStream
         {
             var streams = Streams;
 
             for (int i = 0; i < streams.Count; i++)
             {
-                if (streams[i] is TStream stream)
-                    return stream;
+                if (streams[i] is TStream s)
+                {
+                    stream = s;
+                    return true;
+                }
             }
 
-            return default;
+            stream = null;
+            return false;
         }
 
         /// <summary>
