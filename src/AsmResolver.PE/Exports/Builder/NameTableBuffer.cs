@@ -22,14 +22,14 @@ namespace AsmResolver.PE.Exports.Builder
             if (string.IsNullOrEmpty(name))
                 return;
 
-            if (!_nameOffsets.ContainsKey(name))
+            if (!_nameOffsets.ContainsKey(name!))
             {
                 // Register string.
-                _entries.Add(name);
-                _nameOffsets.Add(name, _length);
+                _entries.Add(name!);
+                _nameOffsets.Add(name!, _length);
 
                 // Calculate length + zero terminator.
-                _length += (uint) Encoding.ASCII.GetByteCount(name) + 1u;
+                _length += (uint) Encoding.ASCII.GetByteCount(name!) + 1u;
             }
         }
 

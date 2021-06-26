@@ -6,7 +6,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
 {
     public class GuidStreamTest
     {
-        private GuidStream _guidStream;
+        private readonly GuidStream _guidStream;
 
         public GuidStreamTest()
         {
@@ -17,7 +17,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
                 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F
             });
         }
-        
+
         [Fact]
         public void IndexZeroGivesZeroGuid()
         {
@@ -50,6 +50,6 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
                 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F,
             }), _guidStream.GetGuidByIndex(3));
         }
-        
+
     }
 }

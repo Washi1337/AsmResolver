@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="AssemblyReference"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedAssemblyReference : AssemblyReference
     {
@@ -43,10 +43,12 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         protected override byte[] GetPublicKeyOrToken() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<BlobStream>()?.GetBlobByIndex(_row.PublicKeyOrToken);
-      
+            .TryGetStream(out BlobStream blobStream)
+            ? blobStream.GetBlobByIndex(_row.PublicKeyOrToken)
+            : null;
+
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() =>
-            _context.ParentModule.GetCustomAttributeCollection(this);  
+            _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

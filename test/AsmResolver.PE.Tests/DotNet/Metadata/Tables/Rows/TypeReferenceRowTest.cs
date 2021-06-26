@@ -11,7 +11,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
         public void ReadRow_SmallResolutionScope_SmallStrings()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             var typeRefTable = tablesStream.GetTable<TypeReferenceRow>();
             Assert.Equal(13, typeRefTable.Count);
@@ -20,7 +20,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                 typeRefTable[0]);
             Assert.Equal(
                 new TypeReferenceRow(0x0006, 0x001E, 0x0177),
-                typeRefTable[typeRefTable.Count - 1]);
+                typeRefTable[^1]);
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                 new TypeReferenceRow(0x0006, 0x00D6, 0x01AE),
                 TypeReferenceRow.FromReader);
         }
-        
+
         [Fact]
         public void RowEnumerationTest()
         {
@@ -39,6 +39,6 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
 
             RowTestUtils.VerifyRowColumnEnumeration(rawRow, row);
         }
-        
+
     }
 }

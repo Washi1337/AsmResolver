@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
         public void ReadRow_SmallMemberRefParent_SmallString_SmallBlob()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             var memberRefTable = tablesStream.GetTable<MemberReferenceRow>();
             Assert.Equal(12, memberRefTable.Count);
@@ -44,7 +44,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
         {
             var rawRow = new uint[] {0x0009, 0x0195, 0x0001};
             var row = new MemberReferenceRow(rawRow[0], rawRow[1], rawRow[2]);
-            
+
             RowTestUtils.VerifyRowColumnEnumeration(rawRow, row);
         }
     }
