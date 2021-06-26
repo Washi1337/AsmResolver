@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <summary>
         /// Gets or sets the object used for resolving a net module.
         /// </summary>
-        public INetModuleResolver ModuleResolver
+        public INetModuleResolver? ModuleResolver
         {
             get;
             set;
@@ -95,6 +95,6 @@ namespace AsmResolver.DotNet.Serialized
         {
             get;
             set;
-        } = new PEReaderParameters();
+        } = new();
     }
 }

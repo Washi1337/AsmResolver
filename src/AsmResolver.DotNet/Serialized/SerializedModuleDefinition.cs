@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
@@ -65,7 +66,7 @@ namespace AsmResolver.DotNet.Serialized
 
             // Copy over "simple" columns.
             Generation = _row.Generation;
-            Attributes = peImage.DotNetDirectory.Flags;
+            Attributes = peImage.DotNetDirectory!.Flags;
 
             // Initialize member factory.
             _memberFactory = new CachedSerializedMemberFactory(ReaderContext);
@@ -92,7 +93,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        public override IDotNetDirectory DotNetDirectory => ReaderContext.Image.DotNetDirectory;
+        public override IDotNetDirectory DotNetDirectory => ReaderContext.Image.DotNetDirectory!;
 
         /// <summary>
         /// Gets the reading context that is used for reading the contents of the module.
