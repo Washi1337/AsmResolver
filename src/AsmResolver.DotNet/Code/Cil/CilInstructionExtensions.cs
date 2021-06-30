@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             return GetStackPopCount(instruction,
                 parent is null
-                || (parent.Owner.Signature?.ReturnsValue).GetValueOrDefault());
+                || !(parent.Owner.Signature?.ReturnsValue).GetValueOrDefault());
         }
 
         /// <summary>
