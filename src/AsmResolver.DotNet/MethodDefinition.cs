@@ -581,7 +581,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ImplementationMap ImplementationMap
+        public ImplementationMap? ImplementationMap
         {
             get => _implementationMap.Value;
             set

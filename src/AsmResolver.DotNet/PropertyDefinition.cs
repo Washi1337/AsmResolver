@@ -156,7 +156,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public Constant Constant
+        public Constant? Constant
         {
             get => _constant.Value;
             set => _constant.Value = value;

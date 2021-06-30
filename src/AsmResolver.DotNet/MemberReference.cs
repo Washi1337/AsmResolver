@@ -147,7 +147,7 @@ namespace AsmResolver.DotNet
             throw new ArgumentOutOfRangeException();
         }
 
-        FieldDefinition IFieldDescriptor.Resolve()
+        FieldDefinition? IFieldDescriptor.Resolve()
         {
             if (!IsField)
                 throw new InvalidOperationException("Member reference must reference a field.");

@@ -187,7 +187,7 @@ namespace AsmResolver.DotNet
         /// flag should be set. However, assigning a new value to this property does not automatically update the value
         /// of the <see cref="HasDefault"/> property.
         /// </remarks>
-        public Constant Constant
+        public Constant? Constant
         {
             get => _constant.Value;
             set => _constant.Value = value;
@@ -199,7 +199,7 @@ namespace AsmResolver.DotNet
         /// flag should be set. However, assigning a new value to this property does not automatically update the value
         /// of the <see cref="HasFieldMarshal"/> property.
         /// </remarks>
-        public MarshalDescriptor MarshalDescriptor
+        public MarshalDescriptor? MarshalDescriptor
         {
             get => _marshalDescriptor.Value;
             set => _marshalDescriptor.Value = value;
