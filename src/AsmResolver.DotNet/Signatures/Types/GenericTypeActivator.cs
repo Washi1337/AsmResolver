@@ -11,7 +11,6 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </remarks>
     public class GenericTypeActivator : ITypeSignatureVisitor<GenericContext, TypeSignature>
     {
-
         /// <summary>
         /// Gets the default instance of the <see cref="GenericTypeActivator"/> class
         /// </summary>

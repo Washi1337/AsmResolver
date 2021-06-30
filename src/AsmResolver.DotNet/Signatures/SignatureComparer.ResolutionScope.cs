@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(IResolutionScope x, IResolutionScope y)
+        public bool Equals(IResolutionScope? x, IResolutionScope? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -68,7 +68,7 @@ namespace AsmResolver.DotNet.Signatures
         };
 
         /// <inheritdoc />
-        public bool Equals(AssemblyDescriptor x, AssemblyDescriptor y)
+        public bool Equals(AssemblyDescriptor? x, AssemblyDescriptor? y)
         {
             if (ReferenceEquals(x, y))
                 return true;

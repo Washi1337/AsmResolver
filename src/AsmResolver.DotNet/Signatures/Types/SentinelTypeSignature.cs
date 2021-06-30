@@ -16,13 +16,13 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ElementType ElementType => ElementType.Sentinel;
 
         /// <inheritdoc />
-        public override string? Name => "<<SENTINEL>>";
+        public override string Name => "<<SENTINEL>>";
 
         /// <inheritdoc />
-        public override string Namespace => null;
+        public override string? Namespace => null;
 
         /// <inheritdoc />
-        public override IResolutionScope Scope => null;
+        public override IResolutionScope? Scope => null;
 
         /// <inheritdoc />
         public override bool IsValueType => false;

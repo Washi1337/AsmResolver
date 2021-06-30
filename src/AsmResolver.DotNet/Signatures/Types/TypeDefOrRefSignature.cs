@@ -40,16 +40,16 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ElementType ElementType => IsValueType ? ElementType.ValueType : ElementType.Class;
 
         /// <inheritdoc />
-        public override string? Name => Type?.Name ?? NullTypeToString;
+        public override string Name => Type?.Name ?? NullTypeToString;
 
         /// <inheritdoc />
-        public override string Namespace => Type?.Namespace;
+        public override string? Namespace => Type.Namespace;
 
         /// <inheritdoc />
-        public override IResolutionScope Scope => Type?.Scope;
+        public override IResolutionScope? Scope => Type.Scope;
 
         /// <inheritdoc />
-        public override ModuleDefinition Module => Type?.Module;
+        public override ModuleDefinition? Module => Type.Module;
 
         /// <inheritdoc />
         public override bool IsValueType
@@ -58,10 +58,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override TypeDefinition Resolve()
-        {
-            return Type.Resolve();
-        }
+        public override TypeDefinition? Resolve() => Type.Resolve();
 
         /// <inheritdoc />
         public override ITypeDefOrRef ToTypeDefOrRef() => Type;

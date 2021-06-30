@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public abstract string Namespace
+        public abstract string? Namespace
         {
             get;
         }
@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public string FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
-        public abstract IResolutionScope Scope
+        public abstract IResolutionScope? Scope
         {
             get;
         }
@@ -62,10 +62,10 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public virtual ModuleDefinition Module => Scope?.Module;
+        public virtual ModuleDefinition? Module => Scope?.Module;
 
         /// <inheritdoc />
-        public ITypeDescriptor DeclaringType => Scope as ITypeDescriptor;
+        public ITypeDescriptor? DeclaringType => Scope as ITypeDescriptor;
 
         /// <summary>
         /// Reads a type signature from a blob reader.
@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 case ElementType.U:
                 case ElementType.TypedByRef:
                 case ElementType.Object:
-                    return context.ReaderContext.ParentModule.CorLibTypeFactory.FromElementType(elementType);
+                    return context.ReaderContext.ParentModule.CorLibTypeFactory.FromElementType(elementType)!;
 
                 case ElementType.ValueType:
                     return new TypeDefOrRefSignature(ReadTypeDefOrRef(context, ref reader, false), true);
@@ -196,7 +196,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.IllegalTypeSpec);
             }
 
-            ITypeDefOrRef result = null;
+            ITypeDefOrRef result;
             switch (token.Table)
             {
                 // Check for infinite recursion.
@@ -236,7 +236,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="context">The output stream.</param>
         /// <param name="type">The type to write.</param>
         /// <param name="propertyName">The property name that was written.</param>
-        protected void WriteTypeDefOrRef(BlobSerializationContext context, ITypeDefOrRef type, string propertyName)
+        protected void WriteTypeDefOrRef(BlobSerializationContext context, ITypeDefOrRef? type, string propertyName)
         {
             uint index = 0;
 
@@ -263,15 +263,23 @@ namespace AsmResolver.DotNet.Signatures.Types
             {
                 case ElementType.Boxed:
                     return module.CorLibTypeFactory.Object;
+
                 case ElementType.SzArray:
                     return new SzArrayTypeSignature(ReadFieldOrPropType(context, ref reader));
+
                 case ElementType.Enum:
-                    return TypeNameParser.Parse(module, reader.ReadSerString());
+                    string? enumTypeName = reader.ReadSerString();
+                    return string.IsNullOrEmpty(enumTypeName)
+                        ? new TypeDefOrRefSignature(InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidFieldOrProptype))
+                        : TypeNameParser.Parse(module, enumTypeName!);
+
                 case ElementType.Type:
                     return new TypeDefOrRefSignature(new TypeReference(module,
                         module.CorLibTypeFactory.CorLibScope, "System", "Type"));
+
                 default:
-                    return module.CorLibTypeFactory.FromElementType(elementType);
+                    return module.CorLibTypeFactory.FromElementType(elementType) as TypeSignature
+                           ?? new TypeDefOrRefSignature(InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidFieldOrProptype));
             }
         }
 
@@ -317,7 +325,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                     }
 
                     var typeDef = type.Resolve();
-                    if (typeDef != null && typeDef.IsEnum)
+                    if (typeDef is not null && typeDef.IsEnum)
                     {
                         writer.WriteByte((byte) ElementType.Enum);
                         writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName(type));
@@ -329,9 +337,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public abstract TypeDefinition Resolve();
+        public abstract TypeDefinition? Resolve();
 
-        IMemberDefinition IMemberDescriptor.Resolve() => Resolve();
+        IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 
         /// <inheritdoc />
         public virtual ITypeDefOrRef ToTypeDefOrRef() => new TypeSpecification(this);
@@ -342,7 +350,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Gets the underlying base type signature, without any extra adornments.
         /// </summary>
         /// <returns>The base signature.</returns>
-        public abstract ITypeDefOrRef GetUnderlyingTypeDefOrRef();
+        public abstract ITypeDefOrRef? GetUnderlyingTypeDefOrRef();
 
         /// <summary>
         /// Substitutes any generic type parameter in the type signature with the parameters provided by
