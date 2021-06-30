@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures
@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="reader">The input stream.</param>
         /// <returns>The signature.</returns>
         /// <exception cref="FormatException">Occurs when the input stream does not point to a valid signature.</exception>
-        public static CustomAttributeSignature FromReader(in BlobReadContext context, ICustomAttributeType ctor, ref BinaryStreamReader reader)
+        public static CustomAttributeSignature? FromReader(in BlobReadContext context, ICustomAttributeType ctor, ref BinaryStreamReader reader)
         {
             ushort prologue = reader.ReadUInt16();
             if (prologue != CustomAttributeSignaturePrologue)
@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Signatures
             var result = new CustomAttributeSignature();
 
             // Read fixed arguments.
-            var parameterTypes = ctor.Signature.ParameterTypes;
+            var parameterTypes = ctor.Signature?.ParameterTypes ?? Array.Empty<TypeSignature>();
             for (int i = 0; i < parameterTypes.Count; i++)
             {
                 var argument = CustomAttributeArgument.FromReader(context, parameterTypes[i], ref reader);

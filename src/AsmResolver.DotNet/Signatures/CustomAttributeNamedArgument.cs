@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Gets or sets the name of the referenced member.
         /// </summary>
-        public string MemberName
+        public string? MemberName
         {
             get;
             set;
@@ -86,10 +86,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"{MemberName} = {Argument}";
-        }
+        public override string ToString() => $"{MemberName} = {Argument}";
 
         /// <summary>
         /// Writes the named argument to the provided output stream.

@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <returns>The activated signature.</returns>
         public PropertySignature InstantiatePropertySignature(PropertySignature signature, GenericContext context)
         {
-            var result = new PropertySignature(signature.Attributes);
+            var result = new PropertySignature(signature.Attributes, signature.ReturnType, signature.ParameterTypes);
             InstantiateMethodSignatureBase(signature, result, context);
             return result;
         }
@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <returns>The activated signature.</returns>
         public MethodSignature InstantiateMethodSignature(MethodSignature signature, GenericContext context)
         {
-            var result = new MethodSignature(signature.Attributes);
+            var result = new MethodSignature(signature.Attributes, signature.ReturnType, signature.ParameterTypes);
             InstantiateMethodSignatureBase(signature, result, context);
             result.GenericParameterCount = signature.GenericParameterCount;
 

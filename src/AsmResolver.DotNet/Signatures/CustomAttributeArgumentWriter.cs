@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Signatures
                 WriteElement(elementType, elements[i]);
         }
 
-        private void WriteElement(TypeSignature argumentType, object element)
+        private void WriteElement(TypeSignature argumentType, object? element)
         {
             var writer = _context.Writer;
 

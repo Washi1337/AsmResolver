@@ -20,7 +20,11 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <returns>The security attribute.</returns>
         public static SecurityAttribute FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
-            var type = TypeNameParser.Parse(context.ReaderContext.ParentModule, reader.ReadSerString());
+            string? typeName = reader.ReadSerString();
+            var type = string.IsNullOrEmpty(typeName)
+                ? new TypeDefOrRefSignature(InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidFieldOrProptype))
+                : TypeNameParser.Parse(context.ReaderContext.ParentModule, typeName!);
+
             var result = new SecurityAttribute(type);
 
             if (!reader.TryReadCompressedUInt32(out uint size))

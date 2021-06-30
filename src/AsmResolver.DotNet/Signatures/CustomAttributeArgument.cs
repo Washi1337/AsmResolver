@@ -85,7 +85,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// When <see cref="ArgumentType"/> is not a <see cref="SzArrayTypeSignature"/>, gets the first element of the
         /// </summary>
-        public object Element => Elements.Count > 0 ? Elements[0] : default;
+        public object? Element => Elements.Count > 0 ? Elements[0] : default;
 
         /// <summary>
         /// Gets a collection of all elements that the argument is built with.
@@ -110,7 +110,7 @@ namespace AsmResolver.DotNet.Signatures
             return !IsNullArray
                 ? ArgumentType.ElementType == ElementType.SzArray
                     ? $"{{{string.Join(", ", Elements)}}}"
-                    : Element.ToString()
+                    : Element?.ToString() ?? "null"
                 : "null";
         }
 
