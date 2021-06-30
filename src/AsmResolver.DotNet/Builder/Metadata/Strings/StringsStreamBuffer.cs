@@ -92,12 +92,12 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         /// </summary>
         /// <param name="value">The string to lookup or add.</param>
         /// <returns>The index of the string.</returns>
-        public uint GetStringIndex(string value)
+        public uint GetStringIndex(string? value)
         {
             if (string.IsNullOrEmpty(value))
                 return 0;
 
-            if (value.IndexOf('\0') >= 0)
+            if (value!.IndexOf('\0') >= 0)
                 throw new ArgumentException("String contains a zero byte.");
 
             if (!_strings.TryGetValue(value, out uint offset))

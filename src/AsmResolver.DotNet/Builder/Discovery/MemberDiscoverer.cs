@@ -2,11 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Code.Cil;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -92,17 +89,17 @@ namespace AsmResolver.DotNet.Builder.Discovery
             return context._result;
         }
 
-        private IList<TMember> GetResultList<TMember>(TableIndex tableIndex)
+        private IList<TMember?> GetResultList<TMember>(TableIndex tableIndex)
             where TMember : IMetadataMember
         {
             return tableIndex switch
             {
-                TableIndex.TypeDef => (IList<TMember>) _result.Types,
-                TableIndex.Field => (IList<TMember>) _result.Fields,
-                TableIndex.Method => (IList<TMember>) _result.Methods,
-                TableIndex.Param => (IList<TMember>) _result.Parameters,
-                TableIndex.Property => (IList<TMember>) _result.Properties,
-                TableIndex.Event => (IList<TMember>) _result.Events,
+                TableIndex.TypeDef => (IList<TMember?>) _result.Types,
+                TableIndex.Field => (IList<TMember?>) _result.Fields,
+                TableIndex.Method => (IList<TMember?>) _result.Methods,
+                TableIndex.Param => (IList<TMember?>) _result.Parameters,
+                TableIndex.Property => (IList<TMember?>) _result.Properties,
+                TableIndex.Event => (IList<TMember?>) _result.Events,
                 _ => throw new ArgumentOutOfRangeException(nameof(tableIndex))
             };
         }
@@ -127,8 +124,8 @@ namespace AsmResolver.DotNet.Builder.Discovery
             where TMember: IMetadataMember, IModuleProvider
         {
             // Get original number of elements in the table.
-            int count = _module.DotNetDirectory.Metadata
-                .GetStream<TablesStream>()
+            int count = _module.DotNetDirectory!.Metadata
+                !.GetStream<TablesStream>()
                 .GetTable(tableIndex)
                 .Count;
 
@@ -243,7 +240,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             }
         }
 
-        private static bool IsNewMember<TMember>(IList<TMember> existingMembers, TMember member)
+        private static bool IsNewMember<TMember>(IList<TMember?> existingMembers, TMember member)
             where TMember : class, IMetadataMember
         {
             return member.MetadataToken.Rid == 0 // Member has not been assigned a RID.
@@ -285,7 +282,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             StuffFreeMemberSlots(placeHolderType, TableIndex.Param, AddPlaceHolderParameter);
         }
 
-        private void StuffFreeMemberSlots<TMember>(TypeDefinition placeHolderType, TableIndex tableIndex,
+        private void StuffFreeMemberSlots<TMember>(TypeDefinition? placeHolderType, TableIndex tableIndex,
             Func<TypeDefinition, MetadataToken, TMember> createPlaceHolder)
             where TMember : IMetadataMember
         {
@@ -299,7 +296,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 uint rid = freeRids[0];
                 freeRids.RemoveAt(0);
                 var token = new MetadataToken(tableIndex, rid);
-                members[(int) (rid - 1)] = createPlaceHolder(placeHolderType, token);
+                members[(int) (rid - 1)] = createPlaceHolder(placeHolderType!, token);
             }
         }
 
@@ -351,12 +348,12 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // If the parameter index is above 0, then we need to add it to the method signature for a
             // valid .NET module.
             if (parameterSequence > 0)
-                method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
+                method.Signature!.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
 
 #if DEBUG
-            string parameterName = method.ParameterDefinitions.Count == 0 ? null : $"placeholder{method.ParameterDefinitions.Count}";
+            string? parameterName = method.ParameterDefinitions.Count == 0 ? null : $"placeholder{method.ParameterDefinitions.Count}";
 #else
-            const string parameterName = null;
+            const string? parameterName = null;
 #endif
 
             // Create and add the placeholder parameter.

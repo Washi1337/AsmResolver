@@ -12,10 +12,10 @@ namespace AsmResolver
         /// <summary>
         /// Represents the null reference.
         /// </summary>
-        public static SegmentReference Null
+        public static ISegmentReference Null
         {
             get;
-        } = new(null);
+        } = new SegmentReference(null);
 
         /// <summary>
         /// Creates a new reference to the provided segment.

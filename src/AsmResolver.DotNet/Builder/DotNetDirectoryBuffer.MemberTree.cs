@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using AsmResolver.DotNet.Code;
 using AsmResolver.IO;
@@ -205,7 +204,7 @@ namespace AsmResolver.DotNet.Builder
                 // serialization of the method body, as well as determining the parameter list.
 
                 var row = new MethodDefinitionRow(
-                    null,
+                    SegmentReference.Null, 
                     method.ImplAttributes,
                     method.Attributes,
                     Metadata.StringsStream.GetStringIndex(method.Name),

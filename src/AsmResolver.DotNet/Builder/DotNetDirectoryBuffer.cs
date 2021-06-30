@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Builder.Resources;
 using AsmResolver.DotNet.Code;
@@ -99,8 +100,11 @@ namespace AsmResolver.DotNet.Builder
             set;
         }
 
-        private bool AssertIsImported(IModuleProvider member)
+        private bool AssertIsImported([NotNullWhen(true)] IModuleProvider? member)
         {
+            if (member is null)
+                return false;
+
             if (member.Module != Module)
             {
                 ErrorListener.RegisterException(new MemberNotImportedException((IMetadataMember) member));
@@ -145,7 +149,7 @@ namespace AsmResolver.DotNet.Builder
             switch (Module.ManagedEntrypoint.MetadataToken.Table)
             {
                 case TableIndex.Method:
-                    entrypointToken = GetMethodDefinitionToken(Module.ManagedEntrypointMethod);
+                    entrypointToken = GetMethodDefinitionToken(Module.ManagedEntrypointMethod!);
                     break;
 
                 case TableIndex.File:
@@ -218,7 +222,7 @@ namespace AsmResolver.DotNet.Builder
 
         private void DefineGenericParameter(MetadataToken ownerToken, GenericParameter parameter)
         {
-            if (parameter is null || !AssertIsImported(parameter))
+            if (!AssertIsImported(parameter))
                 return;
 
             var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
@@ -253,7 +257,7 @@ namespace AsmResolver.DotNet.Builder
         }
 
         private void AddGenericParameterConstraint(MetadataToken ownerToken,
-            GenericParameterConstraint constraint)
+            GenericParameterConstraint? constraint)
         {
             if (constraint is null)
                 return;
@@ -269,7 +273,7 @@ namespace AsmResolver.DotNet.Builder
             AddCustomAttributes(token, constraint);
         }
 
-        private void AddClassLayout(MetadataToken ownerToken, ClassLayout layout)
+        private void AddClassLayout(MetadataToken ownerToken, ClassLayout? layout)
         {
             if (layout is null)
                 return;
