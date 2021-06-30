@@ -75,7 +75,7 @@ namespace AsmResolver.DotNet.Cloning
 
         private static CilMethodBody CloneCilMethodBody(MemberCloneContext context, MethodDefinition method)
         {
-            var body = method.CilMethodBody;
+            var body = method.CilMethodBody!;
 
             var clonedMethod = (MethodDefinition) context.ClonedMembers[method];
 

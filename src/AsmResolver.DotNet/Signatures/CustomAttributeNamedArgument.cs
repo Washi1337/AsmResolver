@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="memberName">The name of the referenced member.</param>
         /// <param name="argumentType">The type of the argument to store.</param>
         /// <param name="argument">The argument value.</param>
-        public CustomAttributeNamedArgument(CustomAttributeArgumentMemberType memberType, string memberName, TypeSignature argumentType, CustomAttributeArgument argument)
+        public CustomAttributeNamedArgument(CustomAttributeArgumentMemberType memberType, string? memberName, TypeSignature argumentType, CustomAttributeArgument argument)
         {
             MemberType = memberType;
             MemberName = memberName;

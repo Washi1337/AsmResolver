@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <inheritdoc />
-        public int GetVariableIndex(object operand)
+        public int GetVariableIndex(object? operand)
         {
             return operand switch
             {
@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <inheritdoc />
-        public int GetArgumentIndex(object operand)
+        public int GetArgumentIndex(object? operand)
         {
             return operand switch
             {
@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <inheritdoc />
-        public uint GetStringToken(object operand)
+        public uint GetStringToken(object? operand)
         {
             return operand switch
             {
@@ -62,7 +62,7 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <inheritdoc />
-        public MetadataToken GetMemberToken(object operand)
+        public MetadataToken GetMemberToken(object? operand)
         {
             return operand switch
             {

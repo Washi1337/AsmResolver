@@ -22,8 +22,8 @@ namespace AsmResolver.DotNet.Code.Cil
             }
             else
             {
-                _agenda = null;
-                _recordedStackSizes = null;
+                _agenda = null!;
+                _recordedStackSizes = null!;
             }
         }
 
@@ -131,12 +131,12 @@ namespace AsmResolver.DotNet.Code.Cil
                 {
                     case CilFlowControl.Branch:
                         // Schedule branch target.
-                        ScheduleLabel(instruction.Offset, (ICilLabel) instruction.Operand, nextStackSize);
+                        ScheduleLabel(instruction.Offset, (ICilLabel) instruction.Operand!, nextStackSize);
                         break;
 
                     case CilFlowControl.ConditionalBranch when instruction.OpCode.Code == CilCode.Switch:
                         // Schedule all switch targets for processing.
-                        var targets = (IList<ICilLabel>) instruction.Operand;
+                        var targets = (IList<ICilLabel>) instruction.Operand!;
                         for (int i = 0; i < targets.Count; i++)
                             ScheduleLabel(instruction.Offset, targets[i], nextStackSize);
 
@@ -146,7 +146,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
                     case CilFlowControl.ConditionalBranch:
                         // Schedule branch target.
-                        ScheduleLabel(instruction.Offset, (ICilLabel) instruction.Operand, nextStackSize);
+                        ScheduleLabel(instruction.Offset, (ICilLabel) instruction.Operand!, nextStackSize);
 
                         // Schedule fallthrough instruction.
                         ScheduleNext(currentState.InstructionIndex, nextStackSize);

@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <inheritdoc />
-        public override object ResolveMember(MetadataToken token)
+        public override object? ResolveMember(MetadataToken token)
         {
             switch (token.Table)
             {
@@ -92,7 +92,7 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <inheritdoc />
-        public override object ResolveString(MetadataToken token)
+        public override object? ResolveString(MetadataToken token)
         {
             return _tokens[(int) token.Rid] as string;
         }

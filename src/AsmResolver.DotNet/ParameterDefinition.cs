@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet
         /// <param name="sequence">The sequence number of the new parameter.</param>
         /// <param name="name">The name of the new parameter.</param>
         /// <param name="attributes">The attributes to assign to the parameter.</param>
-        public ParameterDefinition(ushort sequence, string name, ParameterAttributes attributes)
+        public ParameterDefinition(ushort sequence, string? name, ParameterAttributes attributes)
             : this(new MetadataToken(TableIndex.Param, 0))
         {
             Sequence = sequence;

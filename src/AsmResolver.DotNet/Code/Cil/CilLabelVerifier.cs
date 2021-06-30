@@ -8,8 +8,8 @@ namespace AsmResolver.DotNet.Code.Cil
     internal struct CilLabelVerifier
     {
         private readonly CilMethodBody _body;
-        private List<Exception> _diagnostics;
-        private string _cachedName;
+        private List<Exception>? _diagnostics;
+        private string? _cachedName;
 
         public CilLabelVerifier(CilMethodBody body)
         {
@@ -45,13 +45,19 @@ namespace AsmResolver.DotNet.Code.Cil
                 {
                     case CilOperandType.InlineBrTarget:
                     case CilOperandType.ShortInlineBrTarget:
-                        VerifyBranchLabel(instruction.Offset, (ICilLabel) instruction.Operand);
+                        VerifyBranchLabel(instruction.Offset, instruction.Operand as ICilLabel);
                         break;
 
                     case CilOperandType.InlineSwitch:
-                        var targets = (IList<ICilLabel>) instruction.Operand;
-                        for (int i = 0; i < targets.Count; i++)
-                            VerifyBranchLabel(instruction.Offset, targets[i]);
+                        if (instruction.Operand is not IList<ICilLabel> targets)
+                        {
+                            AddDiagnostic($"Switch table of IL_{instruction.Offset:X4} is null.");
+                        }
+                        else
+                        {
+                            for (int i = 0; i < targets.Count; i++)
+                                VerifyBranchLabel(instruction.Offset, targets[i]);
+                        }
                         break;
                 }
             }
@@ -72,7 +78,7 @@ namespace AsmResolver.DotNet.Code.Cil
             }
         }
 
-        private void VerifyBranchLabel(int offset, ICilLabel label)
+        private void VerifyBranchLabel(int offset, ICilLabel? label)
         {
             switch (label)
             {

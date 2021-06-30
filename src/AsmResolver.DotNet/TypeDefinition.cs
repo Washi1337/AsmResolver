@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet
         /// <param name="ns">The namespace the type resides in.</param>
         /// <param name="name">The name of the type.</param>
         /// <param name="attributes">The attributes associated to the type.</param>
-        public TypeDefinition(string? ns, string name, TypeAttributes attributes)
+        public TypeDefinition(string? ns, string? name, TypeAttributes attributes)
             : this(ns, name, attributes, null)
         {
         }
@@ -75,7 +75,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the type.</param>
         /// <param name="attributes">The attributes associated to the type.</param>
         /// <param name="baseType">The super class that this type extends.</param>
-        public TypeDefinition(string? ns, string name, TypeAttributes attributes, ITypeDefOrRef? baseType)
+        public TypeDefinition(string? ns, string? name, TypeAttributes attributes, ITypeDefOrRef? baseType)
             : this(new MetadataToken(TableIndex.TypeDef, 0))
         {
             Namespace = ns;

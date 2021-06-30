@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             get;
             set;
-        } = null;
+        }
 
         /// <summary>
         /// Gets or sets the value of an override switch indicating whether labels should always be verified for

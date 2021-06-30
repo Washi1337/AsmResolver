@@ -323,26 +323,28 @@ namespace AsmResolver.DotNet.Cloning
         {
             var clonedSignature = new CustomAttributeSignature();
 
-            // Fixed args.
-            foreach (var argument in attribute.Signature.FixedArguments)
-                clonedSignature.FixedArguments.Add(CloneCustomAttributeArgument(context, argument));
-
-            // Named args.
-            foreach (var namedArgument in attribute.Signature.NamedArguments)
+            if (attribute.Signature is not null)
             {
-                var clonedArgument = new CustomAttributeNamedArgument(
-                    namedArgument.MemberType,
-                    namedArgument.MemberName,
-                    namedArgument.ArgumentType,
-                    CloneCustomAttributeArgument(context, namedArgument.Argument));
+                // Fixed args.
+                foreach (var argument in attribute.Signature.FixedArguments)
+                    clonedSignature.FixedArguments.Add(CloneCustomAttributeArgument(context, argument));
 
-                clonedSignature.NamedArguments.Add(clonedArgument);
+                // Named args.
+                foreach (var namedArgument in attribute.Signature.NamedArguments)
+                {
+                    var clonedArgument = new CustomAttributeNamedArgument(
+                        namedArgument.MemberType,
+                        namedArgument.MemberName,
+                        namedArgument.ArgumentType,
+                        CloneCustomAttributeArgument(context, namedArgument.Argument));
+
+                    clonedSignature.NamedArguments.Add(clonedArgument);
+                }
             }
 
-            var clonedAttribute = new CustomAttribute(
+            return new CustomAttribute(
                 (ICustomAttributeType) context.Importer.ImportMethod(attribute.Constructor),
                 clonedSignature);
-            return clonedAttribute;
         }
 
         private static CustomAttributeArgument CloneCustomAttributeArgument(MemberCloneContext context, CustomAttributeArgument argument)
@@ -357,14 +359,14 @@ namespace AsmResolver.DotNet.Cloning
             return clonedArgument;
         }
 
-        private static ImplementationMap CloneImplementationMap(MemberCloneContext context, ImplementationMap map)
+        private static ImplementationMap CloneImplementationMap(MemberCloneContext context, ImplementationMap? map)
         {
             return map is not null
                 ? new ImplementationMap(context.Importer.ImportModule(map.Scope), map.Name, map.Attributes)
                 : null;
         }
 
-        private static Constant CloneConstant(MemberCloneContext context, Constant constant)
+        private static Constant CloneConstant(MemberCloneContext context, Constant? constant)
         {
             return constant is not null
                 ? new Constant(constant.Type,
@@ -406,7 +408,7 @@ namespace AsmResolver.DotNet.Cloning
 
         private static MarshalDescriptor CloneMarshalDescriptor(
             MemberCloneContext context,
-            MarshalDescriptor marshalDescriptor)
+            MarshalDescriptor? marshalDescriptor)
         {
             return marshalDescriptor switch
             {

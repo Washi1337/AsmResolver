@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet
         /// <paramref name="signature"/> is set, the <see cref="FieldAttributes.Static"/> bit should be unset in
         /// <paramref name="attributes"/> and vice versa.
         /// </remarks>
-        public FieldDefinition(string name, FieldAttributes attributes, FieldSignature signature)
+        public FieldDefinition(string? name, FieldAttributes attributes, FieldSignature signature)
             : this(new MetadataToken(TableIndex.Field, 0))
         {
             Name = name;

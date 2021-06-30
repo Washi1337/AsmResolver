@@ -179,7 +179,7 @@ namespace AsmResolver.DotNet.Code.Cil
             ModuleReaderContext context,
             MethodDefinition method,
             CilRawMethodBody rawBody,
-            ICilOperandResolver operandResolver = null)
+            ICilOperandResolver? operandResolver = null)
         {
             var result = new CilMethodBody(method);
 
@@ -191,7 +191,7 @@ namespace AsmResolver.DotNet.Code.Cil
             {
                 result.MaxStack = fatBody.MaxStack;
                 result.InitializeLocals = fatBody.InitLocals;
-                ReadLocalVariables(method.Module, result, fatBody);
+                ReadLocalVariables(context.ParentModule, result, fatBody);
             }
             else
             {
