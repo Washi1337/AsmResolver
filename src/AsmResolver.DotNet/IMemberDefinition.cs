@@ -8,11 +8,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the type that declares the member (if available).
         /// </summary>
-        new TypeDefinition DeclaringType
+        new TypeDefinition? DeclaringType
         {
             get;
         }
-        
+
         /// <summary>
         /// Determines whether the member can be accessed from the scope that is determined by the provided type.
         /// </summary>

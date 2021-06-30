@@ -82,7 +82,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string? FullName => this.GetTypeFullName();
+        public string FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
         public IResolutionScope Scope

@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet
         public string Namespace => Signature?.Namespace;
         
         /// <inheritdoc />
-        public string? FullName => this.GetTypeFullName();
+        public string FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
         public ModuleDefinition Module => Signature?.Module;

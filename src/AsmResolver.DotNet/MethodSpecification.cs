@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet
         public string? Name => Method.Name;
 
         /// <inheritdoc />
-        public string? FullName =>
+        public string FullName =>
             FullNameGenerator.GetMethodFullName(Name, DeclaringType, Method.Signature, Signature.TypeArguments);
 
         /// <inheritdoc />

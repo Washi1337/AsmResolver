@@ -91,7 +91,7 @@ namespace AsmResolver.DotNet
         public bool IsMethod => Signature is MethodSignature;
 
         /// <inheritdoc />
-        public string? FullName
+        public string FullName
         {
             get
             {

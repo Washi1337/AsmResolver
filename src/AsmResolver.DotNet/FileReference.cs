@@ -79,7 +79,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string? FullName => Name;
+        public string FullName => Name;
 
         /// <inheritdoc />
         public ModuleDefinition Module

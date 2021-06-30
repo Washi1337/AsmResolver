@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string? FullName => $"{Scope.Name}!{Name}";
+        public string FullName => $"{Scope.Name}!{Name}";
 
         /// <summary>
         /// Gets or sets the module that contains the external member.

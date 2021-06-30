@@ -34,19 +34,25 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.ParentModule.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.Name);
-
-        /// <inheritdoc />
-        protected override string GetNamespace() => _context.ParentModule.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.Namespace);
-
-        /// <inheritdoc />
-        protected override IImplementation GetImplementation()
+        protected override string? GetName()
         {
-            var encoder = _context.Image.DotNetDirectory.Metadata
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
+        }
+
+        /// <inheritdoc />
+        protected override string? GetNamespace()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Namespace)
+                : null;
+        }
+
+        /// <inheritdoc />
+        protected override IImplementation? GetImplementation()
+        {
+            var encoder = _context.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.Implementation);
 

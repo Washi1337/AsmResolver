@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string? FullName
+        public string FullName
         {
             get
             {
@@ -210,7 +210,7 @@ namespace AsmResolver.DotNet
         protected virtual string? GetCulture() => null;
 
         /// <inheritdoc />
-        public override string ToString() => FullName!;
+        public override string ToString() => FullName;
 
         /// <summary>
         /// Computes the token of a public key using the provided hashing algorithm.
