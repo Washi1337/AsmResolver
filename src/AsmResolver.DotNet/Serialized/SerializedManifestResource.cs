@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Serialized
                 return null;
 
             if (_context.Image.DotNetDirectory!.DotNetResources is not { } resources
-                || resources.TryCreateManifestResourceReader(_row.Offset, out var reader))
+                || !resources.TryCreateManifestResourceReader(_row.Offset, out var reader))
             {
                 return _context.BadImageAndReturn<ISegment>(
                     $"Invalid data offset in manifest resource {MetadataToken.ToString()}.");
