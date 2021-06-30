@@ -40,15 +40,18 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.ParentModule.DotNetDirectory.Metadata
-            .GetStream<StringsStream>().GetStringByIndex(_row.Name);
+        protected override string? GetName()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override MethodSignature GetSignature()
+        protected override MethodSignature? GetSignature()
         {
-            if (!_context.ParentModule.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .TryGetBlobReaderByIndex(_row.Signature, out var reader))
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Signature, out var reader))
             {
                 return _context.BadImageAndReturn<MethodSignature>(
                     $"Invalid signature blob index in method {MetadataToken.ToString()}.");
@@ -66,7 +69,7 @@ namespace AsmResolver.DotNet.Serialized
             _context.ParentModule.GetSecurityDeclarationCollection(this);
 
         /// <inheritdoc />
-        protected override TypeDefinition GetDeclaringType()
+        protected override TypeDefinition? GetDeclaringType()
         {
             var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, _context.ParentModule.GetMethodDeclaringType(MetadataToken.Rid));
             return _context.ParentModule.TryLookupMember(declaringTypeToken, out var member)
@@ -90,11 +93,11 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override MethodBody GetBody() =>
+        protected override MethodBody? GetBody() =>
             _context.Parameters.MethodBodyReader.ReadMethodBody(_context, this, _row);
 
         /// <inheritdoc />
-        protected override ImplementationMap GetImplementationMap()
+        protected override ImplementationMap? GetImplementationMap()
         {
             uint mapRid = _context.ParentModule.GetImplementationMapRid(MetadataToken);
             return _context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.ImplMap, mapRid), out var member)
@@ -120,7 +123,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override MethodSemantics GetSemantics()
+        protected override MethodSemantics? GetSemantics()
         {
             var ownerToken = _context.ParentModule.GetMethodParentSemantics(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)

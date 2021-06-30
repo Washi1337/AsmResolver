@@ -11,8 +11,8 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class MethodSemantics : MetadataMember, IOwnedCollectionElement<IHasSemantics>
     {
-        private readonly LazyVariable<MethodDefinition> _method;
-        private readonly LazyVariable<IHasSemantics> _association;
+        private readonly LazyVariable<MethodDefinition?> _method;
+        private readonly LazyVariable<IHasSemantics?> _association;
 
         /// <summary>
         /// Initializes an empty method semantics object.
@@ -21,8 +21,8 @@ namespace AsmResolver.DotNet
         protected MethodSemantics(MetadataToken token)
             : base(token)
         {
-            _method = new LazyVariable<MethodDefinition>(GetMethod);
-            _association = new LazyVariable<IHasSemantics>(GetAssociation);
+            _method = new LazyVariable<MethodDefinition?>(GetMethod);
+            _association = new LazyVariable<IHasSemantics?>(GetAssociation);
         }
 
         /// <summary>
@@ -45,31 +45,31 @@ namespace AsmResolver.DotNet
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the method that is given special semantics.
         /// </summary>
-        public MethodDefinition Method
+        public MethodDefinition? Method
         {
             get => _method.Value;
             private set => _method.Value = value;
         }
 
         /// <summary>
-        /// Gets or sets the member that the method is associated to. 
+        /// Gets or sets the member that the method is associated to.
         /// </summary>
-        public IHasSemantics Association
+        public IHasSemantics? Association
         {
             get => _association.Value;
             private set => _association.Value = value;
         }
 
-        IHasSemantics IOwnedCollectionElement<IHasSemantics>.Owner
+        IHasSemantics? IOwnedCollectionElement<IHasSemantics>.Owner
         {
             get => Association;
             set => Association = value;
         }
-        
+
         /// <summary>
         /// Obtains the method that was given special semantics.
         /// </summary>
@@ -77,8 +77,8 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Method"/> property.
         /// </remarks>
-        protected virtual MethodDefinition GetMethod() => null;
-        
+        protected virtual MethodDefinition? GetMethod() => null;
+
         /// <summary>
         /// Obtains the member that the method is association to.
         /// </summary>
@@ -86,9 +86,9 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Association"/> property.
         /// </remarks>
-        protected virtual IHasSemantics GetAssociation() => null;
+        protected virtual IHasSemantics? GetAssociation() => null;
 
         /// <inheritdoc />
-        public override string ToString() => $"{Attributes} {Method.FullName}";
+        public override string ToString() => $"{Attributes} {Method?.FullName}";
     }
 }

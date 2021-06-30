@@ -16,8 +16,8 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<string> _name;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<string?> _name;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes the module reference with a metadata token.
@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet
         protected ModuleReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
+            _name = new LazyVariable<string?>(GetName);
         }
 
         /// <summary>
@@ -47,18 +47,18 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ModuleDefinition Module
+        public ModuleDefinition? Module
         {
             get;
             private set;
         }
 
-        ModuleDefinition IOwnedCollectionElement<ModuleDefinition>.Owner
+        ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
             get => Module;
             set => Module = value;
         }
-        
+
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
@@ -77,9 +77,9 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual string? GetName() => null;
 
-        AssemblyDescriptor IResolutionScope.GetAssembly() => Module.Assembly;
+        AssemblyDescriptor? IResolutionScope.GetAssembly() => Module?.Assembly;
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
@@ -92,6 +92,6 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         /// <inheritdoc />
-        public override string ToString() => Name;
+        public override string ToString() => Name ?? NullName;
     }
 }

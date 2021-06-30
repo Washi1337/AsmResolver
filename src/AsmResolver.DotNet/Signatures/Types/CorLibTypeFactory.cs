@@ -152,7 +152,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// </summary>
         /// <param name="type">The type to transform to a corlib type signature.</param>
         /// <returns>The corlib type, or <c>null</c> if none was found.</returns>
-        public CorLibTypeSignature FromType(ITypeDescriptor type)
+        public CorLibTypeSignature? FromType(ITypeDescriptor type)
         {
             return type is CorLibTypeSignature typeSig
                 ? FromElementType(typeSig.ElementType)
@@ -164,7 +164,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// </summary>
         /// <param name="elementType">The element type.</param>
         /// <returns>The corlib type, or <c>null</c> if none was found.</returns>
-        public CorLibTypeSignature FromElementType(ElementType elementType)
+        public CorLibTypeSignature? FromElementType(ElementType elementType)
         {
             return elementType switch
             {
@@ -196,7 +196,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="ns">The namespace.</param>
         /// <param name="name">The name.</param>
         /// <returns>The corlib type, or <c>null</c> if none was found.</returns>
-        public CorLibTypeSignature FromName(string ns, string name)
+        public CorLibTypeSignature? FromName(string? ns, string? name)
         {
             if (ns == "System")
             {

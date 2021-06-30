@@ -147,7 +147,7 @@ namespace AsmResolver.DotNet
                 SystemPrivateCoreLib_v5_0_0_0
             };
 
-            KnownCorLibNames = new HashSet<string>(KnownCorLibReferences.Select(r => r.Name));
+            KnownCorLibNames = new HashSet<string>(KnownCorLibReferences.Select(r => r.Name!));
         }
     }
 }

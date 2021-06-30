@@ -66,7 +66,7 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public string FullName => Scope is null
-            ? Name ?? "<<<EMPTY NAME>>>"
+            ? Name ?? NullName
             : $"{Scope.Name}!{Name}";
 
         /// <summary>

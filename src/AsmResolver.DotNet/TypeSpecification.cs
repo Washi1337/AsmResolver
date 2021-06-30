@@ -9,14 +9,14 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 namespace AsmResolver.DotNet
 {
     /// <summary>
-    /// Represents a type that allows for assigning metadata tokens to type signatures stored in the blob stream. 
+    /// Represents a type that allows for assigning metadata tokens to type signatures stored in the blob stream.
     /// </summary>
-    public class TypeSpecification : 
+    public class TypeSpecification :
         MetadataMember,
         ITypeDefOrRef
     {
-        private readonly LazyVariable<TypeSignature> _signature;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<TypeSignature?> _signature;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes an empty type specification.
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet
         protected TypeSpecification(MetadataToken token)
             : base(token)
         {
-            _signature = new LazyVariable<TypeSignature>(GetSignature);
+            _signature = new LazyVariable<TypeSignature?>(GetSignature);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the type signature that this type specification is referencing.
         /// </summary>
-        public TypeSignature Signature
+        public TypeSignature? Signature
         {
             get => _signature.Value;
             set => _signature.Value = value;
@@ -51,22 +51,22 @@ namespace AsmResolver.DotNet
         public string? Name => Signature?.Name ?? TypeSignature.NullTypeToString;
 
         /// <inheritdoc />
-        public string Namespace => Signature?.Namespace;
-        
+        public string? Namespace => Signature?.Namespace;
+
         /// <inheritdoc />
         public string FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
-        public ModuleDefinition Module => Signature?.Module;
+        public ModuleDefinition? Module => Signature?.Module;
 
         /// <inheritdoc />
-        public IResolutionScope Scope => Signature?.Scope;
+        public IResolutionScope? Scope => Signature?.Scope;
 
         /// <inheritdoc />
-        public ITypeDefOrRef DeclaringType => Signature?.DeclaringType as ITypeDefOrRef;
+        public ITypeDefOrRef? DeclaringType => Signature?.DeclaringType as ITypeDefOrRef;
 
         /// <inheritdoc />
-        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
+        ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <inheritdoc />
         public bool IsValueType => Signature?.IsValueType ?? false;
@@ -81,17 +81,17 @@ namespace AsmResolver.DotNet
                 return _customAttributes;
             }
         }
-        
+
         ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef() => this;
 
         /// <inheritdoc />
-        public TypeSignature ToTypeSignature() => Signature;
+        public TypeSignature? ToTypeSignature() => Signature;
 
         /// <inheritdoc />
-        public TypeDefinition Resolve() => Module?.MetadataResolver?.ResolveType(this);
-        
-        IMemberDefinition IMemberDescriptor.Resolve() => Resolve();
-        
+        public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
+
+        IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
+
         /// <summary>
         /// Obtains the signature the type specification is referencing.
         /// </summary>
@@ -99,7 +99,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Signature"/> property.
         /// </remarks>
-        protected virtual TypeSignature GetSignature() => null;
+        protected virtual TypeSignature? GetSignature() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;

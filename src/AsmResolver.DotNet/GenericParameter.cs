@@ -17,10 +17,10 @@ namespace AsmResolver.DotNet
         IModuleProvider,
         IOwnedCollectionElement<IHasGenericParameters>
     {
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<IHasGenericParameters> _owner;
-        private IList<GenericParameterConstraint> _constraints;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<IHasGenericParameters?> _owner;
+        private IList<GenericParameterConstraint>? _constraints;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes a new empty generic parameter.
@@ -29,8 +29,8 @@ namespace AsmResolver.DotNet
         protected GenericParameter(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
-            _owner = new LazyVariable<IHasGenericParameters>(GetOwner);
+            _name = new LazyVariable<string?>(GetName);
+            _owner = new LazyVariable<IHasGenericParameters?>(GetOwner);
         }
 
         /// <summary>
@@ -58,13 +58,13 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the member that defines this generic parameter.
         /// </summary>
-        public IHasGenericParameters Owner
+        public IHasGenericParameters? Owner
         {
             get => _owner.Value;
-            internal set => _owner.Value = value;
+            private set => _owner.Value = value;
         }
 
-        IHasGenericParameters IOwnedCollectionElement<IHasGenericParameters>.Owner
+        IHasGenericParameters? IOwnedCollectionElement<IHasGenericParameters>.Owner
         {
             get => Owner;
             set => Owner = value;
@@ -89,10 +89,10 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the index of this parameter within the list of generic parameters that the owner defines.
         /// </summary>
-        public ushort Number => (ushort)Owner.GenericParameters.IndexOf(this);
+        public ushort Number => Owner is null ? (ushort) 0 : (ushort) Owner.GenericParameters.IndexOf(this);
 
         /// <inheritdoc />
-        public ModuleDefinition Module => Owner?.Module;
+        public ModuleDefinition? Module => Owner?.Module;
 
         /// <summary>
         /// Gets a collection of constraints put on the generic parameter.
@@ -125,7 +125,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual string? GetName() => null;
 
         /// <summary>
         /// Obtains the owner of the generic parameter.
@@ -134,7 +134,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Owner"/> property.
         /// </remarks>
-        protected virtual IHasGenericParameters GetOwner() => null;
+        protected virtual IHasGenericParameters? GetOwner() => null;
 
         /// <summary>
         /// Obtains a collection of constraints put on the generic parameter.
@@ -157,6 +157,6 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         /// <inheritdoc />
-        public override string ToString() => Name;
+        public override string ToString() => Name ?? NullName;
     }
 }

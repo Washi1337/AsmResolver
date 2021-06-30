@@ -42,10 +42,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override ICustomAttributeType? GetConstructor()
         {
-            var tablesStream = _context.Metadata.GetStream<TablesStream>();
-            var encoder = tablesStream.GetIndexEncoder(CodedIndex.CustomAttributeType);
+            var token = _context.Metadata
+                .GetStream<TablesStream>()
+                .GetIndexEncoder(CodedIndex.CustomAttributeType)
+                .DecodeIndex(_row.Type);
 
-            var token = encoder.DecodeIndex(_row.Type);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as ICustomAttributeType
                 : _context.BadImageAndReturn<ICustomAttributeType>($"Invalid constructor in custom attribute {MetadataToken}.");

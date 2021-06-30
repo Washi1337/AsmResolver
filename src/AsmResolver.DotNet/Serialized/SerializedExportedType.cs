@@ -52,11 +52,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IImplementation? GetImplementation()
         {
-            var encoder = _context.Metadata
+            var token = _context.Metadata
                 .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.Implementation);
+                .GetIndexEncoder(CodedIndex.Implementation)
+                .DecodeIndex(_row.Implementation);
 
-            var token = encoder.DecodeIndex(_row.Implementation);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as IImplementation
                 : _context.BadImageAndReturn<IImplementation>(

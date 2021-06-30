@@ -16,9 +16,9 @@ namespace AsmResolver.DotNet
         IManagedEntrypoint,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<byte[]> _hashValue;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<byte[]?> _hashValue;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes the file reference with a metadata token.
@@ -27,8 +27,8 @@ namespace AsmResolver.DotNet
         protected FileReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
-            _hashValue = new LazyVariable<byte[]>(GetHashValue);
+            _name = new LazyVariable<string?>(GetName);
+            _hashValue = new LazyVariable<byte[]?>(GetHashValue);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string FullName => Name;
+        public string FullName => Name ?? NullName;
 
         /// <inheritdoc />
         public ModuleDefinition Module
@@ -97,7 +97,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the checksum of the referenced file.
         /// </summary>
-        public byte[] HashValue
+        public byte[]? HashValue
         {
             get => _hashValue.Value;
             set => _hashValue.Value = value;
@@ -121,7 +121,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual string? GetName() => null;
 
         /// <summary>
         /// Obtains the hash of the referenced file.
@@ -130,7 +130,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="HashValue"/> property.
         /// </remarks>
-        protected virtual byte[] GetHashValue() => null;
+        protected virtual byte[]? GetHashValue() => null;
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
