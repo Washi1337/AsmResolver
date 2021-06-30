@@ -1,11 +1,12 @@
 using System;
 using AsmResolver.PE;
+using AsmResolver.PE.DotNet.Metadata;
 
 namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Provides a context in which a .NET module parser exists in. This includes the original PE image, as well as the
-    /// module reader parameters. 
+    /// module reader parameters.
     /// </summary>
     public class ModuleReaderContext : IErrorListener
     {
@@ -29,7 +30,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets the root module object that is being read.
         /// </summary>
@@ -37,7 +38,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             get;
         }
-    
+
+        /// <summary>
+        /// Gets the original metadata directory.
+        /// </summary>
+        public IMetadata Metadata => Image.DotNetDirectory!.Metadata!;
+
         /// <summary>
         /// Gets the reader parameters.
         /// </summary>

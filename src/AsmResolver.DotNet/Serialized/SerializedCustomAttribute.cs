@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IHasCustomAttribute GetParent()
+        protected override IHasCustomAttribute? GetParent()
         {
             var ownerToken = _context.ParentModule.GetCustomAttributeOwner(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)
@@ -40,9 +40,9 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override ICustomAttributeType GetConstructor()
+        protected override ICustomAttributeType? GetConstructor()
         {
-            var tablesStream = _context.Image.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = _context.Metadata.GetStream<TablesStream>();
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.CustomAttributeType);
 
             var token = encoder.DecodeIndex(_row.Type);
@@ -52,15 +52,15 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override CustomAttributeSignature GetSignature()
+        protected override CustomAttributeSignature? GetSignature()
         {
             if (Constructor is null)
                 return null;
 
-            var blobStream = _context.Image.DotNetDirectory.Metadata.GetStream<BlobStream>();
-            if (!blobStream.TryGetBlobReaderByIndex(_row.Value, out var reader))
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Value, out var reader))
             {
-                _context.BadImageAndReturn<CallingConventionSignature>(
+                return _context.BadImageAndReturn<CustomAttributeSignature>(
                     $"Invalid signature blob index in custom attribute {MetadataToken}.");
             }
 

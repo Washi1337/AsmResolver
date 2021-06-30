@@ -34,18 +34,28 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string? GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
+        protected override string? GetName()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override string GetCulture() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()?.GetStringByIndex(_row.Culture);
+        protected override string? GetCulture()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Culture)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override byte[] GetPublicKeyOrToken() => _context.Image.DotNetDirectory.Metadata
-            .TryGetStream(out BlobStream blobStream)
-            ? blobStream.GetBlobByIndex(_row.PublicKeyOrToken)
-            : null;
+        protected override byte[]? GetPublicKeyOrToken()
+        {
+            return _context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                ? blobStream.GetBlobByIndex(_row.PublicKeyOrToken)
+                : null;
+        }
 
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() =>

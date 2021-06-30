@@ -6,13 +6,13 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 namespace AsmResolver.DotNet
 {
     /// <summary>
-    /// Represents a custom attribute that is associated to a member in a .NET module. 
+    /// Represents a custom attribute that is associated to a member in a .NET module.
     /// </summary>
     public class CustomAttribute : MetadataMember, IOwnedCollectionElement<IHasCustomAttribute>
     {
-        private readonly LazyVariable<IHasCustomAttribute> _parent;
-        private readonly LazyVariable<ICustomAttributeType> _constructor;
-        private readonly LazyVariable<CustomAttributeSignature> _signature;
+        private readonly LazyVariable<IHasCustomAttribute?> _parent;
+        private readonly LazyVariable<ICustomAttributeType?> _constructor;
+        private readonly LazyVariable<CustomAttributeSignature?> _signature;
 
         /// <summary>
         /// Initializes an empty custom attribute.
@@ -21,9 +21,9 @@ namespace AsmResolver.DotNet
         protected CustomAttribute(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<IHasCustomAttribute>(GetParent);
-            _constructor = new LazyVariable<ICustomAttributeType>(GetConstructor);
-            _signature = new LazyVariable<CustomAttributeSignature>(GetSignature);
+            _parent = new LazyVariable<IHasCustomAttribute?>(GetParent);
+            _constructor = new LazyVariable<ICustomAttributeType?>(GetConstructor);
+            _signature = new LazyVariable<CustomAttributeSignature?>(GetSignature);
         }
 
         /// <summary>
@@ -41,13 +41,13 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the member that this custom attribute is assigned to.
         /// </summary>
-        public IHasCustomAttribute Parent
+        public IHasCustomAttribute? Parent
         {
             get => _parent.Value;
             private set => _parent.Value = value;
         }
 
-        IHasCustomAttribute IOwnedCollectionElement<IHasCustomAttribute>.Owner
+        IHasCustomAttribute? IOwnedCollectionElement<IHasCustomAttribute>.Owner
         {
             get => Parent;
             set => Parent = value;
@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the constructor that is invoked upon initializing the attribute.
         /// </summary>
-        public ICustomAttributeType Constructor
+        public ICustomAttributeType? Constructor
         {
             get => _constructor.Value;
             set => _constructor.Value = value;
@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the signature containing the arguments passed onto the attribute's constructor.
         /// </summary>
-        public CustomAttributeSignature Signature
+        public CustomAttributeSignature? Signature
         {
             get => _signature.Value;
             set => _signature.Value = value;
@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Parent"/> property.
         /// </remarks>
-        protected virtual IHasCustomAttribute GetParent() => null;
+        protected virtual IHasCustomAttribute? GetParent() => null;
 
         /// <summary>
         /// Obtains the constructor of the attribute.
@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Constructor"/> property.
         /// </remarks>
-        protected virtual ICustomAttributeType GetConstructor() => null;
+        protected virtual ICustomAttributeType? GetConstructor() => null;
 
         /// <summary>
         /// Obtains the signature of the attribute.
@@ -96,7 +96,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Signature"/> property.
         /// </remarks>
-        protected virtual CustomAttributeSignature GetSignature() => null;
+        protected virtual CustomAttributeSignature? GetSignature() => null;
 
         /// <inheritdoc />
         public override string ToString() => Constructor?.FullName ?? "<<<NULL CONSTRUCTOR>>>";

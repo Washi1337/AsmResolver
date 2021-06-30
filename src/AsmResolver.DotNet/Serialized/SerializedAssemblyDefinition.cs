@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override string? GetName()
         {
-            return _manifestModule.DotNetDirectory.Metadata!.TryGetStream<StringsStream>(out var stringsStream)
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
                 ? stringsStream.GetStringByIndex(_row.Name)
                 : null;
         }
@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override string? GetCulture()
         {
-            return _manifestModule.DotNetDirectory.Metadata!.TryGetStream<StringsStream>(out var stringsStream)
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
                 ? stringsStream.GetStringByIndex(_row.Culture)
                 : null;
         }
@@ -62,7 +62,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override byte[]? GetPublicKey()
         {
-            return _manifestModule.DotNetDirectory.Metadata!.TryGetStream<BlobStream>(out var blobStream)
+            return _context.Metadata.TryGetStream<BlobStream>(out var blobStream)
                 ? blobStream.GetBlobByIndex(_row.PublicKey)
                 : null;
         }
