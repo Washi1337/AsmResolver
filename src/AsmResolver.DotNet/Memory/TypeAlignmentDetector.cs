@@ -121,7 +121,11 @@ namespace AsmResolver.DotNet.Memory
             {
                 var field = type.Fields[i];
                 if (!field.IsStatic)
+                {
+                    if (field.Signature is null)
+                        throw new ArgumentException($"Field {field.SafeToString()} does not have a field signature.");
                     largestFieldSize = Math.Max(largestFieldSize, field.Signature.FieldType.AcceptVisitor(this));
+                }
             }
 
             uint alignment = largestFieldSize;
