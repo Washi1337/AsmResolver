@@ -106,7 +106,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override TypeDefinition? Resolve() => GenericType.Resolve();
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => GenericType;
+        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => GenericType;
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

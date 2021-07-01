@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="assembly">The reference to the assembly.</param>
         /// <returns>The resolved assembly, or <c>null</c> if the resolution failed.</returns>
-        AssemblyDefinition Resolve(AssemblyDescriptor assembly);
+        AssemblyDefinition? Resolve(AssemblyDescriptor assembly);
 
         /// <summary>
         /// Adds the assembly to the cache.

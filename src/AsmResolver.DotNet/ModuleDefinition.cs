@@ -215,7 +215,7 @@ namespace AsmResolver.DotNet
             _mvid = new LazyVariable<Guid>(GetMvid);
             _encId = new LazyVariable<Guid>(GetEncId);
             _encBaseId = new LazyVariable<Guid>(GetEncBaseId);
-            _managedEntrypoint = new LazyVariable<IManagedEntrypoint?>(GetManagedEntrypoint);
+            _managedEntrypoint = new LazyVariable<IManagedEntrypoint?>(() => GetManagedEntrypoint());
             _runtimeVersion = new LazyVariable<string>(GetRuntimeVersion);
             _nativeResources = new LazyVariable<IResourceDirectory?>(GetNativeResources);
             Attributes = DotNetDirectoryFlags.ILOnly;
@@ -1137,7 +1137,7 @@ namespace AsmResolver.DotNet
         public IPEImage ToPEImage(IPEImageBuilder imageBuilder)
         {
             var result = imageBuilder.CreateImage(this);
-            if (result.DiagnosticBag.HasErrors)
+            if (result.HasFailed)
             {
                 throw new AggregateException(
                     "Construction of the PE image failed with one or more errors.",

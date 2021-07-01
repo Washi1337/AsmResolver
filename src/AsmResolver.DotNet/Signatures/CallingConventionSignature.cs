@@ -19,18 +19,23 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
         /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
         /// <returns>The read signature.</returns>
-        public static CallingConventionSignature FromReader(
+        public static CallingConventionSignature? FromReader(
             in BlobReadContext context,
             ref BinaryStreamReader reader,
             bool readToEnd = true)
         {
             var signature = ReadSignature(context, ref reader);
             if (readToEnd)
-                signature.ExtraData = reader.ReadToEnd();
+            {
+                byte[] extraData = reader.ReadToEnd();
+                if (signature is not null)
+                    signature.ExtraData = extraData;
+            }
+
             return signature;
         }
 
-        private static CallingConventionSignature ReadSignature(in BlobReadContext context, ref BinaryStreamReader reader)
+        private static CallingConventionSignature? ReadSignature(in BlobReadContext context, ref BinaryStreamReader reader)
         {
             byte flag = reader.ReadByte();
             reader.Offset--;

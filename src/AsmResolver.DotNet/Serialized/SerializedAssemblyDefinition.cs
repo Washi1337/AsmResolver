@@ -159,7 +159,7 @@ namespace AsmResolver.DotNet.Serialized
                 // At this point, we can safely use the high-level representation to parse out the signature.
                 // Read the first CA element and parse the runtime info.
                 var attribute = (CustomAttribute) _manifestModule.LookupMember(new MetadataToken(TableIndex.CustomAttribute, rid));
-                if (attribute.Signature.FixedArguments[0].Element is string n && DotNetRuntimeInfo.TryParse(n, out info))
+                if (attribute.Signature?.FixedArguments[0].Element is string n && DotNetRuntimeInfo.TryParse(n, out info))
                     return true;
             }
 

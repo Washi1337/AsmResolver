@@ -6,7 +6,6 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -456,7 +455,7 @@ namespace AsmResolver.DotNet
             }
         }
 
-        IResolutionScope ITypeDescriptor.Scope => GetDeclaringScope();
+        IResolutionScope? ITypeDescriptor.Scope => GetDeclaringScope();
 
         /// <inheritdoc />
         public bool IsValueType => BaseType is {} && (BaseType.IsTypeOf("System", nameof(ValueType)) || IsEnum);
@@ -715,7 +714,7 @@ namespace AsmResolver.DotNet
             return DeclaringType.ToTypeReference();
         }
 
-        TypeDefinition ITypeDescriptor.Resolve() => this;
+        TypeDefinition? ITypeDescriptor.Resolve() => this;
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
@@ -771,7 +770,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// If the static constructor was not present in the type, it will be inserted as the first method in the type.
         /// </remarks>
-        public MethodDefinition GetOrCreateStaticConstructor(ModuleDefinition module)
+        public MethodDefinition GetOrCreateStaticConstructor(ModuleDefinition? module)
         {
             var cctor = GetStaticConstructor();
             if (cctor == null)

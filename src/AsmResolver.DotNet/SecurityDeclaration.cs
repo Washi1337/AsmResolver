@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="action"></param>
         /// <param name="permissionSet"></param>
-        public SecurityDeclaration(SecurityAction action, PermissionSetSignature permissionSet)
+        public SecurityDeclaration(SecurityAction action, PermissionSetSignature? permissionSet)
             : this(new MetadataToken(TableIndex.DeclSecurity, 0))
         {
             Action = action;

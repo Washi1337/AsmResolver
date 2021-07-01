@@ -73,13 +73,13 @@ namespace AsmResolver.DotNet.Signatures.Types
             };
 
         /// <inheritdoc />
-        public override TypeDefinition Resolve()
+        public override TypeDefinition? Resolve()
         {
             return Type.Resolve();
         }
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef()
+        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef()
         {
             return Type;
         }
@@ -91,7 +91,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override IResolutionScope Scope
+        public override IResolutionScope? Scope
         {
             get;
         }

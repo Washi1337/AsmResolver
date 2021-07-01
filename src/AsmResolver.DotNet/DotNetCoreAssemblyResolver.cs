@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AsmResolver.DotNet.Config.Json;
 using AsmResolver.IO;
@@ -40,7 +41,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="configuration">The runtime configuration as specified by the *.runtimeconfig.json file.</param>
         /// <param name="fallbackVersion">The version of .NET to fallback on if the runtime configuration is insufficient.</param>
-        public DotNetCoreAssemblyResolver(RuntimeConfiguration configuration, Version fallbackVersion)
+        public DotNetCoreAssemblyResolver(RuntimeConfiguration? configuration, Version fallbackVersion)
             : this(UncachedFileService.Instance, configuration, fallbackVersion, DotNetCorePathProvider.Default)
         {
         }
@@ -52,7 +53,7 @@ namespace AsmResolver.DotNet
         /// <param name="fileService">The service to use for reading files from the disk.</param>
         /// <param name="configuration">The runtime configuration as specified by the *.runtimeconfig.json file.</param>
         /// <param name="fallbackVersion">The version of .NET to fallback on if the runtime configuration is insufficient.</param>
-        public DotNetCoreAssemblyResolver(IFileService fileService, RuntimeConfiguration configuration, Version fallbackVersion)
+        public DotNetCoreAssemblyResolver(IFileService fileService, RuntimeConfiguration? configuration, Version fallbackVersion)
             : this(fileService, configuration, fallbackVersion, DotNetCorePathProvider.Default)
         {
         }
@@ -63,7 +64,7 @@ namespace AsmResolver.DotNet
         /// <param name="fileService">The service to use for reading files from the disk.</param>
         /// <param name="configuration">The runtime configuration to use.</param>
         /// <param name="pathProvider">The installation directory of .NET Core.</param>
-        public DotNetCoreAssemblyResolver(IFileService fileService, RuntimeConfiguration configuration, DotNetCorePathProvider pathProvider)
+        public DotNetCoreAssemblyResolver(IFileService fileService, RuntimeConfiguration? configuration, DotNetCorePathProvider pathProvider)
             : this(fileService, configuration, null, pathProvider)
         {
         }
@@ -77,8 +78,8 @@ namespace AsmResolver.DotNet
         /// <param name="pathProvider">The installation directory of .NET Core.</param>
         public DotNetCoreAssemblyResolver(
             IFileService fileService,
-            RuntimeConfiguration configuration,
-            Version fallbackVersion,
+            RuntimeConfiguration? configuration,
+            Version? fallbackVersion,
             DotNetCorePathProvider pathProvider)
             : base(fileService)
         {
@@ -95,7 +96,7 @@ namespace AsmResolver.DotNet
                 // Order frameworks such that .NETCore.App is last.
                 var frameworks = options
                     .GetAllFrameworks()
-                    .OrderBy(framework => framework.Name, RuntimeNameComparer.Instance);
+                    .OrderBy(framework => framework.Name!, RuntimeNameComparer.Instance);
 
                 // Get relevant framework directories.
                 foreach (var framework in frameworks)
@@ -129,20 +130,20 @@ namespace AsmResolver.DotNet
         private static string[] GetFrameworkDirectories(DotNetCorePathProvider pathProvider, RuntimeFramework framework)
         {
             if (TryParseVersion(framework.Version, out var version)
-                && pathProvider.HasRuntimeInstalled(framework.Name, version))
+                && pathProvider.HasRuntimeInstalled(framework.Name!, version))
             {
-                return pathProvider.GetRuntimePathCandidates(framework.Name, version).ToArray();
+                return pathProvider.GetRuntimePathCandidates(framework.Name!, version).ToArray();
             }
 
             return Array.Empty<string>();
         }
 
         /// <inheritdoc />
-        protected override string ProbeRuntimeDirectories(AssemblyDescriptor assembly)
+        protected override string? ProbeRuntimeDirectories(AssemblyDescriptor assembly)
         {
             foreach (string candidate in _runtimeDirectories)
             {
-                string path = ProbeDirectory(assembly, candidate);
+                string? path = ProbeDirectory(assembly, candidate);
                 if (!string.IsNullOrEmpty(path))
                     return path;
             }
@@ -150,14 +151,20 @@ namespace AsmResolver.DotNet
             return null;
         }
 
-        private static bool TryParseVersion(string versionString, out Version version)
+        private static bool TryParseVersion(string? versionString, [NotNullWhen(true)] out Version? version)
         {
+            if (string.IsNullOrEmpty(versionString))
+            {
+                version = null;
+                return false;
+            }
+
             // TODO: use semver parsing.
-            int suffixIndex = versionString.IndexOf('-');
+            int suffixIndex = versionString!.IndexOf('-');
             if (suffixIndex >= 0)
                 versionString = versionString.Remove(suffixIndex);
 
-            return Version.TryParse(versionString, out version); ;
+            return Version.TryParse(versionString, out version);
         }
 
         private sealed class RuntimeNameComparer : IComparer<string>

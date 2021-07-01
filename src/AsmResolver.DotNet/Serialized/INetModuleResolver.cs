@@ -10,6 +10,6 @@ namespace AsmResolver.DotNet.Serialized
         /// </summary>
         /// <param name="name">The name of the module to resolve.</param>
         /// <returns>The module, or <c>null</c> if the module could not be resolved.</returns>
-        ModuleDefinition Resolve(string name);
+        ModuleDefinition? Resolve(string name);
     }
 }

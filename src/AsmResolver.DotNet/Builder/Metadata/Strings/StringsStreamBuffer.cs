@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
             uint index = 1;
             while (index < stream.GetPhysicalSize())
             {
-                string @string = stream.GetStringByIndex(index);
+                string @string = stream.GetStringByIndex(index)!;
                 uint newIndex = AppendString(@string);
                 _strings[@string] = newIndex;
 

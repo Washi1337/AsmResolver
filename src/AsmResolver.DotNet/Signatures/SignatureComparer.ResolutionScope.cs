@@ -62,7 +62,7 @@ namespace AsmResolver.DotNet.Signatures
         public int GetHashCode(IResolutionScope obj) => obj switch
         {
             AssemblyDescriptor assembly => GetHashCode(assembly),
-            ModuleDefinition module => GetHashCode(module.Assembly),
+            ModuleDefinition module => module.Assembly is not null ? GetHashCode(module.Assembly) : 0,
             TypeReference typeRef => GetHashCode(typeRef),
             _ => throw new ArgumentOutOfRangeException(nameof(obj))
         };

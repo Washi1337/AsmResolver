@@ -79,7 +79,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     }
 
                     if (obj.GetType().FullName == "System.Reflection.Emit.VarArgMethod")
-                        return _importer.ImportMethod(FieldReader.ReadField<MethodInfo>(obj, "m_method"));
+                        return _importer.ImportMethod(FieldReader.ReadField<MethodInfo>(obj, "m_method")!);
 
                     break;
 

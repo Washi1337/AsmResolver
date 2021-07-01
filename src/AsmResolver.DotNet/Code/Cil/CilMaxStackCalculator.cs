@@ -95,11 +95,12 @@ namespace AsmResolver.DotNet.Code.Cil
                     _ => throw new ArgumentOutOfRangeException(nameof(handler.HandlerType))
                 };
 
-                _agenda.Push(new StackState(instructions.GetIndexByOffset(handler.TryStart.Offset), 0));
-                _agenda.Push(new StackState(instructions.GetIndexByOffset(handler.HandlerStart.Offset), stackDelta));
-
-                if (handler.FilterStart is {Offset: { } offset})
-                    _agenda.Push(new StackState(instructions.GetIndexByOffset(offset), 1));
+                if (handler.TryStart is {Offset: var o1 })
+                    _agenda.Push(new StackState(instructions.GetIndexByOffset(o1), 0));
+                if (handler.HandlerStart is {Offset: var o2 })
+                    _agenda.Push(new StackState(instructions.GetIndexByOffset(o2), stackDelta));
+                if (handler.FilterStart is {Offset: var o3})
+                    _agenda.Push(new StackState(instructions.GetIndexByOffset(o3), 1));
             }
         }
 

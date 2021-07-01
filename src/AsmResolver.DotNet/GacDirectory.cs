@@ -48,8 +48,8 @@ namespace AsmResolver.DotNet
                 if (IsPrefixed)
                     directoryName = _prefix + directoryName;
 
-                string filePath = Path.Combine(fullPath, directoryName, assembly.Name!);
-                filePath = AssemblyResolverBase.ProbeFileFromFilePathWithoutExtension(filePath);
+                string? filePath = AssemblyResolverBase.ProbeFileFromFilePathWithoutExtension(
+                    Path.Combine(fullPath, directoryName, assembly.Name!));
                 if (!string.IsNullOrEmpty(filePath))
                     return filePath;
             }

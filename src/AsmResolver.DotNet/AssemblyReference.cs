@@ -2,6 +2,7 @@ using System;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet
 {
@@ -123,7 +124,7 @@ namespace AsmResolver.DotNet
                 return PublicKeyOrToken;
 
             _publicKeyToken ??= PublicKeyOrToken != null
-                ? ComputePublicKeyToken(PublicKeyOrToken, Resolve().HashAlgorithm)
+                ? ComputePublicKeyToken(PublicKeyOrToken, Resolve()?.HashAlgorithm ?? AssemblyHashAlgorithm.Sha1)
                 : null;
 
             return _publicKeyToken;

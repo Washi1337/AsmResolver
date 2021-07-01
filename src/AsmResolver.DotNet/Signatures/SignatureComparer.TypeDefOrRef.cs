@@ -54,23 +54,23 @@ namespace AsmResolver.DotNet.Signatures
             // If scope does not match, it can still be a reference to an exported type.
             return x.Resolve() is { } definition1
                    && y.Resolve() is { } definition2
-                   && Equals(definition1.Module.Assembly, definition2.Module.Assembly);
+                   && Equals(definition1.Module!.Assembly, definition2.Module!.Assembly);
         }
 
         /// <inheritdoc />
-        public bool Equals(ITypeDefOrRef? x, ITypeDefOrRef? y) => Equals((ITypeDescriptor) x, y);
+        public bool Equals(ITypeDefOrRef? x, ITypeDefOrRef? y) => Equals(x as ITypeDescriptor, y);
 
         /// <inheritdoc />
         public int GetHashCode(ITypeDefOrRef obj) => GetHashCode((ITypeDescriptor) obj);
 
         /// <inheritdoc />
-        public bool Equals(TypeDefinition? x, TypeDefinition? y) => Equals((ITypeDescriptor) x, y);
+        public bool Equals(TypeDefinition? x, TypeDefinition? y) => Equals(x as ITypeDescriptor, y);
 
         /// <inheritdoc />
         public int GetHashCode(TypeDefinition obj) => GetHashCode((ITypeDescriptor) obj);
 
         /// <inheritdoc />
-        public bool Equals(TypeReference? x, TypeReference? y) => Equals((ITypeDescriptor) x, y);
+        public bool Equals(TypeReference? x, TypeReference? y) => Equals(x as ITypeDescriptor, y);
 
         /// <inheritdoc />
         public int GetHashCode(TypeReference obj) => GetHashCode((ITypeDescriptor) obj);
@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(TypeSpecification obj) => GetHashCode(obj.Signature);
+        public int GetHashCode(TypeSpecification obj) => obj.Signature is not null ? GetHashCode(obj.Signature) : 0;
 
         /// <inheritdoc />
         public bool Equals(ExportedType? x, ExportedType? y)

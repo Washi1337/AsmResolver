@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
 
@@ -66,13 +67,16 @@ namespace AsmResolver.DotNet.Code.Native
             if (!_modules.TryGetValue(name, out var module))
             {
                 module = new ImportedModule(name);
-                _modules.Add(module.Name, module);
+                _modules.Add(module.Name!, module);
             }
 
             return module;
         }
 
-        private static bool TryGetSimilarSymbol(ImportedSymbol symbol, IImportedModule module, out ImportedSymbol existingSymbol)
+        private static bool TryGetSimilarSymbol(
+            ImportedSymbol symbol,
+            IImportedModule module,
+            [NotNullWhen(true)] out ImportedSymbol? existingSymbol)
         {
             for (int i = 0; i < module.Symbols.Count; i++)
             {

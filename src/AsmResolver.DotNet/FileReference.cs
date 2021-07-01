@@ -82,13 +82,13 @@ namespace AsmResolver.DotNet
         public string FullName => Name ?? NullName;
 
         /// <inheritdoc />
-        public ModuleDefinition Module
+        public ModuleDefinition? Module
         {
             get;
             private set;
         }
 
-        ModuleDefinition IOwnedCollectionElement<ModuleDefinition>.Owner
+        ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
             get => Module;
             set => Module = value;

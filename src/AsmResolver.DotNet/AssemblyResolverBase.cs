@@ -47,13 +47,13 @@ namespace AsmResolver.DotNet
         } = new List<string>();
 
         /// <inheritdoc />
-        public AssemblyDefinition Resolve(AssemblyDescriptor assembly)
+        public AssemblyDefinition? Resolve(AssemblyDescriptor assembly)
         {
             if (_cache.TryGetValue(assembly, out var assemblyDef))
                 return assemblyDef;
 
             assemblyDef = ResolveImpl(assembly);
-            if (assemblyDef != null)
+            if (assemblyDef is not null)
                 _cache.Add(assembly, assemblyDef);
 
             return assemblyDef;
@@ -89,10 +89,10 @@ namespace AsmResolver.DotNet
         /// This method should not implement caching of resolved assemblies. The caller of this method already implements
         /// this.
         /// </remarks>
-        protected virtual AssemblyDefinition ResolveImpl(AssemblyDescriptor assembly)
+        protected virtual AssemblyDefinition? ResolveImpl(AssemblyDescriptor assembly)
         {
             // Prefer assemblies in the current directory, in case .NET libraries are shipped with the application.
-            string path = ProbeSearchDirectories(assembly);
+            string? path = ProbeSearchDirectories(assembly);
 
             if (string.IsNullOrEmpty(path))
             {
@@ -106,10 +106,10 @@ namespace AsmResolver.DotNet
             }
 
             // Attempt to load the file.
-            AssemblyDefinition assemblyDef = null;
+            AssemblyDefinition? assemblyDef = null;
             try
             {
-                assemblyDef = LoadAssemblyFromFile(path);
+                assemblyDef = LoadAssemblyFromFile(path!);
             }
             catch
             {
@@ -134,11 +134,11 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="assembly">The assembly descriptor to search.</param>
         /// <returns>The path to the assembly, or <c>null</c> if none was found.</returns>
-        protected string ProbeSearchDirectories(AssemblyDescriptor assembly)
+        protected string? ProbeSearchDirectories(AssemblyDescriptor assembly)
         {
             for (int i = 0; i < SearchDirectories.Count; i++)
             {
-                string path = ProbeDirectory(assembly, SearchDirectories[i]);
+                string? path = ProbeDirectory(assembly, SearchDirectories[i]);
                 if (!string.IsNullOrEmpty(path))
                     return path;
             }
@@ -151,7 +151,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="assembly">The assembly descriptor to search.</param>
         /// <returns>The path to the assembly, or <c>null</c> if none was found.</returns>
-        protected abstract string ProbeRuntimeDirectories(AssemblyDescriptor assembly);
+        protected abstract string? ProbeRuntimeDirectories(AssemblyDescriptor assembly);
 
         /// <summary>
         /// Probes a directory for the provided assembly.
@@ -159,18 +159,24 @@ namespace AsmResolver.DotNet
         /// <param name="assembly">The assembly descriptor to search.</param>
         /// <param name="directory">The path to the directory to probe.</param>
         /// <returns>The path to the assembly, or <c>null</c> if none was found.</returns>
-        protected static string ProbeDirectory(AssemblyDescriptor assembly, string directory)
+        protected static string? ProbeDirectory(AssemblyDescriptor assembly, string directory)
         {
-            string path = string.IsNullOrEmpty(assembly.Culture)
-                ? Path.Combine(directory, assembly.Name)
-                : Path.Combine(directory, assembly.Culture, assembly.Name);
+            if (assembly.Name is null)
+                return null;
 
-            path = ProbeFileFromFilePathWithoutExtension(path)
+            string path;
+            if (string.IsNullOrEmpty(assembly.Culture))
+                path = Path.Combine(directory, assembly.Name);
+            else if (assembly.Culture is not null)
+                path = Path.Combine(directory, assembly.Culture, assembly.Name);
+            else
+                return null;
+
+            return ProbeFileFromFilePathWithoutExtension(path)
                    ?? ProbeFileFromFilePathWithoutExtension(Path.Combine(path, assembly.Name));
-            return path;
         }
 
-        internal static string ProbeFileFromFilePathWithoutExtension(string baseFilePath)
+        internal static string? ProbeFileFromFilePathWithoutExtension(string baseFilePath)
         {
             foreach (string extension in BinaryFileExtensions)
             {

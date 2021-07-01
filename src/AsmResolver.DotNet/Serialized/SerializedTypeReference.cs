@@ -57,7 +57,9 @@ namespace AsmResolver.DotNet.Serialized
             var decoder = tablesStream.GetIndexEncoder(CodedIndex.ResolutionScope);
             var token = decoder.DecodeIndex(_row.ResolutionScope);
 
-            return Module.LookupMember(token) as IResolutionScope;
+            return !_context.ParentModule.TryLookupMember(token, out var scope)
+                ? _context.BadImageAndReturn<IResolutionScope>($"Invalid resolution scope in type reference {MetadataToken}.")
+                : scope as IResolutionScope;
         }
 
         /// <inheritdoc />

@@ -9,7 +9,8 @@ namespace AsmResolver.DotNet.Cloning
                 var stub = CreateFieldStub(context, field);
 
                 // If field's declaring type is cloned as well, add the cloned method to the cloned type.
-                if (context.ClonedMembers.TryGetValue(field.DeclaringType, out var member)
+                if (field.DeclaringType is not null
+                    && context.ClonedMembers.TryGetValue(field.DeclaringType, out var member)
                     && member is TypeDefinition declaringType)
                 {
                     declaringType.Fields.Add(stub);

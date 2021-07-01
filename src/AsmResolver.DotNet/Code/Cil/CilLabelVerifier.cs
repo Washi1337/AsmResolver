@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet.Code.Cil
             }
         }
 
-        private void VerifyHandlerLabel(int handlerIndex, string labelName, ICilLabel label)
+        private void VerifyHandlerLabel(int handlerIndex, string labelName, ICilLabel? label)
         {
             switch (label)
             {

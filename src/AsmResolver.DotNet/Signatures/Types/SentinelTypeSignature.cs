@@ -28,10 +28,10 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override bool IsValueType => false;
 
         /// <inheritdoc />
-        public override TypeDefinition Resolve() => throw new InvalidOperationException();
+        public override TypeDefinition? Resolve() => throw new InvalidOperationException();
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => null;
+        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => null;
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context) =>

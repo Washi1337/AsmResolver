@@ -64,7 +64,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ITypeDefOrRef ToTypeDefOrRef() => Type;
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => Type;
+        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => Type;
 
         /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>

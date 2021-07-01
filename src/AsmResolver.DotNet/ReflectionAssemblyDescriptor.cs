@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet
             _assemblyName.CultureName;
 
         /// <inheritdoc />
-        public override bool IsCorLib => KnownCorLibs.KnownCorLibNames.Contains(Name);
+        public override bool IsCorLib => Name is not null && KnownCorLibs.KnownCorLibNames.Contains(Name);
 
         /// <inheritdoc />
         public override byte[]? GetPublicKeyToken() =>

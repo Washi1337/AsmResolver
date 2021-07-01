@@ -173,22 +173,27 @@ namespace AsmResolver.DotNet.Code.Cil
             if (handler.IsFat && !useFatFormat)
                 throw new InvalidOperationException("Can only serialize fat exception handlers in fat format.");
 
+            uint tryStart = (uint) (handler.TryStart?.Offset ?? 0);
+            uint tryEnd= (uint) (handler.TryEnd?.Offset ?? 0);
+            uint handlerStart = (uint) (handler.HandlerStart?.Offset ?? 0);
+            uint handlerEnd = (uint) (handler.HandlerEnd?.Offset ?? 0);
+
             // Write handler type and boundaries.
             if (useFatFormat)
             {
                 writer.WriteUInt32((uint) handler.HandlerType);
-                writer.WriteUInt32((uint) handler.TryStart.Offset);
-                writer.WriteUInt32((uint) (handler.TryEnd.Offset - handler.TryStart.Offset));
-                writer.WriteUInt32((uint) handler.HandlerStart.Offset);
-                writer.WriteUInt32((uint) (handler.HandlerEnd.Offset - handler.HandlerStart.Offset));
+                writer.WriteUInt32(tryStart);
+                writer.WriteUInt32(tryEnd - tryStart);
+                writer.WriteUInt32(handlerStart);
+                writer.WriteUInt32(handlerEnd - handlerStart);
             }
             else
             {
                 writer.WriteUInt16((ushort)handler. HandlerType);
-                writer.WriteUInt16((ushort) handler.TryStart.Offset);
-                writer.WriteByte((byte) (handler.TryEnd.Offset -handler. TryStart.Offset));
-                writer.WriteUInt16((ushort) handler.HandlerStart.Offset);
-                writer.WriteByte((byte) (handler.HandlerEnd.Offset - handler.HandlerStart.Offset));
+                writer.WriteUInt16((ushort) tryStart);
+                writer.WriteByte((byte) (tryEnd - tryStart));
+                writer.WriteUInt16((ushort) handlerStart);
+                writer.WriteByte((byte) (handlerEnd - handlerStart));
             }
 
             // Write handler type or filter start.
@@ -212,7 +217,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 }
 
                 case CilExceptionHandlerType.Filter:
-                    writer.WriteUInt32((uint) handler.FilterStart.Offset);
+                    writer.WriteUInt32((uint) (handler.FilterStart?.Offset ?? 0));
                     break;
 
                 case CilExceptionHandlerType.Finally:

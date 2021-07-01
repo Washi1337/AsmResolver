@@ -456,8 +456,11 @@ namespace AsmResolver.DotNet.Cloning
             return new(declaration.Action, ClonePermissionSet(context, declaration.PermissionSet));
         }
 
-        private static PermissionSetSignature ClonePermissionSet(MemberCloneContext context, PermissionSetSignature permissionSet)
+        private static PermissionSetSignature? ClonePermissionSet(MemberCloneContext context, PermissionSetSignature? permissionSet)
         {
+            if (permissionSet is null)
+                return null;
+
             var result = new PermissionSetSignature();
             foreach (var attribute in permissionSet.Attributes)
                 result.Attributes.Add(CloneSecurityAttribute(context, attribute));

@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <summary>
         /// Gets or sets the security attribute type that is used.
         /// </summary>
-        public TypeSignature AttributeType
+        public TypeSignature? AttributeType
         {
             get;
             set;
@@ -81,7 +81,7 @@ namespace AsmResolver.DotNet.Signatures.Security
         {
             var writer = context.Writer;
 
-            string attributeTypeString;
+            string? attributeTypeString;
             if (AttributeType is null)
             {
                 context.ErrorListener.RegisterException(new NullReferenceException(

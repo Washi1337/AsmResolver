@@ -219,7 +219,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             writer.WriteCompressedUInt32((uint) sizedDimensions.Length);
             foreach (var sizedDimension in sizedDimensions)
-                writer.WriteCompressedUInt32((uint) sizedDimension.Size.Value);
+                writer.WriteCompressedUInt32((uint) sizedDimension.Size!.Value);
 
             // Bounded dimensions.
             var boundedDimensions = Dimensions
@@ -227,7 +227,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 .ToArray();
             writer.WriteCompressedUInt32((uint) boundedDimensions.Length);
             foreach (var boundedDimension in boundedDimensions)
-                writer.WriteCompressedUInt32((uint) boundedDimension.LowerBound.Value);
+                writer.WriteCompressedUInt32((uint) boundedDimension.LowerBound!.Value);
         }
     }
 }

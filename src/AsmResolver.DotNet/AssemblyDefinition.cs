@@ -169,7 +169,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public override bool IsCorLib => KnownCorLibs.KnownCorLibNames.Contains(Name);
+        public override bool IsCorLib => Name is not null && KnownCorLibs.KnownCorLibNames.Contains(Name);
 
         /// <summary>
         /// Obtains the list of defined modules in the .NET assembly.
@@ -227,9 +227,9 @@ namespace AsmResolver.DotNet
             {
                 var ctor = CustomAttributes[i].Constructor;
 
-                if (ctor is not null
+                if (ctor?.DeclaringType is not null
                     && ctor.DeclaringType.IsTypeOf("System.Runtime.Versioning", nameof(TargetFrameworkAttribute))
-                    && CustomAttributes[i].Signature.FixedArguments[0].Element is string name
+                    && CustomAttributes[i].Signature?.FixedArguments[0].Element is string name
                     && DotNetRuntimeInfo.TryParse(name, out info))
                 {
                     return true;

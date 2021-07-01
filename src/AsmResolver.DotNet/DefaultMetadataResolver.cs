@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public TypeDefinition ResolveType(ITypeDescriptor type)
+        public TypeDefinition? ResolveType(ITypeDescriptor? type)
         {
             return type switch
             {
@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet
             };
         }
 
-        private TypeDefinition LookupInCache(ITypeDescriptor type)
+        private TypeDefinition? LookupInCache(ITypeDescriptor type)
         {
             if (_typeCache.TryGetValue(type, out var typeDef))
             {
@@ -60,22 +60,28 @@ namespace AsmResolver.DotNet
             return null;
         }
 
-        private TypeDefinition ResolveTypeReference(TypeReference reference)
+        private TypeDefinition? ResolveTypeReference(TypeReference? reference)
         {
+            if (reference is null)
+                return null;
+
             var resolvedType = LookupInCache(reference);
-            if (resolvedType != null)
+            if (resolvedType is not null)
                 return resolvedType;
 
             var resolution = new TypeResolution(AssemblyResolver);
             resolvedType = resolution.ResolveTypeReference(reference);
-            if (resolvedType != null)
+            if (resolvedType is not null)
                 _typeCache[reference] = resolvedType;
 
             return resolvedType;
         }
 
-        private TypeDefinition ResolveExportedType(ExportedType exportedType)
+        private TypeDefinition? ResolveExportedType(ExportedType? exportedType)
         {
+            if (exportedType is null)
+                return null;
+
             var resolvedType = LookupInCache(exportedType);
             if (resolvedType != null)
                 return resolvedType;
@@ -88,9 +94,9 @@ namespace AsmResolver.DotNet
             return resolvedType;
         }
 
-        private TypeDefinition ResolveTypeSignature(TypeSignature signature)
+        private TypeDefinition? ResolveTypeSignature(TypeSignature? signature)
         {
-            var type = signature.GetUnderlyingTypeDefOrRef();
+            var type = signature?.GetUnderlyingTypeDefOrRef();
             if (type is null)
                 return null;
 
@@ -104,8 +110,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MethodDefinition ResolveMethod(IMethodDescriptor method)
+        public MethodDefinition? ResolveMethod(IMethodDescriptor? method)
         {
+            if (method is null)
+                return null;
+
             var declaringType = ResolveType(method.DeclaringType);
             if (declaringType is null)
                 return null;
@@ -123,8 +132,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public FieldDefinition ResolveField(IFieldDescriptor field)
+        public FieldDefinition? ResolveField(IFieldDescriptor? field)
         {
+            if (field is null)
+                return null;
+
             var declaringType = ResolveType(field.DeclaringType);
             if (declaringType is null)
                 return null;
@@ -152,10 +164,10 @@ namespace AsmResolver.DotNet
                 _implementationStack = new Stack<IImplementation>();
             }
 
-            public TypeDefinition ResolveTypeReference(TypeReference reference)
+            public TypeDefinition? ResolveTypeReference(TypeReference? reference)
             {
                 var scope = reference?.Scope;
-                if (scope is null || _scopeStack.Contains(scope))
+                if (reference?.Name is null || scope is null || _scopeStack.Contains(scope))
                     return null;
                 _scopeStack.Push(scope);
 
@@ -181,10 +193,10 @@ namespace AsmResolver.DotNet
                 }
             }
 
-            public TypeDefinition ResolveExportedType(ExportedType exportedType)
+            public TypeDefinition? ResolveExportedType(ExportedType? exportedType)
             {
                 var implementation = exportedType?.Implementation;
-                if (implementation is null || _implementationStack.Contains(implementation))
+                if (exportedType?.Name is null || implementation is null || _implementationStack.Contains(implementation))
                     return null;
                 _implementationStack.Push(implementation);
 
@@ -196,8 +208,8 @@ namespace AsmResolver.DotNet
                             ? FindTypeInAssembly(assembly, exportedType.Namespace, exportedType.Name)
                             : null;
 
-                    case TableIndex.File:
-                        var module = FindModuleInAssembly(exportedType.Module.Assembly, implementation.Name);
+                    case TableIndex.File when !string.IsNullOrEmpty(implementation.Name):
+                        var module = FindModuleInAssembly(exportedType.Module!.Assembly!, implementation.Name!);
                         return module is {}
                             ? FindTypeInModule(module, exportedType.Namespace, exportedType.Name)
                             : null;
@@ -214,7 +226,7 @@ namespace AsmResolver.DotNet
                 }
             }
 
-            private TypeDefinition FindTypeInAssembly(AssemblyDefinition assembly, string ns, string name)
+            private TypeDefinition? FindTypeInAssembly(AssemblyDefinition assembly, string? ns, string name)
             {
                 for (int i = 0; i < assembly.Modules.Count; i++)
                 {
@@ -227,7 +239,7 @@ namespace AsmResolver.DotNet
                 return null;
             }
 
-            private TypeDefinition FindTypeInModule(ModuleDefinition module, string ns, string name)
+            private TypeDefinition? FindTypeInModule(ModuleDefinition module, string? ns, string name)
             {
                 for (int i = 0; i < module.ExportedTypes.Count; i++)
                 {
@@ -246,7 +258,7 @@ namespace AsmResolver.DotNet
                 return null;
             }
 
-            private static TypeDefinition FindTypeInType(TypeDefinition enclosingType, string name)
+            private static TypeDefinition? FindTypeInType(TypeDefinition enclosingType, string name)
             {
                 for (int i = 0; i < enclosingType.NestedTypes.Count; i++)
                 {
@@ -258,7 +270,7 @@ namespace AsmResolver.DotNet
                 return null;
             }
 
-            private static ModuleDefinition FindModuleInAssembly(AssemblyDefinition assembly, string name)
+            private static ModuleDefinition? FindModuleInAssembly(AssemblyDefinition assembly, string name)
             {
                 for (int i = 0; i < assembly.Modules.Count; i++)
                 {

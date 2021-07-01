@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet
         /// Creates a new reference to an external module.
         /// </summary>
         /// <param name="name">The file name of the module.</param>
-        public ModuleReference(string name)
+        public ModuleReference(string? name)
             : this(new MetadataToken(TableIndex.ModuleRef, 0))
         {
             Name = name;

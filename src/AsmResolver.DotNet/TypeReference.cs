@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet
         /// <param name="scope">The scope that defines the type.</param>
         /// <param name="ns">The namespace the type resides in.</param>
         /// <param name="name">The name of the type.</param>
-        public TypeReference(ModuleDefinition module, IResolutionScope scope, string? ns, string name)
+        public TypeReference(ModuleDefinition? module, IResolutionScope? scope, string? ns, string? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
             _scope.Value = scope;
@@ -95,7 +95,7 @@ namespace AsmResolver.DotNet
         public bool IsValueType => Resolve()?.IsValueType ?? false;
 
         /// <inheritdoc />
-        public ModuleDefinition Module
+        public ModuleDefinition? Module
         {
             get;
             protected set;

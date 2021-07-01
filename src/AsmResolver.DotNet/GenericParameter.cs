@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the parameter.</param>
         /// <param name="attributes">Additional attributes to assign to the parameter.</param>
-        public GenericParameter(string name, GenericParameterAttributes attributes)
+        public GenericParameter(string? name, GenericParameterAttributes attributes)
             : this(new MetadataToken(TableIndex.GenericParam, 0))
         {
             Name = name;
