@@ -5,14 +5,23 @@
 
         <IsPackable>false</IsPackable>
 
-        <LangVersion>8</LangVersion>
-
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DefineConstants>TRACECOREAPP; XUNIT_NULLABLE</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DefineConstants>TRACECOREAPP; XUNIT_NULLABLE</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0-release-20210422-02" />
         <PackageReference Include="xunit" Version="2.4.1" />
+        <PackageReference Include="xunit.analyzers" Version="0.10.0" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

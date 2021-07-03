@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.IO;
-using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Imports
 {
@@ -13,7 +12,7 @@ namespace AsmResolver.PE.Imports
     /// </summary>
     public class ImportedModule : IImportedModule
     {
-        private IList<ImportedSymbol> _members;
+        private IList<ImportedSymbol>? _members;
 
         /// <summary>
         /// Creates a new empty module import.
@@ -32,7 +31,7 @@ namespace AsmResolver.PE.Imports
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get;
             set;
@@ -68,10 +67,12 @@ namespace AsmResolver.PE.Imports
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
-        public static IImportedModule FromReader(PEReaderContext context, ref BinaryStreamReader reader)
+        public static IImportedModule? FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             var entry = new SerializedImportedModule(context, ref reader);
-            return entry.IsEmpty ? null : entry;
+            return entry.IsEmpty
+                ? null
+                : entry;
         }
 
         /// <summary>
@@ -85,10 +86,6 @@ namespace AsmResolver.PE.Imports
             new OwnedCollection<IImportedModule, ImportedSymbol>(this);
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"{Name} ({Symbols.Count} symbols)";
-        }
-
+        public override string ToString() => $"{Name} ({Symbols.Count.ToString()} symbols)";
     }
 }

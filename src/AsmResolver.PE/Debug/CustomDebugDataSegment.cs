@@ -29,7 +29,7 @@ namespace AsmResolver.PE.Debug
         /// <summary>
         /// Gets or sets the raw data of the segment.
         /// </summary>
-        public ISegment Contents
+        public ISegment? Contents
         {
             get;
             set;

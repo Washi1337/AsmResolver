@@ -49,6 +49,9 @@ namespace AsmResolver.PE.Exports.Builder
         /// <param name="symbol">The symbol to register.</param>
         public void AddSymbol(ExportedSymbol symbol)
         {
+            if (symbol.ParentDirectory is null)
+                throw new ArgumentException("Symbol was not added to an export directory.");
+
             if (symbol.IsByName)
             {
                 _namedEntries.Add(symbol);

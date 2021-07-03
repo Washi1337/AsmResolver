@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.IO;
-using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Exports
 {
@@ -43,7 +42,7 @@ namespace AsmResolver.PE.Exports
         }
 
         /// <inheritdoc />
-        protected override string GetName()
+        protected override string? GetName()
         {
             if (!_context.File.TryCreateReaderAtRva(_nameRva, out var reader))
             {

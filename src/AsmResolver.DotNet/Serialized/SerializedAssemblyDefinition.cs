@@ -54,17 +54,17 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override string GetCulture()
         {
-            return _context.Image.DotNetDirectory.Metadata
-                .GetStream<StringsStream>()
-                ?.GetStringByIndex(_row.Culture);
+            return _context.Image.DotNetDirectory.Metadata.TryGetStream(out StringsStream stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Culture)
+                : null;
         }
 
         /// <inheritdoc />
         protected override byte[] GetPublicKey()
         {
-            return _context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                ?.GetBlobByIndex(_row.PublicKey);
+            return _context.Image.DotNetDirectory.Metadata.TryGetStream(out BlobStream blobStream)
+                ? blobStream.GetBlobByIndex(_row.PublicKey)
+                : null;
         }
 
         /// <inheritdoc />

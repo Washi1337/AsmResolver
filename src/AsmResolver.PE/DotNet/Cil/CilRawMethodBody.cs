@@ -8,7 +8,11 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public abstract class CilRawMethodBody : SegmentBase
     {
-        private IReadableSegment _code;
+        /// <inheritdoc />
+        protected CilRawMethodBody(IReadableSegment code)
+        {
+            Code = code;
+        }
 
         /// <summary>
         /// Gets a value indicating whether the method body is using the fat format.
@@ -23,8 +27,8 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         public IReadableSegment Code
         {
-            get => _code;
-            set => _code = value ?? throw new ArgumentNullException(nameof(value));
+            get;
+            set;
         }
 
         /// <summary>
@@ -35,7 +39,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The raw method body.</returns>
         /// <exception cref="NotSupportedException">Occurs when the method header indicates an invalid or unsupported
         /// method body format.</exception>
-        public static CilRawMethodBody FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
+        public static CilRawMethodBody? FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
         {
             var flag = (CilMethodBodyAttributes) reader.ReadByte();
             reader.Offset--;

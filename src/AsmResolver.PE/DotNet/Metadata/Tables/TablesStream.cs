@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -31,8 +30,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// The default name of a table stream using the uncompressed format.
         /// </summary>
         public const string UncompressedStreamName = "#Schema";
-
-        private const int MaxTableCount = (int) TableIndex.GenericParamConstraint;
 
         private readonly IDictionary<CodedIndex, IndexEncoder> _indexEncoders;
         private readonly LazyVariable<IList<IMetadataTable>> _tables;
@@ -68,7 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             get;
             set;
-        } = 0;
+        }
 
         /// <summary>
         /// Gets or sets the major version number of the schema.
@@ -86,7 +83,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             get;
             set;
-        } = 0;
+        }
 
         /// <summary>
         /// Gets or sets the flags of the tables stream.
@@ -445,39 +442,39 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         private Dictionary<CodedIndex, IndexEncoder> CreateIndexEncoders()
         {
-            return new Dictionary<CodedIndex, IndexEncoder>
+            return new()
             {
                 [CodedIndex.TypeDefOrRef] = new IndexEncoder(this,
                     TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.TypeSpec),
-                [CodedIndex.HasConstant] = new IndexEncoder(this,
+                [CodedIndex.HasConstant] = new(this,
                     TableIndex.Field, TableIndex.Param, TableIndex.Property),
-                [CodedIndex.HasCustomAttribute] = new IndexEncoder(this,
+                [CodedIndex.HasCustomAttribute] = new(this,
                     TableIndex.Method, TableIndex.Field, TableIndex.TypeRef, TableIndex.TypeDef,
                     TableIndex.Param, TableIndex.InterfaceImpl, TableIndex.MemberRef, TableIndex.Module,
                     TableIndex.DeclSecurity, TableIndex.Property, TableIndex.Event, TableIndex.StandAloneSig,
                     TableIndex.ModuleRef, TableIndex.TypeSpec, TableIndex.Assembly, TableIndex.AssemblyRef,
                     TableIndex.File, TableIndex.ExportedType, TableIndex.ManifestResource, TableIndex.GenericParam,
                     TableIndex.GenericParamConstraint, TableIndex.MethodSpec),
-                [CodedIndex.HasFieldMarshal] = new IndexEncoder(this,
+                [CodedIndex.HasFieldMarshal] = new(this,
                     TableIndex.Field, TableIndex.Param),
-                [CodedIndex.HasDeclSecurity] = new IndexEncoder(this,
+                [CodedIndex.HasDeclSecurity] = new(this,
                     TableIndex.TypeDef, TableIndex.Method, TableIndex.Assembly),
-                [CodedIndex.MemberRefParent] = new IndexEncoder(this,
+                [CodedIndex.MemberRefParent] = new(this,
                     TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.ModuleRef,
                     TableIndex.Method, TableIndex.TypeSpec),
-                [CodedIndex.HasSemantics] = new IndexEncoder(this,
+                [CodedIndex.HasSemantics] = new(this,
                     TableIndex.Event, TableIndex.Property),
-                [CodedIndex.MethodDefOrRef] = new IndexEncoder(this,
+                [CodedIndex.MethodDefOrRef] = new(this,
                     TableIndex.Method, TableIndex.MemberRef),
-                [CodedIndex.MemberForwarded] = new IndexEncoder(this,
+                [CodedIndex.MemberForwarded] = new(this,
                     TableIndex.Field, TableIndex.Method),
-                [CodedIndex.Implementation] = new IndexEncoder(this,
+                [CodedIndex.Implementation] = new(this,
                     TableIndex.File, TableIndex.AssemblyRef, TableIndex.ExportedType),
-                [CodedIndex.CustomAttributeType] = new IndexEncoder(this,
+                [CodedIndex.CustomAttributeType] = new(this,
                     0, 0, TableIndex.Method, TableIndex.MemberRef, 0),
-                [CodedIndex.ResolutionScope] = new IndexEncoder(this,
+                [CodedIndex.ResolutionScope] = new(this,
                     TableIndex.Module, TableIndex.ModuleRef, TableIndex.AssemblyRef, TableIndex.TypeRef),
-                [CodedIndex.TypeOrMethodDef] = new IndexEncoder(this,
+                [CodedIndex.TypeOrMethodDef] = new(this,
                     TableIndex.TypeDef, TableIndex.Method)
             };
         }

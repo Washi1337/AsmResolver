@@ -54,7 +54,7 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         {
             foreach (var token in Items)
             {
-                if (Type.HasFlag(VTableType.VTable32Bit))
+                if ((Type & VTableType.VTable32Bit) != 0)
                     writer.WriteUInt32(token.ToUInt32());
                 else
                     writer.WriteUInt64(token.ToUInt32());

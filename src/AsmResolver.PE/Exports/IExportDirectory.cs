@@ -49,7 +49,7 @@ namespace AsmResolver.PE.Exports
         /// <summary>
         /// Gets or sets the name of the exports directory.
         /// </summary>
-        string Name
+        string? Name
         {
             get;
             set;

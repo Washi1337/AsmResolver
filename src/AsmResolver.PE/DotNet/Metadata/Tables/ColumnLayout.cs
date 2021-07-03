@@ -3,9 +3,9 @@ using System;
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     /// <summary>
-    /// Provides a description of a single column in a metadata table. 
+    /// Provides a description of a single column in a metadata table.
     /// </summary>
-    public class ColumnLayout
+    public readonly struct ColumnLayout
     {
         /// <summary>
         /// Defines a new column layout, using a fixed size column type.
@@ -45,7 +45,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             Type = type;
             Size = size;
         }
-        
+
         /// <summary>
         /// Gets the name of the column.
         /// </summary>
@@ -53,7 +53,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets the data type that this column persists.
         /// </summary>

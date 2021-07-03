@@ -25,22 +25,24 @@ namespace AsmResolver.PE.Tests.DotNet.Resources
         public void ReadEmbeddedResource1Data()
         {
             var image = PEImage.FromFile(typeof(TestCaseResources).Assembly.Location);
-            var metadata = image.DotNetDirectory.Metadata;
+            var metadata = image.DotNetDirectory!.Metadata!;
             var resource = FindResourceRow(metadata, "AsmResolver.DotNet.TestCases.Resources.Resources.EmbeddedResource1");
 
-            var data = image.DotNetDirectory.DotNetResources.GetManifestResourceData(resource.Offset);
-            Assert.Equal(TestCaseResources.GetEmbeddedResource1Data(), Encoding.ASCII.GetString(data));
+            byte[]? data = image.DotNetDirectory.DotNetResources!.GetManifestResourceData(resource.Offset);
+            Assert.NotNull(data);
+            Assert.Equal(TestCaseResources.GetEmbeddedResource1Data(), Encoding.ASCII.GetString(data!));
         }
 
         [Fact]
         public void ReadEmbeddedResource2Data()
         {
             var image = PEImage.FromFile(typeof(TestCaseResources).Assembly.Location);
-            var metadata = image.DotNetDirectory.Metadata;
+            var metadata = image.DotNetDirectory!.Metadata!;
             var resource = FindResourceRow(metadata, "AsmResolver.DotNet.TestCases.Resources.Resources.EmbeddedResource2");
 
-            var data = image.DotNetDirectory.DotNetResources.GetManifestResourceData(resource.Offset);
-            Assert.Equal(TestCaseResources.GetEmbeddedResource2Data(), Encoding.ASCII.GetString(data));
+            byte[]? data = image.DotNetDirectory.DotNetResources!.GetManifestResourceData(resource.Offset);
+            Assert.NotNull(data);
+            Assert.Equal(TestCaseResources.GetEmbeddedResource2Data(), Encoding.ASCII.GetString(data!));
         }
     }
 }

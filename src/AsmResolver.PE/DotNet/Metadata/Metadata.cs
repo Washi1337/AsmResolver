@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,7 +12,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class Metadata : SegmentBase, IMetadata
     {
-        private IList<IMetadataStream> _streams;
+        private IList<IMetadataStream>? _streams;
 
         /// <inheritdoc />
         public ushort MajorVersion
@@ -101,7 +102,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="offset">The offset of the first stream header.</param>
         /// <returns>A list of stream headers.</returns>
-        protected virtual IList<MetadataStreamHeader> GetStreamHeaders(uint offset)
+        protected virtual MetadataStreamHeader[] GetStreamHeaders(uint offset)
         {
             uint sizeOfHeaders = GetSizeOfStreamHeaders();
             offset += sizeOfHeaders;
@@ -129,10 +130,11 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="writer">The output stream to write to.</param>
         /// <param name="headers">The headers to write.</param>
-        protected virtual void WriteStreamHeaders(IBinaryStreamWriter writer, IEnumerable<MetadataStreamHeader> headers)
+        protected virtual void WriteStreamHeaders(IBinaryStreamWriter writer, MetadataStreamHeader[] headers)
         {
-            foreach (var header in headers)
+            for (int i = 0; i < headers.Length; i++)
             {
+                var header = headers[i];
                 writer.WriteUInt32(header.Offset);
                 writer.WriteUInt32(header.Size);
                 writer.WriteAsciiString(header.Name);
@@ -147,37 +149,63 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="writer">The output stream to write to.</param>
         protected virtual void WriteStreams(IBinaryStreamWriter writer)
         {
-            foreach (var stream in Streams)
-                stream.Write(writer);
+            for (int i = 0; i < Streams.Count; i++)
+                Streams[i].Write(writer);
         }
 
         /// <inheritdoc />
         public virtual IMetadataStream GetStream(string name)
+        {
+            return TryGetStream(name, out var stream)
+                ? stream
+                : throw new KeyNotFoundException($"Metadata directory does not contain a stream called {name}.");
+        }
+
+        /// <inheritdoc />
+        public TStream GetStream<TStream>()
+            where TStream : class, IMetadataStream
+        {
+            return TryGetStream(out TStream? stream)
+                ? stream
+                : throw new KeyNotFoundException(
+                    $"Metadata directory does not contain a stream of type {typeof(TStream).FullName}.");
+        }
+
+        /// <inheritdoc />
+        public bool TryGetStream(string name, [NotNullWhen(true)] out IMetadataStream? stream)
         {
             var streams = Streams;
 
             for (int i = 0; i < streams.Count; i++)
             {
                 if (streams[i].Name == name)
-                    return streams[i];
+                {
+                    stream = streams[i];
+                    return true;
+                }
             }
 
-            return null;
+            stream = null;
+            return false;
         }
 
         /// <inheritdoc />
-        public TStream GetStream<TStream>()
-            where TStream : IMetadataStream
+        public bool TryGetStream<TStream>([NotNullWhen(true)] out TStream? stream)
+            where TStream : class, IMetadataStream
         {
             var streams = Streams;
 
             for (int i = 0; i < streams.Count; i++)
             {
-                if (streams[i] is TStream stream)
-                    return stream;
+                if (streams[i] is TStream s)
+                {
+                    stream = s;
+                    return true;
+                }
             }
 
-            return default;
+            stream = null;
+            return false;
         }
 
         /// <summary>

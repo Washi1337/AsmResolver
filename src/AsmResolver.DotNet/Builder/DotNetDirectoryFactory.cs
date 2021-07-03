@@ -164,35 +164,31 @@ namespace AsmResolver.DotNet.Builder
                 return metadataBuffer;
 
             // Import original contents of the blob stream if specified.
-            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveBlobIndices) != 0)
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveBlobIndices) != 0
+                && originalMetadata.TryGetStream(out BlobStream blobStream))
             {
-                var blobStream = originalMetadata.GetStream<BlobStream>();
-                if (blobStream != null)
-                    metadataBuffer.BlobStream.ImportStream(blobStream);
+                metadataBuffer.BlobStream.ImportStream(blobStream);
             }
 
             // Import original contents of the GUID stream if specified.
-            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveGuidIndices) != 0)
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveGuidIndices) != 0
+                && originalMetadata.TryGetStream(out GuidStream guidStream))
             {
-                var guidStream = originalMetadata.GetStream<GuidStream>();
-                if (guidStream != null)
-                    metadataBuffer.GuidStream.ImportStream(guidStream);
+                metadataBuffer.GuidStream.ImportStream(guidStream);
             }
 
             // Import original contents of the strings stream if specified.
-            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStringIndices) != 0)
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStringIndices) != 0
+                && originalMetadata.TryGetStream(out StringsStream stringsStream))
             {
-                var stringsStream = originalMetadata.GetStream<StringsStream>();
-                if (stringsStream != null)
-                    metadataBuffer.StringsStream.ImportStream(stringsStream);
+                metadataBuffer.StringsStream.ImportStream(stringsStream);
             }
 
             // Import original contents of the strings stream if specified.
-            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveUserStringIndices) != 0)
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveUserStringIndices) != 0
+                && originalMetadata.TryGetStream(out UserStringsStream userStringsStream))
             {
-                var userStringsStream = originalMetadata.GetStream<UserStringsStream>();
-                if (userStringsStream != null)
-                    metadataBuffer.UserStringsStream.ImportStream(userStringsStream);
+                metadataBuffer.UserStringsStream.ImportStream(userStringsStream);
             }
 
             return metadataBuffer;
@@ -244,8 +240,8 @@ namespace AsmResolver.DotNet.Builder
         private static void ImportTableIntoTableBuffers<TMember>(ModuleDefinition module, TableIndex tableIndex,
             Func<TMember, MetadataToken> importAction)
         {
-            int count = module.DotNetDirectory.Metadata
-                .GetStream<TablesStream>()
+            int count = module.DotNetDirectory!.Metadata
+                !.GetStream<TablesStream>()
                 .GetTable(tableIndex)
                 .Count;
 

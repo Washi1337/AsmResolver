@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
         public void ReadRow_SmallBlob_SmallString()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             var assemblyTable = tablesStream.GetTable<AssemblyReferenceRow>();
             Assert.Single(assemblyTable);
@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                     0x001A,
                     0x000A,
                     0x0000,
-                    0x0000), 
+                    0x0000),
                 assemblyTable[0]);
         }
 
@@ -44,7 +44,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                     0x0000),
                 AssemblyReferenceRow.FromReader);
         }
-        
+
         [Fact]
         public void RowEnumerationTest()
         {

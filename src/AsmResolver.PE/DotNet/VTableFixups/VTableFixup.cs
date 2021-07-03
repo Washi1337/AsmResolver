@@ -28,7 +28,7 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns></returns>
-        public static VTableFixup FromReader(PEReaderContext context, ref BinaryStreamReader reader)
+        public static VTableFixup? FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             if (!context.File.TryCreateReaderAtRva(reader.ReadUInt32(), out var tableReader))
             {

@@ -48,7 +48,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override IMetadata GetMetadata()
+        protected override IMetadata? GetMetadata()
         {
             if (!_metadataDirectory.IsPresentInPE)
                 return null;
@@ -64,7 +64,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override DotNetResourcesDirectory GetResources()
+        protected override DotNetResourcesDirectory? GetResources()
         {
             if (!_resourcesDirectory.IsPresentInPE)
                 return null;
@@ -80,7 +80,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetStrongName()
+        protected override IReadableSegment? GetStrongName()
         {
             if (!_strongNameDirectory.IsPresentInPE)
                 return null;
@@ -97,7 +97,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetCodeManagerTable()
+        protected override IReadableSegment? GetCodeManagerTable()
         {
             if (!_codeManagerDirectory.IsPresentInPE)
                 return null;
@@ -113,7 +113,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override VTableFixupsDirectory GetVTableFixups()
+        protected override VTableFixupsDirectory? GetVTableFixups()
         {
             if (!_vtableFixupsDirectory.IsPresentInPE)
                 return null;
@@ -127,14 +127,17 @@ namespace AsmResolver.PE.DotNet
             var vtables = new VTableFixupsDirectory();
             for (int i = 0; i < directoryReader.Length / 8; i++)
             {
-                vtables.Add(VTableFixup.FromReader(_context, ref directoryReader));
+                var entry = VTableFixup.FromReader(_context, ref directoryReader);
+                if (entry is null)
+                    break;
+                vtables.Add(entry);
             }
 
             return vtables;
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetExportAddressTable()
+        protected override IReadableSegment? GetExportAddressTable()
         {
             if (!_exportsDirectory.IsPresentInPE)
                 return null;
@@ -150,7 +153,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetManagedNativeHeader()
+        protected override IReadableSegment? GetManagedNativeHeader()
         {
             if (!_nativeHeaderDirectory.IsPresentInPE)
                 return null;

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AsmResolver.IO;
 
@@ -31,7 +32,7 @@ namespace AsmResolver.PE.Exports.Builder
         private readonly OrdinalNamePointerTableBuffer _ordinalNamePointerTable;
         private readonly NameTableBuffer _nameTableBuffer;
 
-        private IExportDirectory _exportDirectory;
+        private IExportDirectory? _exportDirectory;
 
         /// <summary>
         /// Creates a new empty export directory buffer.
@@ -54,6 +55,7 @@ namespace AsmResolver.PE.Exports.Builder
         /// <summary>
         /// Gets a value indicating whether the export directory buffer is empty or not.
         /// </summary>
+        [MemberNotNullWhen(false, nameof(_exportDirectory))]
         public bool IsEmpty => _exportDirectory is null;
 
         /// <summary>
@@ -99,6 +101,7 @@ namespace AsmResolver.PE.Exports.Builder
 
         private void WriteExportDirectoryHeader(IBinaryStreamWriter writer)
         {
+            _exportDirectory ??= new ExportDirectory(string.Empty);
             writer.WriteUInt32(_exportDirectory.ExportFlags);
             writer.WriteUInt32(_exportDirectory.TimeDateStamp);
             writer.WriteUInt16(_exportDirectory.MajorVersion);
