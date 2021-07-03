@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Signatures
                 WriteArrayElement((SzArrayTypeSignature) argumentType, argument.Elements, argument.IsNullArray);
         }
 
-        private void WriteArrayElement(SzArrayTypeSignature szArrayType, IList<object> elements, bool isNullArray)
+        private void WriteArrayElement(SzArrayTypeSignature szArrayType, IList<object?> elements, bool isNullArray)
         {
             var writer = _context.Writer;
             if (isNullArray)
@@ -169,7 +169,7 @@ namespace AsmResolver.DotNet.Signatures
                 case ElementType.SzArray:
                     WriteArrayElement(
                         (SzArrayTypeSignature) argumentType,
-                        element as IList<object> ?? Array.Empty<object>(),
+                        element as IList<object?> ?? Array.Empty<object?>(),
                         false);
                     break;
 

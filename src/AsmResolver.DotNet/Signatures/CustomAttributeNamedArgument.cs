@@ -13,28 +13,6 @@ namespace AsmResolver.DotNet.Signatures
     public class CustomAttributeNamedArgument
     {
         /// <summary>
-        /// Reads a single named argument from the input stream.
-        /// </summary>
-        /// <param name="context">The blob reader context.</param>
-        /// <param name="reader">The input stream.</param>
-        /// <returns>The argument.</returns>
-        public static CustomAttributeNamedArgument FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
-        {
-            var result = new CustomAttributeNamedArgument
-            {
-                MemberType = (CustomAttributeArgumentMemberType) reader.ReadByte(),
-                ArgumentType = TypeSignature.ReadFieldOrPropType(context, ref reader),
-                MemberName = reader.ReadSerString(),
-            };
-            result.Argument = CustomAttributeArgument.FromReader(context, result.ArgumentType, ref reader);
-            return result;
-        }
-
-        private CustomAttributeNamedArgument()
-        {
-        }
-
-        /// <summary>
         /// Creates a new named custom attribute argument.
         /// </summary>
         /// <param name="memberType">Indicates whether the provided name references a field or a property.</param>
@@ -83,6 +61,22 @@ namespace AsmResolver.DotNet.Signatures
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Reads a single named argument from the input stream.
+        /// </summary>
+        /// <param name="context">The blob reader context.</param>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The argument.</returns>
+        public static CustomAttributeNamedArgument FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
+        {
+            var memberType = (CustomAttributeArgumentMemberType) reader.ReadByte();
+            var argumentType = TypeSignature.ReadFieldOrPropType(context, ref reader);
+            string? memberName = reader.ReadSerString();
+            var argument = CustomAttributeArgument.FromReader(context, argumentType, ref reader);
+
+            return new CustomAttributeNamedArgument(memberType, memberName, argumentType, argument);
         }
 
         /// <inheritdoc />
