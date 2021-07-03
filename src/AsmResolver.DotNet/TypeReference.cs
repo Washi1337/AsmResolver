@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -39,7 +37,7 @@ namespace AsmResolver.DotNet
         /// <param name="scope">The scope that defines the type.</param>
         /// <param name="ns">The namespace the type resides in.</param>
         /// <param name="name">The name of the type.</param>
-        public TypeReference(IResolutionScope scope, string ns, string name)
+        public TypeReference(IResolutionScope? scope, string? ns, string? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
             _scope.Value = scope;
@@ -129,7 +127,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public TypeDefinition? Resolve() => Module?.MetadataResolver?.ResolveType(this);
+        public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 

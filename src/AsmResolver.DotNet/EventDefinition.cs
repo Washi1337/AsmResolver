@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the property.</param>
         /// <param name="attributes">The attributes.</param>
         /// <param name="eventType">The delegate type of the event.</param>
-        public EventDefinition(string? name, EventAttributes attributes, ITypeDefOrRef eventType)
+        public EventDefinition(string? name, EventAttributes attributes, ITypeDefOrRef? eventType)
             : this(new MetadataToken(TableIndex.Event,0))
         {
             Name = name;
@@ -161,7 +161,7 @@ namespace AsmResolver.DotNet
         public bool IsAccessibleFromType(TypeDefinition type) =>
             Semantics.Any(s => s.Method?.IsAccessibleFromType(type) ?? false);
 
-        IMemberDefinition? IMemberDescriptor.Resolve() => this;
+        IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.

@@ -8,7 +8,6 @@ using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
 {
@@ -27,18 +26,18 @@ namespace AsmResolver.DotNet
                 throw new ArgumentException("Invalid local variables signature.");
             }
 
-            for (int i = 0; i < localsSignature?.VariableTypes.Count; i++)
+            for (int i = 0; i < localsSignature.VariableTypes.Count; i++)
                 methodBody.LocalVariables.Add(new CilLocalVariable(localsSignature.VariableTypes[i]));
         }
 
         public static void ReadReflectionExceptionHandlers(CilMethodBody methodBody,
-            IList<object> ehInfos, byte[] ehHeader, ReferenceImporter importer)
+            IList<object>? ehInfos, byte[] ehHeader, ReferenceImporter importer)
         {
             //Sample needed!
-            if (ehHeader != null && ehHeader.Length > 4)
+            if (ehHeader is {Length: > 4})
                 throw new NotImplementedException("Exception handlers from ehHeader not supported yet.");
 
-            if (ehInfos != null && ehInfos.Count > 0)
+            if (ehInfos is {Count: > 0})
             {
                 foreach (var ehInfo in ehInfos)
                     InterpretEHInfo(methodBody, importer, ehInfo);

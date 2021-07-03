@@ -1,13 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet
 {
@@ -36,7 +33,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="method">The method to instantiate.</param>
         /// <param name="signature">The instantiation signature.</param>
-        public MethodSpecification(IMethodDefOrRef method, GenericInstanceMethodSignature signature)
+        public MethodSpecification(IMethodDefOrRef? method, GenericInstanceMethodSignature? signature)
             : this(new MetadataToken(TableIndex.MethodSpec,0))
         {
             Method = method;
@@ -64,7 +61,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string? Name => Method?.Name ?? NullName;
+        public string Name => Method?.Name ?? NullName;
 
         /// <inheritdoc />
         public string FullName => FullNameGenerator.GetMethodFullName(

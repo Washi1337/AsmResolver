@@ -1,3 +1,5 @@
+using System;
+
 namespace AsmResolver.DotNet.Cloning
 {
     public partial class MemberCloner
@@ -20,6 +22,11 @@ namespace AsmResolver.DotNet.Cloning
 
         private static FieldDefinition CreateFieldStub(MemberCloneContext context, FieldDefinition field)
         {
+            if (field.Name is null)
+                throw new ArgumentException($"Field {field.SafeToString()} has no name.");
+            if (field.Signature is null)
+                throw new ArgumentException($"Field {field.SafeToString()} has no signature.");
+
             var clonedField = new FieldDefinition(
                 field.Name,
                 field.Attributes,
@@ -40,7 +47,7 @@ namespace AsmResolver.DotNet.Cloning
             var clonedField = (FieldDefinition) context.ClonedMembers[field];
             CloneCustomAttributes(context, field, clonedField);
             clonedField.ImplementationMap = CloneImplementationMap(context, field.ImplementationMap);
-            clonedField.Constant = CloneConstant(context, field.Constant);
+            clonedField.Constant = CloneConstant(field.Constant);
             clonedField.FieldRva = FieldRvaCloner.CloneFieldRvaData(field);
             clonedField.MarshalDescriptor = CloneMarshalDescriptor(context, field.MarshalDescriptor);
             clonedField.FieldOffset = field.FieldOffset;

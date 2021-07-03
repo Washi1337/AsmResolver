@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -34,7 +33,7 @@ namespace AsmResolver.DotNet
         /// Creates a new instance of the <see cref="InterfaceImplementation"/> class.
         /// </summary>
         /// <param name="interfaceType">The interface to be implemented.</param>
-        public InterfaceImplementation(ITypeDefOrRef interfaceType)
+        public InterfaceImplementation(ITypeDefOrRef? interfaceType)
             : this(new MetadataToken(TableIndex.InterfaceImpl, 0))
         {
             Interface = interfaceType;

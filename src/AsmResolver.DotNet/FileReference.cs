@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -36,7 +35,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the file.</param>
         /// <param name="attributes">The attributes associated to the reference.</param>
-        public FileReference(string name, FileAttributes attributes)
+        public FileReference(string? name, FileAttributes attributes)
             : this(new MetadataToken(TableIndex.File, 0))
         {
             Name = name;

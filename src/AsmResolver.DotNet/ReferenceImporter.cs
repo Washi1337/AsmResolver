@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet.Signatures;
@@ -35,7 +36,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="scope">The resolution scope to import.</param>
         /// <returns>The imported resolution scope.</returns>
-        public IResolutionScope ImportScope(IResolutionScope scope)
+        public IResolutionScope ImportScope(IResolutionScope? scope)
         {
             if (scope is null)
                 throw new ArgumentNullException(nameof(scope));
@@ -61,12 +62,12 @@ namespace AsmResolver.DotNet
         {
             if (assembly is null)
                 throw new ArgumentNullException(nameof(assembly));
-            if (assembly is AssemblyReference reference && reference.Module == TargetModule)
-                return reference;
+            if (assembly is AssemblyReference r && r.Module == TargetModule)
+                return r;
 
-            reference = TargetModule.AssemblyReferences.FirstOrDefault(a => _comparer.Equals(a, assembly));
+            var reference = TargetModule.AssemblyReferences.FirstOrDefault(a => _comparer.Equals(a, assembly));
 
-            if (reference == null)
+            if (reference is null)
             {
                 reference = new AssemblyReference(assembly);
                 TargetModule.AssemblyReferences.Add(reference);
@@ -114,6 +115,13 @@ namespace AsmResolver.DotNet
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
         }
+
+        /// <summary>
+        /// Imports a reference to a type into the module.
+        /// </summary>
+        /// <param name="type">The type to import.</param>
+        /// <returns>The imported type, or <c>null</c> if the provided type was <c>null</c>.</returns>
+        public ITypeDefOrRef? ImportTypeOrNull(ITypeDefOrRef? type) => type is not null ? ImportType(type) : null;
 
         /// <summary>
         /// Imports a reference to a type definition into the module.
@@ -186,6 +194,15 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Imports the given type signature into the target module.
+        /// </summary>
+        /// <param name="type">The type signature to import.</param>
+        /// <returns>The imported type signature, or <c>nulL</c> if the provided type signature was <c>null</c>.</returns>
+        public TypeSignature? ImportTypeSignatureOrNull(TypeSignature? type) => type is not null
+            ? ImportTypeSignature(type)
+            : null;
+
+        /// <summary>
         /// Imports a <see cref="Type"/> as a type reference or specification.
         /// </summary>
         /// <param name="type">The type to import.</param>
@@ -219,9 +236,9 @@ namespace AsmResolver.DotNet
             if (type.IsConstructedGenericType)
                 return ImportGenericType(type);
             if (type.IsPointer)
-                return new PointerTypeSignature(ImportTypeSignature(type.GetElementType()));
+                return new PointerTypeSignature(ImportTypeSignature(type.GetElementType()!));
             if (type.IsByRef)
-                return new ByReferenceTypeSignature(ImportTypeSignature(type.GetElementType()));
+                return new ByReferenceTypeSignature(ImportTypeSignature(type.GetElementType()!));
             if (type.IsGenericParameter)
                 return new GenericParameterSignature(
                     type.DeclaringMethod != null ? GenericParameterType.Method : GenericParameterType.Type,
@@ -241,7 +258,7 @@ namespace AsmResolver.DotNet
 
         private TypeSignature ImportArrayType(Type type)
         {
-            var baseType = ImportTypeSignature(type.GetElementType());
+            var baseType = ImportTypeSignature(type.GetElementType()!);
 
             int rank = type.GetArrayRank();
             if (rank == 1)
@@ -279,6 +296,15 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Imports a reference to- or an instantiation of a method into the module.
+        /// </summary>
+        /// <param name="method">The method to import.</param>
+        /// <returns>The imported method, or <c>null</c> if no method was provided..</returns>
+        /// <exception cref="ArgumentException">Occurs when a method is not added to a type.</exception>
+        public IMethodDescriptor? ImportMethodOrNull(IMethodDescriptor? method) =>
+            method is null ? null : ImportMethod(method);
+
+        /// <summary>
         /// Imports a reference to a method into the module.
         /// </summary>
         /// <param name="method">The method to import.</param>
@@ -303,6 +329,15 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Imports a reference to- or an instantiation of a method into the module.
+        /// </summary>
+        /// <param name="method">The method to import.</param>
+        /// <returns>The imported method, or <c>null</c> if no method was provided..</returns>
+        /// <exception cref="ArgumentException">Occurs when a method is not added to a type.</exception>
+        public IMethodDefOrRef? ImportMethodOrNull(IMethodDefOrRef? method) =>
+            method is null ? null : ImportMethod(method);
+
+        /// <summary>
         /// Imports the provided method signature into the module.
         /// </summary>
         /// <param name="signature">The method signature to import.</param>
@@ -324,7 +359,6 @@ namespace AsmResolver.DotNet
 
             return result;
         }
-
 
         /// <summary>
         /// Imports the provided generic instance method signature into the module.
@@ -368,7 +402,7 @@ namespace AsmResolver.DotNet
         /// <returns>The imported method.</returns>
         public virtual MethodSpecification ImportMethod(MethodSpecification method)
         {
-            if (method?.Method is null || method.Signature is null)
+            if (method.Method is null || method.Signature is null)
                 throw new ArgumentNullException(nameof(method));
             if (method.DeclaringType is null)
                 throw new ArgumentException("Cannot import a method that is not added to a type.");

@@ -243,6 +243,9 @@ namespace AsmResolver.DotNet.Cloning
 
         private static void CreateTypeStub(MemberCloneContext context, TypeDefinition type)
         {
+            if (type.Name is null)
+                throw new ArgumentException($"Type {type.SafeToString()} has no name.");
+
             var typeStub = new TypeDefinition(type.Namespace, type.Name, type.Attributes);
             context.ClonedMembers.Add(type, typeStub);
         }
@@ -278,13 +281,14 @@ namespace AsmResolver.DotNet.Cloning
             foreach (var implementation in type.MethodImplementations)
             {
                 clonedType.MethodImplementations.Add(new MethodImplementation(
-                    context.Importer.ImportMethod(implementation.Declaration),
-                    context.Importer.ImportMethod(implementation.Body)
+                    context.Importer.ImportMethodOrNull(implementation.Declaration),
+                    context.Importer.ImportMethodOrNull(implementation.Body)
                 ));
             }
 
             // If the type is nested and the declaring type is cloned as well, we should add it to the cloned type.
             if (type.IsNested
+                && type.DeclaringType is not null
                 && context.ClonedMembers.TryGetValue(type.DeclaringType, out var member)
                 && member is TypeDefinition clonedDeclaringType)
             {
@@ -305,7 +309,7 @@ namespace AsmResolver.DotNet.Cloning
             MemberCloneContext context,
             InterfaceImplementation implementation)
         {
-            var clonedImplementation = new InterfaceImplementation(context.Importer.ImportType(implementation.Interface));
+            var clonedImplementation = new InterfaceImplementation(context.Importer.ImportTypeOrNull(implementation.Interface));
             CloneCustomAttributes(context, implementation, clonedImplementation);
             return clonedImplementation;
         }
@@ -342,8 +346,15 @@ namespace AsmResolver.DotNet.Cloning
                 }
             }
 
+            var constructor = attribute.Constructor;
+            if (constructor is null)
+            {
+                throw new ArgumentException(
+                    $"Custom attribute of {attribute.Parent.SafeToString()} does not have a constructor defined.");
+            }
+
             return new CustomAttribute(
-                (ICustomAttributeType) context.Importer.ImportMethod(attribute.Constructor),
+                (ICustomAttributeType) context.Importer.ImportMethod(constructor),
                 clonedSignature);
         }
 
@@ -359,20 +370,24 @@ namespace AsmResolver.DotNet.Cloning
             return clonedArgument;
         }
 
-        private static ImplementationMap CloneImplementationMap(MemberCloneContext context, ImplementationMap? map)
+        private static ImplementationMap? CloneImplementationMap(MemberCloneContext context, ImplementationMap? map)
         {
-            return map is not null
-                ? new ImplementationMap(context.Importer.ImportModule(map.Scope), map.Name, map.Attributes)
-                : null;
+            if (map is null)
+                return null;
+            if (map.Scope is null)
+                throw new ArgumentException($"Scope of implementation map {map.SafeToString()}  is null.");
+
+            return new ImplementationMap(context.Importer.ImportModule(map.Scope), map.Name, map.Attributes);
+
         }
 
-        private static Constant CloneConstant(MemberCloneContext context, Constant? constant)
+        private static Constant? CloneConstant(Constant? constant)
         {
             return constant is not null
                 ? new Constant(constant.Type,
                     constant.Value is null
-                    ? null
-                    : new DataBlobSignature(constant.Value.Data))
+                        ? null
+                        : new DataBlobSignature(constant.Value.Data))
                 : null;
         }
 
@@ -400,13 +415,13 @@ namespace AsmResolver.DotNet.Cloning
             MemberCloneContext context,
             GenericParameterConstraint constraint)
         {
-            var clonedConstraint = new GenericParameterConstraint(context.Importer.ImportType(constraint.Constraint));
+            var clonedConstraint = new GenericParameterConstraint(context.Importer.ImportTypeOrNull(constraint.Constraint));
 
             CloneCustomAttributes(context, constraint, clonedConstraint);
             return clonedConstraint;
         }
 
-        private static MarshalDescriptor CloneMarshalDescriptor(
+        private static MarshalDescriptor? CloneMarshalDescriptor(
             MemberCloneContext context,
             MarshalDescriptor? marshalDescriptor)
         {
@@ -418,7 +433,7 @@ namespace AsmResolver.DotNet.Cloning
 
                 CustomMarshalDescriptor custom => new CustomMarshalDescriptor(
                     custom.Guid, custom.NativeTypeName,
-                    context.Importer.ImportTypeSignature(custom.MarshalType),
+                    context.Importer.ImportTypeSignatureOrNull(custom.MarshalType),
                     custom.Cookie),
 
                 FixedArrayMarshalDescriptor fixedArray => new FixedArrayMarshalDescriptor
@@ -434,7 +449,7 @@ namespace AsmResolver.DotNet.Cloning
 
                 SafeArrayMarshalDescriptor safeArray => new SafeArrayMarshalDescriptor(
                     safeArray.VariantType, safeArray.VariantTypeFlags,
-                    context.Importer.ImportTypeSignature(safeArray.UserDefinedSubType)),
+                    context.Importer.ImportTypeSignatureOrNull(safeArray.UserDefinedSubType)),
 
                 SimpleMarshalDescriptor simple => new SimpleMarshalDescriptor(simple.NativeType),
 

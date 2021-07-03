@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -37,7 +36,7 @@ namespace AsmResolver.DotNet
         /// Creates a new generic parameter.
         /// </summary>
         /// <param name="name">The name of the parameter.</param>
-        public GenericParameter(string name)
+        public GenericParameter(string? name)
             : this(new MetadataToken(TableIndex.GenericParam, 0))
         {
             Name = name;

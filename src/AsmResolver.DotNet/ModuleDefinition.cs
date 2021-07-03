@@ -225,7 +225,7 @@ namespace AsmResolver.DotNet
         /// Defines a new .NET module that references mscorlib version 4.0.0.0.
         /// </summary>
         /// <param name="name">The name of the module.</param>
-        public ModuleDefinition(string name)
+        public ModuleDefinition(string? name)
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
@@ -242,7 +242,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the module.</param>
         /// <param name="corLib">The reference to the common object runtime (COR) library that this module will use.</param>
-        public ModuleDefinition(string name, AssemblyReference corLib)
+        public ModuleDefinition(string? name, AssemblyReference corLib)
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
@@ -825,7 +825,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// If the static constructor was not present in the image, the new one is automatically added.
         /// </remarks>
-        public MethodDefinition? GetOrCreateModuleConstructor() => GetOrCreateModuleType().GetOrCreateStaticConstructor();
+        public MethodDefinition GetOrCreateModuleConstructor() => GetOrCreateModuleType().GetOrCreateStaticConstructor();
 
         /// <summary>
         /// Obtains the global scope type of the .NET module.

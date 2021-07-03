@@ -1,6 +1,5 @@
 using System;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -30,7 +29,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="method">The method to give special semantics.</param>
         /// <param name="attributes">The type of semantics to assign.</param>
-        public MethodSemantics(MethodDefinition method, MethodSemanticsAttributes attributes)
+        public MethodSemantics(MethodDefinition? method, MethodSemanticsAttributes attributes)
             : this(new MetadataToken(TableIndex.MethodSemantics, 0))
         {
             Method = method ?? throw new ArgumentNullException(nameof(method));

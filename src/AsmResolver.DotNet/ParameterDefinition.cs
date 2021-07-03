@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -47,7 +45,7 @@ namespace AsmResolver.DotNet
         /// Creates a new parameter definition using the provided name.
         /// </summary>
         /// <param name="name">The name of the new parameter.</param>
-        public ParameterDefinition(string name)
+        public ParameterDefinition(string? name)
             : this(new MetadataToken(TableIndex.Param, 0))
         {
             Name = name;

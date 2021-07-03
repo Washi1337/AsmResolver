@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="type">The type of the constant.</param>
         /// <param name="value">The raw literal value of the constant.</param>
-        public Constant(ElementType type, DataBlobSignature value)
+        public Constant(ElementType type, DataBlobSignature? value)
             : this(new MetadataToken(TableIndex.Constant, 0))
         {
             Type = type;

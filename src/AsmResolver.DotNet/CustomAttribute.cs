@@ -1,6 +1,5 @@
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -31,7 +30,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="constructor">The constructor of the attribute to call.</param>
         /// <param name="signature">The signature containing the arguments to the constructor.</param>
-        public CustomAttribute(ICustomAttributeType constructor, CustomAttributeSignature signature)
+        public CustomAttribute(ICustomAttributeType? constructor, CustomAttributeSignature? signature)
             : this(new MetadataToken(TableIndex.CustomAttribute, 0))
         {
             Constructor = constructor;

@@ -714,7 +714,7 @@ namespace AsmResolver.DotNet
             return DeclaringType.ToTypeReference();
         }
 
-        TypeDefinition? ITypeDescriptor.Resolve() => this;
+        TypeDefinition ITypeDescriptor.Resolve() => this;
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 

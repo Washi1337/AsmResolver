@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -35,10 +34,10 @@ namespace AsmResolver.DotNet
         /// Creates a new constraint for a generic parameter.
         /// </summary>
         /// <param name="constraint">The type to constrain the generic parameter to.</param>
-        public GenericParameterConstraint(ITypeDefOrRef constraint)
+        public GenericParameterConstraint(ITypeDefOrRef? constraint)
             : this(new MetadataToken(TableIndex.GenericParamConstraint, 0))
         {
-            Constraint = constraint ?? throw new ArgumentNullException(nameof(constraint));
+            Constraint = constraint;
         }
 
         /// <summary>

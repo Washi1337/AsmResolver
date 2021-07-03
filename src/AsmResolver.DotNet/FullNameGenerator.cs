@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 
@@ -21,7 +19,7 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetFieldFullName(string? name, ITypeDescriptor? declaringType, FieldSignature? signature)
         {
-            string fieldTypeString = signature?.FieldType?.FullName ?? TypeSignature.NullTypeToString;
+            string fieldTypeString = signature?.FieldType.FullName ?? TypeSignature.NullTypeToString;
 
             return declaringType is null
                 ? $"{fieldTypeString} {name}"
@@ -38,7 +36,7 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetMethodFullName(string? name, ITypeDescriptor? declaringType, MethodSignature? signature)
         {
-            string returnTypeString = signature?.ReturnType?.FullName ?? TypeSignature.NullTypeToString;
+            string returnTypeString = signature?.ReturnType.FullName ?? TypeSignature.NullTypeToString;
             string parameterTypesString = GetParameterTypesString(signature);
 
             return declaringType is null
@@ -58,7 +56,7 @@ namespace AsmResolver.DotNet
         public static string GetMethodFullName(string? name, ITypeDescriptor? declaringType, MethodSignature? signature,
             IEnumerable<TypeSignature> typeArguments)
         {
-            string returnTypeString = signature?.ReturnType?.FullName ?? TypeSignature.NullTypeToString;
+            string returnTypeString = signature?.ReturnType.FullName ?? TypeSignature.NullTypeToString;
             string parameterTypesString = GetParameterTypesString(signature);
             string typeArgumentsString = string.Join(", ", typeArguments);
 

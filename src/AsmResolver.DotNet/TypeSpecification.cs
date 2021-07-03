@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -32,7 +30,7 @@ namespace AsmResolver.DotNet
         /// Creates a new type specification.
         /// </summary>
         /// <param name="signature">The type signature to assign a metadata token.</param>
-        public TypeSpecification(TypeSignature signature)
+        public TypeSpecification(TypeSignature? signature)
             : this(new MetadataToken(TableIndex.TypeSpec, 0))
         {
             Signature = signature;
@@ -48,7 +46,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string? Name => Signature?.Name ?? TypeSignature.NullTypeToString;
+        public string Name => Signature?.Name ?? TypeSignature.NullTypeToString;
 
         /// <inheritdoc />
         public string? Namespace => Signature?.Namespace;

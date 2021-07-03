@@ -105,7 +105,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the assembly.</param>
         /// <param name="version">The version of the assembly.</param>
-        public AssemblyDefinition(string name, Version version)
+        public AssemblyDefinition(string? name, Version version)
             : this(new MetadataToken(TableIndex.Assembly, 0))
         {
             Name = name;
@@ -214,7 +214,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public override AssemblyDefinition? Resolve() => this;
+        public override AssemblyDefinition Resolve() => this;
 
         /// <summary>
         /// Attempts to extract the target runtime from the <see cref="TryGetTargetFramework"/> attribute.

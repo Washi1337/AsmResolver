@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet
         /// <paramref name="signature"/> is set, the <see cref="MethodAttributes.Static"/> bit should be unset in
         /// <paramref name="attributes"/> and vice versa.
         /// </remarks>
-        public MethodDefinition(string? name, MethodAttributes attributes, MethodSignature signature)
+        public MethodDefinition(string? name, MethodAttributes attributes, MethodSignature? signature)
             : this(new MetadataToken(TableIndex.Method, 0))
         {
             Name = name;
