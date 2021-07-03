@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
@@ -83,7 +84,8 @@ namespace AsmResolver.DotNet
         ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef() => this;
 
         /// <inheritdoc />
-        public TypeSignature? ToTypeSignature() => Signature;
+        public TypeSignature ToTypeSignature() =>
+            Signature ?? throw new ArgumentException("Signature embedded into the type specification is null.");
 
         /// <inheritdoc />
         public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);

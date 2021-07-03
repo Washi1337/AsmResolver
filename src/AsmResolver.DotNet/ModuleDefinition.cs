@@ -204,6 +204,10 @@ namespace AsmResolver.DotNet
         public static ModuleDefinition FromImage(IPEImage peImage, ModuleReaderParameters readerParameters) =>
             new SerializedModuleDefinition(peImage, readerParameters);
 
+        // Disable non-nullable property initialization warnings for the CorLibTypeFactory and MetadataResolver
+        // properties. These are expected to be initialized by constructors that use this base constructor.
+#pragma warning disable 8618
+
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
         /// </summary>
@@ -220,6 +224,8 @@ namespace AsmResolver.DotNet
             _nativeResources = new LazyVariable<IResourceDirectory?>(GetNativeResources);
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
+
+#pragma warning restore 8618
 
         /// <summary>
         /// Defines a new .NET module that references mscorlib version 4.0.0.0.

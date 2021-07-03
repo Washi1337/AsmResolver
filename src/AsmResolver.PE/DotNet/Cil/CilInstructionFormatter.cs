@@ -12,7 +12,6 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public class CilInstructionFormatter : ICilInstructionFormatter
     {
-        private const string ReservedStringCharacters = "\\\"\t\r\n\b";
         private const string InvalidOperandString = "<<<INVALID>>>";
 
         /// <summary>
@@ -161,7 +160,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The formatted string.</returns>
         protected virtual string FormatString(object? operand) => operand switch
         {
-            string value => CreateEscapedString(value),
+            string value => value.CreateEscapedString(),
             MetadataToken token => FormatToken(token),
             _ => InvalidOperandString
         };
@@ -191,20 +190,5 @@ namespace AsmResolver.PE.DotNet.Cil
             _ => operand.ToString()
         };
 
-        private static string CreateEscapedString(string literal)
-        {
-            var builder = new StringBuilder(literal.Length + 2);
-
-            builder.Append('"');
-            foreach (char currentChar in literal)
-            {
-                if (ReservedStringCharacters.Contains(currentChar))
-                    builder.Append('\\');
-                builder.Append(currentChar);
-            }
-            builder.Append('"');
-
-            return builder.ToString();
-        }
     }
 }

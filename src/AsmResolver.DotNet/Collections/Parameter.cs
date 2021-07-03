@@ -11,7 +11,11 @@ namespace AsmResolver.DotNet.Collections
     public class Parameter : INameProvider
     {
         private ParameterCollection? _parentCollection;
-        private TypeSignature? _parameterType;
+        private TypeSignature _parameterType;
+
+        // Disable warnings for initialization of _parameterType. This is expected to be initialized by the
+        // parent ParameterCollection.
+#pragma warning disable 8618
 
         internal Parameter(ParameterCollection parentCollection, int index, int methodSignatureIndex)
         {
@@ -19,6 +23,8 @@ namespace AsmResolver.DotNet.Collections
             Index = index;
             MethodSignatureIndex = methodSignatureIndex;
         }
+
+#pragma warning restore 8618
 
         /// <summary>
         /// Gets the index of the parameter.
@@ -45,7 +51,7 @@ namespace AsmResolver.DotNet.Collections
         /// <summary>
         /// Gets the type of the parameter.
         /// </summary>
-        public TypeSignature? ParameterType
+        public TypeSignature ParameterType
         {
             get => _parameterType;
             set

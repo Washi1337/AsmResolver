@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -107,12 +108,23 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override string ToString()
         {
-            return !IsNullArray
-                ? ArgumentType.ElementType == ElementType.SzArray
-                    ? $"{{{string.Join(", ", Elements)}}}"
-                    : Element?.ToString() ?? "null"
-                : "null";
+            if (IsNullArray)
+                return "null";
+
+            object? obj = ArgumentType.ElementType == ElementType.SzArray
+                ? Elements
+                : Element;
+
+            return ElementToString(obj);
         }
+
+        private string ElementToString(object? element) => element switch
+        {
+            null => "null",
+            IList<object?> list => $"{{{string.Join(", ", list.Select(ElementToString))}}}",
+            string x => x.CreateEscapedString(),
+            _ => element.ToString()
+        };
 
         /// <summary>
         /// Writes the fixed argument to the provided output stream.
