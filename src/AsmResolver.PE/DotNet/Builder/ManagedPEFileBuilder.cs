@@ -58,7 +58,7 @@ namespace AsmResolver.PE.DotNet.Builder
             /// <param name="image">The image to build.</param>
             public ManagedPEBuilderContext(IPEImage image)
             {
-                if (image.DotNetDirectory == null)
+                if (image.DotNetDirectory is null)
                     throw new ArgumentException("Image does not contain a .NET directory.");
 
                 ImportDirectory = new ImportDirectoryBuffer(image.PEKind == OptionalHeaderMagic.Pe32);
@@ -393,7 +393,7 @@ namespace AsmResolver.PE.DotNet.Builder
         private static void ProcessRvasInMetadataTables(ManagedPEBuilderContext context)
         {
             var dotNetSegment = context.DotNetSegment;
-            var tablesStream = dotNetSegment.DotNetDirectory?.Metadata?.GetStream<TablesStream>();
+            var tablesStream = dotNetSegment.DotNetDirectory.Metadata?.GetStream<TablesStream>();
             if (tablesStream is null)
                 throw new ArgumentException("Image does not have a .NET metadata tables stream.");
 
@@ -408,7 +408,7 @@ namespace AsmResolver.PE.DotNet.Builder
             {
                 var methodRow = methodTable[i];
 
-                var bodySegment = GetMethodBodySegment(methodRow, i);
+                var bodySegment = GetMethodBodySegment(methodRow);
                 if (bodySegment is CilRawMethodBody cilBody)
                     table.AddCilBody(cilBody);
                 else if (bodySegment is not null)
@@ -426,7 +426,7 @@ namespace AsmResolver.PE.DotNet.Builder
             }
         }
 
-        private static ISegment? GetMethodBodySegment(MethodDefinitionRow methodRow, int i)
+        private static ISegment? GetMethodBodySegment(MethodDefinitionRow methodRow)
         {
             if (methodRow.Body.IsBounded)
                 return methodRow.Body.GetSegment();

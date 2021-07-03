@@ -1,6 +1,5 @@
 using System;
 using AsmResolver.IO;
-using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Win32Resources
 {

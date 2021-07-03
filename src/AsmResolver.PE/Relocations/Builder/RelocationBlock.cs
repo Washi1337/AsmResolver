@@ -7,17 +7,8 @@ namespace AsmResolver.PE.Relocations.Builder
     /// <summary>
     /// Represents one block of relocations to be applied when the PE is loaded into memory.
     /// </summary>
-    public class RelocationBlock : SegmentBase
+    public sealed class RelocationBlock : SegmentBase
     {
-        private IList<RelocationEntry>? _entries;
-
-        /// <summary>
-        /// Initializes an empty relocation block.
-        /// </summary>
-        protected RelocationBlock()
-        {
-        }
-
         /// <summary>
         /// Creates a new base relocation block for the provided page.
         /// </summary>
@@ -25,6 +16,7 @@ namespace AsmResolver.PE.Relocations.Builder
         public RelocationBlock(uint pageRva)
         {
             PageRva = pageRva;
+            Entries =  new List<RelocationEntry>();
         }
 
         /// <summary>
@@ -33,7 +25,6 @@ namespace AsmResolver.PE.Relocations.Builder
         public uint PageRva
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -41,23 +32,7 @@ namespace AsmResolver.PE.Relocations.Builder
         /// </summary>
         public IList<RelocationEntry> Entries
         {
-            get
-            {
-                if (_entries is null)
-                    Interlocked.CompareExchange(ref _entries, GetEntries(), null);
-                return _entries;
-            }
-        }
-
-        /// <summary>
-        /// Obtains the relocations that need to be applied.
-        /// </summary>
-        /// <returns>The relocations.</returns>
-        /// <remarks>
-        /// This method is called upon initialization of the <see cref="Entries"/> property.</remarks>
-        protected virtual IList<RelocationEntry> GetEntries()
-        {
-            return new List<RelocationEntry>();
+            get;
         }
 
         /// <inheritdoc />

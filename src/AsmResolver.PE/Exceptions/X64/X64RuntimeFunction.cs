@@ -55,7 +55,7 @@ namespace AsmResolver.PE.Exceptions.X64
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The read function entry.</returns>
-        public static X64RuntimeFunction? FromReader(PEReaderContext context, ref BinaryStreamReader reader)
+        public static X64RuntimeFunction FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             uint begin = reader.ReadUInt32();
             uint end = reader.ReadUInt32();
@@ -77,8 +77,8 @@ namespace AsmResolver.PE.Exceptions.X64
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
-            writer.WriteUInt32(Begin?.Rva ?? 0);
-            writer.WriteUInt32(End?.Rva ?? 0);
+            writer.WriteUInt32(Begin.Rva);
+            writer.WriteUInt32(End.Rva);
             writer.WriteUInt32(UnwindInfo?.Rva ?? 0);
         }
     }

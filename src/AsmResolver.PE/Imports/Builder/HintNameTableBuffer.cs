@@ -32,7 +32,11 @@ namespace AsmResolver.PE.Imports.Builder
                     }
                 }
                 _moduleNameOffsets[module] = (uint) (currentOffset - newOffset);
-                currentOffset += (uint) Encoding.ASCII.GetByteCount(module.Name) + 1;
+                if (module.Name is not null)
+                    currentOffset += (uint) Encoding.ASCII.GetByteCount(module.Name);
+
+                // Null terminator
+                currentOffset++;
             }
 
             _length = (uint) (currentOffset - newOffset);

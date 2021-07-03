@@ -240,8 +240,8 @@ namespace AsmResolver.DotNet.Builder
         private static void ImportTableIntoTableBuffers<TMember>(ModuleDefinition module, TableIndex tableIndex,
             Func<TMember, MetadataToken> importAction)
         {
-            int count = module.DotNetDirectory.Metadata
-                .GetStream<TablesStream>()
+            int count = module.DotNetDirectory!.Metadata
+                !.GetStream<TablesStream>()
                 .GetTable(tableIndex)
                 .Count;
 
