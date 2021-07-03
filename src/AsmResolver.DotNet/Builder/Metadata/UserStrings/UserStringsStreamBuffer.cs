@@ -52,7 +52,10 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
         public void ImportStream(UserStringsStream stream)
         {
             MetadataStreamBufferHelper.CloneBlobHeap(stream, _writer, (index, newIndex) =>
-                _strings[stream.GetStringByIndex(index)] = newIndex);
+            {
+                if (stream.GetStringByIndex(index) is { } str)
+                    _strings[str] = newIndex;
+            });
         }
 
         /// <summary>

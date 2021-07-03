@@ -52,7 +52,10 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         public void ImportStream(BlobStream stream)
         {
             MetadataStreamBufferHelper.CloneBlobHeap(stream, _writer, (index, newIndex) =>
-                _blobs[stream.GetBlobByIndex(index)] = newIndex);
+            {
+                if (stream.GetBlobByIndex(index) is { } blob)
+                    _blobs[blob] = newIndex;
+            });
         }
 
         /// <summary>
