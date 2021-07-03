@@ -42,6 +42,6 @@ namespace AsmResolver
         /// <remarks>
         /// When <see cref="IsBounded"/> is <c>false</c>, it is not guaranteed this method will succeed.
         /// </remarks>
-        ISegment GetSegment();
+        ISegment? GetSegment();
     }
 }

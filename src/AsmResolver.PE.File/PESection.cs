@@ -1,5 +1,5 @@
 using System;
-using System.Text;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 
@@ -19,7 +19,8 @@ namespace AsmResolver.PE.File
         /// <param name="characteristics">The section flags.</param>
         public PESection(string name, SectionFlags characteristics)
         {
-            Name = name;
+            SectionHeader.AssertIsValidName(name);
+            _name = name;
             Characteristics = characteristics;
         }
 
@@ -29,9 +30,10 @@ namespace AsmResolver.PE.File
         /// <param name="name">The name of the section.</param>
         /// <param name="characteristics">The section flags.</param>
         /// <param name="contents">The contents of the section.</param>
-        public PESection(string name, SectionFlags characteristics, ISegment contents)
+        public PESection(string name, SectionFlags characteristics, ISegment? contents)
         {
-            Name = name;
+            SectionHeader.AssertIsValidName(name);
+            _name = name;
             Characteristics = characteristics;
             Contents = contents;
         }
@@ -52,7 +54,7 @@ namespace AsmResolver.PE.File
         /// <param name="contents">The contents of the section.</param>
         public PESection(SectionHeader header, ISegment contents)
         {
-            Name = header.Name;
+            _name = header.Name;
             Characteristics = header.Characteristics;
             Contents = contents;
         }
@@ -60,7 +62,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets the portable executable file this section is part of.
         /// </summary>
-        public PEFile ContainingFile
+        public PEFile? ContainingFile
         {
             get;
             internal set;
@@ -77,8 +79,7 @@ namespace AsmResolver.PE.File
             get => _name;
             set
             {
-                if (Encoding.UTF8.GetByteCount(value) > 8)
-                    throw new ArgumentException("Name is too long.");
+                SectionHeader.AssertIsValidName(value);
                 _name = value;
             }
         }
@@ -193,7 +194,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets or sets the contents of the section.
         /// </summary>
-        public ISegment Contents
+        public ISegment? Contents
         {
             get;
             set;
@@ -202,6 +203,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets a value indicating whether the section is readable using a binary stream reader.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Contents))]
         public bool IsReadable => Contents is IReadableSegment;
 
         /// <inheritdoc />

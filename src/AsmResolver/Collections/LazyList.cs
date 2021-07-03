@@ -12,7 +12,7 @@ namespace AsmResolver.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public abstract class LazyList<TItem> : IList<TItem>
     {
-        private readonly List<TItem> _items = new List<TItem>();
+        private readonly List<TItem> _items = new();
 
         /// <inheritdoc />
         public TItem this[int index]
@@ -149,14 +149,36 @@ namespace AsmResolver.Collections
             OnRemoveItem(index);
         }
 
+        /// <summary>
+        /// The method that gets called upon replacing an item in the list.
+        /// </summary>
+        /// <param name="index">The index that is being replaced.</param>
+        /// <param name="item">The new item.</param>
         protected virtual void OnSetItem(int index, TItem item) => _items[index] = item;
-        
+
+        /// <summary>
+        /// The method that gets called upon inserting a new item in the list.
+        /// </summary>
+        /// <param name="index">The index where the item is inserted at.</param>
+        /// <param name="item">The new item.</param>
         protected virtual void OnInsertItem(int index, TItem item) => _items.Insert(index, item);
-        
+
+        /// <summary>
+        /// The method that gets called upon inserting a collection of new items in the list.
+        /// </summary>
+        /// <param name="index">The index where the item is inserted at.</param>
+        /// <param name="items">The new items.</param>
         protected virtual void OnInsertRange(int index, IEnumerable<TItem> items) => _items.InsertRange(index, items);
-        
+
+        /// <summary>
+        /// The method that gets called upon removing an item.
+        /// </summary>
+        /// <param name="index">The index of the element to remove.</param>
         protected virtual void OnRemoveItem(int index) => _items.RemoveAt(index);
 
+        /// <summary>
+        /// The method that gets called upon clearing the entire list.
+        /// </summary>
         protected virtual void OnClearItems() => _items.Clear();
 
         /// <summary>
@@ -166,7 +188,7 @@ namespace AsmResolver.Collections
         /// <remarks>
         /// This enumerator only ensures the list is initialized upon calling the <see cref="Enumerator.MoveNext"/> method.
         /// </remarks>
-        public Enumerator GetEnumerator() => new Enumerator(this);
+        public Enumerator GetEnumerator() => new(this);
 
         /// <inheritdoc />
         IEnumerator<TItem> IEnumerable<TItem>.GetEnumerator() => GetEnumerator();
@@ -181,12 +203,16 @@ namespace AsmResolver.Collections
         /// The enumerator only initializes the list when it is needed. If no calls to <see cref="MoveNext"/> were
         /// made, and the lazy list was not initialized yet, it will remain uninitialized.
         /// </remarks>
-        public struct Enumerator : IEnumerator<TItem>
+        public struct Enumerator : IEnumerator<TItem?>
         {
             private readonly LazyList<TItem> _list;
             private List<TItem>.Enumerator _enumerator;
             private bool hasEnumerator;
-            
+
+            /// <summary>
+            /// Creates a new instance of the enumerator.
+            /// </summary>
+            /// <param name="list">The list to enumerate.</param>
             public Enumerator(LazyList<TItem> list)
             {
                 _list = list;
@@ -195,10 +221,10 @@ namespace AsmResolver.Collections
             }
 
             /// <inheritdoc />
-            public TItem Current => hasEnumerator ? _enumerator.Current : default;
+            public TItem? Current => hasEnumerator ? _enumerator.Current : default;
 
             /// <inheritdoc />
-            object IEnumerator.Current => Current;
+            object? IEnumerator.Current => Current;
 
             /// <inheritdoc />
             public bool MoveNext()
@@ -223,6 +249,6 @@ namespace AsmResolver.Collections
                     _enumerator.Dispose();
             }
         }
-        
+
     }
 }

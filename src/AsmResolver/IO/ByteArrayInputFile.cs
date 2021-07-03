@@ -34,14 +34,14 @@ namespace AsmResolver.IO
         /// <param name="filePath">The file path.</param>
         /// <param name="data">The byte array to read from.</param>
         /// <param name="baseAddress">The base address to use.</param>
-        public ByteArrayInputFile(string filePath, byte[] data, ulong baseAddress)
+        public ByteArrayInputFile(string? filePath, byte[] data, ulong baseAddress)
         {
             FilePath = filePath;
             _dataSource = new ByteArrayDataSource(data, baseAddress);
         }
 
         /// <inheritdoc />
-        public string FilePath
+        public string? FilePath
         {
             get;
         }

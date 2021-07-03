@@ -68,7 +68,7 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public ISegment GetSegment() => throw new InvalidOperationException();
+        public ISegment? GetSegment() => throw new InvalidOperationException();
     }
 
 }

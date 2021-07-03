@@ -55,7 +55,8 @@ namespace AsmResolver.PE.File.Headers
         /// <param name="characteristics">The section flags to assign.</param>
         public SectionHeader(string name, SectionFlags characteristics)
         {
-            Name = name;
+            AssertIsValidName(name);
+            _name = name;
             Characteristics = characteristics;
         }
 
@@ -68,6 +69,7 @@ namespace AsmResolver.PE.File.Headers
             Offset = value.Offset;
             Rva = value.Rva;
 
+            _name = value.Name;
             VirtualSize = value.VirtualSize;
             VirtualAddress = value.VirtualAddress;
             SizeOfRawData = value.SizeOfRawData;
@@ -234,7 +236,7 @@ namespace AsmResolver.PE.File.Headers
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            var nameBytes = Encoding.UTF8.GetBytes(Name ?? string.Empty);
+            var nameBytes = Encoding.UTF8.GetBytes(Name);
             writer.WriteBytes(nameBytes);
             writer.WriteZeroes(8 - nameBytes.Length);
 
@@ -259,5 +261,10 @@ namespace AsmResolver.PE.File.Headers
                    $"{nameof(Characteristics)}: {Characteristics})";
         }
 
+        internal static void AssertIsValidName(string value)
+        {
+            if (Encoding.UTF8.GetByteCount(value) > 8)
+                throw new ArgumentException("Section name cannot be longer than 8 characters.");
+        }
     }
 }

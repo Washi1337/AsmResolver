@@ -27,6 +27,6 @@ namespace AsmResolver.PE.Tests
 
         BinaryStreamReader ISegmentReference.CreateReader() => throw new InvalidOperationException();
 
-        public ISegment GetSegment() => throw new InvalidOperationException();
+        public ISegment? GetSegment() => throw new InvalidOperationException();
     }
 }
