@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -196,7 +197,7 @@ namespace AsmResolver.PE.File
         /// <param name="fileOffset">The file offset.</param>
         /// <param name="section">The section that was found.</param>
         /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
-        public bool TryGetSectionContainingOffset(ulong fileOffset, out PESection section)
+        public bool TryGetSectionContainingOffset(ulong fileOffset, [NotNullWhen(true)] out PESection? section)
         {
             section = Sections.FirstOrDefault(s => s.ContainsFileOffset(fileOffset));
             return section != null;
@@ -211,7 +212,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public bool TryGetSectionContainingRva(uint rva, out PESection section)
+        public bool TryGetSectionContainingRva(uint rva,  [NotNullWhen(true)] out PESection? section)
         {
             section = Sections.FirstOrDefault(s => s.ContainsRva(rva));
             return section != null;

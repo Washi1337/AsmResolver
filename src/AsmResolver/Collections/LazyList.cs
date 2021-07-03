@@ -12,7 +12,7 @@ namespace AsmResolver.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public abstract class LazyList<TItem> : IList<TItem>
     {
-        private readonly List<TItem> _items = new List<TItem>();
+        private readonly List<TItem> _items = new();
 
         /// <inheritdoc />
         public TItem this[int index]
@@ -188,7 +188,7 @@ namespace AsmResolver.Collections
         /// <remarks>
         /// This enumerator only ensures the list is initialized upon calling the <see cref="Enumerator.MoveNext"/> method.
         /// </remarks>
-        public Enumerator GetEnumerator() => new Enumerator(this);
+        public Enumerator GetEnumerator() => new(this);
 
         /// <inheritdoc />
         IEnumerator<TItem> IEnumerable<TItem>.GetEnumerator() => GetEnumerator();
