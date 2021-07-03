@@ -7,7 +7,7 @@ namespace AsmResolver
     /// <summary>
     /// Provides a base implementation for a reference to a segment in a binary file.
     /// </summary>
-    public readonly struct SegmentReference : ISegmentReference
+    public sealed class SegmentReference : ISegmentReference
     {
         /// <summary>
         /// Represents the null reference.

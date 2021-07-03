@@ -6,7 +6,7 @@ namespace AsmResolver.PE.File
     /// <summary>
     /// Represents a reference to a segment of a PE file.
     /// </summary>
-    public readonly struct PESegmentReference : ISegmentReference
+    public sealed class PESegmentReference : ISegmentReference
     {
         private readonly IPEFile _peFile;
 

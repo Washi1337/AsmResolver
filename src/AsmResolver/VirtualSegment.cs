@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
 
 namespace AsmResolver
@@ -59,6 +60,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets a value indicating whether the physical contents of this segment is readable by a binary reader.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(PhysicalContents))]
         public bool IsReadable => PhysicalContents is IReadableSegment;
 
         /// <inheritdoc />

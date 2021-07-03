@@ -11,7 +11,7 @@ namespace AsmResolver.PE.File
     public class SerializedPEFile : PEFile
     {
         private readonly IList<SectionHeader> _sectionHeaders;
-        private BinaryStreamReader _reader;
+        private readonly BinaryStreamReader _reader;
 
         /// <summary>
         /// Reads a PE file from an input stream.
