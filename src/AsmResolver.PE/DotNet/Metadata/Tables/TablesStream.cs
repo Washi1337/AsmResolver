@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -31,8 +30,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// The default name of a table stream using the uncompressed format.
         /// </summary>
         public const string UncompressedStreamName = "#Schema";
-
-        private const int MaxTableCount = (int) TableIndex.GenericParamConstraint;
 
         private readonly IDictionary<CodedIndex, IndexEncoder> _indexEncoders;
         private readonly LazyVariable<IList<IMetadataTable>> _tables;
@@ -68,7 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             get;
             set;
-        } = 0;
+        }
 
         /// <summary>
         /// Gets or sets the major version number of the schema.
@@ -86,7 +83,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             get;
             set;
-        } = 0;
+        }
 
         /// <summary>
         /// Gets or sets the flags of the tables stream.

@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 
@@ -44,7 +43,7 @@ namespace AsmResolver.PE.File
         /// </summary>
         /// <param name="section">The section to be copied.</param>
         public PESection(PESection section)
-            : this (section.Name, section.Characteristics, section?.Contents)
+            : this (section.Name, section.Characteristics, section.Contents)
         {
         }
 

@@ -229,7 +229,7 @@ namespace AsmResolver.PE.DotNet.Cil
             {
                 int hashCode = Offset;
                 hashCode = (hashCode * 397) ^ OpCode.GetHashCode();
-                hashCode = (hashCode * 397) ^ (Operand != null ? Operand.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Operand is not null ? Operand.GetHashCode() : 0);
                 return hashCode;
             }
         }

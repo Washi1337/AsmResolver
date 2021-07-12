@@ -46,11 +46,9 @@ namespace AsmResolver.PE.DotNet.Metadata
             for (int i = 0; i < _numberOfStreams; i++)
             {
                 var header = headers[i];
-                var streamReader = _directoryReader.ForkAbsolute(_directoryReader.Offset + header.Offset, headers[i].Size);
 
+                var streamReader = _directoryReader.ForkAbsolute(_directoryReader.Offset + header.Offset, headers[i].Size);
                 var stream = _context.Parameters.MetadataStreamReader.ReadStream(_context, header, ref streamReader);
-                if (stream is null)
-                    continue;
 
                 Items.Add(stream);
             }

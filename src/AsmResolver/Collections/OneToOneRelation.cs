@@ -7,10 +7,10 @@ namespace AsmResolver.Collections
     /// </summary>
     /// <typeparam name="TKey">The first object type.</typeparam>
     /// <typeparam name="TValue">The second object type.</typeparam>
-    public class OneToOneRelation<TKey, TValue>
+    public sealed class OneToOneRelation<TKey, TValue>
     {
-        private readonly IDictionary<TKey, TValue> _keyToValue = new Dictionary<TKey, TValue>();
-        private readonly IDictionary<TValue, TKey> _valueToKey = new Dictionary<TValue, TKey>();
+        private readonly Dictionary<TKey, TValue> _keyToValue = new();
+        private readonly Dictionary<TValue, TKey> _valueToKey = new();
 
         /// <summary>
         /// Registers a one-to-one relation between two objects.

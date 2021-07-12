@@ -174,7 +174,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
-            uint length = 12 + (Code?.GetPhysicalSize() ?? 0);
+            uint length = 12 + Code.GetPhysicalSize();
             ulong endOffset = Offset + length;
 
             ulong sectionsOffset = endOffset.Align(4);
@@ -190,9 +190,9 @@ namespace AsmResolver.PE.DotNet.Cil
         {
             writer.WriteUInt16((ushort) ((ushort) _attributes | 0x3000));
             writer.WriteUInt16(MaxStack);
-            writer.WriteUInt32(Code?.GetPhysicalSize() ?? 0);
+            writer.WriteUInt32(Code.GetPhysicalSize());
             writer.WriteUInt32(LocalVarSigToken.ToUInt32());
-            Code?.Write(writer);
+            Code.Write(writer);
 
             if (HasSections)
             {

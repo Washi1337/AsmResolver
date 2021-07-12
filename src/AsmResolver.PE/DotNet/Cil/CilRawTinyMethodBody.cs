@@ -57,12 +57,12 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => sizeof(byte) + Code?.GetPhysicalSize() ?? 0;
+        public override uint GetPhysicalSize() => sizeof(byte) + Code.GetPhysicalSize();
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            uint codeSize = Code?.GetPhysicalSize() ?? 0;
+            uint codeSize = Code.GetPhysicalSize();
             if (codeSize > 0x3F)
                 throw new ArgumentException("Code of a tiny method body cannot be 64 bytes or larger.");
 

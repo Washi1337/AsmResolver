@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.IO;
-using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Imports
 {

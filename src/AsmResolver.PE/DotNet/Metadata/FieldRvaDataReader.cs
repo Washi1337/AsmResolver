@@ -19,17 +19,14 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             if (fieldRvaRow.Data.CanRead)
             {
-                var table = metadata
-                    .GetStream<TablesStream>()
-                    ?.GetTable<FieldDefinitionRow>(TableIndex.Field);
+                 if (!metadata.TryGetStream<TablesStream>(out var tablesStream))
+                 {
+                     listener.BadImage("Metadata does not contain a tables stream.");
+                     return null;
+                 }
 
-                if (table is null)
-                {
-                    listener.BadImage("Metadata does not contain a tables stream.");
-                    return null;
-                }
-
-                if (fieldRvaRow.Field > table.Count)
+                 var table = tablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
+                 if (fieldRvaRow.Field > table.Count)
                 {
                     listener.BadImage("FieldRva row has an invalid Field column value.");
                     return null;
@@ -48,9 +45,11 @@ namespace AsmResolver.PE.DotNet.Metadata
 
         private int DetermineFieldSize(IMetadata metadata, in FieldDefinitionRow field)
         {
-            var blobStream = metadata.GetStream<BlobStream>();
-            if (blobStream is null || !blobStream.TryGetBlobReaderByIndex(field.Signature, out var reader))
+            if (!metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(field.Signature, out var reader))
+            {
                 return 0;
+            }
 
             reader.ReadByte(); // calling convention attributes.
             var elementType = (ElementType) reader.ReadByte();
@@ -76,12 +75,11 @@ namespace AsmResolver.PE.DotNet.Metadata
 
         private int GetCustomTypeSize(IMetadata metadata, ref BinaryStreamReader reader)
         {
-            if (!reader.TryReadCompressedUInt32(out uint codedIndex))
+            if (!reader.TryReadCompressedUInt32(out uint codedIndex)
+                || !metadata.TryGetStream<TablesStream>(out var tablesStream))
+            {
                 return 0;
-
-            var tablesStream = metadata.GetStream<TablesStream>();
-            if (tablesStream is null)
-                return 0;
+            }
 
             var typeToken = tablesStream
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef)

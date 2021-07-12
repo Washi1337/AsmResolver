@@ -9,8 +9,8 @@ namespace AsmResolver.PE.Relocations.Builder
     /// </summary>
     public class RelocationsDirectoryBuffer : SegmentBase
     {
-        private readonly IList<BaseRelocation> _relocations = new List<BaseRelocation>();
-        private IList<RelocationBlock>? _blocks = new List<RelocationBlock>();
+        private readonly List<BaseRelocation> _relocations = new();
+        private List<RelocationBlock>? _blocks = new();
 
         /// <summary>
         /// Adds a single base relocation to the buffer.
@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Relocations.Builder
 
         private void EnsureBlocksCreated() => _blocks ??= CreateBlocks();
 
-        private IList<RelocationBlock> CreateBlocks()
+        private List<RelocationBlock> CreateBlocks()
         {
             var blocks = new Dictionary<uint, RelocationBlock>();
             for (int i = 0; i < _relocations.Count; i++)
@@ -38,7 +38,7 @@ namespace AsmResolver.PE.Relocations.Builder
             return blocks
                 .OrderBy(x => x.Key)
                 .Select(x => x.Value)
-                .ToArray();
+                .ToList();
         }
 
         private static uint GetPageRva(BaseRelocation relocation) => (uint) (relocation.Location.Rva & ~0xFFF);
