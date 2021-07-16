@@ -31,6 +31,14 @@ namespace AsmResolver.DotNet
             get;
         }
 
+        private static void AssertTypeIsValid(ITypeDefOrRef? type)
+        {
+            if (type is null)
+                throw new ArgumentNullException(nameof(type));
+            if (type.Scope is null)
+                throw new ArgumentException("Cannot import types that are not added to a module.");
+        }
+
         /// <summary>
         /// Imports a resolution scope.
         /// </summary>
@@ -168,14 +176,6 @@ namespace AsmResolver.DotNet
                 return type;
 
             return new TypeSpecification(ImportTypeSignature(type.Signature));
-        }
-
-        private void AssertTypeIsValid(ITypeDefOrRef type)
-        {
-            if (type is null)
-                throw new ArgumentNullException(nameof(type));
-            if (type.Scope == null)
-                throw new ArgumentException("Cannot import types that are not added to a module.");
         }
 
         /// <summary>
@@ -613,7 +613,6 @@ namespace AsmResolver.DotNet
             return new TypeDefOrRefSignature(ImportType(signature.Type), signature.IsValueType);
         }
 
-        /// <inheritdoc />
         TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitFunctionPointerType(FunctionPointerTypeSignature signature)
         {
             return new FunctionPointerTypeSignature(ImportMethodSignature(signature.Signature));
