@@ -165,13 +165,19 @@ namespace AsmResolver.DotNet
                 return null;
 
             string path;
-            if (string.IsNullOrEmpty(assembly.Culture))
-                path = Path.Combine(directory, assembly.Name);
-            else if (assembly.Culture is not null)
-                path = Path.Combine(directory, assembly.Culture, assembly.Name);
-            else
-                return null;
 
+            // If culture is set, prefer the subdirectory with the culture.
+            if (!string.IsNullOrEmpty(assembly.Culture))
+            {
+                path = Path.Combine(directory, assembly.Culture!, assembly.Name);
+                string? result = ProbeFileFromFilePathWithoutExtension(path)
+                                 ?? ProbeFileFromFilePathWithoutExtension(Path.Combine(path, assembly.Name));
+                if (result is null)
+                    return null;
+            }
+
+            // If that fails, assume neutral culture.
+            path = Path.Combine(directory, assembly.Name);
             return ProbeFileFromFilePathWithoutExtension(path)
                    ?? ProbeFileFromFilePathWithoutExtension(Path.Combine(path, assembly.Name));
         }

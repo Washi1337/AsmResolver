@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Threading;
@@ -120,6 +121,12 @@ namespace AsmResolver.DotNet
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the assembly contains a manifest module.
+        /// </summary>
+        [MemberNotNullWhen(true, nameof(ManifestModule))]
+        public bool HasManifestModule => ManifestModule is not null;
 
         /// <summary>
         /// Gets the main module of the .NET assembly containing the assembly's manifest.
