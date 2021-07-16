@@ -20,21 +20,20 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// <param name="rootDirectory">The root resources directory to extract the icon group from.</param>
         /// <returns>The icon group resources, or <c>null</c> if none was found.</returns>
         /// <exception cref="ArgumentException">Occurs when the resource data is not readable.</exception>
-        public static IconResource FromDirectory(IResourceDirectory rootDirectory)
+        public static IconResource? FromDirectory(IResourceDirectory rootDirectory)
         {
-            var groupIconDirectory = (IResourceDirectory) rootDirectory.Entries[ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.GroupIcon)];
+            var groupIconDirectory = (IResourceDirectory) rootDirectory.Entries[
+                ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.GroupIcon)];
 
-            var iconDirectory = (IResourceDirectory)rootDirectory.Entries[ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.Icon)];
-
-            if (groupIconDirectory is null || iconDirectory is null)
-                return null;
+            var iconDirectory = (IResourceDirectory) rootDirectory.Entries[
+                ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.Icon)];
 
             var result = new IconResource();
 
             foreach (var iconGroupResource in groupIconDirectory.Entries.OfType<IResourceDirectory>())
             {
                 var dataEntry = iconGroupResource
-                    ?.Entries
+                    .Entries
                     .OfType<IResourceData>()
                     .FirstOrDefault();
 
@@ -114,10 +113,10 @@ namespace AsmResolver.PE.Win32Resources.Icon
             var newIconDirectory = new ResourceDirectory(ResourceType.Icon);
             foreach (var entry in _entries)
             {
-                foreach (var icon in entry.Value.GetIconEntries())
+                foreach (var (groupEntry, iconEntry) in entry.Value.GetIconEntries())
                 {
-                    newIconDirectory.Entries.Add(new ResourceDirectory(icon.Item1.Id)
-                        {Entries = {new ResourceData(0u, icon.Item2)}});
+                    newIconDirectory.Entries.Add(new ResourceDirectory(groupEntry.Id)
+                        {Entries = {new ResourceData(0u, iconEntry)}});
                 }
             }
 
