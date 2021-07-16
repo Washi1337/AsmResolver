@@ -96,22 +96,26 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
 
+            // Create two dummy fields.
             var fieldType = module.CorLibTypeFactory.Object;
             var field1 = new FieldDefinition("NonAssignedField", FieldAttributes.Static,
                 FieldSignature.CreateStatic(fieldType));
             var field2 = new FieldDefinition("AssignedField", FieldAttributes.Static,
                 FieldSignature.CreateStatic(fieldType));
 
+            // Add both.
             var moduleType = module.GetOrCreateModuleType();
             moduleType.Fields.Add(field1);
             moduleType.Fields.Add(field2);
 
+            // Only assign token to the second one, but leave the first one floating.
             module.TokenAllocator.AssignNextAvailableToken(field2);
 
+            // Rebuild.
             var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
             var newModule = ModuleDefinition.FromImage(image);
 
-            Assert.Equal(field1.Name, ((FieldDefinition) newModule.LookupMember(field1.MetadataToken)).Name);
+            // Verify.
             Assert.Equal(field2.Name, ((FieldDefinition) newModule.LookupMember(field2.MetadataToken)).Name);
         }
 
