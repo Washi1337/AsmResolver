@@ -92,6 +92,30 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void AssignTokenOfNextMemberShouldPreserve()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+
+            var fieldType = module.CorLibTypeFactory.Object;
+            var field1 = new FieldDefinition("NonAssignedField", FieldAttributes.Static,
+                FieldSignature.CreateStatic(fieldType));
+            var field2 = new FieldDefinition("AssignedField", FieldAttributes.Static,
+                FieldSignature.CreateStatic(fieldType));
+
+            var moduleType = module.GetOrCreateModuleType();
+            moduleType.Fields.Add(field1);
+            moduleType.Fields.Add(field2);
+
+            module.TokenAllocator.AssignNextAvailableToken(field2);
+
+            var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
+            var newModule = ModuleDefinition.FromImage(image);
+
+            Assert.Equal(field1.Name, ((FieldDefinition) newModule.LookupMember(field1.MetadataToken)).Name);
+            Assert.Equal(field2.Name, ((FieldDefinition) newModule.LookupMember(field2.MetadataToken)).Name);
+        }
+
+        [Fact]
         public void Issue187()
         {
             // https://github.com/Washi1337/AsmResolver/issues/187
