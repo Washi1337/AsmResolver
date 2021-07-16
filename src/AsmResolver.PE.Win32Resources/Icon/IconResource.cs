@@ -57,13 +57,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         public IconGroupDirectory this[uint id]
         {
             get => _entries[id];
-            set
-            {
-                if (value is null)
-                    _entries.Remove(id);
-                else
-                    _entries[id] = value;
-            }
+            set => _entries[id] = value;
         }
 
         /// <summary>
@@ -72,6 +66,13 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// <param name="id">The id to use for the entry.</param>
         /// <param name="entry">The entry to add.</param>
         public void AddEntry(uint id, IconGroupDirectory entry) => _entries[id] = entry;
+
+        /// <summary>
+        /// Removes an existing entry with a specified id from the icon group resource.
+        /// </summary>
+        /// <param name="id">The icon group id.</param>
+        /// <returns><c>True</c> if the icon entry was successfully removed, otherwise <c>false</c>.</returns>
+        public bool RemoveEntry(uint id) => _entries.Remove(id);
 
         /// <summary>
         /// Gets a collection of entries stored in the icon group directory.

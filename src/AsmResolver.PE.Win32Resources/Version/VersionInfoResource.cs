@@ -121,13 +121,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public VersionTableEntry this[string name]
         {
             get => _entries[name];
-            set
-            {
-                if (value is null)
-                    _entries.Remove(name);
-                else
-                    _entries[name] = value;
-            }
+            set => _entries[name] = value;
         }
 
         /// <summary>

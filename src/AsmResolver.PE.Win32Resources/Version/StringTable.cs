@@ -166,13 +166,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public string this[string key]
         {
             get => _entries[key];
-            set
-            {
-                if (value is null)
-                    _entries.Remove(key);
-                else
-                    _entries[key] = value;
-            }
+            set => _entries[key] = value;
         }
 
         /// <summary>

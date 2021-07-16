@@ -72,13 +72,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         public (IconGroupDirectoryEntry, IconEntry) this[ushort id]
         {
             get => _entries[id];
-            set
-            {
-                if (value.Item1 is null)
-                    _entries.Remove(id);
-                else
-                    _entries[id] = value;
-            }
+            set => _entries[id] = value;
         }
 
         /// <summary>
