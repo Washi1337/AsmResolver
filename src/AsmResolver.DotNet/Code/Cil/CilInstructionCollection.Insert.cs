@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Code.Cil
     public partial class CilInstructionCollection
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private CilInstruction InsertAndReturn(int index, CilOpCode code, object operand = null)
+        private CilInstruction InsertAndReturn(int index, CilOpCode code, object? operand = null)
         {
             var instruction = new CilInstruction(code, operand);
             Insert(index, instruction);

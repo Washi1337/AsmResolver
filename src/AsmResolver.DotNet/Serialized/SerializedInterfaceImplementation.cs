@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override TypeDefinition GetClass()
+        protected override TypeDefinition? GetClass()
         {
             var module = _context.ParentModule;
             var token = module.GetInterfaceImplementationOwner(MetadataToken.Rid);
@@ -43,12 +43,12 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override ITypeDefOrRef GetInterface()
+        protected override ITypeDefOrRef? GetInterface()
         {
-            var encoder = _context.Image.DotNetDirectory.Metadata
+            var token = _context.Metadata
                 .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.TypeDefOrRef);
-            var token = encoder.DecodeIndex(_row.Interface);
+                .GetIndexEncoder(CodedIndex.TypeDefOrRef)
+                .DecodeIndex(_row.Interface);
 
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as ITypeDefOrRef

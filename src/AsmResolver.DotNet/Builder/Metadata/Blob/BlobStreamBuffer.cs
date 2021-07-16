@@ -52,7 +52,10 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         public void ImportStream(BlobStream stream)
         {
             MetadataStreamBufferHelper.CloneBlobHeap(stream, _writer, (index, newIndex) =>
-                _blobs[stream.GetBlobByIndex(index)] = newIndex);
+            {
+                if (stream.GetBlobByIndex(index) is { } blob)
+                    _blobs[blob] = newIndex;
+            });
         }
 
         /// <summary>
@@ -85,7 +88,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         /// </summary>
         /// <param name="blob">The blob to lookup or add.</param>
         /// <returns>The index of the blob.</returns>
-        public uint GetBlobIndex(byte[] blob)
+        public uint GetBlobIndex(byte[]? blob)
         {
             if (blob is null || blob.Length == 0)
                 return 0;
@@ -107,7 +110,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         /// <param name="signature">The signature to lookup or add.</param>
         /// <param name="errorListener">The object responsible for collecting diagnostic information.</param>
         /// <returns>The index of the signature.</returns>
-        public uint GetBlobIndex(ITypeCodedIndexProvider provider, BlobSignature signature, IErrorListener errorListener)
+        public uint GetBlobIndex(ITypeCodedIndexProvider provider, BlobSignature? signature, IErrorListener errorListener)
         {
             if (signature is null)
                 return 0u;

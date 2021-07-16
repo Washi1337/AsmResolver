@@ -1,4 +1,3 @@
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet.Code.Cil
@@ -40,6 +39,6 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             return "V_" + Index;
         }
-        
+
     }
 }

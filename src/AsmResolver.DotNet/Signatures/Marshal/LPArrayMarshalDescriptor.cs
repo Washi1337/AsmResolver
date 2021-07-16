@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures.Marshal

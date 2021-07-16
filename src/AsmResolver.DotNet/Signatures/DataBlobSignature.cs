@@ -1,6 +1,5 @@
 using System;
 using System.Text;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -16,10 +15,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The blob signature.</returns>
-        public static DataBlobSignature FromReader(ref BinaryStreamReader reader)
-        {
-            return new DataBlobSignature(reader.ReadToEnd());
-        }
+        public static DataBlobSignature FromReader(ref BinaryStreamReader reader) => new(reader.ReadToEnd());
 
         /// <summary>
         /// Creates a new data blob signature.

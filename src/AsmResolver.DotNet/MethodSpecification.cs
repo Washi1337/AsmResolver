@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet
 {
@@ -14,9 +13,9 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class MethodSpecification : MetadataMember, IMethodDescriptor, IHasCustomAttribute
     {
-        private readonly LazyVariable<IMethodDefOrRef> _method;
-        private readonly LazyVariable<GenericInstanceMethodSignature> _signature;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<IMethodDefOrRef?> _method;
+        private readonly LazyVariable<GenericInstanceMethodSignature?> _signature;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Creates a new empty method specification.
@@ -25,8 +24,8 @@ namespace AsmResolver.DotNet
         protected MethodSpecification(MetadataToken token)
             : base(token)
         {
-            _method = new LazyVariable<IMethodDefOrRef>(GetMethod);
-            _signature = new LazyVariable<GenericInstanceMethodSignature>(GetSignature);
+            _method = new LazyVariable<IMethodDefOrRef?>(GetMethod);
+            _signature = new LazyVariable<GenericInstanceMethodSignature?>(GetSignature);
         }
 
         /// <summary>
@@ -34,49 +33,52 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="method">The method to instantiate.</param>
         /// <param name="signature">The instantiation signature.</param>
-        public MethodSpecification(IMethodDefOrRef method, GenericInstanceMethodSignature signature)
+        public MethodSpecification(IMethodDefOrRef? method, GenericInstanceMethodSignature? signature)
             : this(new MetadataToken(TableIndex.MethodSpec,0))
         {
             Method = method;
             Signature = signature;
         }
-        
+
         /// <summary>
         /// Gets or sets the method that was instantiated.
         /// </summary>
-        public IMethodDefOrRef Method
+        public IMethodDefOrRef? Method
         {
             get => _method.Value;
             set => _method.Value = value;
         }
 
-        MethodSignature IMethodDescriptor.Signature => Method.Signature;
+        MethodSignature? IMethodDescriptor.Signature => Method?.Signature;
 
         /// <summary>
         /// Gets or sets the generic instantiation of the method.
         /// </summary>
-        public GenericInstanceMethodSignature Signature
+        public GenericInstanceMethodSignature? Signature
         {
             get => _signature.Value;
             set => _signature.Value = value;
         }
 
         /// <inheritdoc />
-        public string Name => Method.Name;
+        public string Name => Method?.Name ?? NullName;
 
         /// <inheritdoc />
-        public string FullName =>
-            FullNameGenerator.GetMethodFullName(Name, DeclaringType, Method.Signature, Signature.TypeArguments);
+        public string FullName => FullNameGenerator.GetMethodFullName(
+            Name,
+            DeclaringType,
+            Method?.Signature,
+            Signature?.TypeArguments ?? Enumerable.Empty<TypeSignature>());
 
         /// <inheritdoc />
-        public ModuleDefinition Module => Method?.Module;
+        public ModuleDefinition? Module => Method?.Module;
 
         /// <summary>
         /// Gets the declaring type of the method.
         /// </summary>
-        public ITypeDefOrRef DeclaringType => Method.DeclaringType;
-        
-        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
+        public ITypeDefOrRef? DeclaringType => Method?.DeclaringType;
+
+        ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
@@ -90,9 +92,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MethodDefinition Resolve() => Method.Resolve();
+        public MethodDefinition? Resolve() => Method?.Resolve();
 
-        IMemberDefinition IMemberDescriptor.Resolve() => Resolve();
+        IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 
         /// <summary>
         /// Obtains the instantiated method.
@@ -101,7 +103,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Method"/> property.
         /// </remarks>
-        protected virtual IMethodDefOrRef GetMethod() => null;
+        protected virtual IMethodDefOrRef? GetMethod() => null;
 
         /// <summary>
         /// Obtains the method instantiation signature.
@@ -110,7 +112,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Signature"/> property.
         /// </remarks>
-        protected virtual GenericInstanceMethodSignature GetSignature() => null;
+        protected virtual GenericInstanceMethodSignature? GetSignature() => null;
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.

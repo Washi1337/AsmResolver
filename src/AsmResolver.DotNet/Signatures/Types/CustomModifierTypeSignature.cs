@@ -52,7 +52,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string Name
+        public override string? Name
         {
             get
             {

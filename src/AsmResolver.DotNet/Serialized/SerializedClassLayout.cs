@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override TypeDefinition GetParent()
+        protected override TypeDefinition? GetParent()
         {
             return _context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.TypeDef, _row.Parent), out var member)
                 ? member as TypeDefinition

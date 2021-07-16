@@ -214,9 +214,9 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="writer">The writer to use.</param>
         /// <param name="value">The string to write.</param>
-        public static void WriteSerString(this IBinaryStreamWriter writer, string value)
+        public static void WriteSerString(this IBinaryStreamWriter writer, string? value)
         {
-            if (value == null)
+            if (value is null)
             {
                 writer.WriteByte(0xFF);
                 return;

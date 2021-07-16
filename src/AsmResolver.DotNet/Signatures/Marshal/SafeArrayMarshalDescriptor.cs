@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
 
             if (reader.CanRead(1))
             {
-                string typeName = reader.ReadSerString();
+                string? typeName = reader.ReadSerString();
                 if (typeName != null)
                     result.UserDefinedSubType = TypeNameParser.Parse(parentModule, typeName);
             }
@@ -62,7 +62,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <param name="variantType">The element type of the safe array.</param>
         /// <param name="flags">The flags associated to the element type of the safe array.</param>
         /// <param name="subType">The user defined array element type.</param>
-        public SafeArrayMarshalDescriptor(SafeArrayVariantType variantType, SafeArrayTypeFlags flags, TypeSignature subType)
+        public SafeArrayMarshalDescriptor(SafeArrayVariantType variantType, SafeArrayTypeFlags flags, TypeSignature? subType)
         {
             VariantType = variantType;
             VariantTypeFlags = flags;
@@ -128,7 +128,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <see cref="SafeArrayVariantType.Unknown"/>, <see cref="SafeArrayVariantType.Dispatch"/>, or
         /// <see cref="SafeArrayVariantType.Record"/>.
         /// </remarks>
-        public TypeSignature UserDefinedSubType
+        public TypeSignature? UserDefinedSubType
         {
             get;
             set;

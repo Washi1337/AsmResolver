@@ -11,15 +11,15 @@ namespace AsmResolver.DotNet.Signatures
 
     internal struct CustomAttributeArgumentReader
     {
-        public static CustomAttributeArgumentReader Create() => new(new List<object>());
+        public static CustomAttributeArgumentReader Create() => new(new List<object?>());
 
-        public CustomAttributeArgumentReader(IList<object> elements)
+        public CustomAttributeArgumentReader(IList<object?> elements)
         {
             Elements = elements;
             IsNullArray = false;
         }
 
-        public IList<object> Elements
+        public IList<object?> Elements
         {
             get;
         }
@@ -36,7 +36,12 @@ namespace AsmResolver.DotNet.Signatures
 
             if (valueType.IsTypeOf("System", "Type"))
             {
-                Elements.Add(TypeNameParser.Parse(module, reader.ReadSerString()));
+                string? typeFullName = reader.ReadSerString();
+                var type = typeFullName is not null
+                    ? TypeNameParser.Parse(module, typeFullName)
+                    : context.ReaderContext.BadImageAndReturn<TypeSignature>("Type full name in attribute argument is null.");
+
+                Elements.Add(type);
                 return;
             }
 
@@ -125,8 +130,8 @@ namespace AsmResolver.DotNet.Signatures
 
                     var enumTypeDef = module.MetadataResolver.ResolveType(valueType);
 
-                    TypeSignature underlyingType = null;
-                    if (enumTypeDef != null && enumTypeDef.IsEnum)
+                    TypeSignature? underlyingType = null;
+                    if (enumTypeDef is {IsEnum: true})
                         underlyingType = enumTypeDef.GetEnumUnderlyingType();
 
                     if (underlyingType is null)

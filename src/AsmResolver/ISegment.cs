@@ -1,3 +1,6 @@
+using System.Linq;
+using System.Text;
+
 namespace AsmResolver
 {
     /// <summary>
@@ -15,6 +18,8 @@ namespace AsmResolver
 
     public static partial class Extensions
     {
+        private const string ReservedStringCharacters = "\\\"\t\r\n\b";
+
         /// <summary>
         /// Rounds the provided unsigned integer up to the nearest multiple of the provided alignment.
         /// </summary>
@@ -52,6 +57,27 @@ namespace AsmResolver
             if (value < 0x4000)
                 return sizeof(ushort);
             return sizeof(uint);
+        }
+
+        /// <summary>
+        /// Converts a string into an escaped string literal.
+        /// </summary>
+        /// <param name="literal">The string to convert.</param>
+        /// <returns>The escaped string.</returns>
+        public static string CreateEscapedString(this string literal)
+        {
+            var builder = new StringBuilder(literal.Length + 2);
+
+            builder.Append('"');
+            foreach (char currentChar in literal)
+            {
+                if (ReservedStringCharacters.Contains(currentChar))
+                    builder.Append('\\');
+                builder.Append(currentChar);
+            }
+            builder.Append('"');
+
+            return builder.ToString();
         }
     }
 }

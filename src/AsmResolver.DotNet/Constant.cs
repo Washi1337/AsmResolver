@@ -9,8 +9,8 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class Constant : MetadataMember
     {
-        private readonly LazyVariable<IHasConstant> _parent;
-        private readonly LazyVariable<DataBlobSignature> _value;
+        private readonly LazyVariable<IHasConstant?> _parent;
+        private readonly LazyVariable<DataBlobSignature?> _value;
 
         /// <summary>
         /// Initializes the constant with a metadata token.
@@ -19,16 +19,16 @@ namespace AsmResolver.DotNet
         protected Constant(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<IHasConstant>(GetParent);
-            _value = new LazyVariable<DataBlobSignature>(GetValue);
+            _parent = new LazyVariable<IHasConstant?>(GetParent);
+            _value = new LazyVariable<DataBlobSignature?>(GetValue);
         }
-        
+
         /// <summary>
-        /// Creates a new constant for a member, with the provided constant type and raw literal value. 
+        /// Creates a new constant for a member, with the provided constant type and raw literal value.
         /// </summary>
         /// <param name="type">The type of the constant.</param>
         /// <param name="value">The raw literal value of the constant.</param>
-        public Constant(ElementType type, DataBlobSignature value)
+        public Constant(ElementType type, DataBlobSignature? value)
             : this(new MetadataToken(TableIndex.Constant, 0))
         {
             Type = type;
@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the type of constant that is stored in the blob stream. 
+        /// Gets the type of constant that is stored in the blob stream.
         /// </summary>
         /// <remarks>This field must always be a value-type.</remarks>
         public ElementType Type
@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the member that is assigned a constant.
         /// </summary>
-        public IHasConstant Parent
+        public IHasConstant? Parent
         {
             get => _parent.Value;
             internal set => _parent.Value = value;
@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the serialized literal value.
         /// </summary>
-        public DataBlobSignature Value
+        public DataBlobSignature? Value
         {
             get => _value.Value;
             set => _value.Value = value;
@@ -70,7 +70,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Parent"/> property.
         /// </remarks>
-        protected virtual IHasConstant GetParent() => null;
+        protected virtual IHasConstant? GetParent() => null;
 
 
         /// <summary>
@@ -80,6 +80,6 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Value"/> property.
         /// </remarks>
-        protected virtual DataBlobSignature GetValue() => null;
+        protected virtual DataBlobSignature? GetValue() => null;
     }
 }

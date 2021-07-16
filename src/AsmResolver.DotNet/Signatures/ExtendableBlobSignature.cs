@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Gets or sets the extra custom data in the blob signature.
         /// </summary>
-        public byte[] ExtraData
+        public byte[]? ExtraData
         {
             get;
             set;
@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Signatures
         public sealed override void Write(BlobSerializationContext context)
         {
             WriteContents(context);
-            if (ExtraData != null)
+            if (ExtraData is not null)
                 context.Writer.WriteBytes(ExtraData);
         }
 

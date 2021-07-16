@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AsmResolver.DotNet.Signatures
 {
-    public partial class SignatureComparer : 
+    public partial class SignatureComparer :
         IEqualityComparer<CallingConventionSignature>,
         IEqualityComparer<FieldSignature>,
         IEqualityComparer<MethodSignature>,
@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<GenericInstanceMethodSignature>
     {
         /// <inheritdoc />
-        public bool Equals(CallingConventionSignature x, CallingConventionSignature y)
+        public bool Equals(CallingConventionSignature? x, CallingConventionSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(FieldSignature x, FieldSignature y)
+        public bool Equals(FieldSignature? x, FieldSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -66,7 +66,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(MethodSignature x, MethodSignature y)
+        public bool Equals(MethodSignature? x, MethodSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet.Signatures
             {
                 int hashCode = (int) obj.Attributes;
                 hashCode = (hashCode * 397) ^ obj.GenericParameterCount;
-                hashCode = (hashCode * 397) ^ (obj.ReturnType != null ? obj.ReturnType.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (obj.ReturnType is not null ? obj.ReturnType.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ GetHashCode(obj.ParameterTypes);
                 hashCode = (hashCode * 397) ^ GetHashCode(obj.SentinelParameterTypes);
                 return hashCode;
@@ -95,7 +95,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(LocalVariablesSignature x, LocalVariablesSignature y)
+        public bool Equals(LocalVariablesSignature? x, LocalVariablesSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -118,7 +118,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(GenericInstanceMethodSignature x, GenericInstanceMethodSignature y)
+        public bool Equals(GenericInstanceMethodSignature? x, GenericInstanceMethodSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -141,7 +141,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(PropertySignature x, PropertySignature y)
+        public bool Equals(PropertySignature? x, PropertySignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;

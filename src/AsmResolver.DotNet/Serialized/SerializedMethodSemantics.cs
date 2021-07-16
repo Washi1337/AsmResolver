@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override MethodDefinition GetMethod()
+        protected override MethodDefinition? GetMethod()
         {
             var token = new MetadataToken(TableIndex.Method, _row.Method);
             return _context.ParentModule.TryLookupMember(token, out var member)
@@ -40,13 +40,13 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IHasSemantics GetAssociation()
+        protected override IHasSemantics? GetAssociation()
         {
-            var encoder = _context.Image.DotNetDirectory.Metadata
+            var token = _context.Metadata
                 .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.HasSemantics);
+                .GetIndexEncoder(CodedIndex.HasSemantics)
+                .DecodeIndex(_row.Association);
 
-            var token = encoder.DecodeIndex(_row.Association);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as IHasSemantics
                 : _context.BadImageAndReturn<IHasSemantics>(

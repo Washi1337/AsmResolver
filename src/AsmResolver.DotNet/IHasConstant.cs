@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet
         /// <para>If this property is set to <c>null</c>, the member is not assigned a constant value.</para>
         /// <para>Updating this property does not update any of the attributes associated to the member.</para>
         /// </remarks>
-        Constant Constant
+        Constant? Constant
         {
             get;
             set;

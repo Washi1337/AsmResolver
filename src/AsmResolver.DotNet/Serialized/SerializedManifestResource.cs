@@ -34,20 +34,20 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName()
+        protected override string? GetName()
         {
-            return _context.Image.DotNetDirectory.Metadata
-                .GetStream<StringsStream>()
-                .GetStringByIndex(_row.Name);
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
         }
 
         /// <inheritdoc />
-        protected override IImplementation GetImplementation()
+        protected override IImplementation? GetImplementation()
         {
             if (_row.Implementation == 0)
                 return null;
 
-            var encoder = _context.Image.DotNetDirectory.Metadata
+            var encoder = _context.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.Implementation);
 
@@ -59,15 +59,16 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override ISegment GetEmbeddedDataSegment()
+        protected override ISegment? GetEmbeddedDataSegment()
         {
             if (_row.Implementation != 0)
                 return null;
 
-            if (!_context.Image.DotNetDirectory.DotNetResources
-                .TryCreateManifestResourceReader(_row.Offset, out var reader))
+            if (_context.Image.DotNetDirectory!.DotNetResources is not { } resources
+                || !resources.TryCreateManifestResourceReader(_row.Offset, out var reader))
             {
-                return _context.BadImageAndReturn<ISegment>($"Invalid data offset in manifest resource {MetadataToken.ToString()}.");
+                return _context.BadImageAndReturn<ISegment>(
+                    $"Invalid data offset in manifest resource {MetadataToken.ToString()}.");
             }
 
             return DataSegment.FromReader(ref reader);

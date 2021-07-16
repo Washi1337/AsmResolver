@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet
         /// For member references, this does not obtain the module definition that the member is defined in. 
         /// Rather, it obtains the module definition that references this reference.
         /// </remarks>
-        ModuleDefinition Module
+        ModuleDefinition? Module
         {
             get;
         }

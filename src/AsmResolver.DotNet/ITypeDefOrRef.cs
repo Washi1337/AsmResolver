@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// When this type is nested, gets the enclosing type.
         /// </summary>
-        new ITypeDefOrRef DeclaringType
+        new ITypeDefOrRef? DeclaringType
         {
             get;
         }

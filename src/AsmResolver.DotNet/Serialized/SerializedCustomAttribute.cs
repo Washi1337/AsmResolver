@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IHasCustomAttribute GetParent()
+        protected override IHasCustomAttribute? GetParent()
         {
             var ownerToken = _context.ParentModule.GetCustomAttributeOwner(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)
@@ -40,27 +40,28 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override ICustomAttributeType GetConstructor()
+        protected override ICustomAttributeType? GetConstructor()
         {
-            var tablesStream = _context.Image.DotNetDirectory.Metadata.GetStream<TablesStream>();
-            var encoder = tablesStream.GetIndexEncoder(CodedIndex.CustomAttributeType);
+            var token = _context.Metadata
+                .GetStream<TablesStream>()
+                .GetIndexEncoder(CodedIndex.CustomAttributeType)
+                .DecodeIndex(_row.Type);
 
-            var token = encoder.DecodeIndex(_row.Type);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as ICustomAttributeType
                 : _context.BadImageAndReturn<ICustomAttributeType>($"Invalid constructor in custom attribute {MetadataToken}.");
         }
 
         /// <inheritdoc />
-        protected override CustomAttributeSignature GetSignature()
+        protected override CustomAttributeSignature? GetSignature()
         {
             if (Constructor is null)
                 return null;
 
-            var blobStream = _context.Image.DotNetDirectory.Metadata.GetStream<BlobStream>();
-            if (!blobStream.TryGetBlobReaderByIndex(_row.Value, out var reader))
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Value, out var reader))
             {
-                _context.BadImageAndReturn<CallingConventionSignature>(
+                return _context.BadImageAndReturn<CustomAttributeSignature>(
                     $"Invalid signature blob index in custom attribute {MetadataToken}.");
             }
 

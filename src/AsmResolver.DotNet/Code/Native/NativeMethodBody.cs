@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AsmResolver.PE.Code;
 
@@ -5,7 +6,7 @@ namespace AsmResolver.DotNet.Code.Native
 {
     /// <summary>
     /// Represents a method body of a method defined in a .NET assembly, implemented using machine code that runs
-    /// natively on the processor. 
+    /// natively on the processor.
     /// </summary>
     public class NativeMethodBody : MethodBody
     {
@@ -16,6 +17,7 @@ namespace AsmResolver.DotNet.Code.Native
         public NativeMethodBody(MethodDefinition owner)
             : base(owner)
         {
+            Code = Array.Empty<byte>();
         }
 
         /// <summary>
@@ -47,5 +49,5 @@ namespace AsmResolver.DotNet.Code.Native
             get;
         } = new List<AddressFixup>();
     }
-  
+
 }

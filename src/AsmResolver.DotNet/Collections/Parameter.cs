@@ -10,8 +10,12 @@ namespace AsmResolver.DotNet.Collections
     /// </summary>
     public class Parameter : INameProvider
     {
-        private ParameterCollection _parentCollection;
+        private ParameterCollection? _parentCollection;
         private TypeSignature _parameterType;
+
+        // Disable warnings for initialization of _parameterType. This is expected to be initialized by the
+        // parent ParameterCollection.
+#pragma warning disable 8618
 
         internal Parameter(ParameterCollection parentCollection, int index, int methodSignatureIndex)
         {
@@ -19,7 +23,9 @@ namespace AsmResolver.DotNet.Collections
             Index = index;
             MethodSignatureIndex = methodSignatureIndex;
         }
-        
+
+#pragma warning restore 8618
+
         /// <summary>
         /// Gets the index of the parameter.
         /// </summary>
@@ -35,7 +41,7 @@ namespace AsmResolver.DotNet.Collections
         public ushort Sequence => (ushort) (Index + 1);
 
         /// <summary>
-        /// Gets the index of the parameter within the method's signature. 
+        /// Gets the index of the parameter within the method's signature.
         /// </summary>
         public int MethodSignatureIndex
         {
@@ -60,10 +66,10 @@ namespace AsmResolver.DotNet.Collections
         /// <summary>
         /// Gets the associated definition of the parameter, if available.
         /// </summary>
-        public ParameterDefinition Definition => _parentCollection.GetParameterDefinition(Sequence);
+        public ParameterDefinition? Definition => _parentCollection?.GetParameterDefinition(Sequence);
 
         /// <inheritdoc />
-        public string Name => Definition?.Name ?? "A_" + MethodSignatureIndex;
+        public string? Name => Definition?.Name ?? $"A_{MethodSignatureIndex.ToString()}";
 
         internal void Remove()
         {

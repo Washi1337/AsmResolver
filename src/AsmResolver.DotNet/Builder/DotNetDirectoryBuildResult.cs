@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Builder
 {

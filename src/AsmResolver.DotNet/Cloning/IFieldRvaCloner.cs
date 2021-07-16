@@ -10,6 +10,6 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="field">The field.</param>
         /// <returns>The cloned segment.</returns>
-        ISegment CloneFieldRvaData(FieldDefinition field);
+        ISegment? CloneFieldRvaData(FieldDefinition field);
     }
 }

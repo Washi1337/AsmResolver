@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Threading;
@@ -21,10 +22,10 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class AssemblyDefinition : AssemblyDescriptor, IHasSecurityDeclaration
     {
-        private IList<ModuleDefinition> _modules;
-        private IList<SecurityDeclaration> _securityDeclarations;
-        private readonly LazyVariable<byte[]> _publicKey;
-        private byte[] _publicKeyToken;
+        private IList<ModuleDefinition>? _modules;
+        private IList<SecurityDeclaration>? _securityDeclarations;
+        private readonly LazyVariable<byte[]?> _publicKey;
+        private byte[]? _publicKeyToken;
 
         /// <summary>
         /// Reads a .NET assembly from the provided input buffer.
@@ -97,7 +98,7 @@ namespace AsmResolver.DotNet
         protected AssemblyDefinition(MetadataToken token)
             : base(token)
         {
-            _publicKey = new LazyVariable<byte[]>(GetPublicKey);
+            _publicKey = new LazyVariable<byte[]?>(GetPublicKey);
         }
 
         /// <summary>
@@ -105,7 +106,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the assembly.</param>
         /// <param name="version">The version of the assembly.</param>
-        public AssemblyDefinition(string name, Version version)
+        public AssemblyDefinition(string? name, Version version)
             : this(new MetadataToken(TableIndex.Assembly, 0))
         {
             Name = name;
@@ -122,9 +123,15 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a value indicating whether the assembly contains a manifest module.
+        /// </summary>
+        [MemberNotNullWhen(true, nameof(ManifestModule))]
+        public bool HasManifestModule => ManifestModule is not null;
+
+        /// <summary>
         /// Gets the main module of the .NET assembly containing the assembly's manifest.
         /// </summary>
-        public ModuleDefinition ManifestModule => Modules.Count > 0 ? Modules[0] : null;
+        public ModuleDefinition? ManifestModule => Modules.Count > 0 ? Modules[0] : null;
 
         /// <summary>
         /// Gets a collection of modules that this .NET assembly defines.
@@ -158,7 +165,7 @@ namespace AsmResolver.DotNet
         /// <para>This property does not automatically update the <see cref="AssemblyDescriptor.HasPublicKey"/> property.</para>
         /// <para>This property corresponds to the Culture column in the assembly definition table.</para>
         /// </remarks>
-        public byte[] PublicKey
+        public byte[]? PublicKey
         {
             get => _publicKey.Value;
             set
@@ -167,6 +174,9 @@ namespace AsmResolver.DotNet
                 _publicKeyToken = null;
             }
         }
+
+        /// <inheritdoc />
+        public override bool IsCorLib => Name is not null && KnownCorLibs.KnownCorLibNames.Contains(Name);
 
         /// <summary>
         /// Obtains the list of defined modules in the .NET assembly.
@@ -195,13 +205,10 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="PublicKey"/> property.
         /// </remarks>
-        protected virtual byte[] GetPublicKey() => null;
+        protected virtual byte[]? GetPublicKey() => null;
 
         /// <inheritdoc />
-        public override bool IsCorLib => KnownCorLibs.KnownCorLibNames.Contains(Name);
-
-        /// <inheritdoc />
-        public override byte[] GetPublicKeyToken()
+        public override byte[]? GetPublicKeyToken()
         {
             if (!HasPublicKey)
                 return PublicKey;
@@ -227,9 +234,9 @@ namespace AsmResolver.DotNet
             {
                 var ctor = CustomAttributes[i].Constructor;
 
-                if (ctor is not null
+                if (ctor?.DeclaringType is not null
                     && ctor.DeclaringType.IsTypeOf("System.Runtime.Versioning", nameof(TargetFrameworkAttribute))
-                    && CustomAttributes[i].Signature.FixedArguments[0].Element is string name
+                    && CustomAttributes[i].Signature?.FixedArguments[0].Element is string name
                     && DotNetRuntimeInfo.TryParse(name, out info))
                 {
                     return true;
@@ -267,8 +274,8 @@ namespace AsmResolver.DotNet
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void Write(string filePath, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            string directory = Path.GetDirectoryName(filePath);
-            if (!Directory.Exists(directory))
+            string? directory = Path.GetDirectoryName(filePath);
+            if (directory is null || !Directory.Exists(directory))
                 throw new DirectoryNotFoundException();
 
             foreach (var module in Modules)
@@ -308,7 +315,7 @@ namespace AsmResolver.DotNet
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void WriteManifest(Stream stream, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            ManifestModule.Write(stream, imageBuilder, fileBuilder);
+            ManifestModule?.Write(stream, imageBuilder, fileBuilder);
         }
     }
 }

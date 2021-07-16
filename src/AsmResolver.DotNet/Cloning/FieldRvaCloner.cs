@@ -8,19 +8,19 @@ namespace AsmResolver.DotNet.Cloning
     public class FieldRvaCloner : IFieldRvaCloner
     {
         /// <inheritdoc />
-        public ISegment CloneFieldRvaData(FieldDefinition field)
+        public ISegment? CloneFieldRvaData(FieldDefinition field)
         {
             switch (field.FieldRva)
             {
                 case null:
                     return null;
-                
+
                 case IReadableSegment readableSegment:
                     return new DataSegment(readableSegment.ToArray());
-                
+
                 case ICloneable cloneable:
                     return (ISegment) cloneable.Clone();
-                
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }

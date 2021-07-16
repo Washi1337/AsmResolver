@@ -77,7 +77,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             };
 
             // Create and add streams.
-            var tablesStream = AddIfNotEmpty<TablesStream>(result, TablesStream);
+            var tablesStream = Add<TablesStream>(result, TablesStream);
             var stringsStream =  AddIfNotEmpty<StringsStream>(result, StringsStream);
             AddIfNotEmpty<UserStringsStream>(result, UserStringsStream);
             var guidStream = AddIfNotEmpty<GuidStream>(result, GuidStream);
@@ -91,18 +91,20 @@ namespace AsmResolver.DotNet.Builder.Metadata
             return result;
         }
 
-        private static TStream AddIfNotEmpty<TStream>(IMetadata metadata, IMetadataStreamBuffer streamBuffer)
+        private static TStream? AddIfNotEmpty<TStream>(IMetadata metadata, IMetadataStreamBuffer streamBuffer)
             where TStream : class, IMetadataStream
         {
-            if (!streamBuffer.IsEmpty)
-            {
-                var stream = streamBuffer.CreateStream();
-                metadata.Streams.Add(stream);
-                return (TStream) stream;
-            }
-
-            return null;
+            return !streamBuffer.IsEmpty
+                ? Add<TStream>(metadata, streamBuffer)
+                : null;
         }
 
+        private static TStream Add<TStream>(IMetadata metadata, IMetadataStreamBuffer streamBuffer)
+            where TStream : class, IMetadataStream
+        {
+            var stream = streamBuffer.CreateStream();
+            metadata.Streams.Add(stream);
+            return (TStream) stream;
+        }
     }
 }

@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(IResolutionScope x, IResolutionScope y)
+        public bool Equals(IResolutionScope? x, IResolutionScope? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -62,13 +62,13 @@ namespace AsmResolver.DotNet.Signatures
         public int GetHashCode(IResolutionScope obj) => obj switch
         {
             AssemblyDescriptor assembly => GetHashCode(assembly),
-            ModuleDefinition module => GetHashCode(module.Assembly),
+            ModuleDefinition module => module.Assembly is not null ? GetHashCode(module.Assembly) : 0,
             TypeReference typeRef => GetHashCode(typeRef),
             _ => throw new ArgumentOutOfRangeException(nameof(obj))
         };
 
         /// <inheritdoc />
-        public bool Equals(AssemblyDescriptor x, AssemblyDescriptor y)
+        public bool Equals(AssemblyDescriptor? x, AssemblyDescriptor? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
