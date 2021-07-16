@@ -1,5 +1,11 @@
+using System;
+using System.Linq;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -83,6 +89,31 @@ namespace AsmResolver.DotNet.Tests
 
             var newReference = (MemberReference) newModule.LookupMember(reference.MetadataToken);
             Assert.Equal(reference.Name, newReference.Name);
+        }
+
+        [Fact]
+        public void Issue187()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/187
+
+            var targetModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+
+            var method = new MethodDefinition("test",
+                MethodAttributes.Public | MethodAttributes.Static,
+                MethodSignature.CreateStatic(targetModule.CorLibTypeFactory.Boolean));
+
+            var body = new CilMethodBody(method);
+            body.Instructions.Add(CilOpCodes.Ldc_I4, 0);
+            body.Instructions.Add(CilOpCodes.Ret);
+            method.CilMethodBody = body;
+
+            targetModule.TopLevelTypes.First().Methods.Add(method);
+
+            var allocator = targetModule.TokenAllocator;
+            allocator.AssignNextAvailableToken(method);
+
+            targetModule.GetOrCreateModuleConstructor();
+            var image = targetModule.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
         }
     }
 }
