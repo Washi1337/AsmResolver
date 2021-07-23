@@ -14,8 +14,9 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
         {
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
 
-            var versionInfo = VersionInfoResource.FromDirectory(image.Resources);
-            var fixedVersionInfo = versionInfo.FixedVersionInfo;
+            var versionInfo = VersionInfoResource.FromDirectory(image.Resources!);
+            Assert.NotNull(versionInfo);
+            var fixedVersionInfo = versionInfo!.FixedVersionInfo;
 
             Assert.Equal(new System.Version(1,0,0,0), fixedVersionInfo.FileVersion);
             Assert.Equal(new System.Version(1,0,0,0), fixedVersionInfo.ProductVersion);
@@ -65,7 +66,8 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             string path = typeof(PEImage).Assembly.Location;
 
             var image = PEImage.FromFile(path);
-            var versionInfo = VersionInfoResource.FromDirectory(image.Resources);
+            var versionInfo = VersionInfoResource.FromDirectory(image.Resources!)!;
+            Assert.NotNull(versionInfo);
 
             var expectedInfo = FileVersionInfo.GetVersionInfo(path);
             var actualInfo = versionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);
@@ -168,11 +170,14 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
         {
             // Load dummy
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var resources = image.Resources!;
 
             // Update version info.
-            var versionInfo = VersionInfoResource.FromDirectory(image.Resources);
+            var versionInfo = VersionInfoResource.FromDirectory(resources)!;
+            Assert.NotNull(versionInfo);
+
             versionInfo.FixedVersionInfo.ProductVersion = new System.Version(1, 2, 3, 4);
-            versionInfo.WriteToDirectory(image.Resources);
+            versionInfo.WriteToDirectory(resources);
 
             // Rebuild
             using var stream = new MemoryStream();
@@ -180,7 +185,8 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
 
             // Reload version info.
             var newImage = PEImage.FromBytes(stream.ToArray());
-            var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources);
+            var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources!)!;
+            Assert.NotNull(newVersionInfo);
 
             // Verify.
             Assert.Equal(versionInfo.FixedVersionInfo.ProductVersion, newVersionInfo.FixedVersionInfo.ProductVersion);

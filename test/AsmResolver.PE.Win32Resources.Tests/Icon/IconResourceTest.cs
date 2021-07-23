@@ -16,7 +16,8 @@ namespace AsmResolver.PE.Win32Resources.Tests.Icon
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
 
             // Read icon resources.
-            var iconResource = IconResource.FromDirectory(image.Resources);
+            var iconResource = IconResource.FromDirectory(image.Resources!)!;
+            Assert.NotNull(iconResource);
 
             // Verify.
             Assert.Single(iconResource.GetIconGroups());
@@ -28,15 +29,18 @@ namespace AsmResolver.PE.Win32Resources.Tests.Icon
         {
             // Load dummy.
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var resources = image.Resources!;
 
             // Update icon resources.
-            var iconResource = IconResource.FromDirectory(image.Resources);
+            var iconResource = IconResource.FromDirectory(resources)!;
+            Assert.NotNull(iconResource);
+
             foreach (var iconGroup in iconResource.GetIconGroups())
             {
                 iconGroup.RemoveEntry(4);
                 iconGroup.Count--;
             }
-            iconResource.WriteToDirectory(image.Resources);
+            iconResource.WriteToDirectory(resources);
 
             // Rebuild.
             using var stream = new MemoryStream();
@@ -44,7 +48,8 @@ namespace AsmResolver.PE.Win32Resources.Tests.Icon
 
             // Reload version info.
             var newImage = PEImage.FromBytes(stream.ToArray());
-            var newIconResource = IconResource.FromDirectory(newImage.Resources);
+            var newIconResource = IconResource.FromDirectory(newImage.Resources!)!;
+            Assert.NotNull(newIconResource);
 
             // Verify.
             Assert.Equal(iconResource.GetIconGroups().ToList()[0].Count, newIconResource.GetIconGroups().ToList()[0].Count);
