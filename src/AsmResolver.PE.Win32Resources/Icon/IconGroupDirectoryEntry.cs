@@ -1,5 +1,4 @@
-﻿using System;
-using AsmResolver.IO;
+﻿using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources.Icon
 {

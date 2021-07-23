@@ -27,16 +27,8 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// Creates a new header for the table entry.
         /// </summary>
         /// <returns></returns>
-        protected VersionTableEntryHeader CreateHeader()
-        {
-            return new VersionTableEntryHeader
-            {
-                Length = (ushort) GetPhysicalSize(),
-                ValueLength = (ushort) GetValueLength(),
-                Type = ValueType,
-                Key = Key,
-            };
-        }
+        protected VersionTableEntryHeader CreateHeader() =>
+            new((ushort) GetPhysicalSize(), (ushort) GetValueLength(), ValueType, Key);
 
         /// <summary>
         /// Gets the length of the raw value.
