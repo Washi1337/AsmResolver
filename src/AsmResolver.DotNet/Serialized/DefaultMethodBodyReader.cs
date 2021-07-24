@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Serialized
     public class DefaultMethodBodyReader : IMethodBodyReader
     {
         /// <inheritdoc />
-        public MethodBody? ReadMethodBody(ModuleReaderContext context, MethodDefinition owner, in MethodDefinitionRow row)
+        public virtual MethodBody? ReadMethodBody(ModuleReaderContext context, MethodDefinition owner, in MethodDefinitionRow row)
         {
             try
             {
