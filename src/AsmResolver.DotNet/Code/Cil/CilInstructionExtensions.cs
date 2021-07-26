@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Code.Cil
@@ -24,7 +25,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             return GetStackPopCount(instruction,
                 parent == null
-                || (parent.Owner.Signature.ReturnType?.IsTypeOf("System", "Void")).GetValueOrDefault());
+                || HasReturnValue(parent.Owner.Signature));
         }
 
         /// <summary>
@@ -158,7 +159,7 @@ namespace AsmResolver.DotNet.Code.Cil
             if (signature == null)
                 return 0;
 
-            if (!signature.ReturnType.IsTypeOf("System", "Void") || instruction.OpCode.Code == CilCode.Newobj)
+            if (!HasReturnValue(signature) || instruction.OpCode.Code == CilCode.Newobj)
                 return 1;
 
             return 0;
@@ -242,5 +243,13 @@ namespace AsmResolver.DotNet.Code.Cil
             }
         }
 
+        private static bool HasReturnValue(MethodSignature signature)
+        {
+            var ret = signature.ReturnType;
+            while (ret is CustomModifierTypeSignature custom)
+                ret = custom.BaseType;
+
+            return ret?.IsTypeOf("System", "Void") ?? false;
+        }
     }
 }
