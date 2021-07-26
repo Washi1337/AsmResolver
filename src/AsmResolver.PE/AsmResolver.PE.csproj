@@ -8,6 +8,7 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
         <LangVersion>9</LangVersion>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -20,6 +21,13 @@
     
     <ItemGroup>
       <ProjectReference Include="..\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="Nullable" Version="1.3.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 
 </Project>

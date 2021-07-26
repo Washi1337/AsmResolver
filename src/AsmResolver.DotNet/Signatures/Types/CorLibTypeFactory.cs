@@ -21,24 +21,24 @@ namespace AsmResolver.DotNet.Signatures.Types
             return new CorLibTypeFactory(importer.ImportScope(KnownCorLibs.MsCorLib_v4_0_0_0));
         }
 
-        private CorLibTypeSignature _void;
-        private CorLibTypeSignature _boolean;
-        private CorLibTypeSignature _char;
-        private CorLibTypeSignature _sbyte;
-        private CorLibTypeSignature _byte;
-        private CorLibTypeSignature _int16;
-        private CorLibTypeSignature _uint16;
-        private CorLibTypeSignature _int32;
-        private CorLibTypeSignature _uint32;
-        private CorLibTypeSignature _int64;
-        private CorLibTypeSignature _uint64;
-        private CorLibTypeSignature _single;
-        private CorLibTypeSignature _double;
-        private CorLibTypeSignature _string;
-        private CorLibTypeSignature _intPtr;
-        private CorLibTypeSignature _uintPtr;
-        private CorLibTypeSignature _object;
-        private CorLibTypeSignature _typedReference;
+        private CorLibTypeSignature? _void;
+        private CorLibTypeSignature? _boolean;
+        private CorLibTypeSignature? _char;
+        private CorLibTypeSignature? _sbyte;
+        private CorLibTypeSignature? _byte;
+        private CorLibTypeSignature? _int16;
+        private CorLibTypeSignature? _uint16;
+        private CorLibTypeSignature? _int32;
+        private CorLibTypeSignature? _uint32;
+        private CorLibTypeSignature? _int64;
+        private CorLibTypeSignature? _uint64;
+        private CorLibTypeSignature? _single;
+        private CorLibTypeSignature? _double;
+        private CorLibTypeSignature? _string;
+        private CorLibTypeSignature? _intPtr;
+        private CorLibTypeSignature? _uintPtr;
+        private CorLibTypeSignature? _object;
+        private CorLibTypeSignature? _typedReference;
 
         /// <summary>
         /// Creates a new factory with the provided resolution scope referencing a common object runtime library.
@@ -152,7 +152,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// </summary>
         /// <param name="type">The type to transform to a corlib type signature.</param>
         /// <returns>The corlib type, or <c>null</c> if none was found.</returns>
-        public CorLibTypeSignature FromType(ITypeDescriptor type)
+        public CorLibTypeSignature? FromType(ITypeDescriptor type)
         {
             return type is CorLibTypeSignature typeSig
                 ? FromElementType(typeSig.ElementType)
@@ -164,7 +164,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// </summary>
         /// <param name="elementType">The element type.</param>
         /// <returns>The corlib type, or <c>null</c> if none was found.</returns>
-        public CorLibTypeSignature FromElementType(ElementType elementType)
+        public CorLibTypeSignature? FromElementType(ElementType elementType)
         {
             return elementType switch
             {
@@ -196,7 +196,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="ns">The namespace.</param>
         /// <param name="name">The name.</param>
         /// <returns>The corlib type, or <c>null</c> if none was found.</returns>
-        public CorLibTypeSignature FromName(string ns, string name)
+        public CorLibTypeSignature? FromName(string? ns, string? name)
         {
             if (ns == "System")
             {
@@ -270,7 +270,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, v);
         }
 
-        private CorLibTypeSignature GetOrCreateCorLibTypeSignature(ref CorLibTypeSignature cache, ElementType elementType, string name)
+        private CorLibTypeSignature GetOrCreateCorLibTypeSignature(ref CorLibTypeSignature? cache, ElementType elementType, string name)
         {
             if (cache is null)
             {

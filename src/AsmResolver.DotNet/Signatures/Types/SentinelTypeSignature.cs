@@ -19,19 +19,19 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override string Name => "<<SENTINEL>>";
 
         /// <inheritdoc />
-        public override string Namespace => null;
+        public override string? Namespace => null;
 
         /// <inheritdoc />
-        public override IResolutionScope Scope => null;
+        public override IResolutionScope? Scope => null;
 
         /// <inheritdoc />
         public override bool IsValueType => false;
 
         /// <inheritdoc />
-        public override TypeDefinition Resolve() => throw new InvalidOperationException();
+        public override TypeDefinition? Resolve() => throw new InvalidOperationException();
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => null;
+        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => null;
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context) =>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -38,10 +39,10 @@ namespace AsmResolver.DotNet
         /// Creates a new .NET installation path provider, using the provided installation folder for .NET.
         /// </summary>
         /// <param name="installationDirectory">The .NET installation folder.</param>
-        public DotNetCorePathProvider(string installationDirectory)
+        public DotNetCorePathProvider(string? installationDirectory)
         {
             if (!string.IsNullOrEmpty(installationDirectory) && Directory.Exists(installationDirectory))
-                DetectInstalledRuntimes(installationDirectory);
+                DetectInstalledRuntimes(installationDirectory!);
         }
 
         /// <summary>
@@ -55,7 +56,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the installation path of the .NET installation on the current system.
         /// </summary>
-        public static string DefaultInstallationPath
+        public static string? DefaultInstallationPath
         {
             get;
         }
@@ -67,7 +68,7 @@ namespace AsmResolver.DotNet
         /// <param name="standardVersion">The .NET standard version.</param>
         /// <param name="coreVersion">The most recent compatible .NET or .NET Core version available.</param>
         /// <returns><c>true</c> if a compatible version was found, <c>false</c> otherwise.</returns>
-        public bool TryGetLatestStandardCompatibleVersion(Version standardVersion, out Version coreVersion)
+        public bool TryGetLatestStandardCompatibleVersion(Version standardVersion, [NotNullWhen(true)] out Version? coreVersion)
         {
             bool foundMatch = false;
             coreVersion = default;
@@ -161,7 +162,7 @@ namespace AsmResolver.DotNet
         /// Attempts to auto detect the installation directory of .NET or .NET Core.
         /// </summary>
         /// <returns>The path to the runtime, or <c>null</c> if none was found.</returns>
-        private static string FindDotNetPath()
+        private static string? FindDotNetPath()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -190,9 +191,9 @@ namespace AsmResolver.DotNet
                 // or System.Private.CoreLib, which is located at <installation_directory>/shared/<runtime>/<version>/.
 
                 string corlibPath = typeof(object).Assembly.Location;
-                string versionPath = Path.GetDirectoryName(corlibPath);
-                string runtimePath = Path.GetDirectoryName(versionPath);
-                string sharedPath = Path.GetDirectoryName(runtimePath);
+                string versionPath = Path.GetDirectoryName(corlibPath)!;
+                string runtimePath = Path.GetDirectoryName(versionPath)!;
+                string sharedPath = Path.GetDirectoryName(runtimePath)!;
                 return Path.GetDirectoryName(sharedPath);
             }
 

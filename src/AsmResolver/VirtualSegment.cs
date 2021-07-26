@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
 
 namespace AsmResolver
@@ -10,7 +11,12 @@ namespace AsmResolver
     {
         private uint _rva;
 
-        public VirtualSegment(ISegment physicalContents, uint virtualSize)
+        /// <summary>
+        /// Creates a new segment that is expanded at runtime to the provided virtual size.
+        /// </summary>
+        /// <param name="physicalContents">The physical contents of the segment.</param>
+        /// <param name="virtualSize">The new size at runtime.</param>
+        public VirtualSegment(ISegment? physicalContents, uint virtualSize)
         {
             PhysicalContents = physicalContents;
             VirtualSize = virtualSize;
@@ -19,7 +25,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets or sets the physical contents of the segment as it is stored on the disk.
         /// </summary>
-        public ISegment PhysicalContents
+        public ISegment? PhysicalContents
         {
             get;
             set;
@@ -54,6 +60,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets a value indicating whether the physical contents of this segment is readable by a binary reader.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(PhysicalContents))]
         public bool IsReadable => PhysicalContents is IReadableSegment;
 
         /// <inheritdoc />

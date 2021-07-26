@@ -1,4 +1,3 @@
-using System;
 using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet.Signatures
@@ -13,7 +12,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="attributes">The attributes of the signature.</param>
         /// <param name="memberReturnType">The type of the object this member returns or contains.</param>
-        protected MemberSignature(CallingConventionAttributes attributes, TypeSignature memberReturnType) 
+        protected MemberSignature(CallingConventionAttributes attributes, TypeSignature memberReturnType)
             : base(attributes)
         {
             MemberReturnType = memberReturnType;

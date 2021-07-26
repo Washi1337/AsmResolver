@@ -50,16 +50,19 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
         private sealed class MockOperandBuilder : ICilOperandBuilder
         {
             /// <inheritdoc />
-            public int GetVariableIndex(object operand) => Convert.ToInt32(operand);
+            public int GetVariableIndex(object? operand) => Convert.ToInt32(operand);
 
             /// <inheritdoc />
-            public int GetArgumentIndex(object operand) => Convert.ToInt32(operand);
+            public int GetArgumentIndex(object? operand) => Convert.ToInt32(operand);
 
             /// <inheritdoc />
-            public uint GetStringToken(object operand) => Convert.ToUInt32(operand);
+            public uint GetStringToken(object? operand) => Convert.ToUInt32(operand);
 
             /// <inheritdoc />
-            public MetadataToken GetMemberToken(object operand) => (MetadataToken) operand;
+            public MetadataToken GetMemberToken(object? operand) =>
+                operand is MetadataToken token
+                    ? token
+                    : MetadataToken.Zero;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Debug
     public class DefaultDebugDataReader : IDebugDataReader
     {
         /// <inheritdoc />
-        public IDebugDataSegment ReadDebugData(PEReaderContext context, DebugDataType type,
+        public IDebugDataSegment? ReadDebugData(PEReaderContext context, DebugDataType type,
             ref BinaryStreamReader reader)
         {
             return type switch

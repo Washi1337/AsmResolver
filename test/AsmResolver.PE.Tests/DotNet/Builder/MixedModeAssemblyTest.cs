@@ -18,7 +18,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
     {
         private const string NonWindowsPlatform = "Test produces a mixed mode assembly which is not supported on non-Windows platforms.";
         private const string Non64BitPlatform = "Test produces a 64-bit assembly which is not supported on 32-bit operating systems.";
-        
+
         private readonly TemporaryDirectoryFixture _fixture;
 
         public MixedModeAssemblyTest(TemporaryDirectoryFixture fixture)
@@ -29,8 +29,8 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
         private static void ReplaceBodyWithNativeCode(IPEImage image, CodeSegment body, bool is32bit)
         {
             // Adjust image flags appropriately.
-            image.DotNetDirectory.Flags &= ~DotNetDirectoryFlags.ILOnly;
-            
+            image.DotNetDirectory!.Flags &= ~DotNetDirectoryFlags.ILOnly;
+
             if (is32bit)
             {
                 image.MachineType = MachineType.I386;
@@ -44,7 +44,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             }
 
             // Access metadata.
-            var metadata = image.DotNetDirectory.Metadata;
+            var metadata = image.DotNetDirectory.Metadata!;
             var stringsStream = metadata.GetStream<StringsStream>();
             var tablesStream = metadata.GetStream<TablesStream>();
             var typeTable = tablesStream.GetTable<TypeDefinitionRow>();
@@ -113,10 +113,10 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
 
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
-            
+
             var module = new ImportedModule("api-ms-win-crt-stdio-l1-1-0.dll");
             image.Imports.Add(module);
-            
+
             var function = new ImportedSymbol(0x4fc, "puts");
             module.Symbols.Add(function);
 
@@ -136,12 +136,12 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
                 0x67, 0x65, 0x64, 0x20, 0x77, 0x6f, 0x72,   // "ged wor"
                 0x6c, 0x64, 0x21, 0x00                      // "ld!"
             });
-            
+
             // Fixup puts call.
             body.AddressFixups.Add(new AddressFixup(
                 0xD, AddressFixupType.Relative32BitAddress, function
             ));
-            
+
             // Replace body.
             ReplaceBodyWithNativeCode(image, body, false);
 
@@ -163,10 +163,10 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
 
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
-            
+
             var module = new ImportedModule("api-ms-win-crt-stdio-l1-1-0.dll");
             image.Imports.Add(module);
-            
+
             var function = new ImportedSymbol(0x4fc, "puts");
             module.Symbols.Add(function);
 
@@ -183,14 +183,14 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
                 /* 19: */  0x5D,                                 // pop ebp
                 /* 1A: */  0xC3,                                 // ret
             });
-            
+
             // Fix up puts call.
             body.AddressFixups.Add(new AddressFixup(
                 0xD, AddressFixupType.Absolute32BitAddress, function
             ));
             image.Relocations.Clear();
             image.Relocations.Add(new BaseRelocation(RelocationType.HighLow, new RelativeReference(body, 0xD)));
-            
+
             // Replace body.
             ReplaceBodyWithNativeCode(image, body, true);
 

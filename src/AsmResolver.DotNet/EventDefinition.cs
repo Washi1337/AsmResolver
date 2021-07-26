@@ -11,17 +11,17 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single event in a type definition of a .NET module.
     /// </summary>
-    public class EventDefinition : 
+    public class EventDefinition :
         MetadataMember,
         IHasSemantics,
         IHasCustomAttribute,
         IOwnedCollectionElement<TypeDefinition>
-    { 
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<TypeDefinition> _declaringType;
-        private readonly LazyVariable<ITypeDefOrRef> _eventType;
-        private IList<MethodSemantics> _semantics;
-        private IList<CustomAttribute> _customAttributes;
+    {
+        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<TypeDefinition?> _declaringType;
+        private readonly LazyVariable<ITypeDefOrRef?> _eventType;
+        private IList<MethodSemantics>? _semantics;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes a new property definition.
@@ -30,9 +30,9 @@ namespace AsmResolver.DotNet
         protected EventDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
-            _eventType = new LazyVariable<ITypeDefOrRef>(GetEventType);
-            _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
+            _name = new LazyVariable<string?>(GetName);
+            _eventType = new LazyVariable<ITypeDefOrRef?>(GetEventType);
+            _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the property.</param>
         /// <param name="attributes">The attributes.</param>
         /// <param name="eventType">The delegate type of the event.</param>
-        public EventDefinition(string name, EventAttributes attributes, ITypeDefOrRef eventType)
+        public EventDefinition(string? name, EventAttributes attributes, ITypeDefOrRef? eventType)
             : this(new MetadataToken(TableIndex.Event,0))
         {
             Name = name;
@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets a value indicating the event uses a special name. 
+        /// Gets or sets a value indicating the event uses a special name.
         /// </summary>
         public bool IsSpecialName
         {
@@ -79,7 +79,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -91,27 +91,27 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the delegate type of the event.
         /// </summary>
-        public ITypeDefOrRef EventType
+        public ITypeDefOrRef? EventType
         {
             get => _eventType.Value;
             set => _eventType.Value = value;
         }
 
         /// <inheritdoc />
-        public ModuleDefinition Module => DeclaringType?.Module;
+        public ModuleDefinition? Module => DeclaringType?.Module;
 
         /// <summary>
         /// Gets the type that defines the property.
         /// </summary>
-        public TypeDefinition DeclaringType
+        public TypeDefinition? DeclaringType
         {
             get => _declaringType.Value;
             private set => _declaringType.Value = value;
         }
 
-        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
+        ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
-        TypeDefinition IOwnedCollectionElement<TypeDefinition>.Owner
+        TypeDefinition? IOwnedCollectionElement<TypeDefinition>.Owner
         {
             get => DeclaringType;
             set => DeclaringType = value;
@@ -129,23 +129,23 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the method definition representing the add accessor of this event definition. 
+        /// Gets the method definition representing the add accessor of this event definition.
         /// </summary>
-        public MethodDefinition AddMethod => 
+        public MethodDefinition? AddMethod =>
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.AddOn)?.Method;
-        
+
         /// <summary>
-        /// Gets the method definition representing the remove accessor of this event definition. 
+        /// Gets the method definition representing the remove accessor of this event definition.
         /// </summary>
-        public MethodDefinition RemoveMethod => 
+        public MethodDefinition? RemoveMethod =>
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.RemoveOn)?.Method;
-        
+
         /// <summary>
-        /// Gets the method definition representing the fire accessor of this event definition. 
+        /// Gets the method definition representing the fire accessor of this event definition.
         /// </summary>
-        public MethodDefinition FireMethod => 
+        public MethodDefinition? FireMethod =>
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Fire)?.Method;
-        
+
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
@@ -156,11 +156,11 @@ namespace AsmResolver.DotNet
                 return _customAttributes;
             }
         }
-        
+
         /// <inheritdoc />
-        public bool IsAccessibleFromType(TypeDefinition type) => 
-            Semantics.Any(s => s.Method.IsAccessibleFromType(type));
-        
+        public bool IsAccessibleFromType(TypeDefinition type) =>
+            Semantics.Any(s => s.Method?.IsAccessibleFromType(type) ?? false);
+
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
-        
+
         /// <summary>
         /// Obtains the name of the property definition.
         /// </summary>
@@ -180,8 +180,8 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
-        
+        protected virtual string? GetName() => null;
+
         /// <summary>
         /// Obtains the event type of the property definition.
         /// </summary>
@@ -189,8 +189,8 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="EventType"/> property.
         /// </remarks>
-        protected virtual ITypeDefOrRef GetEventType() => null;
-        
+        protected virtual ITypeDefOrRef? GetEventType() => null;
+
         /// <summary>
         /// Obtains the declaring type of the property definition.
         /// </summary>
@@ -198,7 +198,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="DeclaringType"/> property.
         /// </remarks>
-        protected virtual TypeDefinition GetDeclaringType() => null;
+        protected virtual TypeDefinition? GetDeclaringType() => null;
 
         /// <summary>
         /// Obtains the methods associated to this property definition.
@@ -207,9 +207,8 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Semantics"/> property.
         /// </remarks>
-        protected virtual IList<MethodSemantics> GetSemantics() =>
-            new MethodSemanticsCollection(this);
-        
+        protected virtual IList<MethodSemantics> GetSemantics() => new MethodSemanticsCollection(this);
+
         /// <inheritdoc />
         public override string ToString() => FullName;
     }

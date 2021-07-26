@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string Name
+        public override string? Name
         {
             get
             {
@@ -88,13 +88,13 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string Namespace => GenericType?.Namespace;
+        public override string? Namespace => GenericType.Namespace;
 
         /// <inheritdoc />
-        public override IResolutionScope Scope => GenericType?.Scope;
+        public override IResolutionScope? Scope => GenericType.Scope;
 
         /// <inheritdoc />
-        public override ModuleDefinition Module => GenericType?.Module;
+        public override ModuleDefinition? Module => GenericType.Module;
 
         /// <inheritdoc />
         public override bool IsValueType
@@ -103,10 +103,10 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override TypeDefinition Resolve() => GenericType.Resolve();
+        public override TypeDefinition? Resolve() => GenericType.Resolve();
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => GenericType;
+        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => GenericType;
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

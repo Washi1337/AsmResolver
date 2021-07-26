@@ -3,12 +3,12 @@
 namespace AsmResolver.DotNet
 {
     /// <summary>
-    /// Describes the explicit layout of a type, including its total and packing size. 
+    /// Describes the explicit layout of a type, including its total and packing size.
     /// </summary>
     public class ClassLayout : MetadataMember
     {
-        private readonly LazyVariable<TypeDefinition> _parent;
-        
+        private readonly LazyVariable<TypeDefinition?> _parent;
+
         /// <summary>
         /// Initializes the class layout with a metadata token.
         /// </summary>
@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet
         protected ClassLayout(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<TypeDefinition>(GetParent);
+            _parent = new LazyVariable<TypeDefinition?>(GetParent);
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the alignment in bytes of each field in the type. 
+        /// Gets the alignment in bytes of each field in the type.
         /// </summary>
         /// <remarks>
         /// This value should be a power of two between 0 and 128.
@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the type that this layout is assigned to.
         /// </summary>
-        public TypeDefinition Parent
+        public TypeDefinition? Parent
         {
             get => _parent.Value;
             internal set => _parent.Value = value;
@@ -69,10 +69,10 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Parent"/> property.
         /// </remarks>
-        protected virtual TypeDefinition GetParent() => null;
+        protected virtual TypeDefinition? GetParent() => null;
 
         /// <inheritdoc />
-        public override string ToString() => 
+        public override string ToString() =>
             $"{nameof(PackingSize)}: {PackingSize}, {nameof(ClassSize)}: {ClassSize}";
     }
 }

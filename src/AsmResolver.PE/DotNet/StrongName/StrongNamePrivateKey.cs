@@ -43,19 +43,10 @@ namespace AsmResolver.PE.DotNet.StrongName
                 throw new FormatException("Input stream does not contain a valid RSA private key header magic.");
 
             uint bitLength = reader.ReadUInt32();
-            uint length8 = bitLength / 8;
-            uint length16 = bitLength / 16;
 
-            var result = new StrongNamePrivateKey
+            var result = new StrongNamePrivateKey(bitLength)
             {
                 PublicExponent = reader.ReadUInt32(),
-                Modulus = new byte[length8],
-                P = new byte[length16],
-                Q = new byte[length16],
-                DP = new byte[length16],
-                DQ = new byte[length16],
-                InverseQ = new byte[length16],
-                PrivateExponent = new byte[length8]
             };
 
             reader.ReadBytes(result.Modulus, 0, result.Modulus.Length);
@@ -80,10 +71,20 @@ namespace AsmResolver.PE.DotNet.StrongName
         }
 
         /// <summary>
-        /// Creates a new empty public/private key pair.
+        /// Creates a new empty private key.
         /// </summary>
-        public StrongNamePrivateKey()
+        public StrongNamePrivateKey(uint bitLength)
+            : base(new byte[bitLength / 8], 65537)
         {
+            uint length8 = bitLength / 8;
+            uint length16 = bitLength / 16;
+
+            P = new byte[length16];
+            Q = new byte[length16];
+            DP = new byte[length16];
+            DQ = new byte[length16];
+            InverseQ = new byte[length16];
+            PrivateExponent = new byte[length8];
         }
 
         /// <summary>
@@ -91,6 +92,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// </summary>
         /// <param name="parameters">The RSA parameters to import.</param>
         public StrongNamePrivateKey(in RSAParameters parameters)
+            : base(parameters.Modulus, ByteSwap(parameters))
         {
             Modulus = parameters.Modulus;
             P = parameters.P;
@@ -98,11 +100,6 @@ namespace AsmResolver.PE.DotNet.StrongName
             DP = parameters.DP;
             DQ = parameters.DQ;
 
-            uint exponent = 0;
-            for (int i = 0; i < Math.Min(sizeof(uint), parameters.Exponent.Length); i++)
-                exponent |= (uint) (parameters.Exponent[i] << (8 * i));
-
-            PublicExponent = exponent;
             InverseQ = parameters.InverseQ;
             PrivateExponent = parameters.D;
         }
@@ -222,6 +219,14 @@ namespace AsmResolver.PE.DotNet.StrongName
             writer.WriteBytes(DQ);
             writer.WriteBytes(InverseQ);
             writer.WriteBytes(PrivateExponent);
+        }
+
+        private static uint ByteSwap(RSAParameters parameters)
+        {
+            uint exponent = 0;
+            for (int i = 0; i < Math.Min(sizeof(uint), parameters.Exponent.Length); i++)
+                exponent |= (uint) (parameters.Exponent[i] << (8 * i));
+            return exponent;
         }
     }
 }

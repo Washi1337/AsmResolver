@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
@@ -17,11 +18,16 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="module">Target Module</param>
         /// <param name="dynamicMethodObj">Dynamic Method / Delegate / DynamicResolver</param>
-        public DynamicMethodDefinition(ModuleDefinition module,object dynamicMethodObj) : 
+        public DynamicMethodDefinition(ModuleDefinition module,object dynamicMethodObj) :
             base(new MetadataToken(TableIndex.Method, 0))
         {
             dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
             var methodBase = FieldReader.ReadField<MethodBase>(dynamicMethodObj, "m_method");
+            if (methodBase is null)
+            {
+                throw new ArgumentException(
+                    "Could not get the underlying method base in the provided dynamic method object.");
+            }
 
             Module = module;
             Name = methodBase.Name;
@@ -47,9 +53,9 @@ namespace AsmResolver.DotNet
                 methodBase.IsStatic ? 0 : CallingConventionAttributes.HasThis,
                 returnType, parameterTypes);
         }
-        
+
         /// <inheritdoc />
         public override ModuleDefinition Module { get; }
-        
+
     }
 }

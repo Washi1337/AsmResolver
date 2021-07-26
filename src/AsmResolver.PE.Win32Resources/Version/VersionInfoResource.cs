@@ -20,12 +20,12 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         /// <param name="rootDirectory">The root resources directory to extract the version info from.</param>
         /// <returns>The version info resource, or <c>null</c> if none was found.</returns>
-        public static VersionInfoResource FromDirectory(IResourceDirectory rootDirectory)
+        public static VersionInfoResource? FromDirectory(IResourceDirectory rootDirectory)
         {
             var versionDirectory = (IResourceDirectory) rootDirectory.Entries[ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.Version)];
 
             var categoryDirectory = versionDirectory
-                ?.Entries
+                .Entries
                 .OfType<IResourceDirectory>()
                 .FirstOrDefault();
 
@@ -121,13 +121,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public VersionTableEntry this[string name]
         {
             get => _entries[name];
-            set
-            {
-                if (value is null)
-                    _entries.Remove(name);
-                else
-                    _entries[name] = value;
-            }
+            set => _entries[name] = value;
         }
 
         /// <summary>
@@ -144,7 +138,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public TEntry GetChild<TEntry>(string name)
             where TEntry : VersionTableEntry
         {
-            return this[name] as TEntry;
+            return (TEntry) this[name];
         }
 
         /// <summary>

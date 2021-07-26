@@ -26,10 +26,10 @@ namespace AsmResolver.PE.DotNet.Builder
             AddIfPresent(dotNetDirectory.Metadata);
             AddIfPresent(dotNetDirectory.DotNetResources);
             AddIfPresent(dotNetDirectory.StrongName);
+
             if (dotNetDirectory.VTableFixups?.Count > 0)
-            {
                 _segments.Add(new VTableFixupsDirectoryBuffer(dotNetDirectory.VTableFixups));
-            }
+
             AddIfPresent(dotNetDirectory.ExportAddressTable);
             AddIfPresent(dotNetDirectory.ManagedNativeHeader);
         }
@@ -67,9 +67,9 @@ namespace AsmResolver.PE.DotNet.Builder
             get;
         }
 
-        private void AddIfPresent(ISegment segment)
+        private void AddIfPresent(ISegment? segment)
         {
-            if (segment != null)
+            if (segment is not null)
                 _segments.Add(segment, 4);
         }
 

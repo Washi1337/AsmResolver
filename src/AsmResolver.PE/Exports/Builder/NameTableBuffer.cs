@@ -17,19 +17,19 @@ namespace AsmResolver.PE.Exports.Builder
         /// Adds the provided name to the buffer if it does not exist yet.
         /// </summary>
         /// <param name="name">The name to add.</param>
-        public void AddName(string name)
+        public void AddName(string? name)
         {
             if (string.IsNullOrEmpty(name))
                 return;
 
-            if (!_nameOffsets.ContainsKey(name))
+            if (!_nameOffsets.ContainsKey(name!))
             {
                 // Register string.
-                _entries.Add(name);
-                _nameOffsets.Add(name, _length);
+                _entries.Add(name!);
+                _nameOffsets.Add(name!, _length);
 
                 // Calculate length + zero terminator.
-                _length += (uint) Encoding.ASCII.GetByteCount(name) + 1u;
+                _length += (uint) Encoding.ASCII.GetByteCount(name!) + 1u;
             }
         }
 
@@ -42,7 +42,9 @@ namespace AsmResolver.PE.Exports.Builder
         /// This method should only be used after the hint-name table has been relocated to the right location in the
         /// PE file.
         /// </remarks>
-        public uint GetNameRva(string name) => Rva + _nameOffsets[name];
+        public uint GetNameRva(string? name) => name is not null
+            ? Rva + _nameOffsets[name]
+            : 0;
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => _length;

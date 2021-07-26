@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -30,25 +31,25 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<AssemblyDefinition>
     {
-        private readonly LazyVariable<string> _name;
+        private readonly LazyVariable<string?> _name;
         private readonly LazyVariable<Guid> _mvid;
         private readonly LazyVariable<Guid> _encId;
         private readonly LazyVariable<Guid> _encBaseId;
 
-        private IList<TypeDefinition> _topLevelTypes;
-        private IList<AssemblyReference> _assemblyReferences;
-        private IList<CustomAttribute> _customAttributes;
+        private IList<TypeDefinition>? _topLevelTypes;
+        private IList<AssemblyReference>? _assemblyReferences;
+        private IList<CustomAttribute>? _customAttributes;
 
-        private readonly LazyVariable<IManagedEntrypoint> _managedEntrypoint;
-        private IList<ModuleReference> _moduleReferences;
-        private IList<FileReference> _fileReferences;
-        private IList<ManifestResource> _resources;
-        private IList<ExportedType> _exportedTypes;
-        private TokenAllocator _tokenAllocator;
+        private readonly LazyVariable<IManagedEntrypoint?> _managedEntrypoint;
+        private IList<ModuleReference>? _moduleReferences;
+        private IList<FileReference>? _fileReferences;
+        private IList<ManifestResource>? _resources;
+        private IList<ExportedType>? _exportedTypes;
+        private TokenAllocator? _tokenAllocator;
 
         private readonly LazyVariable<string> _runtimeVersion;
-        private readonly LazyVariable<IResourceDirectory> _nativeResources;
-        private IList<DebugDataEntry> _debugData;
+        private readonly LazyVariable<IResourceDirectory?> _nativeResources;
+        private IList<DebugDataEntry>? _debugData;
 
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
@@ -203,6 +204,10 @@ namespace AsmResolver.DotNet
         public static ModuleDefinition FromImage(IPEImage peImage, ModuleReaderParameters readerParameters) =>
             new SerializedModuleDefinition(peImage, readerParameters);
 
+        // Disable non-nullable property initialization warnings for the CorLibTypeFactory and MetadataResolver
+        // properties. These are expected to be initialized by constructors that use this base constructor.
+#pragma warning disable 8618
+
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
         /// </summary>
@@ -210,21 +215,23 @@ namespace AsmResolver.DotNet
         protected ModuleDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
+            _name = new LazyVariable<string?>(GetName);
             _mvid = new LazyVariable<Guid>(GetMvid);
             _encId = new LazyVariable<Guid>(GetEncId);
             _encBaseId = new LazyVariable<Guid>(GetEncBaseId);
-            _managedEntrypoint = new LazyVariable<IManagedEntrypoint>(GetManagedEntrypoint);
+            _managedEntrypoint = new LazyVariable<IManagedEntrypoint?>(() => GetManagedEntrypoint());
             _runtimeVersion = new LazyVariable<string>(GetRuntimeVersion);
-            _nativeResources = new LazyVariable<IResourceDirectory>(GetNativeResources);
+            _nativeResources = new LazyVariable<IResourceDirectory?>(GetNativeResources);
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
+
+#pragma warning restore 8618
 
         /// <summary>
         /// Defines a new .NET module that references mscorlib version 4.0.0.0.
         /// </summary>
         /// <param name="name">The name of the module.</param>
-        public ModuleDefinition(string name)
+        public ModuleDefinition(string? name)
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
@@ -241,7 +248,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the module.</param>
         /// <param name="corLib">The reference to the common object runtime (COR) library that this module will use.</param>
-        public ModuleDefinition(string name, AssemblyReference corLib)
+        public ModuleDefinition(string? name, AssemblyReference corLib)
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
@@ -261,7 +268,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// When this module was read from the disk, gets the file path to the module.
         /// </summary>
-        public string FilePath
+        public string? FilePath
         {
             get;
             internal set;
@@ -273,7 +280,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// When this property is <c>null</c>, the module is a new module that is not yet assembled.
         /// </remarks>
-        public virtual IDotNetDirectory DotNetDirectory
+        public virtual IDotNetDirectory? DotNetDirectory
         {
             get;
         } = null;
@@ -290,14 +297,14 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the parent assembly that defines this module.
         /// </summary>
-        public AssemblyDefinition Assembly
+        public AssemblyDefinition? Assembly
         {
             get;
             internal set;
         }
 
         /// <inheritdoc />
-        AssemblyDefinition IOwnedCollectionElement<AssemblyDefinition>.Owner
+        AssemblyDefinition? IOwnedCollectionElement<AssemblyDefinition>.Owner
         {
             get => Assembly;
             set => Assembly = value;
@@ -312,7 +319,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the module definition table.
         /// </remarks>
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -571,7 +578,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the contents of the native Win32 resources data directory of the underlying
         /// portable executable (PE) file.
         /// </summary>
-        public IResourceDirectory NativeResourceDirectory
+        public IResourceDirectory? NativeResourceDirectory
         {
             get => _nativeResources.Value;
             set => _nativeResources.Value = value;
@@ -688,7 +695,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the managed method that is invoked when the .NET module is initialized.
         /// </summary>
-        public MethodDefinition ManagedEntrypointMethod
+        public MethodDefinition? ManagedEntrypointMethod
         {
             get => ManagedEntrypoint as MethodDefinition;
             set => ManagedEntrypoint = value;
@@ -698,7 +705,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the managed entrypoint that is invoked when the .NET module is initialized. This is either a
         /// method, or a reference to a secondary module containing the entrypoint method.
         /// </summary>
-        public IManagedEntrypoint ManagedEntrypoint
+        public IManagedEntrypoint? ManagedEntrypoint
         {
             get => _managedEntrypoint.Value;
             set => _managedEntrypoint.Value = value;
@@ -724,7 +731,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the member to lookup.</param>
         /// <param name="member">The member, or <c>null</c> if the lookup failed.</param>
         /// <returns><c>true</c> if the member was successfully looked up, false otherwise.</returns>
-        public virtual bool TryLookupMember(MetadataToken token, out IMetadataMember member)
+        public virtual bool TryLookupMember(MetadataToken token, [NotNullWhen(true)] out IMetadataMember? member)
         {
             member = null;
             return false;
@@ -750,7 +757,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the member to lookup.</param>
         /// <param name="value">The string, or <c>null</c> if the lookup failed.</param>
         /// <returns><c>true</c> if the string was successfully looked up, false otherwise.</returns>
-        public virtual bool TryLookupString(MetadataToken token, out string value)
+        public virtual bool TryLookupString(MetadataToken token, [NotNullWhen(true)] out string? value)
         {
             value = null;
             return false;
@@ -814,7 +821,7 @@ namespace AsmResolver.DotNet
         /// upon loading the .NET module.
         /// </summary>
         /// <returns>The module constructor, or <c>null</c> if none is present.</returns>
-        public MethodDefinition GetModuleConstructor() => GetModuleType()?.GetStaticConstructor();
+        public MethodDefinition? GetModuleConstructor() => GetModuleType()?.GetStaticConstructor();
 
         /// <summary>
         /// Gets or creates the module static constructor of this metadata image. That is, the first method that is
@@ -830,7 +837,7 @@ namespace AsmResolver.DotNet
         /// Obtains the global scope type of the .NET module.
         /// </summary>
         /// <returns>The module type.</returns>
-        public TypeDefinition GetModuleType() => TopLevelTypes.Count > 0 ? TopLevelTypes[0] : null;
+        public TypeDefinition? GetModuleType() => TopLevelTypes.Count > 0 ? TopLevelTypes[0] : null;
 
         /// <summary>
         /// Obtains or creates the global scope type of the .NET module.
@@ -854,7 +861,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual string? GetName() => null;
 
         /// <summary>
         /// Obtains the MVID of the module definition.
@@ -953,7 +960,7 @@ namespace AsmResolver.DotNet
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
-        AssemblyDescriptor IResolutionScope.GetAssembly() => Assembly;
+        AssemblyDescriptor? IResolutionScope.GetAssembly() => Assembly;
 
         /// <summary>
         /// Obtains the version string of the runtime.
@@ -971,7 +978,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ManagedEntrypoint"/> property.
         /// </remarks>
-        protected virtual IManagedEntrypoint GetManagedEntrypoint() => null;
+        protected virtual IManagedEntrypoint? GetManagedEntrypoint() => null;
 
         /// <summary>
         /// Obtains the native win32 resources directory of the underlying PE image (if available).
@@ -980,7 +987,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="NativeResourceDirectory"/> property.
         /// </remarks>
-        protected virtual IResourceDirectory GetNativeResources() => null;
+        protected virtual IResourceDirectory? GetNativeResources() => null;
 
         /// <summary>
         /// Obtains the native debug data directory of the underlying PE image (if available).
@@ -1011,10 +1018,9 @@ namespace AsmResolver.DotNet
         /// <returns>The resolver.</returns>
         protected IAssemblyResolver CreateAssemblyResolver(IFileService fileService)
         {
-            string fullPath = FilePath;
-            (string directory, string name) = !string.IsNullOrEmpty(fullPath)
-                ? (Path.GetDirectoryName(fullPath), Path.GetFileNameWithoutExtension(fullPath))
-                : (null, null);
+            string? directory = !string.IsNullOrEmpty(FilePath)
+                ? Path.GetDirectoryName(FilePath)
+                : null;
 
             var runtime = OriginalTargetRuntime;
 
@@ -1040,13 +1046,13 @@ namespace AsmResolver.DotNet
             }
 
             if (!string.IsNullOrEmpty(directory))
-                resolver.SearchDirectories.Add(directory);
+                resolver.SearchDirectories.Add(directory!);
 
             return resolver;
         }
 
         /// <inheritdoc />
-        public override string ToString() => Name;
+        public override string ToString() => Name ?? string.Empty;
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and writes it to the file system.
@@ -1144,7 +1150,7 @@ namespace AsmResolver.DotNet
                     result.DiagnosticBag.Exceptions);
             }
 
-            return result.ConstructedImage;
+            return result.ConstructedImage!;
         }
     }
  }

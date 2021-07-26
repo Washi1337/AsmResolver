@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
@@ -19,24 +20,24 @@ namespace AsmResolver.DotNet
         MetadataMember,
         IMemberDefinition,
         IOwnedCollectionElement<TypeDefinition>,
-        IMemberRefParent, 
+        IMemberRefParent,
         ICustomAttributeType,
         IHasGenericParameters,
         IMemberForwarded,
         IHasSecurityDeclaration,
         IManagedEntrypoint
     {
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<TypeDefinition> _declaringType;
-        private readonly LazyVariable<MethodSignature> _signature;
-        private readonly LazyVariable<MethodBody> _methodBody;
-        private readonly LazyVariable<ImplementationMap> _implementationMap;
-        private readonly LazyVariable<MethodSemantics> _semantics;
-        private IList<ParameterDefinition> _parameterDefinitions;
-        private ParameterCollection _parameters;
-        private IList<CustomAttribute> _customAttributes;
-        private IList<SecurityDeclaration> _securityDeclarations;
-        private IList<GenericParameter> _genericParameters;
+        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<TypeDefinition?> _declaringType;
+        private readonly LazyVariable<MethodSignature?> _signature;
+        private readonly LazyVariable<MethodBody?> _methodBody;
+        private readonly LazyVariable<ImplementationMap?> _implementationMap;
+        private readonly LazyVariable<MethodSemantics?> _semantics;
+        private IList<ParameterDefinition>? _parameterDefinitions;
+        private ParameterCollection? _parameters;
+        private IList<CustomAttribute>? _customAttributes;
+        private IList<SecurityDeclaration>? _securityDeclarations;
+        private IList<GenericParameter>? _genericParameters;
 
         /// <summary>
         /// Initializes a new method definition.
@@ -45,12 +46,12 @@ namespace AsmResolver.DotNet
         protected MethodDefinition(MetadataToken token)
             : base(token)
         {
-            _name  =new LazyVariable<string>(GetName);
-            _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
-            _signature = new LazyVariable<MethodSignature>(GetSignature);
-            _methodBody = new LazyVariable<MethodBody>(GetBody);
-            _implementationMap = new LazyVariable<ImplementationMap>(GetImplementationMap);
-            _semantics = new LazyVariable<MethodSemantics>(GetSemantics);
+            _name  =new LazyVariable<string?>(GetName);
+            _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
+            _signature = new LazyVariable<MethodSignature?>(GetSignature);
+            _methodBody = new LazyVariable<MethodBody?>(GetBody);
+            _implementationMap = new LazyVariable<ImplementationMap?>(GetImplementationMap);
+            _semantics = new LazyVariable<MethodSemantics?>(GetSemantics);
         }
 
         /// <summary>
@@ -64,7 +65,7 @@ namespace AsmResolver.DotNet
         /// <paramref name="signature"/> is set, the <see cref="MethodAttributes.Static"/> bit should be unset in
         /// <paramref name="attributes"/> and vice versa.
         /// </remarks>
-        public MethodDefinition(string name, MethodAttributes attributes, MethodSignature signature)
+        public MethodDefinition(string? name, MethodAttributes attributes, MethodSignature? signature)
             : this(new MetadataToken(TableIndex.Method, 0))
         {
             Name = name;
@@ -73,7 +74,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -83,7 +84,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the signature of the method This includes the return type, as well as the types of the
         /// parameters that this method defines.
         /// </summary>
-        public MethodSignature Signature
+        public MethodSignature? Signature
         {
             get => _signature.Value;
             set => _signature.Value = value;
@@ -254,7 +255,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets a value indicating the method can only be overridden if it is also accessible. 
+        /// Gets or sets a value indicating the method can only be overridden if it is also accessible.
         /// </summary>
         public bool CheckAccessOnOverride
         {
@@ -269,7 +270,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// Methods with this flag set should not have a method body assigned for a valid .NET executable. However,
         /// updating this flag will not remove the body of this method, nor does the existence of the method body reflect
-        /// the value of this property. 
+        /// the value of this property.
         /// </remarks>
         public bool IsAbstract
         {
@@ -332,7 +333,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets a value indicating themethod calls another method containing security code.
         /// </summary>
         public bool RequireSecObject
-        {    
+        {
             get => (Attributes & MethodAttributes.RequireSecObject) != 0;
             set => Attributes = (Attributes & ~MethodAttributes.RequireSecObject)
                                 | (value ? MethodAttributes.RequireSecObject : 0);
@@ -446,7 +447,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets a value indicating only one thread can run the method at once. 
+        /// Gets or sets a value indicating only one thread can run the method at once.
         /// </summary>
         public bool IsSynchronized
         {
@@ -464,24 +465,24 @@ namespace AsmResolver.DotNet
             set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.NoInlining)
                                     | (value ? MethodImplAttributes.NoInlining : 0);
         }
-        
+
         /// <inheritdoc />
-        public virtual ModuleDefinition Module => DeclaringType?.Module;
+        public virtual ModuleDefinition? Module => DeclaringType?.Module;
 
         /// <summary>
         /// Gets the type that defines the method.
         /// </summary>
-        public TypeDefinition DeclaringType
+        public TypeDefinition? DeclaringType
         {
             get => _declaringType.Value;
             set => _declaringType.Value = value;
         }
 
-        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
-        
-        ITypeDefOrRef IMethodDefOrRef.DeclaringType => DeclaringType;
+        ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
-        TypeDefinition IOwnedCollectionElement<TypeDefinition>.Owner
+        ITypeDefOrRef? IMethodDefOrRef.DeclaringType => DeclaringType;
+
+        TypeDefinition? IOwnedCollectionElement<TypeDefinition>.Owner
         {
             get => DeclaringType;
             set => DeclaringType = value;
@@ -522,10 +523,11 @@ namespace AsmResolver.DotNet
         /// Gets a value indicating whether the method is implemented using a method body. That is, whether the
         /// <see cref="MethodBody"/> property is not <c>null</c>.
         /// </summary>
-        public bool HasMethodBody => MethodBody != null;
+        [MemberNotNullWhen(true, nameof(MethodBody))]
+        public bool HasMethodBody => MethodBody is not null;
 
         /// <summary>
-        /// Gets or sets the body of the method. 
+        /// Gets or sets the body of the method.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -533,14 +535,14 @@ namespace AsmResolver.DotNet
         /// <see cref="ImplAttributes"/>.
         /// </para>
         /// </remarks>
-        public MethodBody MethodBody
+        public MethodBody? MethodBody
         {
             get => _methodBody.Value;
             set => _methodBody.Value = value;
         }
 
         /// <summary>
-        /// Gets or sets the managed CIL body of the method if available. 
+        /// Gets or sets the managed CIL body of the method if available.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -553,14 +555,14 @@ namespace AsmResolver.DotNet
         /// <see cref="ImplAttributes"/>.
         /// </para>
         /// </remarks>
-        public CilMethodBody CilMethodBody
+        public CilMethodBody? CilMethodBody
         {
             get => MethodBody as CilMethodBody;
             set => MethodBody = value;
         }
 
         /// <summary>
-        /// Gets or sets the unmanaged native body of the method if available. 
+        /// Gets or sets the unmanaged native body of the method if available.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -574,14 +576,14 @@ namespace AsmResolver.DotNet
         /// <see cref="ImplAttributes"/>.
         /// </para>
         /// </remarks>
-        public NativeMethodBody NativeMethodBody
+        public NativeMethodBody? NativeMethodBody
         {
             get => MethodBody as NativeMethodBody;
             set => MethodBody = value;
         }
 
         /// <inheritdoc />
-        public ImplementationMap ImplementationMap
+        public ImplementationMap? ImplementationMap
         {
             get => _implementationMap.Value;
             set
@@ -632,41 +634,41 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the semantics associated to this method (if available).
         /// </summary>
-        public MethodSemantics Semantics
+        public MethodSemantics? Semantics
         {
             get => _semantics.Value;
             set => _semantics.Value = value;
         }
 
         /// <summary>
-        /// Gets a value indicating whether the method is a get method for a property. 
+        /// Gets a value indicating whether the method is a get method for a property.
         /// </summary>
-        public bool IsGetMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.Getter) != 0;
+        public bool IsGetMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.Getter) != 0;
 
         /// <summary>
-        /// Gets a value indicating whether the method is a set method for a property. 
+        /// Gets a value indicating whether the method is a set method for a property.
         /// </summary>
-        public bool IsSetMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.Setter) != 0;
+        public bool IsSetMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.Setter) != 0;
 
         /// <summary>
-        /// Gets a value indicating whether the method is an add method for an event. 
+        /// Gets a value indicating whether the method is an add method for an event.
         /// </summary>
-        public bool IsAddMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.AddOn) != 0;
+        public bool IsAddMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.AddOn) != 0;
 
         /// <summary>
-        /// Gets a value indicating whether the method is a remove method for an event. 
+        /// Gets a value indicating whether the method is a remove method for an event.
         /// </summary>
-        public bool IsRemoveMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.RemoveOn) != 0;
+        public bool IsRemoveMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.RemoveOn) != 0;
 
         /// <summary>
-        /// Gets a value indicating whether the method is a fire method for an event. 
+        /// Gets a value indicating whether the method is a fire method for an event.
         /// </summary>
-        public bool IsFireMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.Fire) != 0;
+        public bool IsFireMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.Fire) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a (class) constructor.
         /// </summary>
-        public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && (Name == ".cctor" || Name == ".ctor");
+        public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && Name is ".cctor" or ".ctor";
 
         MethodDefinition IMethodDescriptor.Resolve() => this;
 
@@ -675,11 +677,11 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
         {
-            if (!DeclaringType.IsAccessibleFromType(type))
+            if (DeclaringType is not { } declaringType || !declaringType.IsAccessibleFromType(type))
                 return false;
-            
+
             var comparer = new SignatureComparer();
-            bool isInSameAssembly = comparer.Equals(DeclaringType.Module, type.Module);
+            bool isInSameAssembly = comparer.Equals(declaringType.Module, type.Module);
 
             return IsPublic
                    || isInSameAssembly && IsAssembly
@@ -694,7 +696,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual string? GetName() => null;
 
         /// <summary>
         /// Obtains the declaring type of the method definition.
@@ -703,7 +705,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="DeclaringType"/> property.
         /// </remarks>
-        protected virtual TypeDefinition GetDeclaringType() => null;
+        protected virtual TypeDefinition? GetDeclaringType() => null;
 
         /// <summary>
         /// Obtains the signature of the method definition.
@@ -712,7 +714,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Signature"/> property.
         /// </remarks>
-        protected virtual MethodSignature GetSignature() => null;
+        protected virtual MethodSignature? GetSignature() => null;
 
         /// <summary>
         /// Obtains the parameter definitions of the method definition.
@@ -721,7 +723,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ParameterDefinitions"/> property.
         /// </remarks>
-        protected virtual IList<ParameterDefinition> GetParameterDefinitions() => 
+        protected virtual IList<ParameterDefinition> GetParameterDefinitions() =>
             new OwnedCollection<MethodDefinition, ParameterDefinition>(this);
 
         /// <summary>
@@ -731,7 +733,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="MethodBody"/> property.
         /// </remarks>
-        protected virtual MethodBody GetBody() => null;
+        protected virtual MethodBody? GetBody() => null;
 
         /// <summary>
         /// Obtains the platform invoke information assigned to the method.
@@ -740,8 +742,8 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ImplementationMap"/> property.
         /// </remarks>
-        protected virtual ImplementationMap GetImplementationMap() => null;
-        
+        protected virtual ImplementationMap? GetImplementationMap() => null;
+
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
         /// </summary>
@@ -759,9 +761,9 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="SecurityDeclarations"/> property.
         /// </remarks>
-        protected virtual IList<SecurityDeclaration> GetSecurityDeclarations() => 
+        protected virtual IList<SecurityDeclaration> GetSecurityDeclarations() =>
             new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(this);
-        
+
         /// <summary>
         /// Obtains the list of generic parameters this member declares.
         /// </summary>
@@ -779,8 +781,8 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Semantics"/> property.
         /// </remarks>
-        protected virtual MethodSemantics GetSemantics() => null;
-        
+        protected virtual MethodSemantics? GetSemantics() => null;
+
         /// <inheritdoc />
         public override string ToString() => FullName;
     }

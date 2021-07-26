@@ -19,13 +19,13 @@ namespace AsmResolver.PE
     /// </summary>
     public class PEImage : IPEImage
     {
-        private IList<IImportedModule> _imports;
-        private readonly LazyVariable<IExportDirectory> _exports;
-        private readonly LazyVariable<IResourceDirectory> _resources;
-        private readonly LazyVariable<IExceptionDirectory> _exceptions;
-        private IList<BaseRelocation> _relocations;
-        private readonly LazyVariable<IDotNetDirectory> _dotNetDirectory;
-        private IList<DebugDataEntry> _debugData;
+        private IList<IImportedModule>? _imports;
+        private readonly LazyVariable<IExportDirectory?> _exports;
+        private readonly LazyVariable<IResourceDirectory?> _resources;
+        private readonly LazyVariable<IExceptionDirectory?> _exceptions;
+        private IList<BaseRelocation>? _relocations;
+        private readonly LazyVariable<IDotNetDirectory?> _dotNetDirectory;
+        private IList<DebugDataEntry>? _debugData;
 
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
@@ -156,14 +156,14 @@ namespace AsmResolver.PE
         /// </summary>
         public PEImage()
         {
-            _exports = new LazyVariable<IExportDirectory>(GetExports);
-            _resources = new LazyVariable<IResourceDirectory>(GetResources);
-            _exceptions = new LazyVariable<IExceptionDirectory>(GetExceptions);
-            _dotNetDirectory = new LazyVariable<IDotNetDirectory>(GetDotNetDirectory);
+            _exports = new LazyVariable<IExportDirectory?>(GetExports);
+            _resources = new LazyVariable<IResourceDirectory?>(GetResources);
+            _exceptions = new LazyVariable<IExceptionDirectory?>(GetExceptions);
+            _dotNetDirectory = new LazyVariable<IDotNetDirectory?>(GetDotNetDirectory);
         }
 
         /// <inheritdoc />
-        public string FilePath
+        public string? FilePath
         {
             get;
             protected set;
@@ -231,21 +231,21 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        public IExportDirectory Exports
+        public IExportDirectory? Exports
         {
             get => _exports.Value;
             set => _exports.Value = value;
         }
 
         /// <inheritdoc />
-        public IResourceDirectory Resources
+        public IResourceDirectory? Resources
         {
             get => _resources.Value;
             set => _resources.Value = value;
         }
 
         /// <inheritdoc />
-        public IExceptionDirectory Exceptions
+        public IExceptionDirectory? Exceptions
         {
             get => _exceptions.Value;
             set => _exceptions.Value = value;
@@ -263,7 +263,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        public IDotNetDirectory DotNetDirectory
+        public IDotNetDirectory? DotNetDirectory
         {
             get => _dotNetDirectory.Value;
             set => _dotNetDirectory.Value = value;
@@ -296,7 +296,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Exports"/> property.
         /// </remarks>
-        protected virtual IExportDirectory GetExports() => null;
+        protected virtual IExportDirectory? GetExports() => null;
 
         /// <summary>
         /// Obtains the root resource directory in the PE.
@@ -305,7 +305,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Resources"/> property.
         /// </remarks>
-        protected virtual IResourceDirectory GetResources() => null;
+        protected virtual IResourceDirectory? GetResources() => null;
 
         /// <summary>
         /// Obtains the contents of the exceptions data directory in the PE.
@@ -314,7 +314,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Exceptions"/> property.
         /// </remarks>
-        protected virtual IExceptionDirectory GetExceptions() => null;
+        protected virtual IExceptionDirectory? GetExceptions() => null;
 
         /// <summary>
         /// Obtains the base relocation blocks in the PE.
@@ -332,7 +332,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="DotNetDirectory"/> property.
         /// </remarks>
-        protected virtual IDotNetDirectory GetDotNetDirectory() => null;
+        protected virtual IDotNetDirectory? GetDotNetDirectory() => null;
 
         /// <summary>
         /// Obtains the debug data entries in the PE.

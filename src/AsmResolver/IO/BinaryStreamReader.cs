@@ -435,7 +435,7 @@ namespace AsmResolver.IO
         /// Reads a serialized UTF8 string from the stream.
         /// </summary>
         /// <returns>The string that was read from the stream.</returns>
-        public string ReadSerString()
+        public string? ReadSerString()
         {
             if (!CanRead(1) || DataSource[Offset] == 0xFF)
             {

@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Builder.Resources
         /// </summary>
         /// <param name="data">The resource data to lookup or add.</param>
         /// <returns>The offset of the resource data.</returns>
-        public uint GetResourceDataOffset(byte[] data)
+        public uint GetResourceDataOffset(byte[]? data)
         {
             if (data is null || data.Length == 0)
                 return 0;

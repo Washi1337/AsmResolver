@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
 
@@ -19,7 +17,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The property signature.</returns>
-        public static PropertySignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
+        public static PropertySignature? FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
             var attributes = (CallingConventionAttributes) reader.ReadByte();
             if ((attributes & CallingConventionAttributes.Property) == 0)
@@ -28,7 +26,11 @@ namespace AsmResolver.DotNet.Signatures
                 return null;
             }
 
-            var result = new PropertySignature(attributes);
+            var result = new PropertySignature(
+                attributes,
+                context.ReaderContext.ParentModule.CorLibTypeFactory.Object,
+                Enumerable.Empty<TypeSignature>());
+
             result.ReadParametersAndReturnType(context, ref reader);
             return result;
         }
@@ -86,15 +88,6 @@ namespace AsmResolver.DotNet.Signatures
             => new PropertySignature(CallingConventionAttributes.HasThis, returnType, parameterTypes);
 
         /// <summary>
-        /// Initializes a new empty property signature.
-        /// </summary>
-        /// <param name="attributes">The attributes.</param>
-        protected internal PropertySignature(CallingConventionAttributes attributes)
-            : base(attributes | CallingConventionAttributes.Property, null, Enumerable.Empty<TypeSignature>())
-        {
-        }
-
-        /// <summary>
         /// Initializes a new property signature with the provided property type and a list of parameter types.
         /// </summary>
         /// <param name="attributes">The attributes.</param>
@@ -135,7 +128,7 @@ namespace AsmResolver.DotNet.Signatures
 
             return string.Format("{0}{1} *{2}",
                 prefix,
-                ReturnType.FullName ?? TypeSignature.NullTypeToString,
+                ReturnType.FullName,
                 parameterTypesString);
         }
     }

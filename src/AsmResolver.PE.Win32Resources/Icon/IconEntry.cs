@@ -1,4 +1,5 @@
-﻿using AsmResolver.IO;
+﻿using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources.Icon
 {
@@ -14,7 +15,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         {
             get;
             set;
-        }
+        } = Array.Empty<byte>();
 
         /// <summary>
         /// Reads an icon resource entry from an input stream.

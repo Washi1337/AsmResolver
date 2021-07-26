@@ -12,7 +12,7 @@ namespace AsmResolver.PE.DotNet.Resources
         /// </summary>
         /// <param name="offset">The offset of the resource data, relative to the start of the data directory.</param>
         /// <returns>The data, or <c>null</c> if the offset is not a valid offset.</returns>
-        public abstract byte[] GetManifestResourceData(uint offset);
+        public abstract byte[]? GetManifestResourceData(uint offset);
 
         /// <summary>
         /// Gets a reader starting at the beginning of the resource data referenced by the provided offset.

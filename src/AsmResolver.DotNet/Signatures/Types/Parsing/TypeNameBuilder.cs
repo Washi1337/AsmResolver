@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
     /// <summary>
     /// Provides a mechanism for building up a fully qualified type names, as they are stored in custom attribute signatures.
     /// </summary>
-    public sealed class TypeNameBuilder : ITypeSignatureVisitor<object>
+    public sealed class TypeNameBuilder : ITypeSignatureVisitor<object?>
     {
         private readonly TextWriter _writer;
         private readonly bool _omitCorLib;
@@ -44,8 +44,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         {
             type.AcceptVisitor(this);
 
-            var assembly = type.Scope.GetAssembly();
-            if (assembly != type.Module.Assembly)
+            var assembly = type.Scope?.GetAssembly();
+            if (assembly is not null && assembly != type.Module?.Assembly)
             {
                 if (assembly.IsCorLib && _omitCorLib)
                     return;
@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         }
 
         /// <inheritdoc />
-        public object VisitArrayType(ArrayTypeSignature signature)
+        public object? VisitArrayType(ArrayTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
             _writer.Write('[');
@@ -70,7 +70,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         public object VisitBoxedType(BoxedTypeSignature signature) => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public object VisitByReferenceType(ByReferenceTypeSignature signature)
+        public object? VisitByReferenceType(ByReferenceTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
             _writer.Write('&');
@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         }
 
         /// <inheritdoc />
-        public object VisitCorLibType(CorLibTypeSignature signature)
+        public object? VisitCorLibType(CorLibTypeSignature signature)
         {
             WriteIdentifier(signature.Namespace);
             _writer.Write('.');
@@ -90,7 +90,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         public object VisitCustomModifierType(CustomModifierTypeSignature signature) => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public object VisitGenericInstanceType(GenericInstanceTypeSignature signature)
+        public object? VisitGenericInstanceType(GenericInstanceTypeSignature signature)
         {
             WriteSimpleTypeName(signature.GenericType);
             _writer.Write('[');
@@ -115,7 +115,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         public object VisitPinnedType(PinnedTypeSignature signature) => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public object VisitPointerType(PointerTypeSignature signature)
+        public object? VisitPointerType(PointerTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
             _writer.Write('*');
@@ -126,7 +126,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         public object VisitSentinelType(SentinelTypeSignature signature) => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public object VisitSzArrayType(SzArrayTypeSignature signature)
+        public object? VisitSzArrayType(SzArrayTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
             _writer.Write("[]");
@@ -134,7 +134,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         }
 
         /// <inheritdoc />
-        public object VisitTypeDefOrRef(TypeDefOrRefSignature signature)
+        public object? VisitTypeDefOrRef(TypeDefOrRefSignature signature)
         {
             WriteSimpleTypeName(signature.Type);
             return null;
@@ -144,16 +144,16 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         public object VisitFunctionPointerType(FunctionPointerTypeSignature signature) =>
             throw new NotSupportedException("Function pointer type signatures are not supported in type name building.");
 
-        private void WriteSimpleTypeName(ITypeDefOrRef type)
+        private void WriteSimpleTypeName(ITypeDefOrRef? type)
         {
             var ancestors = new List<ITypeDefOrRef>();
-            while (type != null)
+            while (type is not null)
             {
                 ancestors.Add(type);
                 type = type.DeclaringType;
             }
 
-            string ns = ancestors[ancestors.Count - 1].Namespace;
+            string? ns = ancestors[ancestors.Count - 1].Namespace;
             if (!string.IsNullOrEmpty(ns))
             {
                 WriteIdentifier(ns, true);
@@ -186,9 +186,12 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             WriteIdentifier(assembly.Culture ?? "neutral");
         }
 
-        private void WriteIdentifier(string identifier, bool escapeDots = false)
+        private void WriteIdentifier(string? identifier, bool escapeDots = false)
         {
-            foreach (char c in identifier)
+            if (string.IsNullOrEmpty(identifier))
+                return;
+
+            foreach (char c in identifier!)
             {
                 if (TypeNameLexer.ReservedChars.Contains(c) && (c != '.' || !escapeDots))
                     _writer.Write('\\');

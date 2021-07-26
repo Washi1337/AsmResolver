@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
 using AsmResolver.IO;
@@ -10,7 +9,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
     /// </summary>
     public class SerializedStringsStream : StringsStream
     {
-        private readonly IDictionary<uint, string> _cachedStrings = new Dictionary<uint, string>();
+        private readonly Dictionary<uint, string> _cachedStrings = new();
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
@@ -47,7 +46,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         public override void Write(IBinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
 
         /// <inheritdoc />
-        public override string GetStringByIndex(uint index)
+        public override string? GetStringByIndex(uint index)
         {
             if (index == 0)
                 return null;

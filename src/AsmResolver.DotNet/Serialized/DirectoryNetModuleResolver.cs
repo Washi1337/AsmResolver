@@ -4,7 +4,7 @@ using System.IO;
 namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
-    /// Provides a basic implementation for a net module resolver, that searches for the net module in a directory.  
+    /// Provides a basic implementation for a net module resolver, that searches for the net module in a directory.
     /// </summary>
     public class DirectoryNetModuleResolver : INetModuleResolver
     {
@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Serialized
             Directory = directory ?? throw new ArgumentNullException(nameof(directory));
             ReaderParameters = readerParameters ?? throw new ArgumentNullException(nameof(readerParameters));
         }
-        
+
         /// <summary>
         /// Gets the search directory.
         /// </summary>
@@ -36,12 +36,12 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        public ModuleDefinition Resolve(string name)
+        public ModuleDefinition? Resolve(string name)
         {
             string path = Path.Combine(Directory, name);
             if (!File.Exists(path))
                 return null;
-            
+
             try
             {
                 return ModuleDefinition.FromFile(path, ReaderParameters);
@@ -52,6 +52,6 @@ namespace AsmResolver.DotNet.Serialized
                 return null;
             }
         }
-        
+
     }
 }

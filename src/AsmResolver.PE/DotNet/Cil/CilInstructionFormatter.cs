@@ -12,7 +12,7 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public class CilInstructionFormatter : ICilInstructionFormatter
     {
-        private const string ReservedStringCharacters = "\\\"\t\r\n\b";
+        private const string InvalidOperandString = "<<<INVALID>>>";
 
         /// <summary>
         /// Gets the default instance of the <see cref="CilInstructionFormatter"/> class.
@@ -52,7 +52,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the provided operand type is not valid.</exception>
-        public virtual string FormatOperand(CilOperandType operandType, object operand) => operandType switch
+        public virtual string FormatOperand(CilOperandType operandType, object? operand) => operandType switch
         {
             CilOperandType.InlineNone => string.Empty,
             CilOperandType.ShortInlineBrTarget => FormatBranchTarget(operand),
@@ -82,11 +82,11 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
-        protected virtual string FormatArgument(object operand) => operand switch
+        protected virtual string FormatArgument(object? operand) => operand switch
         {
             short longIndex => $"A_{longIndex.ToString()}",
             byte shortIndex => $"A_{shortIndex.ToString()}",
-            null => "<<<INVALID>>>",
+            null => InvalidOperandString,
             _ => operand.ToString()
         };
 
@@ -96,11 +96,11 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
-        protected virtual string FormatVariable(object operand) => operand switch
+        protected virtual string FormatVariable(object? operand) => operand switch
         {
             short longIndex => $"V_{longIndex.ToString()}",
             byte shortIndex => $"V_{shortIndex.ToString()}",
-            null => "<<<INVALID>>>",
+            null => InvalidOperandString,
             _ => operand.ToString()
         };
 
@@ -109,8 +109,8 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
-        protected virtual string FormatInteger(object operand) =>
-            Convert.ToString(operand, CultureInfo.InvariantCulture);
+        protected virtual string FormatInteger(object? operand) =>
+            Convert.ToString(operand, CultureInfo.InvariantCulture) ?? InvalidOperandString;
 
 
         /// <summary>
@@ -118,18 +118,18 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
-        protected virtual string FormatFloat(object operand) =>
-            Convert.ToString(operand, CultureInfo.InvariantCulture);
+        protected virtual string FormatFloat(object? operand) =>
+            Convert.ToString(operand, CultureInfo.InvariantCulture) ?? InvalidOperandString;
 
         /// <summary>
         /// Formats a reference to a stand-alone signature.
         /// </summary>
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
-        protected virtual string FormatSignature(object operand) => operand switch
+        protected virtual string FormatSignature(object? operand) => operand switch
         {
             MetadataToken token => FormatToken(token),
-            null => "<<<INVALID>>>",
+            null => InvalidOperandString,
             _ => operand.ToString()
         };
 
@@ -145,11 +145,11 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
-        protected virtual string FormatSwitch(object operand) => operand switch
+        protected virtual string FormatSwitch(object? operand) => operand switch
         {
             IEnumerable<ICilLabel> target => $"({string.Join(", ", target.Select(FormatBranchTarget))})",
             IEnumerable<int> offsets => $"({string.Join(", ", offsets.Select(x => FormatBranchTarget(x)))})",
-            null => "<<<INVALID>>>",
+            null => InvalidOperandString,
             _ => operand.ToString()
         };
 
@@ -158,11 +158,11 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
-        protected virtual string FormatString(object operand) => operand switch
+        protected virtual string FormatString(object? operand) => operand switch
         {
-            string value => CreateEscapedString(value),
+            string value => value.CreateEscapedString(),
             MetadataToken token => FormatToken(token),
-            _ => "<<<INVALID>>>"
+            _ => InvalidOperandString
         };
 
         /// <summary>
@@ -170,11 +170,11 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
-        protected virtual string FormatBranchTarget(object operand) => operand switch
+        protected virtual string FormatBranchTarget(object? operand) => operand switch
         {
             ICilLabel target => FormatLabel(target.Offset),
             int offset => FormatLabel(offset),
-            null => "<<<INVALID>>>",
+            null => InvalidOperandString,
             _ => operand.ToString()
         };
 
@@ -183,27 +183,12 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
-        protected virtual string FormatMember(object operand) => operand switch
+        protected virtual string FormatMember(object? operand) => operand switch
         {
             MetadataToken token => FormatToken(token),
-            null => "<<<INVALID>>>",
+            null => InvalidOperandString,
             _ => operand.ToString()
         };
 
-        private static string CreateEscapedString(string literal)
-        {
-            var builder = new StringBuilder(literal.Length + 2);
-
-            builder.Append('"');
-            foreach (char currentChar in literal)
-            {
-                if (ReservedStringCharacters.Contains(currentChar))
-                    builder.Append('\\');
-                builder.Append(currentChar);
-            }
-            builder.Append('"');
-
-            return builder.ToString();
-        }
     }
 }

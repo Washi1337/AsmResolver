@@ -11,8 +11,8 @@ namespace AsmResolver.PE.DotNet.StrongName
         private readonly Stream _imageStream;
         private readonly AssemblyHashAlgorithm _hashAlgorithm;
 
-        private readonly List<OffsetRange> _includedRanges = new List<OffsetRange>();
-        private readonly List<OffsetRange> _zeroRanges = new List<OffsetRange>();
+        private readonly List<OffsetRange> _includedRanges = new();
+        private readonly List<OffsetRange> _zeroRanges = new();
 
         public StrongNameDataHashBuilder(Stream imageStream, AssemblyHashAlgorithm hashAlgorithm)
         {
@@ -64,7 +64,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                 AssemblyHashAlgorithm.Sha512 => SHA512.Create(),
                 _ => throw new NotSupportedException($"Invalid or unsupported hashing algorithm {_hashAlgorithm}.")
             };
-            
+
             var buffer = new byte[0x1000];
 
             foreach (var range in _includedRanges)
@@ -76,9 +76,9 @@ namespace AsmResolver.PE.DotNet.StrongName
                     var currentRange = new OffsetRange(
                         (uint) _imageStream.Position,
                         (uint) (_imageStream.Position + chunkLength));
-                    
+
                     _imageStream.Read(buffer, 0, chunkLength);
-                    
+
                     ZeroRangesIfApplicable(buffer, currentRange);
                     algorithm.TransformBlock(buffer, 0, chunkLength, buffer, 0);
                 }
@@ -100,6 +100,6 @@ namespace AsmResolver.PE.DotNet.StrongName
                 }
             }
         }
-        
+
     }
 }

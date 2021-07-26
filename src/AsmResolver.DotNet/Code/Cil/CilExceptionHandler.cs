@@ -1,4 +1,3 @@
-using System;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 
@@ -68,13 +67,13 @@ namespace AsmResolver.DotNet.Code.Cil
             // Interpret last field.
             switch (handler.HandlerType)
             {
-                case CilExceptionHandlerType.Exception when body.Owner.Module.TryLookupMember(exceptionTokenOrFilterStart, out var member):
+                case CilExceptionHandlerType.Exception when body.Owner.Module!.TryLookupMember(exceptionTokenOrFilterStart, out var member):
                     handler.ExceptionType = member as ITypeDefOrRef;
                     break;
                 case CilExceptionHandlerType.Filter:
                     handler.FilterStart = body.Instructions.GetByOffset(exceptionTokenOrFilterStart)?.CreateLabel()
                                           ?? new CilOffsetLabel(exceptionTokenOrFilterStart);
-                    break;;
+                    break;
             }
 
             return handler;
@@ -96,7 +95,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <summary>
         /// Gets or sets the instruction that marks the start of the the protected region.
         /// </summary>
-        public ICilLabel TryStart
+        public ICilLabel? TryStart
         {
             get;
             set;
@@ -109,7 +108,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// This instruction marker is exclusive; the referenced instruction does not belong to the protected
         /// region anymore.
         /// </remarks>
-        public ICilLabel TryEnd
+        public ICilLabel? TryEnd
         {
             get;
             set;
@@ -118,7 +117,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <summary>
         /// Gets or sets the instruction that marks the start of the handler region.
         /// </summary>
-        public ICilLabel HandlerStart
+        public ICilLabel? HandlerStart
         {
             get;
             set;
@@ -131,7 +130,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// This instruction marker is exclusive; the referenced instruction does not belong to the handler
         /// region anymore.
         /// </remarks>
-        public ICilLabel HandlerEnd
+        public ICilLabel? HandlerEnd
         {
             get;
             set;
@@ -144,7 +143,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// This property only has meaning if the <see cref="HandlerType"/> property is set to
         /// <see cref="CilExceptionHandlerType.Filter"/>.
         /// </remarks>
-        public ICilLabel FilterStart
+        public ICilLabel? FilterStart
         {
             get;
             set;
@@ -157,7 +156,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// This property only has meaning if the <see cref="HandlerType"/> property is set to
         /// <see cref="CilExceptionHandlerType.Exception"/>.
         /// </remarks>
-        public ITypeDefOrRef ExceptionType
+        public ITypeDefOrRef? ExceptionType
         {
             get;
             set;
@@ -168,10 +167,10 @@ namespace AsmResolver.DotNet.Code.Cil
         /// boundaries of the protected region.
         /// </summary>
         public bool IsFat =>
-            TryStart.Offset >= ushort.MaxValue
-            || HandlerStart.Offset >= ushort.MaxValue
-            || TryEnd.Offset - TryStart.Offset >= byte.MaxValue
-            || HandlerEnd.Offset - HandlerStart.Offset >= byte.MaxValue;
+            TryStart?.Offset >= ushort.MaxValue
+            || HandlerStart?.Offset >= ushort.MaxValue
+            || TryEnd?.Offset - TryStart?.Offset >= byte.MaxValue
+            || HandlerEnd?.Offset - HandlerStart?.Offset >= byte.MaxValue;
 
         /// <inheritdoc />
         public override string ToString()

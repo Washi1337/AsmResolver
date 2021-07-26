@@ -10,10 +10,10 @@ namespace AsmResolver.DotNet.Builder
         public uint GetUserStringIndex(string value) => Metadata.UserStringsStream.GetStringIndex(value);
 
         /// <inheritdoc />
-        public MetadataToken GetTypeReferenceToken(TypeReference type)
+        public MetadataToken GetTypeReferenceToken(TypeReference? type)
         {
-            if (type == null || !AssertIsImported(type))
-                return 0;
+            if (!AssertIsImported(type))
+                return MetadataToken.Zero;
 
             var table = Metadata.TablesStream.GetTable<TypeReferenceRow>(TableIndex.TypeRef);
             var row = new TypeReferenceRow(
@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetTypeDefinitionToken(TypeDefinition type)
+        public MetadataToken GetTypeDefinitionToken(TypeDefinition? type)
         {
             return AssertIsImported(type)
                 ? _tokenMapping[type]
@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetFieldDefinitionToken(FieldDefinition field)
+        public MetadataToken GetFieldDefinitionToken(FieldDefinition? field)
         {
             return AssertIsImported(field)
                 ? _tokenMapping[field]
@@ -44,8 +44,8 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetMethodDefinitionToken(MethodDefinition method)
-        {;
+        public MetadataToken GetMethodDefinitionToken(MethodDefinition? method)
+        {
             return AssertIsImported(method)
                 ? _tokenMapping[method]
                 : MetadataToken.Zero;
@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="parameter">The reference to the parameter to add.</param>
         /// <returns>The metadata token of the added parameter definition.</returns>
-        public MetadataToken GetParameterDefinitionToken(ParameterDefinition parameter)
+        public MetadataToken GetParameterDefinitionToken(ParameterDefinition? parameter)
         {
             return AssertIsImported(parameter)
                 ? _tokenMapping[parameter]
@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="property">The reference to the property to add.</param>
         /// <returns>The metadata token of the added property definition.</returns>
-        public MetadataToken GetPropertyDefinitionToken(PropertyDefinition property)
+        public MetadataToken GetPropertyDefinitionToken(PropertyDefinition? property)
         {
             return AssertIsImported(property)
                 ? _tokenMapping[property]
@@ -81,7 +81,7 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="event">The reference to the event to add.</param>
         /// <returns>The metadata token of the added event definition.</returns>
-        public MetadataToken GetEventDefinitionToken(EventDefinition @event)
+        public MetadataToken GetEventDefinitionToken(EventDefinition? @event)
         {
             return AssertIsImported(@event)
                 ? _tokenMapping[@event]
@@ -89,7 +89,7 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetMemberReferenceToken(MemberReference member)
+        public MetadataToken GetMemberReferenceToken(MemberReference? member)
         {
             if (!AssertIsImported(member))
                 return MetadataToken.Zero;
@@ -107,8 +107,11 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetStandAloneSignatureToken(StandAloneSignature signature)
+        public MetadataToken GetStandAloneSignatureToken(StandAloneSignature? signature)
         {
+            if (signature is null)
+                return MetadataToken.Zero;
+
             var table = Metadata.TablesStream.GetTable<StandAloneSignatureRow>(TableIndex.StandAloneSig);
             var row = new StandAloneSignatureRow(
                 Metadata.BlobStream.GetBlobIndex(this, signature.Signature, ErrorListener));
@@ -120,9 +123,9 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetAssemblyReferenceToken(AssemblyReference assembly)
+        public MetadataToken GetAssemblyReferenceToken(AssemblyReference? assembly)
         {
-            if (!AssertIsImported(assembly))
+            if (assembly is null || !AssertIsImported(assembly))
                 return MetadataToken.Zero;
 
             var table = Metadata.TablesStream.GetTable<AssemblyReferenceRow>(TableIndex.AssemblyRef);
@@ -147,7 +150,7 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="reference">The reference to add.</param>
         /// <returns>The new metadata token assigned to the module reference.</returns>
-        public MetadataToken GetModuleReferenceToken(ModuleReference reference)
+        public MetadataToken GetModuleReferenceToken(ModuleReference? reference)
         {
             if (!AssertIsImported(reference))
                 return MetadataToken.Zero;
@@ -161,7 +164,7 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetTypeSpecificationToken(TypeSpecification type)
+        public MetadataToken GetTypeSpecificationToken(TypeSpecification? type)
         {
             if (!AssertIsImported(type))
                 return MetadataToken.Zero;
@@ -176,8 +179,11 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetMethodSpecificationToken(MethodSpecification method)
+        public MetadataToken GetMethodSpecificationToken(MethodSpecification? method)
         {
+            if (!AssertIsImported(method))
+                return MetadataToken.Zero;
+
             var table = Metadata.TablesStream.GetTable<MethodSpecificationRow>(TableIndex.MethodSpec);
             var row = new MethodSpecificationRow(
                 AddMethodDefOrRef(method.Method),

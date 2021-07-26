@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -16,23 +15,23 @@ namespace AsmResolver.DotNet
     public class FieldDefinition :
         MetadataMember,
         IMemberDefinition,
-        IFieldDescriptor, 
-        IHasCustomAttribute, 
+        IFieldDescriptor,
+        IHasCustomAttribute,
         IHasConstant,
         IMemberForwarded,
         IHasFieldMarshal,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<FieldSignature> _signature;
-        private readonly LazyVariable<TypeDefinition> _declaringType;
-        private readonly LazyVariable<Constant> _constant;
-        private readonly LazyVariable<MarshalDescriptor> _marshalDescriptor;
-        private readonly LazyVariable<ImplementationMap> _implementationMap;
-        private readonly LazyVariable<ISegment> _fieldRva;
+        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<FieldSignature?> _signature;
+        private readonly LazyVariable<TypeDefinition?> _declaringType;
+        private readonly LazyVariable<Constant?> _constant;
+        private readonly LazyVariable<MarshalDescriptor?> _marshalDescriptor;
+        private readonly LazyVariable<ImplementationMap?> _implementationMap;
+        private readonly LazyVariable<ISegment?> _fieldRva;
         private readonly LazyVariable<int?> _fieldOffset;
 
-        private IList<CustomAttribute> _customAttributes;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes a new field definition.
@@ -41,13 +40,13 @@ namespace AsmResolver.DotNet
         protected FieldDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
-            _signature = new LazyVariable<FieldSignature>(GetSignature);
-            _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
-            _constant = new LazyVariable<Constant>(GetConstant);
-            _marshalDescriptor = new LazyVariable<MarshalDescriptor>(GetMarshalDescriptor);
-            _implementationMap = new LazyVariable<ImplementationMap>(GetImplementationMap);
-            _fieldRva = new LazyVariable<ISegment>(GetFieldRva);
+            _name = new LazyVariable<string?>(GetName);
+            _signature = new LazyVariable<FieldSignature?>(GetSignature);
+            _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
+            _constant = new LazyVariable<Constant?>(GetConstant);
+            _marshalDescriptor = new LazyVariable<MarshalDescriptor?>(GetMarshalDescriptor);
+            _implementationMap = new LazyVariable<ImplementationMap?>(GetImplementationMap);
+            _fieldRva = new LazyVariable<ISegment?>(GetFieldRva);
             _fieldOffset = new LazyVariable<int?>(GetFieldOffset);
         }
 
@@ -62,7 +61,7 @@ namespace AsmResolver.DotNet
         /// <paramref name="signature"/> is set, the <see cref="FieldAttributes.Static"/> bit should be unset in
         /// <paramref name="attributes"/> and vice versa.
         /// </remarks>
-        public FieldDefinition(string name, FieldAttributes attributes, FieldSignature signature)
+        public FieldDefinition(string? name, FieldAttributes attributes, FieldSignature? signature)
             : this(new MetadataToken(TableIndex.Field, 0))
         {
             Name = name;
@@ -71,7 +70,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -80,7 +79,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the signature of the field. This includes the field type.
         /// </summary>
-        public FieldSignature Signature
+        public FieldSignature? Signature
         {
             get => _signature.Value;
             set => _signature.Value = value;
@@ -281,26 +280,26 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~FieldAttributes.HasFieldRva)
                                 | (value ? FieldAttributes.HasFieldRva : 0);
         }
-        
+
         /// <inheritdoc />
-        public ModuleDefinition Module => DeclaringType?.Module;
+        public ModuleDefinition? Module => DeclaringType?.Module;
 
         /// <summary>
         /// Gets the type that defines the field.
         /// </summary>
-        public TypeDefinition DeclaringType
+        public TypeDefinition? DeclaringType
         {
             get => _declaringType.Value;
             private set => _declaringType.Value = value;
         }
 
-        TypeDefinition IOwnedCollectionElement<TypeDefinition>.Owner
+        TypeDefinition? IOwnedCollectionElement<TypeDefinition>.Owner
         {
             get => DeclaringType;
             set => DeclaringType = value;
         }
 
-        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
+        ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
@@ -314,21 +313,21 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public Constant Constant
+        public Constant? Constant
         {
             get => _constant.Value;
             set => _constant.Value = value;
         }
 
         /// <inheritdoc />
-        public MarshalDescriptor MarshalDescriptor
+        public MarshalDescriptor? MarshalDescriptor
         {
             get => _marshalDescriptor.Value;
             set => _marshalDescriptor.Value = value;
         }
-        
+
         /// <inheritdoc />
-        public ImplementationMap ImplementationMap
+        public ImplementationMap? ImplementationMap
         {
             get => _implementationMap.Value;
             set
@@ -351,7 +350,7 @@ namespace AsmResolver.DotNet
         /// value of <see cref="HasFieldRva"/> reflect whether the field has initialization data or not. Well-formed
         /// .NET binaries should always set the <see cref="HasFieldRva"/> flag to <c>true</c> if this property is non-null.
         /// </remarks>
-        public ISegment FieldRva
+        public ISegment? FieldRva
         {
             get => _fieldRva.Value;
             set => _fieldRva.Value = value;
@@ -367,24 +366,23 @@ namespace AsmResolver.DotNet
         }
 
         FieldDefinition IFieldDescriptor.Resolve() => this;
-        
+
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
         {
-            if (!DeclaringType.IsAccessibleFromType(type))
+            if (DeclaringType is not { } declaringType || declaringType.IsAccessibleFromType(type))
                 return false;
-            
+
             var comparer = new SignatureComparer();
-            bool isInSameAssembly = comparer.Equals(DeclaringType.Module, type.Module);
+            bool isInSameAssembly = comparer.Equals(declaringType.Module, type.Module);
 
             return IsPublic
                    || isInSameAssembly && IsAssembly
                    || comparer.Equals(DeclaringType, type);
             // TODO: check if in the same family of declaring types.
         }
-
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
@@ -395,7 +393,7 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
-        
+
         /// <summary>
         /// Obtains the name of the field definition.
         /// </summary>
@@ -403,7 +401,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual string? GetName() => null;
 
         /// <summary>
         /// Obtains the signature of the field definition.
@@ -412,7 +410,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Signature"/> property.
         /// </remarks>
-        protected virtual FieldSignature GetSignature() => null;
+        protected virtual FieldSignature? GetSignature() => null;
 
         /// <summary>
         /// Obtains the declaring type of the field definition.
@@ -421,7 +419,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="DeclaringType"/> property.
         /// </remarks>
-        protected virtual TypeDefinition GetDeclaringType() => null;
+        protected virtual TypeDefinition? GetDeclaringType() => null;
 
         /// <summary>
         /// Obtains the constant value assigned to the field definition.
@@ -430,7 +428,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Constant"/> property.
         /// </remarks>
-        protected virtual Constant GetConstant() => null;
+        protected virtual Constant? GetConstant() => null;
 
         /// <summary>
         /// Obtains the marshal descriptor value assigned to the field definition.
@@ -439,7 +437,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="MarshalDescriptor"/> property.
         /// </remarks>
-        protected virtual MarshalDescriptor GetMarshalDescriptor() => null;
+        protected virtual MarshalDescriptor? GetMarshalDescriptor() => null;
 
         /// <summary>
         /// Obtains the platform invoke information assigned to the field.
@@ -448,7 +446,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ImplementationMap"/> property.
         /// </remarks>
-        protected virtual ImplementationMap GetImplementationMap() => null;
+        protected virtual ImplementationMap? GetImplementationMap() => null;
 
         /// <summary>
         /// Obtains the initial value of the field.
@@ -457,8 +455,8 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="FieldRva"/> property.
         /// </remarks>
-        protected virtual ISegment GetFieldRva() => null;
-        
+        protected virtual ISegment? GetFieldRva() => null;
+
         /// <summary>
         /// Obtains the offset of the field as defined in the field layout.
         /// </summary>
@@ -467,7 +465,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="FieldOffset"/> property.
         /// </remarks>
         protected virtual int? GetFieldOffset() => null;
-        
+
         /// <inheritdoc />
         public override string ToString() => FullName;
     }

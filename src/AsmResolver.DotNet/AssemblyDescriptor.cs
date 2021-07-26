@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -19,9 +17,9 @@ namespace AsmResolver.DotNet
     {
         private const int PublicKeyTokenLength = 8;
 
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<string> _culture;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<string?> _culture;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes a new empty assembly descriptor.
@@ -30,8 +28,9 @@ namespace AsmResolver.DotNet
         protected AssemblyDescriptor(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
-            _culture = new LazyVariable<string>(GetCulture);
+            _name = new LazyVariable<string?>(GetName);
+            _culture = new LazyVariable<string?>(GetCulture);
+            Version = new Version(0, 0, 0, 0);
         }
 
         /// <summary>
@@ -40,7 +39,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the assembly table.
         /// </remarks>
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -52,7 +51,7 @@ namespace AsmResolver.DotNet
             get
             {
                 var publicKeyToken = GetPublicKeyToken();
-                string publicKeyTokenString = publicKeyToken != null
+                string publicKeyTokenString = publicKeyToken is not null
                     ? string.Join(string.Empty, publicKeyToken.Select(x => x.ToString("x2")))
                     : "null";
 
@@ -170,7 +169,7 @@ namespace AsmResolver.DotNet
         /// <para>If this value is set to <c>null</c>, the default locale will be used</para>
         /// <para>This property corresponds to the Culture column in the assembly table.</para>
         /// </remarks>
-        public string Culture
+        public string? Culture
         {
             get => _culture.Value;
             set => _culture.Value = value;
@@ -188,7 +187,7 @@ namespace AsmResolver.DotNet
         /// When the application is signed with a strong name, obtains the public key token of the assembly
         /// </summary>
         /// <returns>The token.</returns>
-        public abstract byte[] GetPublicKeyToken();
+        public abstract byte[]? GetPublicKeyToken();
 
         /// <summary>
         /// Obtains the name of the assembly definition.
@@ -197,7 +196,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual string? GetName() => null;
 
         /// <summary>
         /// Obtains the locale string of the assembly definition.
@@ -206,7 +205,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="Culture"/> property.
         /// </remarks>
-        protected virtual string GetCulture() => null;
+        protected virtual string? GetCulture() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;
@@ -242,6 +241,6 @@ namespace AsmResolver.DotNet
         /// Resolves the reference to the assembly to an assembly definition.
         /// </summary>
         /// <returns>The assembly definition, or <c>null</c> if the resolution failed.</returns>
-        public abstract AssemblyDefinition Resolve();
+        public abstract AssemblyDefinition? Resolve();
     }
 }

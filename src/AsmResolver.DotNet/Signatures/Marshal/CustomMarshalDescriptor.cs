@@ -17,10 +17,10 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <returns>The descriptor.</returns>
         public new static CustomMarshalDescriptor FromReader(ModuleDefinition parentModule, ref BinaryStreamReader reader)
         {
-            string guid = reader.ReadSerString();
-            string nativeTypeName = reader.ReadSerString();
-            string marshalTypeName = reader.ReadSerString();
-            string cookie = reader.ReadSerString();
+            string? guid = reader.ReadSerString();
+            string? nativeTypeName = reader.ReadSerString();
+            string? marshalTypeName = reader.ReadSerString();
+            string? cookie = reader.ReadSerString();
 
             return new CustomMarshalDescriptor(guid, nativeTypeName,
                 marshalTypeName is null ? null : TypeNameParser.Parse(parentModule, marshalTypeName), cookie);
@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <param name="nativeTypeName"></param>
         /// <param name="marshalType"></param>
         /// <param name="cookie"></param>
-        public CustomMarshalDescriptor(string guid, string nativeTypeName, TypeSignature marshalType, string cookie)
+        public CustomMarshalDescriptor(string? guid, string? nativeTypeName, TypeSignature? marshalType, string? cookie)
         {
             Guid = guid;
             NativeTypeName = nativeTypeName;
@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <remarks>
         /// This field is ignored by the CLR.
         /// </remarks>
-        public string Guid
+        public string? Guid
         {
             get;
             set;
@@ -62,7 +62,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <remarks>
         /// This field is ignored by the CLR.
         /// </remarks>
-        public string NativeTypeName
+        public string? NativeTypeName
         {
             get;
             set;
@@ -71,7 +71,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <summary>
         /// Gets or sets the type used to marshal the value.
         /// </summary>
-        public TypeSignature MarshalType
+        public TypeSignature? MarshalType
         {
             get;
             set;
@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <summary>
         /// Gets or sets an additional value to be passed onto the custom marshaller.
         /// </summary>
-        public string Cookie
+        public string? Cookie
         {
             get;
             set;

@@ -63,12 +63,12 @@ namespace AsmResolver.PE
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ImportDirectory);
             return dataDirectory.IsPresentInPE
-                ? (IList<IImportedModule>) new SerializedImportedModuleList(ReaderContext, dataDirectory)
+                ? new SerializedImportedModuleList(ReaderContext, dataDirectory)
                 : new List<IImportedModule>();
         }
 
         /// <inheritdoc />
-        protected override IExportDirectory GetExports()
+        protected override IExportDirectory? GetExports()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ExportDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
@@ -78,7 +78,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IResourceDirectory GetResources()
+        protected override IResourceDirectory? GetResources()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ResourceDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
@@ -88,7 +88,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IExceptionDirectory GetExceptions()
+        protected override IExceptionDirectory? GetExceptions()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ExceptionDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
@@ -111,7 +111,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IDotNetDirectory GetDotNetDirectory()
+        protected override IDotNetDirectory? GetDotNetDirectory()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ClrDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))

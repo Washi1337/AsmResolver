@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -11,15 +9,15 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to a type defined in a .NET assembly.
     /// </summary>
-    public class TypeReference : 
+    public class TypeReference :
         MetadataMember,
         ITypeDefOrRef,
         IResolutionScope
     {
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<string> _namespace;
-        private readonly LazyVariable<IResolutionScope> _scope;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<string?> _namespace;
+        private readonly LazyVariable<IResolutionScope?> _scope;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes a new empty type reference.
@@ -28,9 +26,9 @@ namespace AsmResolver.DotNet
         protected TypeReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
-            _namespace = new LazyVariable<string>(GetNamespace);
-            _scope = new LazyVariable<IResolutionScope>(GetScope);
+            _name = new LazyVariable<string?>(GetName);
+            _namespace = new LazyVariable<string?>(GetNamespace);
+            _scope = new LazyVariable<IResolutionScope?>(GetScope);
         }
 
         /// <summary>
@@ -39,7 +37,7 @@ namespace AsmResolver.DotNet
         /// <param name="scope">The scope that defines the type.</param>
         /// <param name="ns">The namespace the type resides in.</param>
         /// <param name="name">The name of the type.</param>
-        public TypeReference(IResolutionScope scope, string ns, string name)
+        public TypeReference(IResolutionScope? scope, string? ns, string? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
             _scope.Value = scope;
@@ -54,7 +52,7 @@ namespace AsmResolver.DotNet
         /// <param name="scope">The scope that defines the type.</param>
         /// <param name="ns">The namespace the type resides in.</param>
         /// <param name="name">The name of the type.</param>
-        public TypeReference(ModuleDefinition module, IResolutionScope scope, string ns, string name)
+        public TypeReference(ModuleDefinition? module, IResolutionScope? scope, string? ns, string? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
             _scope.Value = scope;
@@ -66,7 +64,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the name of the type that this object is referencing.
         /// </summary>
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -75,7 +73,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the namespace the type is residing in.
         /// </summary>
-        public string Namespace
+        public string? Namespace
         {
             get => _namespace.Value;
             set => _namespace.Value = value;
@@ -85,28 +83,28 @@ namespace AsmResolver.DotNet
         public string FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
-        public IResolutionScope Scope
+        public IResolutionScope? Scope
         {
             get => _scope.Value;
             set => _scope.Value = value;
         }
 
         /// <inheritdoc />
-        public bool IsValueType => Resolve()?.IsValueType ?? false; 
+        public bool IsValueType => Resolve()?.IsValueType ?? false;
 
         /// <inheritdoc />
-        public ModuleDefinition Module
+        public ModuleDefinition? Module
         {
             get;
             protected set;
         }
 
-        AssemblyDescriptor IResolutionScope.GetAssembly() => Scope?.GetAssembly();
+        AssemblyDescriptor? IResolutionScope.GetAssembly() => Scope?.GetAssembly();
 
         /// <inheritdoc />
-        public ITypeDefOrRef DeclaringType => Scope as ITypeDefOrRef;
+        public ITypeDefOrRef? DeclaringType => Scope as ITypeDefOrRef;
 
-        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
+        ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
@@ -124,14 +122,14 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public TypeSignature ToTypeSignature()
         {
-            return (TypeSignature) Module?.CorLibTypeFactory.FromType(this)
+            return Module?.CorLibTypeFactory.FromType(this) as TypeSignature
                    ?? new TypeDefOrRefSignature(this, IsValueType);
         }
 
         /// <inheritdoc />
-        public TypeDefinition Resolve() => Module?.MetadataResolver?.ResolveType(this);
-        
-        IMemberDefinition IMemberDescriptor.Resolve() => Resolve();
+        public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
+
+        IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 
         /// <summary>
         /// Obtains the name of the type reference.
@@ -140,7 +138,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual string? GetName() => null;
 
         /// <summary>
         /// Obtains the namespace of the type reference.
@@ -149,7 +147,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Namespace"/> property.
         /// </remarks>
-        protected virtual string GetNamespace() => null;
+        protected virtual string? GetNamespace() => null;
 
         /// <summary>
         /// Obtains the scope of the type reference.
@@ -158,7 +156,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Scope"/> property.
         /// </remarks>
-        protected virtual IResolutionScope GetScope() => null;
+        protected virtual IResolutionScope? GetScope() => null;
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.

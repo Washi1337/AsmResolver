@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Code.Cil
     public partial class CilInstructionCollection : IList<CilInstruction>
     {
         private readonly List<CilInstruction> _items = new();
-        private ICilLabel _endLabel;
+        private ICilLabel? _endLabel;
 
         /// <summary>
         /// Creates a new collection of CIL instructions stored in a method body.
@@ -379,8 +379,11 @@ namespace AsmResolver.DotNet.Code.Cil
 
         private bool TryOptimizeBranch(CilInstruction instruction)
         {
+            if (instruction.Operand is not ICilLabel targetLabel)
+                throw new ArgumentException("Branch target is null.");
+
             int nextOffset = instruction.Offset + instruction.Size;
-            int targetOffset = ((ICilLabel) instruction.Operand).Offset;
+            int targetOffset = targetLabel.Offset;
             int delta = targetOffset - nextOffset;
             bool isShortJump = delta >= sbyte.MinValue && delta <= sbyte.MaxValue;
 
@@ -457,7 +460,7 @@ namespace AsmResolver.DotNet.Code.Cil
             var variable = instruction.GetLocalVariable(Owner.LocalVariables);
 
             CilOpCode code = instruction.OpCode;
-            object operand = instruction.Operand;
+            object? operand = instruction.Operand;
 
             if (instruction.IsLdloc())
             {
@@ -499,7 +502,7 @@ namespace AsmResolver.DotNet.Code.Cil
             var parameter = instruction.GetParameter(Owner.Owner.Parameters);
 
             CilOpCode code = instruction.OpCode;
-            object operand = instruction.Operand;
+            object? operand = instruction.Operand;
 
             if (instruction.IsLdarg())
             {
@@ -553,7 +556,7 @@ namespace AsmResolver.DotNet.Code.Cil
             public void Reset() => ((IEnumerator) _enumerator).Reset();
 
             /// <inheritdoc />
-            public CilInstruction Current => _enumerator.Current;
+            public CilInstruction Current => _enumerator.Current!;
 
             /// <inheritdoc />
             object IEnumerator.Current => Current;
@@ -584,7 +587,7 @@ namespace AsmResolver.DotNet.Code.Cil
             }
 
             /// <inheritdoc />
-            public bool Equals(ICilLabel other) => other != null && Offset == other.Offset;
+            public bool Equals(ICilLabel? other) => other != null && Offset == other.Offset;
 
             public override string ToString() => $"IL_{Offset:X4}";
         }

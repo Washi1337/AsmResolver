@@ -19,7 +19,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// When this PE image was read from the disk, gets the file path to the PE image.
         /// </summary>
-        string FilePath
+        string? FilePath
         {
             get;
         }
@@ -124,7 +124,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets or sets the exports directory in the PE, if available.
         /// </summary>
-        IExportDirectory Exports
+        IExportDirectory? Exports
         {
             get;
             set;
@@ -133,7 +133,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets or sets the root resource directory in the PE, if available.
         /// </summary>
-        IResourceDirectory Resources
+        IResourceDirectory? Resources
         {
             get;
             set;
@@ -142,7 +142,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets or sets the exceptions directory in the PE, if available.
         /// </summary>
-        IExceptionDirectory Exceptions
+        IExceptionDirectory? Exceptions
         {
             get;
             set;
@@ -159,7 +159,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets or sets the data directory containing the CLR 2.0 header of a .NET binary (if available).
         /// </summary>
-        IDotNetDirectory DotNetDirectory
+        IDotNetDirectory? DotNetDirectory
         {
             get;
             set;

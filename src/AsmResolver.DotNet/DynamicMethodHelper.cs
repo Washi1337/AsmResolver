@@ -8,7 +8,6 @@ using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
 {
@@ -20,22 +19,25 @@ namespace AsmResolver.DotNet
                 throw new ArgumentException("Method body should reference a serialized module.");
 
             var reader = ByteArrayDataSource.CreateReader(localSig);
-            var localsSignature = (LocalVariablesSignature) CallingConventionSignature.FromReader(
+            if (CallingConventionSignature.FromReader(
                 new BlobReadContext(module.ReaderContext),
-                ref reader);
+                ref reader) is not LocalVariablesSignature localsSignature)
+            {
+                throw new ArgumentException("Invalid local variables signature.");
+            }
 
-            for (int i = 0; i < localsSignature?.VariableTypes.Count; i++)
+            for (int i = 0; i < localsSignature.VariableTypes.Count; i++)
                 methodBody.LocalVariables.Add(new CilLocalVariable(localsSignature.VariableTypes[i]));
         }
 
         public static void ReadReflectionExceptionHandlers(CilMethodBody methodBody,
-            IList<object> ehInfos, byte[] ehHeader, ReferenceImporter importer)
+            IList<object>? ehInfos, byte[] ehHeader, ReferenceImporter importer)
         {
             //Sample needed!
-            if (ehHeader != null && ehHeader.Length > 4)
+            if (ehHeader is {Length: > 4})
                 throw new NotImplementedException("Exception handlers from ehHeader not supported yet.");
 
-            if (ehInfos != null && ehInfos.Count > 0)
+            if (ehInfos is {Count: > 0})
             {
                 foreach (var ehInfo in ehInfos)
                     InterpretEHInfo(methodBody, importer, ehInfo);
@@ -56,10 +58,10 @@ namespace AsmResolver.DotNet
 
                 int tryStart = FieldReader.ReadField<int>(ehInfo, "m_startAddr");
                 int tryEnd = FieldReader.ReadField<int>(ehInfo, "m_endAddr");
-                int handlerStart = FieldReader.ReadField<int[]>(ehInfo, "m_catchAddr")[i];
-                int handlerEnd = FieldReader.ReadField<int[]>(ehInfo, "m_catchEndAddr")[i];
-                var exceptionType = FieldReader.ReadField<Type[]>(ehInfo, "m_catchClass")[i];
-                var handlerType = (CilExceptionHandlerType) FieldReader.ReadField<int[]>(ehInfo, "m_type")[i];
+                int handlerStart = FieldReader.ReadField<int[]>(ehInfo, "m_catchAddr")![i];
+                int handlerEnd = FieldReader.ReadField<int[]>(ehInfo, "m_catchEndAddr")![i];
+                var exceptionType = FieldReader.ReadField<Type[]>(ehInfo, "m_catchClass")![i];
+                var handlerType = (CilExceptionHandlerType) FieldReader.ReadField<int[]>(ehInfo, "m_type")![i];
 
                 var endTryLabel = instructions.GetByOffset(tryEnd)?.CreateLabel() ?? new CilOffsetLabel(tryEnd);
 
@@ -90,7 +92,7 @@ namespace AsmResolver.DotNet
 
             //We use GetType().FullName just to avoid the System.Reflection.Emit.LightWeight Dll
             if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod+RTDynamicMethod")
-                dynamicMethodObj = FieldReader.ReadField<object>(dynamicMethodObj, "m_owner");
+                dynamicMethodObj = FieldReader.ReadField<object>(dynamicMethodObj, "m_owner")!;
 
             if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod")
             {

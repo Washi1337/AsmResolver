@@ -27,13 +27,16 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <param name="maxStack">The maximum amount of values that can be pushed onto the stack.</param>
         /// <param name="localVarSigToken">The metadata token that defines the local variables for the method body.</param>
         /// <param name="code">The raw code of the method.</param>
-        public CilRawFatMethodBody(CilMethodBodyAttributes attributes, ushort maxStack,
-            MetadataToken localVarSigToken, IReadableSegment code)
+        public CilRawFatMethodBody(
+            CilMethodBodyAttributes attributes,
+            ushort maxStack,
+            MetadataToken localVarSigToken,
+            IReadableSegment code)
+            : base(code)
         {
             Attributes = attributes;
             MaxStack = maxStack;
             LocalVarSigToken = localVarSigToken;
-            Code = code ?? throw new ArgumentNullException(nameof(code));
         }
 
         /// <inheritdoc />
@@ -113,7 +116,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The raw method body.</returns>
         /// <exception cref="FormatException">Occurs when the method header indicates an method body that is not in the
         /// fat format.</exception>
-        public new static CilRawFatMethodBody FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
+        public new static CilRawFatMethodBody? FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
         {
             ulong fileOffset = reader.Offset;
             uint rva = reader.Rva;

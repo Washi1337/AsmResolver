@@ -14,7 +14,7 @@ namespace AsmResolver
         }
 
         /// <summary>
-        /// Gets the virtual address relative to the beginning of the section that the segment is located in. 
+        /// Gets the virtual address relative to the beginning of the section that the segment is located in.
         /// </summary>
         uint Rva
         {
@@ -32,7 +32,7 @@ namespace AsmResolver
         /// <summary>
         /// Assigns a new file and virtual offset to the segment and all its sub-components.
         /// </summary>
-        /// <param name="offseteOffset">The new file offset.</param>
+        /// <param name="newOffset">The new file offset.</param>
         /// <param name="newRva">The new virtual offset.</param>
         void UpdateOffsets(ulong newOffset, uint newRva);
     }

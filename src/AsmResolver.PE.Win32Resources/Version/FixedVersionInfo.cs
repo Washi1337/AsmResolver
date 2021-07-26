@@ -61,7 +61,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         {
             get;
             set;
-        } = new System.Version();
+        } = new();
 
         /// <summary>
         /// Gets or sets the product version number.
@@ -70,7 +70,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         {
             get;
             set;
-        } = new System.Version();
+        } = new();
 
         /// <summary>
         /// Gets or sets the bitmask that specifies the valid bits in <see cref="FileFlags"/>.

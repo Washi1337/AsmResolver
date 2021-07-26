@@ -2,11 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Code.Cil;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -35,7 +32,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private readonly TypeReference _eventHandlerTypeRef;
         private readonly TypeSignature _eventHandlerTypeSig;
 
-        private readonly IDictionary<TableIndex, IList<uint>> _freeRids= new Dictionary<TableIndex, IList<uint>>
+        private readonly Dictionary<TableIndex, IList<uint>> _freeRids = new()
         {
             [TableIndex.TypeDef] = new List<uint>(),
             [TableIndex.Field] = new List<uint>(),
@@ -43,6 +40,16 @@ namespace AsmResolver.DotNet.Builder.Discovery
             [TableIndex.Param] = new List<uint>(),
             [TableIndex.Property] = new List<uint>(),
             [TableIndex.Event] = new List<uint>(),
+        };
+
+        private readonly Dictionary<TableIndex, IList<IMetadataMember>> _floatingMembers = new()
+        {
+            [TableIndex.TypeDef] = new List<IMetadataMember>(),
+            [TableIndex.Field] = new List<IMetadataMember>(),
+            [TableIndex.Method] = new List<IMetadataMember>(),
+            [TableIndex.Param] = new List<IMetadataMember>(),
+            [TableIndex.Property] = new List<IMetadataMember>(),
+            [TableIndex.Event] = new List<IMetadataMember>(),
         };
 
         private MemberDiscoverer(ModuleDefinition module, MemberDiscoveryFlags flags)
@@ -72,8 +79,12 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // 1) Collect all members that were present in the original metadata tables, and leave null slots
             //    in the lists when the member was removed from the module, to preserve RIDs of existing members.
             //
-            // 2) Do a normal member tree traversal, collect new members, and try to place them in the available
-            //    null slots. If that is not possible anymore, just append to the end of the list.
+            // 2) Do a normal  member tree traversal, collect new members, and try to place them in the available
+            //    null slots. If that is not possible anymore, mark them as "floating" because there might still be
+            //    newly added members that were actually assigned a new token.
+            //
+            // 3) After we are sure that every fixed member was assigned a slot, go over all floating members and
+            //    place them either in any of the free slots or append them to the end of the list.
             //
             // 3) Any remaining null slots need to be stuffed with placeholder member definitions. These will be
             //    added to a dummy namespace for placeholder types, and added to a dummy type definition for all
@@ -84,7 +95,8 @@ namespace AsmResolver.DotNet.Builder.Discovery
             if (flags != MemberDiscoveryFlags.None)
                 context.CollectExistingMembers();
 
-            context.CollectNewlyAddedMembers();
+            context.CollectNewlyAddedFixedMembers();
+            context.AddFloatingMembers();
 
             if (flags != MemberDiscoveryFlags.None)
                 context.StuffFreeMemberSlots();
@@ -92,17 +104,17 @@ namespace AsmResolver.DotNet.Builder.Discovery
             return context._result;
         }
 
-        private IList<TMember> GetResultList<TMember>(TableIndex tableIndex)
+        private IList<TMember?> GetResultList<TMember>(TableIndex tableIndex)
             where TMember : IMetadataMember
         {
             return tableIndex switch
             {
-                TableIndex.TypeDef => (IList<TMember>) _result.Types,
-                TableIndex.Field => (IList<TMember>) _result.Fields,
-                TableIndex.Method => (IList<TMember>) _result.Methods,
-                TableIndex.Param => (IList<TMember>) _result.Parameters,
-                TableIndex.Property => (IList<TMember>) _result.Properties,
-                TableIndex.Event => (IList<TMember>) _result.Events,
+                TableIndex.TypeDef => (IList<TMember?>) _result.Types,
+                TableIndex.Field => (IList<TMember?>) _result.Fields,
+                TableIndex.Method => (IList<TMember?>) _result.Methods,
+                TableIndex.Param => (IList<TMember?>) _result.Parameters,
+                TableIndex.Property => (IList<TMember?>) _result.Properties,
+                TableIndex.Event => (IList<TMember?>) _result.Events,
                 _ => throw new ArgumentOutOfRangeException(nameof(tableIndex))
             };
         }
@@ -127,8 +139,8 @@ namespace AsmResolver.DotNet.Builder.Discovery
             where TMember: IMetadataMember, IModuleProvider
         {
             // Get original number of elements in the table.
-            int count = _module.DotNetDirectory.Metadata
-                .GetStream<TablesStream>()
+            int count = _module.DotNetDirectory!.Metadata
+                !.GetStream<TablesStream>()
                 .GetTable(tableIndex)
                 .Count;
 
@@ -154,40 +166,58 @@ namespace AsmResolver.DotNet.Builder.Discovery
             }
         }
 
-        private void CollectNewlyAddedMembers()
+        private void CollectNewlyAddedFixedMembers()
         {
             // Do a normal traversal of the member tree, and try to place newly added members in either the
             // available slots, or at the end of the member lists.
 
             foreach (var type in _module.GetAllTypes())
             {
-                InsertOrAppendIfNew(type);
+                InsertOrAppendIfNew(type, true);
 
                 // Try find new fields.
                 for (int i = 0; i < type.Fields.Count; i++)
-                    InsertOrAppendIfNew(type.Fields[i]);
+                    InsertOrAppendIfNew(type.Fields[i], true);
 
                 // Try find new methods.
                 for (int i = 0; i < type.Methods.Count; i++)
                 {
                     var method = type.Methods[i];
-                    InsertOrAppendIfNew(method);
+                    InsertOrAppendIfNew(method, true);
 
                     foreach (var parameter in method.ParameterDefinitions)
-                        InsertOrAppendIfNew(parameter);
+                        InsertOrAppendIfNew(parameter, true);
                 }
 
                 // Try find new properties.
                 for (int i = 0; i < type.Properties.Count; i++)
-                    InsertOrAppendIfNew(type.Properties[i]);
+                    InsertOrAppendIfNew(type.Properties[i], true);
 
                 // Try find new events.
                 for (int i = 0; i < type.Events.Count; i++)
-                    InsertOrAppendIfNew(type.Events[i]);
+                    InsertOrAppendIfNew(type.Events[i], true);
             }
         }
 
-        private void InsertOrAppendIfNew<TMember>(TMember member)
+        private void AddFloatingMembers()
+        {
+            // Yuck, but works.
+
+            foreach (var member in _floatingMembers[TableIndex.TypeDef])
+                InsertOrAppendIfNew((TypeDefinition) member, false);
+            foreach (var member in _floatingMembers[TableIndex.Field])
+                InsertOrAppendIfNew((FieldDefinition) member, false);
+            foreach (var member in _floatingMembers[TableIndex.Method])
+                InsertOrAppendIfNew((MethodDefinition) member, false);
+            foreach (var member in _floatingMembers[TableIndex.Param])
+                InsertOrAppendIfNew((ParameterDefinition) member, false);
+            foreach (var member in _floatingMembers[TableIndex.Property])
+                InsertOrAppendIfNew((PropertyDefinition) member, false);
+            foreach (var member in _floatingMembers[TableIndex.Event])
+                InsertOrAppendIfNew((EventDefinition) member, false);
+        }
+
+        private void InsertOrAppendIfNew<TMember>(TMember member, bool queueIfNoSlotsAvailable)
             where TMember : class, IMetadataMember
         {
             var memberType = member.MetadataToken.Table;
@@ -236,6 +266,10 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 freeRids.RemoveAt(0);
                 memberList[(int) (nextFreeRid - 1)] = member;
             }
+            else if (queueIfNoSlotsAvailable)
+            {
+                _floatingMembers[memberType].Add(member);
+            }
             else
             {
                 // Fallback method: Just append to the end of the table.
@@ -243,7 +277,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             }
         }
 
-        private static bool IsNewMember<TMember>(IList<TMember> existingMembers, TMember member)
+        private static bool IsNewMember<TMember>(IList<TMember?> existingMembers, TMember member)
             where TMember : class, IMetadataMember
         {
             return member.MetadataToken.Rid == 0 // Member has not been assigned a RID.
@@ -285,7 +319,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             StuffFreeMemberSlots(placeHolderType, TableIndex.Param, AddPlaceHolderParameter);
         }
 
-        private void StuffFreeMemberSlots<TMember>(TypeDefinition placeHolderType, TableIndex tableIndex,
+        private void StuffFreeMemberSlots<TMember>(TypeDefinition? placeHolderType, TableIndex tableIndex,
             Func<TypeDefinition, MetadataToken, TMember> createPlaceHolder)
             where TMember : IMetadataMember
         {
@@ -299,7 +333,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 uint rid = freeRids[0];
                 freeRids.RemoveAt(0);
                 var token = new MetadataToken(tableIndex, rid);
-                members[(int) (rid - 1)] = createPlaceHolder(placeHolderType, token);
+                members[(int) (rid - 1)] = createPlaceHolder(placeHolderType!, token);
             }
         }
 
@@ -340,7 +374,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // contain our dummy parameters in.
 
             if (_allPlaceHolderMethods.Count == 0)
-                InsertOrAppendIfNew(AddPlaceHolderMethod(placeHolderType, token));
+                InsertOrAppendIfNew(AddPlaceHolderMethod(placeHolderType, token), false);
 
             // Get current method to add the parameter def to.
             int methodIndex = _placeHolderParameterCounter % _allPlaceHolderMethods.Count;
@@ -351,12 +385,12 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // If the parameter index is above 0, then we need to add it to the method signature for a
             // valid .NET module.
             if (parameterSequence > 0)
-                method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
+                method.Signature!.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
 
 #if DEBUG
-            string parameterName = method.ParameterDefinitions.Count == 0 ? null : $"placeholder{method.ParameterDefinitions.Count}";
+            string? parameterName = method.ParameterDefinitions.Count == 0 ? null : $"placeholder{method.ParameterDefinitions.Count}";
 #else
-            const string parameterName = null;
+            const string? parameterName = null;
 #endif
 
             // Create and add the placeholder parameter.
@@ -385,7 +419,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             placeHolderType.Methods.Add(getMethod);
             placeHolderType.Properties.Add(property);
             property.Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
-            InsertOrAppendIfNew(getMethod);
+            InsertOrAppendIfNew(getMethod, false);
 
             return property;
         }
@@ -420,8 +454,8 @@ namespace AsmResolver.DotNet.Builder.Discovery
             @event.Semantics.Add(new MethodSemantics(addMethod, MethodSemanticsAttributes.AddOn));
             @event.Semantics.Add(new MethodSemantics(removeMethod, MethodSemanticsAttributes.RemoveOn));
 
-            InsertOrAppendIfNew(addMethod);
-            InsertOrAppendIfNew(removeMethod);
+            InsertOrAppendIfNew(addMethod, false);
+            InsertOrAppendIfNew(removeMethod, false);
 
             return @event;
         }

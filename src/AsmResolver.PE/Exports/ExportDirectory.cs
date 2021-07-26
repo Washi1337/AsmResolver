@@ -10,15 +10,15 @@ namespace AsmResolver.PE.Exports
     /// </summary>
     public class ExportDirectory : IExportDirectory
     {
-        private readonly LazyVariable<string> _name;
-        private IList<ExportedSymbol> _exports;
+        private readonly LazyVariable<string?> _name;
+        private IList<ExportedSymbol>? _exports;
 
         /// <summary>
         /// Initializes a new empty symbol export directory.
         /// </summary>
         protected ExportDirectory()
         {
-            _name = new LazyVariable<string>(GetName);
+            _name = new LazyVariable<string?>(GetName);
         }
 
         /// <summary>
@@ -26,9 +26,8 @@ namespace AsmResolver.PE.Exports
         /// </summary>
         /// <param name="name">The name of the library exporting the symbols.</param>
         public ExportDirectory(string name)
-            : this()
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            _name = new LazyVariable<string?>(name ?? throw new ArgumentNullException(nameof(name)));
         }
 
         /// <inheritdoc />
@@ -36,7 +35,7 @@ namespace AsmResolver.PE.Exports
         {
             get;
             set;
-        } = 0;
+        }
 
         /// <inheritdoc />
         public uint TimeDateStamp
@@ -60,7 +59,7 @@ namespace AsmResolver.PE.Exports
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get => _name.Value;
             set => _name.Value = value;
@@ -91,7 +90,7 @@ namespace AsmResolver.PE.Exports
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual string? GetName() => null;
 
         /// <summary>
         /// Obtains the list of exported symbols defined by the export directory.

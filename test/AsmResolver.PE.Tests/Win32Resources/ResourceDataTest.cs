@@ -11,7 +11,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             var data = new ResourceData(1, new DataSegment(new byte[0]));
             Assert.Equal(1u, data.Id);
         }
-        
+
         [Fact]
         public void ResourceDataConstructorShouldSetContents()
         {
@@ -19,9 +19,9 @@ namespace AsmResolver.PE.Tests.Win32Resources
             {
                 1, 2, 3, 4
             };
-            
+
             var data = new ResourceData(1, new DataSegment(rawData));
-            var readableContents = (IReadableSegment) data.Contents;
+            var readableContents = Assert.IsAssignableFrom<IReadableSegment>(data.Contents);
             Assert.Equal(rawData, readableContents.CreateReader().ReadToEnd());
         }
     }

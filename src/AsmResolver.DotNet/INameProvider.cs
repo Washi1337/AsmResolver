@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the name of the object.
         /// </summary>
-        string Name
+        string? Name
         {
             get;
         }

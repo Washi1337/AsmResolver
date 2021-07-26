@@ -6,6 +6,7 @@
         <IsPackable>false</IsPackable>
 
         <LangVersion>latest</LangVersion>
+        <Nullable>disable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>

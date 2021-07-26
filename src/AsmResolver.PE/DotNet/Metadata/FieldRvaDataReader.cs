@@ -12,21 +12,21 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class FieldRvaDataReader : IFieldRvaDataReader
     {
         /// <inheritdoc />
-        public ISegment ResolveFieldData(IErrorListener listener, IMetadata metadata, in FieldRvaRow fieldRvaRow)
+        public ISegment? ResolveFieldData(IErrorListener listener, IMetadata metadata, in FieldRvaRow fieldRvaRow)
         {
-            if (fieldRvaRow.Data is null)
-                return null;
-
             if (fieldRvaRow.Data.IsBounded)
                 return fieldRvaRow.Data.GetSegment();
 
             if (fieldRvaRow.Data.CanRead)
             {
-                var table = metadata
-                    .GetStream<TablesStream>()
-                    .GetTable<FieldDefinitionRow>(TableIndex.Field);
+                 if (!metadata.TryGetStream<TablesStream>(out var tablesStream))
+                 {
+                     listener.BadImage("Metadata does not contain a tables stream.");
+                     return null;
+                 }
 
-                if (fieldRvaRow.Field > table.Count)
+                 var table = tablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
+                 if (fieldRvaRow.Field > table.Count)
                 {
                     listener.BadImage("FieldRva row has an invalid Field column value.");
                     return null;
@@ -45,8 +45,11 @@ namespace AsmResolver.PE.DotNet.Metadata
 
         private int DetermineFieldSize(IMetadata metadata, in FieldDefinitionRow field)
         {
-            if (!metadata.GetStream<BlobStream>().TryGetBlobReaderByIndex(field.Signature, out var reader))
+            if (!metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(field.Signature, out var reader))
+            {
                 return 0;
+            }
 
             reader.ReadByte(); // calling convention attributes.
             var elementType = (ElementType) reader.ReadByte();
@@ -72,10 +75,11 @@ namespace AsmResolver.PE.DotNet.Metadata
 
         private int GetCustomTypeSize(IMetadata metadata, ref BinaryStreamReader reader)
         {
-            if (!reader.TryReadCompressedUInt32(out uint codedIndex))
+            if (!reader.TryReadCompressedUInt32(out uint codedIndex)
+                || !metadata.TryGetStream<TablesStream>(out var tablesStream))
+            {
                 return 0;
-
-            var tablesStream = metadata.GetStream<TablesStream>();
+            }
 
             var typeToken = tablesStream
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef)

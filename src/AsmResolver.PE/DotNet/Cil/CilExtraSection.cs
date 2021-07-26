@@ -12,10 +12,9 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </remarks>
     public class CilExtraSection : SegmentBase
     {
-        private byte[] _data;
-
         private CilExtraSection()
         {
+            Data = Array.Empty<byte>();
         }
 
         /// <summary>
@@ -91,8 +90,8 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         public byte[] Data
         {
-            get => _data;
-            set => _data = value ?? throw new ArgumentNullException(nameof(value));
+            get;
+            set;
         }
 
         /// <summary>

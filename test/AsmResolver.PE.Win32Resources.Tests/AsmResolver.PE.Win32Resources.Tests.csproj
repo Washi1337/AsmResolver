@@ -8,6 +8,8 @@
         <RootNamespace>AsmResolver.PE.Win32Resources.Tests</RootNamespace>
 
         <LangVersion>8</LangVersion>
+
+        <Nullable>warnings</Nullable>
     </PropertyGroup>
 
     <ItemGroup>

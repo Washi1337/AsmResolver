@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
 using AsmResolver.IO;
@@ -47,7 +46,7 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         public override void Write(IBinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
 
         /// <inheritdoc />
-        public override string GetStringByIndex(uint index)
+        public override string? GetStringByIndex(uint index)
         {
             if (!_cachedStrings.TryGetValue(index, out string value) && index < _reader.Length)
             {

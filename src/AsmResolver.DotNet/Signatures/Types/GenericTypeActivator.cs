@@ -11,7 +11,6 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </remarks>
     public class GenericTypeActivator : ITypeSignatureVisitor<GenericContext, TypeSignature>
     {
-
         /// <summary>
         /// Gets the default instance of the <see cref="GenericTypeActivator"/> class
         /// </summary>
@@ -43,7 +42,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <returns>The activated signature.</returns>
         public PropertySignature InstantiatePropertySignature(PropertySignature signature, GenericContext context)
         {
-            var result = new PropertySignature(signature.Attributes);
+            var result = new PropertySignature(signature.Attributes, signature.ReturnType, Enumerable.Empty<TypeSignature>());
             InstantiateMethodSignatureBase(signature, result, context);
             return result;
         }
@@ -57,7 +56,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <returns>The activated signature.</returns>
         public MethodSignature InstantiateMethodSignature(MethodSignature signature, GenericContext context)
         {
-            var result = new MethodSignature(signature.Attributes);
+            var result = new MethodSignature(signature.Attributes, signature.ReturnType, Enumerable.Empty<TypeSignature>());
             InstantiateMethodSignatureBase(signature, result, context);
             result.GenericParameterCount = signature.GenericParameterCount;
 

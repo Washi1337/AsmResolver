@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -19,8 +20,8 @@ namespace AsmResolver.PE.File
         /// </summary>
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
 
-        private readonly LazyVariable<ISegment> _extraSectionData;
-        private IList<PESection> _sections;
+        private readonly LazyVariable<ISegment?> _extraSectionData;
+        private IList<PESection>? _sections;
 
         /// <summary>
         /// Creates a new empty portable executable file.
@@ -41,12 +42,12 @@ namespace AsmResolver.PE.File
             DosHeader = dosHeader ?? throw new ArgumentNullException(nameof(dosHeader));
             FileHeader = fileHeader ?? throw new ArgumentNullException(nameof(fileHeader));
             OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
-            _extraSectionData = new LazyVariable<ISegment>(GetExtraSectionData);
+            _extraSectionData = new LazyVariable<ISegment?>(GetExtraSectionData);
             MappingMode = PEMappingMode.Unmapped;
         }
 
         /// <inheritdoc />
-        public string FilePath
+        public string? FilePath
         {
             get;
             protected set;
@@ -94,7 +95,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets or sets the padding data in between the last section header and the first section.
         /// </summary>
-        public ISegment ExtraSectionData
+        public ISegment? ExtraSectionData
         {
             get => _extraSectionData.Value;
             set => _extraSectionData.Value = value;
@@ -196,7 +197,7 @@ namespace AsmResolver.PE.File
         /// <param name="fileOffset">The file offset.</param>
         /// <param name="section">The section that was found.</param>
         /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
-        public bool TryGetSectionContainingOffset(ulong fileOffset, out PESection section)
+        public bool TryGetSectionContainingOffset(ulong fileOffset, [NotNullWhen(true)] out PESection? section)
         {
             section = Sections.FirstOrDefault(s => s.ContainsFileOffset(fileOffset));
             return section != null;
@@ -211,7 +212,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public bool TryGetSectionContainingRva(uint rva, out PESection section)
+        public bool TryGetSectionContainingRva(uint rva,  [NotNullWhen(true)] out PESection? section)
         {
             section = Sections.FirstOrDefault(s => s.ContainsRva(rva));
             return section != null;
@@ -501,6 +502,6 @@ namespace AsmResolver.PE.File
         /// <remarks>
         /// This method is called upon the initialization of the <see cref="ExtraSectionData"/> property.
         /// </remarks>
-        protected virtual ISegment GetExtraSectionData() => null;
+        protected virtual ISegment? GetExtraSectionData() => null;
     }
 }

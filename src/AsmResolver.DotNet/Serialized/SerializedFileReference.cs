@@ -6,10 +6,10 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Serialized
-{   
+{
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="FileReference"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedFileReference : FileReference
     {
@@ -35,23 +35,23 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName()
+        protected override string? GetName()
         {
-            return _context.Image.DotNetDirectory.Metadata
-                .GetStream<StringsStream>()
-                .GetStringByIndex(_row.Name);
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
         }
 
         /// <inheritdoc />
-        protected override byte[] GetHashValue()
+        protected override byte[]? GetHashValue()
         {
-            return _context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .GetBlobByIndex(_row.HashValue);
+            return _context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                ? blobStream.GetBlobByIndex(_row.HashValue)
+                : null;
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

@@ -109,7 +109,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             reader.Align(4);
 
             // Read value.
-            var data = new byte[header.ValueLength * sizeof(char)];
+            byte[] data = new byte[header.ValueLength * sizeof(char)];
             int count = reader.ReadBytes(data, 0, data.Length);
 
             // Exclude zero terminator.
@@ -166,13 +166,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public string this[string key]
         {
             get => _entries[key];
-            set
-            {
-                if (value is null)
-                    _entries.Remove(key);
-                else
-                    _entries[key] = value;
-            }
+            set => _entries[key] = value;
         }
 
         /// <summary>
@@ -232,12 +226,11 @@ namespace AsmResolver.PE.Win32Resources.Version
 
         private static void WriteEntry(IBinaryStreamWriter writer, KeyValuePair<string, string> entry)
         {
-            var header = new VersionTableEntryHeader
+            var header = new VersionTableEntryHeader(entry.Key)
             {
                 Length = (ushort) (VersionTableEntryHeader.GetHeaderSize(entry.Key).Align(4)
                                    + CalculateEntryValueSize(entry.Value)),
                 ValueLength = (ushort) (entry.Value.Length + 1),
-                Key = entry.Key,
                 Type = VersionTableValueType.String
             };
             header.Write(writer);

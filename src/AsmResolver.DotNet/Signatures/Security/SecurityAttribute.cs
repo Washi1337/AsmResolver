@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using AsmResolver.DotNet.Signatures.Types;
@@ -20,10 +19,14 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <returns>The security attribute.</returns>
         public static SecurityAttribute FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
-            var type = TypeNameParser.Parse(context.ReaderContext.ParentModule, reader.ReadSerString());
+            string? typeName = reader.ReadSerString();
+            var type = string.IsNullOrEmpty(typeName)
+                ? new TypeDefOrRefSignature(InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidFieldOrProptype))
+                : TypeNameParser.Parse(context.ReaderContext.ParentModule, typeName!);
+
             var result = new SecurityAttribute(type);
 
-            if (!reader.TryReadCompressedUInt32(out uint size))
+            if (!reader.TryReadCompressedUInt32(out uint _))
             {
                 context.ReaderContext.BadImage("Invalid size in security attribute.");
                 return result;
@@ -77,17 +80,7 @@ namespace AsmResolver.DotNet.Signatures.Security
         {
             var writer = context.Writer;
 
-            string attributeTypeString;
-            if (AttributeType is null)
-            {
-                context.ErrorListener.RegisterException(new NullReferenceException(
-                    "Attribute type of security attribute is null."));
-                attributeTypeString = null;
-            }
-            else
-            {
-                attributeTypeString = TypeNameBuilder.GetAssemblyQualifiedName(AttributeType);
-            }
+            string attributeTypeString = TypeNameBuilder.GetAssemblyQualifiedName(AttributeType);
             writer.WriteSerString(attributeTypeString);
 
             if (NamedArguments.Count == 0)

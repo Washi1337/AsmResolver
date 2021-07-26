@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override GenericParameter GetOwner()
+        protected override GenericParameter? GetOwner()
         {
             var token = _context.ParentModule.GetGenericParameterConstraintOwner(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(token, out var member)
@@ -41,13 +41,12 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override ITypeDefOrRef GetConstraint()
+        protected override ITypeDefOrRef? GetConstraint()
         {
-            var encoder = _context.Image.DotNetDirectory.Metadata
+            var token = _context.Metadata
                 .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.TypeDefOrRef);
+                .GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(_row.Constraint);
 
-            var token = encoder.DecodeIndex(_row.Constraint);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as ITypeDefOrRef
                 : _context.BadImageAndReturn<ITypeDefOrRef>(

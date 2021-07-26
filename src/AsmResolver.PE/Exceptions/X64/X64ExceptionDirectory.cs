@@ -22,7 +22,12 @@ namespace AsmResolver.PE.Exceptions.X64
             var result = new List<X64RuntimeFunction>();
 
             while (reader.CanRead(X64RuntimeFunction.EntrySize))
-                result.Add(X64RuntimeFunction.FromReader(_context, ref reader));
+            {
+                var function = X64RuntimeFunction.FromReader(_context, ref reader);
+                if (function is null)
+                    break;
+                result.Add(function);
+            }
 
             return result;
         }

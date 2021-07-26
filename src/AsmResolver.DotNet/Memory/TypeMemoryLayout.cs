@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace AsmResolver.DotNet.Memory
@@ -93,7 +94,7 @@ namespace AsmResolver.DotNet.Memory
         /// <param name="offset">The offset of the field to find.</param>
         /// <param name="field">When the method returns <c>true</c>, contains the field with the provided offset..</param>
         /// <returns><c>true</c> if the field with the provided offset existed, <c>false,</c> otherwise.</returns>
-        public bool TryGetFieldAtOffset(uint offset, out FieldMemoryLayout field)
+        public bool TryGetFieldAtOffset(uint offset, [NotNullWhen(true)] out FieldMemoryLayout? field)
         {
             foreach (var entry in GetOrderedFields())
             {

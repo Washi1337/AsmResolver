@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
 
@@ -11,7 +10,7 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public class GenericInstanceMethodSignature : CallingConventionSignature, IGenericArgumentsProvider
     {
-        internal static GenericInstanceMethodSignature FromReader(
+        internal static GenericInstanceMethodSignature? FromReader(
             in BlobReadContext context,
             ref BinaryStreamReader reader)
         {

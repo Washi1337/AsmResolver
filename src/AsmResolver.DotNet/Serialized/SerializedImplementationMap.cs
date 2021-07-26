@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IMemberForwarded GetMemberForwarded()
+        protected override IMemberForwarded? GetMemberForwarded()
         {
             var ownerToken = _context.ParentModule.GetImplementationMapOwner(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)
@@ -43,12 +43,15 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.ImportName);
+        protected override string? GetName()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.ImportName)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override ModuleReference GetScope()
+        protected override ModuleReference? GetScope()
         {
             return _context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.ModuleRef, _row.ImportScope),
                 out var member)

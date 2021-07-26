@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 
@@ -13,7 +14,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// When this PE file was read from the disk, gets the file path to the PE file.
         /// </summary>
-        string FilePath
+        string? FilePath
         {
             get;
         }
@@ -74,7 +75,7 @@ namespace AsmResolver.PE.File
         /// <param name="rva">The virtual address.</param>
         /// <param name="section">The section that was found.</param>
         /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
-        bool TryGetSectionContainingRva(uint rva, out PESection section);
+        bool TryGetSectionContainingRva(uint rva, [NotNullWhen(true)] out PESection? section);
 
         /// <summary>
         /// Obtains a reader that spans the provided data directory.

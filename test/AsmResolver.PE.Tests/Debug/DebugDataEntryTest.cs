@@ -31,7 +31,7 @@ namespace AsmResolver.PE.Tests.Debug
 
             foreach (var entry in image.DebugData)
             {
-                if (entry.Contents.Type == DebugDataType.CodeView)
+                if (entry.Contents?.Type == DebugDataType.CodeView)
                 {
                     var data = (CodeViewDataSegment) entry.Contents;
                     if (data.Signature == CodeViewSignature.Rsds)
@@ -45,7 +45,7 @@ namespace AsmResolver.PE.Tests.Debug
             {
                 DebugDataType.CodeView,
                 DebugDataType.VcFeature
-            }, image.DebugData.Select(d => d.Contents.Type));
+            }, image.DebugData.Select(d => d.Contents!.Type));
         }
 
         [Fact]
@@ -57,10 +57,10 @@ namespace AsmResolver.PE.Tests.Debug
             Assert.Equal(
                 image.DebugData
                     .Where(e => e.Contents != null)
-                    .Select(e => e.Contents.Type),
+                    .Select(e => e.Contents!.Type),
                 newImage.DebugData
                     .Where(e => e.Contents != null)
-                    .Select(e => e.Contents.Type));
+                    .Select(e => e.Contents!.Type));
         }
     }
 }
