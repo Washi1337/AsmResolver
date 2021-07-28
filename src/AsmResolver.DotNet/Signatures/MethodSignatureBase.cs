@@ -62,7 +62,7 @@ namespace AsmResolver.DotNet.Signatures
                 while (ret is CustomModifierTypeSignature customModifierTypeSignature)
                     ret = customModifierTypeSignature.BaseType;
 
-                return ret?.IsTypeOf("System", "Void") ?? false;
+                return ret?.ElementType == ElementType.Void;
             }
         }
 
