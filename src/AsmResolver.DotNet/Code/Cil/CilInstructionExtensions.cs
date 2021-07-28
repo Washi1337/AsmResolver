@@ -23,8 +23,8 @@ namespace AsmResolver.DotNet.Code.Cil
         public static int GetStackPopCount(this CilInstruction instruction, CilMethodBody? parent)
         {
             return GetStackPopCount(instruction,
-                parent is null
-                || !(parent.Owner.Signature?.ReturnsValue).GetValueOrDefault());
+                parent == null
+                || (parent.Owner.Signature?.ReturnsValue ?? false));
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace AsmResolver.DotNet.Code.Cil
             if (signature == null)
                 return 0;
 
-            if (!signature.ReturnType.IsTypeOf("System", "Void") || instruction.OpCode.Code == CilCode.Newobj)
+            if (!signature.ReturnsValue || instruction.OpCode.Code == CilCode.Newobj)
                 return 1;
 
             return 0;
@@ -241,6 +241,5 @@ namespace AsmResolver.DotNet.Code.Cil
                     throw new ArgumentException("Instruction is not a ldarg or starg instruction.");
             }
         }
-
     }
 }
