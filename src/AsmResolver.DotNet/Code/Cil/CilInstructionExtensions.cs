@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             return GetStackPopCount(instruction,
                 parent == null
-                || (parent.Owner.Signature?.ReturnsValue ?? false));
+                || !(parent.Owner.Signature?.ReturnsValue ?? true));
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace AsmResolver.DotNet.Code.Cil
             if (signature == null)
                 return 0;
 
-            if (!signature.ReturnsValue || instruction.OpCode.Code == CilCode.Newobj)
+            if (signature.ReturnsValue || instruction.OpCode.Code == CilCode.Newobj)
                 return 1;
 
             return 0;
