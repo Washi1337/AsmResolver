@@ -50,10 +50,21 @@ namespace AsmResolver.DotNet.Signatures
             get;
             set;
         }
+
         /// <summary>
         /// Gets value indicating if method returns value or not.
         /// </summary>
-        public bool ReturnsValue => ReturnType.ElementType != ElementType.Void;
+        public bool ReturnsValue
+        {
+            get
+            {
+                var ret = ReturnType;
+                while (ret is CustomModifierTypeSignature customModifierTypeSignature)
+                    ret = customModifierTypeSignature.BaseType;
+
+                return ret.ElementType != ElementType.Void;
+            }
+        }
 
         /// <summary>
         /// Gets an ordered list of types indicating the types of the sentinel parameters that this member defines.
