@@ -32,6 +32,7 @@ namespace AsmResolver.PE.DotNet
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
             Offset = reader.Offset;
+            Rva = reader.Rva;
 
             uint cb = reader.ReadUInt32();
             MajorRuntimeVersion = reader.ReadUInt16();
@@ -125,6 +126,8 @@ namespace AsmResolver.PE.DotNet
             }
 
             var vtables = new VTableFixupsDirectory();
+            vtables.UpdateOffsets(directoryReader.Offset, directoryReader.Rva);
+
             for (int i = 0; i < directoryReader.Length / 8; i++)
             {
                 var entry = VTableFixup.FromReader(_context, ref directoryReader);

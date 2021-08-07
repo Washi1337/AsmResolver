@@ -29,6 +29,9 @@ namespace AsmResolver.PE.DotNet.Metadata
                 throw new ArgumentNullException(nameof(directoryReader));
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
+            Offset = directoryReader.Offset;
+            Rva = directoryReader.Rva;
+
             _streamContentsReader = directoryReader.Fork();
 
             var signature = (MetadataSignature) directoryReader.ReadUInt32();

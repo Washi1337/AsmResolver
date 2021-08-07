@@ -43,6 +43,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _reader = reader;
 
+            Offset = reader.Offset;
+            Rva = reader.Rva;
+
             var headerReader = _reader.Fork();
             Reserved = headerReader.ReadUInt32();
             MajorVersion = headerReader.ReadByte();
