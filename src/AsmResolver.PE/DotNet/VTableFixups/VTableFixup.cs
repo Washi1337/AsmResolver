@@ -38,6 +38,7 @@ namespace AsmResolver.PE.DotNet.VTableFixups
 
             ushort entries = reader.ReadUInt16();
             var vtable = new VTableFixup((VTableType) reader.ReadUInt16());
+            vtable.UpdateOffsets(tableReader.Offset, tableReader.Rva);
 
             for (int i = 0; i < entries; i++)
             {

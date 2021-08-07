@@ -20,6 +20,8 @@ namespace AsmResolver.PE.DotNet.Resources
             if (!reader.IsValid)
                 throw new ArgumentNullException(nameof(reader));
             _reader = reader;
+            Offset = reader.Offset;
+            Rva = reader.Rva;
         }
 
         /// <summary>
@@ -28,8 +30,8 @@ namespace AsmResolver.PE.DotNet.Resources
         /// </summary>
         /// <param name="contents">The input stream.</param>
         public SerializedDotNetResourcesDirectory(IReadableSegment contents)
+            : this(contents.CreateReader())
         {
-            _reader = contents.CreateReader();
         }
 
         /// <inheritdoc />

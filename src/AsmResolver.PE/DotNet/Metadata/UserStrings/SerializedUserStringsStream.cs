@@ -31,6 +31,8 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
             : base(name)
         {
             _reader = reader;
+            Offset = reader.Offset;
+            Rva = reader.Rva;
         }
 
         /// <inheritdoc />
