@@ -10,19 +10,22 @@ AsmResolver supports creating new method bodies that are implemented this way. T
     using AsmResolver.DotNet.Code.Native;
 
 
-Allowing native code in modules
--------------------------------
+Prerequisites
+-------------
 
-Before you can start adding native method bodies to a .NET module, it is required to change a couple of flags in the headers of the executable. In particular, to make the CLR run a mixed mode application, the ``ILOnly`` flag needs to be unset:
+Before you can start adding native method bodies to a .NET module, a few prerequisites have to be met. Failing to do so will make the CLR not run your mixed mode application, and might throw runtime or image format exceptions, even if everything else conforms to the right format. This section will go over these requirements briefly.
+
+Allowing native code in modules
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To make the CLR treat the output file as a mixed mode application, the ``ILOnly`` flag needs to be unset:
 
 .. code-block:: csharp 
 
     ModuleDefinition module = ...
     module.Attributes &= ~DotNetDirectoryFlags.ILOnly;
 
-Failing to do so will make the CLR not run your mixed mode application, and might throw runtime or image format exceptions, even if everything else conforms to the right format.
-
-Furthermore, make sure the right architecture is specified. For example, for an x86 64-bit binary, use the folloing:
+Furthermore, make sure the right architecture is specified. For example, for an x86 64-bit binary, use the following:
 
 .. code-block:: csharp
 
@@ -39,6 +42,19 @@ For 32-bit x86 binaries, use the following:
     module.Attributes |= DotNetDirectoryFlags.Bit32Required;
 
 
+Flags for native methods
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+As per ECMA-335 specification, a method definition can only represent a native function via Platform Invoke (P/Invoke). While P/Invoke is usually used for importing functions from external libraries (such as `kernel32.dll`), it is also needed for implementing native methods that are defined within the current .NET module itself. Therefore, to be able to assign a valid native body to a method, the right flags need to be set in both the ``Attributes`` and ``ImplAttributes`` property of a ``MethodDefinition``:
+
+.. code-block:: csharp
+
+    MethodDefinition method = ...
+
+    method.Attributes |= MethodAttributes.PInvokeImpl;
+    method.ImpleAttributes |= MethodImplAttributes.Native | MethodImplAttributes.Unmanaged | MethodImplAttributes.PreserveSig;
+
+
 The NativeMethodBody class
 --------------------------
 
@@ -50,7 +66,7 @@ Each ``NativeMethodBody`` is assigned to exactly one ``MethodDefinition``. Upon 
 
     MethodDefinition method = ...
 
-    NativeMethodBody body = new NativeMethodBody(method);
+    var body = new NativeMethodBody(method);
     method.NativeMethodBody = body;
 
 

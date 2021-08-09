@@ -122,8 +122,7 @@ Example:
     var stringsStream = metadata.GetStream<StringsStream>();
     string value = stringsStream.GetStringByIndex(0x1234);
 
-Since blobs in the blob stream have a specific format, just obtaining the `byte[]` of a blob might not be all that useful. Therefore, the ``BlobStream`` has an extra ``GetBlobReaderByIndex`` method, that allows for parsing each blob using an ``BinaryStreamReader`` object instead:
-
+Since blobs in the blob stream have a specific format, just obtaining the ``byte[]`` of a blob might not be all that useful. Therefore, the ``BlobStream`` has an extra ``GetBlobReaderByIndex`` method, that allows for parsing each blob using an ``BinaryStreamReader`` object instead. If performance is critical, the ``GetBlobReaderByIndex`` method is preferred over ``GetBlobByIndex``, as this method also avoids an allocation of a temporary buffer as well.
 
 .. code-block:: csharp
 
@@ -154,16 +153,16 @@ Tables can also be obtained by their row type:
 
     MetadataTable<TypeDefinitionRow> typeDefTable = tablesStream.GetTable<TypeDefinitionRow>();
 
-The latter option allows for a more type-safe interaction with the table as well, as each metadata table is associated with its own row structure. Below a table of all row definitions:
+The latter option is the preferred option, as it allows for a more type-safe interaction with the table as well and avoids boxing of each row in the table. Each metadata table is associated with its own row structure. Below a table of all row definitions:
 
 +-------------+-----------------------------+--------------------------------+
 | Table index | Name (as per specification) | AsmResolver row structure name |
 +=============+=============================+================================+
 | 0           | Module                      | ``ModuleDefinitionRow``        |
 +-------------+-----------------------------+--------------------------------+
-| 1           | TypeRef                     | ``TypeDefinitionRow``          |
+| 1           | TypeRef                     | ``TypeReferenceRow``           |
 +-------------+-----------------------------+--------------------------------+
-| 2           | TypeDef                     | ``TypeReferenceRow``           |
+| 2           | TypeDef                     | ``TypeDefinitionRow``          |
 +-------------+-----------------------------+--------------------------------+
 | 3           | FieldPtr                    | ``FieldPointerRow``            |
 +-------------+-----------------------------+--------------------------------+
@@ -297,7 +296,8 @@ Every row structure defined in AsmResolver respects the specification described 
 
 ``ISegmentReference`` exposes a method ``CreateReader()``, which automatically resolves the RVA that was stored in the row, and creates a new input stream that can be used to parse e.g. method bodies or field data.
 
-**Reading method bodies:**
+Reading method bodies:
+~~~~~~~~~~~~~~~~~~~~~~
 
 Reading a managed CIL method body can be done using ``CilRawMethodBody.FromReader`` method:
 
@@ -309,7 +309,8 @@ Reading a managed CIL method body can be done using ``CilRawMethodBody.FromReade
 
 It is important to note that the user is not bound to use ``CilRawMethodBody``. In the case that the ``Native`` (``0x0001``) flag is set in ``MethodDefinitionRow.ImplAttributes``, the implementation of the method body is not written in CIL, but using native code that uses an instruction set dependent on the platform that this application is targeting. Since the bounds of such a method body is not always well-defined, AsmResolver does not do any parsing on its own. However, using the ``CreateReader()`` method, it is still possible to decode instructions from this method body, using a custom instruction decoder.
 
-**Reading field data:**
+Reading field data:
+~~~~~~~~~~~~~~~~~~~
 
 Reading field data can be done in a similar fashion as reading method bodies. Again use the ``CreateReader()`` method to gain access to the raw data of the initial value of the field referenced by a **FieldRVA** row.
 
@@ -319,7 +320,8 @@ Reading field data can be done in a similar fashion as reading method bodies. Ag
     var firstRva = fieldRvaTable[0];
     var reader = firstRva.Data.CreateReader();
 
-**Creating new segment references:**
+Creating new segment references:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Creating new segment references not present in the current PE image yet can for example be done by creating an instance of ``SegmentReference``, which is a wrapper for any ``IReadableSegment`` object.
 

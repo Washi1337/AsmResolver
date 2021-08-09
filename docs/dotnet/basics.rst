@@ -26,7 +26,7 @@ The above will create a module that references mscorlib.dll 4.0.0.0 (.NET Framew
 Opening a .NET module
 ---------------------
 
-Opening a .NET module can be done through one of the `FromXXX` methods from the ``ModuleDefinition`` class:
+Opening a .NET module can be done through one of the ``FromXXX`` methods from the ``ModuleDefinition`` class:
 
 .. code-block:: csharp
 
@@ -73,7 +73,7 @@ On Windows, if a module is loaded and mapped in memory (e.g. as a dependency def
 Writing a .NET module
 ---------------------
 
-Writing a .NET module can be done through one of the `Write` method overloads.
+Writing a .NET module can be done through one of the ``Write`` method overloads.
 
 .. code-block:: csharp
 
@@ -127,7 +127,7 @@ Opening (multi-module) .NET assemblies can be done in a very similar fashion as 
     var assembly = AssemblyDefinition.FromImage(peImage);
 
     
-If you want to read large files (+100MB), consider using memory mapped I/O instead:
+Similar to reading module definitions, if you want to read large files (+100MB), consider using memory mapped I/O instead:
 
 .. code-block:: csharp
 
@@ -138,7 +138,7 @@ If you want to read large files (+100MB), consider using memory mapped I/O inste
 Writing a .NET assembly
 -----------------------
 
-Writing a .NET assembly can be done through one of the `Write` method overloads.
+Writing a .NET assembly can be done through one of the ``Write`` method overloads.
 
 .. code-block:: csharp
 

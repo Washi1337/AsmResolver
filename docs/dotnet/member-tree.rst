@@ -4,7 +4,7 @@ The Member Tree
 Assemblies and modules
 ----------------------
 
-The root of every .NET assembly is represented by the ``AssemblyDefinition`` class. This class exposes basic information such as name, version and public key token, but also a collection of all modules that are defined in the assembly. Modules are represented by the `ModuleDefinition` class.
+The root of every .NET assembly is represented by the ``AssemblyDefinition`` class. This class exposes basic information such as name, version and public key token, but also a collection of all modules that are defined in the assembly. Modules are represented by the ``ModuleDefinition`` class.
 
 Below an example that enumerates all modules defined in an assembly.
 
@@ -14,7 +14,7 @@ Below an example that enumerates all modules defined in an assembly.
     foreach (var module in assembly.Modules)
         Console.WriteLine(module.Name);
 
-Most .NET assemblies only have one module. This main module is also known as the manifest module, and can be accessed directly through the `AssemblyDefinition.ManifestModule` property.
+Most .NET assemblies only have one module. This main module is also known as the manifest module, and can be accessed directly through the ``AssemblyDefinition.ManifestModule`` property.
 
 
 Obtaining types in a module
