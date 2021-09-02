@@ -21,6 +21,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Theory]
         [InlineData("MyType")]
         [InlineData("#=abc")]
+        [InlineData("\u0002\u2007\u2007")]
         public void SimpleTypeNoNamespace(string name)
         {
             var expected = new TypeReference(_module, null, name).ToTypeSignature();
@@ -33,6 +34,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData("MyNamespace.SubNamespace")]
         [InlineData("MyNamespace.SubNamespace.SubSubNamespace")]
         [InlineData("#=abc.#=def")]
+        [InlineData("\u0002\u2007\u2007.\u0002\u2007\u2007")]
         public void SimpleTypeWithNamespace(string ns)
         {
             var expected = new TypeReference(_module, ns, "MyType").ToTypeSignature();
@@ -43,6 +45,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Theory]
         [InlineData("MyNamespace", "MyType", "MyNestedType")]
         [InlineData("MyNamespace", "#=abc", "#=def")]
+        [InlineData("\u0002\u2007\u2007", "\u0002\u2007\u2007", "\u0002\u2007\u2007")]
         public void NestedType(string ns, string name, string nestedType)
         {
             var expected = new TypeReference(
@@ -58,6 +61,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Theory]
         [InlineData("MyType", "MyNestedType")]
         [InlineData("#=abc", "#=def")]
+        [InlineData("\u0002\u2007\u2007", "\u0002\u2007\u2007")]
         public void NestedTypeNoNamespace(string name, string nestedType)
         {
             var expected = new TypeReference(
