@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Exports
@@ -57,11 +58,13 @@ namespace AsmResolver.PE.Exports
         /// <summary>
         /// Gets a value indicating whether the symbol is exported by ordinal number.
         /// </summary>
+        [MemberNotNullWhen(false, nameof(Name))]
         public bool IsByOrdinal => Name is null;
 
         /// <summary>
         /// Gets a value indicating whether the symbol is exported by name.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Name))]
         public bool IsByName => Name is not null;
 
         /// <summary>

@@ -24,7 +24,19 @@ namespace AsmResolver.PE.Imports
         /// This is the ImpHash as introduced by Mandiant.
         /// Reference: https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html
         /// </remarks>
-        public static byte[] GetImportHash(this IPEImage image)
+        public static byte[] GetImportHash(this IPEImage image) => image.GetImportHash(EmptySymbolResolver.Instance);
+
+        /// <summary>
+        /// Computes the hash of all imported symbols.
+        /// </summary>
+        /// <param name="image">The image to get the import hash from.</param>
+        /// <param name="symbolResolver">The object responsible for resolving symbols imported by ordinal.</param>
+        /// <returns>The hash.</returns>
+        /// <remarks>
+        /// This is the ImpHash as introduced by Mandiant.
+        /// Reference: https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html
+        /// </remarks>
+        public static byte[] GetImportHash(this IPEImage image, ISymbolResolver symbolResolver)
         {
             var elements = new List<string>();
 
@@ -34,7 +46,7 @@ namespace AsmResolver.PE.Imports
 
                 string formattedModuleName = FormatModuleName(module);
                 for (int i = 0; i < module.Symbols.Count; i++)
-                    elements.Add($"{formattedModuleName}.{FormatSymbolName(module.Symbols[i])}");
+                    elements.Add($"{formattedModuleName}.{FormatSymbolName(module.Symbols[i], symbolResolver)}");
             }
 
             using var md5 = MD5.Create();
@@ -59,12 +71,19 @@ namespace AsmResolver.PE.Imports
             return name.ToLowerInvariant();
         }
 
-        private static string FormatSymbolName(ImportedSymbol symbol)
+        private static string FormatSymbolName(ImportedSymbol symbol, ISymbolResolver symbolResolver)
         {
             if (symbol.IsImportByName)
                 return symbol.Name.ToLowerInvariant();
 
-            throw new NotImplementedException( "Image contains symbols that are imported by ordinal. This is not supported yet.");
+            var resolvedSymbol = symbolResolver.Resolve(symbol);
+
+            if (resolvedSymbol is null)
+                throw new ArgumentException($"Failed to resolve {symbol}.");
+            if (!resolvedSymbol.IsByName)
+                throw new ArgumentException($"Resolved export for {symbol} has no name.");
+
+            return resolvedSymbol.Name.ToLowerInvariant();
         }
     }
 }
