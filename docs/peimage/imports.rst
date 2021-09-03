@@ -3,12 +3,17 @@ Imports Directory
 
 Most portable executables import functions and fields from other, external libraries. These are stored in a table in the imports data directory of the PE file. Each entry in this table defines a module that is loaded at runtime, and a set of members that are looked up.
 
-The ``IPEImage`` interface exposes the ``Imports`` property, which contains all members that are resolved at runtime, grouped by the defining module.
+All code relevant to the imports directory of a PE resides in the following namespace:
 
-Example
--------
+.. code-block:: csharp
+    
+    using AsmResolver.PE.Imports;
 
-Below is an example of a program that lists all members imported by a given ``IPEImage`` instance: 
+
+Imported Modules and Symbols
+----------------------------
+
+The ``IPEImage`` interface exposes the ``Imports`` property, which contains all members that are resolved at runtime, grouped by the defining module. Below an example of a program that lists all members imported by a given ``IPEImage`` instance: 
 
 .. code-block:: csharp
 
@@ -43,7 +48,7 @@ AsmResolver provides a built-in implementation for calculating the Import Hash. 
     byte[] hash = image.GetImportHash();
 
 
-Since the hash is computed based on the names of all imported symbols, symbols that are imported by ordinal need to be resolved. This resolution process can be customized by providing an instance of ``ISymbolResolver``:
+Since the hash is computed based on the names of all imported symbols, symbols that are imported by ordinal need to be resolved. By default, AsmResolver uses a static lookup table for a couple of common Windows libraries, but should this resolution process be customized, then this can be done by providing a custom instance of ``ISymbolResolver``:
 
 .. code-block:: csharp
 
@@ -60,4 +65,4 @@ Since the hash is computed based on the names of all imported symbols, symbols t
 
 
 
-While the Import Hash can be a good identifier for native PE images, for .NET images this is not the case. .NET images usually only import a single external symbol (either ``mscoree.dll!_CorExeMain`` or ``mscoree.dll!_CorDllMain``), and as such they will almost always have the exact same Import Hash. 
+While the Import Hash can be a good identifier for native PE images, for .NET images this is not the case. .NET images usually only import a single external symbol (either ``mscoree.dll!_CorExeMain`` or ``mscoree.dll!_CorDllMain``), and as such they will almost always have the exact same Import Hash. See :ref:`pe-typereference-hash` for an alternative for .NET images.
