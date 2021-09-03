@@ -329,3 +329,24 @@ Creating new segment references not present in the current PE image yet can for 
 
     var myData = new DataSegment(new byte[] {1, 2, 3, 4});
     var fieldRva = new FieldRvaRow(new SegmentReference(myData), 0);
+
+
+
+TypeReference Hash (TRH)
+------------------------
+
+Similar to the :ref:`pe-import-hash`, the TypeReference Hash (TRH) can be used to help identifying malware family written in a .NET language. However, unlike the Import Hash, the TRH is based on the names of all imported type references instead of the symbols specified in the imports directory of the PE. This is a more accurate representation for .NET images, as virtually every .NET image only uses one native symbol (either ``mscoree.dll!_CorExeMain`` or ``mscoree.dll!_CorDllMain``).
+
+AsmResolver includes a built-in implementation for this that is based on `the reference implementation provided by GData <https://www.gdatasoftware.com/blog/2020/06/36164-introducing-the-typerefhash-trh>`_. The hash can be obtained using the ``GetTypeReferenceHash`` extension method on ``IPEImage`` or on ``IMetadata``:
+
+.. code-block:: csharp
+
+    IPEImage image = ...
+    byte[] hash = image.GetTypeReferenceHash();
+
+    
+.. code-block:: csharp
+
+    IMetadata metadata = ...
+    byte[] hash = metadata.GetTypeReferenceHash();
+
