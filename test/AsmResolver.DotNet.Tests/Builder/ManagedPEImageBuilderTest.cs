@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.NotNull(symbol);
             Assert.Contains(image.Relocations, relocation =>
                 relocation.Location.CanRead
-                && relocation.Location.CreateReader().ReadUInt32() == symbol.AddressTableEntry!.Rva);
+                && relocation.Location.CreateReader().ReadUInt32() == image.ImageBase + symbol.AddressTableEntry!.Rva);
         }
 
         [Fact]
@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.NotNull(symbol);
             Assert.Contains(image.Relocations, relocation =>
                 relocation.Location.CanRead
-                && relocation.Location.CreateReader().ReadUInt32() == symbol.AddressTableEntry!.Rva);
+                && relocation.Location.CreateReader().ReadUInt32() == image.ImageBase + symbol.AddressTableEntry!.Rva);
         }
     }
 }

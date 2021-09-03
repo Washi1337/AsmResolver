@@ -58,6 +58,13 @@ namespace AsmResolver.PE.Relocations.Builder
         }
 
         /// <inheritdoc />
+        public override void UpdateOffsets(ulong newOffset, uint newRva)
+        {
+            base.UpdateOffsets(newOffset, newRva);
+            _blocks = null;
+        }
+
+        /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
             EnsureBlocksCreated();

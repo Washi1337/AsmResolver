@@ -334,6 +334,8 @@ namespace AsmResolver.PE.File
         /// <list type="bullet">
         ///     <item>
         ///         <term>SizeOfHeaders</term>
+        ///         <term>SizeOfImage</term>
+        ///         <term>Data directories</term>
         ///     </item>
         /// </list>
         /// Affected fields in the section header include:

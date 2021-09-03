@@ -47,7 +47,7 @@ namespace AsmResolver.PE.Relocations.Builder
             for (int i = 0; i < Entries.Count; i++)
                 Entries[i].Write(writer);
 
-            new RelocationEntry(0).Write(writer);
+            default(RelocationEntry).Write(writer);
         }
 
     }
