@@ -333,6 +333,7 @@ Creating new segment references not present in the current PE image yet can for 
 
 
 .. _pe-typereference-hash:
+
 TypeReference Hash (TRH)
 ------------------------
 
