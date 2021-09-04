@@ -23,10 +23,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// </summary>
         /// <param name="data">The raw UTF-8 data.</param>
         public Utf8String(byte[] data)
+            : this(data, 0, data.Length)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new UTF-8 string from the provided raw data.
+        /// </summary>
+        /// <param name="data">The raw UTF-8 data.</param>
+        /// <param name="index">The starting index to read from.</param>
+        /// <param name="count">The number of bytes to read..</param>
+        public Utf8String(byte[] data, int index, int count)
         {
             // Copy data to enforce immutability.
-            _data = new byte[data.Length];
-            Buffer.BlockCopy(data, 0, _data,0, data.Length);
+            _data = new byte[count];
+            Buffer.BlockCopy(data, index, _data,0, count);
         }
 
         /// <summary>
@@ -173,6 +184,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
 
         /// <inheritdoc />
         public override string ToString() => Value;
+
+        /// <summary>
+        /// Converts a <see cref="Utf8String"/> into a <see cref="System.String"/>.
+        /// </summary>
+        /// <param name="value">The UTF-8 string value to convert.</param>
+        /// <returns>The string.</returns>
+        [return: NotNullIfNotNull("value")]
+        public static implicit operator string?(Utf8String? value)
+        {
+            if (value is null)
+                return null;
+            if (value.ByteCount == 0)
+                return string.Empty;
+            return value.Value;
+        }
 
         /// <summary>
         /// Converts a <see cref="System.String"/> into an <see cref="Utf8String"/>.

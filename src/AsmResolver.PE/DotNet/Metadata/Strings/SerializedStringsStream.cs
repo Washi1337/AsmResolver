@@ -9,7 +9,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
     /// </summary>
     public class SerializedStringsStream : StringsStream
     {
-        private readonly Dictionary<uint, string> _cachedStrings = new();
+        private readonly Dictionary<uint, Utf8String> _cachedStrings = new();
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
@@ -48,16 +48,30 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         public override void Write(IBinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
 
         /// <inheritdoc />
-        public override string? GetStringByIndex(uint index)
+        public override Utf8String? GetStringByIndex(uint index)
         {
             if (index == 0)
                 return null;
 
-            if (!_cachedStrings.TryGetValue(index, out string value) && index < _reader.Length)
+            if (!_cachedStrings.TryGetValue(index, out var value) && index < _reader.Length)
             {
                 var stringsReader = _reader.ForkRelative(index);
-                var data = stringsReader.ReadBytesUntil(0);
-                value = Encoding.UTF8.GetString(data, 0, data.Length - 1);
+                byte[] rawData = stringsReader.ReadBytesUntil(0);
+
+                if (rawData.Length == 0)
+                {
+                    value = Utf8String.Empty;
+                }
+                else
+                {
+                    // Trim off null terminator byte if its present.
+                    int actualLength = rawData.Length;
+                    if (rawData[actualLength - 1] == 0)
+                        actualLength--;
+
+                    value = new Utf8String(rawData, 0, actualLength);
+                }
+
                 _cachedStrings[index] = value;
             }
 
