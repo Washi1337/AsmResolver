@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
     /// Represents an immutable UTF-8 encoded string stored in the #Strings stream of a .NET image.
     /// This class supports preserving invalid UTF-8 code sequences.
     /// </summary>
-    public sealed class Utf8String : IEquatable<string>, IEquatable<byte[]>, IComparable<Utf8String>
+    public sealed class Utf8String : IEquatable<Utf8String>, IEquatable<string>, IEquatable<byte[]>, IComparable<Utf8String>
     {
         /// <summary>
         /// Represents the empty UTF-8 string.
