@@ -9,6 +9,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.Win32Resources;
@@ -57,14 +58,14 @@ namespace AsmResolver.DotNet.Tests
         public void ReadTypesNoNested()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
-            Assert.Equal(new[] {"<Module>", "Program"}, module.TopLevelTypes.Select(t => t.Name));
+            Assert.Equal(new Utf8String[] {"<Module>", "Program"}, module.TopLevelTypes.Select(t => t.Name));
         }
 
         [Fact]
         public void ReadTypesNested()
         {
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
-            Assert.Equal(new HashSet<string>
+            Assert.Equal(new HashSet<Utf8String>
             {
                 "<Module>",
                 nameof(TopLevelClass1),
@@ -76,7 +77,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadMaliciousNestedClassLoop()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousNestedClassLoop);
-            Assert.Equal(new[] {"<Module>", "Program"}, module.TopLevelTypes.Select(t => t.Name));
+            Assert.Equal(new Utf8String[] {"<Module>", "Program"}, module.TopLevelTypes.Select(t => t.Name));
         }
 
         [Fact]
@@ -84,8 +85,8 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousNestedClassLoop2);
             Assert.Equal(
-                new HashSet<string> {"<Module>", "Program", "MaliciousEnclosingClass"},
-                new HashSet<string>(module.TopLevelTypes.Select(t => t.Name)));
+                new HashSet<Utf8String> {"<Module>", "Program", "MaliciousEnclosingClass"},
+                new HashSet<Utf8String>(module.TopLevelTypes.Select(t => t.Name)));
 
             var enclosingClass = module.TopLevelTypes.First(x => x.Name == "MaliciousEnclosingClass");
             Assert.Single(enclosingClass.NestedTypes);

@@ -4,6 +4,7 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -19,7 +20,7 @@ namespace AsmResolver.DotNet
         IHasConstant,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<TypeDefinition?> _declaringType;
         private readonly LazyVariable<PropertySignature?> _signature;
         private readonly LazyVariable<Constant?> _constant;
@@ -33,7 +34,7 @@ namespace AsmResolver.DotNet
         protected PropertyDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string?>(GetName);
+            _name = new LazyVariable<Utf8String?>(() => GetName());
             _signature = new LazyVariable<PropertySignature?>(GetSignature);
             _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
             _constant = new LazyVariable<Constant?>(GetConstant);
@@ -93,12 +94,19 @@ namespace AsmResolver.DotNet
                                 | (value ? PropertyAttributes.HasDefault : 0);
         }
 
-        /// <inheritdoc />
-        public string? Name
+        /// <summary>
+        /// Gets or sets the name of the property.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the property definition table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <inheritdoc />
         public string FullName => FullNameGenerator.GetPropertyFullName(Name, DeclaringType, Signature);
@@ -187,7 +195,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the signature of the property definition.

@@ -4,6 +4,7 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Marshal;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -22,7 +23,7 @@ namespace AsmResolver.DotNet
         IHasFieldMarshal,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<FieldSignature?> _signature;
         private readonly LazyVariable<TypeDefinition?> _declaringType;
         private readonly LazyVariable<Constant?> _constant;
@@ -40,7 +41,7 @@ namespace AsmResolver.DotNet
         protected FieldDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string?>(GetName);
+            _name = new LazyVariable<Utf8String?>(() => GetName());
             _signature = new LazyVariable<FieldSignature?>(GetSignature);
             _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
             _constant = new LazyVariable<Constant?>(GetConstant);
@@ -69,12 +70,19 @@ namespace AsmResolver.DotNet
             Signature = signature;
         }
 
-        /// <inheritdoc />
-        public string? Name
+        /// <summary>
+        /// Gets or sets the name of the field.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the field table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <summary>
         /// Gets or sets the signature of the field. This includes the field type.
@@ -401,7 +409,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the signature of the field definition.

@@ -349,7 +349,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
                     case "culture":
                         assemblyRef.Culture = ParseCulture();
-                        if (assemblyRef.Culture.Equals("neutral", StringComparison.OrdinalIgnoreCase))
+                        if (assemblyRef.Culture.Equals("neutral"))
                             assemblyRef.Culture = null;
                         break;
 

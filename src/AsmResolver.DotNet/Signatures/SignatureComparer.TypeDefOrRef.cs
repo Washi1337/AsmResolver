@@ -34,9 +34,9 @@ namespace AsmResolver.DotNet.Signatures
         {
             unchecked
             {
-                int hashCode = obj.Name != null ? obj.Name.GetHashCode() : 0;
-                hashCode = (hashCode * 397) ^ (obj.Namespace != null ? obj.Namespace.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (obj.DeclaringType != null ? GetHashCode(obj.DeclaringType) : 0);
+                int hashCode = obj.Name is null ? 0 : obj.Name.GetHashCode();
+                hashCode = (hashCode * 397) ^ (obj.Namespace is null ? 0 : obj.Namespace.GetHashCode());
+                hashCode = (hashCode * 397) ^ (obj.DeclaringType is null ? 0 : GetHashCode(obj.DeclaringType));
                 return hashCode;
             }
         }

@@ -4,6 +4,7 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -60,8 +61,13 @@ namespace AsmResolver.DotNet
             set => _signature.Value = value;
         }
 
-        /// <inheritdoc />
-        public string Name => Method?.Name ?? NullName;
+
+        /// <summary>
+        /// Gets or sets the name of the method specification.
+        /// </summary>
+        public Utf8String Name => Method?.Name ?? NullName;
+
+        string? INameProvider.Name => Name;
 
         /// <inheritdoc />
         public string FullName => FullNameGenerator.GetMethodFullName(

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using AsmResolver.Collections;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -17,8 +18,8 @@ namespace AsmResolver.DotNet
     {
         private const int PublicKeyTokenLength = 8;
 
-        private readonly LazyVariable<string?> _name;
-        private readonly LazyVariable<string?> _culture;
+        private readonly LazyVariable<Utf8String?> _name;
+        private readonly LazyVariable<Utf8String?> _culture;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -28,8 +29,8 @@ namespace AsmResolver.DotNet
         protected AssemblyDescriptor(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string?>(GetName);
-            _culture = new LazyVariable<string?>(GetCulture);
+            _name = new LazyVariable<Utf8String?>(GetName);
+            _culture = new LazyVariable<Utf8String?>(() => GetCulture());
             Version = new Version(0, 0, 0, 0);
         }
 
@@ -39,11 +40,13 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the assembly table.
         /// </remarks>
-        public string? Name
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <inheritdoc />
         public string FullName
@@ -169,7 +172,7 @@ namespace AsmResolver.DotNet
         /// <para>If this value is set to <c>null</c>, the default locale will be used</para>
         /// <para>This property corresponds to the Culture column in the assembly table.</para>
         /// </remarks>
-        public string? Culture
+        public Utf8String? Culture
         {
             get => _culture.Value;
             set => _culture.Value = value;
@@ -196,7 +199,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the locale string of the assembly definition.
@@ -205,7 +208,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="Culture"/> property.
         /// </remarks>
-        protected virtual string? GetCulture() => null;
+        protected virtual Utf8String? GetCulture() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;
@@ -230,8 +233,8 @@ namespace AsmResolver.DotNet
                 _ => throw new NotSupportedException($"Unsupported hashing algorithm {algorithm}.")
             };
 
-            var hash = implementation.ComputeHash(publicKey);
-            var token = new byte[PublicKeyTokenLength];
+            byte[] hash = implementation.ComputeHash(publicKey);
+            byte[] token = new byte[PublicKeyTokenLength];
             for (int i = 0; i < PublicKeyTokenLength; i++)
                 token[i] = hash[hash.Length - 1 - i];
             return token;

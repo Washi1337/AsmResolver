@@ -241,7 +241,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <remarks>
         /// This operation performs a byte-level comparison of the two strings.
         /// </remarks>
-        public static bool operator ==(Utf8String a, Utf8String b) => a.Equals(b);
+        public static bool operator ==(Utf8String? a, Utf8String? b)
+        {
+            if (ReferenceEquals(a, b))
+                return true;
+            if (a is null || b is null)
+                return false;
+            return a.Equals(b);
+        }
 
         /// <summary>
         /// Determines whether two UTF-8 encoded strings are not considered equal.
@@ -252,7 +259,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <remarks>
         /// This operation performs a byte-level comparison of the two strings.
         /// </remarks>
-        public static bool operator !=(Utf8String a, Utf8String b) => !(a == b);
+        public static bool operator !=(Utf8String? a, Utf8String? b) => !(a == b);
 
         /// <summary>
         /// Determines whether an UTF-8 encoded string is considered equal to the provided <see cref="System.String"/>.
@@ -263,7 +270,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <remarks>
         /// This operation performs a string-level comparison.
         /// </remarks>
-        public static bool operator ==(Utf8String a, string b) => a.Value.Equals(b);
+        public static bool operator ==(Utf8String? a, string? b)
+        {
+            if (a is null)
+                return b is null;
+            return b is not null && a.Equals(b);
+        }
 
         /// <summary>
         /// Determines whether an UTF-8 encoded string is not equal to the provided <see cref="System.String"/>.
@@ -274,7 +286,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <remarks>
         /// This operation performs a string-level comparison.
         /// </remarks>
-        public static bool operator !=(Utf8String a, string b) => !(a == b);
+        public static bool operator !=(Utf8String? a, string? b) => !(a == b);
 
         /// <summary>
         /// Determines whether the underlying bytes of an UTF-8 encoded string is equal to the provided byte array.
@@ -285,7 +297,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <remarks>
         /// This operation performs a byte-level comparison.
         /// </remarks>
-        public static bool operator ==(Utf8String a, byte[] b) => a.Value.Equals(b);
+        public static bool operator ==(Utf8String? a, byte[]? b)
+        {
+            if (a is null)
+                return b is null;
+            return b is not null && a.Equals(b);
+        }
 
         /// <summary>
         /// Determines whether the underlying bytes of an UTF-8 encoded string is not equal to the provided byte array.
@@ -296,7 +313,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <remarks>
         /// This operation performs a byte-level comparison.
         /// </remarks>
-        public static bool operator !=(Utf8String a, byte[] b) => !(a == b);
+        public static bool operator !=(Utf8String? a, byte[]? b) => !(a == b);
 
         /// <summary>
         /// Concatenates two UTF-8 encoded strings together.

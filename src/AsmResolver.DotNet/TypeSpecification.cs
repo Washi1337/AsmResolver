@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -46,11 +47,19 @@ namespace AsmResolver.DotNet
             set => _signature.Value = value;
         }
 
-        /// <inheritdoc />
-        public string Name => Signature?.Name ?? TypeSignature.NullTypeToString;
+        /// <summary>
+        /// Gets or sets the name of the referenced type.
+        /// </summary>
+        public Utf8String Name => Signature?.Name ?? TypeSignature.NullTypeToString;
 
-        /// <inheritdoc />
-        public string? Namespace => Signature?.Namespace;
+        string INameProvider.Name => Name;
+
+        /// <summary>
+        /// Gets or sets the namespace the type is residing in.
+        /// </summary>
+        public Utf8String? Namespace => Signature?.Namespace;
+
+        string? ITypeDescriptor.Namespace => Namespace;
 
         /// <inheritdoc />
         public string FullName => this.GetTypeFullName();

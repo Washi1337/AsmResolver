@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -16,7 +17,7 @@ namespace AsmResolver.DotNet
         IModuleProvider,
         IOwnedCollectionElement<IHasGenericParameters>
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<IHasGenericParameters?> _owner;
         private IList<GenericParameterConstraint>? _constraints;
         private IList<CustomAttribute>? _customAttributes;
@@ -28,7 +29,7 @@ namespace AsmResolver.DotNet
         protected GenericParameter(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string?>(GetName);
+            _name = new LazyVariable<Utf8String?>(() => GetName());
             _owner = new LazyVariable<IHasGenericParameters?>(GetOwner);
         }
 
@@ -69,12 +70,19 @@ namespace AsmResolver.DotNet
             set => Owner = value;
         }
 
-        /// <inheritdoc />
-        public string? Name
+        /// <summary>
+        /// Gets or sets the name of the generic parameter.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the generic parameter table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <summary>
         /// Gets or sets additional attributes assigned to this generic parameter.
@@ -124,7 +132,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the owner of the generic parameter.

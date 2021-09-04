@@ -1,5 +1,6 @@
 ﻿using System;
 using AsmResolver.IO;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -63,7 +64,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string? Name => ParameterType switch
+        public override string Name => ParameterType switch
         {
             GenericParameterType.Type => $"!{Index}",
             GenericParameterType.Method => $"!!{Index}",

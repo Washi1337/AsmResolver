@@ -1,6 +1,3 @@
-using System;
-using AsmResolver.DotNet.Builder;
-
 namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
@@ -27,7 +24,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string? Namespace => BaseType?.Namespace;
+        public override string? Namespace => BaseType.Namespace;
 
         /// <inheritdoc />
         public override IResolutionScope? Scope => BaseType.Scope;

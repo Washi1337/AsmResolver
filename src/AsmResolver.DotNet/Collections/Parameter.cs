@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 
 namespace AsmResolver.DotNet.Collections
 {
@@ -10,6 +13,8 @@ namespace AsmResolver.DotNet.Collections
     /// </summary>
     public class Parameter : INameProvider
     {
+        private static readonly List<string> CachedArgNames = new();
+
         private ParameterCollection? _parentCollection;
         private TypeSignature _parameterType;
 
@@ -69,7 +74,22 @@ namespace AsmResolver.DotNet.Collections
         public ParameterDefinition? Definition => _parentCollection?.GetParameterDefinition(Sequence);
 
         /// <inheritdoc />
-        public string? Name => Definition?.Name ?? $"A_{MethodSignatureIndex.ToString()}";
+        public string Name => Definition?.Name ?? GetArgumentName(MethodSignatureIndex);
+
+        [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
+        private static string GetArgumentName(int index)
+        {
+            if (index >= CachedArgNames.Count)
+            {
+                lock (CachedArgNames)
+                {
+                    while (index > CachedArgNames.Count)
+                        CachedArgNames.Add($"A_{CachedArgNames.Count.ToString()}");
+                }
+            }
+
+            return CachedArgNames[index];
+        }
 
         internal void Remove()
         {

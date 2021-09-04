@@ -1,3 +1,4 @@
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -7,7 +8,7 @@ namespace AsmResolver.DotNet
     /// </summary>
     public abstract class MetadataMember : IMetadataMember
     {
-        internal const string NullName = "<<<NULL NAME>>>";
+        internal static readonly Utf8String NullName = "<<<NULL NAME>>>";
 
         /// <summary>
         /// Initializes the metadata member with a metadata token.

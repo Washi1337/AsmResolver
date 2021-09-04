@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -17,7 +18,7 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<TypeDefinition?> _declaringType;
         private readonly LazyVariable<ITypeDefOrRef?> _eventType;
         private IList<MethodSemantics>? _semantics;
@@ -30,7 +31,7 @@ namespace AsmResolver.DotNet
         protected EventDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string?>(GetName);
+            _name = new LazyVariable<Utf8String?>(() => GetName());
             _eventType = new LazyVariable<ITypeDefOrRef?>(GetEventType);
             _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
         }
@@ -78,12 +79,19 @@ namespace AsmResolver.DotNet
                                 | (value ? EventAttributes.RtSpecialName : 0);
         }
 
-        /// <inheritdoc />
-        public string? Name
+        /// <summary>
+        /// Gets or sets the name of the event.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the event table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <inheritdoc />
         public string FullName => FullNameGenerator.GetEventFullName(Name, DeclaringType, EventType);
@@ -180,7 +188,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the event type of the property definition.

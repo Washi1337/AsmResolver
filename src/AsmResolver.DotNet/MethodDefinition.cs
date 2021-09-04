@@ -8,6 +8,7 @@ using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -73,12 +74,19 @@ namespace AsmResolver.DotNet
             Signature = signature;
         }
 
-        /// <inheritdoc />
-        public string? Name
+        /// <summary>
+        /// Gets or sets the name of the method definition.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the method definition table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <summary>
         /// Gets or sets the signature of the method This includes the return type, as well as the types of the
@@ -668,7 +676,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets a value indicating whether the method is a (class) constructor.
         /// </summary>
-        public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && Name is ".cctor" or ".ctor";
+        public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && Name?.Value is ".cctor" or ".ctor";
 
         MethodDefinition IMethodDescriptor.Resolve() => this;
 

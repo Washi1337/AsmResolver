@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures.Marshal;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -22,7 +23,7 @@ namespace AsmResolver.DotNet
         IHasFieldMarshal,
         IOwnedCollectionElement<MethodDefinition>
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<MethodDefinition?> _method;
         private readonly LazyVariable<Constant?> _constant;
         private readonly LazyVariable<MarshalDescriptor?> _marshalDescriptor;
@@ -35,7 +36,7 @@ namespace AsmResolver.DotNet
         protected ParameterDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string?>(GetName);
+            _name = new LazyVariable<Utf8String?>(() => GetName());
             _method = new LazyVariable<MethodDefinition?>(GetMethod);
             _constant = new LazyVariable<Constant?>(GetConstant);
             _marshalDescriptor = new LazyVariable<MarshalDescriptor?>(GetMarshalDescriptor);
@@ -65,12 +66,19 @@ namespace AsmResolver.DotNet
             Attributes = attributes;
         }
 
-        /// <inheritdoc />
-        public string? Name
+        /// <summary>
+        /// Gets or sets the name of the parameter.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the parameter definition table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <summary>
         /// Gets or sets the index for which this parameter definition provides information for.
@@ -210,7 +218,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the method that owns the parameter.

@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class ReferenceImporter : ITypeSignatureVisitor<TypeSignature>
     {
-        private readonly SignatureComparer _comparer = new SignatureComparer();
+        private readonly SignatureComparer _comparer = new();
 
         /// <summary>
         /// Creates a new reference importer.
