@@ -171,7 +171,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         public bool Equals(string other) => Value.Equals(other);
 
         /// <inheritdoc />
-        public int CompareTo(Utf8String other) => string.Compare(Value, other.Value, StringComparison.Ordinal);
+        public int CompareTo(Utf8String other) => ByteArrayEqualityComparer.Instance.Compare(_data, other._data);
 
         /// <inheritdoc />
         /// <remarks>

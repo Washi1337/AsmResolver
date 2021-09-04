@@ -74,16 +74,16 @@ namespace AsmResolver.DotNet.Collections
         public ParameterDefinition? Definition => _parentCollection?.GetParameterDefinition(Sequence);
 
         /// <inheritdoc />
-        public string Name => Definition?.Name ?? GetArgumentName(MethodSignatureIndex);
+        public string Name => Definition?.Name ?? GetDummyArgumentName(MethodSignatureIndex);
 
         [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
-        private static string GetArgumentName(int index)
+        private static string GetDummyArgumentName(int index)
         {
             if (index >= CachedArgNames.Count)
             {
                 lock (CachedArgNames)
                 {
-                    while (index > CachedArgNames.Count)
+                    while (index >= CachedArgNames.Count)
                         CachedArgNames.Add($"A_{CachedArgNames.Count.ToString()}");
                 }
             }

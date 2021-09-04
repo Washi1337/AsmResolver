@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace AsmResolver
@@ -5,7 +6,7 @@ namespace AsmResolver
     /// <summary>
     /// Provides an implementation to compare byte arrays for equality.
     /// </summary>
-    public class ByteArrayEqualityComparer : IEqualityComparer<byte[]>
+    public class ByteArrayEqualityComparer : IEqualityComparer<byte[]>, IComparer<byte[]>
     {
         /// <summary>
         /// Gets the singleton instance of this comparer.
@@ -80,6 +81,20 @@ namespace AsmResolver
                     result = (result * 31) ^ b;
                 return result;
             }
+        }
+
+        /// <inheritdoc />
+        public int Compare(byte[] x, byte[] y)
+        {
+            int length = Math.Min(x.Length, y.Length);
+            for (int i = 0; i < length; i++)
+            {
+                int result = x[i].CompareTo(y[i]);
+                if (result != 0)
+                    return result;
+            }
+
+            return x.Length.CompareTo(y.Length);
         }
     }
 }
