@@ -14,7 +14,6 @@ using AsmResolver.PE.Builder;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Builder;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;

@@ -2,7 +2,6 @@
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet

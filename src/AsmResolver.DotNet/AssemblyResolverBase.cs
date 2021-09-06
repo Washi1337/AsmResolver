@@ -1,7 +1,7 @@
-using AsmResolver.DotNet.Signatures;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 
 namespace AsmResolver.DotNet

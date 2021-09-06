@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Collections;
-using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
