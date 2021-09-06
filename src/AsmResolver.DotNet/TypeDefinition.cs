@@ -50,8 +50,8 @@ namespace AsmResolver.DotNet
         protected TypeDefinition(MetadataToken token)
             : base(token)
         {
-            _namespace = new LazyVariable<Utf8String?>(() => GetNamespace());
-            _name = new LazyVariable<Utf8String?>(() => GetName());
+            _namespace = new LazyVariable<Utf8String?>(GetNamespace);
+            _name = new LazyVariable<Utf8String?>(GetName);
             _baseType = new LazyVariable<ITypeDefOrRef?>(GetBaseType);
             _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
             _classLayout = new LazyVariable<ClassLayout?>(GetClassLayout);

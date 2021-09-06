@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet
         protected GenericParameter(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(() => GetName());
+            _name = new LazyVariable<Utf8String?>(GetName);
             _owner = new LazyVariable<IHasGenericParameters?>(GetOwner);
         }
 

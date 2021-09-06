@@ -216,11 +216,11 @@ namespace AsmResolver.DotNet
         protected ModuleDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(() => GetName());
+            _name = new LazyVariable<Utf8String?>(GetName);
             _mvid = new LazyVariable<Guid>(GetMvid);
             _encId = new LazyVariable<Guid>(GetEncId);
             _encBaseId = new LazyVariable<Guid>(GetEncBaseId);
-            _managedEntrypoint = new LazyVariable<IManagedEntrypoint?>(() => GetManagedEntrypoint());
+            _managedEntrypoint = new LazyVariable<IManagedEntrypoint?>(GetManagedEntrypoint);
             _runtimeVersion = new LazyVariable<string>(GetRuntimeVersion);
             _nativeResources = new LazyVariable<IResourceDirectory?>(GetNativeResources);
             Attributes = DotNetDirectoryFlags.ILOnly;

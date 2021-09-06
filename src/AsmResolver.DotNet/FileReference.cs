@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet
         protected FileReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(() => GetName());
+            _name = new LazyVariable<Utf8String?>(GetName);
             _hashValue = new LazyVariable<byte[]?>(GetHashValue);
         }
 

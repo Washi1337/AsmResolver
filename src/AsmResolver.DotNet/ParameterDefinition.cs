@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet
         protected ParameterDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(() => GetName());
+            _name = new LazyVariable<Utf8String?>(GetName);
             _method = new LazyVariable<MethodDefinition?>(GetMethod);
             _constant = new LazyVariable<Constant?>(GetConstant);
             _marshalDescriptor = new LazyVariable<MarshalDescriptor?>(GetMarshalDescriptor);

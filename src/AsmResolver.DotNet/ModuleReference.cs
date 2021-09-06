@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet
         protected ModuleReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(() => GetName());
+            _name = new LazyVariable<Utf8String?>(GetName);
         }
 
         /// <summary>

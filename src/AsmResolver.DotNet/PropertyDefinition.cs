@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet
         protected PropertyDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(() => GetName());
+            _name = new LazyVariable<Utf8String?>(GetName);
             _signature = new LazyVariable<PropertySignature?>(GetSignature);
             _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
             _constant = new LazyVariable<Constant?>(GetConstant);

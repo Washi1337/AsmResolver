@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet
         protected ManifestResource(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(() => GetName());
+            _name = new LazyVariable<Utf8String?>(GetName);
             _implementation = new LazyVariable<IImplementation?>(GetImplementation);
             _embeddedData = new LazyVariable<ISegment?>(GetEmbeddedDataSegment);
         }

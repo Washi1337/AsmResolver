@@ -27,8 +27,8 @@ namespace AsmResolver.DotNet
         protected TypeReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(() => GetName());
-            _namespace = new LazyVariable<Utf8String?>(() => GetNamespace());
+            _name = new LazyVariable<Utf8String?>(GetName);
+            _namespace = new LazyVariable<Utf8String?>(GetNamespace);
             _scope = new LazyVariable<IResolutionScope?>(GetScope);
         }
 

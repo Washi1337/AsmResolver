@@ -1,5 +1,3 @@
-using AsmResolver.PE.DotNet.Metadata.Strings;
-
 namespace AsmResolver.DotNet
 {
     /// <summary>

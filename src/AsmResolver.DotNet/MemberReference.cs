@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet
             : base(token)
         {
             _parent = new LazyVariable<IMemberRefParent?>(GetParent);
-            _name = new LazyVariable<Utf8String?>(() => GetName());
+            _name = new LazyVariable<Utf8String?>(GetName);
             _signature = new LazyVariable<CallingConventionSignature?>(GetSignature);
         }
 
