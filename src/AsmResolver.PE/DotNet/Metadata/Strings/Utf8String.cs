@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -8,7 +10,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
     /// Represents an immutable UTF-8 encoded string stored in the #Strings stream of a .NET image.
     /// This class supports preserving invalid UTF-8 code sequences.
     /// </summary>
-    public sealed class Utf8String : IEquatable<Utf8String>, IEquatable<string>, IEquatable<byte[]>, IComparable<Utf8String>
+    public sealed class Utf8String :
+        IEquatable<Utf8String>,
+        IEquatable<string>,
+        IEquatable<byte[]>,
+        IComparable<Utf8String>,
+        IEnumerable<char>
     {
         /// <summary>
         /// Represents the empty UTF-8 string.
@@ -63,7 +70,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <summary>
         /// Gets the number of characters in the string.
         /// </summary>
-        public int Length => Value.Length;
+        public int Length => _cachedString is null ? Encoding.UTF8.GetCharCount(_data) : Value.Length;
 
         /// <summary>
         /// Gets a single character in the string.
@@ -121,7 +128,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <param name="other">The other string to append..</param>
         /// <returns>The new string.</returns>
         public Utf8String Concat(string? other) => !string.IsNullOrEmpty(other)
-            ? Concat(Encoding.UTF8.GetBytes(other))
+            ? Concat(Encoding.UTF8.GetBytes(other!))
             : this;
 
         /// <summary>
@@ -139,6 +146,107 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
             Buffer.BlockCopy(other, 0, result, _data.Length, other.Length);
             return result;
         }
+
+        /// <summary>
+        /// Gets the zero-based index of the first occurrence of the provided character in the string.
+        /// </summary>
+        /// <param name="needle">The character to search.</param>
+        /// <returns>The index, or -1 if the character is not present.</returns>
+        public int IndexOf(char needle) => Value.IndexOf(needle);
+
+        /// <summary>
+        /// Gets the zero-based index of the first occurrence of the provided character in the string.
+        /// </summary>
+        /// <param name="needle">The character to search.</param>
+        /// <param name="startIndex">The index to start searching at.</param>
+        /// <returns>The index, or -1 if the character is not present.</returns>
+        public int IndexOf(char needle, int startIndex) => Value.IndexOf(needle, startIndex);
+
+        /// <summary>
+        /// Gets the zero-based index of the first occurrence of the provided string in the string.
+        /// </summary>
+        /// <param name="needle">The string to search.</param>
+        /// <returns>The index, or -1 if the string is not present.</returns>
+        public int IndexOf(string needle) => Value.IndexOf(needle);
+
+        /// <summary>
+        /// Gets the zero-based index of the first occurrence of the provided string in the string.
+        /// </summary>
+        /// <param name="needle">The string to search.</param>
+        /// <param name="startIndex">The index to start searching at.</param>
+        /// <returns>The index, or -1 if the string is not present.</returns>
+        public int IndexOf(string needle, int startIndex) => Value.IndexOf(needle, startIndex);
+
+        /// <summary>
+        /// Gets the zero-based index of the first occurrence of the provided string in the string.
+        /// </summary>
+        /// <param name="needle">The string to search.</param>
+        /// <param name="comparison">The comparison algorithm to use.</param>
+        /// <returns>The index, or -1 if the string is not present.</returns>
+        public int IndexOf(string needle, StringComparison comparison) => Value.IndexOf(needle, comparison);
+
+        /// <summary>
+        /// Gets the zero-based index of the first occurrence of the provided string in the string.
+        /// </summary>
+        /// <param name="needle">The string to search.</param>
+        /// <param name="startIndex">The index to start searching at.</param>
+        /// <param name="comparison">The comparison algorithm to use.</param>
+        /// <returns>The index, or -1 if the string is not present.</returns>
+        public int IndexOf(string needle, int startIndex, StringComparison comparison) => Value.IndexOf(needle, startIndex, comparison);
+
+        /// <summary>
+        /// Gets the zero-based index of the last occurrence of the provided character in the string.
+        /// </summary>
+        /// <param name="needle">The character to search.</param>
+        /// <returns>The index, or -1 if the character is not present.</returns>
+        public int LastIndexOf(char needle) => Value.LastIndexOf(needle);
+
+        /// <summary>
+        /// Gets the zero-based index of the last occurrence of the provided character in the string.
+        /// </summary>
+        /// <param name="needle">The character to search.</param>
+        /// <param name="startIndex">The index to start searching at.</param>
+        /// <returns>The index, or -1 if the character is not present.</returns>
+        public int LastIndexOf(char needle, int startIndex) => Value.LastIndexOf(needle, startIndex);
+
+        /// <summary>
+        /// Gets the zero-based index of the last occurrence of the provided string in the string.
+        /// </summary>
+        /// <param name="needle">The string to search.</param>
+        /// <returns>The index, or -1 if the string is not present.</returns>
+        public int LastIndexOf(string needle) => Value.LastIndexOf(needle);
+
+        /// <summary>
+        /// Gets the zero-based index of the first occurrence of the provided string in the string.
+        /// </summary>
+        /// <param name="needle">The string to search.</param>
+        /// <param name="startIndex">The index to start searching at.</param>
+        /// <returns>The index, or -1 if the string is not present.</returns>
+        public int LastIndexOf(string needle, int startIndex) => Value.LastIndexOf(needle, startIndex);
+
+        /// <summary>
+        /// Gets the zero-based index of the last occurrence of the provided string in the string.
+        /// </summary>
+        /// <param name="needle">The string to search.</param>
+        /// <param name="comparison">The comparison algorithm to use.</param>
+        /// <returns>The index, or -1 if the string is not present.</returns>
+        public int LastIndexOf(string needle, StringComparison comparison) => Value.LastIndexOf(needle, comparison);
+
+        /// <summary>
+        /// Gets the zero-based index of the last occurrence of the provided string in the string.
+        /// </summary>
+        /// <param name="needle">The string to search.</param>
+        /// <param name="startIndex">The index to start searching at.</param>
+        /// <param name="comparison">The comparison algorithm to use.</param>
+        /// <returns>The index, or -1 if the string is not present.</returns>
+        public int LastIndexOf(string needle, int startIndex, StringComparison comparison) => Value.LastIndexOf(needle, startIndex, comparison);
+
+        /// <summary>
+        /// Determines whether the string contains the provided string.
+        /// </summary>
+        /// <param name="needle">The string to search.</param>
+        /// <returns><c>true</c> if the string is present, <c>false</c> otherwise.</returns>
+        public bool Contains(string needle) => IndexOf(needle) >= 0;
 
         /// <summary>
         /// Determines whether the provided string is <c>null</c> or the empty string.
@@ -172,6 +280,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
 
         /// <inheritdoc />
         public int CompareTo(Utf8String other) => ByteArrayEqualityComparer.Instance.Compare(_data, other._data);
+
+        /// <inheritdoc />
+        public IEnumerator<char> GetEnumerator() => Value.GetEnumerator();
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <inheritdoc />
         /// <remarks>

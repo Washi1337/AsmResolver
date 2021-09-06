@@ -73,5 +73,62 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Strings
             Utf8String? s2 = b;
             Assert.Equal((a ?? Array.Empty<byte>()).Concat(b ?? Array.Empty<byte>()), (s1 + s2)?.GetBytes());
         }
+
+        [Theory]
+        [InlineData("0123456789", '0', 0)]
+        [InlineData("0123456789", '5', 5)]
+        [InlineData("0123456789", 'a', -1)]
+        public void IndexOfChar(string haystack, char needle, int expected)
+        {
+            Assert.Equal(expected, new Utf8String(haystack).IndexOf(needle));
+        }
+
+        [Theory]
+        [InlineData("012345678901234567890123456789", '0', 0, 0)]
+        [InlineData("012345678901234567890123456789", '0', 1, 10)]
+        [InlineData("012345678901234567890123456789", '0', 11, 20)]
+        [InlineData("012345678901234567890123456789", '0', 21, -1)]
+        public void IndexOfCharStartingAtIndex(string haystack, char needle, int startIndex, int expected)
+        {
+            Assert.Equal(expected, new Utf8String(haystack).IndexOf(needle, startIndex));
+        }
+
+        [Theory]
+        [InlineData("01234567890123456789", '0', 10)]
+        [InlineData("01234567890123456789", '5', 15)]
+        [InlineData("01234567890123456789", 'a', -1)]
+        public void LastIndexOfChar(string haystack, char needle, int expected)
+        {
+            Assert.Equal(expected, new Utf8String(haystack).LastIndexOf(needle));
+        }
+
+        [Theory]
+        [InlineData("012345678901234567890123456789", '0', 29, 20)]
+        [InlineData("012345678901234567890123456789", '0', 19, 10)]
+        [InlineData("012345678901234567890123456789", '0', 9, 0)]
+        [InlineData("012345678901234567890123456789", 'a', 20, -1)]
+        public void LastIndexOfCharStartingAtIndex(string haystack, char needle, int startIndex, int expected)
+        {
+            Assert.Equal(expected, new Utf8String(haystack).LastIndexOf(needle, startIndex));
+        }
+
+        [Theory]
+        [InlineData("0123456789", "01", 0)]
+        [InlineData("0123456789", "56", 5)]
+        [InlineData("0123456789", "ab", -1)]
+        public void IndexOfString(string haystack, string needle, int expected)
+        {
+            Assert.Equal(expected, new Utf8String(haystack).IndexOf(needle));
+        }
+
+        [Theory]
+        [InlineData("012345678901234567890123456789", "01", 0, 0)]
+        [InlineData("012345678901234567890123456789", "01", 1, 10)]
+        [InlineData("012345678901234567890123456789", "01", 11, 20)]
+        [InlineData("012345678901234567890123456789", "01", 21, -1)]
+        public void IndexOfStringStartingAtIndex(string haystack, string needle, int startIndex, int expected)
+        {
+            Assert.Equal(expected, new Utf8String(haystack).IndexOf(needle, startIndex));
+        }
     }
 }
