@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -10,6 +11,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
     /// Represents an immutable UTF-8 encoded string stored in the #Strings stream of a .NET image.
     /// This class supports preserving invalid UTF-8 code sequences.
     /// </summary>
+    [DebuggerDisplay("{DebugDisplay}")]
     public sealed class Utf8String :
         IEquatable<Utf8String>,
         IEquatable<string>,
@@ -71,6 +73,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// Gets the number of characters in the string.
         /// </summary>
         public int Length => _cachedString is null ? Encoding.UTF8.GetCharCount(_data) : Value.Length;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal string DebugDisplay => Value.CreateEscapedString();
 
         /// <summary>
         /// Gets a single character in the string.

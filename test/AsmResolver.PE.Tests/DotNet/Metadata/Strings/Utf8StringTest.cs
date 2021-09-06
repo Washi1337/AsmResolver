@@ -16,6 +16,17 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Strings
         }
 
         [Theory]
+        [InlineData(new byte[] { 0x41, 0x42, 0x43 }, 3)]
+        [InlineData(new byte[] { 0x80, 0x42, 0x43 }, 3)]
+        public void LengthBeforeAndAfterValueAccessShouldBeConsistentProperty(byte[] data, int expected)
+        {
+            var s1 = new Utf8String(data);
+            Assert.Equal(expected, s1.Length);
+            _ = s1.Value;
+            Assert.Equal(expected, s1.Length);
+        }
+
+        [Theory]
         [InlineData("ABC", "ABC")]
         [InlineData("ABC", "DEF")]
         public void StringEquality(string a, string b)
