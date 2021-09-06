@@ -5,11 +5,10 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace AsmResolver.PE.DotNet.Metadata.Strings
+namespace AsmResolver
 {
     /// <summary>
-    /// Represents an immutable UTF-8 encoded string stored in the #Strings stream of a .NET image.
-    /// This class supports preserving invalid UTF-8 code sequences.
+    /// Represents an immutable UTF-8 encoded string. This class supports preserving invalid UTF-8 code sequences.
     /// </summary>
     [DebuggerDisplay("{DebugDisplay}")]
     public sealed class Utf8String :

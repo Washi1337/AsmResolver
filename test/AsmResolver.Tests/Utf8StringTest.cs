@@ -1,9 +1,8 @@
 using System;
 using System.Linq;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using Xunit;
 
-namespace AsmResolver.PE.Tests.DotNet.Metadata.Strings
+namespace AsmResolver.Tests
 {
     public class Utf8StringTest
     {
