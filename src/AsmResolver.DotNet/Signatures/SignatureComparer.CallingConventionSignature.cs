@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Signatures
             unchecked
             {
                 int hashCode = (int) obj.Attributes;
-                hashCode = (hashCode * 397) ^ (obj.FieldType != null ? obj.FieldType.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ GetHashCode(obj.FieldType);
                 return hashCode;
             }
         }
@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet.Signatures
             {
                 int hashCode = (int) obj.Attributes;
                 hashCode = (hashCode * 397) ^ obj.GenericParameterCount;
-                hashCode = (hashCode * 397) ^ (obj.ReturnType is not null ? obj.ReturnType.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ GetHashCode(obj.ReturnType);
                 hashCode = (hashCode * 397) ^ GetHashCode(obj.ParameterTypes);
                 hashCode = (hashCode * 397) ^ GetHashCode(obj.SentinelParameterTypes);
                 return hashCode;

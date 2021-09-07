@@ -99,8 +99,10 @@ namespace AsmResolver.DotNet.Signatures
                 hashCode = (hashCode * 397) ^ (int) TableIndex.AssemblyRef;
                 hashCode = (hashCode * 397) ^ obj.Version.GetHashCode();
                 hashCode = (hashCode * 397) ^ (int) obj.Attributes;
-                var publicKeyToken = obj.GetPublicKeyToken();
+
+                byte[]? publicKeyToken = obj.GetPublicKeyToken();
                 hashCode = (hashCode * 397) ^ (publicKeyToken is not null ? GetHashCode(publicKeyToken) : 0);
+
                 return hashCode;
             }
         }

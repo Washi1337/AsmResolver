@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -105,7 +104,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             unchecked
             {
-                int hashCode = obj.Method == null ? 0 : obj.Method.GetHashCode();
+                int hashCode = obj.Method == null ? 0 : GetHashCode(obj.Method);
                 hashCode = (hashCode * 397) ^ (obj.Signature is not null ? GetHashCode(obj.Signature) : 0);
                 return hashCode;
             }

@@ -190,7 +190,7 @@ namespace AsmResolver.DotNet.Signatures
             unchecked
             {
                 int hashCode = (int) obj.ElementType << ElementTypeOffset;
-                hashCode = (hashCode * 397) ^ (obj.Name is null ? 0 : obj.Name.GetHashCode());
+                hashCode = (hashCode * 397) ^ obj.Name.GetHashCode();
                 hashCode = (hashCode * 397) ^ (obj.Namespace is null ? 0 : obj.Namespace.GetHashCode());
                 hashCode = (hashCode * 397) ^ (obj.Scope is null ? 0 : GetHashCode(obj.Scope));
                 return hashCode;
