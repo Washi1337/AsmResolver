@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class ImplementationMap : MetadataMember, IFullNameProvider
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<ModuleReference?> _scope;
         private readonly LazyVariable<IMemberForwarded?> _memberForwarded;
 
@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet
         protected ImplementationMap(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string?>(GetName);
+            _name = new LazyVariable<Utf8String?>(GetName);
             _scope = new LazyVariable<ModuleReference?>(GetScope);
             _memberForwarded = new LazyVariable<IMemberForwarded?>(GetMemberForwarded);
         }
@@ -57,12 +57,19 @@ namespace AsmResolver.DotNet
             internal set => _memberForwarded.Value = value;
         }
 
-        /// <inheritdoc />
-        public string? Name
+        /// <summary>
+        /// Gets or sets the name of the map.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the implementation map table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <inheritdoc />
         public string FullName => Scope is null
@@ -85,7 +92,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the scope that declares the imported member.

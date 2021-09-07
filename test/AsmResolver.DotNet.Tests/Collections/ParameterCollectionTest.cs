@@ -3,6 +3,7 @@ using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Methods;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Collections
@@ -179,6 +180,15 @@ namespace AsmResolver.DotNet.Tests.Collections
             var instanceMethod = type.Methods.First(t => !t.IsStatic);
             var signature = Assert.IsAssignableFrom<CorLibTypeSignature>(instanceMethod.Parameters.ThisParameter.ParameterType);
             Assert.Same(module.CorLibTypeFactory.Object, signature);
+        }
+
+        [Fact]
+        public void UnnamedParameterShouldResultInDummyName()
+        {
+            var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceMultipleParametersMethod));
+            foreach (var param in method.ParameterDefinitions)
+                param.Name = null;
+            Assert.All(method.Parameters, p => Assert.Equal(p.Name, $"A_{p.MethodSignatureIndex}"));
         }
     }
 }

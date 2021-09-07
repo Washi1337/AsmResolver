@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet
         IManagedEntrypoint,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<byte[]?> _hashValue;
         private IList<CustomAttribute>? _customAttributes;
 
@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet
         protected FileReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string?>(GetName);
+            _name = new LazyVariable<Utf8String?>(GetName);
             _hashValue = new LazyVariable<byte[]?>(GetHashValue);
         }
 
@@ -70,12 +70,19 @@ namespace AsmResolver.DotNet
                                 | (value ? FileAttributes.ContainsNoMetadata : 0);
         }
 
-        /// <inheritdoc />
-        public string? Name
+        /// <summary>
+        /// Gets or sets the name of the file.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the file table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <inheritdoc />
         public string FullName => Name ?? NullName;
@@ -120,7 +127,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the hash of the referenced file.

@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string? Name => ParameterType switch
+        public override string Name => ParameterType switch
         {
             GenericParameterType.Type => $"!{Index}",
             GenericParameterType.Method => $"!!{Index}",

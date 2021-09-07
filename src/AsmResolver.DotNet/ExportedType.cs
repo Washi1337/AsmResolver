@@ -16,8 +16,8 @@ namespace AsmResolver.DotNet
         ITypeDescriptor,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<string?> _name;
-        private readonly LazyVariable<string?> _namespace;
+        private readonly LazyVariable<Utf8String?> _name;
+        private readonly LazyVariable<Utf8String?> _namespace;
         private readonly LazyVariable<IImplementation?> _implementation;
         private IList<CustomAttribute>? _customAttributes;
 
@@ -28,8 +28,8 @@ namespace AsmResolver.DotNet
         protected ExportedType(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string?>(GetName);
-            _namespace = new LazyVariable<string?>(GetNamespace);
+            _name = new LazyVariable<Utf8String?>(() => GetName());
+            _namespace = new LazyVariable<Utf8String?>(() => GetNamespace());
             _implementation = new LazyVariable<IImplementation?>(GetImplementation);
         }
 
@@ -65,19 +65,33 @@ namespace AsmResolver.DotNet
             set;
         }
 
-        /// <inheritdoc />
-        public string? Name
+        /// <summary>
+        /// Gets or sets the name of the type.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the exported type table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
 
-        /// <inheritdoc />
-        public string? Namespace
+        string? INameProvider.Name => Name;
+
+        /// <summary>
+        /// Gets or sets the namespace of the type.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Namespace column in the exported type table.
+        /// </remarks>
+        public Utf8String? Namespace
         {
             get => _namespace.Value;
             set => _namespace.Value = value;
         }
+
+        string? ITypeDescriptor.Namespace => Namespace;
 
         /// <inheritdoc />
         public string FullName => this.GetTypeFullName();
@@ -146,7 +160,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Namespace"/> property.
         /// </remarks>
-        protected virtual string? GetNamespace() => null;
+        protected virtual Utf8String? GetNamespace() => null;
 
         /// <summary>
         /// Obtains the name of the exported type.
@@ -155,7 +169,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the implementation of the exported type.

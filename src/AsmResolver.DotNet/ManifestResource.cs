@@ -17,7 +17,7 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<IImplementation?> _implementation;
         private readonly LazyVariable<ISegment?> _embeddedData;
         private IList<CustomAttribute>? _customAttributes;
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet
         protected ManifestResource(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string?>(GetName);
+            _name = new LazyVariable<Utf8String?>(GetName);
             _implementation = new LazyVariable<IImplementation?>(GetImplementation);
             _embeddedData = new LazyVariable<ISegment?>(GetEmbeddedDataSegment);
         }
@@ -101,12 +101,19 @@ namespace AsmResolver.DotNet
             set => Attributes = value ? ManifestResourceAttributes.Private : ManifestResourceAttributes.Public;
         }
 
-        /// <inheritdoc />
-        public string? Name
+        /// <summary>
+        /// Gets or sets the name of the manifest resource.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the manifest resource table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <summary>
         /// Gets or sets the implementation indicating the file containing the resource data.
@@ -191,7 +198,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the implementation of this resource.

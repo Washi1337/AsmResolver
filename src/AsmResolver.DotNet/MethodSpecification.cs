@@ -60,8 +60,13 @@ namespace AsmResolver.DotNet
             set => _signature.Value = value;
         }
 
-        /// <inheritdoc />
-        public string Name => Method?.Name ?? NullName;
+
+        /// <summary>
+        /// Gets or sets the name of the method specification.
+        /// </summary>
+        public Utf8String Name => Method?.Name ?? NullName;
+
+        string? INameProvider.Name => Name;
 
         /// <inheritdoc />
         public string FullName => FullNameGenerator.GetMethodFullName(

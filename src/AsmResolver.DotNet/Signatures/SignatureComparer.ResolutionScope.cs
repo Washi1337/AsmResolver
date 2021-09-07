@@ -94,13 +94,13 @@ namespace AsmResolver.DotNet.Signatures
         {
             unchecked
             {
-                int hashCode = (obj.Name != null ? obj.Name.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (obj.Culture != null ? obj.Culture.GetHashCode() : 0);
+                int hashCode = obj.Name is null ? 0 : obj.Name.GetHashCode();
+                hashCode = (hashCode * 397) ^ (obj.Culture is not null ? obj.Culture.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (int) TableIndex.AssemblyRef;
-                hashCode = (hashCode * 397) ^ (obj.Version != null ? obj.Version.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ obj.Version.GetHashCode();
                 hashCode = (hashCode * 397) ^ (int) obj.Attributes;
                 var publicKeyToken = obj.GetPublicKeyToken();
-                hashCode = (hashCode * 397) ^ (publicKeyToken != null ? GetHashCode(publicKeyToken) : 0);
+                hashCode = (hashCode * 397) ^ (publicKeyToken is not null ? GetHashCode(publicKeyToken) : 0);
                 return hashCode;
             }
         }

@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="memberName">The name of the referenced member.</param>
         /// <param name="argumentType">The type of the argument to store.</param>
         /// <param name="argument">The argument value.</param>
-        public CustomAttributeNamedArgument(CustomAttributeArgumentMemberType memberType, string? memberName, TypeSignature argumentType, CustomAttributeArgument argument)
+        public CustomAttributeNamedArgument(CustomAttributeArgumentMemberType memberType, Utf8String? memberName, TypeSignature argumentType, CustomAttributeArgument argument)
         {
             MemberType = memberType;
             MemberName = memberName;
@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Gets or sets the name of the referenced member.
         /// </summary>
-        public string? MemberName
+        public Utf8String? MemberName
         {
             get;
             set;
@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             var memberType = (CustomAttributeArgumentMemberType) reader.ReadByte();
             var argumentType = TypeSignature.ReadFieldOrPropType(context, ref reader);
-            string? memberName = reader.ReadSerString();
+            var memberName = reader.ReadSerString();
             var argument = CustomAttributeArgument.FromReader(context, argumentType, ref reader);
 
             return new CustomAttributeNamedArgument(memberType, memberName, argumentType, argument);

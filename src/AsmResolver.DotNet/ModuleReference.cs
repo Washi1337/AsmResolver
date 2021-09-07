@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet
         protected ModuleReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string?>(GetName);
+            _name = new LazyVariable<Utf8String?>(GetName);
         }
 
         /// <summary>
@@ -38,12 +38,19 @@ namespace AsmResolver.DotNet
             Name = name;
         }
 
-        /// <inheritdoc />
-        public string? Name
+        /// <summary>
+        /// Gets or sets the name of the module.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the module definition table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <inheritdoc />
         public ModuleDefinition? Module
@@ -76,7 +83,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         AssemblyDescriptor? IResolutionScope.GetAssembly() => Module?.Assembly;
 

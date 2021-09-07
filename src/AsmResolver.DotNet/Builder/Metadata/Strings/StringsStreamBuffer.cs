@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
     {
         private readonly MemoryStream _rawStream = new();
         private readonly IBinaryStreamWriter _writer;
-        private readonly Dictionary<string, uint> _strings = new();
+        private readonly Dictionary<Utf8String, uint> _strings = new();
 
         /// <summary>
         /// Creates a new strings stream buffer with the default strings stream name.
@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
             uint index = 1;
             while (index < stream.GetPhysicalSize())
             {
-                string @string = stream.GetStringByIndex(index)!;
+                var @string = stream.GetStringByIndex(index)!;
                 uint newIndex = AppendString(@string);
                 _strings[@string] = newIndex;
 
@@ -78,10 +78,10 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
             return offset;
         }
 
-        private uint AppendString(string value)
+        private uint AppendString(Utf8String value)
         {
             uint offset = (uint) _rawStream.Length;
-            AppendRawData(Encoding.UTF8.GetBytes(value));
+            AppendRawData(value.GetBytesUnsafe());
             _writer.WriteByte(0);
             return offset;
         }
@@ -92,12 +92,12 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         /// </summary>
         /// <param name="value">The string to lookup or add.</param>
         /// <returns>The index of the string.</returns>
-        public uint GetStringIndex(string? value)
+        public uint GetStringIndex(Utf8String? value)
         {
-            if (string.IsNullOrEmpty(value))
+            if (Utf8String.IsNullOrEmpty(value))
                 return 0;
 
-            if (value!.IndexOf('\0') >= 0)
+            if (Array.IndexOf(value.GetBytesUnsafe(), (byte) 0x00) >= 0)
                 throw new ArgumentException("String contains a zero byte.");
 
             if (!_strings.TryGetValue(value, out uint offset))

@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string? GetNamespace()
+        protected override Utf8String? GetNamespace()
         {
             return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
                 ? stringsStream.GetStringByIndex(_row.Namespace)
@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string? GetName()
+        protected override Utf8String? GetName()
         {
             return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
                 ? stringsStream.GetStringByIndex(_row.Name)

@@ -1,4 +1,3 @@
-using System;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -52,14 +51,14 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string? Name
+        public override string Name
         {
             get
             {
                 string modifierString = IsRequired ? "modreq(" : "modopt(";
 
-                string baseType = BaseType?.Name ?? NullTypeToString;
-                string modifier = ModifierType?.FullName ?? NullTypeToString;
+                string baseType = BaseType.Name ?? NullTypeToString;
+                string modifier = ModifierType.FullName;
                 return $"{baseType} {modifierString}{modifier})";
             }
         }

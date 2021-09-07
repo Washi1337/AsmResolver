@@ -55,7 +55,7 @@ namespace AsmResolver.DotNet.Signatures
             switch (argumentType.ElementType)
             {
                 case ElementType.String:
-                    writer.WriteSerString(null);
+                    writer.WriteSerString(default(Utf8String));
                     break;
 
                 case ElementType.Object:
@@ -138,8 +138,12 @@ namespace AsmResolver.DotNet.Signatures
                     writer.WriteDouble((double) element);
                     break;
 
-                case ElementType.String:
-                    writer.WriteSerString(element as string);
+                case ElementType.String when element is string s:
+                    writer.WriteSerString(s);
+                    break;
+
+                case ElementType.String when element is Utf8String s:
+                    writer.WriteSerString(s);
                     break;
 
                 case ElementType.Object:

@@ -25,8 +25,8 @@ namespace AsmResolver.DotNet
         IOwnedCollectionElement<ModuleDefinition>,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<string?> _namespace;
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _namespace;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<ITypeDefOrRef?> _baseType;
         private readonly LazyVariable<TypeDefinition?> _declaringType;
         private readonly LazyVariable<ClassLayout?> _classLayout;
@@ -49,8 +49,8 @@ namespace AsmResolver.DotNet
         protected TypeDefinition(MetadataToken token)
             : base(token)
         {
-            _namespace = new LazyVariable<string?>(GetNamespace);
-            _name = new LazyVariable<string?>(GetName);
+            _namespace = new LazyVariable<Utf8String?>(GetNamespace);
+            _name = new LazyVariable<Utf8String?>(GetName);
             _baseType = new LazyVariable<ITypeDefOrRef?>(GetBaseType);
             _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
             _classLayout = new LazyVariable<ClassLayout?>(GetClassLayout);
@@ -86,20 +86,30 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the namespace the type resides in.
         /// </summary>
-        public string? Namespace
+        /// <remarks>
+        /// This property corresponds to the Namespace column in the type definition table.
+        /// </remarks>
+        public Utf8String? Namespace
         {
             get => _namespace.Value;
             set => _namespace.Value = value;
         }
 
+        string? ITypeDescriptor.Namespace => Namespace;
+
         /// <summary>
         /// Gets or sets the name of the type.
         /// </summary>
-        public string? Name
+        /// <remarks>
+        /// This property corresponds to the Name column in the type definition table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <summary>
         /// Gets the full name (including namespace or declaring type full name) of the type.
@@ -801,7 +811,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Namespace"/> property.
         /// </remarks>
-        protected virtual string? GetNamespace() => null;
+        protected virtual Utf8String? GetNamespace() => null;
 
         /// <summary>
         /// Obtains the name of the type definition.
@@ -810,7 +820,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the base type of the type definition.

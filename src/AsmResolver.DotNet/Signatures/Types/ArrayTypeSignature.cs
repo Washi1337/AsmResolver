@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ElementType ElementType => ElementType.Array;
 
         /// <inheritdoc />
-        public override string? Name => (BaseType.Name ?? NullTypeToString) + GetDimensionsString();
+        public override string Name => $"{BaseType.Name ?? NullTypeToString}{GetDimensionsString()}";
 
         /// <inheritdoc />
         public override bool IsValueType => false;

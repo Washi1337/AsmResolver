@@ -26,22 +26,18 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        protected override string? GetName() =>
-            _assemblyName.Name;
+        protected override Utf8String? GetName() => _assemblyName.Name;
 
         /// <inheritdoc />
-        protected override string GetCulture() =>
-            _assemblyName.CultureName;
+        protected override Utf8String? GetCulture() => _assemblyName.CultureName;
 
         /// <inheritdoc />
         public override bool IsCorLib => Name is not null && KnownCorLibs.KnownCorLibNames.Contains(Name);
 
         /// <inheritdoc />
-        public override byte[]? GetPublicKeyToken() =>
-            _assemblyName.GetPublicKeyToken();
+        public override byte[]? GetPublicKeyToken() => _assemblyName.GetPublicKeyToken();
 
         /// <inheritdoc />
-        public override AssemblyDefinition? Resolve() =>
-            _parentModule.MetadataResolver.AssemblyResolver.Resolve(this);
+        public override AssemblyDefinition? Resolve() => _parentModule.MetadataResolver.AssemblyResolver.Resolve(this);
     }
 }

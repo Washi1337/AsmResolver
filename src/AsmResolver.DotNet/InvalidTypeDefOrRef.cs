@@ -14,26 +14,13 @@ namespace AsmResolver.DotNet
         private static readonly IDictionary<InvalidTypeSignatureError, InvalidTypeDefOrRef> Instances =
             new Dictionary<InvalidTypeSignatureError, InvalidTypeDefOrRef>();
 
-        /// <summary>
-        /// Gets the instance for the provided error.
-        /// </summary>
-        /// <param name="error">The error.</param>
-        /// <returns>The invalid type reference instance.</returns>
-        public static InvalidTypeDefOrRef Get(InvalidTypeSignatureError error)
-        {
-            if (!Instances.TryGetValue(error, out var instance))
-            {
-                instance = new InvalidTypeDefOrRef(error);
-                Instances.Add(error, instance);
-            }
-
-            return instance;
-        }
+        private readonly Utf8String _name;
 
         private InvalidTypeDefOrRef(InvalidTypeSignatureError error)
             : base(new MetadataToken(TableIndex.TypeRef, 0))
         {
             Error = error;
+            _name = $"<<<{Error}>>>".ToUpperInvariant();
         }
 
         /// <summary>
@@ -44,7 +31,11 @@ namespace AsmResolver.DotNet
             get;
         }
 
-        string INameProvider.Name => $"<<<{Error}>>>".ToUpperInvariant();
+        Utf8String ITypeDefOrRef.Name => _name;
+
+        string INameProvider.Name => _name;
+
+        Utf8String? ITypeDefOrRef.Namespace => null;
 
         string? ITypeDescriptor.Namespace => null;
 
@@ -66,6 +57,22 @@ namespace AsmResolver.DotNet
             get;
         } = new List<CustomAttribute>();
 
+        /// <summary>
+        /// Gets the instance for the provided error.
+        /// </summary>
+        /// <param name="error">The error.</param>
+        /// <returns>The invalid type reference instance.</returns>
+        public static InvalidTypeDefOrRef Get(InvalidTypeSignatureError error)
+        {
+            if (!Instances.TryGetValue(error, out var instance))
+            {
+                instance = new InvalidTypeDefOrRef(error);
+                Instances.Add(error, instance);
+            }
+
+            return instance;
+        }
+
         IMemberDefinition? IMemberDescriptor.Resolve() => null;
 
         TypeDefinition? ITypeDescriptor.Resolve() => null;
@@ -76,5 +83,7 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public override string ToString() =>  ((IFullNameProvider) this).Name!;
+
+
     }
 }

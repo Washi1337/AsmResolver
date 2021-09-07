@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet
     public class MemberReference : MetadataMember, ICustomAttributeType, IFieldDescriptor
     {
         private readonly LazyVariable<IMemberRefParent?> _parent;
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<CallingConventionSignature?> _signature;
         private IList<CustomAttribute>? _customAttributes;
 
@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet
             : base(token)
         {
             _parent = new LazyVariable<IMemberRefParent?>(GetParent);
-            _name = new LazyVariable<string?>(GetName);
+            _name = new LazyVariable<Utf8String?>(GetName);
             _signature = new LazyVariable<CallingConventionSignature?>(GetSignature);
         }
 
@@ -57,11 +57,17 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the name of the referenced member.
         /// </summary>
-        public string? Name
+        /// <remarks>
+        /// This property corresponds to the Name column in the member reference table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        /// <inheritdoc />
+        string? INameProvider.Name => Name;
 
         /// <summary>
         /// Gets or sets the signature of the referenced member.
@@ -187,7 +193,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the signature of the member reference.

@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             unchecked
             {
-                int hashCode = obj.Name == null ? 0 : obj.Name.GetHashCode();
+                int hashCode = obj.Name is null ? 0 : obj.Name.GetHashCode();
                 hashCode = (hashCode * 397) ^ (obj.DeclaringType is not null ? GetHashCode(obj.DeclaringType) : 0);
                 hashCode = (hashCode * 397) ^ (obj.Signature is not null ? GetHashCode(obj.Signature) : 0);
                 return hashCode;
@@ -81,7 +81,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             unchecked
             {
-                int hashCode = obj.Name == null ? 0 : obj.Name.GetHashCode();
+                int hashCode = obj.Name is null ? 0 : obj.Name.GetHashCode();
                 hashCode = (hashCode * 397) ^ (obj.DeclaringType is not null ? GetHashCode(obj.DeclaringType) : 0);
                 hashCode = (hashCode * 397) ^ (obj.Signature is not null ? GetHashCode(obj.Signature) : 0);
                 return hashCode;

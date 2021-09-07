@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet
     /// </summary>
     public abstract class MetadataMember : IMetadataMember
     {
-        internal const string NullName = "<<<NULL NAME>>>";
+        internal static readonly Utf8String NullName = "<<<NULL NAME>>>";
 
         /// <summary>
         /// Initializes the metadata member with a metadata token.

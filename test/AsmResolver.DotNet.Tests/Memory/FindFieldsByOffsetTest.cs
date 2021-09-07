@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet.Tests.Memory
             Assert.True(layout.TryGetFieldPath(8, out var path));
             Assert.Equal(
                 new[] {nameof(SequentialTestStructs.MultipleFieldsSequentialStructDefaultPack.LongField)},
-                path.Select(f => f.Field.Name));
+                path.Select(f => f.Field.Name?.Value));
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Tests.Memory
                     nameof(MixedTestStructs.Struct2.Nest1),
                     nameof(MixedTestStructs.Struct1.Dummy1),
                 },
-                path.Select(f => f.Field.Name));
+                path.Select(f => f.Field.Name?.Value));
         }
 
         [Fact]
@@ -83,7 +83,7 @@ namespace AsmResolver.DotNet.Tests.Memory
                     nameof(MixedTestStructs.Struct2.Nest1),
                     nameof(MixedTestStructs.Struct1.Dummy1),
                 },
-                path.Select(f => f.Field.Name));
+                path.Select(f => f.Field.Name?.Value));
         }
     }
 }
