@@ -43,6 +43,81 @@ namespace AsmResolver.DotNet
         private IList<MethodImplementation>? _methodImplementations;
 
         /// <summary>
+        /// Initialize New Delegate.
+        /// </summary>
+        /// <param name="ns">Delegate Namespace.</param>
+        /// <param name="name">Delegate Name.</param>
+        /// <param name="module">Delegate Module.</param>
+        /// <param name="returnType">Invoke Return Type.</param>
+        /// <param name="parameterTypes">Invoke Parameters Types.</param>
+        /// <param name="attributes">Accessibility Attributes.</param>
+        /// <returns>Fully Implemented Delegate.</returns>
+        public static TypeDefinition CreateDelegate(string ns, string name, ModuleDefinition module, TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes, TypeAttributes attributes = TypeAttributes.NotPublic) =>
+            CreateDelegate(ns, name, module, MethodSignature.CreateInstance(returnType, parameterTypes), attributes);
+
+        /// <summary>
+        /// Initialize New Delegate.
+        /// </summary>
+        /// <param name="ns">Delegate Namespace.</param>
+        /// <param name="name">Delegate Name.</param>
+        /// <param name="module">Delegate Module.</param>
+        /// <param name="invokeSignature">Delegate.Invoke Signature.</param>
+        /// <param name="attributes">Accessibility Attributes.</param>
+        /// <returns>Fully Implemented Delegate.</returns>
+        public static TypeDefinition CreateDelegate(string ns, string name, ModuleDefinition module, MethodSignature invokeSignature, TypeAttributes attributes = TypeAttributes.NotPublic)
+        {
+
+            var importer = new ReferenceImporter(module);
+
+            var asyncResult = importer.ImportType(new TypeReference(module.CorLibTypeFactory.CorLibScope, nameof(System), nameof(IAsyncResult))).ToTypeSignature();
+            var asyncCallback = importer.ImportType(new TypeReference(module.CorLibTypeFactory.CorLibScope, nameof(System), nameof(AsyncCallback))).ToTypeSignature();
+
+            // TODO: Handles Generics.
+            var delegateType = new TypeDefinition(
+                ns,
+                name,
+                TypeAttributes.Sealed | attributes,
+                importer.ImportType(new TypeReference(module.CorLibTypeFactory.CorLibScope, nameof(System), nameof(MulticastDelegate))));
+
+            delegateType.IsAutoLayout = true;
+
+            // Delegate ctor.
+
+            var ctor = new MethodDefinition(".ctor",
+                MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RuntimeSpecialName | MethodAttributes.ReuseSlot | MethodAttributes.Public,
+                MethodSignature.CreateInstance(module.CorLibTypeFactory.Void, module.CorLibTypeFactory.Object, module.CorLibTypeFactory.IntPtr));
+
+            ctor.IsRuntime = true;
+            delegateType.Methods.Add(ctor);
+
+            var beginInvoke = new MethodDefinition("BeginInvoke",
+                MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.NewSlot,
+                MethodSignature.CreateInstance(asyncResult, invokeSignature.ParameterTypes));
+
+            beginInvoke.Signature.ParameterTypes.Add(asyncCallback);
+            beginInvoke.Signature.ParameterTypes.Add(module.CorLibTypeFactory.Object);
+
+            beginInvoke.IsRuntime = true;
+            delegateType.Methods.Add(beginInvoke);
+
+            var endInvoke = new MethodDefinition("EndInvoke",
+                MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.NewSlot,
+                MethodSignature.CreateInstance(module.CorLibTypeFactory.Void, asyncResult));
+
+            endInvoke.IsRuntime = true;
+            delegateType.Methods.Add(endInvoke);
+
+            var invoke = new MethodDefinition("Invoke",
+                MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.NewSlot,
+                invokeSignature);
+
+            invoke.IsRuntime = true;
+            delegateType.Methods.Add(invoke);
+
+            return delegateType;
+        }
+
+        /// <summary>
         /// Initializes a new type definition.
         /// </summary>
         /// <param name="token">The token of the type definition.</param>
