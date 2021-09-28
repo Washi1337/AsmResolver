@@ -23,7 +23,7 @@ namespace AsmResolver.PE.Exports
         /// </summary>
         /// <param name="address">The reference to the segment representing the symbol.</param>
         /// <param name="name">The name of the symbol.</param>
-        public ExportedSymbol(ISegmentReference address, string name)
+        public ExportedSymbol(ISegmentReference address, string? name)
         {
             Name = name;
             Address = address;

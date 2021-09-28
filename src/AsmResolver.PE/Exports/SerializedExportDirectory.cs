@@ -57,32 +57,43 @@ namespace AsmResolver.PE.Exports
         protected override IList<ExportedSymbol> GetExports()
         {
             var result = new ExportedSymbolCollection(this);
-
-            if (!_context.File.TryCreateReaderAtRva(_addressTableRva, out var addressReader))
-                _context.BadImage("Export directory contains an invalid address table RVA.");
-
-            if (!_context.File.TryCreateReaderAtRva(_namePointerRva, out var namePointerReader))
-                _context.BadImage("Export directory contains an invalid name pointer table RVA.");
-
-            if (!_context.File.TryCreateReaderAtRva(_ordinalTableRva, out var ordinalReader))
-                _context.BadImage("Export directory contains an invalid ordinal table RVA.");
-
-            if (!addressReader.IsValid || !namePointerReader.IsValid || !ordinalReader.IsValid)
+            if (_numberOfFunctions == 0)
                 return result;
 
-            var ordinalNameTable = ReadOrdinalNameTable(ref namePointerReader, ref ordinalReader);
+            if (!_context.File.TryCreateReaderAtRva(_addressTableRva, out var addressReader))
+            {
+                _context.BadImage("Export directory contains an invalid address table RVA.");
+                return result;
+            }
+
+            IDictionary<uint, string>? ordinalNameTable = null;
+
+            if (_namePointerRva != 0 || _ordinalTableRva != 0)
+            {
+                if (!_context.File.TryCreateReaderAtRva(_namePointerRva, out var namePointerReader))
+                    _context.BadImage("Export directory contains an invalid name pointer table RVA.");
+
+                if (!_context.File.TryCreateReaderAtRva(_ordinalTableRva, out var ordinalReader))
+                    _context.BadImage("Export directory contains an invalid ordinal table RVA.");
+
+                if (namePointerReader.IsValid || ordinalReader.IsValid)
+                    ordinalNameTable = ReadOrdinalNameTable(ref namePointerReader, ref ordinalReader);
+            }
 
             for (uint i = 0; i < _numberOfFunctions; i++)
             {
                 uint rva = addressReader.ReadUInt32();
-                ordinalNameTable.TryGetValue(i, out string name);
+
+                string? name = null;
+                ordinalNameTable?.TryGetValue(i, out name);
+
                 result.Add(new ExportedSymbol(_context.File.GetReferenceToRva(rva), name));
             }
 
             return result;
         }
 
-        private IDictionary<uint, string> ReadOrdinalNameTable(
+        private Dictionary<uint, string> ReadOrdinalNameTable(
             ref BinaryStreamReader namePointerReader,
             ref BinaryStreamReader ordinalReader)
         {
