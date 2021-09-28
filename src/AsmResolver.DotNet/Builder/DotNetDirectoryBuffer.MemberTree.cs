@@ -204,7 +204,7 @@ namespace AsmResolver.DotNet.Builder
                 // serialization of the method body, as well as determining the parameter list.
 
                 var row = new MethodDefinitionRow(
-                    SegmentReference.Null, 
+                    SegmentReference.Null,
                     method.ImplAttributes,
                     method.Attributes,
                     Metadata.StringsStream.GetStringIndex(method.Name),
@@ -301,14 +301,10 @@ namespace AsmResolver.DotNet.Builder
                 var type = _tokenMapping.GetTypeByToken(typeToken);
 
                 // Update extends, field list and method list columns.
-                var typeRow = typeDefTable[rid];
-                typeDefTable[rid] = new TypeDefinitionRow(
-                    typeRow.Attributes,
-                    typeRow.Name,
-                    typeRow.Namespace,
-                    GetTypeDefOrRefIndex(type.BaseType),
-                    fieldList,
-                    methodList);
+                ref var typeRow = ref typeDefTable.GetRowRef(rid);
+                typeRow.Extends = GetTypeDefOrRefIndex(type.BaseType);
+                typeRow.FieldList = fieldList;
+                typeRow.MethodList = methodList;
 
                 // Finalize fields and methods.
                 FinalizeFieldsInType(type, ref fieldPtrRequired);
@@ -412,15 +408,9 @@ namespace AsmResolver.DotNet.Builder
                 var method = _tokenMapping.GetMethodByToken(newToken);
 
                 // Serialize method body and update column.
-                var row = definitionTable[newToken.Rid];
-
-                definitionTable[newToken.Rid] = new MethodDefinitionRow(
-                    MethodBodySerializer.SerializeMethodBody(context, method),
-                    row.ImplAttributes,
-                    row.Attributes,
-                    row.Name,
-                    row.Signature,
-                    paramList);
+                ref var row = ref definitionTable.GetRowRef(rid);
+                row.Body = MethodBodySerializer.SerializeMethodBody(context, method);
+                row.ParameterList = paramList;
 
                 // Finalize parameters.
                 FinalizeParametersInMethod(method, ref paramList, ref paramPtrRequired);

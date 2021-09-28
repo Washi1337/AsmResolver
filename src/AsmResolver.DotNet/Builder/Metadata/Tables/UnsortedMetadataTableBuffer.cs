@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AsmResolver.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -13,7 +14,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
     public class UnsortedMetadataTableBuffer<TRow> : IMetadataTableBuffer<TRow>
         where TRow : struct, IMetadataRow
     {
-        private readonly List<TRow> _entries = new();
+        private readonly RefList<TRow> _entries = new();
         private readonly MetadataTable<TRow> _table;
 
         /// <summary>
@@ -34,6 +35,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
             get => _entries[(int) (rid - 1)];
             set => _entries[(int) (rid - 1)] = value;
         }
+
+        /// <inheritdoc />
+        public ref TRow GetRowRef(uint rid) => ref _entries.GetElementRef((int)(rid - 1));
 
         /// <inheritdoc />
         public virtual MetadataToken Add(in TRow row)
