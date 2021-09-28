@@ -312,17 +312,17 @@ namespace AsmResolver.IO
         /// <returns>The read bytes, including the delimeter if it was found.</returns>
         public byte[] ReadBytesUntil(byte delimeter)
         {
-            var buffer = new List<byte>();
-
-            while (RelativeOffset < Length)
+            var lookahead = Fork();
+            while (lookahead.RelativeOffset < lookahead.Length)
             {
-                byte b = ReadByte();
-                buffer.Add(b);
+                byte b = lookahead.ReadByte();
                 if (b == delimeter)
                     break;
             }
 
-            return buffer.ToArray();
+            byte[] buffer = new byte[lookahead.RelativeOffset - RelativeOffset];
+            ReadBytes(buffer, 0, buffer.Length);
+            return buffer;
         }
 
         /// <summary>

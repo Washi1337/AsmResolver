@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Builder.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using Xunit;
@@ -125,7 +124,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.True(buffer.IsEmpty);
         }
 
-        private void OptimizeAndVerifyIndices(StringsStreamBuffer buffer, params string[] values)
+        private void OptimizeAndVerifyIndices(StringsStreamBuffer buffer, params Utf8String[] values)
         {
             uint[] indices = new uint[values.Length];
             for (int i = 0; i < values.Length; i++)
@@ -256,5 +255,17 @@ namespace AsmResolver.DotNet.Tests.Builder
                 stream.GetPhysicalSize());
         }
 
+        [Fact]
+        public void OptimizeWithInvalidUtf8Characters()
+        {
+            var string1 = new Utf8String(new byte[] { 0x80, 0x79, 0x78 });
+            var string2 = new Utf8String(new byte[] { 0x79, 0x78 });
+
+            var buffer = new StringsStreamBuffer();
+            OptimizeAndVerifyIndices(buffer, string1, string2);
+
+            uint index = buffer.GetStringIndex(string1);
+            Assert.Equal(index + 1, buffer.GetStringIndex(string2));
+        }
     }
 }

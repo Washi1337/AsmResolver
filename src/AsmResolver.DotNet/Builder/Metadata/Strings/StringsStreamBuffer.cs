@@ -129,15 +129,16 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
             for (int i = 0; i < sortedEntries.Count; i++)
             {
                 var currentEntry = sortedEntries[i];
+                var currentBlob = _blobs[currentEntry.Value.BlobIndex];
 
                 // Ignore blobs that are already added.
-                if (_blobs[currentEntry.Value.BlobIndex].IsFixed)
+                if (currentBlob.IsFixed)
                     continue;
 
                 if (i == 0)
                 {
                     // First blob should always be added, since it has no common prefix with anything else.
-                    AppendBlob(_blobs[currentEntry.Value.BlobIndex]);
+                    AppendBlob(currentBlob);
                 }
                 else
                 {
@@ -150,7 +151,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
                     if (reusedIndex != i)
                         ReuseBlob(currentEntry, reusedIndex);
                     else
-                        AppendBlob(_blobs[currentEntry.Value.BlobIndex]);
+                        AppendBlob(currentBlob);
                 }
             }
 
