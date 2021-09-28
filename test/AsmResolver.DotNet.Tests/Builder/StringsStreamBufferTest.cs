@@ -124,7 +124,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.True(buffer.IsEmpty);
         }
 
-        private void OptimizeAndVerifyIndices(StringsStreamBuffer buffer, params Utf8String[] values)
+        private static void OptimizeAndVerifyIndices(StringsStreamBuffer buffer, params Utf8String[] values)
         {
             uint[] indices = new uint[values.Length];
             for (int i = 0; i < values.Length; i++)

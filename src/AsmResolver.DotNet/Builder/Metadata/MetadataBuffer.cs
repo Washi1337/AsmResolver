@@ -69,6 +69,12 @@ namespace AsmResolver.DotNet.Builder.Metadata
             get;
         } = new();
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the strings stream should be optimized for size upon constructing
+        /// the metadata directory. This means that strings that are a suffix of another will not be added twice to the
+        /// buffer, but rather will be referenced using an offset within the longer string. This avoids lots of
+        /// duplication in the final stream.
+        /// </summary>
         public bool OptimizeStringIndices
         {
             get;
@@ -143,7 +149,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             OptimizeTypeReferenceTable(translationTable, tablesStream);
         }
 
-        private void OptimizeAssemblyTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeAssemblyTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<AssemblyDefinitionRow>(TableIndex.Assembly);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -154,7 +160,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeAssemblyReferenceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeAssemblyReferenceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<AssemblyReferenceRow>(TableIndex.AssemblyRef);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -165,7 +171,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeEventDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeEventDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<EventDefinitionRow>(TableIndex.Event);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -175,7 +181,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeExportedTypeTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeExportedTypeTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<ExportedTypeRow>(TableIndex.ExportedType);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -186,7 +192,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeFieldDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeFieldDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -196,7 +202,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeFileReferenceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeFileReferenceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<FileReferenceRow>(TableIndex.File);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -206,7 +212,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeGenericParameterTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeGenericParameterTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<GenericParameterRow>(TableIndex.GenericParam);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -216,7 +222,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeImplementationMapTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeImplementationMapTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<ImplementationMapRow>(TableIndex.ImplMap);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -226,7 +232,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeManifestResourceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeManifestResourceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<ManifestResourceRow>(TableIndex.ManifestResource);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -236,7 +242,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeMemberReferenceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeMemberReferenceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<MemberReferenceRow>(TableIndex.MemberRef);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -246,7 +252,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeMethodDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeMethodDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -256,7 +262,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeModuleDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeModuleDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<ModuleDefinitionRow>(TableIndex.Module);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -266,7 +272,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeModuleReferenceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeModuleReferenceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<ModuleReferenceRow>(TableIndex.ModuleRef);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -276,7 +282,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeParameterDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeParameterDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<ParameterDefinitionRow>(TableIndex.Param);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -286,7 +292,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizePropertyDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizePropertyDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<PropertyDefinitionRow>(TableIndex.Property);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -296,7 +302,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeTypeDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeTypeDefinitionTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
             for (uint rid = 1; rid <= table.Count; rid++)
@@ -307,7 +313,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             }
         }
 
-        private void OptimizeTypeReferenceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
+        private static void OptimizeTypeReferenceTable(IDictionary<uint, uint> translationTable, TablesStream tablesStream)
         {
             var table = tablesStream.GetTable<TypeReferenceRow>(TableIndex.TypeRef);
             for (uint rid = 1; rid <= table.Count; rid++)
