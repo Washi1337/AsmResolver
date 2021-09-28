@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace AsmResolver.Collections
 {
@@ -86,7 +87,7 @@ namespace AsmResolver.Collections
             {
                 AssertIsValidIndex(index);
                 _items[index] = value;
-                _version++;
+                IncrementVersion();
             }
         }
 
@@ -129,7 +130,7 @@ namespace AsmResolver.Collections
             EnsureEnoughCapacity(_count + 1);
             _items[_count] = item;
             _count++;
-            _version++;
+            IncrementVersion();
         }
 
         /// <inheritdoc />
@@ -140,7 +141,7 @@ namespace AsmResolver.Collections
         {
             Array.Clear(_items, 0, _items.Length);
             _count = 0;
-            _version++;
+            IncrementVersion();
         }
 
         /// <inheritdoc />
@@ -200,7 +201,7 @@ namespace AsmResolver.Collections
 
             _items[index] = item;
             _count++;
-            _version++;
+            IncrementVersion();
         }
 
         /// <inheritdoc />
@@ -225,7 +226,7 @@ namespace AsmResolver.Collections
                 Array.Copy(_items, index + 1, _items, index, _count - index);
 
             _items[_count] = default!;
-            _version++;
+            IncrementVersion();
         }
 
         /// <summary>
@@ -255,6 +256,15 @@ namespace AsmResolver.Collections
                 newCapacity = requiredCount;
 
             Array.Resize(ref _items, newCapacity);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void IncrementVersion()
+        {
+            unchecked
+            {
+                _version++;
+            }
         }
 
         /// <summary>
