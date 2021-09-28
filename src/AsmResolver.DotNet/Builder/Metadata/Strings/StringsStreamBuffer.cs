@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
     /// </summary>
     public class StringsStreamBuffer : IMetadataStreamBuffer
     {
-        private readonly Dictionary<Utf8String, StringIndex> _index = new();
+        private Dictionary<Utf8String, StringIndex> _index = new();
         private List<StringsStreamBlob> _blobs = new();
         private uint _currentOffset = 1;
         private int _fixedBlobCount = 0;
@@ -108,11 +108,15 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         /// <remarks>
         /// This method might invalidate all offsets obtained by <see cref="GetStringIndex"/>.
         /// </remarks>
-        public Dictionary<uint, uint> Optimize()
+        public IDictionary<uint, uint> Optimize()
         {
             uint finalOffset = 1;
+            var newIndex = new Dictionary<Utf8String, StringIndex>();
             var newBlobs = new List<StringsStreamBlob>(_fixedBlobCount);
-            var translationTable = new Dictionary<uint, uint>();
+            var translationTable = new Dictionary<uint, uint>
+            {
+                [0] = 0
+            };
 
             // Import fixed blobs.
             for (int i = 0; i < _fixedBlobCount; i++)
@@ -152,6 +156,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
 
             // Replace contents of current buffer with the newly constructed buffer.
             _blobs = newBlobs;
+            _index = newIndex;
             _currentOffset = finalOffset;
             return translationTable;
 
@@ -159,9 +164,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
             {
                 newBlobs.Add(blob);
 
-                var index = _index[blob.Blob];
-                translationTable[index.Offset] = finalOffset;
-                _index[blob.Blob] = new StringIndex(index.BlobIndex, finalOffset);
+                var oldIndex = _index[blob.Blob];
+                translationTable[oldIndex.Offset] = finalOffset;
+                newIndex[blob.Blob] = new StringIndex(newBlobs.Count - 1, finalOffset);
 
                 finalOffset += blob.GetPhysicalSize();
             }
@@ -169,11 +174,12 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
             void ReuseBlob(in KeyValuePair<Utf8String, StringIndex> currentEntry, int reusedIndex)
             {
                 var reusedEntry = sortedEntries[reusedIndex];
+                uint reusedEntryNewOffset = translationTable[reusedEntry.Value.Offset];
                 int relativeOffset = reusedEntry.Key.ByteCount - currentEntry.Key.ByteCount;
-                uint newOffset = (uint)(reusedEntry.Value.Offset + relativeOffset);
+                uint newOffset = (uint)(reusedEntryNewOffset + relativeOffset);
 
                 translationTable[currentEntry.Value.Offset] = newOffset;
-                _index[currentEntry.Key] = new StringIndex(reusedEntry.Value.BlobIndex, newOffset);
+                newIndex[currentEntry.Key] = new StringIndex(reusedEntry.Value.BlobIndex, newOffset);
             }
         }
 

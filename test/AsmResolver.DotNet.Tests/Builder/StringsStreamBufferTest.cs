@@ -156,6 +156,26 @@ namespace AsmResolver.DotNet.Tests.Builder
         }
 
         [Fact]
+        public void AddStringsWithSameSuffixReversedShouldResultInStringReuseAfterOptimize()
+        {
+            var buffer = new StringsStreamBuffer();
+            OptimizeAndVerifyIndices(buffer,
+                "BB",
+                "BBBB",
+                "AAAABBBB");
+
+            uint index1 = buffer.GetStringIndex("AAAABBBB");
+            uint index2 = buffer.GetStringIndex("BBBB");
+            uint index3 = buffer.GetStringIndex("BB");
+
+            Assert.Equal(index1 + 4u, index2);
+            Assert.Equal(index1 + 6u, index3);
+
+            var stream = buffer.CreateStream();
+            Assert.Equal((1u + 8u + 1u).Align(4), stream.GetPhysicalSize());
+        }
+
+        [Fact]
         public void OptimizeAfterImportedStreamShouldPreserveImportedData()
         {
             var existingStringsStream = new SerializedStringsStream(StringsStream.DefaultName, Encoding.UTF8.GetBytes(
