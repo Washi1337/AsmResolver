@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the custom attribute metadata table.
     /// </summary>
-    public readonly struct CustomAttributeRow : IMetadataRow
+    public struct CustomAttributeRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single custom attribute row from an input stream.
@@ -62,6 +62,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Parent
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -71,14 +72,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Type
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream containing the arguments of the constructor call.
+        /// Gets or sets an index into the #Blob stream containing the arguments of the constructor call.
         /// </summary>
         public uint Value
         {
             get;
+            set;
         }
 
         /// <summary>

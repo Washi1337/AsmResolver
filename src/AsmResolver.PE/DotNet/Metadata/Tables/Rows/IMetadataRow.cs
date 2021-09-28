@@ -16,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         #endif
     {
         /// <summary>
-        /// Gets the index of the table that this row is stored in.
+        /// Gets or sets the index of the table that this row is stored in.
         /// </summary>
         TableIndex TableIndex
         {
@@ -25,7 +25,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 
         #if NET20 || NET35 || NET40
         /// <summary>
-        /// Gets the number of columns that the metadata row defines.
+        /// Gets or sets the number of columns that the metadata row defines.
         /// </summary>
         int Count
         {
@@ -33,7 +33,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Gets the value of a column, zero-extended to an unsigned int32.
+        /// Gets or sets the value of a column, zero-extended to an unsigned int32.
         /// </summary>
         /// <param name="index">The column index.</param>
         uint this[int index]

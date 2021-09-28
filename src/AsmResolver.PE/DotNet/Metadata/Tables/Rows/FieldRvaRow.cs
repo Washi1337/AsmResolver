@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the implementation map metadata table.
     /// </summary>
-    public readonly struct FieldRvaRow : IMetadataRow
+    public struct FieldRvaRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single field RVA row from an input stream.
@@ -60,14 +60,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public ISegmentReference Data
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the Field table indicating the field that was assigned an initial value.
+        /// Gets or sets an index into the Field table indicating the field that was assigned an initial value.
         /// </summary>
         public uint Field
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

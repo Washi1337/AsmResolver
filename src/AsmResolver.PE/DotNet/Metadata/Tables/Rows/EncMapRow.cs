@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the Edit-and-Continue remap metadata table.
     /// </summary>
-    public readonly struct EncMapRow : IMetadataRow
+    public struct EncMapRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single edit-and-continue remap row from an input stream.
@@ -44,11 +44,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the token that was remapped.
+        /// Gets or sets the token that was remapped.
         /// </summary>
         public MetadataToken Token
         {
             get;
+            set;
         }
 
         /// <summary>

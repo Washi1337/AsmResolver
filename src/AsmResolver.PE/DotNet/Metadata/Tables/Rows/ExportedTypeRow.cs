@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the exported type metadata table.
     /// </summary>
-    public readonly struct ExportedTypeRow : IMetadataRow
+    public struct ExportedTypeRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single exported type row from an input stream.
@@ -62,15 +62,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the exported type.
+        /// Gets or sets the attributes associated to the exported type.
         /// </summary>
         public TypeAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the RID hint of the type definition that was exported.
+        /// Gets or sets the RID hint of the type definition that was exported.
         /// </summary>
         /// <remarks>
         /// This field is used as a hint only. If the entry in the table does not match the name and namespace referenced
@@ -80,10 +81,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint TypeDefinitionId
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the name of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
         /// <remarks>
         /// This value should always index a non-empty string.
@@ -91,10 +93,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the namespace of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the namespace of the type reference.
         /// </summary>
         /// <remarks>
         /// This value can be zero. If it is not, it should always index a non-empty string.
@@ -102,15 +105,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Namespace
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an Implementation index (an index into either the File, ExportedType or AssemblyRef table), indicating
+        /// Gets or sets an Implementation index (an index into either the File, ExportedType or AssemblyRef table), indicating
         /// the scope that can be used to resolve the exported type.
         /// </summary>
         public uint Implementation
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

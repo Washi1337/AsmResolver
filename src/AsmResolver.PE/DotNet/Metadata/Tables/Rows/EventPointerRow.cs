@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the event pointer metadata table.
     /// </summary>
-    public readonly struct EventPointerRow : IMetadataRow
+    public struct EventPointerRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single event pointer row from an input stream.
@@ -44,11 +44,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the Event table that this pointer references.
+        /// Gets or sets an index into the Event table that this pointer references.
         /// </summary>
         public uint Event
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

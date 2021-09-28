@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the property definition metadata table.
     /// </summary>
-    public readonly struct PropertyDefinitionRow : IMetadataRow
+    public struct PropertyDefinitionRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single property definition row from an input stream.
@@ -67,15 +67,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the property definition.
+        /// Gets or sets the attributes associated to the property definition.
         /// </summary>
         public PropertyAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the name of the property.
+        /// Gets or sets an index into the #Strings stream referencing the name of the property.
         /// </summary>
         /// <remarks>
         /// This value should always index a non-empty string.
@@ -83,15 +84,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream referencing the signature of the property. This includes the property
+        /// Gets or sets an index into the #Blob stream referencing the signature of the property. This includes the property
         /// type.
         /// </summary>
         public uint Type
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

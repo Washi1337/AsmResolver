@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the nested class metadata table.
     /// </summary>
-    public readonly struct NestedClassRow : IMetadataRow
+    public struct NestedClassRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single nested class row from an input stream.
@@ -49,19 +49,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the TypeDef table indicating the class that was nested into another class.
+        /// Gets or sets an index into the TypeDef table indicating the class that was nested into another class.
         /// </summary>
         public uint NestedClass
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the TypeDef table indicating the enclosing class.
+        /// Gets or sets an index into the TypeDef table indicating the enclosing class.
         /// </summary>
         public uint EnclosingClass
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

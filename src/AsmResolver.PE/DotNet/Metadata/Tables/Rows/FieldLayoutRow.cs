@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the field layout metadata table.
     /// </summary>
-    public readonly struct FieldLayoutRow : IMetadataRow
+    public struct FieldLayoutRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single field layout row from an input stream.
@@ -49,19 +49,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the offset of the field relative to the start of the enclosing structure type.
+        /// Gets or sets the offset of the field relative to the start of the enclosing structure type.
         /// </summary>
         public uint Offset
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the Field type referencing the field that this layout was assigned to.
+        /// Gets or sets an index into the Field type referencing the field that this layout was assigned to.
         /// </summary>
         public uint Field
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

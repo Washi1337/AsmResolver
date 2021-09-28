@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the method implementation metadata table.
     /// </summary>
-    public readonly struct MethodImplementationRow : IMetadataRow
+    public struct MethodImplementationRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single method implementation row from an input stream.
@@ -68,11 +68,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the TypeDef table indicating the class that inherited methods from an interface.
+        /// Gets or sets an index into the TypeDef table indicating the class that inherited methods from an interface.
         /// </summary>
         public uint Class
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -82,6 +83,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint MethodBody
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -91,6 +93,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint MethodDeclaration
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

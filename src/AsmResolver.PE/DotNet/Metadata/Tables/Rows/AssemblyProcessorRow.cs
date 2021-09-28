@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the assembly processor metadata table.
     /// </summary>
-    public readonly struct AssemblyProcessorRow : IMetadataRow
+    public struct AssemblyProcessorRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single assembly processor row from an input stream.
@@ -44,11 +44,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the processor identifier the assembly is targeting.
+        /// Gets or sets the processor identifier the assembly is targeting.
         /// </summary>
         public uint ProcessorId
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

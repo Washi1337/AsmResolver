@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the module definition metadata table.
     /// </summary>
-    public readonly struct ModuleReferenceRow : IMetadataRow
+    public struct ModuleReferenceRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single module reference row from an input stream.
@@ -45,11 +45,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the #Strings heap referencing the name of the external module that was imported.
+        /// Gets or sets an index into the #Strings heap referencing the name of the external module that was imported.
         /// </summary>
         public uint Name
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

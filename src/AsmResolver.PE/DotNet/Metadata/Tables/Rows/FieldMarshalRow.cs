@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the field marshal metadata table.
     /// </summary>
-    public readonly struct FieldMarshalRow : IMetadataRow
+    public struct FieldMarshalRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single field marshal row from an input stream.
@@ -56,14 +56,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Parent
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream containing the marshaller data.
+        /// Gets or sets an index into the #Blob stream containing the marshaller data.
         /// </summary>
         public uint NativeType
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

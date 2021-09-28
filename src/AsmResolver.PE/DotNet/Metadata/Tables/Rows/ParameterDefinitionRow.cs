@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the parameter definition metadata table.
     /// </summary>
-    public readonly struct ParameterDefinitionRow : IMetadataRow
+    public struct ParameterDefinitionRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single parameter definition row from an input stream.
@@ -53,23 +53,25 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the parameter.
+        /// Gets or sets the attributes associated to the parameter.
         /// </summary>
         public ParameterAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the index of the parameter definition.
+        /// Gets or sets the index of the parameter definition.
         /// </summary>
         public ushort Sequence
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the name of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
         /// <remarks>
         /// If this value is zero, the parameter name is considered <c>null</c>.
@@ -77,6 +79,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Name
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

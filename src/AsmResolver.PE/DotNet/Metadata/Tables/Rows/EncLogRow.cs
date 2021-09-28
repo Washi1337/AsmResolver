@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the Edit-and-Continue log metadata table.
     /// </summary>
-    public readonly struct EncLogRow : IMetadataRow
+    public struct EncLogRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single edit-and-continue log row from an input stream.
@@ -49,19 +49,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the metadata token to apply the delta function to.
+        /// Gets or sets the metadata token to apply the delta function to.
         /// </summary>
         public MetadataToken Token
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the delta function to apply.
+        /// Gets or sets the delta function to apply.
         /// </summary>
         public DeltaFunctionCode FuncCode
         {
             get;
+            set;
         }
 
         /// <summary>
