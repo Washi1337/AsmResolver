@@ -99,6 +99,27 @@ If everything is supposed to be preserved as much as possible, then instead of s
     Preserving RIDs within metadata tables might require AsmResolver to make use of the Edit-And-Continue metadata tables (such as the pointer tables). The resulting tables stream could therefore be renamed from ``#~`` to ``#-``, and the file size might increase.
 
 
+String folding in #Strings stream
+---------------------------------
+
+Named metadata members (such as types, methods and fields) are assigned a name by referencing a string in the ``#Strings`` stream by its starting offset. When a metadata member has a name that is a suffix of another member's name, then it is possible to only store the longer name in the ``#Strings`` stream, and let the member with the shorter name use an offset within the middle of this longer name. For example, consider two members with the names ``ABCDEFG`` and ``DEFG``. If ``ABCDEFG`` is stored at offset ``1``, then the name ``DEFG`` is implicitly defined at offset ``1 + 3 = 4``, and can thus be referenced without appending ``DEFG`` to the stream a second time.
+
+By default, the PE image builder will fold strings in the ``#Strings`` stream as described in the above. However, for some input binaries, this might make the building process take a significant amount of time. Therefore, to disable this folding of strings, specify the ``NoStringsStreamOptimization`` flag in your ``DotNetDirectoryFactory``:
+
+.. code-block:: csharp
+
+    factory.MetadataBuilderFlags |= MetadataBuilderFlags.NoStringsStreamOptimization;
+
+
+.. warning::
+    Some obfuscated binaries might include lots of members that have very long but similar names. For these types of binaries, disabling this optimization can result in a significantly larger output file size.
+
+
+.. note::
+
+    When ``PreserveStringIndices`` is set and string folding is enabled (``NoStringsStreamOptimization`` is unset), the PE image builder will not fold strings from the original ``#Strings`` stream into each other. However, it will still try to reuse these original strings as much as possible.
+
+
 Preserving maximum stack depth
 ------------------------------
 

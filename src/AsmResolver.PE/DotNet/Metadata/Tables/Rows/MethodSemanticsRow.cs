@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the method semantics metadata table.
     /// </summary>
-    public readonly struct MethodSemanticsRow : IMetadataRow
+    public struct MethodSemanticsRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single method semantics row from an input stream.
@@ -69,19 +69,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the semantic attributes that are assigned to the method.
+        /// Gets or sets the semantic attributes that are assigned to the method.
         /// </summary>
         public MethodSemanticsAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the method definition table indicating the method that was assigned special semantics.
+        /// Gets or sets an index into the method definition table indicating the method that was assigned special semantics.
         /// </summary>
         public uint Method
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -91,6 +93,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Association
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

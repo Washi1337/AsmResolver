@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the field pointer metadata table.
     /// </summary>
-    public readonly struct FieldPointerRow : IMetadataRow
+    public struct FieldPointerRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single field pointer row from an input stream.
@@ -44,11 +44,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the Field table that this pointer references.
+        /// Gets or sets an index into the Field table that this pointer references.
         /// </summary>
         public uint Field
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

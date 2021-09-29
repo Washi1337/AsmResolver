@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the method definition metadata table.
     /// </summary>
-    public readonly struct MethodDefinitionRow : IMetadataRow
+    public struct MethodDefinitionRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single method definition row from an input stream.
@@ -80,10 +80,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public ISegmentReference Body
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the characteristics of the implementation of the method body.
+        /// Gets or sets the characteristics of the implementation of the method body.
         /// </summary>
         /// <remarks>
         /// These attributes dictate the format of <see cref="Body"/>.
@@ -91,18 +92,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public MethodImplAttributes ImplAttributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the attributes associated to the method.
+        /// Gets or sets the attributes associated to the method.
         /// </summary>
         public MethodAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the name of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
         /// <remarks>
         /// This value should always index a non-empty string.
@@ -110,10 +113,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob heap containing the signature of the method. This includes the return type,
+        /// Gets or sets an index into the #Blob heap containing the signature of the method. This includes the return type,
         /// as well as parameter types.
         /// </summary>
         /// <remarks>
@@ -122,14 +126,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Signature
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the Param (or ParamPtr) table, representing the first parameter that this method defines.
+        /// Gets or sets an index into the Param (or ParamPtr) table, representing the first parameter that this method defines.
         /// </summary>
         public uint ParameterList
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

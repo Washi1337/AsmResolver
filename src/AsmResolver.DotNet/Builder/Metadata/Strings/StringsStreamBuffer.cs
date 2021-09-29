@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -13,9 +13,10 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
     /// </summary>
     public class StringsStreamBuffer : IMetadataStreamBuffer
     {
-        private readonly MemoryStream _rawStream = new();
-        private readonly IBinaryStreamWriter _writer;
-        private readonly Dictionary<Utf8String, uint> _strings = new();
+        private Dictionary<Utf8String, StringIndex> _index = new();
+        private List<StringsStreamBlob> _blobs = new();
+        private uint _currentOffset = 1;
+        private int _fixedBlobCount = 0;
 
         /// <summary>
         /// Creates a new strings stream buffer with the default strings stream name.
@@ -32,8 +33,6 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         public StringsStreamBuffer(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            _writer = new BinaryStreamWriter(_rawStream);
-            _writer.WriteByte(0);
         }
 
         /// <inheritdoc />
@@ -43,46 +42,38 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         }
 
         /// <inheritdoc />
-        public bool IsEmpty => _rawStream.Length <= 1;
+        public bool IsEmpty => _blobs.Count == 0;
 
         /// <summary>
         /// Imports the contents of a strings stream and indexes all present strings.
         /// </summary>
         /// <param name="stream">The stream to import.</param>
+        /// <exception cref="InvalidOperationException">Occurs when the stream buffer is not empty.</exception>
         public void ImportStream(StringsStream stream)
         {
-            uint index = 1;
-            while (index < stream.GetPhysicalSize())
-            {
-                var @string = stream.GetStringByIndex(index)!;
-                uint newIndex = AppendString(@string);
-                _strings[@string] = newIndex;
+            if (!IsEmpty)
+                throw new InvalidOperationException("Cannot import a stream if the buffer is not empty.");
 
-                index += (uint) Encoding.UTF8.GetByteCount(@string) + 1;
+            uint offset = 1;
+            uint size = stream.GetPhysicalSize();
+
+            while (offset < size)
+            {
+                var value = stream.GetStringByIndex(offset)!;
+
+                uint newOffset = AppendString(value, true);
+                _index[value] = new StringIndex(_blobs.Count - 1, newOffset);
+
+                offset += (uint) value.ByteCount + 1;
+                _fixedBlobCount++;
             }
         }
 
-        /// <summary>
-        /// Appends raw data to the stream.
-        /// </summary>
-        /// <param name="data">The data to append.</param>
-        /// <returns>The index to the start of the data.</returns>
-        /// <remarks>
-        /// This method does not index the string. Calling <see cref="AppendRawData"/> or <see cref="GetStringIndex" />
-        /// on the same data will append the data a second time.
-        /// </remarks>
-        public uint AppendRawData(byte[] data)
+        private uint AppendString(Utf8String value, bool isFixed)
         {
-            uint offset = (uint) _rawStream.Length;
-            _writer.WriteBytes(data, 0, data.Length);
-            return offset;
-        }
-
-        private uint AppendString(Utf8String value)
-        {
-            uint offset = (uint) _rawStream.Length;
-            AppendRawData(value.GetBytesUnsafe());
-            _writer.WriteByte(0);
+            uint offset = _currentOffset;
+            _blobs.Add(new StringsStreamBlob(value, isFixed));
+            _currentOffset += (uint)value.ByteCount + 1;
             return offset;
         }
 
@@ -100,13 +91,111 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
             if (Array.IndexOf(value.GetBytesUnsafe(), (byte) 0x00) >= 0)
                 throw new ArgumentException("String contains a zero byte.");
 
-            if (!_strings.TryGetValue(value, out uint offset))
+            if (!_index.TryGetValue(value, out var offsetId))
             {
-                offset = AppendString(value);
-                _strings.Add(value, offset);
+                uint offset = AppendString(value, false);
+                offsetId = new StringIndex(_blobs.Count - 1, offset);
+                _index.Add(value, offsetId);
             }
 
-            return offset;
+            return offsetId.Offset;
+        }
+
+        /// <summary>
+        /// Optimizes the buffer by removing string entries that have a common suffix with another.
+        /// </summary>
+        /// <returns>A translation table that maps old offsets to the new ones after optimizing.</returns>
+        /// <remarks>
+        /// This method might invalidate all offsets obtained by <see cref="GetStringIndex"/>.
+        /// </remarks>
+        public IDictionary<uint, uint> Optimize()
+        {
+            uint finalOffset = 1;
+            var newIndex = new Dictionary<Utf8String, StringIndex>();
+            var newBlobs = new List<StringsStreamBlob>(_fixedBlobCount);
+            var translationTable = new Dictionary<uint, uint>
+            {
+                [0] = 0
+            };
+
+            // Import fixed blobs.
+            for (int i = 0; i < _fixedBlobCount; i++)
+                AppendBlob(_blobs[i]);
+
+            // Sort all blobs based on common suffix.
+            var sortedEntries = _index.ToList();
+            sortedEntries.Sort(StringsStreamBlobSuffixComparer.Instance);
+
+            for (int i = 0; i < sortedEntries.Count; i++)
+            {
+                var currentEntry = sortedEntries[i];
+                var currentBlob = _blobs[currentEntry.Value.BlobIndex];
+
+                // Ignore blobs that are already added.
+                if (currentBlob.IsFixed)
+                    continue;
+
+                if (i == 0)
+                {
+                    // First blob should always be added, since it has no common prefix with anything else.
+                    AppendBlob(currentBlob);
+                }
+                else
+                {
+                    // Check if any blobs have a common suffix.
+                    int reusedIndex = i;
+                    while (reusedIndex > 0 && BytesEndsWith(sortedEntries[reusedIndex - 1].Key.GetBytesUnsafe(), currentEntry.Key.GetBytesUnsafe()))
+                        reusedIndex--;
+
+                    // Reuse blob if blob had a common suffix.
+                    if (reusedIndex != i)
+                        ReuseBlob(currentEntry, reusedIndex);
+                    else
+                        AppendBlob(currentBlob);
+                }
+            }
+
+            // Replace contents of current buffer with the newly constructed buffer.
+            _blobs = newBlobs;
+            _index = newIndex;
+            _currentOffset = finalOffset;
+            return translationTable;
+
+            void AppendBlob(in StringsStreamBlob blob)
+            {
+                newBlobs.Add(blob);
+
+                var oldIndex = _index[blob.Blob];
+                translationTable[oldIndex.Offset] = finalOffset;
+                newIndex[blob.Blob] = new StringIndex(newBlobs.Count - 1, finalOffset);
+
+                finalOffset += blob.GetPhysicalSize();
+            }
+
+            void ReuseBlob(in KeyValuePair<Utf8String, StringIndex> currentEntry, int reusedIndex)
+            {
+                var reusedEntry = sortedEntries[reusedIndex];
+                uint reusedEntryNewOffset = translationTable[reusedEntry.Value.Offset];
+                int relativeOffset = reusedEntry.Key.ByteCount - currentEntry.Key.ByteCount;
+                uint newOffset = (uint)(reusedEntryNewOffset + relativeOffset);
+
+                translationTable[currentEntry.Value.Offset] = newOffset;
+                newIndex[currentEntry.Key] = new StringIndex(reusedEntry.Value.BlobIndex, newOffset);
+            }
+        }
+
+        private static bool BytesEndsWith(byte[] x, byte[] y)
+        {
+            if (x.Length < y.Length)
+                return false;
+
+            for (int i = x.Length - 1, j = y.Length - 1; i >= 0 && j >= 0; i--, j--)
+            {
+                if (x[i] != y[j])
+                    return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -115,8 +204,17 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         /// <returns>The metadata stream.</returns>
         public StringsStream CreateStream()
         {
-            _writer.Align(4);
-            return new SerializedStringsStream(Name, _rawStream.ToArray());
+            using var outputStream = new MemoryStream();
+
+            var writer = new BinaryStreamWriter(outputStream);
+            writer.WriteByte(0);
+
+            foreach (var blob in _blobs)
+                blob.Write(writer);
+
+            writer.Align(4);
+
+            return new SerializedStringsStream(Name, outputStream.ToArray());
         }
 
         /// <inheritdoc />

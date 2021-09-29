@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the constants metadata table.
     /// </summary>
-    public readonly struct ConstantRow : IMetadataRow
+    public struct ConstantRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single constant row from an input stream.
@@ -73,7 +73,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the type of constant that is stored in the blob stream.
+        /// Gets or sets the type of constant that is stored in the blob stream.
         /// </summary>
         /// <remarks>This field must always be a value-type.</remarks>
         public ElementType Type
@@ -82,12 +82,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Gets the single padding byte between the type and parent columns.
+        /// Gets or sets the single padding byte between the type and parent columns.
         /// </summary>
         /// <remarks>This field should always be zero.</remarks>
         public byte Padding
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -97,14 +98,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Parent
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream containing the serialized constant value.
+        /// Gets or sets an index into the #Blob stream containing the serialized constant value.
         /// </summary>
         public uint Value
         {
             get;
+            set;
         }
 
         /// <summary>

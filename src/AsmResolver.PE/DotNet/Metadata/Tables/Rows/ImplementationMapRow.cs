@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the implementation map metadata table.
     /// </summary>
-    public readonly struct ImplementationMapRow : IMetadataRow
+    public struct ImplementationMapRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single implementation map row from an input stream.
@@ -58,7 +58,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the implementation mapping.
+        /// Gets or sets the attributes associated to the implementation mapping.
         /// </summary>
         public ImplementationMapAttributes Attributes
         {
@@ -72,22 +72,25 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint MemberForwarded
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the name of the imported member.
+        /// Gets or sets an index into the #Strings stream referencing the name of the imported member.
         /// </summary>
         public uint ImportName
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the ModuleRef table indicating the module that this imported member defines.
+        /// Gets or sets an index into the ModuleRef table indicating the module that this imported member defines.
         /// </summary>
         public uint ImportScope
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the type specification metadata table.
     /// </summary>
-    public readonly struct TypeSpecificationRow : IMetadataRow
+    public struct TypeSpecificationRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single type specification row from an input stream.
@@ -45,11 +45,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the #Blob stream referencing the type signature that was exposed by this row.
+        /// Gets or sets an index into the #Blob stream referencing the type signature that was exposed by this row.
         /// </summary>
         public uint Signature
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the security declaration metadata table.
     /// </summary>
-    public readonly struct SecurityDeclarationRow : IMetadataRow
+    public struct SecurityDeclarationRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single security declaration row from an input stream.
@@ -53,11 +53,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the action to be performed.
+        /// Gets or sets the action to be performed.
         /// </summary>
         public SecurityAction Action
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -67,14 +68,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Parent
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream referencing the permission set assigned to the member.
+        /// Gets or sets an index into the #Blob stream referencing the permission set assigned to the member.
         /// </summary>
         public uint PermissionSet
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

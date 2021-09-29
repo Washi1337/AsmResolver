@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the type definition metadata table.
     /// </summary>
-    public readonly struct TypeDefinitionRow : IMetadataRow
+    public struct TypeDefinitionRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single type definition row from an input stream.
@@ -67,15 +67,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the type.
+        /// Gets or sets the attributes associated to the type.
         /// </summary>
         public  TypeAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the name of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
         /// <remarks>
         /// This value should always index a non-empty string.
@@ -83,10 +84,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the namespace of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the namespace of the type reference.
         /// </summary>
         /// <remarks>
         /// This value can be zero. If it is not, it should always index a non-empty string.
@@ -94,6 +96,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Namespace
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -103,22 +106,25 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Extends
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the Field (or FieldPtr) table, representing the first field defined in the type.
+        /// Gets or sets an index into the Field (or FieldPtr) table, representing the first field defined in the type.
         /// </summary>
         public uint FieldList
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the Method (or MethodPtr) table, representing the first method defined in the type.
+        /// Gets or sets an index into the Method (or MethodPtr) table, representing the first method defined in the type.
         /// </summary>
         public uint MethodList
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

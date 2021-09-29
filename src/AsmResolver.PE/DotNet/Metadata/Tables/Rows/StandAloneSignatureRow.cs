@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the stand-alone signature metadata table.
     /// </summary>
-    public readonly struct StandAloneSignatureRow : IMetadataRow
+    public struct StandAloneSignatureRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single stand-alone signature row from an input stream.
@@ -44,11 +44,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the #Blob stream referencing the signature that was exposed by this row.
+        /// Gets or sets an index into the #Blob stream referencing the signature that was exposed by this row.
         /// </summary>
         public uint Signature
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

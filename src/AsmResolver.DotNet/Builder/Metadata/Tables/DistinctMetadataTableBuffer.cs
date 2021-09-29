@@ -45,6 +45,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         /// <inheritdoc />
+        public ref TRow GetRowRef(uint rid) => ref _underlyingBuffer.GetRowRef(rid);
+
+        /// <inheritdoc />
         public MetadataToken Add(in TRow row)
         {
             if (!_entries.TryGetValue(row, out var token))

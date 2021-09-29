@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -60,13 +61,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="originalLayout">The layout of the table.</param>
         /// <param name="readRow">The method to use for reading each row in the table.</param>
         public SerializedMetadataTable(
-                PEReaderContext context,
-                in BinaryStreamReader reader,
-                TableIndex tableIndex,
-                TableLayout originalLayout,
-                ReadRowExtendedDelegate readRow)
+            PEReaderContext context,
+            in BinaryStreamReader reader,
+            TableIndex tableIndex,
+            TableLayout originalLayout,
+            ReadRowExtendedDelegate readRow)
             : this(reader, tableIndex, originalLayout,
-                (ref BinaryStreamReader reader, TableLayout layout) => readRow(context, ref reader, layout))
+                (ref BinaryStreamReader r, TableLayout l) => readRow(context, ref r, l))
         {
         }
 
@@ -74,9 +75,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public override int Count => IsInitialized ? Rows.Count : _rowCount;
 
         /// <inheritdoc />
-        protected override IList<TRow> GetRows()
+        protected override RefList<TRow> GetRows()
         {
-            var result = new List<TRow>();
+            var result = new RefList<TRow>(_rowCount);
 
             var reader = _reader.Fork();
             for (int i = 0; i < _rowCount; i++)

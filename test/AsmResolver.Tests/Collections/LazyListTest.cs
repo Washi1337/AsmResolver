@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using AsmResolver.Collections;
 using Xunit;
 
-namespace AsmResolver.Tests
+namespace AsmResolver.Tests.Collections
 {
     public class LazyListTest
     {
@@ -15,12 +15,12 @@ namespace AsmResolver.Tests
                 get;
                 private set;
             }
-            
+
             public DummyLazyList(IList<int> items)
             {
                 _items = items;
             }
-            
+
             protected override void Initialize()
             {
                 foreach (var item in _items)
@@ -53,7 +53,7 @@ namespace AsmResolver.Tests
                 3
             };
             var list = new DummyLazyList(actualItems);
-            var enumerator = list.GetEnumerator(); 
+            var enumerator = list.GetEnumerator();
             Assert.False(list.InitializeMethodCalled);
         }
     }
