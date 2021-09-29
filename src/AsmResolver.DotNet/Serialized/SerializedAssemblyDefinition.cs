@@ -16,6 +16,9 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedAssemblyDefinition : AssemblyDefinition
     {
+        private static readonly Utf8String SystemRuntimeVersioningNamespace = "System.Runtime.Versioning";
+        private static readonly Utf8String TargetFrameworkAttributeName = nameof(TargetFrameworkAttribute);
+
         private readonly ModuleReaderContext _context;
         private readonly AssemblyDefinitionRow _row;
         private readonly SerializedModuleDefinition _manifestModule;
@@ -151,15 +154,19 @@ namespace AsmResolver.DotNet.Serialized
                     continue;
 
                 // Compare namespace and name of attribute type.
-                string? ns = stringsStream.GetStringByIndex(typeRow.Namespace);
-                string? name = stringsStream.GetStringByIndex(typeRow.Name);
-                if (ns != "System.Runtime.Versioning" || name != nameof(TargetFrameworkAttribute))
+                var ns = stringsStream.GetStringByIndex(typeRow.Namespace);
+                var name = stringsStream.GetStringByIndex(typeRow.Name);
+                if (ns != SystemRuntimeVersioningNamespace || name != TargetFrameworkAttributeName)
                     continue;
 
                 // At this point, we can safely use the high-level representation to parse out the signature.
                 // Read the first CA element and parse the runtime info.
                 var attribute = (CustomAttribute) _manifestModule.LookupMember(new MetadataToken(TableIndex.CustomAttribute, rid));
-                if (attribute.Signature?.FixedArguments[0].Element is string n && DotNetRuntimeInfo.TryParse(n, out info))
+                if (attribute.Signature is null || attribute.Signature.FixedArguments.Count == 0)
+                    continue;
+
+                object? element = attribute.Signature.FixedArguments[0].Element;
+                if (element is string or Utf8String && DotNetRuntimeInfo.TryParse(element.ToString(), out info))
                     return true;
             }
 
