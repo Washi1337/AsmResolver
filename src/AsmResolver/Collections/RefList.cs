@@ -55,8 +55,8 @@ namespace AsmResolver.Collections
         /// </summary>
         /// <remarks>
         /// This number is incremented each time the underlying array is resized or when an element is replaced.
-        /// It can also be used to verify that the reference returned by <see cref="GetElementRef"/> is still
-        /// referencing an element in the current array.
+        /// It can also be used to verify that the reference returned by <see cref="GetElementRef(int, out int)"/> is
+        /// still referencing an element in the current array.
         /// </remarks>
         public int Version => _version;
 
