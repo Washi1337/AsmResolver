@@ -45,7 +45,8 @@ namespace AsmResolver.DotNet.Serialized
         {
             var token = _context.Metadata
                 .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(_row.Constraint);
+                .GetIndexEncoder(CodedIndex.TypeDefOrRef)
+                .DecodeIndex(_row.Constraint);
 
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as ITypeDefOrRef

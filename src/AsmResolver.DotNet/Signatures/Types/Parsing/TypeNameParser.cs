@@ -348,9 +348,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                         break;
 
                     case "culture":
-                        assemblyRef.Culture = ParseCulture();
-                        if (assemblyRef.Culture.Equals("neutral"))
-                            assemblyRef.Culture = null;
+                        string culture = ParseCulture();
+                        assemblyRef.Culture = !culture.Equals("neutral", StringComparison.OrdinalIgnoreCase)
+                            ? culture
+                            : null;
                         break;
 
                     default:
