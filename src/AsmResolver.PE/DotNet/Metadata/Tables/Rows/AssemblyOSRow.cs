@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the assembly operating system metadata table.
     /// </summary>
-    public readonly struct AssemblyOSRow : IMetadataRow
+    public struct AssemblyOSRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single assembly operating system row from an input stream.
@@ -53,27 +53,30 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the identifier of the platform the assembly is targeting.
+        /// Gets or sets the identifier of the platform the assembly is targeting.
         /// </summary>
         public uint PlatformId
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the major version of the platform the assembly is targeting.
+        /// Gets or sets the major version of the platform the assembly is targeting.
         /// </summary>
         public uint MajorVersion
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the minor version of the platform the assembly is targeting.
+        /// Gets or sets the minor version of the platform the assembly is targeting.
         /// </summary>
         public uint MinorVersion
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

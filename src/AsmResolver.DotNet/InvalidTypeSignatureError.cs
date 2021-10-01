@@ -9,20 +9,25 @@ namespace AsmResolver.DotNet
         /// Indicates the blob signature was too short.
         /// </summary>
         BlobTooShort,
-        
+
         /// <summary>
         /// Indicates a TypeDefOrRef coded index could not be decoded to a valid index.
         /// </summary>
         InvalidCodedIndex,
-        
+
         /// <summary>
-        /// Indicates there exists a reference loop between the metadata tables and the blob stream. 
+        /// Indicates there exists a reference loop between the metadata tables and the blob stream.
         /// </summary>
         MetadataLoop,
-        
+
         /// <summary>
-        /// Indicates a TypeDefOrRef coded index decoded to a TypeSpec, but is not allowed by the runtime to be one. 
+        /// Indicates a TypeDefOrRef coded index decoded to a TypeSpec, but is not allowed by the runtime to be one.
         /// </summary>
-        IllegalTypeSpec
+        IllegalTypeSpec,
+
+        /// <summary>
+        /// Indicates the type was parsed from an invalid value of a FieldOrPropType.
+        /// </summary>
+        InvalidFieldOrProptype,
     }
 }

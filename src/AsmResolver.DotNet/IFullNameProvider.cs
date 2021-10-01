@@ -1,7 +1,7 @@
 namespace AsmResolver.DotNet
 {
     /// <summary>
-    /// Represents a named object that has a full name. 
+    /// Represents a named object that has a full name.
     /// </summary>
     public interface IFullNameProvider : INameProvider
     {

@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the generic parameter metadata table.
     /// </summary>
-    public readonly struct GenericParameterConstraintRow : IMetadataRow
+    public struct GenericParameterConstraintRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single generic parameter row from an input stream.
@@ -50,11 +50,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the GenericParam table indicating the owner of the constraint.
+        /// Gets or sets an index into the GenericParam table indicating the owner of the constraint.
         /// </summary>
         public uint Owner
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -64,6 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Constraint
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

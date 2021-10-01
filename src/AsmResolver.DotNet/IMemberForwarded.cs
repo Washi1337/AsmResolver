@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the Platform Invoke (P/Invoke) implementation mapping of this member (if available).
         /// </summary>
-        ImplementationMap ImplementationMap
+        ImplementationMap? ImplementationMap
         {
             get;
             set;

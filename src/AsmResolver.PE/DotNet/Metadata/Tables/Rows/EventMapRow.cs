@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the event map metadata table.
     /// </summary>
-    public readonly struct EventMapRow : IMetadataRow
+    public struct EventMapRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single event map row from an input stream.
@@ -49,19 +49,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the TypeDef table that this mapping is associating to an event list.
+        /// Gets or sets an index into the TypeDef table that this mapping is associating to an event list.
         /// </summary>
         public uint Parent
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the Event table indicating the first event that is defined in the event list.
+        /// Gets or sets an index into the Event table indicating the first event that is defined in the event list.
         /// </summary>
         public uint EventList
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

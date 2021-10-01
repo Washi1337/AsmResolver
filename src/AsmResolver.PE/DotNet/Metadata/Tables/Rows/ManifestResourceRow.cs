@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the manifest resource metadata table.
     /// </summary>
-    public readonly struct ManifestResourceRow : IMetadataRow
+    public struct ManifestResourceRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single manifest resource row from an input stream.
@@ -58,31 +58,34 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the byte offset within the referenced file at which the resource record begins.
+        /// Gets or sets the byte offset within the referenced file at which the resource record begins.
         /// </summary>
         public uint Offset
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the attributes associated with this resource.
+        /// Gets or sets the attributes associated with this resource.
         /// </summary>
         public ManifestResourceAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap referencing the name of the resource.
+        /// Gets or sets an index into the #Strings heap referencing the name of the resource.
         /// </summary>
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an Implementation index (an index into either the File, AssemblyRef or ExportedType table) indicating
+        /// Gets or sets an Implementation index (an index into either the File, AssemblyRef or ExportedType table) indicating
         /// the file that contains the resource data.
         /// </summary>
         /// <remarks>
@@ -91,6 +94,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Implementation
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

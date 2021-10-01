@@ -34,7 +34,7 @@ namespace AsmResolver.PE.Tests.DotNet.VTableFixups
             if (rebuild)
                 peImage = RebuildAndReloadManagedPE(peImage);
 
-            var fixups = peImage.DotNetDirectory.VTableFixups;
+            var fixups = peImage.DotNetDirectory!.VTableFixups!;
             int token = 0x06000001;
             for (int i = 0; i < 2; i++)
             {
@@ -58,7 +58,7 @@ namespace AsmResolver.PE.Tests.DotNet.VTableFixups
             if (rebuild)
                 peImage = RebuildAndReloadManagedPE(peImage);
 
-            var fixups = peImage.DotNetDirectory.VTableFixups;
+            var fixups = peImage.DotNetDirectory!.VTableFixups!;
 
             Assert.Equal(2, fixups.Count);
             Assert.Equal(3, fixups[0].Tokens.Count);

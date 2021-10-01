@@ -34,11 +34,10 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override CallingConventionSignature GetSignature()
+        protected override CallingConventionSignature? GetSignature()
         {
-            if (!_context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .TryGetBlobReaderByIndex(_row.Signature, out var reader))
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Signature, out var reader))
             {
                 return _context.BadImageAndReturn<CallingConventionSignature>(
                     $"Invalid signature blob index in stand-alone signature {MetadataToken.ToString()}.");

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -13,10 +13,10 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class MemberReference : MetadataMember, ICustomAttributeType, IFieldDescriptor
     {
-        private readonly LazyVariable<IMemberRefParent> _parent;
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<CallingConventionSignature> _signature;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<IMemberRefParent?> _parent;
+        private readonly LazyVariable<Utf8String?> _name;
+        private readonly LazyVariable<CallingConventionSignature?> _signature;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes a new member reference.
@@ -25,19 +25,19 @@ namespace AsmResolver.DotNet
         protected MemberReference(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<IMemberRefParent>(GetParent);
-            _name = new LazyVariable<string>(GetName);
-            _signature = new LazyVariable<CallingConventionSignature>(GetSignature);
+            _parent = new LazyVariable<IMemberRefParent?>(GetParent);
+            _name = new LazyVariable<Utf8String?>(GetName);
+            _signature = new LazyVariable<CallingConventionSignature?>(GetSignature);
         }
 
         /// <summary>
-        /// Creates a new reference to a member in an (external) .NET assembly. 
+        /// Creates a new reference to a member in an (external) .NET assembly.
         /// </summary>
         /// <param name="parent">The declaring member that defines the referenced member.</param>
         /// <param name="name">The name of the referenced member.</param>
         /// <param name="signature">The signature of the referenced member. This dictates whether the
         /// referenced member is a field or a method.</param>
-        public MemberReference(IMemberRefParent parent, string name, MemberSignature signature)
+        public MemberReference(IMemberRefParent? parent, string? name, MemberSignature? signature)
             : this(new MetadataToken(TableIndex.MemberRef, 0))
         {
             Parent = parent;
@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the member that declares the referenced member.
         /// </summary>
-        public IMemberRefParent Parent
+        public IMemberRefParent? Parent
         {
             get => _parent.Value;
             set => _parent.Value = value;
@@ -57,11 +57,17 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the name of the referenced member.
         /// </summary>
-        public string Name
+        /// <remarks>
+        /// This property corresponds to the Name column in the member reference table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        /// <inheritdoc />
+        string? INameProvider.Name => Name;
 
         /// <summary>
         /// Gets or sets the signature of the referenced member.
@@ -69,24 +75,26 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property dictates whether the referenced member is a field or a method.
         /// </remarks>
-        public CallingConventionSignature Signature
+        public CallingConventionSignature? Signature
         {
             get => _signature.Value;
             set => _signature.Value = value;
         }
 
-        MethodSignature IMethodDescriptor.Signature => Signature as MethodSignature;
+        MethodSignature? IMethodDescriptor.Signature => Signature as MethodSignature;
 
-        FieldSignature IFieldDescriptor.Signature => Signature as FieldSignature;
+        FieldSignature? IFieldDescriptor.Signature => Signature as FieldSignature;
 
         /// <summary>
         /// Gets a value indicating whether the referenced member is a field.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Signature))]
         public bool IsField => Signature is FieldSignature;
 
         /// <summary>
         /// Gets a value indicating whether the referenced member is a method
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Signature))]
         public bool IsMethod => Signature is MethodSignature;
 
         /// <inheritdoc />
@@ -98,26 +106,25 @@ namespace AsmResolver.DotNet
                     return FullNameGenerator.GetFieldFullName(Name, DeclaringType, (FieldSignature) Signature);
                 if (IsMethod)
                     return FullNameGenerator.GetMethodFullName(Name, DeclaringType, (MethodSignature) Signature);
-                return Name;
+                return Name ?? NullName;
             }
         }
 
         /// <inheritdoc />
-        public ModuleDefinition Module => Parent?.Module;
+        public ModuleDefinition? Module => Parent?.Module;
 
         /// <summary>
         /// Gets the type that declares the referenced member, if available.
         /// </summary>
-        public ITypeDefOrRef DeclaringType =>
-            Parent switch
-            {
-                ITypeDefOrRef typeDefOrRef => typeDefOrRef,
-                MethodDefinition method => method.DeclaringType,
-                _ => null
-            };
+        public ITypeDefOrRef? DeclaringType => Parent switch
+        {
+            ITypeDefOrRef typeDefOrRef => typeDefOrRef,
+            MethodDefinition method => method.DeclaringType,
+            _ => null
+        };
 
-        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
-        
+        ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
+
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
@@ -135,9 +142,9 @@ namespace AsmResolver.DotNet
         /// <returns>The resolved member definition, or <c>null</c> if the member could not be resolved.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the member reference has an invalid signature.</exception>
         /// <remarks>
-        /// This method can only be invoked if the reference was added to a module. 
+        /// This method can only be invoked if the reference was added to a module.
         /// </remarks>
-        public IMemberDefinition Resolve()
+        public IMemberDefinition? Resolve()
         {
             if (IsMethod)
                 return ((IMethodDescriptor) this).Resolve();
@@ -146,14 +153,14 @@ namespace AsmResolver.DotNet
             throw new ArgumentOutOfRangeException();
         }
 
-        FieldDefinition IFieldDescriptor.Resolve()
+        FieldDefinition? IFieldDescriptor.Resolve()
         {
             if (!IsField)
                 throw new InvalidOperationException("Member reference must reference a field.");
             return Module?.MetadataResolver.ResolveField(this);
         }
 
-        MethodDefinition IMethodDescriptor.Resolve()
+        MethodDefinition? IMethodDescriptor.Resolve()
         {
             if (!IsMethod)
                 throw new InvalidOperationException("Member reference must reference a method.");
@@ -169,7 +176,7 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
-        
+
         /// <summary>
         /// Obtains the parent of the member reference.
         /// </summary>
@@ -177,7 +184,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Parent"/> property.
         /// </remarks>
-        protected virtual IMemberRefParent GetParent() => null;
+        protected virtual IMemberRefParent? GetParent() => null;
 
         /// <summary>
         /// Obtains the name of the member reference.
@@ -186,7 +193,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the signature of the member reference.
@@ -195,7 +202,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Signature"/> property.
         /// </remarks>
-        protected virtual CallingConventionSignature GetSignature() => null;
+        protected virtual CallingConventionSignature? GetSignature() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;

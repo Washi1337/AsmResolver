@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="AssemblyReference"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedAssemblyReference : AssemblyReference
     {
@@ -34,19 +34,31 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
+        protected override Utf8String? GetName()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override string GetCulture() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()?.GetStringByIndex(_row.Culture);
+        protected override Utf8String? GetCulture()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Culture)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override byte[] GetPublicKeyOrToken() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<BlobStream>()?.GetBlobByIndex(_row.PublicKeyOrToken);
-      
+        protected override byte[]? GetPublicKeyOrToken()
+        {
+            return _context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                ? blobStream.GetBlobByIndex(_row.PublicKeyOrToken)
+                : null;
+        }
+
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() =>
-            _context.ParentModule.GetCustomAttributeCollection(this);  
+            _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the generic parameter metadata table.
     /// </summary>
-    public readonly struct GenericParameterRow : IMetadataRow
+    public struct GenericParameterRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single generic parameter row from an input stream.
@@ -57,19 +57,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the index of the generic parameter.
+        /// Gets or sets the index of the generic parameter.
         /// </summary>
         public ushort Number
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the attributes associated to the generic parameter.
+        /// Gets or sets the attributes associated to the generic parameter.
         /// </summary>
         public GenericParameterAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -79,14 +81,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Owner
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the name of the generic parameter.
+        /// Gets or sets an index into the #Strings stream referencing the name of the generic parameter.
         /// </summary>
         public uint Name
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

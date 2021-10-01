@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -16,9 +14,9 @@ namespace AsmResolver.DotNet
         IModuleProvider,
         IOwnedCollectionElement<GenericParameter>
     {
-        private readonly LazyVariable<GenericParameter> _owner;
-        private readonly LazyVariable<ITypeDefOrRef> _constraint;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<GenericParameter?> _owner;
+        private readonly LazyVariable<ITypeDefOrRef?> _constraint;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes the generic parameter constraint with a metadata token.
@@ -27,31 +25,31 @@ namespace AsmResolver.DotNet
         protected GenericParameterConstraint(MetadataToken token)
             : base(token)
         {
-            _owner = new LazyVariable<GenericParameter>(GetOwner);
-            _constraint = new LazyVariable<ITypeDefOrRef>(GetConstraint);
+            _owner = new LazyVariable<GenericParameter?>(GetOwner);
+            _constraint = new LazyVariable<ITypeDefOrRef?>(GetConstraint);
         }
 
         /// <summary>
         /// Creates a new constraint for a generic parameter.
         /// </summary>
         /// <param name="constraint">The type to constrain the generic parameter to.</param>
-        public GenericParameterConstraint(ITypeDefOrRef constraint)
+        public GenericParameterConstraint(ITypeDefOrRef? constraint)
             : this(new MetadataToken(TableIndex.GenericParamConstraint, 0))
         {
-            Constraint = constraint ?? throw new ArgumentNullException(nameof(constraint));
+            Constraint = constraint;
         }
 
         /// <summary>
         /// Gets the generic parameter that was constrained.
         /// </summary>
-        public GenericParameter Owner
+        public GenericParameter? Owner
         {
             get => _owner.Value;
             private set => _owner.Value = value;
         }
 
         /// <inheritdoc />
-        GenericParameter IOwnedCollectionElement<GenericParameter>.Owner
+        GenericParameter? IOwnedCollectionElement<GenericParameter>.Owner
         {
             get => Owner;
             set => Owner = value;
@@ -60,14 +58,14 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the type that the generic parameter was constrained to.
         /// </summary>
-        public ITypeDefOrRef Constraint
+        public ITypeDefOrRef? Constraint
         {
             get => _constraint.Value;
             set => _constraint.Value = value;
         }
 
         /// <inheritdoc />
-        public ModuleDefinition Module => Owner?.Module;
+        public ModuleDefinition? Module => Owner?.Module;
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
@@ -76,7 +74,7 @@ namespace AsmResolver.DotNet
                 if (_customAttributes is null)
                     Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
                 return _customAttributes;
-                
+
             }
         }
 
@@ -87,8 +85,8 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Owner"/> property.
         /// </remarks>
-        protected virtual GenericParameter GetOwner() => null;
-        
+        protected virtual GenericParameter? GetOwner() => null;
+
         /// <summary>
         /// Obtains the type that the generic parameter was constrained to.
         /// </summary>
@@ -96,7 +94,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Constraint"/> property.
         /// </remarks>
-        protected virtual ITypeDefOrRef GetConstraint() => null;
+        protected virtual ITypeDefOrRef? GetConstraint() => null;
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
@@ -105,7 +103,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="CustomAttributes"/> property.
         /// </remarks>
-        protected virtual IList<CustomAttribute> GetCustomAttributes() => 
+        protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
     }
 }

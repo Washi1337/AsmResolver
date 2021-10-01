@@ -4,13 +4,16 @@ using AsmResolver.IO;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a segment that originates from a slice of a <see cref="IDataSource"/>.
+    /// </summary>
     public class DataSourceSegment : SegmentBase, IReadableSegment
     {
         private readonly IDataSource _dataSource;
         private readonly ulong _originalOffset;
         private readonly uint _originalSize;
 
-        private DisplacedDataSource _displacedDataSource;
+        private DisplacedDataSource? _displacedDataSource;
 
         /// <inheritdoc />
         public DataSourceSegment(IDataSource dataSource, ulong offset, uint rva, uint size)

@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the method specification metadata table.
     /// </summary>
-    public readonly struct MethodSpecificationRow : IMetadataRow
+    public struct MethodSpecificationRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single method specification row from an input stream.
@@ -49,19 +49,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the method definition table indicating the method to be instantiated.
+        /// Gets or sets an index into the method definition table indicating the method to be instantiated.
         /// </summary>
         public uint Method
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream referencing the instantiation parameters of the method.
+        /// Gets or sets an index into the #Blob stream referencing the instantiation parameters of the method.
         /// </summary>
         public uint Instantiation
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

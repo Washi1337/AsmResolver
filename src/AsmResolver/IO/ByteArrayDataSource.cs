@@ -52,6 +52,7 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public bool IsValidAddress(ulong address) => address - BaseAddress < (ulong) _data.Length;
 
+        /// <inheritdoc />
         public int ReadBytes(ulong address, byte[] buffer, int index, int count)
         {
             int relativeIndex = (int) (address - BaseAddress);

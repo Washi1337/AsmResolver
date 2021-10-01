@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(IResolutionScope x, IResolutionScope y)
+        public bool Equals(IResolutionScope? x, IResolutionScope? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -62,13 +62,13 @@ namespace AsmResolver.DotNet.Signatures
         public int GetHashCode(IResolutionScope obj) => obj switch
         {
             AssemblyDescriptor assembly => GetHashCode(assembly),
-            ModuleDefinition module => GetHashCode(module.Assembly),
+            ModuleDefinition module => module.Assembly is not null ? GetHashCode(module.Assembly) : 0,
             TypeReference typeRef => GetHashCode(typeRef),
             _ => throw new ArgumentOutOfRangeException(nameof(obj))
         };
 
         /// <inheritdoc />
-        public bool Equals(AssemblyDescriptor x, AssemblyDescriptor y)
+        public bool Equals(AssemblyDescriptor? x, AssemblyDescriptor? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -94,13 +94,15 @@ namespace AsmResolver.DotNet.Signatures
         {
             unchecked
             {
-                int hashCode = (obj.Name != null ? obj.Name.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (obj.Culture != null ? obj.Culture.GetHashCode() : 0);
+                int hashCode = obj.Name is null ? 0 : obj.Name.GetHashCode();
+                hashCode = (hashCode * 397) ^ (obj.Culture is not null ? obj.Culture.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (int) TableIndex.AssemblyRef;
-                hashCode = (hashCode * 397) ^ (obj.Version != null ? obj.Version.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ obj.Version.GetHashCode();
                 hashCode = (hashCode * 397) ^ (int) obj.Attributes;
-                var publicKeyToken = obj.GetPublicKeyToken();
-                hashCode = (hashCode * 397) ^ (publicKeyToken != null ? GetHashCode(publicKeyToken) : 0);
+
+                byte[]? publicKeyToken = obj.GetPublicKeyToken();
+                hashCode = (hashCode * 397) ^ (publicKeyToken is not null ? GetHashCode(publicKeyToken) : 0);
+
                 return hashCode;
             }
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -31,13 +30,13 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IMethodDefOrRef GetMethod()
+        protected override IMethodDefOrRef? GetMethod()
         {
-            var encoder = _context.Image.DotNetDirectory.Metadata
+            var methodToken = _context.Metadata
                 .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.MethodDefOrRef);
+                .GetIndexEncoder(CodedIndex.MethodDefOrRef)
+                .DecodeIndex(_row.Method);
 
-            var methodToken = encoder.DecodeIndex(_row.Method);
             return _context.ParentModule.TryLookupMember(methodToken, out var member)
                 ? member as IMethodDefOrRef
                 : _context.BadImageAndReturn<IMethodDefOrRef>(
@@ -45,11 +44,10 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override GenericInstanceMethodSignature GetSignature()
+        protected override GenericInstanceMethodSignature? GetSignature()
         {
-            if (!_context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .TryGetBlobReaderByIndex(_row.Instantiation, out var reader))
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Instantiation, out var reader))
             {
                 return _context.BadImageAndReturn<GenericInstanceMethodSignature>(
                     $"Invalid instantiation blob index in method specification {MetadataToken.ToString()}.");

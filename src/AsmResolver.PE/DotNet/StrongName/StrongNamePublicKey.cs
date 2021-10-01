@@ -46,30 +46,17 @@ namespace AsmResolver.PE.DotNet.StrongName
 
             uint bitLength = reader.ReadUInt32();
 
-            var result = new StrongNamePublicKey
-            {
-                PublicExponent = reader.ReadUInt32(),
-                Modulus = new byte[bitLength / 8]
-            };
-
+            var result = new StrongNamePublicKey(new byte[bitLength / 8], reader.ReadUInt32());
             reader.ReadBytes(result.Modulus, 0, result.Modulus.Length);
-
             return result;
         }
 
-        internal byte[] CopyReversed(byte[] data)
+        private byte[] CopyReversed(byte[] data)
         {
             var result = new byte[data.Length];
             for (int i = 0; i < data.Length; i++)
                 result[result.Length - i - 1] = data[i];
             return result;
-        }
-
-        /// <summary>
-        /// Creates a new empty public key.
-        /// </summary>
-        public StrongNamePublicKey()
-        {
         }
 
         /// <summary>

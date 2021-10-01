@@ -20,6 +20,8 @@ namespace AsmResolver.PE.DotNet.Resources
             if (!reader.IsValid)
                 throw new ArgumentNullException(nameof(reader));
             _reader = reader;
+            Offset = reader.Offset;
+            Rva = reader.Rva;
         }
 
         /// <summary>
@@ -28,8 +30,8 @@ namespace AsmResolver.PE.DotNet.Resources
         /// </summary>
         /// <param name="contents">The input stream.</param>
         public SerializedDotNetResourcesDirectory(IReadableSegment contents)
+            : this(contents.CreateReader())
         {
-            _reader = contents.CreateReader();
         }
 
         /// <inheritdoc />
@@ -39,12 +41,12 @@ namespace AsmResolver.PE.DotNet.Resources
         public override void Write(IBinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
 
         /// <inheritdoc />
-        public override byte[] GetManifestResourceData(uint offset)
+        public override byte[]? GetManifestResourceData(uint offset)
         {
             if (!TryCreateManifestResourceReader(offset, out var reader))
                 return null;
 
-            var buffer = new byte[reader.Length];
+            byte[] buffer = new byte[reader.Length];
             reader.ReadBytes(buffer, 0, buffer.Length);
             return buffer;
         }

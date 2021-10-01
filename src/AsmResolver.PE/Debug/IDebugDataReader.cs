@@ -14,6 +14,6 @@ namespace AsmResolver.PE.Debug
         /// <param name="type">The type of data.</param>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns>The debug data, or <c>null</c> if the debug data could not be read.</returns>
-        IDebugDataSegment ReadDebugData(PEReaderContext context, DebugDataType type, ref BinaryStreamReader reader);
+        IDebugDataSegment? ReadDebugData(PEReaderContext context, DebugDataType type, ref BinaryStreamReader reader);
     }
 }

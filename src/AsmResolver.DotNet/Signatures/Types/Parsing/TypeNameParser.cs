@@ -67,7 +67,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return typeSpec;
         }
 
-        private void SetScope(TypeReference reference, IResolutionScope newScope)
+        private void SetScope(TypeReference reference, IResolutionScope? newScope)
         {
             // Find the top-most type.
             while (reference.Scope is TypeReference declaringType)
@@ -258,9 +258,9 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         {
             // Note: This is a slight deviation from grammar (but is equivalent), to make the parsing easier.
             //       We read all components
-            (string ns, var names) = ParseNamespaceTypeName();
+            (string? ns, var names) = ParseNamespaceTypeName();
 
-            TypeReference result = null;
+            TypeReference? result = null;
             for (int i = 0; i < names.Count; i++)
             {
                 result = result is null
@@ -274,12 +274,12 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return result.ToTypeSignature();
         }
 
-        private (string Namespace, IList<string> TypeNames) ParseNamespaceTypeName()
+        private (string? Namespace, IList<string> TypeNames) ParseNamespaceTypeName()
         {
             var names = ParseDottedExpression(TypeNameTerminal.Identifier);
 
             // The namespace is every name concatenated except for the last one.
-            string ns;
+            string? ns;
             if (names.Count > 1)
             {
                 ns = string.Join(".", names.Take(names.Count - 1));
@@ -348,9 +348,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                         break;
 
                     case "culture":
-                        assemblyRef.Culture = ParseCulture();
-                        if (assemblyRef.Culture.Equals("neutral", StringComparison.OrdinalIgnoreCase))
-                            assemblyRef.Culture = null;
+                        string culture = ParseCulture();
+                        assemblyRef.Culture = !culture.Equals("neutral", StringComparison.OrdinalIgnoreCase)
+                            ? culture
+                            : null;
                         break;
 
                     default:
@@ -367,7 +368,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return Version.Parse(versionString);
         }
 
-        private byte[] ParseHexBlob()
+        private byte[]? ParseHexBlob()
         {
             var hexString = Expect(TypeNameTerminal.Identifier, TypeNameTerminal.Number).Text;
             if (hexString == "null")
@@ -375,7 +376,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             if (hexString.Length % 2 != 0)
                 throw new FormatException("Provided hex string does not have an even length.");
 
-            var result = new byte[hexString.Length / 2];
+            byte[] result = new byte[hexString.Length / 2];
             for (int i = 0; i < hexString.Length; i+=2)
                 result[i / 2] = byte.Parse(hexString.Substring(i, 2), NumberStyles.HexNumber);
             return result;

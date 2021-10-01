@@ -18,7 +18,7 @@ namespace AsmResolver.PE.Relocations
             Type = type;
             Location = location ?? throw new ArgumentNullException(nameof(location));
         }
-        
+
         /// <summary>
         /// Gets the type of relocation to apply.
         /// </summary>
@@ -26,7 +26,7 @@ namespace AsmResolver.PE.Relocations
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets the location within the executable to apply the relocation to.
         /// </summary>
@@ -69,6 +69,6 @@ namespace AsmResolver.PE.Relocations
                 return ((int) Type * 397) ^ (int) Location.Rva;
             }
         }
-        
+
     }
 }

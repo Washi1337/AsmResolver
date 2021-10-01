@@ -60,10 +60,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint ResolutionScope
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the name of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
         /// <remarks>
         /// This value should always index a non-empty string.
@@ -71,10 +72,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the namespace of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the namespace of the type reference.
         /// </summary>
         /// <remarks>
         /// This value can be zero. If it is not, it should always index a non-empty string.
@@ -82,6 +84,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Namespace
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

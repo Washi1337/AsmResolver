@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the property map metadata table.
     /// </summary>
-    public readonly struct PropertyMapRow : IMetadataRow
+    public struct PropertyMapRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single property map row from an input stream.
@@ -64,19 +64,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the TypeDef table that this mapping is associating to an property list.
+        /// Gets or sets an index into the TypeDef table that this mapping is associating to an property list.
         /// </summary>
         public uint Parent
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the Event table indicating the first property that is defined in the property list.
+        /// Gets or sets an index into the Event table indicating the first property that is defined in the property list.
         /// </summary>
         public uint PropertyList
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

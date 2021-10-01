@@ -57,7 +57,7 @@ namespace AsmResolver.PE.Imports
             _lookupRva == 0
             && TimeDateStamp == 0
             && ForwarderChain == 0
-            && Name == null
+            && Name is null
             && _addressRva == 0;
 
         /// <inheritdoc />

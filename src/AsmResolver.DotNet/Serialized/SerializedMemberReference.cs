@@ -35,9 +35,9 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IMemberRefParent GetParent()
+        protected override IMemberRefParent? GetParent()
         {
-            var encoder =  _context.Image.DotNetDirectory.Metadata
+            var encoder =  _context.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.MemberRefParent);
 
@@ -49,16 +49,18 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.Name);
+        protected override Utf8String? GetName()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override CallingConventionSignature GetSignature()
+        protected override CallingConventionSignature? GetSignature()
         {
-            if (!_context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .TryGetBlobReaderByIndex(_row.Signature, out var reader))
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Signature, out var reader))
             {
                 return _context.BadImageAndReturn<CallingConventionSignature>(
                     $"Invalid signature blob index in member reference {MetadataToken.ToString()}.");

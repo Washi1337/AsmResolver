@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the field definition metadata table.
     /// </summary>
-    public readonly struct FieldDefinitionRow : IMetadataRow
+    public struct FieldDefinitionRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single field definition row from an input stream.
@@ -53,15 +53,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the field definition.
+        /// Gets or sets the attributes associated to the field definition.
         /// </summary>
         public FieldAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the name of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
         /// <remarks>
         /// This value should always index a non-empty string.
@@ -69,10 +70,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob heap containing the signature of the field. This includes the field type.
+        /// Gets or sets an index into the #Blob heap containing the signature of the field. This includes the field type.
         /// </summary>
         /// <remarks>
         /// This value should always index a valid field signature.

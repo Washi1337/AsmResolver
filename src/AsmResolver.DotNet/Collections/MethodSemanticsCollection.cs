@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AsmResolver.Collections;
 
@@ -25,12 +26,15 @@ namespace AsmResolver.DotNet.Collections
             set;
         } = true;
 
-        private void AssertSemanticsValidity(MethodSemantics item)
+        private void AssertSemanticsValidity([NotNull] MethodSemantics item)
         {
             if (!ValidateMembership)
                 return;
-            
-            if (item.Method.Semantics is {})
+
+            if (item.Method is null)
+                throw new ArgumentException("Method semantics is not assigned to a method.");
+
+            if (item.Method.Semantics is { })
                 throw new ArgumentException($"Method {item.Method} is already assigned semantics.");
         }
 
@@ -39,16 +43,16 @@ namespace AsmResolver.DotNet.Collections
         {
             AssertSemanticsValidity(item);
             base.OnInsertItem(index, item);
-            item.Method.Semantics = item;
+            item.Method!.Semantics = item;
         }
 
         /// <inheritdoc />
         protected override void OnSetItem(int index, MethodSemantics item)
         {
             AssertSemanticsValidity(item);
-            Items[index].Method.Semantics = null;
+            Items[index].Method!.Semantics = null;
             base.OnSetItem(index, item);
-            item.Method.Semantics = item;
+            item.Method!.Semantics = item;
         }
 
         /// <inheritdoc />
@@ -59,13 +63,13 @@ namespace AsmResolver.DotNet.Collections
                 AssertSemanticsValidity(item);
             base.OnInsertRange(index, list);
             foreach (var item in list)
-                item.Method.Semantics = item;
+                item.Method!.Semantics = item;
         }
 
         /// <inheritdoc />
         protected override void OnRemoveItem(int index)
         {
-            Items[index].Method.Semantics = null;
+            Items[index].Method!.Semantics = null;
             base.OnRemoveItem(index);
         }
 
@@ -73,7 +77,7 @@ namespace AsmResolver.DotNet.Collections
         protected override void OnClearItems()
         {
             foreach (var item in Items)
-                item.Method.Semantics = null;
+                item.Method!.Semantics = null;
             base.OnClearItems();
         }
     }

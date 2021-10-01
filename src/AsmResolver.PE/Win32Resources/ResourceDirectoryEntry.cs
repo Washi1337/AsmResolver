@@ -1,6 +1,5 @@
 using System.Text;
 using AsmResolver.IO;
-using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Win32Resources
@@ -46,7 +45,7 @@ namespace AsmResolver.PE.Win32Resources
                 }
 
                 int length = nameReader.ReadUInt16() * 2;
-                var data = new byte[length];
+                byte[] data = new byte[length];
                 length = nameReader.ReadBytes(data, 0, length);
 
                 Name = Encoding.Unicode.GetString(data, 0, length);
@@ -56,7 +55,7 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Gets the name of the entry (if available).
         /// </summary>
-        public string Name
+        public string? Name
         {
             get;
         }

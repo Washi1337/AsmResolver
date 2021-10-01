@@ -12,27 +12,27 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="operand">The variable operand.</param>
         /// <returns>The variable index.</returns>
-        int GetVariableIndex(object operand);
-        
+        int GetVariableIndex(object? operand);
+
         /// <summary>
         /// Transforms the provided argument operand into its argument index.
         /// </summary>
         /// <param name="operand">The argument operand.</param>
         /// <returns>The argument index.</returns>
-        int GetArgumentIndex(object operand);
-        
+        int GetArgumentIndex(object? operand);
+
         /// <summary>
         /// Transforms the provided string operand into a string token.
         /// </summary>
         /// <param name="operand">The string operand.</param>
         /// <returns>The string token.</returns>
-        uint GetStringToken(object operand);
-        
+        uint GetStringToken(object? operand);
+
         /// <summary>
         /// Transforms the provided member into a metadata token that references the member.
         /// </summary>
         /// <param name="operand">The member.</param>
         /// <returns>The metadata token.</returns>
-        MetadataToken GetMemberToken(object operand);
+        MetadataToken GetMemberToken(object? operand);
     }
 }

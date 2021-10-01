@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="ModuleReference"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedModuleReference : ModuleReference
     {
@@ -33,15 +33,15 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName()
+        protected override Utf8String? GetName()
         {
-            return _context.Image.DotNetDirectory.Metadata
-                .GetStream<StringsStream>()
-                .GetStringByIndex(_row.Name);
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

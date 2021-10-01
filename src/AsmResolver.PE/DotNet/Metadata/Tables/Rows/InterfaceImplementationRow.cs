@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the interface implementation metadata table.
     /// </summary>
-    public readonly struct InterfaceImplementationRow : IMetadataRow
+    public struct InterfaceImplementationRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single interface implementation row from an input stream.
@@ -50,11 +50,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the TypeDef table indicating the type that implements the interface.
+        /// Gets or sets an index into the TypeDef table indicating the type that implements the interface.
         /// </summary>
         public uint Class
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -64,6 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Interface
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

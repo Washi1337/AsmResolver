@@ -33,20 +33,20 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override string Name => $"method {Signature}";
 
         /// <inheritdoc />
-        public override string Namespace => null;
+        public override string? Namespace => null;
 
         /// <inheritdoc />
-        public override IResolutionScope Scope => Signature?.ReturnType?.Scope;
+        public override IResolutionScope? Scope => Signature.ReturnType.Scope;
 
         /// <inheritdoc />
         public override bool IsValueType => true;
 
         /// <inheritdoc />
-        public override TypeDefinition Resolve() => GetUnderlyingTypeDefOrRef()?.Resolve();
+        public override TypeDefinition? Resolve() => GetUnderlyingTypeDefOrRef()?.Resolve();
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() =>
-            Signature?.ReturnType?.Module.CorLibTypeFactory.IntPtr.Type;
+        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() =>
+            Signature?.ReturnType?.Module?.CorLibTypeFactory.IntPtr.Type;
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

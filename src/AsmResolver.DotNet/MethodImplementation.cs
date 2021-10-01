@@ -10,16 +10,16 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="declaration">The interface method that is implemented.</param>
         /// <param name="body">The method implementing the base method.</param>
-        public MethodImplementation(IMethodDefOrRef declaration, IMethodDefOrRef body)
+        public MethodImplementation(IMethodDefOrRef? declaration, IMethodDefOrRef? body)
         {
             Declaration = declaration;
             Body = body;
         }
-        
+
         /// <summary>
         /// Gets the interface method that is implemented.
         /// </summary>
-        public IMethodDefOrRef Declaration
+        public IMethodDefOrRef? Declaration
         {
             get;
         }
@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the method that implements the base method.
         /// </summary>
-        public IMethodDefOrRef Body
+        public IMethodDefOrRef? Body
         {
             get;
         }

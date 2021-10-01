@@ -3,14 +3,14 @@
 namespace AsmResolver.Collections
 {
     /// <summary>
-    /// Describes a one-to-one relation between two object types, with an efficient lookup time for both keys and values. 
+    /// Describes a one-to-one relation between two object types, with an efficient lookup time for both keys and values.
     /// </summary>
     /// <typeparam name="TKey">The first object type.</typeparam>
     /// <typeparam name="TValue">The second object type.</typeparam>
-    public class OneToOneRelation<TKey, TValue>
+    public sealed class OneToOneRelation<TKey, TValue>
     {
-        private readonly IDictionary<TKey, TValue> _keyToValue = new Dictionary<TKey, TValue>();
-        private readonly IDictionary<TValue, TKey> _valueToKey = new Dictionary<TValue, TKey>();
+        private readonly Dictionary<TKey, TValue> _keyToValue = new();
+        private readonly Dictionary<TValue, TKey> _valueToKey = new();
 
         /// <summary>
         /// Registers a one-to-one relation between two objects.
@@ -53,8 +53,16 @@ namespace AsmResolver.Collections
             return key;
         }
 
+        /// <summary>
+        /// Gets all keys stored in the one-to-one mapping.
+        /// </summary>
+        /// <returns>The keys.</returns>
         public IEnumerable<TKey> GetKeys() => _keyToValue.Keys;
 
+        /// <summary>
+        /// Gets all values stored in the one-to-one mapping.
+        /// </summary>
+        /// <returns>The values.</returns>
         public IEnumerable<TValue> GetValues() => _valueToKey.Keys;
     }
 }

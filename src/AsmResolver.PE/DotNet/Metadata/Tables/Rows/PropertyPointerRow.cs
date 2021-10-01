@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the property pointer metadata table.
     /// </summary>
-    public readonly struct PropertyPointerRow : IMetadataRow
+    public struct PropertyPointerRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single property pointer row from an input stream.
@@ -44,11 +44,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the Property table that this pointer references.
+        /// Gets or sets an index into the Property table that this pointer references.
         /// </summary>
         public uint Property
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

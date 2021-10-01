@@ -13,7 +13,7 @@ namespace AsmResolver.PE.Tests.Exports
         public void ReadName()
         {
             var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
-            Assert.Equal("SimpleDll.dll", image.Exports.Name);
+            Assert.Equal("SimpleDll.dll", image.Exports?.Name);
         }
 
         [Fact]
@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Tests.Exports
             {
                 "NamedExport1",
                 "NamedExport2",
-            }, image.Exports.Entries.Select(e => e.Name));
+            }, image.Exports?.Entries.Select(e => e.Name));
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace AsmResolver.PE.Tests.Exports
             {
                 0x000111DBu,
                 0x00011320u,
-            }, image.Exports.Entries.Select(e => e.Address.Rva));
+            }, image.Exports?.Entries.Select(e => e.Address.Rva));
         }
 
         [Fact]
@@ -46,14 +46,14 @@ namespace AsmResolver.PE.Tests.Exports
             {
                 1u,
                 2u,
-            }, image.Exports.Entries.Select(e => e.Ordinal));
+            }, image.Exports?.Entries.Select(e => e.Ordinal));
         }
 
         [Fact]
         public void ChangeBaseOrdinalShouldUpdateAllOrdinals()
         {
             var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
-            image.Exports.BaseOrdinal = 10;
+            image.Exports!.BaseOrdinal = 10;
             Assert.Equal(new[]
             {
                 10u,
@@ -65,7 +65,7 @@ namespace AsmResolver.PE.Tests.Exports
         public void RemoveExportShouldUpdateOrdinals()
         {
             var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
-            var export = image.Exports.Entries[0];
+            var export = image.Exports!.Entries[0];
             image.Exports.Entries.RemoveAt(0);
             Assert.Equal(0u, export.Ordinal);
             Assert.Equal(1u, image.Exports.Entries[0].Ordinal);
@@ -75,7 +75,7 @@ namespace AsmResolver.PE.Tests.Exports
         public void InsertExportShouldUpdateOrdinals()
         {
             var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
-            image.Exports.Entries.Insert(0, new ExportedSymbol(new VirtualAddress(0x1234), "NewExport"));
+            image.Exports!.Entries.Insert(0, new ExportedSymbol(new VirtualAddress(0x1234), "NewExport"));
             Assert.Equal(new[]
             {
                 1u,
@@ -106,7 +106,7 @@ namespace AsmResolver.PE.Tests.Exports
                 Entries = {new ExportedSymbol(new VirtualAddress(0x12345678), "TestExport")}
             };
             var newImage = RebuildAndReloadManagedPE(image);
-            Assert.Equal(image.Exports.Name, newImage.Exports.Name);
+            Assert.Equal(image.Exports.Name, newImage.Exports?.Name);
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace AsmResolver.PE.Tests.Exports
             var newImage = RebuildAndReloadManagedPE(image);
 
             // Verify.
-            Assert.Equal(1, newImage.Exports.Entries.Count);
+            Assert.Equal(1, newImage.Exports!.Entries.Count);
             var newExportedSymbol = newImage.Exports.Entries[0];
             Assert.Equal(exportedSymbol.Name, newExportedSymbol.Name);
             Assert.Equal(exportedSymbol.Ordinal, newExportedSymbol.Ordinal);

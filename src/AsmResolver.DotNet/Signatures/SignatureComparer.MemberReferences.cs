@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -11,20 +10,20 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<MethodSpecification>
     {
         /// <inheritdoc />
-        public bool Equals(MemberReference x, MemberReference y)
+        public bool Equals(MemberReference? x, MemberReference? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
             if (x is null || y is null)
                 return false;
-        
+
             if (x.IsMethod)
                 return Equals((IMethodDescriptor) x, y);
             if (y.IsField)
                 return Equals((IFieldDescriptor) x, y);
             return false;
         }
-        
+
         /// <inheritdoc />
         public int GetHashCode(MemberReference obj)
         {
@@ -34,9 +33,9 @@ namespace AsmResolver.DotNet.Signatures
                 return GetHashCode((IFieldDescriptor) obj);
             throw new ArgumentOutOfRangeException(nameof(obj));
         }
-        
+
         /// <inheritdoc />
-        public bool Equals(IMethodDescriptor x, IMethodDescriptor y)
+        public bool Equals(IMethodDescriptor? x, IMethodDescriptor? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -56,15 +55,15 @@ namespace AsmResolver.DotNet.Signatures
         {
             unchecked
             {
-                int hashCode = obj.Name == null ? 0 : obj.Name.GetHashCode();
-                hashCode = (hashCode * 397) ^ GetHashCode(obj.DeclaringType);
-                hashCode = (hashCode * 397) ^ GetHashCode(obj.Signature);
+                int hashCode = obj.Name is null ? 0 : obj.Name.GetHashCode();
+                hashCode = (hashCode * 397) ^ (obj.DeclaringType is not null ? GetHashCode(obj.DeclaringType) : 0);
+                hashCode = (hashCode * 397) ^ (obj.Signature is not null ? GetHashCode(obj.Signature) : 0);
                 return hashCode;
             }
         }
 
         /// <inheritdoc />
-        public bool Equals(IFieldDescriptor x, IFieldDescriptor y)
+        public bool Equals(IFieldDescriptor? x, IFieldDescriptor? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -81,15 +80,15 @@ namespace AsmResolver.DotNet.Signatures
         {
             unchecked
             {
-                int hashCode = obj.Name == null ? 0 : obj.Name.GetHashCode();
-                hashCode = (hashCode * 397) ^ GetHashCode(obj.DeclaringType);
-                hashCode = (hashCode * 397) ^ GetHashCode(obj.Signature);
+                int hashCode = obj.Name is null ? 0 : obj.Name.GetHashCode();
+                hashCode = (hashCode * 397) ^ (obj.DeclaringType is not null ? GetHashCode(obj.DeclaringType) : 0);
+                hashCode = (hashCode * 397) ^ (obj.Signature is not null ? GetHashCode(obj.Signature) : 0);
                 return hashCode;
             }
         }
 
         /// <inheritdoc />
-        public bool Equals(MethodSpecification x, MethodSpecification y)
+        public bool Equals(MethodSpecification? x, MethodSpecification? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -105,8 +104,8 @@ namespace AsmResolver.DotNet.Signatures
         {
             unchecked
             {
-                int hashCode = obj.Method == null ? 0 : obj.Method.GetHashCode();
-                hashCode = (hashCode * 397) ^ GetHashCode(obj.Signature);
+                int hashCode = obj.Method == null ? 0 : GetHashCode(obj.Method);
+                hashCode = (hashCode * 397) ^ (obj.Signature is not null ? GetHashCode(obj.Signature) : 0);
                 return hashCode;
             }
         }

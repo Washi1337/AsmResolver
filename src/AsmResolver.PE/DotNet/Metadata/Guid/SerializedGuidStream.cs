@@ -29,6 +29,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
             : base(name)
         {
             _reader = reader;
+            Offset = reader.Offset;
+            Rva = reader.Rva;
         }
 
         /// <inheritdoc />

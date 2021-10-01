@@ -155,7 +155,8 @@ namespace AsmResolver.DotNet.Memory
         }
 
         private TypeMemoryLayout VisitTypeReference(TypeReference type) =>
-            VisitTypeDefinition(type.Resolve());
+            VisitTypeDefinition(type.Resolve() ?? throw new ArgumentException(
+                $"Could not resolve type {type.SafeToString()}."));
 
         private TypeMemoryLayout VisitTypeDefinition(TypeDefinition type)
         {
@@ -210,6 +211,9 @@ namespace AsmResolver.DotNet.Memory
                     continue;
 
                 // Determine field memory layout.
+                if (field.Signature is null)
+                    throw new ArgumentException($"Field {field.SafeToString()} does not have a field signature.");
+
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
                 if (contentsLayout.IsPlatformDependent)
                     result.Attributes |= MemoryLayoutAttributes.IsPlatformDependent;
@@ -254,6 +258,10 @@ namespace AsmResolver.DotNet.Memory
                 }
 
                 uint offset = (uint) field.FieldOffset.Value;
+
+                if (field.Signature is null)
+                    throw new ArgumentException($"Field {field.SafeToString()} does not have a field signature.");
+
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
                 if (contentsLayout.IsPlatformDependent)
                     result.Attributes |= MemoryLayoutAttributes.IsPlatformDependent;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace AsmResolver.Collections
@@ -24,7 +25,7 @@ namespace AsmResolver.Collections
         {
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
-        
+
         /// <summary>
         /// Gets the owner of the collection.
         /// </summary>
@@ -32,10 +33,16 @@ namespace AsmResolver.Collections
         {
             get;
         }
-        
-        protected void AssertNotNullAndHasNoOwner(TItem item)
+
+        /// <summary>
+        /// Verifies that the provided item is not null and not added to another list.
+        /// </summary>
+        /// <param name="item">The item to verify.</param>
+        /// <exception cref="ArgumentNullException">Occurs when the item is null.</exception>
+        /// <exception cref="ArgumentException">Occurs when the item is already owned by another collection.</exception>
+        protected void AssertNotNullAndHasNoOwner(TItem? item)
         {
-            if (item == null)
+            if (item is null)
                 throw new ArgumentNullException(nameof(item));
             if (item.Owner != null && item.Owner != Owner)
                 throw new ArgumentException("Item is already added to another collection.");
@@ -89,6 +96,6 @@ namespace AsmResolver.Collections
                 item.Owner = null;
             base.OnClearItems();
         }
-        
+
     }
 }

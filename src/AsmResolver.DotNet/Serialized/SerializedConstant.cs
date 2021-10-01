@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IHasConstant GetParent()
+        protected override IHasConstant? GetParent()
         {
             var token = _context.ParentModule.GetConstantOwner(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(token, out var member)
@@ -43,11 +43,10 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override DataBlobSignature GetValue()
+        protected override DataBlobSignature? GetValue()
         {
-            if (!_context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .TryGetBlobReaderByIndex(_row.Value, out var reader))
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Value, out var reader))
             {
                 // Don't report error. null constants are allowed (e.g. null strings).
                 return null;

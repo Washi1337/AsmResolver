@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet.Collections
         /// <summary>
         /// Gets the virtual parameter containing the current instance of the class that the method is defined in.
         /// </summary>
-        public Parameter ThisParameter
+        public Parameter? ThisParameter
         {
             get;
             private set;
@@ -68,10 +68,11 @@ namespace AsmResolver.DotNet.Collections
         /// </remarks>
         public void PullUpdatesFromMethodSignature()
         {
-            if (_owner.Signature.HasThis != _hasThis)
+            bool newHasThis = _owner.Signature?.HasThis ?? false;
+            if (newHasThis != _hasThis)
             {
                 _parameters.Clear();
-                _hasThis = _owner.Signature.HasThis;
+                _hasThis = newHasThis;
             }
 
             EnsureAllParametersCreated();
@@ -87,11 +88,10 @@ namespace AsmResolver.DotNet.Collections
             }
             else
             {
-                if (ThisParameter is null)
-                    ThisParameter = new Parameter(this, -1, 0);
+                ThisParameter ??= new Parameter(this, -1, 0);
             }
 
-            int signatureCount = _owner.Signature.ParameterTypes.Count;
+            int signatureCount = _owner.Signature?.ParameterTypes.Count ?? 0;
 
             // Add missing parameters.
             while (_parameters.Count < signatureCount)
@@ -112,15 +112,20 @@ namespace AsmResolver.DotNet.Collections
         private void UpdateParameterTypes()
         {
             // Update implicit parameters.
+            if (_owner.Signature is null)
+                return;
+
             ReturnParameter.SetParameterTypeInternal(_owner.Signature.ReturnType);
-            ThisParameter?.SetParameterTypeInternal(GetThisParameterType());
+
+            if (GetThisParameterType() is { } thisType)
+                ThisParameter?.SetParameterTypeInternal(thisType);
 
             // Update remaining parameter types.
             for (int i = 0; i < _parameters.Count; i++)
                 _parameters[i].SetParameterTypeInternal(_owner.Signature.ParameterTypes[i]);
         }
 
-        private TypeSignature GetThisParameterType()
+        private TypeSignature? GetThisParameterType()
         {
             if (_owner.DeclaringType is null)
                 return null;
@@ -132,13 +137,16 @@ namespace AsmResolver.DotNet.Collections
             return result;
         }
 
-        internal ParameterDefinition GetParameterDefinition(int sequence)
+        internal ParameterDefinition? GetParameterDefinition(int sequence)
         {
             return _owner.ParameterDefinitions.FirstOrDefault(p => p.Sequence == sequence);
         }
 
         internal void PushParameterUpdateToSignature(Parameter parameter)
         {
+            if (_owner.Signature is null)
+                return;
+
             if (parameter.Index == -2)
                 _owner.Signature.ReturnType = parameter.ParameterType;
             else if (parameter.Index == -1)
@@ -170,7 +178,9 @@ namespace AsmResolver.DotNet.Collections
         public Parameter GetBySignatureIndex(int index)
         {
             int actualIndex = index - MethodSignatureIndexBase;
-            return actualIndex == -1 && _hasThis ? ThisParameter : this[actualIndex];
+            return actualIndex == -1 && _hasThis
+                ? ThisParameter ?? throw new IndexOutOfRangeException()
+                : this[actualIndex];
         }
 
         /// <inheritdoc />

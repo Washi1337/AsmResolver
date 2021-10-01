@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the event map metadata table.
     /// </summary>
-    public readonly struct EventDefinitionRow : IMetadataRow
+    public struct EventDefinitionRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single event definition row from an input stream.
@@ -54,15 +54,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the event definition.
+        /// Gets or sets the attributes associated to the event definition.
         /// </summary>
         public EventAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the name of the event.
+        /// Gets or sets an index into the #Strings stream referencing the name of the event.
         /// </summary>
         /// <remarks>
         /// This value should always index a non-empty string.
@@ -70,6 +71,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -79,6 +81,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint EventType
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

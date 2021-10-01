@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -16,8 +15,8 @@ namespace AsmResolver.DotNet
     /// </remarks>
     public class StandAloneSignature : MetadataMember, IHasCustomAttribute
     {
-        private readonly LazyVariable<BlobSignature> _signature;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<BlobSignature?> _signature;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes a new stand-alone signature.
@@ -26,7 +25,7 @@ namespace AsmResolver.DotNet
         protected StandAloneSignature(MetadataToken token)
             : base(token)
         {
-            _signature = new LazyVariable<BlobSignature>(GetSignature);
+            _signature = new LazyVariable<BlobSignature?>(GetSignature);
         }
 
         /// <summary>
@@ -42,7 +41,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the signature that was referenced by this metadata member.
         /// </summary>
-        public BlobSignature Signature
+        public BlobSignature? Signature
         {
             get => _signature.Value;
             set => _signature.Value = value;
@@ -66,7 +65,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Signature"/> property.
         /// </remarks>
-        protected virtual CallingConventionSignature GetSignature() => null;
+        protected virtual CallingConventionSignature? GetSignature() => null;
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
@@ -79,6 +78,6 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         /// <inheritdoc />
-        public override string ToString() => Signature.ToString();
+        public override string ToString() => Signature?.ToString() ?? "<<<EMPTY SIGNATURE>>>";
     }
 }

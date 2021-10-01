@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -37,7 +38,7 @@ namespace AsmResolver.DotNet.Signatures
         public CustomAttributeArgument(TypeSignature argumentType)
         {
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
-            Elements = new List<object>();
+            Elements = new List<object?>();
         }
 
         /// <summary>
@@ -45,10 +46,10 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
         /// <param name="value">The value of the argument.</param>
-        public CustomAttributeArgument(TypeSignature argumentType, object value)
+        public CustomAttributeArgument(TypeSignature argumentType, object? value)
         {
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
-            Elements = new List<object>(1) {value};
+            Elements = new List<object?>(1) {value};
         }
 
         /// <summary>
@@ -56,10 +57,10 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
         /// <param name="elements">The value making up the elements of the array argument.</param>
-        public CustomAttributeArgument(TypeSignature argumentType, IEnumerable<object> elements)
+        public CustomAttributeArgument(TypeSignature argumentType, IEnumerable<object?> elements)
         {
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
-            Elements = new List<object>(elements);
+            Elements = new List<object?>(elements);
         }
 
         /// <summary>
@@ -67,10 +68,10 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
         /// <param name="elements">The value making up the elements of the array argument.</param>
-        public CustomAttributeArgument(TypeSignature argumentType, params object[] elements)
+        public CustomAttributeArgument(TypeSignature argumentType, params object?[] elements)
         {
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
-            Elements = new List<object>(elements);
+            Elements = new List<object?>(elements);
         }
 
         /// <summary>
@@ -85,12 +86,12 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// When <see cref="ArgumentType"/> is not a <see cref="SzArrayTypeSignature"/>, gets the first element of the
         /// </summary>
-        public object Element => Elements.Count > 0 ? Elements[0] : default;
+        public object? Element => Elements.Count > 0 ? Elements[0] : default;
 
         /// <summary>
         /// Gets a collection of all elements that the argument is built with.
         /// </summary>
-        public IList<object> Elements
+        public IList<object?> Elements
         {
             get;
         }
@@ -107,12 +108,23 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override string ToString()
         {
-            return !IsNullArray
-                ? ArgumentType.ElementType == ElementType.SzArray
-                    ? $"{{{string.Join(", ", Elements)}}}"
-                    : Element.ToString()
-                : "null";
+            if (IsNullArray)
+                return "null";
+
+            object? obj = ArgumentType.ElementType == ElementType.SzArray
+                ? Elements
+                : Element;
+
+            return ElementToString(obj);
         }
+
+        private string ElementToString(object? element) => element switch
+        {
+            null => "null",
+            IList<object?> list => $"{{{string.Join(", ", list.Select(ElementToString))}}}",
+            string x => x.CreateEscapedString(),
+            _ => element.ToString()
+        };
 
         /// <summary>
         /// Writes the fixed argument to the provided output stream.

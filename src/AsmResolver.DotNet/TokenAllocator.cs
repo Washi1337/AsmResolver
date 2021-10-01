@@ -1,7 +1,7 @@
-﻿using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Metadata.Tables;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
 {
@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet
             Initialize(module.DotNetDirectory);
         }
 
-        private void Initialize(IDotNetDirectory netDirectory)
+        private void Initialize(IDotNetDirectory? netDirectory)
         {
             if (netDirectory is null)
                 InitializeDefault();
@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet
 
         private void InitializeTable(IDotNetDirectory netDirectory)
         {
-            var tableStream = netDirectory.Metadata.GetStream<TablesStream>();
+            var tableStream = netDirectory.Metadata!.GetStream<TablesStream>();
             for (TableIndex index = 0; index < TableIndex.Max; index++)
             {
                 var table = tableStream.GetTable(index);

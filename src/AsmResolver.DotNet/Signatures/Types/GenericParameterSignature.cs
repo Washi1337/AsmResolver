@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </summary>
     public class GenericParameterSignature : TypeSignature
     {
-        private readonly IResolutionScope _scope;
+        private readonly IResolutionScope? _scope;
 
         /// <summary>
         /// Creates a new reference to a generic parameter.
@@ -71,19 +71,19 @@ namespace AsmResolver.DotNet.Signatures.Types
         };
 
         /// <inheritdoc />
-        public override string Namespace => null;
+        public override string? Namespace => null;
 
         /// <inheritdoc />
-        public override IResolutionScope Scope => _scope;
+        public override IResolutionScope? Scope => _scope;
 
         /// <inheritdoc />
         public override bool IsValueType => false;
 
         /// <inheritdoc />
-        public override TypeDefinition Resolve() => null;
+        public override TypeDefinition? Resolve() => null;
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => null;
+        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => null;
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

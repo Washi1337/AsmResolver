@@ -36,12 +36,15 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.Name);
+        protected override Utf8String? GetName()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override MethodDefinition GetMethod()
+        protected override MethodDefinition? GetMethod()
         {
             var ownerToken = new MetadataToken(TableIndex.Method, _context.ParentModule.GetParameterOwner(MetadataToken.Rid));
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)
@@ -55,11 +58,11 @@ namespace AsmResolver.DotNet.Serialized
             _context.ParentModule.GetCustomAttributeCollection(this);
 
         /// <inheritdoc />
-        protected override Constant GetConstant() =>
+        protected override Constant? GetConstant() =>
             _context.ParentModule.GetConstant(MetadataToken);
 
         /// <inheritdoc />
-        protected override MarshalDescriptor GetMarshalDescriptor() =>
+        protected override MarshalDescriptor? GetMarshalDescriptor() =>
             _context.ParentModule.GetFieldMarshal(MetadataToken);
 
     }

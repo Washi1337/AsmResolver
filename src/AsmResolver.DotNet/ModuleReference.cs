@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -16,8 +15,8 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<string> _name;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<Utf8String?> _name;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes the module reference with a metadata token.
@@ -26,39 +25,46 @@ namespace AsmResolver.DotNet
         protected ModuleReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
+            _name = new LazyVariable<Utf8String?>(GetName);
         }
 
         /// <summary>
         /// Creates a new reference to an external module.
         /// </summary>
         /// <param name="name">The file name of the module.</param>
-        public ModuleReference(string name)
+        public ModuleReference(string? name)
             : this(new MetadataToken(TableIndex.ModuleRef, 0))
         {
             Name = name;
         }
 
-        /// <inheritdoc />
-        public string Name
+        /// <summary>
+        /// Gets or sets the name of the module.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the module definition table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
 
+        string? INameProvider.Name => Name;
+
         /// <inheritdoc />
-        public ModuleDefinition Module
+        public ModuleDefinition? Module
         {
             get;
             private set;
         }
 
-        ModuleDefinition IOwnedCollectionElement<ModuleDefinition>.Owner
+        ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
             get => Module;
             set => Module = value;
         }
-        
+
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
@@ -77,9 +83,9 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
-        AssemblyDescriptor IResolutionScope.GetAssembly() => Module.Assembly;
+        AssemblyDescriptor? IResolutionScope.GetAssembly() => Module?.Assembly;
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
@@ -92,6 +98,6 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         /// <inheritdoc />
-        public override string ToString() => Name;
+        public override string ToString() => Name ?? NullName;
     }
 }

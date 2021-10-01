@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -51,6 +49,21 @@ namespace AsmResolver.DotNet.Signatures
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Gets value indicating if method returns value or not.
+        /// </summary>
+        public bool ReturnsValue
+        {
+            get
+            {
+                var ret = ReturnType;
+                while (ret is CustomModifierTypeSignature customModifierTypeSignature)
+                    ret = customModifierTypeSignature.BaseType;
+
+                return ret.ElementType != ElementType.Void;
+            }
         }
 
         /// <summary>
@@ -112,25 +125,16 @@ namespace AsmResolver.DotNet.Signatures
         {
             context.Writer.WriteCompressedUInt32((uint) ParameterTypes.Count);
 
-            if (ReturnType is null)
-            {
-                context.ErrorListener.RegisterException(new InvalidBlobSignatureException(this,
-                    new NullReferenceException("Return type is null.")));
-                context.Writer.WriteByte((byte) ElementType.Object);
-            }
-            else
-            {
-                ReturnType.Write(context);
-            }
+            ReturnType.Write(context);
 
-            foreach (var type in ParameterTypes)
-                type.Write(context);
+            for (int i = 0; i < ParameterTypes.Count; i++)
+                ParameterTypes[i].Write(context);
 
             if (IncludeSentinel)
             {
                 context.Writer.WriteByte((byte) ElementType.Sentinel);
-                foreach (var sentinelType in SentinelParameterTypes)
-                    sentinelType.Write(context);
+                for (int i = 0; i < SentinelParameterTypes.Count; i++)
+                    SentinelParameterTypes[i].Write(context);
             }
         }
 

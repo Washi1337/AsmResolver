@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Exports
@@ -22,7 +23,7 @@ namespace AsmResolver.PE.Exports
         /// </summary>
         /// <param name="address">The reference to the segment representing the symbol.</param>
         /// <param name="name">The name of the symbol.</param>
-        public ExportedSymbol(ISegmentReference address, string name)
+        public ExportedSymbol(ISegmentReference address, string? name)
         {
             Name = name;
             Address = address;
@@ -31,13 +32,13 @@ namespace AsmResolver.PE.Exports
         /// <summary>
         /// Gets the export directory this symbol was added to (if available).
         /// </summary>
-        public IExportDirectory ParentDirectory
+        public IExportDirectory? ParentDirectory
         {
             get;
             private set;
         }
 
-        IExportDirectory IOwnedCollectionElement<IExportDirectory>.Owner
+        IExportDirectory? IOwnedCollectionElement<IExportDirectory>.Owner
         {
             get => ParentDirectory;
             set => ParentDirectory = value;
@@ -52,27 +53,29 @@ namespace AsmResolver.PE.Exports
         /// <summary>
         /// Gets the ordinal of the exported symbol.
         /// </summary>
-        public uint Ordinal => Index == -1 ? 0u : (uint) Index + ParentDirectory.BaseOrdinal;
+        public uint Ordinal => Index == -1 ? 0u : (uint) Index + (ParentDirectory?.BaseOrdinal ?? 0);
 
         /// <summary>
-        /// Gets a value indicating whether the symbol is exported by ordinal number. 
+        /// Gets a value indicating whether the symbol is exported by ordinal number.
         /// </summary>
+        [MemberNotNullWhen(false, nameof(Name))]
         public bool IsByOrdinal => Name is null;
-        
+
         /// <summary>
-        /// Gets a value indicating whether the symbol is exported by name. 
+        /// Gets a value indicating whether the symbol is exported by name.
         /// </summary>
-        public bool IsByName => Name is {};
-        
+        [MemberNotNullWhen(true, nameof(Name))]
+        public bool IsByName => Name is not null;
+
         /// <summary>
         /// Gets or sets the name of the exported symbol.
         /// </summary>
-        public string Name
+        public string? Name
         {
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the reference to the segment representing the symbol.
         /// </summary>
@@ -90,7 +93,7 @@ namespace AsmResolver.PE.Exports
         public override string ToString()
         {
             string displayName = Name ?? $"#{Ordinal.ToString()}";
-            return ParentDirectory is null 
+            return ParentDirectory is null
                 ? displayName
                 : $"{ParentDirectory.Name}!{displayName}";
         }

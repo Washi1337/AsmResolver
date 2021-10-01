@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// </summary>
         /// <param name="path">The path to the runtime configuration file.</param>
         /// <returns>The parsed runtime configuration.</returns>
-        public static RuntimeConfiguration FromFile(string path)
+        public static RuntimeConfiguration? FromFile(string path)
         {
             return FromJson(File.ReadAllText(path));
         }
@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// </summary>
         /// <param name="json">The raw json string configuration file.</param>
         /// <returns>The parsed runtime configuration.</returns>
-        public static RuntimeConfiguration FromJson(string json)
+        public static RuntimeConfiguration? FromJson(string json)
         {
             return JsonSerializer.Deserialize<RuntimeConfiguration>(json, JsonSerializerOptions);
         }

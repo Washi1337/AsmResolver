@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -11,20 +12,20 @@ namespace AsmResolver.DotNet.Collections
     {
         public delegate uint GetOwnerRidDelegate(uint rid, TAssociationRow row);
         public delegate MetadataRange GetMemberListDelegate(uint rid);
-        
+
         private readonly IMetadata _metadata;
         private readonly TableIndex _associationTable;
         private readonly GetOwnerRidDelegate _getOwnerRid;
         private readonly GetMemberListDelegate _getMemberList;
-        private readonly object _lock = new object();
-        
-        private IDictionary<uint, MetadataRange> _memberLists;
-        private IDictionary<uint, uint> _memberOwners;
-        
+        private readonly object _lock = new();
+
+        private IDictionary<uint, MetadataRange>? _memberLists;
+        private IDictionary<uint, uint>? _memberOwners;
+
         public LazyRidListRelation(
-            IMetadata metadata, 
+            IMetadata metadata,
             TableIndex associationTable,
-            GetOwnerRidDelegate getOwnerRid, 
+            GetOwnerRidDelegate getOwnerRid,
             GetMemberListDelegate getMemberList)
         {
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
@@ -32,18 +33,22 @@ namespace AsmResolver.DotNet.Collections
             _getMemberList = getMemberList ?? throw new ArgumentNullException(nameof(getMemberList));
             _associationTable = associationTable;
         }
-        
+
+        [MemberNotNull(nameof(_memberLists))]
+        [MemberNotNull(nameof(_memberOwners))]
         private void EnsureIsInitialized()
         {
-            if (_memberLists is null)
+            if (_memberLists is null || _memberOwners is null)
                 Initialize();
         }
 
+        [MemberNotNull(nameof(_memberLists))]
+        [MemberNotNull(nameof(_memberOwners))]
         private void Initialize()
         {
             lock (_lock)
             {
-                if (_memberLists != null)
+                if (_memberLists is not null && _memberOwners is not null)
                     return;
 
                 var tablesStream = _metadata.GetStream<TablesStream>();
@@ -62,9 +67,9 @@ namespace AsmResolver.DotNet.Collections
 
         private void InitializeMemberList(uint ownerRid, MetadataRange memberRange)
         {
-            _memberLists[ownerRid] = memberRange;
+            _memberLists![ownerRid] = memberRange;
             foreach (var token in memberRange)
-                _memberOwners[token.Rid] = ownerRid;
+                _memberOwners![token.Rid] = ownerRid;
         }
 
         public MetadataRange GetMemberRange(uint ownerRid)

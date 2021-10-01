@@ -20,7 +20,8 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The method signature.</returns>
         public static MethodSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
-            var result = new MethodSignature((CallingConventionAttributes) reader.ReadByte());
+            var result = new MethodSignature((CallingConventionAttributes) reader.ReadByte(),
+                context.ReaderContext.ParentModule.CorLibTypeFactory.Void, Enumerable.Empty<TypeSignature>());
 
             // Generic parameter count.
             if (result.IsGeneric)
@@ -89,15 +90,6 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The signature.</returns>
         public static MethodSignature CreateInstance(TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes)
             => new MethodSignature(CallingConventionAttributes.HasThis, returnType, parameterTypes);
-
-        /// <summary>
-        /// Initializes an empty method signature with no parameters.
-        /// </summary>
-        /// <param name="attributes">The attributes</param>
-        protected internal MethodSignature(CallingConventionAttributes attributes)
-            : base(attributes, null, Enumerable.Empty<TypeSignature>())
-        {
-        }
 
         /// <summary>
         /// Creates a new method signature with the provided return and parameter types.

@@ -17,9 +17,17 @@ namespace AsmResolver.DotNet.Signatures.Types
             Name = name;
 
             if (corlibScope is ModuleDefinition module)
-                Type = module.TopLevelTypes.First(t => t.IsTypeOf(Namespace, Name));
+            {
+                Type = module.TopLevelTypes.First(t => t.IsTypeOf("System", name));
+            }
+            else if (corlibScope.Module is not null)
+            {
+                Type = new TypeReference(corlibScope.Module, corlibScope, "System", name);
+            }
             else
-                Type = new TypeReference(corlibScope.Module, corlibScope, Namespace, Name);
+            {
+                throw new ArgumentException("Provided CorLib was not valid.");
+            }
         }
 
         /// <summary>
@@ -31,7 +39,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string Name
+        public override string? Name
         {
             get;
         }
@@ -65,13 +73,13 @@ namespace AsmResolver.DotNet.Signatures.Types
             };
 
         /// <inheritdoc />
-        public override TypeDefinition Resolve()
+        public override TypeDefinition? Resolve()
         {
             return Type.Resolve();
         }
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef()
+        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef()
         {
             return Type;
         }
@@ -83,7 +91,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override IResolutionScope Scope
+        public override IResolutionScope? Scope
         {
             get;
         }

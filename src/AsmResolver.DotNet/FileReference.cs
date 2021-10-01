@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -16,9 +15,9 @@ namespace AsmResolver.DotNet
         IManagedEntrypoint,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<byte[]> _hashValue;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<Utf8String?> _name;
+        private readonly LazyVariable<byte[]?> _hashValue;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes the file reference with a metadata token.
@@ -27,8 +26,8 @@ namespace AsmResolver.DotNet
         protected FileReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
-            _hashValue = new LazyVariable<byte[]>(GetHashValue);
+            _name = new LazyVariable<Utf8String?>(GetName);
+            _hashValue = new LazyVariable<byte[]?>(GetHashValue);
         }
 
         /// <summary>
@@ -36,7 +35,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the file.</param>
         /// <param name="attributes">The attributes associated to the reference.</param>
-        public FileReference(string name, FileAttributes attributes)
+        public FileReference(string? name, FileAttributes attributes)
             : this(new MetadataToken(TableIndex.File, 0))
         {
             Name = name;
@@ -71,24 +70,31 @@ namespace AsmResolver.DotNet
                                 | (value ? FileAttributes.ContainsNoMetadata : 0);
         }
 
-        /// <inheritdoc />
-        public string Name
+        /// <summary>
+        /// Gets or sets the name of the file.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the file table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
 
-        /// <inheritdoc />
-        public string FullName => Name;
+        string? INameProvider.Name => Name;
 
         /// <inheritdoc />
-        public ModuleDefinition Module
+        public string FullName => Name ?? NullName;
+
+        /// <inheritdoc />
+        public ModuleDefinition? Module
         {
             get;
             private set;
         }
 
-        ModuleDefinition IOwnedCollectionElement<ModuleDefinition>.Owner
+        ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
             get => Module;
             set => Module = value;
@@ -97,7 +103,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the checksum of the referenced file.
         /// </summary>
-        public byte[] HashValue
+        public byte[]? HashValue
         {
             get => _hashValue.Value;
             set => _hashValue.Value = value;
@@ -121,7 +127,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the hash of the referenced file.
@@ -130,7 +136,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="HashValue"/> property.
         /// </remarks>
-        protected virtual byte[] GetHashValue() => null;
+        protected virtual byte[]? GetHashValue() => null;
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.

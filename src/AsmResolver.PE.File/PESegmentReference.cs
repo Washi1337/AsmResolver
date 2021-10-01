@@ -6,7 +6,7 @@ namespace AsmResolver.PE.File
     /// <summary>
     /// Represents a reference to a segment of a PE file.
     /// </summary>
-    public readonly struct PESegmentReference : ISegmentReference
+    public sealed class PESegmentReference : ISegmentReference
     {
         private readonly IPEFile _peFile;
 
@@ -48,6 +48,6 @@ namespace AsmResolver.PE.File
         public BinaryStreamReader CreateReader() => _peFile.CreateReaderAtRva(Rva);
 
         /// <inheritdoc />
-        public ISegment GetSegment() => throw new InvalidOperationException();
+        public ISegment? GetSegment() => throw new InvalidOperationException();
     }
 }

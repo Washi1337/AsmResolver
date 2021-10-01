@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AsmResolver
 {
@@ -8,9 +9,9 @@ namespace AsmResolver
     /// <typeparam name="T">The type of the values that the variable stores.</typeparam>
     public class LazyVariable<T>
     {
-        private T _value;
-        private readonly Func<T> _getValue;
-        private readonly object _lockObject = new object();
+        private T? _value;
+        private readonly Func<T?>? _getValue;
+        private readonly object _lockObject = new();
 
         /// <summary>
         /// Creates a new lazy variable and initialize it with a constant.
@@ -26,7 +27,7 @@ namespace AsmResolver
         /// Creates a new lazy variable and delays the initialization of the default value.
         /// </summary>
         /// <param name="getValue">The method to execute when initializing the default value.</param>
-        public LazyVariable(Func<T> getValue)
+        public LazyVariable(Func<T?> getValue)
         {
             _getValue = getValue ?? throw new ArgumentNullException(nameof(getValue));
         }
@@ -34,6 +35,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets a value indicating the value has been initialized.
         /// </summary>
+        [MemberNotNullWhen(false, nameof(_getValue))]
         public bool IsInitialized
         {
             get;
@@ -49,7 +51,7 @@ namespace AsmResolver
             {
                 if (!IsInitialized)
                     InitializeValue();
-                return _value;
+                return _value!;
             }
             set
             {
@@ -72,6 +74,6 @@ namespace AsmResolver
                 }
             }
         }
-        
+
     }
 }

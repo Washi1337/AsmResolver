@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// <summary>
     /// Represents a single row in the assembly definition metadata table.
     /// </summary>
-    public readonly struct AssemblyReferenceRow : IMetadataRow
+    public struct AssemblyReferenceRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single assembly definition row from an input stream.
@@ -79,47 +79,52 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the major version number of the assembly.
+        /// Gets or sets the major version number of the assembly.
         /// </summary>
         public ushort MajorVersion
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the minor version number of the assembly.
+        /// Gets or sets the minor version number of the assembly.
         /// </summary>
         public ushort MinorVersion
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the build number of the assembly.
+        /// Gets or sets the build number of the assembly.
         /// </summary>
         public ushort BuildNumber
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the revision number of the assembly.
+        /// Gets or sets the revision number of the assembly.
         /// </summary>
         public ushort RevisionNumber
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the attributes associated to the assembly.
+        /// Gets or sets the attributes associated to the assembly.
         /// </summary>
         public AssemblyAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream referencing the public key or token of the assembly to use for
+        /// Gets or sets an index into the #Blob stream referencing the public key or token of the assembly to use for
         /// verification of a signature.
         /// </summary>
         /// <remarks>
@@ -128,18 +133,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint PublicKeyOrToken
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the name of the assembly.
+        /// Gets or sets an index into the #Strings stream referencing the name of the assembly.
         /// </summary>
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the locale string of the assembly.
+        /// Gets or sets an index into the #Strings stream referencing the locale string of the assembly.
         /// </summary>
         /// <remarks>
         /// When this field is set to zero, the default culture is used.
@@ -147,14 +154,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Culture
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream referencing the hash value of the assembly reference.
+        /// Gets or sets an index into the #Blob stream referencing the hash value of the assembly reference.
         /// </summary>
         public uint HashValue
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

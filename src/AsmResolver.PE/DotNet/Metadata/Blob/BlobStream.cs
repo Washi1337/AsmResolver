@@ -42,7 +42,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// <returns>
         /// The blob, excluding the bytes encoding the length of the blob, or <c>null</c> if the index was invalid.
         /// </returns>
-        public abstract byte[] GetBlobByIndex(uint index);
+        public abstract byte[]? GetBlobByIndex(uint index);
 
         /// <summary>
         /// Gets a blob binary reader by its blob index.

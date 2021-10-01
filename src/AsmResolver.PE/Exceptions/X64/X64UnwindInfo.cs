@@ -18,6 +18,9 @@ namespace AsmResolver.PE.Exceptions.X64
         public X64UnwindInfo()
         {
             Version = 1;
+            UnwindCodes = Array.Empty<ushort>();
+            ExceptionHandler = SegmentReference.Null;
+            ExceptionHandlerData = SegmentReference.Null;
         }
 
         /// <summary>
@@ -133,7 +136,7 @@ namespace AsmResolver.PE.Exceptions.X64
         /// When <see cref="IsChained"/> is <c>true</c>, gets or sets the function that this unwind information is
         /// chained with.
         /// </summary>
-        public X64RuntimeFunction ChainedFunction
+        public X64RuntimeFunction? ChainedFunction
         {
             get;
             set;
@@ -215,7 +218,7 @@ namespace AsmResolver.PE.Exceptions.X64
 
                 // TODO: include custom EH data.
             }
-            else if (IsChained)
+            else if (IsChained && ChainedFunction is not null)
             {
                 ChainedFunction.Write(writer);
             }

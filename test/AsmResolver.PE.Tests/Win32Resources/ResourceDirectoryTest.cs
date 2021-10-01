@@ -17,9 +17,9 @@ namespace AsmResolver.PE.Tests.Win32Resources
             {
                 Name = name;
             }
-            
+
             public uint Id { get; set; }
-            public string Name { get; set; }
+            public string? Name { get; set; }
             public bool IsData { get; set; }
             public IList<ResourceEntryInfo> Entries { get; } = new List<ResourceEntryInfo>();
         }
@@ -97,7 +97,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
                 }
             };
 
-            AssertStructure(expected, peImage.Resources);
+            AssertStructure(expected, peImage.Resources!);
         }
 
         [Fact]
@@ -108,16 +108,16 @@ namespace AsmResolver.PE.Tests.Win32Resources
 
             const int maxDirCount = 20;
             int dirCount = 0;
-            
+
             var stack = new Stack<IResourceEntry>();
-            stack.Push(peImage.Resources);
+            stack.Push(peImage.Resources!);
             while (stack.Count > 0)
             {
                 var current = stack.Pop();
                 if (current.IsDirectory)
                 {
                     Assert.True(dirCount < maxDirCount, "Traversal reached limit of resource directories.");
-                    
+
                     dirCount++;
                     foreach (var entry in ((IResourceDirectory) current).Entries)
                         stack.Push(entry);
@@ -130,7 +130,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDirName,
                 new PEReaderParameters(EmptyErrorListener.Instance));
-            Assert.Null(peImage.Resources.Entries[0].Name);
+            Assert.Null(peImage.Resources!.Entries[0].Name);
         }
 
         [Fact]
@@ -138,8 +138,8 @@ namespace AsmResolver.PE.Tests.Win32Resources
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDirOffset,
                 new PEReaderParameters(EmptyErrorListener.Instance));
-            
-            var entry = peImage.Resources.Entries[0];
+
+            var entry = peImage.Resources!.Entries[0];
             Assert.Equal(16u, entry.Id);
             Assert.True(entry.IsDirectory);
 
@@ -153,12 +153,12 @@ namespace AsmResolver.PE.Tests.Win32Resources
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDataOffset,
                 new PEReaderParameters(EmptyErrorListener.Instance));
 
-            var directory = (IResourceDirectory) peImage.Resources.Entries[0];
+            var directory = (IResourceDirectory) peImage.Resources!.Entries[0];
             directory = (IResourceDirectory) directory.Entries[0];
             var data = (IResourceData) directory.Entries[0];
-            
+
             Assert.Null(data.Contents);
         }
-        
+
     }
 }

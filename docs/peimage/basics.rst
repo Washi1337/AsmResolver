@@ -65,7 +65,8 @@ Building an image back to a PE file can be done by using one of the classes that
 
 .. note::
     
-    Currently AsmResolver only provides a builder for .NET images.
+    Currently AsmResolver only provides a full fletched builder for .NET images.
+
 
 Building a .NET image can be done through the ``AsmResolver.PE.DotNet.Builder.ManagedPEFileBuilder`` class:
 

@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IHasSecurityDeclaration GetParent()
+        protected override IHasSecurityDeclaration? GetParent()
         {
             var module = _context.ParentModule;
 
@@ -47,11 +47,10 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override PermissionSetSignature GetPermissionSet()
+        protected override PermissionSetSignature? GetPermissionSet()
         {
-            if (!_context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .TryGetBlobReaderByIndex(_row.PermissionSet, out var reader))
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.PermissionSet, out var reader))
             {
                 return _context.BadImageAndReturn<PermissionSetSignature>(
                     $"Invalid permission set blob index in security declaration {MetadataToken.ToString()}.");

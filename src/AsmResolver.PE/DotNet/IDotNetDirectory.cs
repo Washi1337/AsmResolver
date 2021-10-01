@@ -36,7 +36,7 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the metadata of the .NET binary.
         /// </summary>
-        IMetadata Metadata
+        IMetadata? Metadata
         {
             get;
             set;
@@ -64,7 +64,7 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the embedded resources data of the .NET binary (if available).
         /// </summary>
-        DotNetResourcesDirectory DotNetResources
+        DotNetResourcesDirectory? DotNetResources
         {
             get;
             set;
@@ -73,7 +73,7 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the strong name signature of the .NET binary (if available).
         /// </summary>
-        IReadableSegment StrongName
+        IReadableSegment? StrongName
         {
             get;
             set;
@@ -82,7 +82,7 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the code manager table of the .NET binary (if available).
         /// </summary>
-        IReadableSegment CodeManagerTable
+        IReadableSegment? CodeManagerTable
         {
             get;
             set;
@@ -92,7 +92,7 @@ namespace AsmResolver.PE.DotNet
         /// Gets or sets the data directory containing the VTable fixups that need to be applied when executing mixed
         /// mode applications (if available).
         /// </summary>
-        VTableFixupsDirectory VTableFixups
+        VTableFixupsDirectory? VTableFixups
         {
             get;
             set;
@@ -102,7 +102,7 @@ namespace AsmResolver.PE.DotNet
         /// Gets or sets the data directory containing the addresses to native stubs of exports defined in the
         /// .NET binary (if available).
         /// </summary>
-        IReadableSegment ExportAddressTable
+        IReadableSegment? ExportAddressTable
         {
             get;
             set;
@@ -111,7 +111,7 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the managed native header of a mixed mode application (if available).
         /// </summary>
-        IReadableSegment ManagedNativeHeader
+        IReadableSegment? ManagedNativeHeader
         {
             get;
             set;

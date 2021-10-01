@@ -12,7 +12,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         public void DetectNoExtraData()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             Assert.False(tablesStream.HasExtraData);
         }
@@ -21,7 +21,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         public void DetectExtraData()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_TablesStream_ExtraData);
-            var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             Assert.True(tablesStream.HasExtraData);
             Assert.Equal(12345678u, tablesStream.ExtraData);
@@ -32,7 +32,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         {
             var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
             var peImage = PEImage.FromFile(peFile);
-            var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             using var tempStream = new MemoryStream();
             tablesStream.Write(new BinaryStreamWriter(tempStream));

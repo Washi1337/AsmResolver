@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Gets or sets the name of the framework implementation.
         /// </summary>
-        public string Name
+        public string? Name
         {
             get;
             set;
@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Gets or sets the version number of the framework implementation.
         /// </summary>
-        public string Version
+        public string? Version
         {
             get;
             set;

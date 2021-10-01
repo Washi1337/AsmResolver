@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Debug.CodeView
         /// <param name="context">Context for the reader</param>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
-        public static CodeViewDataSegment FromReader(PEReaderContext context, ref BinaryStreamReader reader)
+        public static CodeViewDataSegment? FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             var signature = (CodeViewSignature) reader.ReadUInt32();
 

@@ -312,17 +312,17 @@ namespace AsmResolver.IO
         /// <returns>The read bytes, including the delimeter if it was found.</returns>
         public byte[] ReadBytesUntil(byte delimeter)
         {
-            var buffer = new List<byte>();
-
-            while (RelativeOffset < Length)
+            var lookahead = Fork();
+            while (lookahead.RelativeOffset < lookahead.Length)
             {
-                byte b = ReadByte();
-                buffer.Add(b);
+                byte b = lookahead.ReadByte();
                 if (b == delimeter)
                     break;
             }
 
-            return buffer.ToArray();
+            byte[] buffer = new byte[lookahead.RelativeOffset - RelativeOffset];
+            ReadBytes(buffer, 0, buffer.Length);
+            return buffer;
         }
 
         /// <summary>
@@ -435,7 +435,7 @@ namespace AsmResolver.IO
         /// Reads a serialized UTF8 string from the stream.
         /// </summary>
         /// <returns>The string that was read from the stream.</returns>
-        public string ReadSerString()
+        public Utf8String? ReadSerString()
         {
             if (!CanRead(1) || DataSource[Offset] == 0xFF)
             {
@@ -448,7 +448,7 @@ namespace AsmResolver.IO
 
             byte[] data = new byte[length];
             length = (uint) ReadBytes(data, 0, (int) length);
-            return Encoding.UTF8.GetString(data, 0, (int) length);
+            return new Utf8String(data, 0, (int)length);
         }
 
         /// <summary>

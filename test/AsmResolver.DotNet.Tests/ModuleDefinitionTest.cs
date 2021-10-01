@@ -9,6 +9,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.Win32Resources;
@@ -57,14 +58,14 @@ namespace AsmResolver.DotNet.Tests
         public void ReadTypesNoNested()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
-            Assert.Equal(new[] {"<Module>", "Program"}, module.TopLevelTypes.Select(t => t.Name));
+            Assert.Equal(new Utf8String[] { "<Module>", "Program" }, module.TopLevelTypes.Select(t => t.Name));
         }
 
         [Fact]
         public void ReadTypesNested()
         {
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
-            Assert.Equal(new HashSet<string>
+            Assert.Equal(new HashSet<Utf8String>
             {
                 "<Module>",
                 nameof(TopLevelClass1),
@@ -76,7 +77,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadMaliciousNestedClassLoop()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousNestedClassLoop);
-            Assert.Equal(new[] {"<Module>", "Program"}, module.TopLevelTypes.Select(t => t.Name));
+            Assert.Equal(new Utf8String[] { "<Module>", "Program" }, module.TopLevelTypes.Select(t => t.Name));
         }
 
         [Fact]
@@ -84,8 +85,8 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousNestedClassLoop2);
             Assert.Equal(
-                new HashSet<string> {"<Module>", "Program", "MaliciousEnclosingClass"},
-                new HashSet<string>(module.TopLevelTypes.Select(t => t.Name)));
+                new HashSet<Utf8String> { "<Module>", "Program", "MaliciousEnclosingClass" },
+                new HashSet<Utf8String>(module.TopLevelTypes.Select(t => t.Name)));
 
             var enclosingClass = module.TopLevelTypes.First(x => x.Name == "MaliciousEnclosingClass");
             Assert.Single(enclosingClass.NestedTypes);
@@ -108,7 +109,7 @@ namespace AsmResolver.DotNet.Tests
             var member = module.LookupMember(new MetadataToken(TableIndex.TypeRef, 12));
             Assert.IsAssignableFrom<TypeReference>(member);
 
-            var typeRef = (TypeReference) member;
+            var typeRef = (TypeReference)member;
             Assert.Equal("System", typeRef.Namespace);
             Assert.Equal("Object", typeRef.Name);
         }
@@ -120,7 +121,7 @@ namespace AsmResolver.DotNet.Tests
             var member = module.LookupMember(new MetadataToken(TableIndex.TypeDef, 2));
             Assert.IsAssignableFrom<TypeDefinition>(member);
 
-            var typeDef = (TypeDefinition) member;
+            var typeDef = (TypeDefinition)member;
             Assert.Equal("HelloWorld", typeDef.Namespace);
             Assert.Equal("Program", typeDef.Name);
         }
@@ -132,7 +133,7 @@ namespace AsmResolver.DotNet.Tests
             var member = module.LookupMember(new MetadataToken(TableIndex.AssemblyRef, 1));
             Assert.IsAssignableFrom<AssemblyReference>(member);
 
-            var assemblyRef = (AssemblyReference) member;
+            var assemblyRef = (AssemblyReference)member;
             Assert.Equal("mscorlib", assemblyRef.Name);
             Assert.Same(module.AssemblyReferences[0], assemblyRef);
         }
@@ -144,7 +145,7 @@ namespace AsmResolver.DotNet.Tests
             var member = module.LookupMember(new MetadataToken(TableIndex.ModuleRef, 1));
             Assert.IsAssignableFrom<ModuleReference>(member);
 
-            var moduleRef = (ModuleReference) member;
+            var moduleRef = (ModuleReference)member;
             Assert.Equal("MyModel.netmodule", moduleRef.Name);
             Assert.Same(module.ModuleReferences[0], moduleRef);
         }
@@ -226,14 +227,14 @@ namespace AsmResolver.DotNet.Tests
 
             // Add new directory.
             const string directoryName = "Test";
-            var entryData = new byte[] {0, 1, 2, 3, 4};
+            var entryData = new byte[] { 0, 1, 2, 3, 4 };
             var directory = new ResourceDirectory(directoryName)
             {
                 Entries =
                 {
                     new ResourceDirectory(1)
                     {
-                        Entries = {new ResourceData(1234, new DataSegment(entryData))}
+                        Entries = { new ResourceData(1234, new DataSegment(entryData)) }
                     }
                 }
             };
@@ -245,12 +246,12 @@ namespace AsmResolver.DotNet.Tests
             var newModule = ModuleDefinition.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
 
             // Assert contents.
-            var newDirectory = (IResourceDirectory) newModule.NativeResourceDirectory.Entries
+            var newDirectory = (IResourceDirectory)newModule.NativeResourceDirectory.Entries
                 .First(entry => entry.Name == directoryName);
-            newDirectory = (IResourceDirectory) newDirectory.Entries[0];
+            newDirectory = (IResourceDirectory)newDirectory.Entries[0];
 
-            var newData = (IResourceData) newDirectory.Entries[0];
-            var newContents = (IReadableSegment) newData.Contents;
+            var newData = (IResourceData)newDirectory.Entries[0];
+            var newContents = (IReadableSegment)newData.Contents;
             Assert.Equal(entryData, newContents.ToArray());
         }
 
@@ -295,6 +296,32 @@ namespace AsmResolver.DotNet.Tests
             var newFile = Assert.Single(newModule.FileReferences);
             Assert.NotNull(newFile);
             Assert.Equal(file.Name, newFile.Name);
+        }
+
+        [Fact]
+        public void DetectTargetNetFramework40()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            Assert.Contains(DotNetRuntimeInfo.NetFramework, module.OriginalTargetRuntime.Name);
+            Assert.Equal(4, module.OriginalTargetRuntime.Version.Major);
+            Assert.Equal(0, module.OriginalTargetRuntime.Version.Minor);
+        }
+
+        [Fact]
+        public void DetectTargetNetCore()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            Assert.Contains(DotNetRuntimeInfo.NetCoreApp, module.OriginalTargetRuntime.Name);
+            Assert.Equal(2, module.OriginalTargetRuntime.Version.Major);
+            Assert.Equal(2, module.OriginalTargetRuntime.Version.Minor);
+        }
+
+        [Fact]
+        public void DetectTargetStandard()
+        {
+            var module = ModuleDefinition.FromFile(typeof(ISegment).Assembly.Location);
+            Assert.Contains(DotNetRuntimeInfo.NetStandard, module.OriginalTargetRuntime.Name);
+            Assert.Equal(2, module.OriginalTargetRuntime.Version.Major);
         }
     }
 }
