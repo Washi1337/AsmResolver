@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Exceptions.X64
 {
@@ -17,6 +18,9 @@ namespace AsmResolver.PE.Exceptions.X64
         public X64UnwindInfo()
         {
             Version = 1;
+            UnwindCodes = Array.Empty<ushort>();
+            ExceptionHandler = SegmentReference.Null;
+            ExceptionHandlerData = SegmentReference.Null;
         }
 
         /// <summary>
@@ -132,7 +136,7 @@ namespace AsmResolver.PE.Exceptions.X64
         /// When <see cref="IsChained"/> is <c>true</c>, gets or sets the function that this unwind information is
         /// chained with.
         /// </summary>
-        public X64RuntimeFunction ChainedFunction
+        public X64RuntimeFunction? ChainedFunction
         {
             get;
             set;
@@ -144,7 +148,7 @@ namespace AsmResolver.PE.Exceptions.X64
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The read unwind information.</returns>
-        public static X64UnwindInfo FromReader(PEReaderContext context, IBinaryStreamReader reader)
+        public static X64UnwindInfo FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             var result = new X64UnwindInfo();
             result.UpdateOffsets(reader.Offset, reader.Rva);
@@ -168,7 +172,7 @@ namespace AsmResolver.PE.Exceptions.X64
             }
             else if (result.IsChained)
             {
-                result.ChainedFunction = X64RuntimeFunction.FromReader(context, reader);
+                result.ChainedFunction = X64RuntimeFunction.FromReader(context, ref reader);
             }
 
             return result;
@@ -214,7 +218,7 @@ namespace AsmResolver.PE.Exceptions.X64
 
                 // TODO: include custom EH data.
             }
-            else if (IsChained)
+            else if (IsChained && ChainedFunction is not null)
             {
                 ChainedFunction.Write(writer);
             }

@@ -1,4 +1,5 @@
 using System.IO;
+using AsmResolver.IO;
 using Xunit;
 
 namespace AsmResolver.Tests

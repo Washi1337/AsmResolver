@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="ImplementationMap"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedImplementationMap : ImplementationMap
     {
@@ -33,26 +33,31 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IMemberForwarded GetMemberForwarded()
+        protected override IMemberForwarded? GetMemberForwarded()
         {
             var ownerToken = _context.ParentModule.GetImplementationMapOwner(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)
                 ? member as IMemberForwarded
+                :  _context.BadImageAndReturn<IMemberForwarded>(
+                    $"Invalid forwarded member in implementation map {MetadataToken.ToString()}.");;
+        }
+
+        /// <inheritdoc />
+        protected override Utf8String? GetName()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.ImportName)
                 : null;
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.ImportName);
-
-        /// <inheritdoc />
-        protected override ModuleReference GetScope()
+        protected override ModuleReference? GetScope()
         {
             return _context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.ModuleRef, _row.ImportScope),
                 out var member)
                 ? member as ModuleReference
-                : null;
+                : _context.BadImageAndReturn<ModuleReference>(
+                    $"Invalid import scope in implementation map {MetadataToken.ToString()}.");
         }
     }
 }

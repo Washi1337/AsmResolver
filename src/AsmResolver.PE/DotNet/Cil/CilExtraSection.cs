@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -11,10 +12,9 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </remarks>
     public class CilExtraSection : SegmentBase
     {
-        private byte[] _data;
-
         private CilExtraSection()
         {
+            Data = Array.Empty<byte>();
         }
 
         /// <summary>
@@ -90,8 +90,8 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         public byte[] Data
         {
-            get => _data;
-            set => _data = value ?? throw new ArgumentNullException(nameof(value));
+            get;
+            set;
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns>The extra section that was read.</returns>
-        public static CilExtraSection FromReader(IBinaryStreamReader reader)
+        public static CilExtraSection FromReader(ref BinaryStreamReader reader)
         {
             var section = new CilExtraSection
             {

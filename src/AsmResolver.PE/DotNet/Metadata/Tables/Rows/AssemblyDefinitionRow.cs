@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the assembly definition metadata table.
     /// </summary>
-    public readonly struct AssemblyDefinitionRow : IMetadataRow
+    public struct AssemblyDefinitionRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single assembly definition row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the assembly definition table.</param>
         /// <returns>The row.</returns>
-        public static AssemblyDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static AssemblyDefinitionRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new AssemblyDefinitionRow(
                 (AssemblyHashAlgorithm) reader.ReadUInt32(),
@@ -42,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// for verification of a signature, or 0 if the assembly was not signed.</param>
         /// <param name="name">The index into the #Strings stream referencing the name of the assembly.</param>
         /// <param name="culture">The index into the #Strings stream referencing the locale string of the assembly.</param>
-        public AssemblyDefinitionRow(AssemblyHashAlgorithm hashAlgorithm, 
+        public AssemblyDefinitionRow(AssemblyHashAlgorithm hashAlgorithm,
             ushort majorVersion, ushort minorVersion, ushort buildNumber, ushort revisionNumber,
             AssemblyAttributes attributes, uint publicKey, uint name, uint culture)
         {
@@ -56,13 +57,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             Name = name;
             Culture = culture;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.Assembly;
 
         /// <inheritdoc />
         public int Count => 9;
-        
+
         /// <inheritdoc />
         public uint this[int index] => index switch
         {
@@ -79,55 +80,61 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the hashing algorithm that was used to sign the assembly.
+        /// Gets or sets the hashing algorithm that was used to sign the assembly.
         /// </summary>
         public AssemblyHashAlgorithm HashAlgorithm
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the major version number of the assembly.
+        /// Gets or sets the major version number of the assembly.
         /// </summary>
         public ushort MajorVersion
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the minor version number of the assembly.
+        /// Gets or sets the minor version number of the assembly.
         /// </summary>
         public ushort MinorVersion
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the build number of the assembly.
+        /// Gets or sets the build number of the assembly.
         /// </summary>
         public ushort BuildNumber
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the revision number of the assembly.
+        /// Gets or sets the revision number of the assembly.
         /// </summary>
         public ushort RevisionNumber
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the attributes associated to the assembly.
+        /// Gets or sets the attributes associated to the assembly.
         /// </summary>
         public AssemblyAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream referencing the public key of the assembly to use for verification of
+        /// Gets or sets an index into the #Blob stream referencing the public key of the assembly to use for verification of
         /// a signature.
         /// </summary>
         /// <remarks>
@@ -136,18 +143,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint PublicKey
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the name of the assembly.
+        /// Gets or sets an index into the #Strings stream referencing the name of the assembly.
         /// </summary>
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the locale string of the assembly.
+        /// Gets or sets an index into the #Strings stream referencing the locale string of the assembly.
         /// </summary>
         /// <remarks>
         /// When this field is set to zero, the default culture is used.
@@ -155,6 +164,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Culture
         {
             get;
+            set;
         }
 
         /// <inheritdoc />
@@ -178,9 +188,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
         public bool Equals(AssemblyDefinitionRow other)
         {
-            return HashAlgorithm == other.HashAlgorithm 
+            return HashAlgorithm == other.HashAlgorithm
                    && MajorVersion == other.MajorVersion
-                   && MinorVersion == other.MinorVersion 
+                   && MinorVersion == other.MinorVersion
                    && BuildNumber == other.BuildNumber
                    && RevisionNumber == other.RevisionNumber
                    && Attributes == other.Attributes

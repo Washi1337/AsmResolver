@@ -1,5 +1,6 @@
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Resources;
+using AsmResolver.PE.DotNet.VTableFixups;
 
 namespace AsmResolver.PE.DotNet
 {
@@ -35,7 +36,7 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the metadata of the .NET binary.
         /// </summary>
-        IMetadata Metadata
+        IMetadata? Metadata
         {
             get;
             set;
@@ -49,10 +50,10 @@ namespace AsmResolver.PE.DotNet
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the metadata token or entrypoint virtual address, depending on whether
-        /// <see cref="DotNetDirectoryFlags.NativeEntrypoint"/> is set in <see cref="Flags" />. 
+        /// <see cref="DotNetDirectoryFlags.NativeEntrypoint"/> is set in <see cref="Flags" />.
         /// </summary>
         uint Entrypoint
         {
@@ -63,7 +64,7 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the embedded resources data of the .NET binary (if available).
         /// </summary>
-        DotNetResourcesDirectory DotNetResources
+        DotNetResourcesDirectory? DotNetResources
         {
             get;
             set;
@@ -72,16 +73,16 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the strong name signature of the .NET binary (if available).
         /// </summary>
-        IReadableSegment StrongName
+        IReadableSegment? StrongName
         {
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the data directory containing the code manager table of the .NET binary (if available).
         /// </summary>
-        IReadableSegment CodeManagerTable
+        IReadableSegment? CodeManagerTable
         {
             get;
             set;
@@ -91,7 +92,7 @@ namespace AsmResolver.PE.DotNet
         /// Gets or sets the data directory containing the VTable fixups that need to be applied when executing mixed
         /// mode applications (if available).
         /// </summary>
-        IReadableSegment VTableFixups
+        VTableFixupsDirectory? VTableFixups
         {
             get;
             set;
@@ -99,18 +100,18 @@ namespace AsmResolver.PE.DotNet
 
         /// <summary>
         /// Gets or sets the data directory containing the addresses to native stubs of exports defined in the
-        /// .NET binary (if available). 
+        /// .NET binary (if available).
         /// </summary>
-        IReadableSegment ExportAddressTable
+        IReadableSegment? ExportAddressTable
         {
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the data directory containing the managed native header of a mixed mode application (if available).
         /// </summary>
-        IReadableSegment ManagedNativeHeader
+        IReadableSegment? ManagedNativeHeader
         {
             get;
             set;

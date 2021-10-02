@@ -1,6 +1,8 @@
 using System;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Resources;
+using AsmResolver.PE.DotNet.VTableFixups;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.DotNet
@@ -25,30 +27,29 @@ namespace AsmResolver.PE.DotNet
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
-        public SerializedDotNetDirectory(PEReaderContext context, IBinaryStreamReader reader)
+        public SerializedDotNetDirectory(PEReaderContext context, ref BinaryStreamReader reader)
         {
-            if (reader == null)
-                throw new ArgumentNullException(nameof(reader));
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
             Offset = reader.Offset;
+            Rva = reader.Rva;
 
             uint cb = reader.ReadUInt32();
             MajorRuntimeVersion = reader.ReadUInt16();
             MinorRuntimeVersion = reader.ReadUInt16();
-            _metadataDirectory = DataDirectory.FromReader(reader);
+            _metadataDirectory = DataDirectory.FromReader(ref reader);
             Flags = (DotNetDirectoryFlags) reader.ReadUInt32();
             Entrypoint = reader.ReadUInt32();
-            _resourcesDirectory = DataDirectory.FromReader(reader);
-            _strongNameDirectory = DataDirectory.FromReader(reader);
-            _codeManagerDirectory = DataDirectory.FromReader(reader);
-            _vtableFixupsDirectory = DataDirectory.FromReader(reader);
-            _exportsDirectory = DataDirectory.FromReader(reader);
-            _nativeHeaderDirectory = DataDirectory.FromReader(reader);
+            _resourcesDirectory = DataDirectory.FromReader(ref reader);
+            _strongNameDirectory = DataDirectory.FromReader(ref reader);
+            _codeManagerDirectory = DataDirectory.FromReader(ref reader);
+            _vtableFixupsDirectory = DataDirectory.FromReader(ref reader);
+            _exportsDirectory = DataDirectory.FromReader(ref reader);
+            _nativeHeaderDirectory = DataDirectory.FromReader(ref reader);
         }
 
         /// <inheritdoc />
-        protected override IMetadata GetMetadata()
+        protected override IMetadata? GetMetadata()
         {
             if (!_metadataDirectory.IsPresentInPE)
                 return null;
@@ -58,13 +59,13 @@ namespace AsmResolver.PE.DotNet
                 _context.BadImage(".NET data directory contains an invalid metadata directory RVA and/or size.");
                 return null;
             }
-            
-            return new SerializedMetadata(_context, directoryReader);
+
+            return new SerializedMetadata(_context, ref directoryReader);
 
         }
 
         /// <inheritdoc />
-        protected override DotNetResourcesDirectory GetResources()
+        protected override DotNetResourcesDirectory? GetResources()
         {
             if (!_resourcesDirectory.IsPresentInPE)
                 return null;
@@ -80,7 +81,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetStrongName()
+        protected override IReadableSegment? GetStrongName()
         {
             if (!_strongNameDirectory.IsPresentInPE)
                 return null;
@@ -90,14 +91,14 @@ namespace AsmResolver.PE.DotNet
                 _context.BadImage(".NET data directory contains an invalid strong name directory RVA and/or size.");
                 return null;
             }
-            
+
             // TODO: interpretation instead of raw contents.
-            return DataSegment.FromReader(directoryReader);
+            return DataSegment.FromReader(ref directoryReader);
 
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetCodeManagerTable()
+        protected override IReadableSegment? GetCodeManagerTable()
         {
             if (!_codeManagerDirectory.IsPresentInPE)
                 return null;
@@ -107,13 +108,13 @@ namespace AsmResolver.PE.DotNet
                 _context.BadImage(".NET data directory contains an invalid code manager directory RVA and/or size.");
                 return null;
             }
-            
+
             // TODO: interpretation instead of raw contents.
-            return DataSegment.FromReader(directoryReader);
+            return DataSegment.FromReader(ref directoryReader);
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetVTableFixups()
+        protected override VTableFixupsDirectory? GetVTableFixups()
         {
             if (!_vtableFixupsDirectory.IsPresentInPE)
                 return null;
@@ -124,12 +125,22 @@ namespace AsmResolver.PE.DotNet
                 return null;
             }
 
-            // TODO: interpretation instead of raw contents.
-            return DataSegment.FromReader(directoryReader);
+            var vtables = new VTableFixupsDirectory();
+            vtables.UpdateOffsets(directoryReader.Offset, directoryReader.Rva);
+
+            for (int i = 0; i < directoryReader.Length / 8; i++)
+            {
+                var entry = VTableFixup.FromReader(_context, ref directoryReader);
+                if (entry is null)
+                    break;
+                vtables.Add(entry);
+            }
+
+            return vtables;
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetExportAddressTable()
+        protected override IReadableSegment? GetExportAddressTable()
         {
             if (!_exportsDirectory.IsPresentInPE)
                 return null;
@@ -139,13 +150,13 @@ namespace AsmResolver.PE.DotNet
                 _context.BadImage(".NET data directory contains an invalid export address directory RVA and/or size.");
                 return null;
             }
-            
+
             // TODO: interpretation instead of raw contents.
-            return DataSegment.FromReader(directoryReader);
+            return DataSegment.FromReader(ref directoryReader);
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetManagedNativeHeader()
+        protected override IReadableSegment? GetManagedNativeHeader()
         {
             if (!_nativeHeaderDirectory.IsPresentInPE)
                 return null;
@@ -155,9 +166,9 @@ namespace AsmResolver.PE.DotNet
                 _context.BadImage(".NET data directory contains an invalid native header directory RVA and/or size.");
                 return null;
             }
-            
+
             // TODO: interpretation instead of raw contents.
-            return DataSegment.FromReader(directoryReader);
+            return DataSegment.FromReader(ref directoryReader);
 
         }
 

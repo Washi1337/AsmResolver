@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the event map metadata table.
     /// </summary>
-    public readonly struct EventMapRow : IMetadataRow
+    public struct EventMapRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single event map row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the event map table.</param>
         /// <returns>The row.</returns>
-        public static EventMapRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static EventMapRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new EventMapRow(
                 reader.ReadIndex((IndexSize) layout.Columns[0].Size),
@@ -48,19 +49,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the TypeDef table that this mapping is associating to an event list.
+        /// Gets or sets an index into the TypeDef table that this mapping is associating to an event list.
         /// </summary>
         public uint Parent
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the Event table indicating the first event that is defined in the event list.
+        /// Gets or sets an index into the Event table indicating the first event that is defined in the event list.
         /// </summary>
         public uint EventList
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

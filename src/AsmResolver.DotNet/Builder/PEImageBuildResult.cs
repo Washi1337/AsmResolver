@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.PE;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -16,7 +15,7 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="image">The constructed image, or <c>null</c> if the construction failed.</param>
         /// <param name="diagnosticBag">The diagnostics that were collected during the construction of the image.</param>
         /// <param name="tokenMapping">An object that maps metadata members to their newly assigned tokens.</param>
-        public PEImageBuildResult(IPEImage image, DiagnosticBag diagnosticBag, ITokenMapping tokenMapping)
+        public PEImageBuildResult(IPEImage? image, DiagnosticBag diagnosticBag, ITokenMapping tokenMapping)
         {
             ConstructedImage = image;
             DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
@@ -26,10 +25,16 @@ namespace AsmResolver.DotNet.Builder
         /// <summary>
         /// Gets the constructed image, or <c>null</c> if the construction failed.
         /// </summary>
-        public IPEImage ConstructedImage
+        public IPEImage? ConstructedImage
         {
             get;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the image was constructed successfully or not.
+        /// </summary>
+        [MemberNotNullWhen(false, nameof(ConstructedImage))]
+        public bool HasFailed => ConstructedImage is null;
 
         /// <summary>
         /// Gets the bag containing the diagnostics that were collected during the construction of the image.

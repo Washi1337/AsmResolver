@@ -16,7 +16,8 @@ namespace AsmResolver.DotNet.Cloning
                 var stub = CreateMethodStub(context, method);
 
                 // If method's declaring type is cloned as well, add the cloned method to the cloned type.
-                if (context.ClonedMembers.TryGetValue(method.DeclaringType, out var member)
+                if (method.DeclaringType is not null
+                    && context.ClonedMembers.TryGetValue(method.DeclaringType, out var member)
                     && member is TypeDefinition declaringType)
                 {
                     declaringType.Methods.Add(stub);
@@ -26,6 +27,11 @@ namespace AsmResolver.DotNet.Cloning
 
         private static MethodDefinition CreateMethodStub(MemberCloneContext context, MethodDefinition method)
         {
+            if (method.Name is null)
+                throw new ArgumentException($"Method {method.SafeToString()} has no name.");
+            if (method.Signature is null)
+                throw new ArgumentException($"Method {method.SafeToString()} has no signature.");
+
             var clonedMethod = new MethodDefinition(method.Name, method.Attributes,
                 context.Importer.ImportMethodSignature(method.Signature));
             clonedMethod.ImplAttributes = method.ImplAttributes;
@@ -40,7 +46,7 @@ namespace AsmResolver.DotNet.Cloning
         {
             var clonedParameterDef = new ParameterDefinition(parameterDef.Sequence, parameterDef.Name, parameterDef.Attributes);
             CloneCustomAttributes(context, parameterDef, clonedParameterDef);
-            clonedParameterDef.Constant = CloneConstant(context, parameterDef.Constant);
+            clonedParameterDef.Constant = CloneConstant(parameterDef.Constant);
             clonedParameterDef.MarshalDescriptor = CloneMarshalDescriptor(context, parameterDef.MarshalDescriptor);
             return clonedParameterDef;
         }
@@ -75,7 +81,7 @@ namespace AsmResolver.DotNet.Cloning
 
         private static CilMethodBody CloneCilMethodBody(MemberCloneContext context, MethodDefinition method)
         {
-            var body = method.CilMethodBody;
+            var body = method.CilMethodBody!;
 
             var clonedMethod = (MethodDefinition) context.ClonedMembers[method];
 
@@ -120,14 +126,14 @@ namespace AsmResolver.DotNet.Cloning
             // Fixup branches.
             foreach (var branch in branches)
             {
-                var label = (ICilLabel) branch.Operand;
-                branch.Operand = new CilInstructionLabel(clonedBody.Instructions.GetByOffset(label.Offset));
+                var label = (ICilLabel) branch.Operand!;
+                branch.Operand = clonedBody.Instructions.GetLabel(label.Offset);
             }
 
             // Fixup switches.
             foreach (var @switch in switches)
             {
-                var labels = (IList<ICilLabel>) @switch.Operand;
+                var labels = (IList<ICilLabel>) @switch.Operand!;
                 var clonedLabels = new List<ICilLabel>(labels.Count);
 
                 for (int i = 0; i < labels.Count; i++)
@@ -149,6 +155,27 @@ namespace AsmResolver.DotNet.Cloning
                     clonedInstruction.Operand = instruction.Operand;
                     break;
 
+                case CilOperandType.InlineField when instruction.Operand is IFieldDescriptor field:
+                    clonedInstruction.Operand = context.Importer.ImportField(field);
+                    break;
+
+                case CilOperandType.InlineMethod when instruction.Operand is IMethodDescriptor method:
+                    clonedInstruction.Operand = context.Importer.ImportMethod(method);
+                    break;
+
+                case CilOperandType.InlineSig when instruction.Operand is StandAloneSignature standAlone:
+                    instruction.Operand = new StandAloneSignature(standAlone.Signature switch
+                    {
+                        MethodSignature signature => context.Importer.ImportMethodSignature(signature),
+                        GenericInstanceMethodSignature signature => context.Importer.ImportGenericInstanceMethodSignature(signature),
+                        _ => throw new NotImplementedException()
+                    });
+                    break;
+
+                case CilOperandType.InlineType when instruction.Operand is ITypeDefOrRef type:
+                    clonedInstruction.Operand = context.Importer.ImportType(type);
+                    break;
+
                 case CilOperandType.InlineI:
                 case CilOperandType.InlineI8:
                 case CilOperandType.InlineNone:
@@ -156,46 +183,28 @@ namespace AsmResolver.DotNet.Cloning
                 case CilOperandType.InlineString:
                 case CilOperandType.ShortInlineI:
                 case CilOperandType.ShortInlineR:
+                case CilOperandType.InlineField:
+                case CilOperandType.InlineMethod:
+                case CilOperandType.InlineType:
                     clonedInstruction.Operand = instruction.Operand;
                     break;
 
-                case CilOperandType.InlineField:
-                    clonedInstruction.Operand = context.Importer.ImportField((IFieldDescriptor)instruction.Operand);
-                    break;
-
-                case CilOperandType.InlineMethod:
-                    clonedInstruction.Operand = context.Importer.ImportMethod((IMethodDescriptor)instruction.Operand);
-                    break;
-
-                case CilOperandType.InlineSig:
-                    if (instruction.Operand is StandAloneSignature standalone)
-                    {
-                        instruction.Operand = new StandAloneSignature(standalone.Signature switch
-                        {
-                            MethodSignature signature => context.Importer.ImportMethodSignature(signature),
-                            GenericInstanceMethodSignature signature => context.Importer.ImportGenericInstanceMethodSignature(signature),
-                            _ => throw new NotImplementedException()
-                        });
-                    }
-                    else
-                        throw new NotImplementedException();
-                    break;
                 case CilOperandType.InlineTok:
                     clonedInstruction.Operand = CloneInlineTokOperand(context, instruction);
                     break;
 
-                case CilOperandType.InlineType:
-                    clonedInstruction.Operand = context.Importer.ImportType((ITypeDefOrRef)instruction.Operand);
-                    break;
-
                 case CilOperandType.InlineVar:
                 case CilOperandType.ShortInlineVar:
-                    clonedInstruction.Operand = clonedBody.LocalVariables[((CilLocalVariable)instruction.Operand).Index];
+                    clonedInstruction.Operand = instruction.Operand is CilLocalVariable local
+                        ? clonedBody.LocalVariables[local.Index]
+                        : instruction.Operand;
                     break;
 
                 case CilOperandType.InlineArgument:
                 case CilOperandType.ShortInlineArgument:
-                    clonedInstruction.Operand = clonedBody.Owner.Parameters.GetBySignatureIndex(((Parameter)instruction.Operand).MethodSignatureIndex);
+                    clonedInstruction.Operand = instruction.Operand is Parameter parameter
+                        ? clonedBody.Owner.Parameters.GetBySignatureIndex(parameter.MethodSignatureIndex)
+                        : instruction.Operand;
                     break;
 
                 default:
@@ -225,18 +234,20 @@ namespace AsmResolver.DotNet.Cloning
                 clonedBody.ExceptionHandlers.Add(new CilExceptionHandler
                 {
                     HandlerType = handler.HandlerType,
-                    TryStart = clonedBody.Instructions.GetLabel(handler.TryStart.Offset),
-                    TryEnd = clonedBody.Instructions.GetLabel(handler.TryEnd.Offset),
-                    HandlerStart = clonedBody.Instructions.GetLabel(handler.HandlerStart.Offset),
-                    HandlerEnd = clonedBody.Instructions.GetLabel(handler.HandlerEnd.Offset),
-                    FilterStart = handler.FilterStart is { } filterStart
-                        ? clonedBody.Instructions.GetLabel(filterStart.Offset)
-                        : null,
+                    TryStart = ToClonedLabel(handler.TryStart),
+                    TryEnd = ToClonedLabel(handler.TryEnd),
+                    HandlerStart = ToClonedLabel(handler.HandlerStart),
+                    HandlerEnd = ToClonedLabel(handler.HandlerEnd),
+                    FilterStart = ToClonedLabel(handler.FilterStart),
                     ExceptionType = handler.ExceptionType is null
                         ? null
                         : context.Importer.ImportType(handler.ExceptionType)
                 });
             }
+
+            ICilLabel? ToClonedLabel(ICilLabel? label) => label is not null
+                ? clonedBody.Instructions.GetLabel(label.Offset)
+                : null;
         }
     }
 }

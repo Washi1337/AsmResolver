@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.PE.DotNet.Cil;
@@ -43,5 +43,6 @@ namespace AsmResolver.DotNet.Tests
                 methodSpec.Signature,
                 _comparer);
         }
+
     }
 }

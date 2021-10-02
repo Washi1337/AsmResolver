@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.PE.File;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Imports
 {
@@ -12,21 +13,7 @@ namespace AsmResolver.PE.Imports
     /// </summary>
     public class ImportedModule : IImportedModule
     {
-        /// <summary>
-        /// Reads a single module import entry from an input stream.
-        /// </summary>
-        /// <param name="context">The reader context.</param>
-        /// <param name="reader">The input stream to read from.</param>
-        /// <returns></returns>
-        public static IImportedModule FromReader(
-            PEReaderContext context,
-            IBinaryStreamReader reader)
-        {
-            var entry = new SerializedImportedModule(context, reader);
-            return entry.IsEmpty ? null : entry;
-        }
-        
-        private IList<ImportedSymbol> _members;
+        private IList<ImportedSymbol>? _members;
 
         /// <summary>
         /// Creates a new empty module import.
@@ -36,7 +23,7 @@ namespace AsmResolver.PE.Imports
         }
 
         /// <summary>
-        /// Creates a new module import. 
+        /// Creates a new module import.
         /// </summary>
         /// <param name="name">The name of the module to import.</param>
         public ImportedModule(string name)
@@ -45,7 +32,7 @@ namespace AsmResolver.PE.Imports
         }
 
         /// <inheritdoc />
-        public string Name
+        public string? Name
         {
             get;
             set;
@@ -70,10 +57,23 @@ namespace AsmResolver.PE.Imports
         {
             get
             {
-                if (_members is null) 
+                if (_members is null)
                     Interlocked.CompareExchange(ref _members, GetSymbols(), null);
                 return _members;
             }
+        }
+        /// <summary>
+        /// Reads a single module import entry from an input stream.
+        /// </summary>
+        /// <param name="context">The reader context.</param>
+        /// <param name="reader">The input stream to read from.</param>
+        /// <returns></returns>
+        public static IImportedModule? FromReader(PEReaderContext context, ref BinaryStreamReader reader)
+        {
+            var entry = new SerializedImportedModule(context, ref reader);
+            return entry.IsEmpty
+                ? null
+                : entry;
         }
 
         /// <summary>
@@ -83,14 +83,10 @@ namespace AsmResolver.PE.Imports
         /// This method is called to initialize the value of <see cref="Symbols" /> property.
         /// </remarks>
         /// <returns>The members list.</returns>
-        protected virtual IList<ImportedSymbol> GetSymbols() => 
+        protected virtual IList<ImportedSymbol> GetSymbols() =>
             new OwnedCollection<IImportedModule, ImportedSymbol>(this);
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"{Name} ({Symbols.Count} symbols)";
-        }
-        
+        public override string ToString() => $"{Name} ({Symbols.Count.ToString()} symbols)";
     }
 }

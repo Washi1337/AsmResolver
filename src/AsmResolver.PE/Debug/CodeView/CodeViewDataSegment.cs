@@ -1,4 +1,6 @@
-﻿namespace AsmResolver.PE.Debug.CodeView
+﻿using AsmResolver.IO;
+
+namespace AsmResolver.PE.Debug.CodeView
 {
     /// <summary>
     /// Represents a debug data stream using the CodeView format
@@ -22,13 +24,13 @@
         /// <param name="context">Context for the reader</param>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
-        public static CodeViewDataSegment FromReader(PEReaderContext context, IBinaryStreamReader reader)
+        public static CodeViewDataSegment? FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             var signature = (CodeViewSignature) reader.ReadUInt32();
 
             return signature switch
             {
-                CodeViewSignature.Rsds => RsdsDataSegment.FromReader(context, reader),
+                CodeViewSignature.Rsds => RsdsDataSegment.FromReader(context, ref reader),
                 CodeViewSignature.Nb05 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
                 CodeViewSignature.Nb09 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
                 CodeViewSignature.Nb10 => context.NotSupportedAndReturn<CodeViewDataSegment>(),

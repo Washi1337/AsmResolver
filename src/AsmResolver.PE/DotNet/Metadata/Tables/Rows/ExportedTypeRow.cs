@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the exported type metadata table.
     /// </summary>
-    public readonly struct ExportedTypeRow : IMetadataRow
+    public struct ExportedTypeRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single exported type row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the exported type table.</param>
         /// <returns>The row.</returns>
-        public static ExportedTypeRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static ExportedTypeRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new ExportedTypeRow(
                 (TypeAttributes) reader.ReadUInt32(),
@@ -42,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             Namespace = ns;
             Implementation = implementation;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.ExportedType;
 
@@ -61,28 +62,30 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the exported type.
+        /// Gets or sets the attributes associated to the exported type.
         /// </summary>
         public TypeAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the RID hint of the type definition that was exported.
+        /// Gets or sets the RID hint of the type definition that was exported.
         /// </summary>
         /// <remarks>
         /// This field is used as a hint only. If the entry in the table does not match the name and namespace referenced
         /// by <see cref="Name"/> and <see cref="Namespace"/> respectively, then the CLR falls back to a search for the
-        /// type definition. 
+        /// type definition.
         /// </remarks>
         public uint TypeDefinitionId
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the name of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
         /// <remarks>
         /// This value should always index a non-empty string.
@@ -90,10 +93,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the namespace of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the namespace of the type reference.
         /// </summary>
         /// <remarks>
         /// This value can be zero. If it is not, it should always index a non-empty string.
@@ -101,15 +105,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Namespace
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an Implementation index (an index into either the File, ExportedType or AssemblyRef table), indicating
+        /// Gets or sets an Implementation index (an index into either the File, ExportedType or AssemblyRef table), indicating
         /// the scope that can be used to resolve the exported type.
         /// </summary>
         public uint Implementation
         {
             get;
+            set;
         }
 
         /// <inheritdoc />
@@ -130,7 +136,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public bool Equals(ExportedTypeRow other)
         {
             return Attributes == other.Attributes
-                   && TypeDefinitionId == other.TypeDefinitionId 
+                   && TypeDefinitionId == other.TypeDefinitionId
                    && Name == other.Name
                    && Namespace == other.Namespace
                    && Implementation == other.Implementation;

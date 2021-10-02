@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -17,10 +16,10 @@ namespace AsmResolver.DotNet
         IModuleProvider,
         IOwnedCollectionElement<IHasGenericParameters>
     {
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<IHasGenericParameters> _owner;
-        private IList<GenericParameterConstraint> _constraints;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<Utf8String?> _name;
+        private readonly LazyVariable<IHasGenericParameters?> _owner;
+        private IList<GenericParameterConstraint>? _constraints;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes a new empty generic parameter.
@@ -29,15 +28,15 @@ namespace AsmResolver.DotNet
         protected GenericParameter(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
-            _owner = new LazyVariable<IHasGenericParameters>(GetOwner);
+            _name = new LazyVariable<Utf8String?>(GetName);
+            _owner = new LazyVariable<IHasGenericParameters?>(GetOwner);
         }
 
         /// <summary>
         /// Creates a new generic parameter.
         /// </summary>
         /// <param name="name">The name of the parameter.</param>
-        public GenericParameter(string name)
+        public GenericParameter(string? name)
             : this(new MetadataToken(TableIndex.GenericParam, 0))
         {
             Name = name;
@@ -48,7 +47,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the parameter.</param>
         /// <param name="attributes">Additional attributes to assign to the parameter.</param>
-        public GenericParameter(string name, GenericParameterAttributes attributes)
+        public GenericParameter(string? name, GenericParameterAttributes attributes)
             : this(new MetadataToken(TableIndex.GenericParam, 0))
         {
             Name = name;
@@ -58,24 +57,31 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the member that defines this generic parameter.
         /// </summary>
-        public IHasGenericParameters Owner
+        public IHasGenericParameters? Owner
         {
             get => _owner.Value;
-            internal set => _owner.Value = value;
+            private set => _owner.Value = value;
         }
 
-        IHasGenericParameters IOwnedCollectionElement<IHasGenericParameters>.Owner
+        IHasGenericParameters? IOwnedCollectionElement<IHasGenericParameters>.Owner
         {
             get => Owner;
             set => Owner = value;
         }
 
-        /// <inheritdoc />
-        public string Name
+        /// <summary>
+        /// Gets or sets the name of the generic parameter.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the generic parameter table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <summary>
         /// Gets or sets additional attributes assigned to this generic parameter.
@@ -89,10 +95,10 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the index of this parameter within the list of generic parameters that the owner defines.
         /// </summary>
-        public ushort Number => (ushort)Owner.GenericParameters.IndexOf(this);
+        public ushort Number => Owner is null ? (ushort) 0 : (ushort) Owner.GenericParameters.IndexOf(this);
 
         /// <inheritdoc />
-        public ModuleDefinition Module => Owner?.Module;
+        public ModuleDefinition? Module => Owner?.Module;
 
         /// <summary>
         /// Gets a collection of constraints put on the generic parameter.
@@ -125,7 +131,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the owner of the generic parameter.
@@ -134,7 +140,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Owner"/> property.
         /// </remarks>
-        protected virtual IHasGenericParameters GetOwner() => null;
+        protected virtual IHasGenericParameters? GetOwner() => null;
 
         /// <summary>
         /// Obtains a collection of constraints put on the generic parameter.
@@ -157,6 +163,6 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         /// <inheritdoc />
-        public override string ToString() => Name;
+        public override string ToString() => Name ?? NullName;
     }
 }

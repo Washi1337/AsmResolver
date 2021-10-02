@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
@@ -6,7 +7,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// Provides a description of the layout of a table in the tables metadata stream. This includes information about
     /// the name, data type and size in bytes of each column.
     /// </summary>
-    public class TableLayout
+    public readonly struct TableLayout
     {
         /// <summary>
         /// Defines a new layout for a metadata table.
@@ -17,11 +18,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             Columns = columns;
             RowSize = (uint) columns.Sum(c => c.Size);
         }
-        
+
         /// <summary>
         /// Gets a collection of columns that this table defines.
         /// </summary>
-        public ColumnLayout[] Columns
+        public IReadOnlyList<ColumnLayout> Columns
         {
             get;
         }
@@ -39,6 +40,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return $"({string.Join(", ", Columns.Select(c => c.Name))})";
         }
-        
+
     }
 }

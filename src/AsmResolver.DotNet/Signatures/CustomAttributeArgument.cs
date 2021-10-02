@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -18,58 +20,58 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="reader">The input stream.</param>
         /// <returns>The argument.</returns>
         public static CustomAttributeArgument FromReader(in BlobReadContext context, TypeSignature argumentType,
-            IBinaryStreamReader reader)
+            ref BinaryStreamReader reader)
         {
-            var elementReader = new CustomAttributeArgumentReader(context, reader);
-            elementReader.ReadValue(argumentType);
-            
+            var elementReader = CustomAttributeArgumentReader.Create();
+            elementReader.ReadValue(context, ref reader, argumentType);
+
             return new CustomAttributeArgument(argumentType, elementReader.Elements)
             {
                 IsNullArray = elementReader.IsNullArray
             };
         }
-        
+
         /// <summary>
-        /// Creates a new empty custom attribute argument. 
+        /// Creates a new empty custom attribute argument.
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
         public CustomAttributeArgument(TypeSignature argumentType)
         {
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
-            Elements = new List<object>();
+            Elements = new List<object?>();
         }
 
         /// <summary>
-        /// Creates a new custom attribute argument. 
+        /// Creates a new custom attribute argument.
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
         /// <param name="value">The value of the argument.</param>
-        public CustomAttributeArgument(TypeSignature argumentType, object value)
+        public CustomAttributeArgument(TypeSignature argumentType, object? value)
         {
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
-            Elements = new List<object>(1) {value};
-        }
-        
-        /// <summary>
-        /// Creates a new custom attribute array argument. 
-        /// </summary>
-        /// <param name="argumentType">The type of the argument.</param>
-        /// <param name="elements">The value making up the elements of the array argument.</param>
-        public CustomAttributeArgument(TypeSignature argumentType, IEnumerable<object> elements)
-        {
-            ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
-            Elements = new List<object>(elements);
+            Elements = new List<object?>(1) {value};
         }
 
         /// <summary>
-        /// Creates a new custom attribute array argument. 
+        /// Creates a new custom attribute array argument.
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
         /// <param name="elements">The value making up the elements of the array argument.</param>
-        public CustomAttributeArgument(TypeSignature argumentType, params object[] elements)
+        public CustomAttributeArgument(TypeSignature argumentType, IEnumerable<object?> elements)
         {
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
-            Elements = new List<object>(elements);
+            Elements = new List<object?>(elements);
+        }
+
+        /// <summary>
+        /// Creates a new custom attribute array argument.
+        /// </summary>
+        /// <param name="argumentType">The type of the argument.</param>
+        /// <param name="elements">The value making up the elements of the array argument.</param>
+        public CustomAttributeArgument(TypeSignature argumentType, params object?[] elements)
+        {
+            ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
+            Elements = new List<object?>(elements);
         }
 
         /// <summary>
@@ -84,12 +86,12 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// When <see cref="ArgumentType"/> is not a <see cref="SzArrayTypeSignature"/>, gets the first element of the
         /// </summary>
-        public object Element => Elements.Count > 0 ? Elements[0] : default;
+        public object? Element => Elements.Count > 0 ? Elements[0] : default;
 
         /// <summary>
         /// Gets a collection of all elements that the argument is built with.
         /// </summary>
-        public IList<object> Elements
+        public IList<object?> Elements
         {
             get;
         }
@@ -106,12 +108,23 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override string ToString()
         {
-            return !IsNullArray
-                ? ArgumentType.ElementType == ElementType.SzArray
-                    ? $"{{{string.Join(", ", Elements)}}}"
-                    : Element.ToString()
-                : "null";
+            if (IsNullArray)
+                return "null";
+
+            object? obj = ArgumentType.ElementType == ElementType.SzArray
+                ? Elements
+                : Element;
+
+            return ElementToString(obj);
         }
+
+        private string ElementToString(object? element) => element switch
+        {
+            null => "null",
+            IList<object?> list => $"{{{string.Join(", ", list.Select(ElementToString))}}}",
+            string x => x.CreateEscapedString(),
+            _ => element.ToString()
+        };
 
         /// <summary>
         /// Writes the fixed argument to the provided output stream.

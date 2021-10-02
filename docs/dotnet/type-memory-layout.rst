@@ -92,19 +92,19 @@ Sometimes, offsets within a structure refer to a field within a nested field. Fo
 .. code-block:: csharp
 
     [StructLayout(LayoutKind.Sequential, Size = 17)]
-    public  struct Struct1
+    public struct Struct1
     {
         public int Dummy1;
     }
 
     [StructLayout(LayoutKind.Sequential, Size = 23, Pack = 2)]
-    public  struct Struct2
+    public struct Struct2
     {
         public Struct1 Nest1;
     }
 
     [StructLayout(LayoutKind.Sequential, Size = 87, Pack = 64)]
-    public  struct Struct3
+    public struct Struct3
     {
         public Struct1 Nest1;
 

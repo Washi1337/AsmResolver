@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="MemberReference"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedMemberReference : MemberReference
     {
@@ -35,35 +35,42 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IMemberRefParent GetParent()
+        protected override IMemberRefParent? GetParent()
         {
-            var encoder =  _context.Image.DotNetDirectory.Metadata
+            var encoder =  _context.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.MemberRefParent);
-            
+
             var parentToken = encoder.DecodeIndex(_row.Parent);
             return _context.ParentModule.TryLookupMember(parentToken, out var member)
                 ? member as IMemberRefParent
-                : null;
+                : _context.BadImageAndReturn<IMemberRefParent>(
+                    $"Invalid parent in member reference {MetadataToken.ToString()}.");
         }
-        
-        /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override CallingConventionSignature GetSignature()
+        protected override Utf8String? GetName()
         {
-            var reader =  _context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.Signature);
-            
-            return CallingConventionSignature.FromReader(new BlobReadContext(_context), reader, true);
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
         }
-        
+
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override CallingConventionSignature? GetSignature()
+        {
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Signature, out var reader))
+            {
+                return _context.BadImageAndReturn<CallingConventionSignature>(
+                    $"Invalid signature blob index in member reference {MetadataToken.ToString()}.");
+            }
+
+            return CallingConventionSignature.FromReader(new BlobReadContext(_context), ref reader, true);
+        }
+
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

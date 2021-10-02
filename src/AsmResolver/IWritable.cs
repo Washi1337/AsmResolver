@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver
 {
     /// <summary>

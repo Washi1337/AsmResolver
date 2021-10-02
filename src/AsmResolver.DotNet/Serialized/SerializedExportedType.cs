@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="ExportedType"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedExportedType : ExportedType
     {
@@ -34,26 +34,33 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.ParentModule.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.Name);
-
-        /// <inheritdoc />
-        protected override string GetNamespace() => _context.ParentModule.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.Namespace);
-
-        /// <inheritdoc />
-        protected override IImplementation GetImplementation()
+        protected override Utf8String? GetName()
         {
-            var encoder = _context.Image.DotNetDirectory.Metadata
-                .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.Implementation);
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
+        }
 
-            var token = encoder.DecodeIndex(_row.Implementation);
+        /// <inheritdoc />
+        protected override Utf8String? GetNamespace()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Namespace)
+                : null;
+        }
+
+        /// <inheritdoc />
+        protected override IImplementation? GetImplementation()
+        {
+            var token = _context.Metadata
+                .GetStream<TablesStream>()
+                .GetIndexEncoder(CodedIndex.Implementation)
+                .DecodeIndex(_row.Implementation);
+
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as IImplementation
-                : null;
+                : _context.BadImageAndReturn<IImplementation>(
+                    $"Invalid implementation reference in exported type {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />

@@ -190,7 +190,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NoUSStream);
             var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveUserStringIndices));
-            Assert.Null(image.DotNetDirectory.Metadata.GetStream<UserStringsStream>());
+            Assert.False(image.DotNetDirectory!.Metadata!.TryGetStream<UserStringsStream>(out _));
         }
     }
 }

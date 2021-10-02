@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Serialized
     public interface IMethodBodyReader
     {
         /// <summary>
-        /// Reads a method body 
+        /// Reads a method body
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="owner">The owner of the method body.</param>
@@ -19,6 +19,6 @@ namespace AsmResolver.DotNet.Serialized
         /// Implementations should never access <see cref="MethodDefinition.MethodBody"/> or
         /// <see cref="MethodDefinition.CilMethodBody"/>, as this might result in an infinite recursive loop.
         /// </remarks>
-        MethodBody ReadMethodBody(ModuleReaderContext context, MethodDefinition owner, in MethodDefinitionRow row);
+        MethodBody? ReadMethodBody(ModuleReaderContext context, MethodDefinition owner, in MethodDefinitionRow row);
     }
 }

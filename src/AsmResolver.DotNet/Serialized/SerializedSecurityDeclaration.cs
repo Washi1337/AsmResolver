@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="SecurityDeclaration"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedSecurityDeclaration : SecurityDeclaration
     {
@@ -35,26 +35,28 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IHasSecurityDeclaration GetParent()
+        protected override IHasSecurityDeclaration? GetParent()
         {
             var module = _context.ParentModule;
-            
+
             var ownerToken = module.GetSecurityDeclarationOwner(MetadataToken.Rid);
             return module.TryLookupMember(ownerToken, out var member)
                 ? member as IHasSecurityDeclaration
-                : null;
+                : _context.BadImageAndReturn<IHasSecurityDeclaration>(
+                    $"Invalid parent of security declaration {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
-        protected override PermissionSetSignature GetPermissionSet()
+        protected override PermissionSetSignature? GetPermissionSet()
         {
-            var reader = _context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.PermissionSet);
-            
-            return reader is {} ? 
-                PermissionSetSignature.FromReader(new BlobReadContext(_context), reader) 
-                : null;
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.PermissionSet, out var reader))
+            {
+                return _context.BadImageAndReturn<PermissionSetSignature>(
+                    $"Invalid permission set blob index in security declaration {MetadataToken.ToString()}.");
+            }
+
+            return PermissionSetSignature.FromReader(new BlobReadContext(_context), ref reader);
         }
     }
 }

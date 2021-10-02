@@ -26,28 +26,28 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <inheritdoc />
-        public virtual object ResolveMember(MetadataToken token)
+        public virtual object? ResolveMember(MetadataToken token)
         {
             _contextModule.TryLookupMember(token, out var member);
             return member;
         }
 
         /// <inheritdoc />
-        public virtual object ResolveString(MetadataToken token)
+        public virtual object? ResolveString(MetadataToken token)
         {
-            _contextModule.TryLookupString(token, out string value);
+            _contextModule.TryLookupString(token, out string? value);
             return value;
         }
 
         /// <inheritdoc />
-        public virtual object ResolveLocalVariable(int index)
+        public virtual object? ResolveLocalVariable(int index)
         {
             var locals = _methodBody.LocalVariables;
             return index >= 0 && index < locals.Count ? locals[index] : null;
         }
 
         /// <inheritdoc />
-        public virtual object ResolveParameter(int index)
+        public virtual object? ResolveParameter(int index)
         {
             var parameters = _methodBody.Owner.Parameters;
             return parameters.ContainsSignatureIndex(index) ? parameters.GetBySignatureIndex(index) : null;

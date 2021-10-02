@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures.Marshal
 {
@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <remarks>
         /// This method assumes the native type has already been read from the binary stream reader.
         /// </remarks>
-        public static LPArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static LPArrayMarshalDescriptor FromReader(ref BinaryStreamReader reader)
         {
             var descriptor = new LPArrayMarshalDescriptor((NativeType) reader.ReadByte());
 
@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         {
             ArrayElementType = arrayElementType;
         }
-        
+
         /// <inheritdoc />
         public override NativeType NativeType => NativeType.LPArray;
 
@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         }
 
         /// <summary>
-        /// Gets or sets the number of elements in the parameter 
+        /// Gets or sets the number of elements in the parameter
         /// </summary>
         public int? NumberOfElements
         {
@@ -86,7 +86,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) NativeType);
             writer.WriteByte((byte) ArrayElementType);
 

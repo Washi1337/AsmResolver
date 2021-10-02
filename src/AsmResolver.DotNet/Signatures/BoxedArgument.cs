@@ -13,12 +13,12 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="type">The value type of the boxed object.</param>
         /// <param name="value">The boxed value.</param>
-        public BoxedArgument(TypeSignature type, object value)
+        public BoxedArgument(TypeSignature type, object? value)
         {
             Type = type ?? throw new ArgumentNullException(nameof(type));
             Value = value;
         }
-        
+
         /// <summary>
         /// Gets the type of the boxed argument.
         /// </summary>
@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Gets the boxed value.
         /// </summary>
-        public object Value
+        public object? Value
         {
             get;
         }
@@ -51,11 +51,11 @@ namespace AsmResolver.DotNet.Signatures
         {
             unchecked
             {
-                return ((Type != null ? Type.GetHashCode() : 0) * 397) ^ (Value != null ? Value.GetHashCode() : 0);
+                return (Type.GetHashCode() * 397) ^ (Value != null ? Value.GetHashCode() : 0);
             }
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"({Type}) {(Value ?? "null")}";
+        public override string ToString() => $"({Type}) {Value ?? "null"}";
     }
 }

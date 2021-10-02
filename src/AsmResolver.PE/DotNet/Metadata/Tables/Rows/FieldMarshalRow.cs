@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the field marshal metadata table.
     /// </summary>
-    public readonly struct FieldMarshalRow : IMetadataRow
+    public struct FieldMarshalRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single field marshal row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the field marshal table.</param>
         /// <returns>The row.</returns>
-        public static FieldMarshalRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static FieldMarshalRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new FieldMarshalRow(
                 reader.ReadIndex((IndexSize) layout.Columns[0].Size),
@@ -55,14 +56,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Parent
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream containing the marshaller data.
+        /// Gets or sets an index into the #Blob stream containing the marshaller data.
         /// </summary>
         public uint NativeType
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

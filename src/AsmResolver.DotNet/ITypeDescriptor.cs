@@ -1,17 +1,16 @@
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet
 {
     /// <summary>
-    /// Provides members for describing a type in a managed assembly. 
+    /// Provides members for describing a type in a managed assembly.
     /// </summary>
     public interface ITypeDescriptor : IMemberDescriptor
     {
         /// <summary>
         /// Gets the namespace the type resides in.
         /// </summary>
-        string Namespace
+        string? Namespace
         {
             get;
         }
@@ -19,7 +18,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the resolution scope that defines the type.
         /// </summary>
-        IResolutionScope Scope
+        IResolutionScope? Scope
         {
             get;
         }
@@ -31,15 +30,15 @@ namespace AsmResolver.DotNet
         {
             get;
         }
-        
+
         /// <summary>
-        /// Resolves the reference to a type definition. 
+        /// Resolves the reference to a type definition.
         /// </summary>
         /// <returns>The resolved type definition, or <c>null</c> if the type could not be resolved.</returns>
         /// <remarks>
-        /// This method can only be invoked if the reference was added to a module. 
+        /// This method can only be invoked if the reference was added to a module.
         /// </remarks>
-        new TypeDefinition Resolve();
+        new TypeDefinition? Resolve();
 
         /// <summary>
         /// Transforms the type descriptor to an instance of a <see cref="ITypeDefOrRef"/>, which can be referenced by

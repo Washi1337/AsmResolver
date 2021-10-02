@@ -11,7 +11,7 @@ namespace AsmResolver.PE.Imports
         /// <summary>
         /// Gets or sets the name of the module that was imported.
         /// </summary>
-        string Name
+        string? Name
         {
             get;
             set;

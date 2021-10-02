@@ -1,18 +1,17 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Properties;
+using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -20,25 +19,7 @@ namespace AsmResolver.DotNet.Tests
     public class CustomAttributeTest
     {
         private readonly SignatureComparer _comparer = new SignatureComparer();
-        
-        [Fact]
-        public void ReadAssembly()
-        {
-            var assembly = AssemblyDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
-            
-            Assert.Contains(assembly.CustomAttributes, c
-                =>c.Constructor.DeclaringType.Name == nameof(TestCaseAttribute));
-        }
-        
-        [Fact]
-        public void ReadModule()
-        {
-            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
 
-            Assert.All(module.CustomAttributes, a =>
-                Assert.Equal(nameof(TestCaseAttribute), a.Constructor.DeclaringType.Name));
-        }
-        
         [Fact]
         public void ReadConstructor()
         {
@@ -48,28 +29,16 @@ namespace AsmResolver.DotNet.Tests
             Assert.All(type.CustomAttributes, a =>
                 Assert.Equal(nameof(TestCaseAttribute), a.Constructor.DeclaringType.Name));
         }
-        
-        [Fact]
-        public void ReadParameters()
-        {
-            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
-            var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
-            var method = type.Methods.First(m => m.Name == nameof(CustomAttributesTestClass.TestMethod));
-            
-            Assert.All(method.ParameterDefinitions,  p =>
-                Assert.All(p.CustomAttributes, a =>
-                    Assert.Equal(nameof(TestCaseAttribute), a.Constructor.DeclaringType.Name)));
-        }
-        
+
         [Fact]
         public void PersistentConstructor()
         {
             var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
             using var stream = new MemoryStream();
             module.Write(stream);
-            
-            module = ModuleDefinition.FromReader(new ByteArrayReader(stream.ToArray()));
-            
+
+            module = ModuleDefinition.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
             Assert.All(type.CustomAttributes, a =>
                 Assert.Equal(nameof(TestCaseAttribute), a.Constructor.DeclaringType.Name));
@@ -111,7 +80,7 @@ namespace AsmResolver.DotNet.Tests
             var method = type.Methods.First(m => m.Name == methodName);
             var attribute = method.CustomAttributes
                 .First(c => c.Constructor.DeclaringType.Name == nameof(TestCaseAttribute));
-            
+
             if (rebuild)
                 attribute = RebuildAndLookup(attribute);
             return attribute;
@@ -129,14 +98,14 @@ namespace AsmResolver.DotNet.Tests
                 .Methods.First(f => f.Name == method.Name)
                 .CustomAttributes[0];
         }
-        
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
         public void FixedInt32Argument(bool rebuild)
         {
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32Argument), rebuild);
-            
+
             Assert.Single(attribute.Signature.FixedArguments);
             Assert.Empty(attribute.Signature.NamedArguments);
 
@@ -169,7 +138,7 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature.FixedArguments[0];
             Assert.Equal((int) TestEnum.Value3, argument.Element);
         }
-        
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -181,10 +150,10 @@ namespace AsmResolver.DotNet.Tests
 
             var argument = attribute.Signature.FixedArguments[0];
             Assert.Equal(
-                attribute.Constructor.Module.CorLibTypeFactory.String, 
+                attribute.Constructor.Module.CorLibTypeFactory.String,
                 argument.Element as TypeSignature, _comparer);
         }
-        
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -196,7 +165,7 @@ namespace AsmResolver.DotNet.Tests
 
             var argument = attribute.Signature.FixedArguments[0];
             var factory = attribute.Constructor.Module.CorLibTypeFactory;
-            
+
             var listRef = new TypeReference(factory.CorLibScope, "System.Collections.Generic", "KeyValuePair`2");
             var instance = new GenericInstanceTypeSignature(listRef, false,
                 new SzArrayTypeSignature(factory.String),
@@ -204,7 +173,7 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal(instance, argument.Element as TypeSignature, _comparer);
         }
-        
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -259,7 +228,7 @@ namespace AsmResolver.DotNet.Tests
             var expected = new TypeReference(
                 attribute.Constructor.Module.CorLibTypeFactory.CorLibScope,
                 "System", "Int32");
-            
+
             var argument = attribute.Signature.NamedArguments[0];
             Assert.Equal(nameof(TestCaseAttribute.TypeValue), argument.MemberName);
             Assert.Equal(expected, (ITypeDescriptor) argument.Argument.Element, _comparer);
@@ -282,14 +251,14 @@ namespace AsmResolver.DotNet.Tests
         public void GenericTypeArgument(bool rebuild)
         {
             // https://github.com/Washi1337/AsmResolver/issues/92
-            
+
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.GenericType), rebuild);
             var argument = attribute.Signature.FixedArguments[0];
 
             var module = attribute.Constructor.Module;
             var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
             var expected = new GenericInstanceTypeSignature(nestedClass, false, module.CorLibTypeFactory.Object);
-            
+
             Assert.IsAssignableFrom<TypeSignature>(argument.Element);
             Assert.Equal(expected, (TypeSignature) argument.Element, _comparer);
         }
@@ -300,7 +269,7 @@ namespace AsmResolver.DotNet.Tests
         public void ArrayGenericTypeArgument(bool rebuild)
         {
             // https://github.com/Washi1337/AsmResolver/issues/92
-            
+
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.GenericTypeArray), rebuild);
             var argument = attribute.Signature.FixedArguments[0];
 
@@ -320,7 +289,7 @@ namespace AsmResolver.DotNet.Tests
         public void IntPassedOnAsObject(bool rebuild)
         {
             // https://github.com/Washi1337/AsmResolver/issues/92
-            
+
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.Int32PassedAsObject), rebuild);
             var argument = attribute.Signature.FixedArguments[0];
 
@@ -334,7 +303,7 @@ namespace AsmResolver.DotNet.Tests
         public void TypePassedOnAsObject(bool rebuild)
         {
             // https://github.com/Washi1337/AsmResolver/issues/92
-            
+
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.TypePassedAsObject), rebuild);
             var argument = attribute.Signature.FixedArguments[0];
 

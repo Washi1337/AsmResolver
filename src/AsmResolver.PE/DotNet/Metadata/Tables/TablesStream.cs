@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     /// <summary>
-    /// Represents the metadata stream containing tables defining each member in a .NET assembly. 
+    /// Represents the metadata stream containing tables defining each member in a .NET assembly.
     /// </summary>
     public class TablesStream : SegmentBase, IMetadataStream
     {
@@ -15,23 +15,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// The default name of a table stream using the compressed format.
         /// </summary>
         public const string CompressedStreamName = "#~";
-            
+
         /// <summary>
         /// The default name of a table stream using the Edit-and-Continue, uncompressed format.
         /// </summary>
         public const string EncStreamName = "#-";
-        
+
         /// <summary>
         /// The default name of a table stream using the minimal format.
         /// </summary>
         public const string MinimalStreamName = "#JTD";
-        
+
         /// <summary>
         /// The default name of a table stream using the uncompressed format.
         /// </summary>
         public const string UncompressedStreamName = "#Schema";
-        
-        private const int MaxTableCount = (int) TableIndex.GenericParamConstraint;
 
         private readonly IDictionary<CodedIndex, IndexEncoder> _indexEncoders;
         private readonly LazyVariable<IList<IMetadataTable>> _tables;
@@ -61,13 +59,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Reserved, for future use.
         /// </summary>
         /// <remarks>
-        /// This field must be set to 0 by the CoreCLR implementation of the runtime. 
+        /// This field must be set to 0 by the CoreCLR implementation of the runtime.
         /// </remarks>
         public uint Reserved
         {
             get;
             set;
-        } = 0;
+        }
 
         /// <summary>
         /// Gets or sets the major version number of the schema.
@@ -85,7 +83,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             get;
             set;
-        } = 0;
+        }
 
         /// <summary>
         /// Gets or sets the flags of the tables stream.
@@ -172,7 +170,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         /// <remarks>
         /// This value is ignored by the CoreCLR implementation of the runtime, and the standard compilers always set
-        /// this value to 1. 
+        /// this value to 1.
         /// </remarks>
         public byte Log2LargestRid
         {
@@ -207,9 +205,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Gets the layout of all tables in the stream.
         /// </summary>
         protected IList<TableLayout> TableLayouts => _layouts.Value;
-        
+
         /// <inheritdoc />
-        public virtual IBinaryStreamReader CreateReader() => throw new NotSupportedException();
+        public virtual BinaryStreamReader CreateReader() => throw new NotSupportedException();
 
         /// <summary>
         /// Updates the layouts of each metadata table, according to the <see cref="Flags"/> property.
@@ -244,7 +242,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public override void Write(IBinaryStreamWriter writer)
         {
             SynchronizeTableLayoutsWithFlags();
-            
+
             writer.WriteUInt32(Reserved);
             writer.WriteByte(MajorVersion);
             writer.WriteByte(MinorVersion);
@@ -272,14 +270,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         protected virtual ulong ComputeValidBitmask()
         {
             // TODO: make more configurable (maybe add IMetadataTable.IsPresent property?).
-            
+
             ulong result = 0;
             for (int i = 0; i < Tables.Count; i++)
             {
                 if (Tables[i].Count > 0)
                     result |= 1UL << i;
             }
-            
+
             return result;
         }
 
@@ -291,7 +289,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         protected virtual ulong ComputeSortedBitmask()
         {
             // TODO: make more configurable (maybe add IMetadataTable.IsSorted property?).
-            
+
             return 0x000016003301FA00;
         }
 
@@ -331,7 +329,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
             return (uint) size;
         }
-        
+
         /// <summary>
         /// Writes for each present table the row count to the output stream.
         /// </summary>
@@ -394,95 +392,95 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             var layouts = TableLayouts;
             return new IMetadataTable[]
             {
-                new MetadataTable<ModuleDefinitionRow>(TableIndex.Module, layouts[0]), 
-                new MetadataTable<TypeReferenceRow>(TableIndex.TypeRef, layouts[1]), 
-                new MetadataTable<TypeDefinitionRow>(TableIndex.TypeDef, layouts[2]), 
-                new MetadataTable<FieldPointerRow>(TableIndex.FieldPtr, layouts[3]), 
-                new MetadataTable<FieldDefinitionRow>(TableIndex.Field, layouts[4]), 
-                new MetadataTable<MethodPointerRow>(TableIndex.Method, layouts[5]), 
-                new MetadataTable<MethodDefinitionRow>(TableIndex.Method, layouts[6]), 
-                new MetadataTable<ParameterPointerRow>(TableIndex.ParamPtr, layouts[7]), 
-                new MetadataTable<ParameterDefinitionRow>(TableIndex.Param, layouts[8]), 
-                new MetadataTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl, layouts[9]), 
-                new MetadataTable<MemberReferenceRow>(TableIndex.MemberRef, layouts[10]), 
-                new MetadataTable<ConstantRow>(TableIndex.Constant, layouts[11]), 
-                new MetadataTable<CustomAttributeRow>(TableIndex.CustomAttribute, layouts[12]), 
-                new MetadataTable<FieldMarshalRow>(TableIndex.FieldMarshal, layouts[13]), 
-                new MetadataTable<SecurityDeclarationRow>(TableIndex.DeclSecurity, layouts[14]), 
-                new MetadataTable<ClassLayoutRow>(TableIndex.ClassLayout, layouts[15]), 
-                new MetadataTable<FieldLayoutRow>(TableIndex.FieldLayout, layouts[16]), 
-                new MetadataTable<StandAloneSignatureRow>(TableIndex.StandAloneSig, layouts[17]), 
-                new MetadataTable<EventMapRow>(TableIndex.EventMap, layouts[18]), 
+                new MetadataTable<ModuleDefinitionRow>(TableIndex.Module, layouts[0]),
+                new MetadataTable<TypeReferenceRow>(TableIndex.TypeRef, layouts[1]),
+                new MetadataTable<TypeDefinitionRow>(TableIndex.TypeDef, layouts[2]),
+                new MetadataTable<FieldPointerRow>(TableIndex.FieldPtr, layouts[3]),
+                new MetadataTable<FieldDefinitionRow>(TableIndex.Field, layouts[4]),
+                new MetadataTable<MethodPointerRow>(TableIndex.Method, layouts[5]),
+                new MetadataTable<MethodDefinitionRow>(TableIndex.Method, layouts[6]),
+                new MetadataTable<ParameterPointerRow>(TableIndex.ParamPtr, layouts[7]),
+                new MetadataTable<ParameterDefinitionRow>(TableIndex.Param, layouts[8]),
+                new MetadataTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl, layouts[9]),
+                new MetadataTable<MemberReferenceRow>(TableIndex.MemberRef, layouts[10]),
+                new MetadataTable<ConstantRow>(TableIndex.Constant, layouts[11]),
+                new MetadataTable<CustomAttributeRow>(TableIndex.CustomAttribute, layouts[12]),
+                new MetadataTable<FieldMarshalRow>(TableIndex.FieldMarshal, layouts[13]),
+                new MetadataTable<SecurityDeclarationRow>(TableIndex.DeclSecurity, layouts[14]),
+                new MetadataTable<ClassLayoutRow>(TableIndex.ClassLayout, layouts[15]),
+                new MetadataTable<FieldLayoutRow>(TableIndex.FieldLayout, layouts[16]),
+                new MetadataTable<StandAloneSignatureRow>(TableIndex.StandAloneSig, layouts[17]),
+                new MetadataTable<EventMapRow>(TableIndex.EventMap, layouts[18]),
                 new MetadataTable<EventPointerRow>(TableIndex.EventPtr, layouts[19]),
-                new MetadataTable<EventDefinitionRow>(TableIndex.Event, layouts[20]), 
-                new MetadataTable<PropertyMapRow>(TableIndex.PropertyMap, layouts[21]), 
-                new MetadataTable<PropertyPointerRow>(TableIndex.PropertyPtr, layouts[22]), 
-                new MetadataTable<PropertyDefinitionRow>(TableIndex.Property, layouts[23]), 
-                new MetadataTable<MethodSemanticsRow>(TableIndex.MethodSemantics, layouts[24]), 
-                new MetadataTable<MethodImplementationRow>(TableIndex.MethodImpl, layouts[25]), 
-                new MetadataTable<ModuleReferenceRow>(TableIndex.ModuleRef, layouts[26]), 
-                new MetadataTable<TypeSpecificationRow>(TableIndex.TypeSpec, layouts[27]), 
-                new MetadataTable<ImplementationMapRow>(TableIndex.ImplMap, layouts[28]), 
-                new MetadataTable<FieldRvaRow>(TableIndex.FieldRva, layouts[29]), 
-                new MetadataTable<EncLogRow>(TableIndex.EncLog, layouts[30]), 
-                new MetadataTable<EncMapRow>(TableIndex.EncMap, layouts[31]), 
-                new MetadataTable<AssemblyDefinitionRow>(TableIndex.Assembly, layouts[32]), 
-                new MetadataTable<AssemblyProcessorRow>(TableIndex.AssemblyProcessor, layouts[33]), 
-                new MetadataTable<AssemblyOSRow>(TableIndex.AssemblyOS, layouts[34]), 
-                new MetadataTable<AssemblyReferenceRow>(TableIndex.AssemblyRef, layouts[35]), 
-                new MetadataTable<AssemblyRefProcessorRow>(TableIndex.AssemblyRefProcessor, layouts[36]), 
-                new MetadataTable<AssemblyRefOSRow>(TableIndex.AssemblyRefProcessor, layouts[37]), 
-                new MetadataTable<FileReferenceRow>(TableIndex.File, layouts[38]), 
-                new MetadataTable<ExportedTypeRow>(TableIndex.ExportedType, layouts[39]), 
+                new MetadataTable<EventDefinitionRow>(TableIndex.Event, layouts[20]),
+                new MetadataTable<PropertyMapRow>(TableIndex.PropertyMap, layouts[21]),
+                new MetadataTable<PropertyPointerRow>(TableIndex.PropertyPtr, layouts[22]),
+                new MetadataTable<PropertyDefinitionRow>(TableIndex.Property, layouts[23]),
+                new MetadataTable<MethodSemanticsRow>(TableIndex.MethodSemantics, layouts[24]),
+                new MetadataTable<MethodImplementationRow>(TableIndex.MethodImpl, layouts[25]),
+                new MetadataTable<ModuleReferenceRow>(TableIndex.ModuleRef, layouts[26]),
+                new MetadataTable<TypeSpecificationRow>(TableIndex.TypeSpec, layouts[27]),
+                new MetadataTable<ImplementationMapRow>(TableIndex.ImplMap, layouts[28]),
+                new MetadataTable<FieldRvaRow>(TableIndex.FieldRva, layouts[29]),
+                new MetadataTable<EncLogRow>(TableIndex.EncLog, layouts[30]),
+                new MetadataTable<EncMapRow>(TableIndex.EncMap, layouts[31]),
+                new MetadataTable<AssemblyDefinitionRow>(TableIndex.Assembly, layouts[32]),
+                new MetadataTable<AssemblyProcessorRow>(TableIndex.AssemblyProcessor, layouts[33]),
+                new MetadataTable<AssemblyOSRow>(TableIndex.AssemblyOS, layouts[34]),
+                new MetadataTable<AssemblyReferenceRow>(TableIndex.AssemblyRef, layouts[35]),
+                new MetadataTable<AssemblyRefProcessorRow>(TableIndex.AssemblyRefProcessor, layouts[36]),
+                new MetadataTable<AssemblyRefOSRow>(TableIndex.AssemblyRefProcessor, layouts[37]),
+                new MetadataTable<FileReferenceRow>(TableIndex.File, layouts[38]),
+                new MetadataTable<ExportedTypeRow>(TableIndex.ExportedType, layouts[39]),
                 new MetadataTable<ManifestResourceRow>(TableIndex.ManifestResource, layouts[40]),
-                new MetadataTable<NestedClassRow>(TableIndex.NestedClass, layouts[41]), 
-                new MetadataTable<GenericParameterRow>(TableIndex.GenericParam, layouts[42]), 
-                new MetadataTable<MethodSpecificationRow>(TableIndex.MethodSpec, layouts[43]), 
-                new MetadataTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint, layouts[44]), 
+                new MetadataTable<NestedClassRow>(TableIndex.NestedClass, layouts[41]),
+                new MetadataTable<GenericParameterRow>(TableIndex.GenericParam, layouts[42]),
+                new MetadataTable<MethodSpecificationRow>(TableIndex.MethodSpec, layouts[43]),
+                new MetadataTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint, layouts[44]),
             };
         }
 
         private Dictionary<CodedIndex, IndexEncoder> CreateIndexEncoders()
         {
-            return new Dictionary<CodedIndex, IndexEncoder>
+            return new()
             {
                 [CodedIndex.TypeDefOrRef] = new IndexEncoder(this,
                     TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.TypeSpec),
-                [CodedIndex.HasConstant] = new IndexEncoder(this,
+                [CodedIndex.HasConstant] = new(this,
                     TableIndex.Field, TableIndex.Param, TableIndex.Property),
-                [CodedIndex.HasCustomAttribute] = new IndexEncoder(this,
+                [CodedIndex.HasCustomAttribute] = new(this,
                     TableIndex.Method, TableIndex.Field, TableIndex.TypeRef, TableIndex.TypeDef,
                     TableIndex.Param, TableIndex.InterfaceImpl, TableIndex.MemberRef, TableIndex.Module,
                     TableIndex.DeclSecurity, TableIndex.Property, TableIndex.Event, TableIndex.StandAloneSig,
                     TableIndex.ModuleRef, TableIndex.TypeSpec, TableIndex.Assembly, TableIndex.AssemblyRef,
                     TableIndex.File, TableIndex.ExportedType, TableIndex.ManifestResource, TableIndex.GenericParam,
                     TableIndex.GenericParamConstraint, TableIndex.MethodSpec),
-                [CodedIndex.HasFieldMarshal] = new IndexEncoder(this,
+                [CodedIndex.HasFieldMarshal] = new(this,
                     TableIndex.Field, TableIndex.Param),
-                [CodedIndex.HasDeclSecurity] = new IndexEncoder(this,
+                [CodedIndex.HasDeclSecurity] = new(this,
                     TableIndex.TypeDef, TableIndex.Method, TableIndex.Assembly),
-                [CodedIndex.MemberRefParent] = new IndexEncoder(this,
+                [CodedIndex.MemberRefParent] = new(this,
                     TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.ModuleRef,
                     TableIndex.Method, TableIndex.TypeSpec),
-                [CodedIndex.HasSemantics] = new IndexEncoder(this,
+                [CodedIndex.HasSemantics] = new(this,
                     TableIndex.Event, TableIndex.Property),
-                [CodedIndex.MethodDefOrRef] = new IndexEncoder(this,
+                [CodedIndex.MethodDefOrRef] = new(this,
                     TableIndex.Method, TableIndex.MemberRef),
-                [CodedIndex.MemberForwarded] = new IndexEncoder(this,
+                [CodedIndex.MemberForwarded] = new(this,
                     TableIndex.Field, TableIndex.Method),
-                [CodedIndex.Implementation] = new IndexEncoder(this,
+                [CodedIndex.Implementation] = new(this,
                     TableIndex.File, TableIndex.AssemblyRef, TableIndex.ExportedType),
-                [CodedIndex.CustomAttributeType] = new IndexEncoder(this,
+                [CodedIndex.CustomAttributeType] = new(this,
                     0, 0, TableIndex.Method, TableIndex.MemberRef, 0),
-                [CodedIndex.ResolutionScope] = new IndexEncoder(this,
+                [CodedIndex.ResolutionScope] = new(this,
                     TableIndex.Module, TableIndex.ModuleRef, TableIndex.AssemblyRef, TableIndex.TypeRef),
-                [CodedIndex.TypeOrMethodDef] = new IndexEncoder(this,
+                [CodedIndex.TypeOrMethodDef] = new(this,
                     TableIndex.TypeDef, TableIndex.Method)
             };
         }
-        
+
         /// <summary>
-        /// Gets a table by its table index. 
+        /// Gets a table by its table index.
         /// </summary>
         /// <param name="index">The table index.</param>
         /// <returns>The table.</returns>
@@ -493,7 +491,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         /// <typeparam name="TRow">The type of rows the table stores.</typeparam>
         /// <returns>The table.</returns>
-        public virtual MetadataTable<TRow> GetTable<TRow>() 
+        public virtual MetadataTable<TRow> GetTable<TRow>()
             where TRow : struct, IMetadataRow
         {
             return Tables.OfType<MetadataTable<TRow>>().First();
@@ -505,7 +503,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <typeparam name="TRow">The type of rows the table stores.</typeparam>
         /// <param name="index">The table index.</param>
         /// <returns>The table.</returns>
-        public virtual MetadataTable<TRow> GetTable<TRow>(TableIndex index) 
+        public virtual MetadataTable<TRow> GetTable<TRow>(TableIndex index)
             where TRow : struct, IMetadataRow
         {
             return (MetadataTable<TRow>) Tables[(int) index];
@@ -619,7 +617,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Type", ColumnType.Byte),
                     new ColumnLayout("Padding", ColumnType.Byte),
                     new ColumnLayout("Parent", ColumnType.HasConstant, GetColumnSize(ColumnType.HasConstant)),
-                    new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)), 
+                    new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
                     new ColumnLayout("Parent", ColumnType.HasCustomAttribute, GetColumnSize(ColumnType.HasCustomAttribute)),
                     new ColumnLayout("Type", ColumnType.CustomAttributeType, GetColumnSize(ColumnType.CustomAttributeType)),
@@ -741,18 +739,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Owner", ColumnType.TypeOrMethodDef, GetColumnSize(ColumnType.TypeOrMethodDef)),
                     new ColumnLayout("EnclosingClass", ColumnType.String, StringIndexSize)),
                 new TableLayout(
-                    new ColumnLayout("Method", ColumnType.Method, GetColumnSize(ColumnType.Method)),
+                    new ColumnLayout("Method", ColumnType.Method, GetColumnSize(ColumnType.MethodDefOrRef)),
                     new ColumnLayout("Instantiation", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
                     new ColumnLayout("Owner", ColumnType.GenericParam, GetColumnSize(ColumnType.GenericParam)),
                     new ColumnLayout("Constraint", ColumnType.TypeDefOrRef, GetColumnSize(ColumnType.TypeDefOrRef))),
             };
-            
+
             return result;
         }
 
         /// <summary>
-        /// Gets the range of metadata tokens referencing fields that a type defines. 
+        /// Gets the range of metadata tokens referencing fields that a type defines.
         /// </summary>
         /// <param name="typeDefRid">The row identifier of the type definition to obtain the fields from.</param>
         /// <returns>The range of metadata tokens.</returns>
@@ -761,16 +759,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 TableIndex.Field, TableIndex.FieldPtr);
 
         /// <summary>
-        /// Gets the range of metadata tokens referencing methods that a type defines. 
+        /// Gets the range of metadata tokens referencing methods that a type defines.
         /// </summary>
         /// <param name="typeDefRid">The row identifier of the type definition to obtain the methods from.</param>
         /// <returns>The range of metadata tokens.</returns>
         public MetadataRange GetMethodRange(uint typeDefRid) =>
             GetMemberRange(TableIndex.TypeDef, typeDefRid, 5,
                 TableIndex.Method, TableIndex.MethodPtr);
-        
+
         /// <summary>
-        /// Gets the range of metadata tokens referencing parameters that a method defines. 
+        /// Gets the range of metadata tokens referencing parameters that a method defines.
         /// </summary>
         /// <param name="methodDefRid">The row identifier of the method definition to obtain the parameters from.</param>
         /// <returns>The range of metadata tokens.</returns>
@@ -779,7 +777,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 TableIndex.Param, TableIndex.ParamPtr);
 
         /// <summary>
-        /// Gets the range of metadata tokens referencing properties that a property map row defines. 
+        /// Gets the range of metadata tokens referencing properties that a property map row defines.
         /// </summary>
         /// <param name="propertyMapRid">The row identifier of the property map to obtain the properties from.</param>
         /// <returns>The range of metadata tokens.</returns>
@@ -788,7 +786,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 TableIndex.Property, TableIndex.PropertyPtr);
 
         /// <summary>
-        /// Gets the range of metadata tokens referencing events that a event map row defines. 
+        /// Gets the range of metadata tokens referencing events that a event map row defines.
         /// </summary>
         /// <param name="eventMapRid">The row identifier of the event map to obtain the events from.</param>
         /// <returns>The range of metadata tokens.</returns>
@@ -800,7 +798,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             TableIndex memberTableIndex, TableIndex redirectTableIndex)
         {
             int index = (int) (ownerRid - 1);
-            
+
             // Check if valid owner RID.
             var ownerTable = GetTable(ownerTableIndex);
             if (index < 0 || index >= ownerTable.Count)
@@ -816,7 +814,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             var redirectTable = GetTable(redirectTableIndex);
             if (redirectTable.Count > 0)
                 return new RedirectedMetadataRange(redirectTable, memberTableIndex, startRid, endRid);
-            
+
             // If not, its a simple range.
             return new ContinuousMetadataRange(memberTableIndex, startRid, endRid);
         }

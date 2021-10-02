@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the generic parameter metadata table.
     /// </summary>
-    public readonly struct GenericParameterRow : IMetadataRow
+    public struct GenericParameterRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single generic parameter row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the generic parameter table.</param>
         /// <returns>The row.</returns>
-        public static GenericParameterRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static GenericParameterRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new GenericParameterRow(
                 reader.ReadUInt16(),
@@ -23,7 +24,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size),
                 reader.ReadIndex((IndexSize) layout.Columns[3].Size));
         }
-        
+
         /// <summary>
         /// Creates a new row for the generic parameter metadata table.
         /// </summary>
@@ -38,7 +39,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             Owner = owner;
             Name = name;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.GenericParam;
 
@@ -56,19 +57,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the index of the generic parameter.
+        /// Gets or sets the index of the generic parameter.
         /// </summary>
         public ushort Number
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the attributes associated to the generic parameter.
+        /// Gets or sets the attributes associated to the generic parameter.
         /// </summary>
         public GenericParameterAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -78,14 +81,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Owner
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the name of the generic parameter.
+        /// Gets or sets an index into the #Strings stream referencing the name of the generic parameter.
         /// </summary>
         public uint Name
         {
             get;
+            set;
         }
 
         /// <inheritdoc />
@@ -104,9 +109,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
         public bool Equals(GenericParameterRow other)
         {
-            return Number == other.Number 
+            return Number == other.Number
                    && Attributes == other.Attributes
-                   && Owner == other.Owner 
+                   && Owner == other.Owner
                    && Name == other.Name;
         }
 

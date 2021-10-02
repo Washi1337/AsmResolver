@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the constants metadata table.
     /// </summary>
-    public readonly struct ConstantRow : IMetadataRow
+    public struct ConstantRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single constant row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the constants table.</param>
         /// <returns>The row.</returns>
-        public static ConstantRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static ConstantRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new ConstantRow(
                 (ElementType) reader.ReadByte(),
@@ -38,7 +39,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             Parent = parent;
             Value = value;
         }
-        
+
         /// <summary>
         /// Creates a new row for the constants metadata table.
         /// </summary>
@@ -70,9 +71,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             3 => Value,
             _ => throw new IndexOutOfRangeException()
         };
-        
+
         /// <summary>
-        /// Gets the type of constant that is stored in the blob stream. 
+        /// Gets or sets the type of constant that is stored in the blob stream.
         /// </summary>
         /// <remarks>This field must always be a value-type.</remarks>
         public ElementType Type
@@ -81,29 +82,32 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Gets the single padding byte between the type and parent columns.
+        /// Gets or sets the single padding byte between the type and parent columns.
         /// </summary>
         /// <remarks>This field should always be zero.</remarks>
         public byte Padding
         {
             get;
+            set;
         }
 
         /// <summary>
         /// Gets a HasConstant index (an index into either the Field, Parameter or Property table) that is the owner
-        /// of the constant. 
+        /// of the constant.
         /// </summary>
         public uint Parent
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream containing the serialized constant value.
+        /// Gets or sets an index into the #Blob stream containing the serialized constant value.
         /// </summary>
         public uint Value
         {
             get;
+            set;
         }
 
         /// <summary>

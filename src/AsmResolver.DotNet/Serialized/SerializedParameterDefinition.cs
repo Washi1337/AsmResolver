@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="ParameterDefinition"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedParameterDefinition : ParameterDefinition
     {
@@ -36,29 +36,33 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.Name);
+        protected override Utf8String? GetName()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override MethodDefinition GetMethod()
+        protected override MethodDefinition? GetMethod()
         {
             var ownerToken = new MetadataToken(TableIndex.Method, _context.ParentModule.GetParameterOwner(MetadataToken.Rid));
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)
                 ? member as MethodDefinition
-                : null;
+                : _context.BadImageAndReturn<MethodDefinition>(
+                    $"Parameter {MetadataToken.ToString()} is not in a range of a method.");
         }
-        
+
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
 
         /// <inheritdoc />
-        protected override Constant GetConstant() => 
+        protected override Constant? GetConstant() =>
             _context.ParentModule.GetConstant(MetadataToken);
 
         /// <inheritdoc />
-        protected override MarshalDescriptor GetMarshalDescriptor() =>
+        protected override MarshalDescriptor? GetMarshalDescriptor() =>
             _context.ParentModule.GetFieldMarshal(MetadataToken);
 
     }

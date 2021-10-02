@@ -1,10 +1,9 @@
 using System;
-using System.Runtime.Serialization;
 
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
-    /// Describes the exception that occurs upon encountering an invalid or incomplete blob signature. 
+    /// Describes the exception that occurs upon encountering an invalid or incomplete blob signature.
     /// </summary>
     [Serializable]
     public class InvalidBlobSignatureException : Exception
@@ -33,7 +32,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="signature">The invalid or incomplete signature.</param>
         /// <param name="inner">The inner cause of the invalid blob signature.</param>
-        public InvalidBlobSignatureException(BlobSignature signature, Exception inner)
+        public InvalidBlobSignatureException(BlobSignature signature, Exception? inner)
             : this(signature, $"Blob signature {signature.SafeToString()} is invalid or incomplete.", inner)
         {
         }
@@ -44,7 +43,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="signature">The invalid or incomplete signature.</param>
         /// <param name="message">The error message.</param>
         /// <param name="inner">The inner cause of the invalid blob signature.</param>
-        public InvalidBlobSignatureException(BlobSignature signature, string message, Exception inner)
+        public InvalidBlobSignatureException(BlobSignature signature, string message, Exception? inner)
             : base(message, inner)
         {
             Signature = signature;
@@ -58,5 +57,5 @@ namespace AsmResolver.DotNet.Signatures
             get;
         }
     }
-    
+
 }

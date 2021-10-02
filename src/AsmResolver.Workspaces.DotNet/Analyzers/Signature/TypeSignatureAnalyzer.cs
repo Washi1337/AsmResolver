@@ -116,6 +116,13 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
                 }
                 return signature;
             }
+
+            /// <inheritdoc />
+            public TypeSignature VisitFunctionPointerType(FunctionPointerTypeSignature signature, AnalysisContext context)
+            {
+                context.ScheduleForAnalysis(signature.Signature);
+                return signature;
+            }
         }
     }
 }

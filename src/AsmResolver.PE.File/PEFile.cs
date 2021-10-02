@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Models a file using the portable executable (PE) file format. It provides access to various PE headers, as well
-    /// as the raw contents of each section present in the file. 
+    /// as the raw contents of each section present in the file.
     /// </summary>
     public class PEFile : IPEFile
     {
@@ -18,39 +20,8 @@ namespace AsmResolver.PE.File
         /// </summary>
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
 
-        /// <summary>
-        /// Reads an unmapped PE file from the disk.
-        /// </summary>
-        /// <param name="path">The file path to the PE file.</param>
-        /// <returns>The PE file that was read.</returns>
-        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromFile(string path)
-        {
-            var result = FromReader(new ByteArrayReader(System.IO.File.ReadAllBytes(path)));
-            result.FilePath = path;
-            return result;
-        }
-
-        /// <summary>
-        /// Reads an unmapped PE file from memory.
-        /// </summary>
-        /// <param name="raw">The raw bytes representing the contents of the PE file to read.</param>
-        /// <returns>The PE file that was read.</returns>
-        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromBytes(byte[] raw) => FromReader(new ByteArrayReader(raw));
-
-        /// <summary>
-        /// Reads a PE file from the provided input stream.
-        /// </summary>
-        /// <param name="reader">The input stream to read from.</param>
-        /// <param name="mode">Indicates how the input PE file is mapped.</param>
-        /// <returns>The PE file that was read.</returns>
-        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) => 
-            new SerializedPEFile(reader, mode);
-
-        private readonly LazyVariable<ISegment> _extraSectionData;
-        private IList<PESection> _sections;
+        private readonly LazyVariable<ISegment?> _extraSectionData;
+        private IList<PESection>? _sections;
 
         /// <summary>
         /// Creates a new empty portable executable file.
@@ -71,12 +42,12 @@ namespace AsmResolver.PE.File
             DosHeader = dosHeader ?? throw new ArgumentNullException(nameof(dosHeader));
             FileHeader = fileHeader ?? throw new ArgumentNullException(nameof(fileHeader));
             OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
-            _extraSectionData = new LazyVariable<ISegment>(GetExtraSectionData);
+            _extraSectionData = new LazyVariable<ISegment?>(GetExtraSectionData);
             MappingMode = PEMappingMode.Unmapped;
         }
 
         /// <inheritdoc />
-        public string FilePath
+        public string? FilePath
         {
             get;
             protected set;
@@ -124,17 +95,84 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets or sets the padding data in between the last section header and the first section.
         /// </summary>
-        public ISegment ExtraSectionData
+        public ISegment? ExtraSectionData
         {
             get => _extraSectionData.Value;
             set => _extraSectionData.Value = value;
         }
 
+        /// <summary>
+        /// Reads an unmapped PE file from the disk.
+        /// </summary>
+        /// <param name="path">The file path to the PE file.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static PEFile FromFile(string path) => FromFile(UncachedFileService.Instance.OpenFile(path));
+
+        /// <summary>
+        /// Reads an unmapped PE file.
+        /// </summary>
+        /// <param name="file">The file representing the PE.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static PEFile FromFile(IInputFile file)
+        {
+            var result = FromReader(file.CreateReader());
+            result.FilePath = file.FilePath;
+            return result;
+        }
+
+        /// <summary>
+        /// Reads an unmapped PE file from memory.
+        /// </summary>
+        /// <param name="raw">The raw bytes representing the contents of the PE file to read.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static PEFile FromBytes(byte[] raw) => FromReader(ByteArrayDataSource.CreateReader(raw));
+
+        /// <summary>
+        /// Reads a mapped PE file starting at the provided module base address (HINSTANCE).
+        /// </summary>
+        /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static unsafe PEFile FromModuleBaseAddress(IntPtr hInstance)
+        {
+            // Perform some minimal parsing to get the size of the image from the optional header.
+            uint nextHeaderOffset = *(uint*) ((byte*) hInstance + DosHeader.NextHeaderFieldOffset);
+            uint sizeOfImage = *(uint*) ((byte*) hInstance
+                + nextHeaderOffset
+                + sizeof(uint)
+                + FileHeader.FileHeaderSize
+                + OptionalHeader.OptionalHeaderSizeOfImageFieldOffset);
+            return FromDataSource(new UnmanagedDataSource(hInstance, sizeOfImage), PEMappingMode.Mapped);
+        }
+
+        /// <summary>
+        /// Reads a PE file from the provided data source.
+        /// </summary>
+        /// <param name="dataSource">The data source to read from.</param>
+        /// <param name="mode">Indicates how the input PE file is mapped.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static PEFile FromDataSource(IDataSource dataSource, PEMappingMode mode = PEMappingMode.Unmapped) =>
+            FromReader(new BinaryStreamReader(dataSource, dataSource.BaseAddress, 0, (uint) dataSource.Length), mode);
+
+        /// <summary>
+        /// Reads a PE file from the provided input stream.
+        /// </summary>
+        /// <param name="reader">The input stream to read from.</param>
+        /// <param name="mode">Indicates how the input PE file is mapped.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static PEFile FromReader(in BinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
+            new SerializedPEFile(reader, mode);
+
         /// <inheritdoc />
         public ISegmentReference GetReferenceToRva(uint rva) => new PESegmentReference(this, rva);
 
         /// <inheritdoc />
-        public uint FileOffsetToRva(ulong fileOffset) => 
+        public uint FileOffsetToRva(ulong fileOffset) =>
             GetSectionContainingOffset(fileOffset).FileOffsetToRva(fileOffset);
 
         /// <inheritdoc />
@@ -159,7 +197,7 @@ namespace AsmResolver.PE.File
         /// <param name="fileOffset">The file offset.</param>
         /// <param name="section">The section that was found.</param>
         /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
-        public bool TryGetSectionContainingOffset(ulong fileOffset, out PESection section)
+        public bool TryGetSectionContainingOffset(ulong fileOffset, [NotNullWhen(true)] out PESection? section)
         {
             section = Sections.FirstOrDefault(s => s.ContainsFileOffset(fileOffset));
             return section != null;
@@ -174,14 +212,14 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public bool TryGetSectionContainingRva(uint rva, out PESection section)
+        public bool TryGetSectionContainingRva(uint rva,  [NotNullWhen(true)] out PESection? section)
         {
             section = Sections.FirstOrDefault(s => s.ContainsRva(rva));
             return section != null;
         }
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateDataDirectoryReader(DataDirectory dataDirectory)
+        public BinaryStreamReader CreateDataDirectoryReader(DataDirectory dataDirectory)
         {
             var section = GetSectionContainingRva(dataDirectory.VirtualAddress);
             ulong fileOffset = section.RvaToFileOffset(dataDirectory.VirtualAddress);
@@ -189,7 +227,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public bool TryCreateDataDirectoryReader(DataDirectory dataDirectory, out IBinaryStreamReader reader)
+        public bool TryCreateDataDirectoryReader(DataDirectory dataDirectory, out BinaryStreamReader reader)
         {
             if (TryGetSectionContainingRva(dataDirectory.VirtualAddress, out var section))
             {
@@ -198,19 +236,19 @@ namespace AsmResolver.PE.File
                 return true;
             }
 
-            reader = null;
+            reader = default;
             return false;
         }
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset)
+        public BinaryStreamReader CreateReaderAtFileOffset(uint fileOffset)
         {
             var section = GetSectionContainingOffset(fileOffset);
             return section.CreateReader(fileOffset);
         }
-        
+
         /// <inheritdoc />
-        public bool TryCreateReaderAtFileOffset(uint fileOffset, out IBinaryStreamReader reader)
+        public bool TryCreateReaderAtFileOffset(uint fileOffset, out BinaryStreamReader reader)
         {
             if (TryGetSectionContainingOffset(fileOffset, out var section))
             {
@@ -218,19 +256,19 @@ namespace AsmResolver.PE.File
                 return true;
             }
 
-            reader = null;
+            reader = default;
             return false;
         }
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset, uint size)
+        public BinaryStreamReader CreateReaderAtFileOffset(uint fileOffset, uint size)
         {
             var section = GetSectionContainingOffset(fileOffset);
             return section.CreateReader(fileOffset, size);
-        } 
-        
+        }
+
         /// <inheritdoc />
-        public bool TryCreateReaderAtFileOffset(uint fileOffset, uint size, out IBinaryStreamReader reader)
+        public bool TryCreateReaderAtFileOffset(uint fileOffset, uint size, out BinaryStreamReader reader)
         {
             if (TryGetSectionContainingOffset(fileOffset, out var section))
             {
@@ -238,19 +276,19 @@ namespace AsmResolver.PE.File
                 return true;
             }
 
-            reader = null;
+            reader = default;
             return false;
         }
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReaderAtRva(uint rva)
+        public BinaryStreamReader CreateReaderAtRva(uint rva)
         {
             var section = GetSectionContainingRva(rva);
             return section.CreateReader(section.RvaToFileOffset(rva));
         }
 
         /// <inheritdoc />
-        public bool TryCreateReaderAtRva(uint rva, out IBinaryStreamReader reader)
+        public bool TryCreateReaderAtRva(uint rva, out BinaryStreamReader reader)
         {
             if (TryGetSectionContainingRva(rva, out var section))
             {
@@ -258,19 +296,19 @@ namespace AsmResolver.PE.File
                 return true;
             }
 
-            reader = null;
+            reader = default;
             return false;
         }
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReaderAtRva(uint rva, uint size)
+        public BinaryStreamReader CreateReaderAtRva(uint rva, uint size)
         {
             var section = GetSectionContainingRva(rva);
             return section.CreateReader(section.RvaToFileOffset(rva), size);
         }
 
         /// <inheritdoc />
-        public bool TryCreateReaderAtRva(uint rva, uint size, out IBinaryStreamReader reader)
+        public bool TryCreateReaderAtRva(uint rva, uint size, out BinaryStreamReader reader)
         {
             if (TryGetSectionContainingRva(rva, out var section))
             {
@@ -278,10 +316,10 @@ namespace AsmResolver.PE.File
                 return true;
             }
 
-            reader = null;
+            reader = default;
             return false;
         }
-        
+
         /// <summary>
         /// Recomputes file offsets and sizes in the file, optional and section headers.
         /// </summary>
@@ -296,6 +334,8 @@ namespace AsmResolver.PE.File
         /// <list type="bullet">
         ///     <item>
         ///         <term>SizeOfHeaders</term>
+        ///         <term>SizeOfImage</term>
+        ///         <term>Data directories</term>
         ///     </item>
         /// </list>
         /// Affected fields in the section header include:
@@ -313,9 +353,9 @@ namespace AsmResolver.PE.File
             var oldSections = Sections.Select(_ => _.CreateHeader()).ToList();
 
             FileHeader.NumberOfSections = (ushort) Sections.Count;
-            
+
             FileHeader.UpdateOffsets(
-                DosHeader.NextHeaderOffset + 4, 
+                DosHeader.NextHeaderOffset + 4,
                 DosHeader.NextHeaderOffset + 4);
             OptionalHeader.UpdateOffsets(
                 FileHeader.Offset + FileHeader.GetPhysicalSize(),
@@ -326,7 +366,7 @@ namespace AsmResolver.PE.File
                                                    + FileHeader.SizeOfOptionalHeader
                                                    + SectionHeader.SectionHeaderSize * (uint) Sections.Count)
                 .Align(OptionalHeader.FileAlignment);
-            
+
             AlignSections();
             AlignDataDirectoryEntries(oldSections);
 
@@ -336,7 +376,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Aligns all sections according to the file and section alignment properties in the optional header. 
+        /// Aligns all sections according to the file and section alignment properties in the optional header.
         /// </summary>
         public void AlignSections()
         {
@@ -344,7 +384,7 @@ namespace AsmResolver.PE.File
 
             for (int i = 0; i < Sections.Count; i++)
             {
-                var section = Sections[i];                
+                var section = Sections[i];
 
                 uint rva = i > 0
                     ? Sections[i - 1].Rva + Sections[i - 1].GetVirtualSize()
@@ -357,9 +397,9 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Aligns all data directories' virtual address according to the section header's ones. 
+        /// Aligns all data directories' virtual address according to the section header's ones.
         /// </summary>
-        public void AlignDataDirectoryEntries(IList<SectionHeader> oldHeaders) 
+        public void AlignDataDirectoryEntries(IList<SectionHeader> oldHeaders)
         {
             var dataDirectoryEntries = OptionalHeader.DataDirectories;
             for (int j = 0; j < dataDirectoryEntries.Count; j++)
@@ -371,8 +411,8 @@ namespace AsmResolver.PE.File
                     for(int i = 0; i < oldHeaders.Count; i++)
                     {
                         var header = oldHeaders[i];
-                        
-                        // Locate section containing image directory. 
+
+                        // Locate section containing image directory.
                         if (header.VirtualAddress <= virtualAddress && header.VirtualAddress + header.SizeOfRawData > virtualAddress)
                         {
                             // Calculate the delta between the new section.rva and the old one.
@@ -410,7 +450,7 @@ namespace AsmResolver.PE.File
         /// </summary>
         /// <param name="stream">The output stream to write to.</param>
         public void Write(Stream stream) => Write(new BinaryStreamWriter(stream));
-        
+
         /// <summary>
         /// Writes the PE file to the provided output stream.
         /// </summary>
@@ -418,27 +458,27 @@ namespace AsmResolver.PE.File
         public void Write(IBinaryStreamWriter writer)
         {
             UpdateHeaders();
-            
+
             // Dos header.
             DosHeader.Write(writer);
-            
+
             // NT headers
             writer.Offset = DosHeader.NextHeaderOffset;
-            
+
             writer.WriteUInt32(ValidPESignature);
             FileHeader.Write(writer);
             OptionalHeader.Write(writer);
 
             // Section headers.
             writer.Offset = OptionalHeader.Offset + FileHeader.SizeOfOptionalHeader;
-            foreach (var section in Sections) 
+            foreach (var section in Sections)
                 section.CreateHeader().Write(writer);
 
             // Data between section headers and sections.
             ExtraSectionData?.Write(writer);
 
             // Sections.
-            
+
             writer.Offset = OptionalHeader.SizeOfHeaders;
             foreach (var section in Sections)
             {
@@ -464,6 +504,6 @@ namespace AsmResolver.PE.File
         /// <remarks>
         /// This method is called upon the initialization of the <see cref="ExtraSectionData"/> property.
         /// </remarks>
-        protected virtual ISegment GetExtraSectionData() => null;
+        protected virtual ISegment? GetExtraSectionData() => null;
     }
 }

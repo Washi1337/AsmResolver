@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Code.Cil
     public partial class CilInstructionCollection
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private CilInstruction InsertAndReturn(int index, CilOpCode code, object operand = null)
+        private CilInstruction InsertAndReturn(int index, CilOpCode code, object? operand = null)
         {
             var instruction = new CilInstruction(code, operand);
             Insert(index, instruction);
@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <exception cref="ArgumentNullException">
         /// Occurs when <paramref name="labels"/> is null.
         /// </exception>
-        public CilInstruction Insert(int index, CilOpCode code, params ICilLabel[] labels) => 
+        public CilInstruction Insert(int index, CilOpCode code, params ICilLabel[] labels) =>
             Add(code, (IEnumerable<ICilLabel>) labels);
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             object operand = code.OperandType switch
             {
-                CilOperandType.InlineI => constant,
+                CilOperandType.InlineI => (object) constant,
                 CilOperandType.ShortInlineI => (sbyte) constant,
                 _ => throw new InvalidCilInstructionException(code)
             };
@@ -308,7 +308,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             if (member is null)
                 throw new ArgumentNullException(nameof(member));
-            
+
             switch (code.OperandType)
             {
                 case CilOperandType.InlineField when member.IsField:
@@ -316,7 +316,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilOperandType.InlineTok:
                     break;
                 default:
-                    throw new InvalidCilInstructionException(code);    
+                    throw new InvalidCilInstructionException(code);
             }
 
             return InsertAndReturn(index, code, member);
@@ -443,6 +443,6 @@ namespace AsmResolver.DotNet.Code.Cil
 
             return InsertAndReturn(index, code, token);
         }
-        
+
     }
 }

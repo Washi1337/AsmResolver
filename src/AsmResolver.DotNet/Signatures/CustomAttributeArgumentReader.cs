@@ -1,29 +1,28 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
 {
     // src/coreclr/src/vm/customattribute.cpp
-    
-    internal sealed class CustomAttributeArgumentReader
-    {
-        private readonly BlobReadContext _context;
-        private readonly IBinaryStreamReader _reader;
 
-        public CustomAttributeArgumentReader(in BlobReadContext context, IBinaryStreamReader reader)
+    internal struct CustomAttributeArgumentReader
+    {
+        public static CustomAttributeArgumentReader Create() => new(new List<object?>());
+
+        public CustomAttributeArgumentReader(IList<object?> elements)
         {
-            _context = context;
-            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            Elements = elements;
+            IsNullArray = false;
         }
 
-        public IList<object> Elements
+        public IList<object?> Elements
         {
             get;
-        } = new List<object>();
+        }
 
         public bool IsNullArray
         {
@@ -31,88 +30,94 @@ namespace AsmResolver.DotNet.Signatures
             private set;
         }
 
-        public void ReadValue(TypeSignature valueType)
+        public void ReadValue(in BlobReadContext context, ref BinaryStreamReader reader, TypeSignature valueType)
         {
-            var module = _context.ReaderContext.ParentModule;
-            
+            var module = context.ReaderContext.ParentModule;
+
             if (valueType.IsTypeOf("System", "Type"))
             {
-                Elements.Add(TypeNameParser.Parse(module, _reader.ReadSerString()));
+                string? typeFullName = reader.ReadSerString();
+                var type = typeFullName is not null
+                    ? TypeNameParser.Parse(module, typeFullName)
+                    : context.ReaderContext.BadImageAndReturn<TypeSignature>("Type full name in attribute argument is null.");
+
+                Elements.Add(type);
                 return;
             }
 
             switch (valueType.ElementType)
             {
                 case ElementType.Boolean:
-                    Elements.Add(_reader.ReadByte() == 1);
+                    Elements.Add(reader.ReadByte() == 1);
                     break;
 
                 case ElementType.Char:
-                    Elements.Add((char) _reader.ReadUInt16());
+                    Elements.Add((char) reader.ReadUInt16());
                     break;
 
                 case ElementType.R4:
-                    Elements.Add(_reader.ReadSingle());
+                    Elements.Add(reader.ReadSingle());
                     break;
 
                 case ElementType.R8:
-                    Elements.Add(_reader.ReadDouble());
+                    Elements.Add(reader.ReadDouble());
                     break;
 
                 case ElementType.I1:
-                    Elements.Add(_reader.ReadSByte());
+                    Elements.Add(reader.ReadSByte());
                     break;
 
                 case ElementType.I2:
-                    Elements.Add(_reader.ReadInt16());
+                    Elements.Add(reader.ReadInt16());
                     break;
 
                 case ElementType.I4:
-                    Elements.Add(_reader.ReadInt32());
+                    Elements.Add(reader.ReadInt32());
                     break;
 
                 case ElementType.I8:
-                    Elements.Add(_reader.ReadInt64());
+                    Elements.Add(reader.ReadInt64());
                     break;
 
                 case ElementType.U1:
-                    Elements.Add(_reader.ReadByte());
+                    Elements.Add(reader.ReadByte());
                     break;
 
                 case ElementType.U2:
-                    Elements.Add(_reader.ReadUInt16());
+                    Elements.Add(reader.ReadUInt16());
                     break;
 
                 case ElementType.U4:
-                    Elements.Add(_reader.ReadUInt32());
+                    Elements.Add(reader.ReadUInt32());
                     break;
 
                 case ElementType.U8:
-                    Elements.Add(_reader.ReadUInt64());
+                    Elements.Add(reader.ReadUInt64());
                     break;
 
                 case ElementType.String:
-                    Elements.Add(_reader.ReadSerString());
+                    Elements.Add(reader.ReadSerString());
                     break;
 
                 case ElementType.Object:
-                    var reader = new CustomAttributeArgumentReader(_context, _reader);
-                    var type = TypeSignature.ReadFieldOrPropType(_context, _reader);
-                    reader.ReadValue(type);
+                    var type = TypeSignature.ReadFieldOrPropType(context, ref reader);
+
+                    var subReader = Create();
+                    subReader.ReadValue(context, ref reader, type);
                     Elements.Add(new BoxedArgument(type, type.ElementType == ElementType.SzArray
-                        ? reader.Elements.ToArray()
-                        : reader.Elements[0]));
+                        ? subReader.Elements.ToArray()
+                        : subReader.Elements[0]));
                     break;
 
                 case ElementType.SzArray:
                     var arrayElementType = ((SzArrayTypeSignature) valueType).BaseType;
-                    uint elementCount = _reader.CanRead(sizeof(uint)) ? _reader.ReadUInt32() : uint.MaxValue;
+                    uint elementCount = reader.CanRead(sizeof(uint)) ? reader.ReadUInt32() : uint.MaxValue;
                     IsNullArray = elementCount == uint.MaxValue;
 
                     if (!IsNullArray)
                     {
                         for (uint i = 0; i < elementCount; i++)
-                            ReadValue(arrayElementType);
+                            ReadValue(context, ref reader, arrayElementType);
                     }
 
                     break;
@@ -122,24 +127,24 @@ namespace AsmResolver.DotNet.Signatures
                 case ElementType.ValueType:
                     // Value is an enum, resolve it and get underlying type.
                     // If that fails, most enums are int32s, assume that is the case in an attempt to recover.
-                    
+
                     var enumTypeDef = module.MetadataResolver.ResolveType(valueType);
 
-                    TypeSignature underlyingType = null;
-                    if (enumTypeDef != null && enumTypeDef.IsEnum)
+                    TypeSignature? underlyingType = null;
+                    if (enumTypeDef is {IsEnum: true})
                         underlyingType = enumTypeDef.GetEnumUnderlyingType();
 
                     if (underlyingType is null)
                     {
-                        _context.ReaderContext.BadImage($"Underlying enum type {valueType} could not be resolved. Assuming System.Int32 for custom attribute argument.");
+                        context.ReaderContext.BadImage($"Underlying enum type {valueType} could not be resolved. Assuming System.Int32 for custom attribute argument.");
                         underlyingType = module.CorLibTypeFactory.Int32;
                     }
-                    
-                    ReadValue(underlyingType);
+
+                    ReadValue(context, ref reader, underlyingType);
                     break;
 
                 default:
-                    _context.ReaderContext.NotSupported($"Unsupported element type {valueType.ElementType} in custom attribute argument.");
+                    context.ReaderContext.NotSupported($"Unsupported element type {valueType.ElementType} in custom attribute argument.");
                     Elements.Add(null);
                     break;
             }

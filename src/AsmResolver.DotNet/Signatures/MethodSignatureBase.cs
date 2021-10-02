@@ -1,13 +1,12 @@
-using System;
 using System.Collections.Generic;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
-    /// Provides a base for method and property signatures. 
+    /// Provides a base for method and property signatures.
     /// </summary>
     public abstract class MethodSignatureBase : MemberSignature
     {
@@ -18,7 +17,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="memberReturnType"></param>
         /// <param name="parameterTypes"></param>
         protected MethodSignatureBase(
-            CallingConventionAttributes attributes, 
+            CallingConventionAttributes attributes,
             TypeSignature memberReturnType,
             IEnumerable<TypeSignature> parameterTypes)
             : base(attributes, memberReturnType)
@@ -27,7 +26,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
-        /// Gets an ordered list of types indicating the types of the parameters that this member defines. 
+        /// Gets an ordered list of types indicating the types of the parameters that this member defines.
         /// </summary>
         public IList<TypeSignature> ParameterTypes
         {
@@ -44,7 +43,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether sentinel parameters should be included in the signature. 
+        /// Gets or sets a value indicating whether sentinel parameters should be included in the signature.
         /// </summary>
         public bool IncludeSentinel
         {
@@ -53,7 +52,22 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
-        /// Gets an ordered list of types indicating the types of the sentinel parameters that this member defines. 
+        /// Gets value indicating if method returns value or not.
+        /// </summary>
+        public bool ReturnsValue
+        {
+            get
+            {
+                var ret = ReturnType;
+                while (ret is CustomModifierTypeSignature customModifierTypeSignature)
+                    ret = customModifierTypeSignature.BaseType;
+
+                return ret.ElementType != ElementType.Void;
+            }
+        }
+
+        /// <summary>
+        /// Gets an ordered list of types indicating the types of the sentinel parameters that this member defines.
         /// </summary>
         /// <remarks>
         /// For any of the sentinel parameter types to be emitted to the output module, the <see cref="IncludeSentinel"/>
@@ -70,7 +84,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input stream.</param>
-        protected void ReadParametersAndReturnType(in BlobReadContext context, IBinaryStreamReader reader)
+        protected void ReadParametersAndReturnType(in BlobReadContext context, ref BinaryStreamReader reader)
         {
             // Parameter count.
             if (!reader.TryReadCompressedUInt32(out uint parameterCount))
@@ -80,13 +94,13 @@ namespace AsmResolver.DotNet.Signatures
             }
 
             // Return type.
-            ReturnType = TypeSignature.FromReader(context, reader);
+            ReturnType = TypeSignature.FromReader(context, ref reader);
 
             // Parameter types.
             bool sentinel = false;
             for (int i = 0; i < parameterCount; i++)
             {
-                var parameterType = TypeSignature.FromReader(context, reader);
+                var parameterType = TypeSignature.FromReader(context, ref reader);
 
                 if (parameterType.ElementType == ElementType.Sentinel)
                 {
@@ -111,25 +125,16 @@ namespace AsmResolver.DotNet.Signatures
         {
             context.Writer.WriteCompressedUInt32((uint) ParameterTypes.Count);
 
-            if (ReturnType is null)
-            {
-                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
-                    new NullReferenceException("Return type is null.")));
-                context.Writer.WriteByte((byte) ElementType.Object);   
-            }
-            else
-            {
-                ReturnType.Write(context);
-            }
+            ReturnType.Write(context);
 
-            foreach (var type in ParameterTypes)
-                type.Write(context);
+            for (int i = 0; i < ParameterTypes.Count; i++)
+                ParameterTypes[i].Write(context);
 
             if (IncludeSentinel)
             {
                 context.Writer.WriteByte((byte) ElementType.Sentinel);
-                foreach (var sentinelType in SentinelParameterTypes)
-                    sentinelType.Write(context);
+                for (int i = 0; i < SentinelParameterTypes.Count; i++)
+                    SentinelParameterTypes[i].Write(context);
             }
         }
 
@@ -147,6 +152,6 @@ namespace AsmResolver.DotNet.Signatures
                 count++;
             return count;
         }
-        
+
     }
 }

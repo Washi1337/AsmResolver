@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the class layout metadata table.
     /// </summary>
-    public readonly struct ClassLayoutRow : IMetadataRow
+    public struct ClassLayoutRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single class layout row from an input stream.
@@ -15,14 +16,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the class layout table.</param>
         /// <returns>The row.</returns>
-        public static ClassLayoutRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static ClassLayoutRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new ClassLayoutRow(
                 reader.ReadUInt16(),
                 reader.ReadUInt32(),
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
-        
+
         /// <summary>
         /// Creates a new row for the class layout metadata table,
         /// </summary>
@@ -52,7 +53,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the alignment in bytes of each field in the type. 
+        /// Gets or sets the alignment in bytes of each field in the type.
         /// </summary>
         /// <remarks>
         /// This value should be a power of two between 0 and 128.
@@ -60,22 +61,25 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public ushort PackingSize
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the size in bytes of the type.
+        /// Gets or sets the size in bytes of the type.
         /// </summary>
         public uint ClassSize
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the TypeDef table indicating the type that this layout is assigned to.
+        /// Gets or sets an index into the TypeDef table indicating the type that this layout is assigned to.
         /// </summary>
         public uint Parent
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

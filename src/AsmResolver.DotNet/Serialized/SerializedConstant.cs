@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="Constant"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedConstant : Constant
     {
@@ -34,24 +34,25 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IHasConstant GetParent()
+        protected override IHasConstant? GetParent()
         {
             var token = _context.ParentModule.GetConstantOwner(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as IHasConstant
-                : null;
+                : _context.BadImageAndReturn<IHasConstant>($"Invalid parent member in constant {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
-        protected override DataBlobSignature GetValue()
+        protected override DataBlobSignature? GetValue()
         {
-            var reader = _context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.Value);
-            
-            return reader is null
-                ? null
-                : DataBlobSignature.FromReader(reader);
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Value, out var reader))
+            {
+                // Don't report error. null constants are allowed (e.g. null strings).
+                return null;
+            }
+
+            return DataBlobSignature.FromReader(ref reader);
         }
     }
 }

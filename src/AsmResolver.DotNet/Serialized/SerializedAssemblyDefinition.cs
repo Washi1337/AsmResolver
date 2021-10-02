@@ -16,6 +16,9 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedAssemblyDefinition : AssemblyDefinition
     {
+        private static readonly Utf8String SystemRuntimeVersioningNamespace = "System.Runtime.Versioning";
+        private static readonly Utf8String TargetFrameworkAttributeName = nameof(TargetFrameworkAttribute);
+
         private readonly ModuleReaderContext _context;
         private readonly AssemblyDefinitionRow _row;
         private readonly SerializedModuleDefinition _manifestModule;
@@ -44,27 +47,27 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName()
+        protected override Utf8String? GetName()
         {
-            return _context.Image.DotNetDirectory.Metadata
-                .GetStream<StringsStream>()
-                ?.GetStringByIndex(_row.Name);
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
         }
 
         /// <inheritdoc />
-        protected override string GetCulture()
+        protected override Utf8String? GetCulture()
         {
-            return _context.Image.DotNetDirectory.Metadata
-                .GetStream<StringsStream>()
-                ?.GetStringByIndex(_row.Culture);
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Culture)
+                : null;
         }
 
         /// <inheritdoc />
-        protected override byte[] GetPublicKey()
+        protected override byte[]? GetPublicKey()
         {
-            return _context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                ?.GetBlobByIndex(_row.PublicKey);
+            return _context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                ? blobStream.GetBlobByIndex(_row.PublicKey)
+                : null;
         }
 
         /// <inheritdoc />
@@ -77,20 +80,19 @@ namespace AsmResolver.DotNet.Serialized
             };
 
             var moduleResolver = _context.Parameters.ModuleResolver;
-            if (moduleResolver != null)
+            if (moduleResolver is not null)
             {
-                var directory = _context.Image.DotNetDirectory;
-                var tablesStream = directory.Metadata.GetStream<TablesStream>();
-                var stringsStream = directory.Metadata.GetStream<StringsStream>();
+                var metadata = _context.Image.DotNetDirectory!.Metadata!;
+                var tablesStream = metadata.GetStream<TablesStream>();
+                var stringsStream = metadata.GetStream<StringsStream>();
 
                 var filesTable = tablesStream.GetTable<FileReferenceRow>(TableIndex.File);
                 foreach (var fileRow in filesTable)
                 {
                     if (fileRow.Attributes == FileAttributes.ContainsMetadata)
                     {
-                        string name = stringsStream.GetStringByIndex(fileRow.Name);
-                        var module = moduleResolver.Resolve(name);
-                        if (module != null)
+                        string? name = stringsStream.GetStringByIndex(fileRow.Name);
+                        if (!string.IsNullOrEmpty(name) && moduleResolver.Resolve(name!) is { } module)
                             result.Add(module);
                     }
                 }
@@ -113,9 +115,13 @@ namespace AsmResolver.DotNet.Serialized
             // We need to override this to be able to detect the runtime without lazily resolving all kinds of members.
 
             // Get relevant streams.
-            var metadata = _manifestModule.DotNetDirectory.Metadata;
+            var metadata = _manifestModule.DotNetDirectory.Metadata!;
             var tablesStream = metadata.GetStream<TablesStream>();
-            var stringsStream = metadata.GetStream<StringsStream>();
+            if (!metadata.TryGetStream<StringsStream>(out var stringsStream))
+            {
+                info = default;
+                return false;
+            }
 
             // Get relevant tables.
             // Since we are looking for the TargetFrameworkAttribute attribute, and these are
@@ -148,15 +154,19 @@ namespace AsmResolver.DotNet.Serialized
                     continue;
 
                 // Compare namespace and name of attribute type.
-                string ns = stringsStream.GetStringByIndex(typeRow.Namespace);
-                string name = stringsStream.GetStringByIndex(typeRow.Name);
-                if (ns != "System.Runtime.Versioning" || name != nameof(TargetFrameworkAttribute))
+                var ns = stringsStream.GetStringByIndex(typeRow.Namespace);
+                var name = stringsStream.GetStringByIndex(typeRow.Name);
+                if (ns != SystemRuntimeVersioningNamespace || name != TargetFrameworkAttributeName)
                     continue;
 
                 // At this point, we can safely use the high-level representation to parse out the signature.
                 // Read the first CA element and parse the runtime info.
                 var attribute = (CustomAttribute) _manifestModule.LookupMember(new MetadataToken(TableIndex.CustomAttribute, rid));
-                if (attribute.Signature.FixedArguments[0].Element is string n && DotNetRuntimeInfo.TryParse(n, out info))
+                if (attribute.Signature is null || attribute.Signature.FixedArguments.Count == 0)
+                    continue;
+
+                object? element = attribute.Signature.FixedArguments[0].Element;
+                if (element is string or Utf8String && DotNetRuntimeInfo.TryParse(element.ToString(), out info))
                     return true;
             }
 

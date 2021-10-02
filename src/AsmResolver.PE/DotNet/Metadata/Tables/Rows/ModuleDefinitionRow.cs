@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the module definition metadata table.
     /// </summary>
-    public readonly struct ModuleDefinitionRow : IMetadataRow
+    public struct ModuleDefinitionRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single module definition row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the module definition table.</param>
         /// <returns>The row.</returns>
-        public static ModuleDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static ModuleDefinitionRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new ModuleDefinitionRow(
                 reader.ReadUInt16(),
@@ -61,7 +62,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
     /// <summary>
-        /// Gets the generation number of the module.  
+        /// Gets or sets the generation number of the module.
         /// </summary>
         /// <remarks>
         /// This value is reserved and should be set to zero.
@@ -69,40 +70,45 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public ushort Generation
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the name of the module. 
+        /// Gets or sets an index into the #Strings heap containing the name of the module.
         /// </summary>
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #GUID heap containing the unique identifier to distinguish between two versions
+        /// Gets or sets an index into the #GUID heap containing the unique identifier to distinguish between two versions
         /// of the same module.
         /// </summary>
         public uint Mvid
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #GUID heap containing the unique identifier to distinguish between two
+        /// Gets or sets an index into the #GUID heap containing the unique identifier to distinguish between two
         /// edit-and-continue generations.
         /// </summary>
         public uint EncId
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #GUID heap containing the base identifier of an edit-and-continue generation.
+        /// Gets or sets an index into the #GUID heap containing the base identifier of an edit-and-continue generation.
         /// </summary>
         public uint EncBaseId
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

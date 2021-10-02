@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the file metadata table.
     /// </summary>
-    public readonly struct FileReferenceRow : IMetadataRow
+    public struct FileReferenceRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single file row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the file table.</param>
         /// <returns>The row.</returns>
-        public static FileReferenceRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static FileReferenceRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new FileReferenceRow(
                 (FileAttributes) reader.ReadUInt32(),
@@ -52,27 +53,30 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the file reference.
+        /// Gets or sets the attributes associated to the file reference.
         /// </summary>
         public FileAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the name of the file.
+        /// Gets or sets an index into the #Strings stream referencing the name of the file.
         /// </summary>
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream referencing the hash value of the file.
+        /// Gets or sets an index into the #Blob stream referencing the hash value of the file.
         /// </summary>
         public uint HashValue
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

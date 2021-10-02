@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.IO;
 
 namespace AsmResolver.Workspaces.DotNet
 {
@@ -17,7 +18,7 @@ namespace AsmResolver.Workspaces.DotNet
         /// <inheritdoc />
         public AssemblyCollection()
         {
-            _resolver = new WorkspaceAssemblyResolver(this);
+            _resolver = new WorkspaceAssemblyResolver(new ByteArrayFileService(), this);
         }
 
         /// <inheritdoc />
@@ -67,7 +68,8 @@ namespace AsmResolver.Workspaces.DotNet
             private readonly AssemblyCollection _collection;
             private readonly SignatureComparer _comparer = new();
 
-            public WorkspaceAssemblyResolver(AssemblyCollection collection)
+            public WorkspaceAssemblyResolver(IFileService fileService, AssemblyCollection collection)
+                : base(fileService)
             {
                 _collection = collection;
             }

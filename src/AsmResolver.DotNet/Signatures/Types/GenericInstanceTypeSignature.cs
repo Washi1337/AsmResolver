@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -9,9 +10,9 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </summary>
     public class GenericInstanceTypeSignature : TypeSignature, IGenericArgumentsProvider
     {
-        internal new static GenericInstanceTypeSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
+        internal new static GenericInstanceTypeSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
-            var genericType = TypeSignature.FromReader(context, reader);
+            var genericType = TypeSignature.FromReader(context, ref reader);
             var signature = new GenericInstanceTypeSignature(genericType.ToTypeDefOrRef(), genericType.ElementType == ElementType.ValueType);
 
             if (!reader.TryReadCompressedUInt32(out uint count))
@@ -21,7 +22,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             }
 
             for (int i = 0; i < count; i++)
-                signature.TypeArguments.Add(TypeSignature.FromReader(context, reader));
+                signature.TypeArguments.Add(TypeSignature.FromReader(context, ref reader));
 
             return signature;
         }
@@ -77,7 +78,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string Name
+        public override string? Name
         {
             get
             {
@@ -87,13 +88,13 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string Namespace => GenericType?.Namespace;
+        public override string? Namespace => GenericType.Namespace;
 
         /// <inheritdoc />
-        public override IResolutionScope Scope => GenericType?.Scope;
+        public override IResolutionScope? Scope => GenericType.Scope;
 
         /// <inheritdoc />
-        public override ModuleDefinition Module => GenericType?.Module;
+        public override ModuleDefinition? Module => GenericType.Module;
 
         /// <inheritdoc />
         public override bool IsValueType
@@ -102,10 +103,10 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override TypeDefinition Resolve() => GenericType.Resolve();
+        public override TypeDefinition? Resolve() => GenericType.Resolve();
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => GenericType;
+        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => GenericType;
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

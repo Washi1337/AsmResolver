@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
@@ -13,7 +14,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
     public class UserStringsStreamBuffer : IMetadataStreamBuffer
     {
         private readonly MemoryStream _rawStream = new();
-        private readonly BinaryStreamWriter _writer;
+        private readonly IBinaryStreamWriter _writer;
         private readonly Dictionary<string, uint> _strings = new();
 
         /// <summary>
@@ -51,7 +52,10 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
         public void ImportStream(UserStringsStream stream)
         {
             MetadataStreamBufferHelper.CloneBlobHeap(stream, _writer, (index, newIndex) =>
-                _strings[stream.GetStringByIndex(index)] = newIndex);
+            {
+                if (stream.GetStringByIndex(index) is { } str)
+                    _strings[str] = newIndex;
+            });
         }
 
         /// <summary>
@@ -70,7 +74,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
             return offset;
         }
 
-        private uint AppendString(string value)
+        private uint AppendString(string? value)
         {
             uint offset = (uint) _rawStream.Length;
 
@@ -97,7 +101,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
         /// </summary>
         /// <param name="value">The user-string to lookup or add.</param>
         /// <returns>The index of the user-string.</returns>
-        public uint GetStringIndex(string value)
+        public uint GetStringIndex(string? value)
         {
             if (value is null)
                 return 0;

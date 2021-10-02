@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace AsmResolver
+namespace AsmResolver.IO
 {
     /// <summary>
     /// Provides methods for writing data to a binary stream.
@@ -92,10 +92,12 @@ namespace AsmResolver
         /// </summary>
         /// <param name="value">The 64-bit floating point number to write.</param>
         void WriteDouble(double value);
-
     }
 
-    public static partial class Extensions
+    /// <summary>
+    /// Provides extension methods to various I/O interfaces in AsmResolver.
+    /// </summary>
+    public static partial class IOExtensions
     {
         /// <summary>
         /// Writes a buffer of data to the stream.
@@ -119,13 +121,13 @@ namespace AsmResolver
                 writer.WriteUInt64(0);
                 count -= sizeof(ulong);
             }
-            
+
             while (count >= sizeof(uint))
             {
                 writer.WriteUInt32(0);
                 count -= sizeof(uint);
             }
-            
+
             while (count >= sizeof(ushort))
             {
                 writer.WriteUInt16(0);
@@ -181,7 +183,7 @@ namespace AsmResolver
                     throw new ArgumentOutOfRangeException(nameof(size), size, null);
             }
         }
-        
+
         /// <summary>
         /// Compresses and writes an unsigned integer to the stream.
         /// </summary>
@@ -212,15 +214,33 @@ namespace AsmResolver
         /// </summary>
         /// <param name="writer">The writer to use.</param>
         /// <param name="value">The string to write.</param>
-        public static void WriteSerString(this IBinaryStreamWriter writer, string value)
+        public static void WriteSerString(this IBinaryStreamWriter writer, string? value)
         {
-            if (value == null)
+            if (value is null)
             {
                 writer.WriteByte(0xFF);
                 return;
             }
 
-            var bytes = Encoding.UTF8.GetBytes(value);
+            byte[] bytes = Encoding.UTF8.GetBytes(value);
+            writer.WriteCompressedUInt32((uint)bytes.Length);
+            writer.WriteBytes(bytes);
+        }
+
+        /// <summary>
+        /// Writes an UTF8 string to the stream.
+        /// </summary>
+        /// <param name="writer">The writer to use.</param>
+        /// <param name="value">The string to write.</param>
+        public static void WriteSerString(this IBinaryStreamWriter writer, Utf8String? value)
+        {
+            if (value is null)
+            {
+                writer.WriteByte(0xFF);
+                return;
+            }
+
+            byte[] bytes = value.GetBytesUnsafe();
             writer.WriteCompressedUInt32((uint)bytes.Length);
             writer.WriteBytes(bytes);
         }

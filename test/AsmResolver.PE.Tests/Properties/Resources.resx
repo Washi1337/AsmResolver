@@ -54,4 +54,10 @@
     <data name="SEHSamples" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\SEHSamples.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="UnmanagedExports_x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\UnmanagedExports.x32.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="UnmanagedExports_x64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\UnmanagedExports.x64.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
 </root>

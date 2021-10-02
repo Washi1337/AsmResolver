@@ -1,10 +1,11 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources.Version
 {
     /// <summary>
     /// Represents the organization of data in a file-version resource. It is the root structure that contains
-    /// all other file-version information structures. 
+    /// all other file-version information structures.
     /// </summary>
     public class FixedVersionInfo : SegmentBase
     {
@@ -12,15 +13,15 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// The signature value a FixedVersionInfo structure starts with.
         /// </summary>
         public const uint Signature = 0xFEEF04BD;
-        
+
         internal const uint DefaultStructVersion = 0x00010000;
-        
+
         /// <summary>
         /// Reads a single fixed version info structure from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The read structure.</returns>
-        public static FixedVersionInfo FromReader(IBinaryStreamReader reader)
+        public static FixedVersionInfo FromReader(ref BinaryStreamReader reader)
         {
             var result = new FixedVersionInfo();
             result.UpdateOffsets(reader.Offset, reader.Rva);
@@ -30,20 +31,20 @@ namespace AsmResolver.PE.Win32Resources.Version
                 throw new FormatException($"Input stream does not point to a valid FixedVersionInfo structure.");
 
             uint structVersion = reader.ReadUInt32();
-            
-            result.FileVersion = ReadVersion(reader);
-            result.ProductVersion = ReadVersion(reader);
+
+            result.FileVersion = ReadVersion(ref reader);
+            result.ProductVersion = ReadVersion(ref reader);
             result.FileFlagsMask = (FileFlags) reader.ReadUInt32();
             result.FileFlags = (FileFlags) reader.ReadUInt32();
             result.FileOS = (FileOS) reader.ReadUInt32();
             result.FileType = (FileType) reader.ReadUInt32();
             result.FileSubType = (FileSubType) reader.ReadUInt32();
             result.FileDate = reader.ReadUInt64();
-            
+
             return result;
         }
 
-        private static System.Version ReadVersion(IBinaryStreamReader reader)
+        private static System.Version ReadVersion(ref BinaryStreamReader reader)
         {
             ushort minor = reader.ReadUInt16();
             ushort major = reader.ReadUInt16();
@@ -60,7 +61,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         {
             get;
             set;
-        } = new System.Version();
+        } = new();
 
         /// <summary>
         /// Gets or sets the product version number.
@@ -69,7 +70,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         {
             get;
             set;
-        } = new System.Version();
+        } = new();
 
         /// <summary>
         /// Gets or sets the bitmask that specifies the valid bits in <see cref="FileFlags"/>.
@@ -91,7 +92,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         }
 
         /// <summary>
-        /// Gets or ses the operating system for which this file was designed. 
+        /// Gets or ses the operating system for which this file was designed.
         /// </summary>
         public FileOS FileOS
         {
@@ -128,7 +129,7 @@ namespace AsmResolver.PE.Win32Resources.Version
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() =>
-            sizeof(uint) // Signature 
+            sizeof(uint) // Signature
             + sizeof(uint) // StructVersion
             + sizeof(ushort) * 4 // FileVersion
             + sizeof(ushort) * 4 // ProductVersion

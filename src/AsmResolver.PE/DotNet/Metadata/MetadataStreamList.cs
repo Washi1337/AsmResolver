@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.Collections;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -9,9 +10,9 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class MetadataStreamList : LazyList<IMetadataStream>
     {
         private readonly PEReaderContext _context;
-        private readonly IBinaryStreamReader _directoryReader;
-        private readonly IBinaryStreamReader _entriesReader;
         private readonly int _numberOfStreams;
+        private BinaryStreamReader _directoryReader;
+        private BinaryStreamReader _entriesReader;
 
         /// <summary>
         /// Prepares a new lazy-initialized metadata stream list.
@@ -22,33 +23,36 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="numberOfStreams">The number of streams.</param>
         public MetadataStreamList(
             PEReaderContext context,
-            IBinaryStreamReader directoryReader, 
-            IBinaryStreamReader entriesReader, 
+            in BinaryStreamReader directoryReader,
+            in BinaryStreamReader entriesReader,
             int numberOfStreams)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _directoryReader = directoryReader ?? throw new ArgumentNullException(nameof(directoryReader));
-            _entriesReader = entriesReader ?? throw new ArgumentNullException(nameof(entriesReader));
+            _directoryReader = directoryReader;
+            _entriesReader = entriesReader;
             _numberOfStreams = numberOfStreams;
         }
 
         /// <inheritdoc />
-        public override int Count => IsInitialized ? Items.Count : _numberOfStreams; 
+        public override int Count => IsInitialized ? Items.Count : _numberOfStreams;
 
         /// <inheritdoc />
         protected override void Initialize()
         {
             var headers = new MetadataStreamHeader[_numberOfStreams];
             for (int i = 0; i < _numberOfStreams; i++)
-                headers[i] = MetadataStreamHeader.FromReader(_entriesReader);
+                headers[i] = MetadataStreamHeader.FromReader(ref _entriesReader);
 
             for (int i = 0; i < _numberOfStreams; i++)
             {
                 var header = headers[i];
-                var streamReader = _directoryReader.Fork(_directoryReader.Offset + header.Offset, headers[i].Size);
-                Items.Add(_context.Parameters.MetadataStreamReader.ReadStream(_context, header, streamReader));
+
+                var streamReader = _directoryReader.ForkAbsolute(_directoryReader.Offset + header.Offset, headers[i].Size);
+                var stream = _context.Parameters.MetadataStreamReader.ReadStream(_context, header, ref streamReader);
+
+                Items.Add(stream);
             }
         }
-        
+
     }
 }

@@ -45,6 +45,12 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         /// <summary>
+        /// Gets or sets a reference to a row in the metadata table.
+        /// </summary>
+        /// <param name="rid">The identifier of the metadata row.</param>
+        ref TRow GetRowRef(uint rid);
+
+        /// <summary>
         /// Adds a row to the metadata table.
         /// </summary>
         /// <param name="row">The row to add.</param>

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
@@ -18,22 +19,23 @@ namespace AsmResolver.DotNet.Serialized
         private readonly LazyRidListRelation<PropertyMapRow> _propertyLists;
         private readonly LazyRidListRelation<EventMapRow> _eventLists;
 
-        private OneToManyRelation<uint, uint> _typeDefTree;
-        private OneToManyRelation<MetadataToken, uint> _semantics;
-        private Dictionary<uint, MetadataToken> _semanticMethods;
-        private OneToOneRelation<MetadataToken, uint> _constants;
-        private OneToManyRelation<MetadataToken, uint> _customAttributes;
-        private OneToManyRelation<MetadataToken, uint> _securityDeclarations;
-        private OneToManyRelation<MetadataToken, uint> _genericParameters;
-        private OneToManyRelation<MetadataToken, uint> _genericParameterConstraints;
-        private OneToManyRelation<MetadataToken, uint> _interfaces;
-        private OneToManyRelation<MetadataToken, uint> _methodImplementations;
-        private OneToOneRelation<MetadataToken, uint> _classLayouts;
-        private OneToOneRelation<MetadataToken, uint> _implementationMaps;
-        private OneToOneRelation<MetadataToken, uint> _fieldRvas;
-        private OneToOneRelation<MetadataToken, uint> _fieldMarshals;
-        private OneToOneRelation<MetadataToken, uint> _fieldLayouts;
+        private OneToManyRelation<uint, uint>? _typeDefTree;
+        private OneToManyRelation<MetadataToken, uint>? _semantics;
+        private Dictionary<uint, MetadataToken>? _semanticMethods;
+        private OneToOneRelation<MetadataToken, uint>? _constants;
+        private OneToManyRelation<MetadataToken, uint>? _customAttributes;
+        private OneToManyRelation<MetadataToken, uint>? _securityDeclarations;
+        private OneToManyRelation<MetadataToken, uint>? _genericParameters;
+        private OneToManyRelation<MetadataToken, uint>? _genericParameterConstraints;
+        private OneToManyRelation<MetadataToken, uint>? _interfaces;
+        private OneToManyRelation<MetadataToken, uint>? _methodImplementations;
+        private OneToOneRelation<MetadataToken, uint>? _classLayouts;
+        private OneToOneRelation<MetadataToken, uint>? _implementationMaps;
+        private OneToOneRelation<MetadataToken, uint>? _fieldRvas;
+        private OneToOneRelation<MetadataToken, uint>? _fieldMarshals;
+        private OneToOneRelation<MetadataToken, uint>? _fieldLayouts;
 
+        [MemberNotNull(nameof(_typeDefTree))]
         private void EnsureTypeDefinitionTreeInitialized()
         {
             if (_typeDefTree is null)
@@ -42,7 +44,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToManyRelation<uint, uint> InitializeTypeDefinitionTree()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var nestedClassTable = tablesStream.GetTable<NestedClassRow>(TableIndex.NestedClass);
 
             var typeDefTree = new OneToManyRelation<uint, uint>();
@@ -84,15 +86,19 @@ namespace AsmResolver.DotNet.Serialized
 
         internal uint GetEventDeclaringType(uint eventRid) => _eventLists.GetMemberOwner(eventRid);
 
+        [MemberNotNull(nameof(_semantics))]
+        [MemberNotNull(nameof(_semanticMethods))]
         private void EnsureMethodSemanticsInitialized()
         {
-            if (_semantics is null)
+            if (_semantics is null || _semanticMethods is null)
                 InitializeMethodSemantics();
         }
 
+        [MemberNotNull(nameof(_semantics))]
+        [MemberNotNull(nameof(_semanticMethods))]
         private void InitializeMethodSemantics()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var semanticsTable = tablesStream.GetTable<MethodSemanticsRow>(TableIndex.MethodSemantics);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
 
@@ -131,6 +137,7 @@ namespace AsmResolver.DotNet.Serialized
             return token;
         }
 
+        [MemberNotNull(nameof(_constants))]
         private void EnsureConstantsInitialized()
         {
             if (_constants is null)
@@ -139,7 +146,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToOneRelation<MetadataToken, uint> GetConstants()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var constantTable = tablesStream.GetTable<ConstantRow>(TableIndex.Constant);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasConstant);
 
@@ -160,7 +167,7 @@ namespace AsmResolver.DotNet.Serialized
             return _constants.GetValue(ownerToken);
         }
 
-        internal Constant GetConstant(MetadataToken ownerToken)
+        internal Constant? GetConstant(MetadataToken ownerToken)
         {
             uint constantRid = GetConstantRid(ownerToken);
             return TryLookupMember(new MetadataToken(TableIndex.Constant, constantRid), out var member)
@@ -174,6 +181,7 @@ namespace AsmResolver.DotNet.Serialized
             return _constants.GetKey(constantRid);
         }
 
+        [MemberNotNull(nameof(_customAttributes))]
         private void EnsureCustomAttributesInitialized()
         {
             if (_customAttributes is null)
@@ -182,7 +190,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToManyRelation<MetadataToken, uint> InitializeCustomAttributes()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var attributeTable = tablesStream.GetTable<CustomAttributeRow>(TableIndex.CustomAttribute);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
 
@@ -226,6 +234,7 @@ namespace AsmResolver.DotNet.Serialized
             return result;
         }
 
+        [MemberNotNull(nameof(_securityDeclarations))]
         private void EnsureSecurityDeclarationsInitialized()
         {
             if (_securityDeclarations is null)
@@ -234,7 +243,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToManyRelation<MetadataToken, uint> InitializeSecurityDeclarations()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var declarationTable = tablesStream.GetTable<SecurityDeclarationRow>(TableIndex.DeclSecurity);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasDeclSecurity);
 
@@ -251,7 +260,7 @@ namespace AsmResolver.DotNet.Serialized
 
         internal MetadataToken GetSecurityDeclarationOwner(uint attributeRid)
         {
-            EnsureCustomAttributesInitialized();
+            EnsureSecurityDeclarationsInitialized();
             return _securityDeclarations.GetKey(attributeRid);
         }
 
@@ -269,6 +278,7 @@ namespace AsmResolver.DotNet.Serialized
             return result;
         }
 
+        [MemberNotNull(nameof(_genericParameters))]
         private void EnsureGenericParametersInitialized()
         {
             if (_genericParameters is null)
@@ -277,7 +287,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToManyRelation<MetadataToken, uint> InitializeGenericParameters()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var parameterTable = tablesStream.GetTable<GenericParameterRow>(TableIndex.GenericParam);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
 
@@ -304,6 +314,7 @@ namespace AsmResolver.DotNet.Serialized
             return _genericParameters.GetValues(ownerToken);
         }
 
+        [MemberNotNull(nameof(_genericParameterConstraints))]
         private void EnsureGenericParameterConstrainsInitialized()
         {
             if (_genericParameterConstraints is null)
@@ -312,7 +323,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToManyRelation<MetadataToken, uint> InitializeGenericParameterConstraints()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var constraintTable = tablesStream.GetTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint);
 
             var constraints = new OneToManyRelation<MetadataToken, uint>();
@@ -338,6 +349,7 @@ namespace AsmResolver.DotNet.Serialized
             return _genericParameterConstraints.GetValues(ownerToken);
         }
 
+        [MemberNotNull(nameof(_interfaces))]
         private void EnsureInterfacesInitialized()
         {
             if (_interfaces is null)
@@ -346,7 +358,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToManyRelation<MetadataToken, uint> InitializeInterfaces()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var interfaceImplTable = tablesStream.GetTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl);
 
             var interfaces = new OneToManyRelation<MetadataToken, uint>();
@@ -372,6 +384,7 @@ namespace AsmResolver.DotNet.Serialized
             return _interfaces.GetValues(ownerToken);
         }
 
+        [MemberNotNull(nameof(_methodImplementations))]
         private void EnsureMethodImplementationsInitialized()
         {
             if (_methodImplementations is null)
@@ -380,7 +393,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToManyRelation<MetadataToken, uint> InitializeMethodImplementations()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var methodImplTable = tablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
 
             var methodImplementations = new OneToManyRelation<MetadataToken, uint>();
@@ -400,6 +413,7 @@ namespace AsmResolver.DotNet.Serialized
             return _methodImplementations.GetValues(ownerToken);
         }
 
+        [MemberNotNull(nameof(_classLayouts))]
         private void EnsureClassLayoutsInitialized()
         {
             if (_classLayouts is null)
@@ -408,7 +422,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToOneRelation<MetadataToken, uint> InitializeClassLayouts()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var layoutTable = tablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);
 
             var layouts = new OneToOneRelation<MetadataToken, uint>();
@@ -428,6 +442,7 @@ namespace AsmResolver.DotNet.Serialized
             return _classLayouts.GetValue(ownerToken);
         }
 
+        [MemberNotNull(nameof(_implementationMaps))]
         private void EnsureImplementationMapsInitialized()
         {
             if (_implementationMaps is null)
@@ -436,7 +451,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToOneRelation<MetadataToken, uint> InitializeImplementationMaps()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var mapTable = tablesStream.GetTable<ImplementationMapRow>(TableIndex.ImplMap);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
 
@@ -463,6 +478,7 @@ namespace AsmResolver.DotNet.Serialized
             return _implementationMaps.GetKey(mapRid);
         }
 
+        [MemberNotNull(nameof(_fieldRvas))]
         private void EnsureFieldRvasInitialized()
         {
             if (_fieldRvas is null)
@@ -471,7 +487,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToOneRelation<MetadataToken, uint> InitializeFieldRvas()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var rvaTable = tablesStream.GetTable<FieldRvaRow>(TableIndex.FieldRva);
 
             var rvas = new OneToOneRelation<MetadataToken, uint>();
@@ -491,6 +507,7 @@ namespace AsmResolver.DotNet.Serialized
             return _fieldRvas.GetValue(fieldToken);
         }
 
+        [MemberNotNull(nameof(_fieldMarshals))]
         private void EnsureFieldMarshalsInitialized()
         {
             if (_fieldMarshals is null)
@@ -499,7 +516,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToOneRelation<MetadataToken, uint> InitializeFieldMarshals()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var marshalTable = tablesStream.GetTable<FieldMarshalRow>(TableIndex.FieldMarshal);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasFieldMarshal);
 
@@ -520,26 +537,24 @@ namespace AsmResolver.DotNet.Serialized
             return _fieldMarshals.GetValue(fieldToken);
         }
 
-        internal MarshalDescriptor GetFieldMarshal(MetadataToken ownerToken)
+        internal MarshalDescriptor? GetFieldMarshal(MetadataToken ownerToken)
         {
-            var metadata = DotNetDirectory.Metadata;
+            var metadata = DotNetDirectory.Metadata!;
             var table = metadata
                 .GetStream<TablesStream>()
                 .GetTable<FieldMarshalRow>(TableIndex.FieldMarshal);
 
-            uint rid = GetFieldMarshalRid(ownerToken);
-
-            if (table.TryGetByRid(rid, out var row))
+            if (!metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !table.TryGetByRid(GetFieldMarshalRid(ownerToken), out var row)
+                || !blobStream.TryGetBlobReaderByIndex(row.NativeType, out var reader))
             {
-                var reader = metadata
-                    .GetStream<BlobStream>()
-                    .GetBlobReaderByIndex(row.NativeType);
-                return MarshalDescriptor.FromReader(this, reader);
+                return null;
             }
 
-            return null;
+            return MarshalDescriptor.FromReader(this, ref reader);
         }
 
+        [MemberNotNull(nameof(_fieldLayouts))]
         private void EnsureFieldLayoutsInitialized()
         {
             if (_fieldLayouts is null)
@@ -548,7 +563,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToOneRelation<MetadataToken, uint> InitializeFieldLayouts()
         {
-            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var layoutTable = tablesStream.GetTable<FieldLayoutRow>(TableIndex.FieldLayout);
 
             var fieldLayouts = new OneToOneRelation<MetadataToken, uint>();

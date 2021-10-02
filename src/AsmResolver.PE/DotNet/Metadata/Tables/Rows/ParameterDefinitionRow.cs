@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the parameter definition metadata table.
     /// </summary>
-    public readonly struct ParameterDefinitionRow : IMetadataRow
+    public struct ParameterDefinitionRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single parameter definition row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the parameter definition table.</param>
         /// <returns>The row.</returns>
-        public static ParameterDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static ParameterDefinitionRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new ParameterDefinitionRow(
                 (ParameterAttributes) reader.ReadUInt16(),
@@ -24,7 +25,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Creates a new row for the parameter definition metadata table. 
+        /// Creates a new row for the parameter definition metadata table.
         /// </summary>
         /// <param name="attributes">The attributes associated to the parameter.</param>
         /// <param name="sequence">The index of the parameter definition.</param>
@@ -52,23 +53,25 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the parameter.
+        /// Gets or sets the attributes associated to the parameter.
         /// </summary>
         public ParameterAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the index of the parameter definition.
+        /// Gets or sets the index of the parameter definition.
         /// </summary>
         public ushort Sequence
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the name of the type reference.
+        /// Gets or sets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
         /// <remarks>
         /// If this value is zero, the parameter name is considered <c>null</c>.
@@ -76,6 +79,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Name
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

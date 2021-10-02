@@ -24,7 +24,7 @@ To access the metadata directory, access the ``IDotNetDirectory.Metadata`` prope
 
 .. code-block:: csharp
 
-    IMetadata metadata = peImage.DotNetDirectory.Metadata;
+    var metadata = peImage.DotNetDirectory.Metadata;
 
     Console.WriteLine("Metadata file format version: {0}.{1}", metadata.MajorVersion, metadata.MinorVersion);
     Console.WriteLine("Target .NET runtime version: " + metadata.VersionString);
@@ -68,7 +68,7 @@ AsmResolver supports parsing streams using the names in the table below. Any str
 | ``#US``                   | ``UserStringsStream``  |
 +---------------------------+------------------------+
 
-Some streams support reading the raw contents using a ``IBinaryStreamReader``. Effectively, every stream that was read from the disk is readable in this way. Below an example of a program that dumps for each readable stream the contents to a file on the disk:
+Some streams support reading the raw contents using a ``BinaryStreamReader``. Effectively, every stream that was read from the disk is readable in this way. Below an example of a program that dumps for each readable stream the contents to a file on the disk:
 
 .. code-block:: csharp
 
@@ -122,15 +122,15 @@ Example:
     var stringsStream = metadata.GetStream<StringsStream>();
     string value = stringsStream.GetStringByIndex(0x1234);
 
-Since blobs in the blob stream have a specific format, just obtaining the `byte[]` of a blob might not be all that useful. Therefore, the ``BlobStream`` has an extra ``GetBlobReaderByIndex`` method, that allows for parsing each blob using an ``IBinaryStreamReader`` object instead:
-
+Since blobs in the blob stream have a specific format, just obtaining the ``byte[]`` of a blob might not be all that useful. Therefore, the ``BlobStream`` has an extra ``GetBlobReaderByIndex`` method, that allows for parsing each blob using an ``BinaryStreamReader`` object instead. If performance is critical, the ``GetBlobReaderByIndex`` method is preferred over ``GetBlobByIndex``, as this method also avoids an allocation of a temporary buffer as well.
 
 .. code-block:: csharp
 
     var blobStream = metadata.GetStream<BlobStream>();
-    var reader = blobStream.GetBlobReaderByIndex(0x1234);
-
-    // Use reader to parse the blob signature ...
+    if (blobStream.TryGetBlobReaderByIndex(0x1234, out var reader))
+    {
+        // Use reader to parse the blob signature ...
+    }
 
 Tables stream
 -------------
@@ -153,16 +153,16 @@ Tables can also be obtained by their row type:
 
     MetadataTable<TypeDefinitionRow> typeDefTable = tablesStream.GetTable<TypeDefinitionRow>();
 
-The latter option allows for a more type-safe interaction with the table as well, as each metadata table is associated with its own row structure. Below a table of all row definitions:
+The latter option is the preferred option, as it allows for a more type-safe interaction with the table as well and avoids boxing of each row in the table. Each metadata table is associated with its own row structure. Below a table of all row definitions:
 
 +-------------+-----------------------------+--------------------------------+
 | Table index | Name (as per specification) | AsmResolver row structure name |
 +=============+=============================+================================+
 | 0           | Module                      | ``ModuleDefinitionRow``        |
 +-------------+-----------------------------+--------------------------------+
-| 1           | TypeRef                     | ``TypeDefinitionRow``          |
+| 1           | TypeRef                     | ``TypeReferenceRow``           |
 +-------------+-----------------------------+--------------------------------+
-| 2           | TypeDef                     | ``TypeReferenceRow``           |
+| 2           | TypeDef                     | ``TypeDefinitionRow``          |
 +-------------+-----------------------------+--------------------------------+
 | 3           | FieldPtr                    | ``FieldPointerRow``            |
 +-------------+-----------------------------+--------------------------------+
@@ -255,8 +255,10 @@ Metadata tables are similar to normal ``ICollection<T>`` instances. They provide
 
     Console.WriteLine("Number of types: " + typeDefTable.Count);
 
-    TypeDefinitionRow firstType = typeDefTable[0];
+    // Get a single row.
+    TypeDefinitionRow firstTypeRow = typeDefTable[0];
 
+    // Iterate over all rows:
     foreach (var typeRow in typeDefTable)
     {
         // ...
@@ -294,7 +296,8 @@ Every row structure defined in AsmResolver respects the specification described 
 
 ``ISegmentReference`` exposes a method ``CreateReader()``, which automatically resolves the RVA that was stored in the row, and creates a new input stream that can be used to parse e.g. method bodies or field data.
 
-**Reading method bodies:**
+Reading method bodies:
+~~~~~~~~~~~~~~~~~~~~~~
 
 Reading a managed CIL method body can be done using ``CilRawMethodBody.FromReader`` method:
 
@@ -306,7 +309,8 @@ Reading a managed CIL method body can be done using ``CilRawMethodBody.FromReade
 
 It is important to note that the user is not bound to use ``CilRawMethodBody``. In the case that the ``Native`` (``0x0001``) flag is set in ``MethodDefinitionRow.ImplAttributes``, the implementation of the method body is not written in CIL, but using native code that uses an instruction set dependent on the platform that this application is targeting. Since the bounds of such a method body is not always well-defined, AsmResolver does not do any parsing on its own. However, using the ``CreateReader()`` method, it is still possible to decode instructions from this method body, using a custom instruction decoder.
 
-**Reading field data:**
+Reading field data:
+~~~~~~~~~~~~~~~~~~~
 
 Reading field data can be done in a similar fashion as reading method bodies. Again use the ``CreateReader()`` method to gain access to the raw data of the initial value of the field referenced by a **FieldRVA** row.
 
@@ -316,7 +320,8 @@ Reading field data can be done in a similar fashion as reading method bodies. Ag
     var firstRva = fieldRvaTable[0];
     var reader = firstRva.Data.CreateReader();
 
-**Creating new segment references:**
+Creating new segment references:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Creating new segment references not present in the current PE image yet can for example be done by creating an instance of ``SegmentReference``, which is a wrapper for any ``IReadableSegment`` object.
 
@@ -324,3 +329,26 @@ Creating new segment references not present in the current PE image yet can for 
 
     var myData = new DataSegment(new byte[] {1, 2, 3, 4});
     var fieldRva = new FieldRvaRow(new SegmentReference(myData), 0);
+
+
+
+.. _pe-typereference-hash:
+
+TypeReference Hash (TRH)
+------------------------
+
+Similar to the :ref:`pe-import-hash`, the TypeReference Hash (TRH) can be used to help identifying malware family written in a .NET language. However, unlike the Import Hash, the TRH is based on the names of all imported type references instead of the symbols specified in the imports directory of the PE. This is a more accurate representation for .NET images, as virtually every .NET image only uses one native symbol (either ``mscoree.dll!_CorExeMain`` or ``mscoree.dll!_CorDllMain``).
+
+AsmResolver includes a built-in implementation for this that is based on `the reference implementation provided by GData <https://www.gdatasoftware.com/blog/2020/06/36164-introducing-the-typerefhash-trh>`_. The hash can be obtained using the ``GetTypeReferenceHash`` extension method on ``IPEImage`` or on ``IMetadata``:
+
+.. code-block:: csharp
+
+    IPEImage image = ...
+    byte[] hash = image.GetTypeReferenceHash();
+
+    
+.. code-block:: csharp
+
+    IMetadata metadata = ...
+    byte[] hash = metadata.GetTypeReferenceHash();
+

@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures.Security
 {
@@ -17,12 +17,16 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input blob stream.</param>
         /// <returns>The security attribute.</returns>
-        public static SecurityAttribute FromReader(in BlobReadContext context, IBinaryStreamReader reader)
+        public static SecurityAttribute FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
-            var type = TypeNameParser.Parse(context.ReaderContext.ParentModule, reader.ReadSerString());
+            string? typeName = reader.ReadSerString();
+            var type = string.IsNullOrEmpty(typeName)
+                ? new TypeDefOrRefSignature(InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidFieldOrProptype))
+                : TypeNameParser.Parse(context.ReaderContext.ParentModule, typeName!);
+
             var result = new SecurityAttribute(type);
 
-            if (!reader.TryReadCompressedUInt32(out uint size))
+            if (!reader.TryReadCompressedUInt32(out uint _))
             {
                 context.ReaderContext.BadImage("Invalid size in security attribute.");
                 return result;
@@ -36,7 +40,7 @@ namespace AsmResolver.DotNet.Signatures.Security
 
             for (int i = 0; i < namedArgumentCount; i++)
             {
-                var argument = CustomAttributeNamedArgument.FromReader(context, reader);
+                var argument = CustomAttributeNamedArgument.FromReader(context, ref reader);
                 result.NamedArguments.Add(argument);
             }
 
@@ -62,7 +66,7 @@ namespace AsmResolver.DotNet.Signatures.Security
         }
 
         /// <summary>
-        /// Gets the list of named arguments used for instantiating the attribute. 
+        /// Gets the list of named arguments used for instantiating the attribute.
         /// </summary>
         public IList<CustomAttributeNamedArgument> NamedArguments
         {
@@ -76,17 +80,7 @@ namespace AsmResolver.DotNet.Signatures.Security
         {
             var writer = context.Writer;
 
-            string attributeTypeString;
-            if (AttributeType is null)
-            {
-                context.DiagnosticBag.RegisterException(new NullReferenceException(
-                    "Attribute type of security attribute is null."));
-                attributeTypeString = null;
-            }
-            else
-            {
-                attributeTypeString = TypeNameBuilder.GetAssemblyQualifiedName(AttributeType);
-            }
+            string attributeTypeString = TypeNameBuilder.GetAssemblyQualifiedName(AttributeType);
             writer.WriteSerString(attributeTypeString);
 
             if (NamedArguments.Count == 0)
@@ -98,9 +92,9 @@ namespace AsmResolver.DotNet.Signatures.Security
             {
                 using var subBlob = new MemoryStream();
                 var subContext = new BlobSerializationContext(
-                    new BinaryStreamWriter(subBlob), 
+                    new BinaryStreamWriter(subBlob),
                     context.IndexProvider,
-                    context.DiagnosticBag);
+                    context.ErrorListener);
 
                 subContext.Writer.WriteCompressedUInt32((uint) NamedArguments.Count);
                 foreach (var argument in NamedArguments)
@@ -110,7 +104,7 @@ namespace AsmResolver.DotNet.Signatures.Security
                 writer.WriteBytes(subBlob.ToArray());
             }
         }
-        
+
 
         /// <inheritdoc />
         public override string ToString() =>

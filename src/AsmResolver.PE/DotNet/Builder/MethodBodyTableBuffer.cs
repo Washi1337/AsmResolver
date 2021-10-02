@@ -1,3 +1,4 @@
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.PE.DotNet.Builder
@@ -7,11 +8,11 @@ namespace AsmResolver.PE.DotNet.Builder
     /// </summary>
     public class MethodBodyTableBuffer : ISegment
     {
-        private readonly SegmentBuilder _tinyBodies = new SegmentBuilder();
-        private readonly SegmentBuilder _fatBodies = new SegmentBuilder();
-        private readonly SegmentBuilder _nativeBodies = new SegmentBuilder();
-        
-        private readonly SegmentBuilder _segments = new SegmentBuilder();
+        private readonly SegmentBuilder _tinyBodies = new();
+        private readonly SegmentBuilder _fatBodies = new();
+        private readonly SegmentBuilder _nativeBodies = new();
+
+        private readonly SegmentBuilder _segments = new();
 
         /// <summary>
         /// Creates a new method body table buffer.
@@ -50,7 +51,7 @@ namespace AsmResolver.PE.DotNet.Builder
         /// <param name="body">The method body to add.</param>
         /// <param name="alignment">The byte-boundary to align the body to.</param>
         public void AddNativeBody(ISegment body, uint alignment) => _nativeBodies.Add(body, alignment);
-        
+
         /// <inheritdoc />
         public void UpdateOffsets(ulong newOffset, uint newRva) => _segments.UpdateOffsets(newOffset, newRva);
 

@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Tests
 {
@@ -8,7 +9,7 @@ namespace AsmResolver.PE.Tests
         {
             Rva = rva;
         }
-        
+
         ulong IOffsetProvider.Offset => Rva;
 
         public uint Rva
@@ -24,8 +25,8 @@ namespace AsmResolver.PE.Tests
 
         bool ISegmentReference.IsBounded => false;
 
-        IBinaryStreamReader ISegmentReference.CreateReader() => throw new InvalidOperationException();
-        
-        public ISegment GetSegment() => throw new InvalidOperationException();
+        BinaryStreamReader ISegmentReference.CreateReader() => throw new InvalidOperationException();
+
+        public ISegment? GetSegment() => throw new InvalidOperationException();
     }
 }

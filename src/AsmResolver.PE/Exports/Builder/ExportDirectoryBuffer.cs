@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Exports.Builder
 {
@@ -24,13 +26,13 @@ namespace AsmResolver.PE.Exports.Builder
                 + sizeof(uint) // NamePointerRVA
                 + sizeof(uint) // OrdinalTableRVA
             ;
-        
+
         private readonly SegmentBuilder _contentsBuilder;
         private readonly ExportAddressTableBuffer _addressTableBuffer;
         private readonly OrdinalNamePointerTableBuffer _ordinalNamePointerTable;
         private readonly NameTableBuffer _nameTableBuffer;
-        
-        private IExportDirectory _exportDirectory;
+
+        private IExportDirectory? _exportDirectory;
 
         /// <summary>
         /// Creates a new empty export directory buffer.
@@ -53,6 +55,7 @@ namespace AsmResolver.PE.Exports.Builder
         /// <summary>
         /// Gets a value indicating whether the export directory buffer is empty or not.
         /// </summary>
+        [MemberNotNullWhen(false, nameof(_exportDirectory))]
         public bool IsEmpty => _exportDirectory is null;
 
         /// <summary>
@@ -64,10 +67,10 @@ namespace AsmResolver.PE.Exports.Builder
         {
             if (!IsEmpty)
                 throw new InvalidProgramException("Cannot add a secondary export directory to the buffer.");
-            
+
             // Set header.
             _exportDirectory = exportDirectory;
-            
+
             // Add contents.
             _nameTableBuffer.AddName(exportDirectory.Name);
             foreach (var symbol in exportDirectory.Entries)
@@ -78,7 +81,7 @@ namespace AsmResolver.PE.Exports.Builder
                     _nameTableBuffer.AddName(symbol.Name);
             }
         }
-        
+
         /// <inheritdoc />
         public override void UpdateOffsets(ulong newOffset, uint newRva)
         {
@@ -95,9 +98,10 @@ namespace AsmResolver.PE.Exports.Builder
             WriteExportDirectoryHeader(writer);
             _contentsBuilder.Write(writer);
         }
-        
+
         private void WriteExportDirectoryHeader(IBinaryStreamWriter writer)
         {
+            _exportDirectory ??= new ExportDirectory(string.Empty);
             writer.WriteUInt32(_exportDirectory.ExportFlags);
             writer.WriteUInt32(_exportDirectory.TimeDateStamp);
             writer.WriteUInt16(_exportDirectory.MajorVersion);

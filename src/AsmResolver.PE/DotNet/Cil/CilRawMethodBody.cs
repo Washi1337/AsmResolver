@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -7,7 +8,11 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public abstract class CilRawMethodBody : SegmentBase
     {
-        private byte[] _code;
+        /// <inheritdoc />
+        protected CilRawMethodBody(IReadableSegment code)
+        {
+            Code = code;
+        }
 
         /// <summary>
         /// Gets a value indicating whether the method body is using the fat format.
@@ -20,10 +25,10 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// Gets or sets the raw bytes that make up the CIL code of the method body.
         /// </summary>
-        public byte[] Code
+        public IReadableSegment Code
         {
-            get => _code;
-            set => _code = value ?? throw new ArgumentNullException(nameof(value));
+            get;
+            set;
         }
 
         /// <summary>
@@ -34,15 +39,15 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The raw method body.</returns>
         /// <exception cref="NotSupportedException">Occurs when the method header indicates an invalid or unsupported
         /// method body format.</exception>
-        public static CilRawMethodBody FromReader(IErrorListener errorListener, IBinaryStreamReader reader)
+        public static CilRawMethodBody? FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
         {
             var flag = (CilMethodBodyAttributes) reader.ReadByte();
             reader.Offset--;
 
             if ((flag & CilMethodBodyAttributes.Fat) == CilMethodBodyAttributes.Fat)
-                return CilRawFatMethodBody.FromReader(errorListener, reader);
+                return CilRawFatMethodBody.FromReader(errorListener, ref reader);
             if ((flag & CilMethodBodyAttributes.Tiny) == CilMethodBodyAttributes.Tiny)
-                return CilRawTinyMethodBody.FromReader(errorListener, reader);
+                return CilRawTinyMethodBody.FromReader(errorListener, ref reader);
 
             throw new NotSupportedException("Invalid or unsupported method body format.");
         }

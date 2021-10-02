@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.Debug
 {
     /// <summary>
@@ -19,14 +21,14 @@ namespace AsmResolver.PE.Debug
                 + sizeof(uint) // PointerToRawData
             ;
 
-        private readonly LazyVariable<IDebugDataSegment> _contents;
+        private readonly LazyVariable<IDebugDataSegment?> _contents;
 
         /// <summary>
         /// Initializes an empty <see cref="DebugDataEntry"/> instance.
         /// </summary>
         protected DebugDataEntry()
         {
-            _contents = new LazyVariable<IDebugDataSegment>(GetContents);
+            _contents = new LazyVariable<IDebugDataSegment?>(GetContents);
         }
 
         /// <summary>
@@ -34,13 +36,12 @@ namespace AsmResolver.PE.Debug
         /// </summary>
         /// <param name="contents">The contents.</param>
         public DebugDataEntry(IDebugDataSegment contents)
-            : this()
         {
-            Contents = contents;
+            _contents = new LazyVariable<IDebugDataSegment?>(contents);
         }
 
         /// <summary>
-        /// Reserved, must be zero. 
+        /// Reserved, must be zero.
         /// </summary>
         public uint Characteristics
         {
@@ -49,7 +50,7 @@ namespace AsmResolver.PE.Debug
         }
 
         /// <summary>
-        /// Gets or sets the time and date that the debug data was created. 
+        /// Gets or sets the time and date that the debug data was created.
         /// </summary>
         public uint TimeDateStamp
         {
@@ -58,7 +59,7 @@ namespace AsmResolver.PE.Debug
         }
 
         /// <summary>
-        /// Gets or sets the major version number of the debug data format. 
+        /// Gets or sets the major version number of the debug data format.
         /// </summary>
         public ushort MajorVersion
         {
@@ -67,18 +68,18 @@ namespace AsmResolver.PE.Debug
         }
 
         /// <summary>
-        /// Gets or sets the minor version number of the debug data format. 
+        /// Gets or sets the minor version number of the debug data format.
         /// </summary>
         public ushort MinorVersion
         {
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the raw contents of the debug data entry.
         /// </summary>
-        public IDebugDataSegment Contents
+        public IDebugDataSegment? Contents
         {
             get => _contents.Value;
             set => _contents.Value = value;
@@ -91,7 +92,7 @@ namespace AsmResolver.PE.Debug
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Contents"/> property.
         /// </remarks>
-        protected virtual IDebugDataSegment GetContents() => null;
+        protected virtual IDebugDataSegment? GetContents() => null;
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => DebugDataEntryHeaderSize;

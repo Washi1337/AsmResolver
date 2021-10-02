@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -19,12 +19,12 @@ namespace AsmResolver.DotNet
         IHasConstant,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<TypeDefinition> _declaringType;
-        private readonly LazyVariable<PropertySignature> _signature;
-        private readonly LazyVariable<Constant> _constant;
-        private IList<MethodSemantics> _semantics;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<Utf8String?> _name;
+        private readonly LazyVariable<TypeDefinition?> _declaringType;
+        private readonly LazyVariable<PropertySignature?> _signature;
+        private readonly LazyVariable<Constant?> _constant;
+        private IList<MethodSemantics>? _semantics;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes a new property definition.
@@ -33,10 +33,10 @@ namespace AsmResolver.DotNet
         protected PropertyDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
-            _signature = new LazyVariable<PropertySignature>(GetSignature);
-            _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
-            _constant = new LazyVariable<Constant>(GetConstant);
+            _name = new LazyVariable<Utf8String?>(GetName);
+            _signature = new LazyVariable<PropertySignature?>(GetSignature);
+            _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
+            _constant = new LazyVariable<Constant?>(GetConstant);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the property.</param>
         /// <param name="attributes">The attributes.</param>
         /// <param name="signature">The signature of the property.</param>
-        public PropertyDefinition(string name, PropertyAttributes attributes, PropertySignature signature)
+        public PropertyDefinition(string? name, PropertyAttributes attributes, PropertySignature? signature)
             : this(new MetadataToken(TableIndex.Property,0))
         {
             Name = name;
@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets a value indicating the property uses a special name. 
+        /// Gets or sets a value indicating the property uses a special name.
         /// </summary>
         public bool IsSpecialName
         {
@@ -77,9 +77,9 @@ namespace AsmResolver.DotNet
         /// </summary>
         public bool IsRuntimeSpecialName
         {
-            get => (Attributes & PropertyAttributes.RtSpecialName) != 0;
-            set => Attributes = (Attributes & ~PropertyAttributes.RtSpecialName)
-                                | (value ? PropertyAttributes.RtSpecialName : 0);
+            get => (Attributes & PropertyAttributes.RuntimeSpecialName) != 0;
+            set => Attributes = (Attributes & ~PropertyAttributes.RuntimeSpecialName)
+                                | (value ? PropertyAttributes.RuntimeSpecialName : 0);
         }
 
 
@@ -93,12 +93,19 @@ namespace AsmResolver.DotNet
                                 | (value ? PropertyAttributes.HasDefault : 0);
         }
 
-        /// <inheritdoc />
-        public string Name
+        /// <summary>
+        /// Gets or sets the name of the property.
+        /// </summary>
+        /// <remarks>
+        /// This property corresponds to the Name column in the property definition table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <inheritdoc />
         public string FullName => FullNameGenerator.GetPropertyFullName(Name, DeclaringType, Signature);
@@ -107,27 +114,27 @@ namespace AsmResolver.DotNet
         /// Gets or sets the signature of the property. This includes the property type, as well as any parameters the
         /// property might define.
         /// </summary>
-        public PropertySignature Signature
+        public PropertySignature? Signature
         {
             get => _signature.Value;
             set => _signature.Value = value;
         }
 
         /// <inheritdoc />
-        public ModuleDefinition Module => DeclaringType?.Module;
+        public ModuleDefinition? Module => DeclaringType?.Module;
 
         /// <summary>
         /// Gets the type that defines the property.
         /// </summary>
-        public TypeDefinition DeclaringType
+        public TypeDefinition? DeclaringType
         {
             get => _declaringType.Value;
             private set => _declaringType.Value = value;
         }
 
-        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
+        ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
-        TypeDefinition IOwnedCollectionElement<TypeDefinition>.Owner
+        TypeDefinition? IOwnedCollectionElement<TypeDefinition>.Owner
         {
             get => DeclaringType;
             set => DeclaringType = value;
@@ -143,7 +150,7 @@ namespace AsmResolver.DotNet
                 return _semantics;
             }
         }
-        
+
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
@@ -156,30 +163,30 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public Constant Constant
+        public Constant? Constant
         {
             get => _constant.Value;
             set => _constant.Value = value;
         }
 
         /// <summary>
-        /// Gets the method definition representing the get accessor of this property definition. 
+        /// Gets the method definition representing the get accessor of this property definition.
         /// </summary>
-        public MethodDefinition GetMethod => 
+        public MethodDefinition? GetMethod =>
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Getter)?.Method;
 
         /// <summary>
-        /// Gets the method definition representing the set accessor of this property definition. 
+        /// Gets the method definition representing the set accessor of this property definition.
         /// </summary>
-        public MethodDefinition SetMethod => 
+        public MethodDefinition? SetMethod =>
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Setter)?.Method;
 
         /// <inheritdoc />
-        public bool IsAccessibleFromType(TypeDefinition type) => 
-            Semantics.Any(s => s.Method.IsAccessibleFromType(type));
+        public bool IsAccessibleFromType(TypeDefinition type) =>
+            Semantics.Any(s => s.Method?.IsAccessibleFromType(type) ?? false);
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
-        
+
         /// <summary>
         /// Obtains the name of the property definition.
         /// </summary>
@@ -187,7 +194,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the signature of the property definition.
@@ -196,7 +203,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Signature"/> property.
         /// </remarks>
-        protected virtual PropertySignature GetSignature() => null;
+        protected virtual PropertySignature? GetSignature() => null;
 
         /// <summary>
         /// Obtains the declaring type of the property definition.
@@ -205,7 +212,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="DeclaringType"/> property.
         /// </remarks>
-        protected virtual TypeDefinition GetDeclaringType() => null;
+        protected virtual TypeDefinition? GetDeclaringType() => null;
 
         /// <summary>
         /// Obtains the methods associated to this property definition.
@@ -234,7 +241,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Constant"/> property.
         /// </remarks>
-        protected virtual Constant GetConstant() => null;
+        protected virtual Constant? GetConstant() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;

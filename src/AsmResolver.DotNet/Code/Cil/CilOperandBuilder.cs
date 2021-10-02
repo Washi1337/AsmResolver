@@ -7,69 +7,69 @@ namespace AsmResolver.DotNet.Code.Cil
 {
     /// <summary>
     /// Provides a default implementation of the <see cref="ICilOperandBuilder"/> interface, that pulls metadata tokens
-    /// from a metadata buffer. 
+    /// from a metadata buffer.
     /// </summary>
     public class CilOperandBuilder : ICilOperandBuilder
     {
         private readonly IMetadataTokenProvider _provider;
-        private readonly DiagnosticBag _diagnosticBag;
+        private readonly IErrorListener _errorListener;
 
         /// <summary>
         /// Creates a new CIL operand builder that pulls metadata tokens from a mutable metadata buffer.
         /// </summary>
-        public CilOperandBuilder(IMetadataTokenProvider provider, DiagnosticBag diagnosticBag)
+        public CilOperandBuilder(IMetadataTokenProvider provider, IErrorListener errorListener)
         {
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
-            _diagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
+            _errorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
         }
 
         /// <inheritdoc />
-        public int GetVariableIndex(object operand)
+        public int GetVariableIndex(object? operand)
         {
             return operand switch
             {
                 CilLocalVariable localVariable => localVariable.Index,
                 byte raw => raw,
                 ushort raw => raw,
-                _ => _diagnosticBag.RegisterExceptionAndReturnDefault<int>(
+                _ => _errorListener.RegisterExceptionAndReturnDefault<int>(
                     new NotSupportedException($"Invalid or unsupported variable operand ({operand.SafeToString()})."))
             };
         }
 
         /// <inheritdoc />
-        public int GetArgumentIndex(object operand)
+        public int GetArgumentIndex(object? operand)
         {
             return operand switch
             {
                 Parameter parameter => parameter.MethodSignatureIndex,
                 byte raw => raw,
                 ushort raw => raw,
-                _ => _diagnosticBag.RegisterExceptionAndReturnDefault<int>(
+                _ => _errorListener.RegisterExceptionAndReturnDefault<int>(
                     new NotSupportedException($"Invalid or unsupported argument operand ({operand.SafeToString()})."))
             };
         }
 
         /// <inheritdoc />
-        public uint GetStringToken(object operand)
+        public uint GetStringToken(object? operand)
         {
             return operand switch
             {
                 string value => 0x70000000 | _provider.GetUserStringIndex(value),
                 uint raw => raw,
-                _ => _diagnosticBag.RegisterExceptionAndReturnDefault<uint>(
+                _ => _errorListener.RegisterExceptionAndReturnDefault<uint>(
                     new NotSupportedException($"Invalid or unsupported string operand ({operand.SafeToString()})."))
             };
         }
 
         /// <inheritdoc />
-        public MetadataToken GetMemberToken(object operand)
+        public MetadataToken GetMemberToken(object? operand)
         {
             return operand switch
             {
                 IMetadataMember member => GetMemberToken(member),
                 MetadataToken token => token,
                 uint raw => raw,
-                _ => _diagnosticBag.RegisterExceptionAndReturnDefault<uint>(
+                _ => _errorListener.RegisterExceptionAndReturnDefault<uint>(
                     new NotSupportedException($"Invalid or unsupported member operand ({operand.SafeToString()})."))
             };
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.Collections;
+using AsmResolver.IO;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
@@ -11,13 +12,12 @@ namespace AsmResolver.PE.Imports
     /// </summary>
     public class SerializedImportedModule : ImportedModule
     {
-        private readonly PEReaderContext _context;
-
         /// <summary>
         /// The amount of bytes a single entry uses in the import directory table.
         /// </summary>
         public const uint ModuleImportSize = 5 * sizeof(uint);
-        
+
+        private readonly PEReaderContext _context;
         private readonly uint _lookupRva;
         private readonly uint _addressRva;
 
@@ -26,9 +26,9 @@ namespace AsmResolver.PE.Imports
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
-        public SerializedImportedModule(PEReaderContext context, IBinaryStreamReader reader)
+        public SerializedImportedModule(PEReaderContext context, ref BinaryStreamReader reader)
         {
-            if (reader == null)
+            if (!reader.IsValid)
                 throw new ArgumentNullException(nameof(reader));
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
@@ -57,14 +57,14 @@ namespace AsmResolver.PE.Imports
             _lookupRva == 0
             && TimeDateStamp == 0
             && ForwarderChain == 0
-            && Name == null
+            && Name is null
             && _addressRva == 0;
 
         /// <inheritdoc />
         protected override IList<ImportedSymbol> GetSymbols()
         {
             var result = new OwnedCollection<IImportedModule, ImportedSymbol>(this);
-            
+
             if (IsEmpty)
                 return result;
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -11,7 +12,7 @@ namespace AsmResolver.PE.DotNet.Cil
     {
         private readonly IBinaryStreamWriter _writer;
         private readonly ICilOperandBuilder _operandBuilder;
-        private readonly string _diagnosticPrefix;
+        private readonly string? _diagnosticPrefix;
         private readonly IErrorListener _errorListener;
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace AsmResolver.PE.DotNet.Cil
         public CilAssembler(
             IBinaryStreamWriter writer,
             ICilOperandBuilder operandBuilder,
-            string methodBodyName,
+            string? methodBodyName,
             IErrorListener errorListener)
         {
             _writer = writer ?? throw new ArgumentNullException(nameof(writer));
@@ -124,7 +125,7 @@ namespace AsmResolver.PE.DotNet.Cil
                     break;
 
                 case CilOperandType.InlineSwitch:
-                    var labels = (IList<ICilLabel>) instruction.Operand;
+                    var labels = instruction.Operand as IList<ICilLabel> ?? Array.Empty<ICilLabel>();
                     _writer.WriteInt32(labels.Count);
 
                     int baseOffset = (int) _writer.Offset + labels.Count * sizeof(int);
@@ -242,7 +243,7 @@ namespace AsmResolver.PE.DotNet.Cil
             return ThrowInvalidOperandType<double>(instruction, typeof(double));
         }
 
-        private T ThrowInvalidOperandType<T>(CilInstruction instruction, Type expectedOperand)
+        private T? ThrowInvalidOperandType<T>(CilInstruction instruction, Type expectedOperand)
         {
             string found = instruction.Operand?.GetType().Name ?? "null";
             _errorListener.RegisterException(new ArgumentOutOfRangeException(
@@ -250,7 +251,7 @@ namespace AsmResolver.PE.DotNet.Cil
             return default;
         }
 
-        private T ThrowInvalidOperandType<T>(CilInstruction instruction, params Type[] expectedOperands)
+        private T? ThrowInvalidOperandType<T>(CilInstruction instruction, params Type[] expectedOperands)
         {
             string[] names = expectedOperands
                 .Select(o => o.Name)

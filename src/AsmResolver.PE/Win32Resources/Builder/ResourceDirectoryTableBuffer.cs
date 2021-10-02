@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources.Builder
 {
@@ -19,7 +20,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// <param name="dataEntryTable">The table containing the structures of each data entry.</param>
         public ResourceDirectoryTableBuffer(
             ISegment parentBuffer,
-            ResourceTableBuffer<string> nameTable, 
+            ResourceTableBuffer<string> nameTable,
             ResourceTableBuffer<IResourceData> dataEntryTable)
             : base(parentBuffer)
         {
@@ -31,7 +32,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         public override uint GetEntrySize(IResourceDirectory entry) =>
             SerializedResourceDirectory.ResourceDirectorySize
             + (uint) entry.Entries.Count * ResourceDirectoryEntry.EntrySize;
-        
+
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
@@ -39,7 +40,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
             {
                 if (entry.IsDirectory)
                     WriteDirectory(writer, (IResourceDirectory) entry);
-                else 
+                else
                     throw new ArgumentException("Directory table contains a data entry.");
             }
         }
@@ -63,7 +64,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         private void WriteEntry(IBinaryStreamWriter writer, IResourceEntry entry)
         {
             writer.WriteUInt32(entry.Name != null
-                ? _nameTable.GetEntryOffset(entry.Name) | 0x8000_0000 
+                ? _nameTable.GetEntryOffset(entry.Name) | 0x8000_0000
                 : entry.Id);
 
             writer.WriteUInt32(entry.IsDirectory

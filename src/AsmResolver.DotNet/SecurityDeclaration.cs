@@ -1,5 +1,4 @@
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Security;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -7,14 +6,14 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 namespace AsmResolver.DotNet
 {
     /// <summary>
-    /// Provides a set of security attributes assigned to a metadata member. 
+    /// Provides a set of security attributes assigned to a metadata member.
     /// </summary>
-    public class SecurityDeclaration : 
+    public class SecurityDeclaration :
         MetadataMember,
         IOwnedCollectionElement<IHasSecurityDeclaration>
     {
-        private readonly LazyVariable<IHasSecurityDeclaration> _parent;
-        private readonly LazyVariable<PermissionSetSignature> _permissionSet;
+        private readonly LazyVariable<IHasSecurityDeclaration?> _parent;
+        private readonly LazyVariable<PermissionSetSignature?> _permissionSet;
 
         /// <summary>
         /// Initializes the <see cref="SecurityDeclaration"/> with a metadata token.
@@ -23,8 +22,8 @@ namespace AsmResolver.DotNet
         protected SecurityDeclaration(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<IHasSecurityDeclaration>(GetParent);
-            _permissionSet = new LazyVariable<PermissionSetSignature>(GetPermissionSet);
+            _parent = new LazyVariable<IHasSecurityDeclaration?>(GetParent);
+            _permissionSet = new LazyVariable<PermissionSetSignature?>(GetPermissionSet);
         }
 
         /// <summary>
@@ -32,15 +31,15 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="action"></param>
         /// <param name="permissionSet"></param>
-        public SecurityDeclaration(SecurityAction action, PermissionSetSignature permissionSet)
+        public SecurityDeclaration(SecurityAction action, PermissionSetSignature? permissionSet)
             : this(new MetadataToken(TableIndex.DeclSecurity, 0))
         {
             Action = action;
             PermissionSet = permissionSet;
         }
-        
+
         /// <summary>
-        /// Gets the action that is applied. 
+        /// Gets the action that is applied.
         /// </summary>
         public SecurityAction Action
         {
@@ -51,14 +50,14 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the member that is assigned the permission set.
         /// </summary>
-        public IHasSecurityDeclaration Parent
+        public IHasSecurityDeclaration? Parent
         {
             get => _parent.Value;
             private set => _parent.Value = value;
         }
 
         /// <inheritdoc />
-        IHasSecurityDeclaration IOwnedCollectionElement<IHasSecurityDeclaration>.Owner
+        IHasSecurityDeclaration? IOwnedCollectionElement<IHasSecurityDeclaration>.Owner
         {
             get => Parent;
             set => Parent = value;
@@ -67,7 +66,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the collection of security attributes.
         /// </summary>
-        public PermissionSetSignature PermissionSet
+        public PermissionSetSignature? PermissionSet
         {
             get => _permissionSet.Value;
             set => _permissionSet.Value = value;
@@ -80,8 +79,8 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Parent"/> property.
         /// </remarks>
-        protected virtual IHasSecurityDeclaration GetParent() => null;
-        
+        protected virtual IHasSecurityDeclaration? GetParent() => null;
+
         /// <summary>
         /// Obtains the assigned permission set.
         /// </summary>
@@ -89,6 +88,6 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="PermissionSet"/> property.
         /// </remarks>
-        protected virtual PermissionSetSignature GetPermissionSet() => null;
+        protected virtual PermissionSetSignature? GetPermissionSet() => null;
     }
 }

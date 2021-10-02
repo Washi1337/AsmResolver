@@ -45,7 +45,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             }
 
             /// <inheritdoc />
-            public MetadataToken Current => new MetadataToken(_range.Table, _currentRid);
+            public MetadataToken Current => new(_range.Table, _currentRid);
 
             object IEnumerator.Current => Current;
 

@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the method specification metadata table.
     /// </summary>
-    public readonly struct MethodSpecificationRow : IMetadataRow
+    public struct MethodSpecificationRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single method specification row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the method specification table.</param>
         /// <returns>The row.</returns>
-        public static MethodSpecificationRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static MethodSpecificationRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new MethodSpecificationRow(
                 reader.ReadIndex((IndexSize) layout.Columns[0].Size),
@@ -48,19 +49,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the method definition table indicating the method to be instantiated.
+        /// Gets or sets an index into the method definition table indicating the method to be instantiated.
         /// </summary>
         public uint Method
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream referencing the instantiation parameters of the method.
+        /// Gets or sets an index into the #Blob stream referencing the instantiation parameters of the method.
         /// </summary>
         public uint Instantiation
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

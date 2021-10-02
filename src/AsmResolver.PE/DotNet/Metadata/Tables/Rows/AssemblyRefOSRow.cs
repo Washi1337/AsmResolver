@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the assembly reference operating system metadata table.
     /// </summary>
-    public readonly struct AssemblyRefOSRow : IMetadataRow
+    public struct AssemblyRefOSRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single assembly reference operating system row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the assembly reference operating system table.</param>
         /// <returns>The row.</returns>
-        public static AssemblyRefOSRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static AssemblyRefOSRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new AssemblyRefOSRow(
                 reader.ReadUInt32(),
@@ -23,7 +24,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadUInt32(),
                 reader.ReadIndex((IndexSize) layout.Columns[3].Size));
         }
-        
+
         /// <summary>
         /// Creates a new row for the assembly reference operating system metadata table.
         /// </summary>
@@ -39,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             MinorVersion = minorVersion;
             AssemblyReference = assemblyReference;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.AssemblyRefOS;
 
@@ -55,38 +56,42 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             3 => AssemblyReference,
             _ => throw new IndexOutOfRangeException()
         };
-        
+
         /// <summary>
-        /// Gets the identifier of the platform the assembly is targeting.
+        /// Gets or sets the identifier of the platform the assembly is targeting.
         /// </summary>
         public uint PlatformId
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the major version of the platform the assembly is targeting.
+        /// Gets or sets the major version of the platform the assembly is targeting.
         /// </summary>
         public uint MajorVersion
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the minor version of the platform the assembly is targeting.
+        /// Gets or sets the minor version of the platform the assembly is targeting.
         /// </summary>
         public uint MinorVersion
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the AssemblyRef table referencing the assembly reference that this operating system row
+        /// Gets or sets an index into the AssemblyRef table referencing the assembly reference that this operating system row
         /// was assigned to.
         /// </summary>
         public uint AssemblyReference
         {
             get;
+            set;
         }
 
         /// <inheritdoc />
@@ -129,7 +134,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 return hashCode;
             }
         }
-        
+
         /// <inheritdoc />
         public override string ToString()
         {

@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the assembly operating system metadata table.
     /// </summary>
-    public readonly struct AssemblyOSRow : IMetadataRow
+    public struct AssemblyOSRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single assembly operating system row from an input stream.
@@ -15,14 +16,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the assembly operating system table.</param>
         /// <returns>The row.</returns>
-        public static AssemblyOSRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static AssemblyOSRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new AssemblyOSRow(
                 reader.ReadUInt32(),
                 reader.ReadUInt32(),
                 reader.ReadUInt32());
         }
-        
+
         /// <summary>
         /// Creates a new row for the assembly operating system metadata table.
         /// </summary>
@@ -35,7 +36,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             MajorVersion = majorVersion;
             MinorVersion = minorVersion;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.AssemblyOS;
 
@@ -50,29 +51,32 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             2 => MinorVersion,
             _ => throw new IndexOutOfRangeException()
         };
-        
+
         /// <summary>
-        /// Gets the identifier of the platform the assembly is targeting.
+        /// Gets or sets the identifier of the platform the assembly is targeting.
         /// </summary>
         public uint PlatformId
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the major version of the platform the assembly is targeting.
+        /// Gets or sets the major version of the platform the assembly is targeting.
         /// </summary>
         public uint MajorVersion
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the minor version of the platform the assembly is targeting.
+        /// Gets or sets the minor version of the platform the assembly is targeting.
         /// </summary>
         public uint MinorVersion
         {
             get;
+            set;
         }
 
         /// <inheritdoc />
@@ -90,7 +94,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
         public bool Equals(AssemblyOSRow other)
         {
-            return PlatformId == other.PlatformId 
+            return PlatformId == other.PlatformId
                    && MajorVersion == other.MajorVersion
                    && MinorVersion == other.MinorVersion;
         }

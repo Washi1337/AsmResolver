@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the generic parameter metadata table.
     /// </summary>
-    public readonly struct GenericParameterConstraintRow : IMetadataRow
+    public struct GenericParameterConstraintRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single generic parameter row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the generic parameter table.</param>
         /// <returns>The row.</returns>
-        public static GenericParameterConstraintRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static GenericParameterConstraintRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new GenericParameterConstraintRow(
                 reader.ReadIndex((IndexSize) layout.Columns[0].Size),
@@ -49,11 +50,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the GenericParam table indicating the owner of the constraint.
+        /// Gets or sets an index into the GenericParam table indicating the owner of the constraint.
         /// </summary>
         public uint Owner
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -63,6 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Constraint
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="TypeReference"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedTypeReference : TypeReference
     {
@@ -32,31 +32,39 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetNamespace() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()?
-            .GetStringByIndex(_row.Namespace);
+        protected override Utf8String? GetNamespace()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Namespace)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()?
-            .GetStringByIndex(_row.Name);
+        protected override Utf8String? GetName()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override IResolutionScope GetScope()
+        protected override IResolutionScope? GetScope()
         {
             if (_row.ResolutionScope == 0)
                 return _context.ParentModule;
-            
-            var tablesStream = _context.Image.DotNetDirectory.Metadata.GetStream<TablesStream>();
+
+            var tablesStream = _context.Metadata.GetStream<TablesStream>();
             var decoder = tablesStream.GetIndexEncoder(CodedIndex.ResolutionScope);
             var token = decoder.DecodeIndex(_row.ResolutionScope);
 
-            return Module.LookupMember(token) as IResolutionScope;
+            return !_context.ParentModule.TryLookupMember(token, out var scope)
+                ? _context.BadImageAndReturn<IResolutionScope>($"Invalid resolution scope in type reference {MetadataToken}.")
+                : scope as IResolutionScope;
         }
-        
+
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
-   
+
     }
 }

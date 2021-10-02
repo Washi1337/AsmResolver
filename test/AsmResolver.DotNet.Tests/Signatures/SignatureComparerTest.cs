@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             Assert.NotEqual(module.CorLibTypeFactory.Byte, module.CorLibTypeFactory.Boolean, _comparer);
         }
-        
+
         [Fact]
         public void MatchTopLevelTypeRefTypeRef()
         {
@@ -62,10 +62,10 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var assembly = new AssemblyDefinition(_someAssemblyReference.Name, _someAssemblyReference.Version);
             var module = new ModuleDefinition(assembly.Name + ".dll");
             assembly.Modules.Add(module);
-            
+
             var definition = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public);
             module.TopLevelTypes.Add(definition);
-            
+
             var reference = new TypeReference(_someAssemblyReference, "SomeNamespace", "SomeType");
             Assert.Equal((ITypeDefOrRef) definition, reference, _comparer);
         }
@@ -76,10 +76,10 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var assembly = new AssemblyDefinition(_someAssemblyReference.Name + "2", _someAssemblyReference.Version);
             var module = new ModuleDefinition(assembly.Name + ".dll");
             assembly.Modules.Add(module);
-            
+
             var definition = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public);
             module.TopLevelTypes.Add(definition);
-            
+
             var reference = new TypeReference(_someAssemblyReference, "SomeNamespace", "SomeType");
             Assert.NotEqual((ITypeDefOrRef) definition, reference, _comparer);
         }

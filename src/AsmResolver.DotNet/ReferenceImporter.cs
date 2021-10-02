@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class ReferenceImporter : ITypeSignatureVisitor<TypeSignature>
     {
-        private readonly SignatureComparer _comparer = new SignatureComparer();
+        private readonly SignatureComparer _comparer = new();
 
         /// <summary>
         /// Creates a new reference importer.
@@ -30,12 +30,20 @@ namespace AsmResolver.DotNet
             get;
         }
 
+        private static void AssertTypeIsValid(ITypeDefOrRef? type)
+        {
+            if (type is null)
+                throw new ArgumentNullException(nameof(type));
+            if (type.Scope is null)
+                throw new ArgumentException("Cannot import types that are not added to a module.");
+        }
+
         /// <summary>
         /// Imports a resolution scope.
         /// </summary>
         /// <param name="scope">The resolution scope to import.</param>
         /// <returns>The imported resolution scope.</returns>
-        public IResolutionScope ImportScope(IResolutionScope scope)
+        public IResolutionScope ImportScope(IResolutionScope? scope)
         {
             if (scope is null)
                 throw new ArgumentNullException(nameof(scope));
@@ -46,7 +54,7 @@ namespace AsmResolver.DotNet
             {
                 AssemblyReference assembly => ImportAssembly(assembly),
                 TypeReference parentType => (IResolutionScope) ImportType(parentType),
-                ModuleDefinition moduleDef => ImportAssembly(moduleDef.Assembly),
+                ModuleDefinition moduleDef => ImportAssembly(moduleDef.Assembly ?? throw new ArgumentException("Module is not added to an assembly.")),
                 ModuleReference moduleRef => ImportModule(moduleRef),
                 _ => throw new ArgumentOutOfRangeException(nameof(scope))
             };
@@ -61,12 +69,12 @@ namespace AsmResolver.DotNet
         {
             if (assembly is null)
                 throw new ArgumentNullException(nameof(assembly));
-            if (assembly is AssemblyReference reference && reference.Module == TargetModule)
-                return reference;
+            if (assembly is AssemblyReference r && r.Module == TargetModule)
+                return r;
 
-            reference = TargetModule.AssemblyReferences.FirstOrDefault(a => _comparer.Equals(a, assembly));
-            
-            if (reference == null)
+            var reference = TargetModule.AssemblyReferences.FirstOrDefault(a => _comparer.Equals(a, assembly));
+
+            if (reference is null)
             {
                 reference = new AssemblyReference(assembly);
                 TargetModule.AssemblyReferences.Add(reference);
@@ -89,7 +97,7 @@ namespace AsmResolver.DotNet
 
             var reference = TargetModule.ModuleReferences.FirstOrDefault(a => _comparer.Equals(a, module));
 
-            if (reference == null)
+            if (reference is null)
             {
                 reference = new ModuleReference(module.Name);
                 TargetModule.ModuleReferences.Add(reference);
@@ -97,7 +105,7 @@ namespace AsmResolver.DotNet
 
             return reference;
         }
-        
+
         /// <summary>
         /// Imports a reference to a type into the module.
         /// </summary>
@@ -116,6 +124,13 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Imports a reference to a type into the module.
+        /// </summary>
+        /// <param name="type">The type to import.</param>
+        /// <returns>The imported type, or <c>null</c> if the provided type was <c>null</c>.</returns>
+        public ITypeDefOrRef? ImportTypeOrNull(ITypeDefOrRef? type) => type is not null ? ImportType(type) : null;
+
+        /// <summary>
         /// Imports a reference to a type definition into the module.
         /// </summary>
         /// <param name="type">The type to import.</param>
@@ -123,11 +138,11 @@ namespace AsmResolver.DotNet
         protected virtual ITypeDefOrRef ImportType(TypeDefinition type)
         {
             AssertTypeIsValid(type);
-            
+
             if (type.Module == TargetModule)
                 return type;
-            
-            return new TypeReference(TargetModule, ImportScope(type.Module), type.Namespace, type.Name);
+
+            return new TypeReference(TargetModule, ImportScope(type.Module!), type.Namespace, type.Name);
         }
 
         /// <summary>
@@ -138,13 +153,13 @@ namespace AsmResolver.DotNet
         protected virtual ITypeDefOrRef ImportType(TypeReference type)
         {
             AssertTypeIsValid(type);
-            
+
             if (type.Module == TargetModule)
                 return type;
-            
-            return new TypeReference(TargetModule, ImportScope(type.Scope), type.Namespace, type.Name);
+
+            return new TypeReference(TargetModule, ImportScope(type.Scope!), type.Namespace, type.Name);
         }
-        
+
         /// <summary>
         /// Imports a reference to a type specification into the module.
         /// </summary>
@@ -153,19 +168,13 @@ namespace AsmResolver.DotNet
         protected virtual ITypeDefOrRef ImportType(TypeSpecification type)
         {
             AssertTypeIsValid(type);
-            
+            if (type.Signature is null)
+                throw new ArgumentNullException(nameof(type));
+
             if (type.Module == TargetModule)
                 return type;
-            
-            return new TypeSpecification(ImportTypeSignature(type.Signature));
-        }
 
-        private void AssertTypeIsValid(ITypeDefOrRef type)
-        {
-            if (type is null)
-                throw new ArgumentNullException(nameof(type));
-            if (type.Scope == null)
-                throw new ArgumentException("Cannot import types that are not added to a module.");
+            return new TypeSpecification(ImportTypeSignature(type.Signature));
         }
 
         /// <summary>
@@ -184,6 +193,15 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Imports the given type signature into the target module.
+        /// </summary>
+        /// <param name="type">The type signature to import.</param>
+        /// <returns>The imported type signature, or <c>nulL</c> if the provided type signature was <c>null</c>.</returns>
+        public TypeSignature? ImportTypeSignatureOrNull(TypeSignature? type) => type is not null
+            ? ImportTypeSignature(type)
+            : null;
+
+        /// <summary>
         /// Imports a <see cref="Type"/> as a type reference or specification.
         /// </summary>
         /// <param name="type">The type to import.</param>
@@ -192,14 +210,14 @@ namespace AsmResolver.DotNet
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
-            
+
             var importedTypeSig = ImportTypeSignature(type);
             if (importedTypeSig is TypeDefOrRefSignature
                 || importedTypeSig is CorLibTypeSignature)
             {
-                return importedTypeSig.GetUnderlyingTypeDefOrRef();
+                return importedTypeSig.GetUnderlyingTypeDefOrRef()!;
             }
-            
+
             return new TypeSpecification(importedTypeSig);
         }
 
@@ -217,9 +235,9 @@ namespace AsmResolver.DotNet
             if (type.IsConstructedGenericType)
                 return ImportGenericType(type);
             if (type.IsPointer)
-                return new PointerTypeSignature(ImportTypeSignature(type.GetElementType()));
+                return new PointerTypeSignature(ImportTypeSignature(type.GetElementType()!));
             if (type.IsByRef)
-                return new ByReferenceTypeSignature(ImportTypeSignature(type.GetElementType()));
+                return new ByReferenceTypeSignature(ImportTypeSignature(type.GetElementType()!));
             if (type.IsGenericParameter)
                 return new GenericParameterSignature(
                     type.DeclaringMethod != null ? GenericParameterType.Method : GenericParameterType.Type,
@@ -233,14 +251,14 @@ namespace AsmResolver.DotNet
                 ImportAssembly(new ReflectionAssemblyDescriptor(TargetModule, type.Assembly.GetName())),
                 type.Namespace,
                 type.Name);
-            
+
             return new TypeDefOrRefSignature(reference, type.IsValueType);
         }
 
         private TypeSignature ImportArrayType(Type type)
         {
-            var baseType = ImportTypeSignature(type.GetElementType());
-            
+            var baseType = ImportTypeSignature(type.GetElementType()!);
+
             int rank = type.GetArrayRank();
             if (rank == 1)
                 return new SzArrayTypeSignature(baseType);
@@ -258,7 +276,7 @@ namespace AsmResolver.DotNet
                 result.TypeArguments.Add(ImportTypeSignature(argument));
             return result;
         }
-        
+
         /// <summary>
         /// Imports a reference to- or an instantiation of a method into the module.
         /// </summary>
@@ -275,7 +293,16 @@ namespace AsmResolver.DotNet
                 _ => throw new ArgumentOutOfRangeException(nameof(method))
             };
         }
-        
+
+        /// <summary>
+        /// Imports a reference to- or an instantiation of a method into the module.
+        /// </summary>
+        /// <param name="method">The method to import.</param>
+        /// <returns>The imported method, or <c>null</c> if no method was provided..</returns>
+        /// <exception cref="ArgumentException">Occurs when a method is not added to a type.</exception>
+        public IMethodDescriptor? ImportMethodOrNull(IMethodDescriptor? method) =>
+            method is null ? null : ImportMethod(method);
+
         /// <summary>
         /// Imports a reference to a method into the module.
         /// </summary>
@@ -288,15 +315,26 @@ namespace AsmResolver.DotNet
                 throw new ArgumentNullException(nameof(method));
             if (method.DeclaringType is null)
                 throw new ArgumentException("Cannot import a method that is not added to a type.");
+            if (method.Signature is null)
+                throw new ArgumentException("Cannot import a method that does not have a signature.");
 
             if (method.Module == TargetModule)
                 return method;
-           
+
             return new MemberReference(
                 ImportType(method.DeclaringType),
                 method.Name,
                 ImportMethodSignature(method.Signature));
         }
+
+        /// <summary>
+        /// Imports a reference to- or an instantiation of a method into the module.
+        /// </summary>
+        /// <param name="method">The method to import.</param>
+        /// <returns>The imported method, or <c>null</c> if no method was provided..</returns>
+        /// <exception cref="ArgumentException">Occurs when a method is not added to a type.</exception>
+        public IMethodDefOrRef? ImportMethodOrNull(IMethodDefOrRef? method) =>
+            method is null ? null : ImportMethod(method);
 
         /// <summary>
         /// Imports the provided method signature into the module.
@@ -307,20 +345,19 @@ namespace AsmResolver.DotNet
         {
             if (signature is null)
                 throw new ArgumentNullException(nameof(signature));
-            
+
             var parameterTypes = new TypeSignature[signature.ParameterTypes.Count];
             for (int i = 0; i < parameterTypes.Length; i++)
                 parameterTypes[i] = ImportTypeSignature(signature.ParameterTypes[i]);
-            
+
             var result = new MethodSignature(signature.Attributes, ImportTypeSignature(signature.ReturnType), parameterTypes);
             result.GenericParameterCount = signature.GenericParameterCount;
-            
+
             for (int i = 0; i < signature.SentinelParameterTypes.Count; i++)
                 result.SentinelParameterTypes.Add(ImportTypeSignature(signature.SentinelParameterTypes[i]));
-            
+
             return result;
         }
-
 
         /// <summary>
         /// Imports the provided generic instance method signature into the module.
@@ -364,7 +401,7 @@ namespace AsmResolver.DotNet
         /// <returns>The imported method.</returns>
         public virtual MethodSpecification ImportMethod(MethodSpecification method)
         {
-            if (method is null)
+            if (method.Method is null || method.Signature is null)
                 throw new ArgumentNullException(nameof(method));
             if (method.DeclaringType is null)
                 throw new ArgumentException("Cannot import a method that is not added to a type.");
@@ -373,7 +410,7 @@ namespace AsmResolver.DotNet
                 return method;
 
             var memberRef = ImportMethod(method.Method);
-            
+
             var instantiation = new GenericInstanceMethodSignature();
             foreach (var argument in method.Signature.TypeArguments)
                 instantiation.TypeArguments.Add(ImportTypeSignature(argument));
@@ -390,7 +427,7 @@ namespace AsmResolver.DotNet
         {
             if (method is null)
                 throw new ArgumentNullException(nameof(method));
-            
+
             if (method.IsGenericMethod && !method.IsGenericMethodDefinition)
                 return ImportGenericMethod((MethodInfo) method);
 
@@ -410,13 +447,16 @@ namespace AsmResolver.DotNet
                 method.IsStatic ? 0 : CallingConventionAttributes.HasThis,
                 returnType, parameterTypes);
 
+            if (method.DeclaringType == null)
+                throw new ArgumentException("Method's declaring type is null.");
+
             return new MemberReference(ImportType(method.DeclaringType), method.Name, result);
         }
 
         private IMethodDescriptor ImportGenericMethod(MethodInfo method)
         {
             var memberRef = (IMethodDefOrRef) ImportMethod(method.GetGenericMethodDefinition());
-            
+
             var instantiation = new GenericInstanceMethodSignature();
             foreach (var argument in method.GetGenericArguments())
                 instantiation.TypeArguments.Add(ImportTypeSignature(argument));
@@ -436,6 +476,8 @@ namespace AsmResolver.DotNet
                 throw new ArgumentNullException(nameof(field));
             if (field.DeclaringType is null)
                 throw new ArgumentException("Cannot import a field that is not added to a type.");
+            if (field.Signature is null)
+                throw new ArgumentException("Cannot import a field that does not have a signature.");
 
             if (field.Module == TargetModule)
                 return field;
@@ -455,7 +497,7 @@ namespace AsmResolver.DotNet
         {
             if (signature is null)
                 throw new ArgumentNullException(nameof(signature));
-            
+
             return new FieldSignature(signature.Attributes, ImportTypeSignature(signature.FieldType));
         }
 
@@ -473,10 +515,10 @@ namespace AsmResolver.DotNet
             if (field.DeclaringType != null && field.DeclaringType.IsConstructedGenericType)
                 field = field.Module.ResolveField(field.MetadataToken);
 
-            var scope = field.DeclaringType != null 
-                ? ImportType(field.DeclaringType) 
+            var scope = field.DeclaringType != null
+                ? ImportType(field.DeclaringType)
                 : TargetModule.GetModuleType();
-            
+
             var signature = new FieldSignature(field.IsStatic ? 0 : CallingConventionAttributes.HasThis,
                 ImportTypeSignature(field.FieldType));
 
@@ -492,14 +534,14 @@ namespace AsmResolver.DotNet
         {
             if (signature is null)
                 throw new ArgumentNullException(nameof(signature));
-            
+
             var parameterTypes = new TypeSignature[signature.ParameterTypes.Count];
             for (int i = 0; i < parameterTypes.Length; i++)
                 parameterTypes[i] = ImportTypeSignature(signature.ParameterTypes[i]);
-            
+
             return new PropertySignature(
                 signature.Attributes,
-                ImportTypeSignature(signature.ReturnType), 
+                ImportTypeSignature(signature.ReturnType),
                 parameterTypes);
         }
 
@@ -523,7 +565,7 @@ namespace AsmResolver.DotNet
 
         TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitCorLibType(CorLibTypeSignature signature)
         {
-            return TargetModule.CorLibTypeFactory.FromElementType(signature.ElementType);
+            return TargetModule.CorLibTypeFactory.FromElementType(signature.ElementType)!;
         }
 
         TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitCustomModifierType(CustomModifierTypeSignature signature)
@@ -568,6 +610,11 @@ namespace AsmResolver.DotNet
         TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitTypeDefOrRef(TypeDefOrRefSignature signature)
         {
             return new TypeDefOrRefSignature(ImportType(signature.Type), signature.IsValueType);
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitFunctionPointerType(FunctionPointerTypeSignature signature)
+        {
+            return new FunctionPointerTypeSignature(ImportMethodSignature(signature.Signature));
         }
     }
 }

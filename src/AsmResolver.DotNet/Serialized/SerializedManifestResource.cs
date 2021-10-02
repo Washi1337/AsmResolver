@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="ManifestResource"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedManifestResource : ManifestResource
     {
@@ -34,43 +34,48 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName()
+        protected override Utf8String? GetName()
         {
-            return _context.Image.DotNetDirectory.Metadata
-                .GetStream<StringsStream>()
-                .GetStringByIndex(_row.Name);
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
         }
 
         /// <inheritdoc />
-        protected override IImplementation GetImplementation()
+        protected override IImplementation? GetImplementation()
         {
-            if (_row.Implementation != 0)
+            if (_row.Implementation == 0)
                 return null;
 
-            var encoder = _context.Image.DotNetDirectory.Metadata
+            var encoder = _context.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.Implementation);
 
             var token = encoder.DecodeIndex(_row.Implementation);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as IImplementation
-                : null;
+                : _context.BadImageAndReturn<IImplementation>(
+                    $"Invalid implementation in manifest resource {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
-        protected override ISegment GetEmbeddedDataSegment()
+        protected override ISegment? GetEmbeddedDataSegment()
         {
             if (_row.Implementation != 0)
                 return null;
 
-            var reader = _context.Image.DotNetDirectory.DotNetResources.CreateManifestResourceReader(_row.Offset);
-            return reader is null 
-                ? null 
-                : DataSegment.FromReader(reader);
+            if (_context.Image.DotNetDirectory!.DotNetResources is not { } resources
+                || !resources.TryCreateManifestResourceReader(_row.Offset, out var reader))
+            {
+                return _context.BadImageAndReturn<ISegment>(
+                    $"Invalid data offset in manifest resource {MetadataToken.ToString()}.");
+            }
+
+            return DataSegment.FromReader(ref reader);
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

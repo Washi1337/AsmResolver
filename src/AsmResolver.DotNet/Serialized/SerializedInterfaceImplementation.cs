@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="InterfaceImplementation"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedInterfaceImplementation : InterfaceImplementation
     {
@@ -32,30 +32,32 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override TypeDefinition GetClass()
+        protected override TypeDefinition? GetClass()
         {
             var module = _context.ParentModule;
             var token = module.GetInterfaceImplementationOwner(MetadataToken.Rid);
             return module.TryLookupMember(token, out var member)
                 ? member as TypeDefinition
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>(
+                    $"Invalid parent class in interface implementation {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
-        protected override ITypeDefOrRef GetInterface()
+        protected override ITypeDefOrRef? GetInterface()
         {
-            var encoder = _context.Image.DotNetDirectory.Metadata
+            var token = _context.Metadata
                 .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.TypeDefOrRef);
-            var token = encoder.DecodeIndex(_row.Interface);
-            
+                .GetIndexEncoder(CodedIndex.TypeDefOrRef)
+                .DecodeIndex(_row.Interface);
+
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as ITypeDefOrRef
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>(
+                    $"Invalid interface in interface implementation {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

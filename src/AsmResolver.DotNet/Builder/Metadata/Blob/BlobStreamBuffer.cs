@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 
@@ -13,7 +14,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
     public class BlobStreamBuffer : IMetadataStreamBuffer
     {
         private readonly MemoryStream _rawStream = new();
-        private readonly BinaryStreamWriter _writer;
+        private readonly IBinaryStreamWriter _writer;
         private readonly Dictionary<byte[], uint> _blobs = new(ByteArrayEqualityComparer.Instance);
 
         /// <summary>
@@ -51,7 +52,10 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         public void ImportStream(BlobStream stream)
         {
             MetadataStreamBufferHelper.CloneBlobHeap(stream, _writer, (index, newIndex) =>
-                _blobs[stream.GetBlobByIndex(index)] = newIndex);
+            {
+                if (stream.GetBlobByIndex(index) is { } blob)
+                    _blobs[blob] = newIndex;
+            });
         }
 
         /// <summary>
@@ -84,7 +88,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         /// </summary>
         /// <param name="blob">The blob to lookup or add.</param>
         /// <returns>The index of the blob.</returns>
-        public uint GetBlobIndex(byte[] blob)
+        public uint GetBlobIndex(byte[]? blob)
         {
             if (blob is null || blob.Length == 0)
                 return 0;
@@ -104,9 +108,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         /// </summary>
         /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
         /// <param name="signature">The signature to lookup or add.</param>
-        /// <param name="diagnosticBag">The bag used to collect diagnostic information.</param>
+        /// <param name="errorListener">The object responsible for collecting diagnostic information.</param>
         /// <returns>The index of the signature.</returns>
-        public uint GetBlobIndex(ITypeCodedIndexProvider provider, BlobSignature signature, DiagnosticBag diagnosticBag)
+        public uint GetBlobIndex(ITypeCodedIndexProvider provider, BlobSignature? signature, IErrorListener errorListener)
         {
             if (signature is null)
                 return 0u;
@@ -114,7 +118,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
             // Serialize blob.
             using var stream = new MemoryStream();
             var writer = new BinaryStreamWriter(stream);
-            signature.Write(new BlobSerializationContext(writer, provider, diagnosticBag));
+            signature.Write(new BlobSerializationContext(writer, provider, errorListener));
 
             return GetBlobIndex(stream.ToArray());
         }

@@ -1,3 +1,5 @@
+using System;
+
 namespace AsmResolver.DotNet.Cloning
 {
     public partial class MemberCloner
@@ -9,7 +11,8 @@ namespace AsmResolver.DotNet.Cloning
                 var clonedProperty = DeepCopyProperty(context, property);
 
                 // If property's declaring type is cloned as well, add the cloned property to the cloned type.
-                if (context.ClonedMembers.TryGetValue(property.DeclaringType, out var member)
+                if (property.DeclaringType is not null
+                    && context.ClonedMembers.TryGetValue(property.DeclaringType, out var member)
                     && member is TypeDefinition declaringType)
                 {
                     declaringType.Properties.Add(clonedProperty);
@@ -19,13 +22,18 @@ namespace AsmResolver.DotNet.Cloning
 
         private PropertyDefinition DeepCopyProperty(MemberCloneContext context, PropertyDefinition property)
         {
+            if (property.Name is null)
+                throw new ArgumentException($"Property {property.SafeToString()} has no name.");
+            if (property.Signature is null)
+                throw new ArgumentException($"Property {property.SafeToString()} has no signature.");
+
             var clonedProperty = new PropertyDefinition(property.Name,
                 property.Attributes,
                 context.Importer.ImportPropertySignature(property.Signature));
 
             CloneSemantics(context, property, clonedProperty);
             CloneCustomAttributes(context, property, clonedProperty);
-            property.Constant = CloneConstant(context, property.Constant);
+            property.Constant = CloneConstant(property.Constant);
 
             return clonedProperty;
         }
@@ -37,7 +45,8 @@ namespace AsmResolver.DotNet.Cloning
                 var clonedEvent = DeepCopyEvent(context, @event);
 
                 // If event's declaring type is cloned as well, add the cloned event to the cloned type.
-                if (context.ClonedMembers.TryGetValue(@event.DeclaringType, out var member)
+                if (@event.DeclaringType is not null
+                    && context.ClonedMembers.TryGetValue(@event.DeclaringType, out var member)
                     && member is TypeDefinition declaringType)
                 {
                     declaringType.Events.Add(clonedEvent);
@@ -47,6 +56,11 @@ namespace AsmResolver.DotNet.Cloning
 
         private static EventDefinition DeepCopyEvent(MemberCloneContext context, EventDefinition @event)
         {
+            if (@event.Name is null)
+                throw new ArgumentException($"Event {@event.SafeToString()} has no name.");
+            if (@event.EventType is null)
+                throw new ArgumentException($"Event {@event.SafeToString()} has no event-type.");
+
             var clonedEvent = new EventDefinition(@event.Name,
                 @event.Attributes,
                 context.Importer.ImportType(@event.EventType));
@@ -63,7 +77,7 @@ namespace AsmResolver.DotNet.Cloning
             foreach (var semantics in semanticsProvider.Semantics)
             {
                 clonedProvider.Semantics.Add(new MethodSemantics(
-                    (MethodDefinition) context.ClonedMembers[semantics.Method],
+                    (MethodDefinition) context.ClonedMembers[semantics.Method!],
                     semantics.Attributes));
             }
         }

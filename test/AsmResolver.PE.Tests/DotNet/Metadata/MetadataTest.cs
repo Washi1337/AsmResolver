@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
@@ -17,8 +18,8 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         public void CorrectHeader()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var metadata = peImage.DotNetDirectory.Metadata;
-            
+            var metadata = peImage.DotNetDirectory!.Metadata!;
+
             Assert.Equal(1, metadata.MajorVersion);
             Assert.Equal(1, metadata.MinorVersion);
             Assert.Equal(0u, metadata.Reserved);
@@ -31,7 +32,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         public void CorrectStreamHeaders()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var metadata = peImage.DotNetDirectory.Metadata;
+            var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var expectedNames = new[] {"#~", "#Strings", "#US", "#GUID", "#Blob"};
             Assert.Equal(expectedNames, metadata.Streams.Select(s => s.Name));
@@ -41,7 +42,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         public void DetectStringsStream()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var metadata = peImage.DotNetDirectory.Metadata;
+            var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var stream = metadata.GetStream(StringsStream.DefaultName);
             Assert.NotNull(stream);
@@ -52,7 +53,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         public void DetectUserStringsStream()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var metadata = peImage.DotNetDirectory.Metadata;
+            var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var stream = metadata.GetStream(UserStringsStream.DefaultName);
             Assert.NotNull(stream);
@@ -63,7 +64,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         public void DetectBlobStream()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var metadata = peImage.DotNetDirectory.Metadata;
+            var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var stream = metadata.GetStream(BlobStream.DefaultName);
             Assert.NotNull(stream);
@@ -74,7 +75,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         public void DetectGuidStream()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var metadata = peImage.DotNetDirectory.Metadata;
+            var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var stream = metadata.GetStream(GuidStream.DefaultName);
             Assert.NotNull(stream);
@@ -85,7 +86,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         public void DetectCompressedTableStream()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var metadata = peImage.DotNetDirectory.Metadata;
+            var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var stream = metadata.GetStream(TablesStream.CompressedStreamName);
             Assert.NotNull(stream);
@@ -97,25 +98,26 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         {
             var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
             var peImage = PEImage.FromFile(peFile);
-            var metadata = peImage.DotNetDirectory.Metadata;
+            var metadata = peImage.DotNetDirectory!.Metadata!;
 
             using var tempStream = new MemoryStream();
             metadata.Write(new BinaryStreamWriter(tempStream));
 
-            var newMetadata = new SerializedMetadata(new PEReaderContext(peFile), new ByteArrayReader(tempStream.ToArray())); 
-            
+            var reader = ByteArrayDataSource.CreateReader(tempStream.ToArray());
+            var newMetadata = new SerializedMetadata(new PEReaderContext(peFile), ref reader);
+
             Assert.Equal(metadata.MajorVersion, newMetadata.MajorVersion);
             Assert.Equal(metadata.MinorVersion, newMetadata.MinorVersion);
             Assert.Equal(metadata.Reserved, newMetadata.Reserved);
             Assert.Equal(metadata.VersionString, newMetadata.VersionString);
             Assert.Equal(metadata.Flags, newMetadata.Flags);
-            
+
             Assert.Equal(metadata.Streams.Count, newMetadata.Streams.Count);
             for (int i = 0; i < metadata.Streams.Count; i++)
             {
                 var oldStream = metadata.Streams[i];
                 var newStream = newMetadata.Streams[i];
-                
+
                 Assert.Equal(oldStream.Name, newStream.Name);
                 var oldData = oldStream.CreateReader().ReadToEnd();
                 var newData = newStream.CreateReader().ReadToEnd();
@@ -123,7 +125,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
 
             }
         }
-        
-        
+
+
     }
 }

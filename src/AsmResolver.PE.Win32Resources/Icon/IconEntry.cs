@@ -1,4 +1,7 @@
-﻿namespace AsmResolver.PE.Win32Resources.Icon
+﻿using System;
+using AsmResolver.IO;
+
+namespace AsmResolver.PE.Win32Resources.Icon
 {
     /// <summary>
     /// Represents a single icon resource entry.
@@ -12,14 +15,14 @@
         {
             get;
             set;
-        }
+        } = Array.Empty<byte>();
 
         /// <summary>
         /// Reads an icon resource entry from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The parsed icon resource entry.</returns>
-        public static IconEntry FromReader(IBinaryStreamReader reader)
+        public static IconEntry FromReader(ref BinaryStreamReader reader)
         {
             var result = new IconEntry
             {

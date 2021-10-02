@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Debug.CodeView
 {
@@ -24,13 +25,14 @@ namespace AsmResolver.PE.Debug.CodeView
         /// <param name="context">Context for the reader</param>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
-        public new static RsdsDataSegment FromReader(PEReaderContext context, IBinaryStreamReader reader)
+        public new static RsdsDataSegment? FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             if (reader.Length < RsdsExpectedDataSize)
             {
                 context.BadImage("RSDS Data was shorter than the minimal expected length");
                 return null;
             }
+
             var result = new RsdsDataSegment();
             byte[] buffer = new byte[16];
             reader.ReadBytes(buffer, 0, 16);
@@ -67,7 +69,7 @@ namespace AsmResolver.PE.Debug.CodeView
         /// <summary>
         /// Gets or sets the PDB path
         /// </summary>
-        public string Path
+        public string? Path
         {
             get;
             set;
@@ -76,11 +78,11 @@ namespace AsmResolver.PE.Debug.CodeView
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
-            return sizeof(uint)         //Signature
-                   + 16                 //Guid
-                   + sizeof(uint)       //Age
-                   + (uint) Path.Length //Path
-                   + sizeof(byte)       //Zero byte for null terminated string
+            return sizeof(uint)                 //Signature
+                   + 16                         //Guid
+                   + sizeof(uint)               //Age
+                   + (uint) (Path?.Length ?? 0) //Path
+                   + sizeof(byte)               //Zero byte for null terminated string
                 ;
         }
 
@@ -90,7 +92,7 @@ namespace AsmResolver.PE.Debug.CodeView
             writer.WriteUInt32((uint) Signature);
             writer.WriteBytes(Guid.ToByteArray());
             writer.WriteUInt32(Age);
-            writer.WriteBytes(Encoding.UTF8.GetBytes(Path));
+            writer.WriteBytes(Encoding.UTF8.GetBytes(Path ?? string.Empty));
             writer.WriteByte(0x00);
         }
     }

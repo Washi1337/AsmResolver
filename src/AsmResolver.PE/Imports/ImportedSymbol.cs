@@ -1,5 +1,5 @@
 using System;
-using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Imports
@@ -10,7 +10,6 @@ namespace AsmResolver.PE.Imports
     public class ImportedSymbol : IOwnedCollectionElement<IImportedModule>, ISymbol
     {
         private ushort _ordinalOrHint;
-        private string _name;
 
         /// <summary>
         /// Creates a new import entry that references a member exposed by ordinal.
@@ -20,7 +19,7 @@ namespace AsmResolver.PE.Imports
         {
             Ordinal = ordinal;
         }
-        
+
         /// <summary>
         /// Creates a new import entry that references a member exposed by name.
         /// </summary>
@@ -35,14 +34,14 @@ namespace AsmResolver.PE.Imports
         /// <summary>
         /// Gets the module that defines the symbol.
         /// </summary>
-        public IImportedModule DeclaringModule
+        public IImportedModule? DeclaringModule
         {
             get;
             private set;
         }
 
         /// <inheritdoc />
-        IImportedModule IOwnedCollectionElement<IImportedModule>.Owner
+        IImportedModule? IOwnedCollectionElement<IImportedModule>.Owner
         {
             get => DeclaringModule;
             set => DeclaringModule = value;
@@ -60,7 +59,7 @@ namespace AsmResolver.PE.Imports
             set
             {
                 _ordinalOrHint = value;
-                _name = null;
+                Name = null;
             }
         }
 
@@ -76,16 +75,16 @@ namespace AsmResolver.PE.Imports
         /// <summary>
         /// Gets or sets the name of the member that was imported.
         /// </summary>
-        public string Name
+        public string? Name
         {
-            get => _name;
-            set => _name = value;
+            get;
+            set;
         }
 
         /// <summary>
-        /// Gets or sets the entry in the import address table (IAT). 
+        /// Gets or sets the entry in the import address table (IAT).
         /// </summary>
-        public ISegmentReference AddressTableEntry
+        public ISegmentReference? AddressTableEntry
         {
             get;
             set;
@@ -94,12 +93,13 @@ namespace AsmResolver.PE.Imports
         /// <summary>
         /// Gets a value indicating the member is imported by its ordinal.
         /// </summary>
-        public bool IsImportByOrdinal => Name == null;
+        public bool IsImportByOrdinal => Name is null;
 
         /// <summary>
         /// Gets a value indicating the member is imported by its name.
         /// </summary>
-        public bool IsImportByName => Name != null;
+        [MemberNotNullWhen(true, nameof(Name))]
+        public bool IsImportByName => Name is not null;
 
         /// <inheritdoc />
         public override string ToString()
@@ -111,13 +111,13 @@ namespace AsmResolver.PE.Imports
             string addressSpecifier = AddressTableEntry is null
                 ? "???"
                 : AddressTableEntry.Rva.ToString("X8");
-            
+
             return IsImportByOrdinal
                 ? $"{prefix}#{Ordinal.ToString()} ({addressSpecifier})"
                 : $"{prefix}{Name} ({addressSpecifier})";
         }
 
         /// <inheritdoc />
-        public ISegmentReference GetReference() => AddressTableEntry;
+        public ISegmentReference? GetReference() => AddressTableEntry;
     }
 }

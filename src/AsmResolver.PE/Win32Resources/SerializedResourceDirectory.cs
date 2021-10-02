@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.Collections;
+using AsmResolver.IO;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
@@ -14,11 +15,11 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Indicates the size of a single sub-directory entry in a resource directory.
         /// </summary>
-        public const uint ResourceDirectorySize = 2 * sizeof(uint) + 4 * sizeof(ushort); 
-            
+        public const uint ResourceDirectorySize = 2 * sizeof(uint) + 4 * sizeof(ushort);
+
         /// <summary>
         /// Indicates the maximum depth of sub directories a resource directory can have before AsmResolver aborts
-        /// reading the resource tree branch. 
+        /// reading the resource tree branch.
         /// </summary>
         public const int MaxDepth = 10;
 
@@ -38,8 +39,8 @@ namespace AsmResolver.PE.Win32Resources
         /// The current depth of the resource directory tree structure.
         /// If this value exceeds <see cref="MaxDepth"/>, this class will not initialize any entries.
         /// </param>
-        public SerializedResourceDirectory(PEReaderContext context, ResourceDirectoryEntry? entry, 
-            IBinaryStreamReader directoryReader, int depth = 0)
+        public SerializedResourceDirectory(PEReaderContext context, ResourceDirectoryEntry? entry,
+            ref BinaryStreamReader directoryReader, int depth = 0)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _depth = depth;
@@ -53,7 +54,7 @@ namespace AsmResolver.PE.Win32Resources
                     Id = value.IdOrNameOffset;
             }
 
-            if (directoryReader != null)
+            if (directoryReader.IsValid)
             {
                 Characteristics = directoryReader.ReadUInt32();
                 TimeDateStamp = directoryReader.ReadUInt32();
@@ -65,7 +66,7 @@ namespace AsmResolver.PE.Win32Resources
                 _entriesRva = directoryReader.Rva;
 
                 directoryReader.Offset =
-                    (directoryReader.Offset + (ulong) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize));
+                    directoryReader.Offset + (ulong) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
             }
         }
 
@@ -73,7 +74,7 @@ namespace AsmResolver.PE.Win32Resources
         protected override IList<IResourceEntry> GetEntries()
         {
             var result = new OwnedCollection<IResourceDirectory, IResourceEntry>(this);
-            
+
             // Optimisation, check for invalid resource directory offset, and prevention of self loop:
             if (_namedEntries + _idEntries == 0 || _depth >= MaxDepth)
             {
@@ -95,18 +96,18 @@ namespace AsmResolver.PE.Win32Resources
 
             for (int i = 0; i < _namedEntries + _idEntries; i++)
             {
-                var rawEntry = new ResourceDirectoryEntry(_context, entriesReader);
-                
+                var rawEntry = new ResourceDirectoryEntry(_context, ref entriesReader);
+
                 // Note: Even if creating the directory reader fails, we still want to include the directory entry
                 //       itself. In such a case, we expose the directory as an empty directory. This is why the
                 //       following if statement does not dictate the creation of the data entry or not.
-                
+
                 if (!_context.File.TryCreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset, out var entryReader))
                     _context.BadImage($"Resource directory entry {i.ToString()} has an invalid data offset.");
-                
+
                 result.Add(rawEntry.IsSubDirectory
-                    ? (IResourceEntry) new SerializedResourceDirectory(_context,  rawEntry, entryReader, _depth + 1)
-                    : new SerializedResourceData(_context, rawEntry, entryReader));
+                    ? new SerializedResourceDirectory(_context,  rawEntry, ref entryReader, _depth + 1)
+                    : new SerializedResourceData(_context, rawEntry, ref entryReader));
             }
 
             return result;

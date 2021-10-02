@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     // TODO: Implement a more granular lazy initialization.
-    
+
     /// <summary>
     /// Provides a base implementation of a metadata table in the table stream of a managed executable file.
     /// </summary>
@@ -15,7 +17,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     public class MetadataTable<TRow> : IMetadataTable, ICollection<TRow>
         where TRow : struct, IMetadataRow
     {
-        private IList<TRow> _items;
+        private RefList<TRow>? _items;
 
         /// <summary>
         /// Creates a new metadata table using the provided layout.
@@ -25,17 +27,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public MetadataTable(TableIndex tableIndex, TableLayout layout)
         {
             TableIndex = tableIndex;
-            Layout = layout ?? throw new ArgumentNullException(nameof(layout));
+            Layout = layout;
         }
 
         /// <summary>
-        /// Gets the index of the table in the tables stream. 
+        /// Gets the index of the table in the tables stream.
         /// </summary>
         public TableIndex TableIndex
         {
             get;
         }
-        
+
         /// <inheritdoc />
         public TableLayout Layout
         {
@@ -61,9 +63,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
+        /// Gets the version number of the list.
+        /// </summary>
+        public int Version => Rows.Version;
+
+        /// <summary>
         /// Gets the internal list of rows that are stored in the metadata table.
         /// </summary>
-        protected IList<TRow> Rows
+        protected RefList<TRow> Rows
         {
             get
             {
@@ -80,18 +87,30 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         /// <inheritdoc cref="ICollection{T}.Count" />
         public virtual int Count => Rows.Count;
-        
+
         /// <inheritdoc />
         public bool IsReadOnly => false; // TODO: it might be necessary later to make this configurable.
 
         /// <inheritdoc />
-        public object SyncRoot
-        {
-            get;
-        } = new object();
+        public object SyncRoot => this;
 
         /// <inheritdoc />
         public bool IsSynchronized => false;
+
+        /// <summary>
+        /// Gets a mutable reference to a row within the table.
+        /// </summary>
+        /// <param name="rid">The RID of the row to obtain a reference for.</param>
+        /// <returns>The row reference.</returns>
+        public ref TRow GetRowRef(uint rid) => ref Rows.GetElementRef((int) (rid - 1));
+
+        /// <summary>
+        /// Gets a mutable reference to a row within the table.
+        /// </summary>
+        /// <param name="rid">The RID of the row to obtain a reference for.</param>
+        /// <param name="version">The version of the underlying buffer upon obtaining the reference.</param>
+        /// <returns>The row reference.</returns>
+        public ref TRow GetRowRef(uint rid, out int version) => ref Rows.GetElementRef((int) (rid - 1), out version);
 
         /// <inheritdoc />
         public void Add(TRow item) => Rows.Add(item);
@@ -101,7 +120,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         /// <inheritdoc />
         public bool Contains(TRow item) =>  Rows.Contains(item);
-        
+
         /// <inheritdoc />
         public void CopyTo(TRow[] array, int arrayIndex) => Rows.CopyTo(array, arrayIndex);
 
@@ -124,7 +143,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Rows"/> property.
         /// </remarks>
-        protected virtual IList<TRow> GetRows() => new List<TRow>();
+        protected virtual RefList<TRow> GetRows() => new();
 
         /// <summary>
         /// Gets the contents of a row by its row identifier.
@@ -176,7 +195,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
             int left = 0;
             int right = Count - 1;
-           
+
             while (left <= right)
             {
                 int m = (left + right) / 2;
@@ -221,7 +240,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         public virtual void UpdateTableLayout(TableLayout layout)
         {
-            for (int i = 0; i < Layout.Columns.Length; i++)
+            for (int i = 0; i < Layout.Columns.Count; i++)
             {
                 if (Layout.Columns[i].Name != layout.Columns[i].Name
                     || Layout.Columns[i].Type != layout.Columns[i].Type)
@@ -236,9 +255,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
-            foreach (var row in Rows) 
-                row.Write(writer, Layout);
+            for (int i = 0; i < Rows.Count; i++)
+                Rows[i].Write(writer, Layout);
         }
-        
+
     }
 }

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
+      <ProjectReference Include="..\..\src\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
+      <ProjectReference Include="..\..\src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj" />
+      <ProjectReference Include="..\..\src\AsmResolver.PE\AsmResolver.PE.csproj" />
+      <ProjectReference Include="..\..\src\AsmResolver\AsmResolver.csproj" />
+    </ItemGroup>
+
+</Project>

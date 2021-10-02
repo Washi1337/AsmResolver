@@ -6,7 +6,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="ClassLayout"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedClassLayout : ClassLayout
     {
@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the class layout for.</param>
         /// <param name="row">The metadata table row to base the class layout on.</param>
         public SerializedClassLayout(
-            ModuleReaderContext context, 
+            ModuleReaderContext context,
             MetadataToken token,
             in ClassLayoutRow row)
             : base(token)
@@ -33,11 +33,11 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override TypeDefinition GetParent()
+        protected override TypeDefinition? GetParent()
         {
             return _context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.TypeDef, _row.Parent), out var member)
                 ? member as TypeDefinition
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>($"Invalid parent type in class layout {MetadataToken.ToString()}.");
         }
     }
 }

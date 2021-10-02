@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="PropertyDefinition"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedPropertyDefinition : PropertyDefinition
     {
@@ -35,29 +35,36 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.Name);
-
-        /// <inheritdoc />
-        protected override PropertySignature GetSignature()
+        protected override Utf8String? GetName()
         {
-            var reader = _context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.Type);
-            
-            return PropertySignature.FromReader(new BlobReadContext(_context), reader);
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
         }
 
         /// <inheritdoc />
-        protected override TypeDefinition GetDeclaringType()
+        protected override PropertySignature? GetSignature()
+        {
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Type, out var reader))
+            {
+                return _context.BadImageAndReturn<PropertySignature>(
+                    $"Invalid signature blob index in property {MetadataToken.ToString()}.");
+            }
+
+            return PropertySignature.FromReader(new BlobReadContext(_context), ref reader);
+        }
+
+        /// <inheritdoc />
+        protected override TypeDefinition? GetDeclaringType()
         {
             var module = _context.ParentModule;
-            
+
             var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, module.GetPropertyDeclaringType(MetadataToken.Rid));
             return module.TryLookupMember(declaringTypeToken, out var member)
                 ? member as TypeDefinition
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>(
+                    $"Property {MetadataToken.ToString()} is not in the range of a property map of a declaring type.");
         }
 
         /// <inheritdoc />
@@ -76,13 +83,13 @@ namespace AsmResolver.DotNet.Serialized
             result.ValidateMembership = true;
             return result;
         }
-        
+
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
 
         /// <inheritdoc />
-        protected override Constant GetConstant() => 
+        protected override Constant? GetConstant() =>
             _context.ParentModule.GetConstant(MetadataToken);
     }
 }

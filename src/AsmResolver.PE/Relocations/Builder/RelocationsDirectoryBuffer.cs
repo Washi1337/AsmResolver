@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Relocations.Builder
 {
@@ -8,9 +9,9 @@ namespace AsmResolver.PE.Relocations.Builder
     /// </summary>
     public class RelocationsDirectoryBuffer : SegmentBase
     {
-        private readonly IList<BaseRelocation> _relocations = new List<BaseRelocation>();
-        private IList<RelocationBlock> _blocks = new List<RelocationBlock>();
-        
+        private readonly List<BaseRelocation> _relocations = new();
+        private List<RelocationBlock>? _blocks = new();
+
         /// <summary>
         /// Adds a single base relocation to the buffer.
         /// </summary>
@@ -21,17 +22,14 @@ namespace AsmResolver.PE.Relocations.Builder
             _blocks = null;
         }
 
-        private void EnsureBlocksCreated()
-        {
-            if (_blocks == null)
-                _blocks = CreateBlocks();
-        }
+        private void EnsureBlocksCreated() => _blocks ??= CreateBlocks();
 
-        private IList<RelocationBlock> CreateBlocks()
+        private List<RelocationBlock> CreateBlocks()
         {
             var blocks = new Dictionary<uint, RelocationBlock>();
-            foreach (var relocation in _relocations)
+            for (int i = 0; i < _relocations.Count; i++)
             {
+                var relocation = _relocations[i];
                 uint pageRva = GetPageRva(relocation);
                 var block = GetOrCreateBlock(blocks, pageRva);
                 block.Entries.Add(CreateEntry(relocation));
@@ -40,13 +38,13 @@ namespace AsmResolver.PE.Relocations.Builder
             return blocks
                 .OrderBy(x => x.Key)
                 .Select(x => x.Value)
-                .ToArray();
+                .ToList();
         }
 
         private static uint GetPageRva(BaseRelocation relocation) => (uint) (relocation.Location.Rva & ~0xFFF);
 
         private static RelocationEntry CreateEntry(BaseRelocation relocation) =>
-            new RelocationEntry(relocation.Type, (int) (relocation.Location.Rva & 0xFFF));
+            new(relocation.Type, (int) (relocation.Location.Rva & 0xFFF));
 
         private static RelocationBlock GetOrCreateBlock(IDictionary<uint, RelocationBlock> blocks, uint pageRva)
         {
@@ -58,21 +56,28 @@ namespace AsmResolver.PE.Relocations.Builder
 
             return block;
         }
-        
+
+        /// <inheritdoc />
+        public override void UpdateOffsets(ulong newOffset, uint newRva)
+        {
+            base.UpdateOffsets(newOffset, newRva);
+            _blocks = null;
+        }
+
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
             EnsureBlocksCreated();
-            return (uint) _blocks.Sum(b => b.GetPhysicalSize());
+            return (uint) _blocks!.Sum(b => b.GetPhysicalSize());
         }
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
             EnsureBlocksCreated();
-            foreach (var block in CreateBlocks())
-                block.Write(writer);
+            for (int i = 0; i < _blocks!.Count; i++)
+                _blocks![i].Write(writer);
         }
-        
+
     }
 }

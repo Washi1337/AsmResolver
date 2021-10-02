@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -45,6 +47,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
+        [MemberNotNullWhen(true, nameof(Contents))]
         public bool CanRead => Contents is IReadableSegment;
 
         /// <summary>
@@ -57,7 +60,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReader()
+        public BinaryStreamReader CreateReader()
         {
             if (!CanRead)
                 throw new InvalidOperationException("Contents of the metadata stream is not readable.");

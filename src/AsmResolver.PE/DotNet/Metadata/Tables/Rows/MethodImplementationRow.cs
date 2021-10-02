@@ -2,12 +2,12 @@
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
 // version 3.0 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -15,13 +15,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the method implementation metadata table.
     /// </summary>
-    public readonly struct MethodImplementationRow : IMetadataRow
+    public struct MethodImplementationRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single method implementation row from an input stream.
@@ -29,7 +30,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the method implementation table.</param>
         /// <returns>The row.</returns>
-        public static MethodImplementationRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static MethodImplementationRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new MethodImplementationRow(
                 reader.ReadIndex((IndexSize) layout.Columns[0].Size),
@@ -67,11 +68,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets an index into the TypeDef table indicating the class that inherited methods from an interface.
+        /// Gets or sets an index into the TypeDef table indicating the class that inherited methods from an interface.
         /// </summary>
         public uint Class
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -81,6 +83,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint MethodBody
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -90,6 +93,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint MethodDeclaration
         {
             get;
+            set;
         }
 
         /// <inheritdoc />
@@ -107,8 +111,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
         public bool Equals(MethodImplementationRow other)
         {
-            return Class == other.Class 
-                   && MethodBody == other.MethodBody 
+            return Class == other.Class
+                   && MethodBody == other.MethodBody
                    && MethodDeclaration == other.MethodDeclaration;
         }
 

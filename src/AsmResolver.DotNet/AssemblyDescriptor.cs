@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -19,9 +17,9 @@ namespace AsmResolver.DotNet
     {
         private const int PublicKeyTokenLength = 8;
 
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<string> _culture;
-        private IList<CustomAttribute> _customAttributes;
+        private readonly LazyVariable<Utf8String?> _name;
+        private readonly LazyVariable<Utf8String?> _culture;
+        private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
         /// Initializes a new empty assembly descriptor.
@@ -30,8 +28,9 @@ namespace AsmResolver.DotNet
         protected AssemblyDescriptor(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<string>(GetName);
-            _culture = new LazyVariable<string>(GetCulture);
+            _name = new LazyVariable<Utf8String?>(GetName);
+            _culture = new LazyVariable<Utf8String?>(() => GetCulture());
+            Version = new Version(0, 0, 0, 0);
         }
 
         /// <summary>
@@ -40,11 +39,13 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the assembly table.
         /// </remarks>
-        public string Name
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <inheritdoc />
         public string FullName
@@ -52,7 +53,7 @@ namespace AsmResolver.DotNet
             get
             {
                 var publicKeyToken = GetPublicKeyToken();
-                string publicKeyTokenString = publicKeyToken != null
+                string publicKeyTokenString = publicKeyToken is not null
                     ? string.Join(string.Empty, publicKeyToken.Select(x => x.ToString("x2")))
                     : "null";
 
@@ -170,7 +171,7 @@ namespace AsmResolver.DotNet
         /// <para>If this value is set to <c>null</c>, the default locale will be used</para>
         /// <para>This property corresponds to the Culture column in the assembly table.</para>
         /// </remarks>
-        public string Culture
+        public Utf8String? Culture
         {
             get => _culture.Value;
             set => _culture.Value = value;
@@ -188,7 +189,7 @@ namespace AsmResolver.DotNet
         /// When the application is signed with a strong name, obtains the public key token of the assembly
         /// </summary>
         /// <returns>The token.</returns>
-        public abstract byte[] GetPublicKeyToken();
+        public abstract byte[]? GetPublicKeyToken();
 
         /// <summary>
         /// Obtains the name of the assembly definition.
@@ -197,7 +198,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the locale string of the assembly definition.
@@ -206,7 +207,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initializing the <see cref="Culture"/> property.
         /// </remarks>
-        protected virtual string GetCulture() => null;
+        protected virtual Utf8String? GetCulture() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;
@@ -221,7 +222,7 @@ namespace AsmResolver.DotNet
         {
             using HashAlgorithm implementation = algorithm switch
             {
-                AssemblyHashAlgorithm.None => throw new ArgumentException("Attempted to compute a hashing algorithm without providing a hashing algorithm."),
+                AssemblyHashAlgorithm.None => SHA1.Create(), // Default algo is SHA-1.
                 AssemblyHashAlgorithm.Md5 => MD5.Create(),
                 AssemblyHashAlgorithm.Sha1 => SHA1.Create(),
                 AssemblyHashAlgorithm.Hmac => HMAC.Create(),
@@ -231,8 +232,8 @@ namespace AsmResolver.DotNet
                 _ => throw new NotSupportedException($"Unsupported hashing algorithm {algorithm}.")
             };
 
-            var hash = implementation.ComputeHash(publicKey);
-            var token = new byte[PublicKeyTokenLength];
+            byte[] hash = implementation.ComputeHash(publicKey);
+            byte[] token = new byte[PublicKeyTokenLength];
             for (int i = 0; i < PublicKeyTokenLength; i++)
                 token[i] = hash[hash.Length - 1 - i];
             return token;
@@ -242,6 +243,6 @@ namespace AsmResolver.DotNet
         /// Resolves the reference to the assembly to an assembly definition.
         /// </summary>
         /// <returns>The assembly definition, or <c>null</c> if the resolution failed.</returns>
-        public abstract AssemblyDefinition Resolve();
+        public abstract AssemblyDefinition? Resolve();
     }
 }

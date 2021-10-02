@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -28,7 +29,7 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <inheritdoc />
-        public override object ResolveMember(MetadataToken token)
+        public override object? ResolveMember(MetadataToken token)
         {
             switch (token.Table)
             {
@@ -78,21 +79,20 @@ namespace AsmResolver.DotNet.Code.Cil
                     }
 
                     if (obj.GetType().FullName == "System.Reflection.Emit.VarArgMethod")
-                        return _importer.ImportMethod(FieldReader.ReadField<MethodInfo>(obj, "m_method"));
+                        return _importer.ImportMethod(FieldReader.ReadField<MethodInfo>(obj, "m_method")!);
 
                     break;
 
                 case TableIndex.StandAloneSig:
-                    return CallingConventionSignature.FromReader(
-                        new BlobReadContext(_readerContext),
-                        new ByteArrayReader((byte[]) _tokens[(int) token.Rid]));
+                    var reader = ByteArrayDataSource.CreateReader((byte[]) _tokens[(int) token.Rid]);
+                    return CallingConventionSignature.FromReader(new BlobReadContext(_readerContext), ref reader);
             }
 
             return token;
         }
 
         /// <inheritdoc />
-        public override object ResolveString(MetadataToken token)
+        public override object? ResolveString(MetadataToken token)
         {
             return _tokens[(int) token.Rid] as string;
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -10,13 +9,13 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="MethodSpecification"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedMethodSpecification : MethodSpecification
     {
         private readonly ModuleReaderContext _context;
         private readonly MethodSpecificationRow _row;
-        
+
         /// <summary>
         /// Creates a method specification from a method specification metadata row.
         /// </summary>
@@ -31,30 +30,34 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IMethodDefOrRef GetMethod()
+        protected override IMethodDefOrRef? GetMethod()
         {
-            var encoder = _context.Image.DotNetDirectory.Metadata
+            var methodToken = _context.Metadata
                 .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.MethodDefOrRef);
-            
-            var methodToken = encoder.DecodeIndex(_row.Method);
+                .GetIndexEncoder(CodedIndex.MethodDefOrRef)
+                .DecodeIndex(_row.Method);
+
             return _context.ParentModule.TryLookupMember(methodToken, out var member)
                 ? member as IMethodDefOrRef
-                : null;
+                : _context.BadImageAndReturn<IMethodDefOrRef>(
+                    $"Invalid method in method specification {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
-        protected override GenericInstanceMethodSignature GetSignature()
+        protected override GenericInstanceMethodSignature? GetSignature()
         {
-            var reader = _context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.Instantiation);
-            
-            return GenericInstanceMethodSignature.FromReader(new BlobReadContext(_context), reader);
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Instantiation, out var reader))
+            {
+                return _context.BadImageAndReturn<GenericInstanceMethodSignature>(
+                    $"Invalid instantiation blob index in method specification {MetadataToken.ToString()}.");
+            }
+
+            return GenericInstanceMethodSignature.FromReader(new BlobReadContext(_context), ref reader);
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

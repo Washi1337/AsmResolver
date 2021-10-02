@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Serialized
     public class DefaultMethodBodyReader : IMethodBodyReader
     {
         /// <inheritdoc />
-        public MethodBody ReadMethodBody(ModuleReaderContext context, MethodDefinition owner, in MethodDefinitionRow row)
+        public virtual MethodBody? ReadMethodBody(ModuleReaderContext context, MethodDefinition owner, in MethodDefinitionRow row)
         {
             try
             {
@@ -22,8 +22,11 @@ namespace AsmResolver.DotNet.Serialized
                 {
                     if (owner.IsIL)
                     {
-                        var rawBody = CilRawMethodBody.FromReader(context, row.Body.CreateReader());
-                        return CilMethodBody.FromRawMethodBody(context, owner, rawBody);
+                        var reader = row.Body.CreateReader();
+                        var rawBody = CilRawMethodBody.FromReader(context, ref reader);
+                        return rawBody is not null
+                            ? CilMethodBody.FromRawMethodBody(context, owner, rawBody)
+                            : null;
                     }
                     else
                     {

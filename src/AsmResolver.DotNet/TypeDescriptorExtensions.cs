@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name.</param>
         /// <returns><c>true</c> if the name and the namespace of the type matches the provided values,
         /// <c>false</c> otherwise.</returns>
-        public static bool IsTypeOf(this ITypeDescriptor type, string ns, string name) =>
+        public static bool IsTypeOf(this ITypeDescriptor type, string? ns, string? name) =>
             type.Name == name && type.Namespace == ns;
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="type">The element type.</param>
         /// <returns>The constructed array type signature.</returns>
-        public static SzArrayTypeSignature MakeSzArrayType(this ITypeDescriptor type) => 
+        public static SzArrayTypeSignature MakeSzArrayType(this ITypeDescriptor type) =>
             new SzArrayTypeSignature(type.ToTypeSignature());
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet
         /// <param name="type">The element type.</param>
         /// <param name="dimensionCount">The number of dimensions in the array.</param>
         /// <returns>The constructed array type signature.</returns>
-        public static ArrayTypeSignature MakeArrayType(this ITypeDescriptor type, int dimensionCount) => 
+        public static ArrayTypeSignature MakeArrayType(this ITypeDescriptor type, int dimensionCount) =>
             new ArrayTypeSignature(type.ToTypeSignature(), dimensionCount);
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet
         /// <param name="type">The element type.</param>
         /// <param name="dimensions">The dimensions of the array.</param>
         /// <returns>The constructed array type signature.</returns>
-        public static ArrayTypeSignature MakeArrayType(this ITypeDescriptor type, params ArrayDimension[] dimensions) => 
+        public static ArrayTypeSignature MakeArrayType(this ITypeDescriptor type, params ArrayDimension[] dimensions) =>
             new ArrayTypeSignature(type.ToTypeSignature(), dimensions);
 
         /// <summary>

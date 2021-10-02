@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Methods;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Collections
@@ -14,7 +16,7 @@ namespace AsmResolver.DotNet.Tests.Collections
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
             return type.Methods.First(m => m.Name == name);
         }
-        
+
         private static MethodDefinition ObtainInstanceTestMethod(string name)
         {
             var module = ModuleDefinition.FromFile(typeof(InstanceMethods).Assembly.Location);
@@ -60,7 +62,7 @@ namespace AsmResolver.DotNet.Tests.Collections
                 "System.String",
                 typeof(MultipleMethods).FullName
             }, method.Parameters.Select(p => p.ParameterType.FullName));
-            
+
             Assert.Null(method.Parameters.ThisParameter);
         }
 
@@ -92,19 +94,19 @@ namespace AsmResolver.DotNet.Tests.Collections
             var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceMultipleParametersMethod));
             Assert.Equal(new[]
             {
-                "intParameter", 
+                "intParameter",
                 "stringParameter",
                 "boolParameter"
-                
+
             }, method.Parameters.Select(p => p.Name));
-            
+
             Assert.Equal(new[]
             {
                 "System.Int32",
                 "System.String",
                 "System.Boolean",
             }, method.Parameters.Select(p => p.ParameterType.FullName));
-            
+
             Assert.NotNull(method.Parameters.ThisParameter);
             Assert.Equal(nameof(InstanceMethods), method.Parameters.ThisParameter.ParameterType.Name);
         }
@@ -137,9 +139,9 @@ namespace AsmResolver.DotNet.Tests.Collections
             var newType = method.Module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
             method.DeclaringType.Methods.Remove(method);
             newType.Methods.Add(method);
-            
+
             method.Parameters.PullUpdatesFromMethodSignature();
-            
+
             Assert.Equal(nameof(MultipleMethods), method.Parameters.ThisParameter.ParameterType.Name);
         }
 
@@ -150,9 +152,9 @@ namespace AsmResolver.DotNet.Tests.Collections
 
             method.IsStatic = true;
             method.Signature.HasThis = false;
-            
+
             method.Parameters.PullUpdatesFromMethodSignature();
-            
+
             Assert.Null(method.Parameters.ThisParameter);
         }
 
@@ -163,11 +165,30 @@ namespace AsmResolver.DotNet.Tests.Collections
 
             method.IsStatic = false;
             method.Signature.HasThis = true;
-            
+
             method.Parameters.PullUpdatesFromMethodSignature();
-            
+
             Assert.NotNull(method.Parameters.ThisParameter);
             Assert.Equal(nameof(MultipleMethods), method.Parameters.ThisParameter.ParameterType.Name);
+        }
+
+        [Fact]
+        public void ThisParameterOfCorLibShouldResultInCorLibTypeSignature()
+        {
+            var module = ModuleDefinition.FromFile(typeof(object).Assembly.Location);
+            var type = module.CorLibTypeFactory.Object.Type.Resolve();
+            var instanceMethod = type.Methods.First(t => !t.IsStatic);
+            var signature = Assert.IsAssignableFrom<CorLibTypeSignature>(instanceMethod.Parameters.ThisParameter.ParameterType);
+            Assert.Same(module.CorLibTypeFactory.Object, signature);
+        }
+
+        [Fact]
+        public void UnnamedParameterShouldResultInDummyName()
+        {
+            var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceMultipleParametersMethod));
+            foreach (var param in method.ParameterDefinitions)
+                param.Name = null;
+            Assert.All(method.Parameters, p => Assert.Equal(p.Name, $"A_{p.MethodSignatureIndex}"));
         }
     }
 }

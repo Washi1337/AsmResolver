@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -14,9 +15,63 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </remarks>
     public class ArrayTypeSignature : TypeSpecificationSignature
     {
-        internal new static ArrayTypeSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
+        /// <summary>
+        /// Creates a new array type signature.
+        /// </summary>
+        /// <param name="baseType">The element type.</param>
+        public ArrayTypeSignature(TypeSignature baseType)
+            : base(baseType)
         {
-            var signature = new ArrayTypeSignature(TypeSignature.FromReader(context, reader));
+            Dimensions = new List<ArrayDimension>(0);
+        }
+
+        /// <summary>
+        /// Creates a new array type signature with the provided dimensions count.
+        /// </summary>
+        /// <param name="baseType">The element type.</param>
+        /// <param name="dimensionCount">The number of dimensions.</param>
+        public ArrayTypeSignature(TypeSignature baseType, int dimensionCount)
+            : base(baseType)
+        {
+            if (dimensionCount < 0)
+                throw new ArgumentException("Number of dimensions cannot be negative.");
+
+            Dimensions = new List<ArrayDimension>(dimensionCount);
+            for (int i = 0; i < dimensionCount; i++)
+                Dimensions.Add(new ArrayDimension());
+        }
+
+        /// <summary>
+        /// Creates a new array type signature with the provided dimensions count.
+        /// </summary>
+        /// <param name="baseType">The element type.</param>
+        /// <param name="dimensions">The dimensions.</param>
+        public ArrayTypeSignature(TypeSignature baseType, params ArrayDimension[] dimensions)
+            : base(baseType)
+        {
+            Dimensions = new List<ArrayDimension>(dimensions);
+        }
+
+        /// <inheritdoc />
+        public override ElementType ElementType => ElementType.Array;
+
+        /// <inheritdoc />
+        public override string Name => $"{BaseType.Name ?? NullTypeToString}{GetDimensionsString()}";
+
+        /// <inheritdoc />
+        public override bool IsValueType => false;
+
+        /// <summary>
+        /// Gets a collection of dimensions.
+        /// </summary>
+        public IList<ArrayDimension> Dimensions
+        {
+            get;
+        }
+
+        internal new static ArrayTypeSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
+        {
+            var signature = new ArrayTypeSignature(TypeSignature.FromReader(context, ref reader));
 
             // Rank
             if (!reader.TryReadCompressedUInt32(out uint rank))
@@ -77,60 +132,6 @@ namespace AsmResolver.DotNet.Signatures.Types
             }
 
             return signature;
-        }
-
-        /// <summary>
-        /// Creates a new array type signature.
-        /// </summary>
-        /// <param name="baseType">The element type.</param>
-        public ArrayTypeSignature(TypeSignature baseType)
-            : base(baseType)
-        {
-            Dimensions = new List<ArrayDimension>(0);
-        }
-
-        /// <summary>
-        /// Creates a new array type signature with the provided dimensions count.
-        /// </summary>
-        /// <param name="baseType">The element type.</param>
-        /// <param name="dimensionCount">The number of dimensions.</param>
-        public ArrayTypeSignature(TypeSignature baseType, int dimensionCount)
-            : base(baseType)
-        {
-            if (dimensionCount < 0)
-                throw new ArgumentException("Number of dimensions cannot be negative.");
-
-            Dimensions = new List<ArrayDimension>(dimensionCount);
-            for (int i = 0; i < dimensionCount; i++)
-                Dimensions.Add(new ArrayDimension());
-        }
-
-        /// <summary>
-        /// Creates a new array type signature with the provided dimensions count.
-        /// </summary>
-        /// <param name="baseType">The element type.</param>
-        /// <param name="dimensions">The dimensions.</param>
-        public ArrayTypeSignature(TypeSignature baseType, params ArrayDimension[] dimensions)
-            : base(baseType)
-        {
-            Dimensions = new List<ArrayDimension>(dimensions);
-        }
-
-        /// <inheritdoc />
-        public override ElementType ElementType => ElementType.Array;
-
-        /// <inheritdoc />
-        public override string Name => (BaseType?.Name ?? NullTypeToString) + GetDimensionsString();
-
-        /// <inheritdoc />
-        public override bool IsValueType => false;
-
-        /// <summary>
-        /// Gets a collection of dimensions.
-        /// </summary>
-        public IList<ArrayDimension> Dimensions
-        {
-            get;
         }
 
         private string GetDimensionsString()
@@ -218,7 +219,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             writer.WriteCompressedUInt32((uint) sizedDimensions.Length);
             foreach (var sizedDimension in sizedDimensions)
-                writer.WriteCompressedUInt32((uint) sizedDimension.Size.Value);
+                writer.WriteCompressedUInt32((uint) sizedDimension.Size!.Value);
 
             // Bounded dimensions.
             var boundedDimensions = Dimensions
@@ -226,7 +227,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 .ToArray();
             writer.WriteCompressedUInt32((uint) boundedDimensions.Length);
             foreach (var boundedDimension in boundedDimensions)
-                writer.WriteCompressedUInt32((uint) boundedDimension.LowerBound.Value);
+                writer.WriteCompressedUInt32((uint) boundedDimension.LowerBound!.Value);
         }
     }
 }

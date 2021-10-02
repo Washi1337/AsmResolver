@@ -43,12 +43,12 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <param name="offset">The offset of the instruction to find.</param>
         /// <returns>The instruction with the provided offset, or null if none could be found.</returns>
         /// <remarks>Requires the offsets of the instructions pre-calculated.</remarks>
-        public static CilInstruction GetByOffset(this IList<CilInstruction> self, int offset)
+        public static CilInstruction? GetByOffset(this IList<CilInstruction> self, int offset)
         {
             int index = GetIndexByOffset(self, offset);
-            return index == -1
-                ? null
-                : self[index];
+            return index != -1
+                ? self[index]
+                : null;
         }
     }
 }

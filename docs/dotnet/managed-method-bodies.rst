@@ -40,6 +40,7 @@ Instructions that are assembled into the method body are automatically disassemb
     var instructions = body.Instructions;
 
 The ``CilInstruction`` class defines three basic properties:
+
 - ``Offset``: The offset of the instruction, relative to the start of the code stream.
 - ``OpCode``: The operation the instruction performs.
 - ``Operand``: The operand of the instruction.
@@ -194,6 +195,9 @@ Below an example on how to use the ``ReferenceImporter`` to emit a call to ``Con
     var writeLine = importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] { typeof(string) } );
 
     body.Instructions.Add(new CilInstruction(CilOpCodes.Call, writeLine));
+
+
+More information on the capabilities and limitations of the ``ReferenceImporter`` can be found in :ref:`dotnet-reference-importing`.
 
 
 Expanding and optimising macros

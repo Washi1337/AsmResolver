@@ -125,7 +125,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     _buffer.Append(currentChar);
             }
 
-            return new TypeNameToken(terminal, _buffer.ToString().Trim());
+            return new TypeNameToken(terminal, _buffer.ToString().Trim(' '));
         }
 
         private TypeNameToken ReadIdentifierToken()
@@ -159,7 +159,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     _buffer.Append(currentChar);
             }
 
-            return new TypeNameToken(TypeNameTerminal.Identifier, _buffer.ToString().Trim());
+            return new TypeNameToken(TypeNameTerminal.Identifier, _buffer.ToString().Trim(' '));
         }
 
         private TypeNameToken ReadSymbolToken(TypeNameTerminal terminal)

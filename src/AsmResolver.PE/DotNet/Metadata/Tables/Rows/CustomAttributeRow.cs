@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the custom attribute metadata table.
     /// </summary>
-    public readonly struct CustomAttributeRow : IMetadataRow
+    public struct CustomAttributeRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single custom attribute row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the custom attribute table.</param>
         /// <returns>The row.</returns>
-        public static CustomAttributeRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static CustomAttributeRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new CustomAttributeRow(
                 reader.ReadIndex((IndexSize) layout.Columns[0].Size),
@@ -42,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 
         /// <inheritdoc />
         public int Count => 3;
-        
+
         /// <inheritdoc />
         public uint this[int index] => index switch
         {
@@ -51,7 +52,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             2 => Value,
             _ => throw new IndexOutOfRangeException()
         };
-        
+
         /// <summary>
         /// Gets a HasCustomAttribute index (an index into either the Method, Field, TypeRef, TypeDef,
         /// Param, InterfaceImpl, MemberRef, Module, DeclSecurity, Property, Event, StandAloneSig, ModuleRef,
@@ -61,6 +62,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Parent
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -70,14 +72,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Type
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Blob stream containing the arguments of the constructor call.
+        /// Gets or sets an index into the #Blob stream containing the arguments of the constructor call.
         /// </summary>
         public uint Value
         {
             get;
+            set;
         }
 
         /// <summary>

@@ -12,6 +12,8 @@ Table of Contents:
    :name: sec-general
 
    overview
+   faq
+
 
 .. toctree::
    :maxdepth: 1
@@ -35,6 +37,8 @@ Table of Contents:
    peimage/imports
    peimage/exports
    peimage/win32resources
+   peimage/exceptions
+   peimage/debug
    peimage/dotnet
 
 

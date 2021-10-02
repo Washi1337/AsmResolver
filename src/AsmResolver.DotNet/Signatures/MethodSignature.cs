@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -17,9 +18,10 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The method signature.</returns>
-        public static MethodSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
+        public static MethodSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
-            var result = new MethodSignature((CallingConventionAttributes) reader.ReadByte());
+            var result = new MethodSignature((CallingConventionAttributes) reader.ReadByte(),
+                context.ReaderContext.ParentModule.CorLibTypeFactory.Void, Enumerable.Empty<TypeSignature>());
 
             // Generic parameter count.
             if (result.IsGeneric)
@@ -33,7 +35,7 @@ namespace AsmResolver.DotNet.Signatures
                 result.GenericParameterCount = (int) genericParameterCount;
             }
 
-            result.ReadParametersAndReturnType(context, reader);
+            result.ReadParametersAndReturnType(context, ref reader);
             return result;
         }
 
@@ -90,15 +92,6 @@ namespace AsmResolver.DotNet.Signatures
             => new MethodSignature(CallingConventionAttributes.HasThis, returnType, parameterTypes);
 
         /// <summary>
-        /// Initializes an empty method signature with no parameters.
-        /// </summary>
-        /// <param name="attributes">The attributes</param>
-        protected internal MethodSignature(CallingConventionAttributes attributes)
-            : base(attributes, null, Enumerable.Empty<TypeSignature>())
-        {
-        }
-
-        /// <summary>
         /// Creates a new method signature with the provided return and parameter types.
         /// </summary>
         /// <param name="attributes">The attributes.</param>
@@ -130,6 +123,12 @@ namespace AsmResolver.DotNet.Signatures
         /// </remarks>
         public MethodSignature InstantiateGenericTypes(GenericContext context)
             => GenericTypeActivator.Instance.InstantiateMethodSignature(this, context);
+
+        /// <summary>
+        /// Constructs a new function pointer type signature based on this method signature.
+        /// </summary>
+        /// <returns>The new type signature.</returns>
+        public FunctionPointerTypeSignature MakeFunctionPointerType() => new(this);
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

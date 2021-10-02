@@ -1,4 +1,3 @@
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Marshal;
 
 namespace AsmResolver.DotNet
@@ -13,7 +12,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the description on how a specific value needs to be marshaled upon calling to or from unmanaged
         /// code via P/Invoke dispatch.
         /// </summary>
-        MarshalDescriptor MarshalDescriptor
+        MarshalDescriptor? MarshalDescriptor
         {
             get;
             set;

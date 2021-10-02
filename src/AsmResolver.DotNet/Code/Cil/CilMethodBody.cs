@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -144,18 +145,18 @@ namespace AsmResolver.DotNet.Code.Cil
             dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
 
             //Get Runtime Fields
-            byte[] code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code");
-            var scope = FieldReader.ReadField<object>(dynamicMethodObj, "m_scope");
-            var tokenList = FieldReader.ReadField<List<object>>(scope, "m_tokens");
-            byte[] localSig = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_localSignature");
-            byte[] ehHeader = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_exceptionHeader");
-            var ehInfos = FieldReader.ReadField<IList<object>>(dynamicMethodObj, "m_exceptions");
+            byte[] code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code")!;
+            object scope = FieldReader.ReadField<object>(dynamicMethodObj, "m_scope")!;
+            var tokenList = FieldReader.ReadField<List<object>>(scope, "m_tokens")!;
+            byte[] localSig = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_localSignature")!;
+            byte[] ehHeader = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_exceptionHeader")!;
+            var ehInfos = FieldReader.ReadField<IList<object>>(dynamicMethodObj, "m_exceptions")!;
 
             //Local Variables
             DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
 
             // Read raw instructions.
-            var reader = new ByteArrayReader(code);
+            var reader = ByteArrayDataSource.CreateReader(code);
             var disassembler = new CilDisassembler(reader, new DynamicCilOperandResolver(module, result, tokenList));
             result.Instructions.AddRange(disassembler.ReadInstructions());
 
@@ -178,7 +179,7 @@ namespace AsmResolver.DotNet.Code.Cil
             ModuleReaderContext context,
             MethodDefinition method,
             CilRawMethodBody rawBody,
-            ICilOperandResolver operandResolver = null)
+            ICilOperandResolver? operandResolver = null)
         {
             var result = new CilMethodBody(method);
 
@@ -190,7 +191,7 @@ namespace AsmResolver.DotNet.Code.Cil
             {
                 result.MaxStack = fatBody.MaxStack;
                 result.InitializeLocals = fatBody.InitLocals;
-                ReadLocalVariables(method.Module, result, fatBody);
+                ReadLocalVariables(context.ParentModule, result, fatBody);
             }
             else
             {
@@ -228,7 +229,7 @@ namespace AsmResolver.DotNet.Code.Cil
             ICilOperandResolver operandResolver,
             CilRawMethodBody rawBody)
         {
-            var reader = new ByteArrayReader(rawBody.Code);
+            var reader = rawBody.Code.CreateReader();
             var disassembler = new CilDisassembler(reader, operandResolver);
             result.Instructions.AddRange(disassembler.ReadInstructions());
         }
@@ -240,13 +241,13 @@ namespace AsmResolver.DotNet.Code.Cil
                 var section = fatBody.ExtraSections[i];
                 if (section.IsEHTable)
                 {
-                    var reader = new ByteArrayReader(section.Data);
-                    int size = section.IsFat
+                    var reader = ByteArrayDataSource.CreateReader(section.Data);
+                    uint size = section.IsFat
                         ? CilExceptionHandler.FatExceptionHandlerSize
                         : CilExceptionHandler.TinyExceptionHandlerSize;
 
                     while (reader.CanRead(size))
-                        result.ExceptionHandlers.Add(CilExceptionHandler.FromReader(result, reader, section.IsFat));
+                        result.ExceptionHandlers.Add(CilExceptionHandler.FromReader(result, ref reader, section.IsFat));
                 }
             }
         }

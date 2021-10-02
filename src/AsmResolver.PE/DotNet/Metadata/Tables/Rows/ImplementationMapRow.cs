@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the implementation map metadata table.
     /// </summary>
-    public readonly struct ImplementationMapRow : IMetadataRow
+    public struct ImplementationMapRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single implementation map row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the implementation map table.</param>
         /// <returns>The row.</returns>
-        public static ImplementationMapRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static ImplementationMapRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new ImplementationMapRow(
                 (ImplementationMapAttributes) reader.ReadUInt16(),
@@ -39,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             ImportName = importName;
             ImportScope = importScope;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.ImplMap;
 
@@ -57,7 +58,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the attributes associated to the implementation mapping.
+        /// Gets or sets the attributes associated to the implementation mapping.
         /// </summary>
         public ImplementationMapAttributes Attributes
         {
@@ -71,22 +72,25 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint MemberForwarded
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the name of the imported member.
+        /// Gets or sets an index into the #Strings stream referencing the name of the imported member.
         /// </summary>
         public uint ImportName
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the ModuleRef table indicating the module that this imported member defines.
+        /// Gets or sets an index into the ModuleRef table indicating the module that this imported member defines.
         /// </summary>
         public uint ImportScope
         {
             get;
+            set;
         }
 
         /// <inheritdoc />
@@ -106,8 +110,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public bool Equals(ImplementationMapRow other)
         {
             return Attributes == other.Attributes
-                   && MemberForwarded == other.MemberForwarded 
-                   && ImportName == other.ImportName 
+                   && MemberForwarded == other.MemberForwarded
+                   && ImportName == other.ImportName
                    && ImportScope == other.ImportScope;
         }
 

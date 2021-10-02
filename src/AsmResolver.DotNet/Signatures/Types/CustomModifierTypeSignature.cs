@@ -1,4 +1,3 @@
-using System;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -58,8 +57,8 @@ namespace AsmResolver.DotNet.Signatures.Types
             {
                 string modifierString = IsRequired ? "modreq(" : "modopt(";
 
-                string baseType = BaseType?.Name ?? NullTypeToString;
-                string modifier = ModifierType?.FullName ?? NullTypeToString;
+                string baseType = BaseType.Name ?? NullTypeToString;
+                string modifier = ModifierType.FullName;
                 return $"{baseType} {modifierString}{modifier})";
             }
         }

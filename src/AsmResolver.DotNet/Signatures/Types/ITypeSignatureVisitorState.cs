@@ -3,9 +3,9 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// <summary>
     /// Provides members for visiting type signatures.
     /// </summary>
-    /// <typeparam name="TSTate">The type of additional state.</typeparam>
+    /// <typeparam name="TState">The type of additional state.</typeparam>
     /// <typeparam name="TResult">The type of value to return.</typeparam>
-    public interface ITypeSignatureVisitor<in TSTate, out TResult>
+    public interface ITypeSignatureVisitor<in TState, out TResult>
     {
         /// <summary>
         /// Visits an instance of an <see cref="ArrayTypeSignature"/>.
@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitArrayType(ArrayTypeSignature signature, TSTate state);
+        TResult VisitArrayType(ArrayTypeSignature signature, TState state);
 
         /// <summary>
         /// Visits an instance of a <see cref="BoxedTypeSignature"/>.
@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitBoxedType(BoxedTypeSignature signature, TSTate state);
+        TResult VisitBoxedType(BoxedTypeSignature signature, TState state);
 
         /// <summary>
         /// Visits an instance of a <see cref="ByReferenceTypeSignature"/>.
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitByReferenceType(ByReferenceTypeSignature signature, TSTate state);
+        TResult VisitByReferenceType(ByReferenceTypeSignature signature, TState state);
 
         /// <summary>
         /// Visits an instance of a <see cref="CorLibTypeSignature"/>.
@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitCorLibType(CorLibTypeSignature signature, TSTate state);
+        TResult VisitCorLibType(CorLibTypeSignature signature, TState state);
 
         /// <summary>
         /// Visits an instance of a <see cref="CustomModifierTypeSignature"/>.
@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitCustomModifierType(CustomModifierTypeSignature signature, TSTate state);
+        TResult VisitCustomModifierType(CustomModifierTypeSignature signature, TState state);
 
         /// <summary>
         /// Visits an instance of a <see cref="GenericInstanceTypeSignature"/>.
@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitGenericInstanceType(GenericInstanceTypeSignature signature, TSTate state);
+        TResult VisitGenericInstanceType(GenericInstanceTypeSignature signature, TState state);
 
         /// <summary>
         /// Visits an instance of a <see cref="GenericParameterSignature"/>.
@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitGenericParameter(GenericParameterSignature signature, TSTate state);
+        TResult VisitGenericParameter(GenericParameterSignature signature, TState state);
 
         /// <summary>
         /// Visits an instance of a <see cref="PinnedTypeSignature"/>.
@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitPinnedType(PinnedTypeSignature signature, TSTate state);
+        TResult VisitPinnedType(PinnedTypeSignature signature, TState state);
 
         /// <summary>
         /// Visits an instance of a <see cref="PointerTypeSignature"/>.
@@ -77,7 +77,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitPointerType(PointerTypeSignature signature, TSTate state);
+        TResult VisitPointerType(PointerTypeSignature signature, TState state);
 
         /// <summary>
         /// Visits an instance of a <see cref="SentinelTypeSignature"/>.
@@ -85,7 +85,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitSentinelType(SentinelTypeSignature signature, TSTate state);
+        TResult VisitSentinelType(SentinelTypeSignature signature, TState state);
 
         /// <summary>
         /// Visits an instance of a <see cref="SzArrayTypeSignature"/>.
@@ -93,7 +93,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitSzArrayType(SzArrayTypeSignature signature, TSTate state);
+        TResult VisitSzArrayType(SzArrayTypeSignature signature, TState state);
 
         /// <summary>
         /// Visits an instance of a <see cref="TypeDefOrRefSignature"/>.
@@ -101,7 +101,15 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="signature">The signature to visit.</param>
         /// <param name="state">Additional state.</param>
         /// <returns>The result provided by the visitor.</returns>
-        TResult VisitTypeDefOrRef(TypeDefOrRefSignature signature, TSTate state);
+        TResult VisitTypeDefOrRef(TypeDefOrRefSignature signature, TState state);
+
+        /// <summary>
+        /// Visits an instance of a <see cref="FunctionPointerTypeSignature"/>.
+        /// </summary>
+        /// <param name="signature">The signature to visit.</param>
+        /// <param name="context">Additional state.</param>
+        /// <returns>The result provided by the visitor.</returns>
+        TResult VisitFunctionPointerType(FunctionPointerTypeSignature signature, TState context);
     }
 
 }

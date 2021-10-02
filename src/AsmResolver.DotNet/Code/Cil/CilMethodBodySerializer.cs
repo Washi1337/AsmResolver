@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -34,7 +35,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             get;
             set;
-        } = null;
+        }
 
         /// <summary>
         /// Gets or sets the value of an override switch indicating whether labels should always be verified for
@@ -83,7 +84,7 @@ namespace AsmResolver.DotNet.Code.Cil
             }
             catch (Exception ex)
             {
-                context.DiagnosticBag.RegisterException(ex);
+                context.ErrorListener.RegisterException(ex);
             }
 
             // Serialize CIL stream.
@@ -115,7 +116,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 token = context.TokenProvider.GetStandAloneSignatureToken(standAloneSig);
             }
 
-            var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, code);
+            var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, new DataSegment(code));
             fatBody.InitLocals = body.InitializeLocals;
 
             // Build up EH table section.
@@ -139,7 +140,7 @@ namespace AsmResolver.DotNet.Code.Cil
         private static byte[] BuildRawCodeStream(MethodBodySerializationContext context, CilMethodBody body)
         {
             using var codeStream = new MemoryStream();
-            var bag = context.DiagnosticBag;
+            var bag = context.ErrorListener;
 
             var writer = new BinaryStreamWriter(codeStream);
             var assembler = new CilAssembler(
@@ -172,22 +173,27 @@ namespace AsmResolver.DotNet.Code.Cil
             if (handler.IsFat && !useFatFormat)
                 throw new InvalidOperationException("Can only serialize fat exception handlers in fat format.");
 
+            uint tryStart = (uint) (handler.TryStart?.Offset ?? 0);
+            uint tryEnd= (uint) (handler.TryEnd?.Offset ?? 0);
+            uint handlerStart = (uint) (handler.HandlerStart?.Offset ?? 0);
+            uint handlerEnd = (uint) (handler.HandlerEnd?.Offset ?? 0);
+
             // Write handler type and boundaries.
             if (useFatFormat)
             {
                 writer.WriteUInt32((uint) handler.HandlerType);
-                writer.WriteUInt32((uint) handler.TryStart.Offset);
-                writer.WriteUInt32((uint) (handler.TryEnd.Offset - handler.TryStart.Offset));
-                writer.WriteUInt32((uint) handler.HandlerStart.Offset);
-                writer.WriteUInt32((uint) (handler.HandlerEnd.Offset - handler.HandlerStart.Offset));
+                writer.WriteUInt32(tryStart);
+                writer.WriteUInt32(tryEnd - tryStart);
+                writer.WriteUInt32(handlerStart);
+                writer.WriteUInt32(handlerEnd - handlerStart);
             }
             else
             {
                 writer.WriteUInt16((ushort)handler. HandlerType);
-                writer.WriteUInt16((ushort) handler.TryStart.Offset);
-                writer.WriteByte((byte) (handler.TryEnd.Offset -handler. TryStart.Offset));
-                writer.WriteUInt16((ushort) handler.HandlerStart.Offset);
-                writer.WriteByte((byte) (handler.HandlerEnd.Offset - handler.HandlerStart.Offset));
+                writer.WriteUInt16((ushort) tryStart);
+                writer.WriteByte((byte) (tryEnd - tryStart));
+                writer.WriteUInt16((ushort) handlerStart);
+                writer.WriteByte((byte) (handlerEnd - handlerStart));
             }
 
             // Write handler type or filter start.
@@ -202,7 +208,7 @@ namespace AsmResolver.DotNet.Code.Cil
                         TypeReference typeReference => provider.GetTypeReferenceToken(typeReference),
                         TypeDefinition typeDefinition => provider.GetTypeDefinitionToken(typeDefinition),
                         TypeSpecification typeSpecification => provider.GetTypeSpecificationToken(typeSpecification),
-                        _ => context.DiagnosticBag.RegisterExceptionAndReturnDefault<MetadataToken>(
+                        _ => context.ErrorListener.RegisterExceptionAndReturnDefault<MetadataToken>(
                             new ArgumentOutOfRangeException(
                                 $"Invalid or unsupported exception type ({handler.ExceptionType.SafeToString()})"))
                     };
@@ -211,7 +217,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 }
 
                 case CilExceptionHandlerType.Filter:
-                    writer.WriteUInt32((uint) handler.FilterStart.Offset);
+                    writer.WriteUInt32((uint) (handler.FilterStart?.Offset ?? 0));
                     break;
 
                 case CilExceptionHandlerType.Finally:
@@ -220,7 +226,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     break;
 
                 default:
-                    context.DiagnosticBag.RegisterException(new ArgumentOutOfRangeException(
+                    context.ErrorListener.RegisterException(new ArgumentOutOfRangeException(
                             $"Invalid or unsupported handler type ({handler.HandlerType.SafeToString()}"));
                     break;
             }

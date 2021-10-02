@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
 
@@ -11,10 +12,8 @@ namespace AsmResolver.DotNet.Code.Native
     /// </summary>
     public class NativeSymbolsProvider : INativeSymbolsProvider
     {
-        private readonly Dictionary<string, IImportedModule> _modules = new Dictionary<string, IImportedModule>();
-
-        private readonly Dictionary<ISegmentReference, BaseRelocation> _relocations =
-            new Dictionary<ISegmentReference, BaseRelocation>();
+        private readonly Dictionary<string, IImportedModule> _modules = new();
+        private readonly Dictionary<ISegmentReference, BaseRelocation> _relocations =new();
 
         /// <summary>
         /// Creates a new instance of the <see cref="NativeSymbolsProvider"/> class.
@@ -24,7 +23,7 @@ namespace AsmResolver.DotNet.Code.Native
         {
             ImageBase = imageBase;
         }
-        
+
         /// <inheritdoc />
         public ulong ImageBase
         {
@@ -44,10 +43,13 @@ namespace AsmResolver.DotNet.Code.Native
         {
             if (symbol.DeclaringModule is null)
                 throw new ArgumentException($"Symbol {symbol} is not added to a module.");
-         
+
             // Find declaring module.
-            var module = GetModuleByName(symbol.DeclaringModule.Name);
-            
+            string? moduleName = symbol.DeclaringModule.Name;
+            if (moduleName is null)
+                throw new ArgumentException($"Parent module for symbol {symbol} has no name.");
+            var module = GetModuleByName(moduleName);
+
             // See if we have already imported this symbol before.
             if (TryGetSimilarSymbol(symbol, module, out var existing))
                 return existing;
@@ -65,13 +67,16 @@ namespace AsmResolver.DotNet.Code.Native
             if (!_modules.TryGetValue(name, out var module))
             {
                 module = new ImportedModule(name);
-                _modules.Add(module.Name, module);
+                _modules.Add(module.Name!, module);
             }
 
             return module;
         }
 
-        private static bool TryGetSimilarSymbol(ImportedSymbol symbol, IImportedModule module, out ImportedSymbol existingSymbol)
+        private static bool TryGetSimilarSymbol(
+            ImportedSymbol symbol,
+            IImportedModule module,
+            [NotNullWhen(true)] out ImportedSymbol? existingSymbol)
         {
             for (int i = 0; i < module.Symbols.Count; i++)
             {

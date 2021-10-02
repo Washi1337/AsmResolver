@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Indicates configuration properties to configure the runtime and the framework
         /// </summary>
-        public Dictionary<string, JsonElement> ConfigProperties
+        public Dictionary<string, JsonElement>? ConfigProperties
         {
             get;
             set;
@@ -52,7 +52,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// Gets or sets the optional string value which specifies the Target Framework Moniker.
         /// </summary>
         [JsonPropertyName("tfm")]
-        public string TargetFrameworkMoniker
+        public string? TargetFrameworkMoniker
         {
             get;
             set;
@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// The presence of this section (or another framework in the new frameworks section) indicates
         /// that the application is a framework-dependent app.
         /// </remarks>
-        public RuntimeFramework Framework
+        public RuntimeFramework? Framework
         {
             get;
             set;
@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Gets an optional array (added in .NET Core 3.0) that allows multiple frameworks to be specified.
         /// </summary>
-        public List<RuntimeFramework> IncludedFrameworks
+        public List<RuntimeFramework>? IncludedFrameworks
         {
             get;
             set;
@@ -104,7 +104,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// Optional property which specifies additional paths to consider when looking for dependencies.
         /// The value is either a single string, or an array of strings.
         /// </summary>
-        public List<string> AdditionalProbingPaths
+        public List<string>? AdditionalProbingPaths
         {
             get;
             set;

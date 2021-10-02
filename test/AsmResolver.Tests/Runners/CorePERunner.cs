@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -6,12 +7,19 @@ namespace AsmResolver.Tests.Runners
     public class CorePERunner : PERunner
     {
         private readonly string _template;
-        
+
         public CorePERunner(string basePath)
             : base(basePath)
         {
             using var stream = typeof(CorePERunner).Assembly.GetManifestResourceStream(
                 "AsmResolver.Tests.Resources.RuntimeConfigTemplate.txt");
+
+            if (stream is null)
+            {
+                throw new ArgumentException(
+                    "RuntimeConfigTemplate.txt not found. Test library might not be built correctly.");
+            }
+
             using var reader = new StreamReader(stream);
 
             _template = reader.ReadToEnd();
@@ -26,9 +34,9 @@ namespace AsmResolver.Tests.Runners
                     .Replace("%version%", "3.1.0")
                     .Replace("%name%", "Microsoft.NETCore.App")
                 ;
-            
+
             File.WriteAllText(Path.ChangeExtension(filePath, ".runtimeconfig.json"), deps);
-            
+
             return new ProcessStartInfo
             {
                 FileName = "dotnet",

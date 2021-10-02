@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.Win32Resources
 {
     /// <summary>
@@ -8,14 +11,14 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Gets or sets the raw contents of the data entry.
         /// </summary>
-        ISegment Contents
+        ISegment? Contents
         {
             get;
             set;
         }
 
         /// <summary>
-        /// Gets or sets the code page that is used to decode code point values within the resource data. 
+        /// Gets or sets the code page that is used to decode code point values within the resource data.
         /// </summary>
         /// <remarks>
         /// Typically, the code page would be the Unicode code page.
@@ -29,6 +32,7 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Gets a value indicating whether the <see cref="Contents"/> is readable using a binary stream reader.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Contents))]
         bool CanRead
         {
             get;
@@ -38,6 +42,6 @@ namespace AsmResolver.PE.Win32Resources
         /// Creates a new binary stream reader that reads the raw contents of the resource file.
         /// </summary>
         /// <returns>The reader.</returns>
-        IBinaryStreamReader CreateReader();
+        BinaryStreamReader CreateReader();
     }
 }

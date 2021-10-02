@@ -42,7 +42,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <remarks>
         /// This constructor does not do any verification on the correctness of the instruction.
         /// </remarks>
-        public CilInstruction(CilOpCode opCode, object operand)
+        public CilInstruction(CilOpCode opCode, object? operand)
             : this(0, opCode, operand)
         {
         }
@@ -56,7 +56,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <remarks>
         /// This constructor does not do any verification on the correctness of the instruction.
         /// </remarks>
-        public CilInstruction(int offset, CilOpCode opCode, object operand)
+        public CilInstruction(int offset, CilOpCode opCode, object? operand)
         {
             Offset = offset;
             OpCode = opCode;
@@ -84,7 +84,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// Gets or sets the operand of the instruction, if available.
         /// </summary>
-        public object Operand
+        public object? Operand
         {
             get;
             set;
@@ -112,10 +112,10 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="value">The constant to push.</param>
         /// <returns>The operation code and operand.</returns>
-        public static (CilOpCode code, object operand) GetLdcI4OpCodeOperand(int value)
+        public static (CilOpCode code, object? operand) GetLdcI4OpCodeOperand(int value)
         {
             CilOpCode code;
-            object operand = null;
+            object? operand = null;
             switch (value)
             {
                 case -1:
@@ -148,7 +148,7 @@ namespace AsmResolver.PE.DotNet.Cil
                 case 8:
                     code = CilOpCodes.Ldc_I4_8;
                     break;
-                case { } x when x >= sbyte.MinValue && x <= sbyte.MaxValue:
+                case var x and <= sbyte.MaxValue and >= sbyte.MinValue:
                     code = CilOpCodes.Ldc_I4_S;
                     operand = (sbyte) x;
                     break;
@@ -161,31 +161,31 @@ namespace AsmResolver.PE.DotNet.Cil
             return (code, operand);
         }
 
-        private int GetOperandSize() =>
-            OpCode.OperandType switch
-            {
-                CilOperandType.InlineNone => 0,
-                CilOperandType.ShortInlineI => sizeof(sbyte),
-                CilOperandType.ShortInlineArgument => sizeof(sbyte),
-                CilOperandType.ShortInlineBrTarget => sizeof(sbyte),
-                CilOperandType.ShortInlineVar => sizeof(sbyte),
-                CilOperandType.InlineVar => sizeof(ushort),
-                CilOperandType.InlineArgument => sizeof(ushort),
-                CilOperandType.InlineBrTarget => sizeof(uint),
-                CilOperandType.InlineI => sizeof(uint),
-                CilOperandType.InlineField => sizeof(uint),
-                CilOperandType.InlineMethod => sizeof(uint),
-                CilOperandType.InlineSig => sizeof(uint),
-                CilOperandType.InlineString => sizeof(uint),
-                CilOperandType.InlineTok => sizeof(uint),
-                CilOperandType.InlineType => sizeof(uint),
-                CilOperandType.InlineI8 => sizeof(ulong),
-                CilOperandType.ShortInlineR => sizeof(float),
-                CilOperandType.InlineR => sizeof(double),
-                CilOperandType.InlineSwitch => (((IList<ICilLabel>) Operand).Count + 1) * sizeof(int),
-                CilOperandType.InlinePhi => throw new NotSupportedException(),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+        private int GetOperandSize() => OpCode.OperandType switch
+        {
+            CilOperandType.InlineNone => 0,
+            CilOperandType.ShortInlineI => sizeof(sbyte),
+            CilOperandType.ShortInlineArgument => sizeof(sbyte),
+            CilOperandType.ShortInlineBrTarget => sizeof(sbyte),
+            CilOperandType.ShortInlineVar => sizeof(sbyte),
+            CilOperandType.InlineVar => sizeof(ushort),
+            CilOperandType.InlineArgument => sizeof(ushort),
+            CilOperandType.InlineBrTarget => sizeof(uint),
+            CilOperandType.InlineI => sizeof(uint),
+            CilOperandType.InlineField => sizeof(uint),
+            CilOperandType.InlineMethod => sizeof(uint),
+            CilOperandType.InlineSig => sizeof(uint),
+            CilOperandType.InlineString => sizeof(uint),
+            CilOperandType.InlineTok => sizeof(uint),
+            CilOperandType.InlineType => sizeof(uint),
+            CilOperandType.InlineI8 => sizeof(ulong),
+            CilOperandType.ShortInlineR => sizeof(float),
+            CilOperandType.InlineR => sizeof(double),
+            CilOperandType.InlineSwitch when Operand is IList<ICilLabel> targets => (targets.Count + 1) * sizeof(int),
+            CilOperandType.InlineSwitch => sizeof(uint),
+            CilOperandType.InlinePhi => throw new NotSupportedException(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
         /// <inheritdoc />
         public override string ToString() => CilInstructionFormatter.Instance.FormatInstruction(this);
@@ -211,7 +211,7 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <inheritdoc />
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj))
                 return false;
@@ -229,7 +229,7 @@ namespace AsmResolver.PE.DotNet.Cil
             {
                 int hashCode = Offset;
                 hashCode = (hashCode * 397) ^ OpCode.GetHashCode();
-                hashCode = (hashCode * 397) ^ (Operand != null ? Operand.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Operand is not null ? Operand.GetHashCode() : 0);
                 return hashCode;
             }
         }
@@ -316,9 +316,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// Determines whether the instruction is a branching instruction (either conditional or unconditional).
         /// </summary>
-        public bool IsBranch() =>
-            OpCode.FlowControl == CilFlowControl.Branch
-            || OpCode.FlowControl == CilFlowControl.ConditionalBranch;
+        public bool IsBranch() => OpCode.FlowControl is CilFlowControl.Branch or CilFlowControl.ConditionalBranch;
 
         /// <summary>
         /// Determines whether the instruction is an unconditional branch instruction.
@@ -361,8 +359,8 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         public int GetLdcI4Constant() => OpCode.Code switch
         {
-            CilCode.Ldc_I4 => (int) Operand,
-            CilCode.Ldc_I4_S => (sbyte) Operand,
+            CilCode.Ldc_I4 => (int) (Operand ?? 0),
+            CilCode.Ldc_I4_S => (sbyte) (Operand ?? (sbyte) 0),
             CilCode.Ldc_I4_0 => 0,
             CilCode.Ldc_I4_1 => 1,
             CilCode.Ldc_I4_2 => 2,

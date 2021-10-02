@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using AsmResolver.PE.File;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Exports
 {
@@ -22,9 +22,9 @@ namespace AsmResolver.PE.Exports
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
-        public SerializedExportDirectory(PEReaderContext context, IBinaryStreamReader reader)
+        public SerializedExportDirectory(PEReaderContext context, ref BinaryStreamReader reader)
         {
-            if (reader == null)
+            if (!reader.IsValid)
                 throw new ArgumentNullException(nameof(reader));
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
@@ -42,14 +42,14 @@ namespace AsmResolver.PE.Exports
         }
 
         /// <inheritdoc />
-        protected override string GetName()
+        protected override string? GetName()
         {
             if (!_context.File.TryCreateReaderAtRva(_nameRva, out var reader))
             {
                 _context.BadImage("Export directory contains an invalid name RVA.");
                 return null;
             }
-            
+
             return reader.ReadAsciiString();
         }
 
@@ -57,36 +57,48 @@ namespace AsmResolver.PE.Exports
         protected override IList<ExportedSymbol> GetExports()
         {
             var result = new ExportedSymbolCollection(this);
-
-            if (!_context.File.TryCreateReaderAtRva(_addressTableRva, out var addressReader))
-                _context.BadImage("Export directory contains an invalid address table RVA.");
-            
-            if (!_context.File.TryCreateReaderAtRva(_namePointerRva, out var namePointerReader))
-                _context.BadImage("Export directory contains an invalid name pointer table RVA.");
-
-            if (!_context.File.TryCreateReaderAtRva(_ordinalTableRva, out var ordinalReader))
-                _context.BadImage("Export directory contains an invalid ordinal table RVA.");
-            
-            if (addressReader is null || namePointerReader is null || ordinalReader is null)
+            if (_numberOfFunctions == 0)
                 return result;
 
-            var ordinalNameTable = ReadOrdinalNameTable(namePointerReader, ordinalReader);
+            if (!_context.File.TryCreateReaderAtRva(_addressTableRva, out var addressReader))
+            {
+                _context.BadImage("Export directory contains an invalid address table RVA.");
+                return result;
+            }
+
+            IDictionary<uint, string>? ordinalNameTable = null;
+
+            if (_namePointerRva != 0 || _ordinalTableRva != 0)
+            {
+                if (!_context.File.TryCreateReaderAtRva(_namePointerRva, out var namePointerReader))
+                    _context.BadImage("Export directory contains an invalid name pointer table RVA.");
+
+                if (!_context.File.TryCreateReaderAtRva(_ordinalTableRva, out var ordinalReader))
+                    _context.BadImage("Export directory contains an invalid ordinal table RVA.");
+
+                if (namePointerReader.IsValid || ordinalReader.IsValid)
+                    ordinalNameTable = ReadOrdinalNameTable(ref namePointerReader, ref ordinalReader);
+            }
 
             for (uint i = 0; i < _numberOfFunctions; i++)
             {
                 uint rva = addressReader.ReadUInt32();
-                ordinalNameTable.TryGetValue(i, out string name);
+
+                string? name = null;
+                ordinalNameTable?.TryGetValue(i, out name);
+
                 result.Add(new ExportedSymbol(_context.File.GetReferenceToRva(rva), name));
             }
 
             return result;
         }
 
-        private IDictionary<uint, string> ReadOrdinalNameTable(
-            IBinaryStreamReader namePointerReader, IBinaryStreamReader ordinalReader)
+        private Dictionary<uint, string> ReadOrdinalNameTable(
+            ref BinaryStreamReader namePointerReader,
+            ref BinaryStreamReader ordinalReader)
         {
             var result = new Dictionary<uint, string>();
-            
+
             for (int i = 0; i < _numberOfNames; i++)
             {
                 uint ordinal = ordinalReader.ReadUInt16();
@@ -97,6 +109,6 @@ namespace AsmResolver.PE.Exports
             }
 
             return result;
-        } 
+        }
     }
 }

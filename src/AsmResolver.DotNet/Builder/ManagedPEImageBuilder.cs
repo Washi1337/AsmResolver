@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -52,8 +50,8 @@ namespace AsmResolver.DotNet.Builder
         {
             var context = new PEImageBuildContext();
 
-            PEImage image = null;
-            ITokenMapping tokenMapping = null;
+            PEImage? image = null;
+            ITokenMapping? tokenMapping = null;
 
             try
             {

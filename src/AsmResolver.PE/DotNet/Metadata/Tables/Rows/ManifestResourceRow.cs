@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the manifest resource metadata table.
     /// </summary>
-    public readonly struct ManifestResourceRow : IMetadataRow
+    public struct ManifestResourceRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single manifest resource row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the manifest resource table.</param>
         /// <returns>The row.</returns>
-        public static ManifestResourceRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static ManifestResourceRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new ManifestResourceRow(
                 reader.ReadUInt32(),
@@ -23,7 +24,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size),
                 reader.ReadIndex((IndexSize) layout.Columns[3].Size));
         }
-        
+
         /// <summary>
         /// Creates a new row for the manifest resource metadata table.
         /// </summary>
@@ -39,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             Name = name;
             Implementation = implementation;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.ManifestResource;
 
@@ -57,32 +58,35 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the byte offset within the referenced file at which the resource record begins. 
+        /// Gets or sets the byte offset within the referenced file at which the resource record begins.
         /// </summary>
         public uint Offset
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the attributes associated with this resource.
+        /// Gets or sets the attributes associated with this resource.
         /// </summary>
         public ManifestResourceAttributes Attributes
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap referencing the name of the resource.
+        /// Gets or sets an index into the #Strings heap referencing the name of the resource.
         /// </summary>
         public uint Name
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets an Implementation index (an index into either the File, AssemblyRef or ExportedType table) indicating
-        /// the file that contains the resource data. 
+        /// Gets or sets an Implementation index (an index into either the File, AssemblyRef or ExportedType table) indicating
+        /// the file that contains the resource data.
         /// </summary>
         /// <remarks>
         /// When this field is set to zero, the resource data is embedded into the current assembly.
@@ -90,6 +94,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Implementation
         {
             get;
+            set;
         }
 
         /// <inheritdoc />
@@ -108,9 +113,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
         public bool Equals(ManifestResourceRow other)
         {
-            return Offset == other.Offset 
+            return Offset == other.Offset
                    && Attributes == other.Attributes
-                   && Name == other.Name 
+                   && Name == other.Name
                    && Implementation == other.Implementation;
         }
 

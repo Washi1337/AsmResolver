@@ -81,6 +81,9 @@ namespace AsmResolver.DotNet.Memory
 
         public uint VisitTypeDefOrRef(TypeDefOrRefSignature signature) => VisitTypeDefOrRef(signature.Type);
 
+        /// <inheritdoc />
+        public uint VisitFunctionPointerType(FunctionPointerTypeSignature signature) => PointerSize;
+
         public uint VisitTypeDefOrRef(ITypeDefOrRef type)
         {
             return type.MetadataToken.Table switch
@@ -118,7 +121,11 @@ namespace AsmResolver.DotNet.Memory
             {
                 var field = type.Fields[i];
                 if (!field.IsStatic)
+                {
+                    if (field.Signature is null)
+                        throw new ArgumentException($"Field {field.SafeToString()} does not have a field signature.");
                     largestFieldSize = Math.Max(largestFieldSize, field.Signature.FieldType.AcceptVisitor(this));
+                }
             }
 
             uint alignment = largestFieldSize;

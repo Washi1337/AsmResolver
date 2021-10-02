@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in the Edit-and-Continue remap metadata table.
     /// </summary>
-    public readonly struct EncMapRow : IMetadataRow
+    public struct EncMapRow : IMetadataRow
     {
         /// <summary>
         /// Reads a single edit-and-continue remap row from an input stream.
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the edit-and-continue remap table.</param>
         /// <returns>The row.</returns>
-        public static EncMapRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static EncMapRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new EncMapRow(reader.ReadUInt32());
         }
@@ -28,7 +29,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             Token = token;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.EncMap;
 
@@ -43,11 +44,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         };
 
         /// <summary>
-        /// Gets the token that was remapped.
+        /// Gets or sets the token that was remapped.
         /// </summary>
         public MetadataToken Token
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -83,7 +85,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({Token})";
         }
-        
+
         /// <inheritdoc />
         public IEnumerator<uint> GetEnumerator()
         {

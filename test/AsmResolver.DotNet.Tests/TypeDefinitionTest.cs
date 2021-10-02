@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Fields;
@@ -10,7 +11,9 @@ using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.DotNet.TestCases.Types;
 using AsmResolver.DotNet.TestCases.Types.Structs;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -107,42 +110,42 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
 
             var class1 = module.TopLevelTypes.First(t => t.Name == nameof(TopLevelClass1));
-            Assert.Equal(new HashSet<string>
+            Assert.Equal(new HashSet<Utf8String>
             {
                 nameof(TopLevelClass1.Nested1),
                 nameof(TopLevelClass1.Nested2)
             }, class1.NestedTypes.Select(t => t.Name));
 
             var nested1 = class1.NestedTypes.First(t => t.Name == nameof(TopLevelClass1.Nested1));
-            Assert.Equal(new HashSet<string>
+            Assert.Equal(new HashSet<Utf8String>
             {
                 nameof(TopLevelClass1.Nested1.Nested1Nested1),
                 nameof(TopLevelClass1.Nested1.Nested1Nested2)
             }, nested1.NestedTypes.Select(t => t.Name));
 
             var nested2 = class1.NestedTypes.First(t => t.Name == nameof(TopLevelClass1.Nested2));
-            Assert.Equal(new HashSet<string>
+            Assert.Equal(new HashSet<Utf8String>
             {
                 nameof(TopLevelClass1.Nested2.Nested2Nested1),
                 nameof(TopLevelClass1.Nested2.Nested2Nested2)
             }, nested2.NestedTypes.Select(t => t.Name));
 
             var class2 = module.TopLevelTypes.First(t => t.Name == nameof(TopLevelClass2));
-            Assert.Equal(new HashSet<string>
+            Assert.Equal(new HashSet<Utf8String>
             {
                 nameof(TopLevelClass2.Nested3),
                 nameof(TopLevelClass2.Nested4)
             }, class2.NestedTypes.Select(t => t.Name));
 
             var nested3 = class2.NestedTypes.First(t => t.Name == nameof(TopLevelClass2.Nested3));
-            Assert.Equal(new HashSet<string>
+            Assert.Equal(new HashSet<Utf8String>
             {
                 nameof(TopLevelClass2.Nested3.Nested3Nested1),
                 nameof(TopLevelClass2.Nested3.Nested3Nested2)
             }, nested3.NestedTypes.Select(t => t.Name));
 
             var nested4 = class2.NestedTypes.First(t => t.Name == nameof(TopLevelClass2.Nested4));
-            Assert.Equal(new HashSet<string>
+            Assert.Equal(new HashSet<Utf8String>
             {
                 nameof(TopLevelClass2.Nested4.Nested4Nested1),
                 nameof(TopLevelClass2.Nested4.Nested4Nested2)
@@ -189,7 +192,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleField));
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(SingleField.IntField),
             }, type.Fields.Select(p => p.Name));
@@ -209,7 +212,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleFields).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleFields));
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(MultipleFields.IntField),
                 nameof(MultipleFields.StringField),
@@ -248,7 +251,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleMethod));
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(SingleMethod.VoidParameterlessMethod),
             }, type.Methods.Select(p => p.Name));
@@ -268,7 +271,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 ".ctor",
                 nameof(MultipleMethods.VoidParameterlessMethod),
@@ -310,7 +313,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(SingleProperty.IntProperty)
             }, type.Properties.Select(p => p.Name));
@@ -322,7 +325,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
             var newType = RebuildAndLookup(type);
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(SingleProperty.IntProperty)
             }, newType.Properties.Select(p => p.Name));
@@ -333,7 +336,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(MultipleProperties.ReadOnlyProperty), nameof(MultipleProperties.WriteOnlyProperty),
                 nameof(MultipleProperties.ReadWriteProperty), "Item",
@@ -346,7 +349,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
             var newType = RebuildAndLookup(type);
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(MultipleProperties.ReadOnlyProperty), nameof(MultipleProperties.WriteOnlyProperty),
                 nameof(MultipleProperties.ReadWriteProperty), "Item",
@@ -375,7 +378,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleEvent));
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(SingleEvent.SimpleEvent)
             }, type.Events.Select(p => p.Name));
@@ -387,7 +390,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleEvent));
             var newType = RebuildAndLookup(type);
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(SingleEvent.SimpleEvent)
             }, newType.Events.Select(p => p.Name));
@@ -398,7 +401,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleEvents));
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(MultipleEvents.Event1),
                 nameof(MultipleEvents.Event2),
@@ -412,7 +415,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleEvents));
             var newType = RebuildAndLookup(type);
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(MultipleEvents.Event1),
                 nameof(MultipleEvents.Event2),
@@ -441,10 +444,10 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementations));
-            Assert.Equal(new HashSet<string>(new[]
+            Assert.Equal(new HashSet<Utf8String>(new Utf8String[]
             {
                 nameof(IInterface1), nameof(IInterface2),
-            }), new HashSet<string>(type.Interfaces.Select(i => i.Interface.Name)));
+            }), new HashSet<Utf8String>(type.Interfaces.Select(i => i.Interface.Name)));
         }
 
         [Fact]
@@ -453,10 +456,10 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementations));
             var newType = RebuildAndLookup(type);
-            Assert.Equal(new HashSet<string>(new[]
+            Assert.Equal(new HashSet<Utf8String>(new Utf8String[]
             {
                 nameof(IInterface1), nameof(IInterface2),
-            }), new HashSet<string>(newType.Interfaces.Select(i => i.Interface.Name)));
+            }), new HashSet<Utf8String>(newType.Interfaces.Select(i => i.Interface.Name)));
         }
 
         [Fact]
@@ -465,7 +468,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementations));
 
-            Assert.Contains(type.MethodImplementations, i => i.Declaration.Name == "Interface2Method");
+            Assert.Contains(type.MethodImplementations, i => i.Declaration!.Name == "Interface2Method");
         }
 
         [Fact]
@@ -475,7 +478,7 @@ namespace AsmResolver.DotNet.Tests
             var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementations));
             var newType = RebuildAndLookup(type);
 
-            Assert.Contains(newType.MethodImplementations, i => i.Declaration.Name == "Interface2Method");
+            Assert.Contains(newType.MethodImplementations, i => i.Declaration!.Name == "Interface2Method");
         }
 
         [Fact]
@@ -519,6 +522,30 @@ namespace AsmResolver.DotNet.Tests
             Assert.True(type.Implements(typeof(IInterface2).FullName));
             Assert.True(type.Implements(typeof(IInterface3).FullName));
             Assert.False(type.Implements(typeof(IInterface4).FullName));
+        }
+
+        [Fact]
+        public void CorLibTypeDefinitionToSignatureShouldResultInCorLibTypeSignature()
+        {
+            var module = new ModuleDefinition("Test");
+            var type = module.CorLibTypeFactory.Object.Resolve();
+            var signature = type.ToTypeSignature();
+            var corlibType = Assert.IsAssignableFrom<CorLibTypeSignature>(signature);
+            Assert.Equal(ElementType.Object, corlibType.ElementType);
+        }
+
+        [Fact]
+        public void InvalidMetadataLoopInBaseTypeShouldNotCrashIsValueType()
+        {
+            var module = new ModuleDefinition("Test");
+            var typeA = new TypeDefinition(null, "A", TypeAttributes.Public);
+            var typeB = new TypeDefinition(null, "B", TypeAttributes.Public, typeA);
+            typeA.BaseType = typeB;
+            module.TopLevelTypes.Add(typeA);
+            module.TopLevelTypes.Add(typeB);
+
+            Assert.False(typeB.IsValueType);
+            Assert.False(typeB.IsEnum);
         }
     }
 }

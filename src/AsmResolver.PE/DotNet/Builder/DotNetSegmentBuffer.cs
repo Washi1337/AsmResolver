@@ -1,7 +1,5 @@
-using System;
-using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.IO;
+using AsmResolver.PE.DotNet.VTableFixups.Builder;
 
 namespace AsmResolver.PE.DotNet.Builder
 {
@@ -28,7 +26,10 @@ namespace AsmResolver.PE.DotNet.Builder
             AddIfPresent(dotNetDirectory.Metadata);
             AddIfPresent(dotNetDirectory.DotNetResources);
             AddIfPresent(dotNetDirectory.StrongName);
-            AddIfPresent(dotNetDirectory.VTableFixups);
+
+            if (dotNetDirectory.VTableFixups?.Count > 0)
+                _segments.Add(new VTableFixupsDirectoryBuffer(dotNetDirectory.VTableFixups));
+
             AddIfPresent(dotNetDirectory.ExportAddressTable);
             AddIfPresent(dotNetDirectory.ManagedNativeHeader);
         }
@@ -66,15 +67,15 @@ namespace AsmResolver.PE.DotNet.Builder
             get;
         }
 
-        private void AddIfPresent(ISegment segment)
+        private void AddIfPresent(ISegment? segment)
         {
-            if (segment != null)
+            if (segment is not null)
                 _segments.Add(segment, 4);
         }
 
         /// <inheritdoc />
         public void UpdateOffsets(ulong newOffset, uint newRva) => _segments.UpdateOffsets(newOffset, newRva);
-        
+
         /// <inheritdoc />
         public uint GetPhysicalSize() => _segments.GetPhysicalSize();
 

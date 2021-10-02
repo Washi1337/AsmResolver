@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using AsmResolver.IO;
 using AsmResolver.PE.File;
 using Xunit;
 

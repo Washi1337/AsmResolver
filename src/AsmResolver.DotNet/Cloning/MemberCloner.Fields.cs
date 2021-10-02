@@ -1,3 +1,5 @@
+using System;
+
 namespace AsmResolver.DotNet.Cloning
 {
     public partial class MemberCloner
@@ -9,7 +11,8 @@ namespace AsmResolver.DotNet.Cloning
                 var stub = CreateFieldStub(context, field);
 
                 // If field's declaring type is cloned as well, add the cloned method to the cloned type.
-                if (context.ClonedMembers.TryGetValue(field.DeclaringType, out var member)
+                if (field.DeclaringType is not null
+                    && context.ClonedMembers.TryGetValue(field.DeclaringType, out var member)
                     && member is TypeDefinition declaringType)
                 {
                     declaringType.Fields.Add(stub);
@@ -19,6 +22,11 @@ namespace AsmResolver.DotNet.Cloning
 
         private static FieldDefinition CreateFieldStub(MemberCloneContext context, FieldDefinition field)
         {
+            if (field.Name is null)
+                throw new ArgumentException($"Field {field.SafeToString()} has no name.");
+            if (field.Signature is null)
+                throw new ArgumentException($"Field {field.SafeToString()} has no signature.");
+
             var clonedField = new FieldDefinition(
                 field.Name,
                 field.Attributes,
@@ -39,7 +47,7 @@ namespace AsmResolver.DotNet.Cloning
             var clonedField = (FieldDefinition) context.ClonedMembers[field];
             CloneCustomAttributes(context, field, clonedField);
             clonedField.ImplementationMap = CloneImplementationMap(context, field.ImplementationMap);
-            clonedField.Constant = CloneConstant(context, field.Constant);
+            clonedField.Constant = CloneConstant(field.Constant);
             clonedField.FieldRva = FieldRvaCloner.CloneFieldRvaData(field);
             clonedField.MarshalDescriptor = CloneMarshalDescriptor(context, field.MarshalDescriptor);
             clonedField.FieldOffset = field.FieldOffset;

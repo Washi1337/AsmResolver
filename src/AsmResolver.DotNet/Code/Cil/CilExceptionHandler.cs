@@ -1,4 +1,4 @@
-using System;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Code.Cil
@@ -7,18 +7,18 @@ namespace AsmResolver.DotNet.Code.Cil
     /// Represents a region of code in a CIL method body that is protected by a (filtered) exception handler, finally or
     /// faulting clause.
     /// </summary>
-    public class CilExceptionHandler 
+    public class CilExceptionHandler
     {
         /// <summary>
         /// The size in bytes of an exception handler using the tiny format.
         /// </summary>
-        public const int TinyExceptionHandlerSize = 2 * sizeof(byte) + 3 * sizeof(ushort) + sizeof(uint);
-        
+        public const uint TinyExceptionHandlerSize = 2 * sizeof(byte) + 3 * sizeof(ushort) + sizeof(uint);
+
         /// <summary>
         /// The size in bytes of an exception handler using the fat format.
         /// </summary>
-        public const int FatExceptionHandlerSize = 6 * sizeof(uint);
-        
+        public const uint FatExceptionHandlerSize = 6 * sizeof(uint);
+
         /// <summary>
         /// Reads a single exception handler from the provided input stream.
         /// </summary>
@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <param name="reader">The input stream.</param>
         /// <param name="isFat"><c>true</c> if the fat format should be used, <c>false</c> otherwise.</param>
         /// <returns>The exception handler.</returns>
-        public static CilExceptionHandler FromReader(CilMethodBody body, IBinaryStreamReader reader, bool isFat)
+        public static CilExceptionHandler FromReader(CilMethodBody body, ref BinaryStreamReader reader, bool isFat)
         {
             CilExceptionHandlerType handlerType;
             int tryStartOffset;
@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Code.Cil
             }
 
             int exceptionTokenOrFilterStart = reader.ReadInt32();
-            
+
             // Create handler.
             var handler = new CilExceptionHandler
             {
@@ -63,24 +63,24 @@ namespace AsmResolver.DotNet.Code.Cil
                 HandlerStart = body.Instructions.GetLabel(handlerStartOffset),
                 HandlerEnd = body.Instructions.GetLabel(handlerEndOffset),
             };
-            
+
             // Interpret last field.
             switch (handler.HandlerType)
             {
-                case CilExceptionHandlerType.Exception when body.Owner.Module.TryLookupMember(exceptionTokenOrFilterStart, out var member):
+                case CilExceptionHandlerType.Exception when body.Owner.Module!.TryLookupMember(exceptionTokenOrFilterStart, out var member):
                     handler.ExceptionType = member as ITypeDefOrRef;
                     break;
                 case CilExceptionHandlerType.Filter:
                     handler.FilterStart = body.Instructions.GetByOffset(exceptionTokenOrFilterStart)?.CreateLabel()
                                           ?? new CilOffsetLabel(exceptionTokenOrFilterStart);
-                    break;;
+                    break;
             }
 
             return handler;
         }
-        
+
         /// <summary>
-        /// Gets or sets the type of the protected region. 
+        /// Gets or sets the type of the protected region.
         /// </summary>
         /// <remarks>
         /// This property determines whether the <see cref="FilterStart"/> and/or <see cref="ExceptionType"/> properties
@@ -91,11 +91,11 @@ namespace AsmResolver.DotNet.Code.Cil
             get;
             set;
         }
-        
+
         /// <summary>
-        /// Gets or sets the instruction that marks the start of the the protected region. 
+        /// Gets or sets the instruction that marks the start of the the protected region.
         /// </summary>
-        public ICilLabel TryStart
+        public ICilLabel? TryStart
         {
             get;
             set;
@@ -108,7 +108,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// This instruction marker is exclusive; the referenced instruction does not belong to the protected
         /// region anymore.
         /// </remarks>
-        public ICilLabel TryEnd
+        public ICilLabel? TryEnd
         {
             get;
             set;
@@ -117,7 +117,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <summary>
         /// Gets or sets the instruction that marks the start of the handler region.
         /// </summary>
-        public ICilLabel HandlerStart
+        public ICilLabel? HandlerStart
         {
             get;
             set;
@@ -130,7 +130,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// This instruction marker is exclusive; the referenced instruction does not belong to the handler
         /// region anymore.
         /// </remarks>
-        public ICilLabel HandlerEnd
+        public ICilLabel? HandlerEnd
         {
             get;
             set;
@@ -141,9 +141,9 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         /// <remarks>
         /// This property only has meaning if the <see cref="HandlerType"/> property is set to
-        /// <see cref="CilExceptionHandlerType.Filter"/>. 
+        /// <see cref="CilExceptionHandlerType.Filter"/>.
         /// </remarks>
-        public ICilLabel FilterStart
+        public ICilLabel? FilterStart
         {
             get;
             set;
@@ -154,9 +154,9 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         /// <remarks>
         /// This property only has meaning if the <see cref="HandlerType"/> property is set to
-        /// <see cref="CilExceptionHandlerType.Exception"/>. 
+        /// <see cref="CilExceptionHandlerType.Exception"/>.
         /// </remarks>
-        public ITypeDefOrRef ExceptionType
+        public ITypeDefOrRef? ExceptionType
         {
             get;
             set;
@@ -167,18 +167,20 @@ namespace AsmResolver.DotNet.Code.Cil
         /// boundaries of the protected region.
         /// </summary>
         public bool IsFat =>
-            TryEnd.Offset - TryStart.Offset >= byte.MaxValue
-            || HandlerStart.Offset - HandlerEnd.Offset >= byte.MaxValue;
+            TryStart?.Offset >= ushort.MaxValue
+            || HandlerStart?.Offset >= ushort.MaxValue
+            || TryEnd?.Offset - TryStart?.Offset >= byte.MaxValue
+            || HandlerEnd?.Offset - HandlerStart?.Offset >= byte.MaxValue;
 
         /// <inheritdoc />
         public override string ToString()
         {
             return string.Format("{0}: {1}, {2}: {3}, {4}: {5}, {6}: {7}, {8}: {9}, {10}: {11}, {12}: {13}",
-                nameof(HandlerType), HandlerType, 
+                nameof(HandlerType), HandlerType,
                 nameof(TryStart), TryStart,
                 nameof(TryEnd), TryEnd,
                 nameof(HandlerStart), HandlerStart,
-                nameof(HandlerEnd), HandlerEnd, 
+                nameof(HandlerEnd), HandlerEnd,
                 nameof(FilterStart), FilterStart,
                 nameof(ExceptionType), ExceptionType);
         }

@@ -6,7 +6,6 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -26,22 +25,22 @@ namespace AsmResolver.DotNet
         IOwnedCollectionElement<ModuleDefinition>,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<string> _namespace;
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<ITypeDefOrRef> _baseType;
-        private readonly LazyVariable<TypeDefinition> _declaringType;
-        private readonly LazyVariable<ClassLayout> _classLayout;
-        private IList<TypeDefinition> _nestedTypes;
-        private ModuleDefinition _module;
-        private IList<FieldDefinition> _fields;
-        private IList<MethodDefinition> _methods;
-        private IList<PropertyDefinition> _properties;
-        private IList<EventDefinition> _events;
-        private IList<CustomAttribute> _customAttributes;
-        private IList<SecurityDeclaration> _securityDeclarations;
-        private IList<GenericParameter> _genericParameters;
-        private IList<InterfaceImplementation> _interfaces;
-        private IList<MethodImplementation> _methodImplementations;
+        private readonly LazyVariable<Utf8String?> _namespace;
+        private readonly LazyVariable<Utf8String?> _name;
+        private readonly LazyVariable<ITypeDefOrRef?> _baseType;
+        private readonly LazyVariable<TypeDefinition?> _declaringType;
+        private readonly LazyVariable<ClassLayout?> _classLayout;
+        private IList<TypeDefinition>? _nestedTypes;
+        private ModuleDefinition? _module;
+        private IList<FieldDefinition>? _fields;
+        private IList<MethodDefinition>? _methods;
+        private IList<PropertyDefinition>? _properties;
+        private IList<EventDefinition>? _events;
+        private IList<CustomAttribute>? _customAttributes;
+        private IList<SecurityDeclaration>? _securityDeclarations;
+        private IList<GenericParameter>? _genericParameters;
+        private IList<InterfaceImplementation>? _interfaces;
+        private IList<MethodImplementation>? _methodImplementations;
 
         /// <summary>
         /// Initializes a new type definition.
@@ -50,11 +49,11 @@ namespace AsmResolver.DotNet
         protected TypeDefinition(MetadataToken token)
             : base(token)
         {
-            _namespace = new LazyVariable<string>(GetNamespace);
-            _name = new LazyVariable<string>(GetName);
-            _baseType = new LazyVariable<ITypeDefOrRef>(GetBaseType);
-            _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
-            _classLayout = new LazyVariable<ClassLayout>(GetClassLayout);
+            _namespace = new LazyVariable<Utf8String?>(GetNamespace);
+            _name = new LazyVariable<Utf8String?>(GetName);
+            _baseType = new LazyVariable<ITypeDefOrRef?>(GetBaseType);
+            _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
+            _classLayout = new LazyVariable<ClassLayout?>(GetClassLayout);
         }
 
         /// <summary>
@@ -63,7 +62,7 @@ namespace AsmResolver.DotNet
         /// <param name="ns">The namespace the type resides in.</param>
         /// <param name="name">The name of the type.</param>
         /// <param name="attributes">The attributes associated to the type.</param>
-        public TypeDefinition(string ns, string name, TypeAttributes attributes)
+        public TypeDefinition(string? ns, string? name, TypeAttributes attributes)
             : this(ns, name, attributes, null)
         {
         }
@@ -75,7 +74,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the type.</param>
         /// <param name="attributes">The attributes associated to the type.</param>
         /// <param name="baseType">The super class that this type extends.</param>
-        public TypeDefinition(string ns, string name, TypeAttributes attributes, ITypeDefOrRef baseType)
+        public TypeDefinition(string? ns, string? name, TypeAttributes attributes, ITypeDefOrRef? baseType)
             : this(new MetadataToken(TableIndex.TypeDef, 0))
         {
             Namespace = ns;
@@ -87,20 +86,30 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the namespace the type resides in.
         /// </summary>
-        public string Namespace
+        /// <remarks>
+        /// This property corresponds to the Namespace column in the type definition table.
+        /// </remarks>
+        public Utf8String? Namespace
         {
             get => _namespace.Value;
             set => _namespace.Value = value;
         }
 
+        string? ITypeDescriptor.Namespace => Namespace;
+
         /// <summary>
         /// Gets or sets the name of the type.
         /// </summary>
-        public string Name
+        /// <remarks>
+        /// This property corresponds to the Name column in the type definition table.
+        /// </remarks>
+        public Utf8String? Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
+
+        string? INameProvider.Name => Name;
 
         /// <summary>
         /// Gets the full name (including namespace or declaring type full name) of the type.
@@ -402,7 +411,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the super class that this type extends.
         /// </summary>
-        public ITypeDefOrRef BaseType
+        public ITypeDefOrRef? BaseType
         {
             get => _baseType.Value;
             set => _baseType.Value = value;
@@ -411,9 +420,9 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the module that defines the type.
         /// </summary>
-        public ModuleDefinition Module => DeclaringType != null ? DeclaringType.Module : _module;
+        public ModuleDefinition? Module => DeclaringType is not null ? DeclaringType.Module : _module;
 
-        ModuleDefinition IOwnedCollectionElement<ModuleDefinition>.Owner
+        ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
             get => Module;
             set => _module = value;
@@ -422,17 +431,17 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// When this type is nested, gets the enclosing type.
         /// </summary>
-        public TypeDefinition DeclaringType
+        public TypeDefinition? DeclaringType
         {
             get => _declaringType.Value;
             private set => _declaringType.Value = value;
         }
 
-        ITypeDefOrRef ITypeDefOrRef.DeclaringType => DeclaringType;
+        ITypeDefOrRef? ITypeDefOrRef.DeclaringType => DeclaringType;
 
-        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
+        ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
-        TypeDefinition IOwnedCollectionElement<TypeDefinition>.Owner
+        TypeDefinition? IOwnedCollectionElement<TypeDefinition>.Owner
         {
             get => DeclaringType;
             set => DeclaringType = value;
@@ -456,7 +465,7 @@ namespace AsmResolver.DotNet
             }
         }
 
-        IResolutionScope ITypeDescriptor.Scope => GetDeclaringScope();
+        IResolutionScope? ITypeDescriptor.Scope => GetDeclaringScope();
 
         /// <inheritdoc />
         public bool IsValueType => BaseType is {} && (BaseType.IsTypeOf("System", nameof(ValueType)) || IsEnum);
@@ -606,7 +615,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// When this property is set to <c>null</c>, the runtime decides the layout of the class.
         /// </remarks>
-        public ClassLayout ClassLayout
+        public ClassLayout? ClassLayout
         {
             get => _classLayout.Value;
             set => _classLayout.Value = value;
@@ -647,7 +656,7 @@ namespace AsmResolver.DotNet
             var type = this;
             do
             {
-                if (type.Interfaces.Any(@interface => @interface.Interface.FullName == fullName))
+                if (type.Interfaces.Any(@interface => @interface.Interface?.FullName == fullName))
                     return true;
 
                 var current = type;
@@ -665,8 +674,11 @@ namespace AsmResolver.DotNet
         ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef() => this;
 
         /// <inheritdoc />
-        public TypeSignature ToTypeSignature() =>
-            new TypeDefOrRefSignature(this, IsValueType);
+        public TypeSignature ToTypeSignature()
+        {
+            return Module?.CorLibTypeFactory.FromType(this) as TypeSignature
+                   ?? new TypeDefOrRefSignature(this, IsValueType);
+        }
 
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
@@ -681,7 +693,7 @@ namespace AsmResolver.DotNet
 
             if (IsNested)
             {
-                if (!DeclaringType.IsAccessibleFromType(type))
+                if (DeclaringType is not { } declaringType || !declaringType.IsAccessibleFromType(type))
                     return false;
 
                 return IsNestedPublic
@@ -699,14 +711,12 @@ namespace AsmResolver.DotNet
         /// <returns>The type reference.</returns>
         public TypeReference ToTypeReference()
         {
-            var scope = DeclaringType is null
-                ? (IResolutionScope) Module
-                : DeclaringType.ToTypeReference();
+            var scope = DeclaringType?.ToTypeReference() ?? Module as IResolutionScope;
 
             return new TypeReference(Module, scope, Namespace, Name);
         }
 
-        private IResolutionScope GetDeclaringScope()
+        private IResolutionScope? GetDeclaringScope()
         {
             if (DeclaringType is null)
                 return Module;
@@ -726,7 +736,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// To verify whether a type is an enum or not, use the <see cref="IsEnum"/> property.
         /// </remarks>
-        public TypeSignature GetEnumUnderlyingType()
+        public TypeSignature? GetEnumUnderlyingType()
         {
             if (!IsEnum)
                 throw new InvalidOperationException("Type is not an enum.");
@@ -744,7 +754,7 @@ namespace AsmResolver.DotNet
         /// Gets the static constructor that is executed when the CLR loads this type.
         /// </summary>
         /// <returns>The static constructor, or <c>null</c> if none is present.</returns>
-        public MethodDefinition GetStaticConstructor()
+        public MethodDefinition? GetStaticConstructor()
         {
             return Methods.FirstOrDefault(m =>
                 m.IsConstructor
@@ -770,7 +780,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// If the static constructor was not present in the type, it will be inserted as the first method in the type.
         /// </remarks>
-        public MethodDefinition GetOrCreateStaticConstructor(ModuleDefinition module)
+        public MethodDefinition GetOrCreateStaticConstructor(ModuleDefinition? module)
         {
             var cctor = GetStaticConstructor();
             if (cctor == null)
@@ -801,7 +811,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Namespace"/> property.
         /// </remarks>
-        protected virtual string GetNamespace() => null;
+        protected virtual Utf8String? GetNamespace() => null;
 
         /// <summary>
         /// Obtains the name of the type definition.
@@ -810,7 +820,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the base type of the type definition.
@@ -819,7 +829,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="BaseType"/> property.
         /// </remarks>
-        protected virtual ITypeDefOrRef GetBaseType() => null;
+        protected virtual ITypeDefOrRef? GetBaseType() => null;
 
         /// <summary>
         /// Obtains the list of nested types that this type defines.
@@ -838,7 +848,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="DeclaringType"/> property.
         /// </remarks>
-        protected virtual TypeDefinition GetDeclaringType() => null;
+        protected virtual TypeDefinition? GetDeclaringType() => null;
 
         /// <summary>
         /// Obtains the collection of fields that this type defines.
@@ -938,7 +948,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ClassLayout"/> property.
         /// </remarks>
-        protected virtual ClassLayout GetClassLayout() => null;
+        protected virtual ClassLayout? GetClassLayout() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;

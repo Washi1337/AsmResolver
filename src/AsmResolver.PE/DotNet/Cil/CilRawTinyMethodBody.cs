@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -19,12 +20,8 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="code">The buffer containing the raw CIL instructions.</param>
         public CilRawTinyMethodBody(byte[] code)
+            : base(new DataSegment(code))
         {
-            if (code == null)
-                throw new ArgumentNullException(nameof(code));
-
-            Code = new byte[code.Length];
-            Buffer.BlockCopy(code, 0, Code, 0, code.Length);
         }
 
         /// <inheritdoc />
@@ -38,7 +35,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The raw method body.</returns>
         /// <exception cref="FormatException">Occurs when the method header indicates an method body that is not in the
         /// tiny format.</exception>
-        public new static CilRawTinyMethodBody FromReader(IErrorListener errorListener, IBinaryStreamReader reader)
+        public new static CilRawTinyMethodBody? FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
         {
             ulong fileOffset = reader.Offset;
             uint rva = reader.Rva;
@@ -51,7 +48,7 @@ namespace AsmResolver.PE.DotNet.Cil
             }
 
             int codeSize = (byte) flag >> 2;
-            var code = new byte[codeSize];
+            byte[] code = new byte[codeSize];
             reader.ReadBytes(code, 0, codeSize);
 
             var methodBody = new CilRawTinyMethodBody(code);
@@ -60,17 +57,18 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => (uint) (sizeof(byte) + Code.Length);
+        public override uint GetPhysicalSize() => sizeof(byte) + Code.GetPhysicalSize();
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            if (Code.Length > 0x3F)
+            uint codeSize = Code.GetPhysicalSize();
+            if (codeSize > 0x3F)
                 throw new ArgumentException("Code of a tiny method body cannot be 64 bytes or larger.");
 
-            byte flag = (byte) ((byte) CilMethodBodyAttributes.Tiny | (Code.Length << 2));
+            byte flag = (byte) ((byte) CilMethodBodyAttributes.Tiny | (codeSize << 2));
             writer.WriteByte(flag);
-            writer.WriteBytes(Code);
+            Code?.Write(writer);
         }
     }
 }

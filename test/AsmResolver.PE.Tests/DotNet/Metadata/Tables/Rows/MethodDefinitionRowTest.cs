@@ -11,7 +11,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
         public void ReadRow_SmallString_SmallBlob_SmallParam()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             var methodTable = tablesStream.GetTable<MethodDefinitionRow>();
             Assert.Equal(2, methodTable.Count);
@@ -47,7 +47,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                     0x0001),
                 MethodDefinitionRow.FromReader);
         }
-        
+
         [Fact]
         public void RowEnumerationTest()
         {

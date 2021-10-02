@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="GenericParameterConstraint"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedGenericParameterConstraint : GenericParameterConstraint
     {
@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the constraint for.</param>
         /// <param name="row">The metadata table row to base the constraint on.</param>
         public SerializedGenericParameterConstraint(
-            ModuleReaderContext context, 
+            ModuleReaderContext context,
             MetadataToken token,
             in GenericParameterConstraintRow row)
             : base(token)
@@ -31,29 +31,31 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override GenericParameter GetOwner()
+        protected override GenericParameter? GetOwner()
         {
             var token = _context.ParentModule.GetGenericParameterConstraintOwner(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as GenericParameter
-                : null;
+                : _context.BadImageAndReturn<GenericParameter>(
+                    $"Invalid owner in generic parameter constraint {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
-        protected override ITypeDefOrRef GetConstraint()
+        protected override ITypeDefOrRef? GetConstraint()
         {
-            var encoder = _context.Image.DotNetDirectory.Metadata
+            var token = _context.Metadata
                 .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.TypeDefOrRef);
+                .GetIndexEncoder(CodedIndex.TypeDefOrRef)
+                .DecodeIndex(_row.Constraint);
 
-            var token = encoder.DecodeIndex(_row.Constraint);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as ITypeDefOrRef
-                : null;
+                : _context.BadImageAndReturn<ITypeDefOrRef>(
+                    $"Invalid constraint type in generic parameter constraint {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

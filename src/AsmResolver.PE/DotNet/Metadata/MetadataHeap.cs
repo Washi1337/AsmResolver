@@ -1,9 +1,10 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
     /// <summary>
-    /// Provides a base implementation of a metadata heap. 
+    /// Provides a base implementation of a metadata heap.
     /// </summary>
     public abstract class MetadataHeap : SegmentBase, IMetadataStream
     {
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
-        
+
         /// <inheritdoc />
         public string Name
         {
@@ -30,9 +31,9 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// Gets a value indicating whether any index into this metadata heap will need 2 or 4 bytes to be encoded.
         /// </summary>
         public IndexSize IndexSize => GetPhysicalSize() > ushort.MaxValue ? IndexSize.Long : IndexSize.Short;
-        
+
         /// <inheritdoc />
-        public virtual IBinaryStreamReader CreateReader() => throw new NotSupportedException();
-        
+        public virtual BinaryStreamReader CreateReader() => throw new NotSupportedException();
+
     }
 }

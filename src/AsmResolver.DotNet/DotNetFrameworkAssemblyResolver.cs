@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet
 {
@@ -15,6 +16,16 @@ namespace AsmResolver.DotNet
         /// Creates a new default assembly resolver.
         /// </summary>
         public DotNetFrameworkAssemblyResolver()
+            : this(UncachedFileService.Instance)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new default assembly resolver.
+        /// </summary>
+        /// <param name="fileService">The service to use for reading files from the disk.</param>
+        public DotNetFrameworkAssemblyResolver(IFileService fileService)
+            : base(fileService)
         {
             DetectGacDirectories();
         }
@@ -56,17 +67,17 @@ namespace AsmResolver.DotNet
             if (Directory.Exists("/usr/lib/mono/gac"))
                 GacDirectories.Add(new GacDirectory("/usr/lib/mono/gac"));
 
-            string mostRecentMonoDirectory = Directory
+            string? mostRecentMonoDirectory = Directory
                 .EnumerateDirectories("/usr/lib/mono")
                 .Where(d => d.EndsWith("-api"))
                 .OrderByDescending(x => x)
                 .FirstOrDefault();
 
-            if (mostRecentMonoDirectory != null)
+            if (mostRecentMonoDirectory is not null)
                 SearchDirectories.Add(mostRecentMonoDirectory);
         }
 
-        private void AddGacDirectories(string windowsGac, string prefix)
+        private void AddGacDirectories(string windowsGac, string? prefix)
         {
             if (!Directory.Exists(windowsGac))
                 return;
@@ -80,11 +91,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        protected override string ProbeRuntimeDirectories(AssemblyDescriptor assembly)
+        protected override string? ProbeRuntimeDirectories(AssemblyDescriptor assembly)
         {
             for (int i = 0; i < GacDirectories.Count; i++)
             {
-                string path = GacDirectories[i].Probe(assembly);
+                string? path = GacDirectories[i].Probe(assembly);
                 if (!string.IsNullOrEmpty(path))
                     return path;
             }

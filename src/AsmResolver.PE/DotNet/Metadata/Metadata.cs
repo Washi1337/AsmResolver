@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -10,7 +12,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class Metadata : SegmentBase, IMetadata
     {
-        private IList<IMetadataStream> _streams;
+        private IList<IMetadataStream>? _streams;
 
         /// <inheritdoc />
         public ushort MajorVersion
@@ -69,24 +71,24 @@ namespace AsmResolver.PE.DotNet.Metadata
                            + sizeof(ushort)                          // Flags
                            + sizeof(ushort)                          // Stream count
                            + GetSizeOfStreamHeaders()                // Stream headers
-                           + Streams.Sum(s => s.GetPhysicalSize())); // Streams 
+                           + Streams.Sum(s => s.GetPhysicalSize())); // Streams
         }
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
             ulong start = writer.Offset;
-            
+
             writer.WriteUInt32((uint) MetadataSignature.Bsjb);
             writer.WriteUInt16(MajorVersion);
             writer.WriteUInt16(MinorVersion);
             writer.WriteUInt32(Reserved);
-            
+
             var versionBytes = new byte[((uint) VersionString.Length).Align(4)];
             Encoding.UTF8.GetBytes(VersionString, 0, VersionString.Length, versionBytes, 0);
             writer.WriteInt32(versionBytes.Length);
             writer.WriteBytes(versionBytes);
-            
+
             writer.WriteUInt16(Flags);
             writer.WriteUInt16((ushort) Streams.Count);
 
@@ -100,11 +102,11 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="offset">The offset of the first stream header.</param>
         /// <returns>A list of stream headers.</returns>
-        protected virtual IList<MetadataStreamHeader> GetStreamHeaders(uint offset)
+        protected virtual MetadataStreamHeader[] GetStreamHeaders(uint offset)
         {
             uint sizeOfHeaders = GetSizeOfStreamHeaders();
             offset += sizeOfHeaders;
-            
+
             var result = new MetadataStreamHeader[Streams.Count];
             for (int i = 0; i < result.Length; i++)
             {
@@ -128,10 +130,11 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="writer">The output stream to write to.</param>
         /// <param name="headers">The headers to write.</param>
-        protected virtual void WriteStreamHeaders(IBinaryStreamWriter writer, IEnumerable<MetadataStreamHeader> headers)
+        protected virtual void WriteStreamHeaders(IBinaryStreamWriter writer, MetadataStreamHeader[] headers)
         {
-            foreach (var header in headers)
+            for (int i = 0; i < headers.Length; i++)
             {
+                var header = headers[i];
                 writer.WriteUInt32(header.Offset);
                 writer.WriteUInt32(header.Size);
                 writer.WriteAsciiString(header.Name);
@@ -146,37 +149,63 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="writer">The output stream to write to.</param>
         protected virtual void WriteStreams(IBinaryStreamWriter writer)
         {
-            foreach (var stream in Streams)
-                stream.Write(writer);
+            for (int i = 0; i < Streams.Count; i++)
+                Streams[i].Write(writer);
         }
-        
+
         /// <inheritdoc />
         public virtual IMetadataStream GetStream(string name)
         {
-            var streams = Streams;
-              
-            for (int i = 0; i < streams.Count; i++)
-            {
-                if (streams[i].Name == name)
-                    return streams[i];
-            }
-
-            return null;
+            return TryGetStream(name, out var stream)
+                ? stream
+                : throw new KeyNotFoundException($"Metadata directory does not contain a stream called {name}.");
         }
 
         /// <inheritdoc />
         public TStream GetStream<TStream>()
-            where TStream : IMetadataStream
+            where TStream : class, IMetadataStream
+        {
+            return TryGetStream(out TStream? stream)
+                ? stream
+                : throw new KeyNotFoundException(
+                    $"Metadata directory does not contain a stream of type {typeof(TStream).FullName}.");
+        }
+
+        /// <inheritdoc />
+        public bool TryGetStream(string name, [NotNullWhen(true)] out IMetadataStream? stream)
         {
             var streams = Streams;
-            
+
             for (int i = 0; i < streams.Count; i++)
             {
-                if (streams[i] is TStream stream)
-                    return stream;
+                if (streams[i].Name == name)
+                {
+                    stream = streams[i];
+                    return true;
+                }
             }
 
-            return default;
+            stream = null;
+            return false;
+        }
+
+        /// <inheritdoc />
+        public bool TryGetStream<TStream>([NotNullWhen(true)] out TStream? stream)
+            where TStream : class, IMetadataStream
+        {
+            var streams = Streams;
+
+            for (int i = 0; i < streams.Count; i++)
+            {
+                if (streams[i] is TStream s)
+                {
+                    stream = s;
+                    return true;
+                }
+            }
+
+            stream = null;
+            return false;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Relocations.Builder
 {
@@ -28,12 +29,12 @@ namespace AsmResolver.PE.Relocations.Builder
         /// the page.</exception>
         public RelocationEntry(RelocationType type, int offset)
         {
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be negative.");
-            if (offset > 0xFFF)
-                throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be larger than 0xFFF.");
-            
-            _value = (ushort) (((byte) type << 12) | (offset & 0xFFF));
+            _value = offset switch
+            {
+                < 0 => throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be negative."),
+                > 0xFFF => throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be larger than 0xFFF."),
+                _ => (ushort) (((byte) type << 12) | (offset & 0xFFF))
+            };
         }
 
         /// <summary>

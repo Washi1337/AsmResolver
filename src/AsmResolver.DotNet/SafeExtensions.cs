@@ -1,10 +1,11 @@
 using System;
+using AsmResolver.DotNet.Builder;
 
 namespace AsmResolver.DotNet
 {
     internal static class SafeExtensions
     {
-        public static string SafeToString(this IMetadataMember self)
+        public static string SafeToString(this IMetadataMember? self)
         {
             if (self is null)
                 return "null";
@@ -24,7 +25,7 @@ namespace AsmResolver.DotNet
             }
         }
 
-        public static string SafeToString(this object self)
+        public static string SafeToString(this object? self)
         {
             if (self is null)
                 return "null";
@@ -37,6 +38,11 @@ namespace AsmResolver.DotNet
             {
                 return self.GetType().ToString();
             }
+        }
+
+        public static void MetadataBuilder(this IErrorListener listener, string message)
+        {
+            listener.RegisterException(new MetadataBuilderException(message));
         }
     }
 }

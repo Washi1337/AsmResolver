@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The signature.</returns>
-        public static LocalVariablesSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
+        public static LocalVariablesSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
             var result = new LocalVariablesSignature();
             result.Attributes = (CallingConventionAttributes) reader.ReadByte();
@@ -28,11 +28,11 @@ namespace AsmResolver.DotNet.Signatures
             }
 
             for (int i = 0; i < count; i++)
-                result.VariableTypes.Add(TypeSignature.FromReader(context, reader));
-            
+                result.VariableTypes.Add(TypeSignature.FromReader(context, ref reader));
+
             return result;
         }
-        
+
         /// <summary>
         /// Creates a new empty local variables signature.
         /// </summary>
@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             VariableTypes = new List<TypeSignature>(variableTypes);
         }
-        
+
         /// <summary>
         /// Gets a collection representing the variable types of a CIL method body.
         /// </summary>
@@ -72,10 +72,10 @@ namespace AsmResolver.DotNet.Signatures
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) Attributes);
             writer.WriteCompressedUInt32((uint) VariableTypes.Count);
-            
+
             foreach (var type in VariableTypes)
                 type.Write(context);
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -10,8 +11,8 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class SerializedMetadata : Metadata
     {
         private readonly PEReaderContext _context;
-        private readonly IBinaryStreamReader _streamEntriesReader;
-        private readonly IBinaryStreamReader _streamContentsReader;
+        private readonly BinaryStreamReader _streamEntriesReader;
+        private readonly BinaryStreamReader _streamContentsReader;
         private readonly int _numberOfStreams;
 
         /// <summary>
@@ -22,14 +23,17 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
         /// <exception cref="NotSupportedException">Occurs when an unsupported metadata directory format was encountered.</exception>
         /// <exception cref="BadImageFormatException">Occurs when the metadata directory header is invalid.</exception>
-        public SerializedMetadata(PEReaderContext context, IBinaryStreamReader directoryReader)
+        public SerializedMetadata(PEReaderContext context, ref BinaryStreamReader directoryReader)
         {
-            if (directoryReader == null) 
+            if (!directoryReader.IsValid)
                 throw new ArgumentNullException(nameof(directoryReader));
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
+            Offset = directoryReader.Offset;
+            Rva = directoryReader.Rva;
+
             _streamContentsReader = directoryReader.Fork();
-            
+
             var signature = (MetadataSignature) directoryReader.ReadUInt32();
             switch (signature)
             {
@@ -39,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Metadata
                 case MetadataSignature.Moc:
                     _context.NotSupported("Old +MOC metadata header format is not supported.");
                     return;
-                    
+
                 default:
                     _context.BadImage($"Invalid metadata header ({(uint) signature:X8}).");
                     return;
@@ -49,7 +53,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             MinorVersion = directoryReader.ReadUInt16();
             Reserved = directoryReader.ReadUInt32();
 
-            int versionLength = directoryReader.ReadInt32();
+            uint versionLength = directoryReader.ReadUInt32();
             if (!directoryReader.CanRead(versionLength))
             {
                 _context.BadImage($"Invalid version length in metadata header ({versionLength.ToString()} characters).");
@@ -70,11 +74,11 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             if (_numberOfStreams == 0)
                 return base.GetStreams();
-            
+
             return new MetadataStreamList(
-                _context, 
-                _streamContentsReader.Fork(),
-                _streamEntriesReader.Fork(),
+                _context,
+                _streamContentsReader,
+                _streamEntriesReader,
                 _numberOfStreams);
         }
 

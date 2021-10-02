@@ -8,6 +8,6 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the underlying assembly that this scope defines.
         /// </summary>
-        AssemblyDescriptor GetAssembly();
+        AssemblyDescriptor? GetAssembly();
     }
 }

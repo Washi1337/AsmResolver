@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.File.Headers
 {
     /// <summary>
@@ -17,9 +19,9 @@ namespace AsmResolver.PE.File.Headers
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The read file header.</returns>
-        public static FileHeader FromReader(IBinaryStreamReader reader)
+        public static FileHeader FromReader(ref BinaryStreamReader reader)
         {
-            return new FileHeader
+            return new()
             {
                 Offset = reader.Offset,
                 Rva = reader.Rva,
@@ -80,7 +82,7 @@ namespace AsmResolver.PE.File.Headers
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the size of the optional header.
         /// </summary>
@@ -113,6 +115,6 @@ namespace AsmResolver.PE.File.Headers
             writer.WriteUInt16(SizeOfOptionalHeader);
             writer.WriteUInt16((ushort)Characteristics);
         }
-        
+
     }
 }

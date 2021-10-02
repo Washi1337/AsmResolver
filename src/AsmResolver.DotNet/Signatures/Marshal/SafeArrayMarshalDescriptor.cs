@@ -1,5 +1,6 @@
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures.Marshal
 {
@@ -15,7 +16,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <param name="parentModule">The module defining the descriptor.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The descriptor.</returns>
-        public new static SafeArrayMarshalDescriptor FromReader(ModuleDefinition parentModule, IBinaryStreamReader reader)
+        public new static SafeArrayMarshalDescriptor FromReader(ModuleDefinition parentModule, ref BinaryStreamReader reader)
         {
             if (!reader.TryReadCompressedUInt32(out uint type))
                 return new SafeArrayMarshalDescriptor(SafeArrayVariantType.NotSet);
@@ -24,10 +25,10 @@ namespace AsmResolver.DotNet.Signatures.Marshal
             var flags = (SafeArrayTypeFlags) type & ~ SafeArrayTypeFlags.Mask;
 
             var result = new SafeArrayMarshalDescriptor(variantType, flags);
-            
+
             if (reader.CanRead(1))
             {
-                string typeName = reader.ReadSerString();
+                string? typeName = reader.ReadSerString();
                 if (typeName != null)
                     result.UserDefinedSubType = TypeNameParser.Parse(parentModule, typeName);
             }
@@ -61,13 +62,13 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <param name="variantType">The element type of the safe array.</param>
         /// <param name="flags">The flags associated to the element type of the safe array.</param>
         /// <param name="subType">The user defined array element type.</param>
-        public SafeArrayMarshalDescriptor(SafeArrayVariantType variantType, SafeArrayTypeFlags flags, TypeSignature subType)
+        public SafeArrayMarshalDescriptor(SafeArrayVariantType variantType, SafeArrayTypeFlags flags, TypeSignature? subType)
         {
             VariantType = variantType;
             VariantTypeFlags = flags;
             UserDefinedSubType = subType;
         }
-        
+
         /// <inheritdoc />
         public override NativeType NativeType => NativeType.SafeArray;
 
@@ -120,24 +121,24 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         }
 
         /// <summary>
-        /// Gets or sets the user defined element type of the safe array. 
+        /// Gets or sets the user defined element type of the safe array.
         /// </summary>
         /// <remarks>
         /// This value is usually <c>null</c>. Valid .NET assemblies require <see cref="VariantType"/> to be set to
         /// <see cref="SafeArrayVariantType.Unknown"/>, <see cref="SafeArrayVariantType.Dispatch"/>, or
         /// <see cref="SafeArrayVariantType.Record"/>.
         /// </remarks>
-        public TypeSignature UserDefinedSubType
+        public TypeSignature? UserDefinedSubType
         {
             get;
             set;
         }
-        
+
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) NativeType);
             if (VariantType != SafeArrayVariantType.NotSet)
             {

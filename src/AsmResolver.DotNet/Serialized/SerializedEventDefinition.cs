@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="EventDefinition"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedEventDefinition : EventDefinition
     {
@@ -34,31 +34,35 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.Name);
-
-        /// <inheritdoc />
-        protected override ITypeDefOrRef GetEventType()
+        protected override Utf8String? GetName()
         {
-            var encoder =  _context.Image.DotNetDirectory.Metadata
-                .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.TypeDefOrRef);
-            
-            var eventTypeToken = encoder.DecodeIndex(_row.EventType);
-            return _context.ParentModule.TryLookupMember(eventTypeToken, out var member)
-                ? member as ITypeDefOrRef
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
                 : null;
         }
 
         /// <inheritdoc />
-        protected override TypeDefinition GetDeclaringType()
+        protected override ITypeDefOrRef? GetEventType()
+        {
+            var eventTypeToken = _context.Metadata
+                .GetStream<TablesStream>()
+                .GetIndexEncoder(CodedIndex.TypeDefOrRef)
+                .DecodeIndex(_row.EventType);
+
+            return _context.ParentModule.TryLookupMember(eventTypeToken, out var member)
+                ? member as ITypeDefOrRef
+                : _context.BadImageAndReturn<ITypeDefOrRef>($"Invalid event type referenced by event {MetadataToken.ToString()}.");
+        }
+
+        /// <inheritdoc />
+        protected override TypeDefinition? GetDeclaringType()
         {
             var module = _context.ParentModule;
             var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, module.GetEventDeclaringType(MetadataToken.Rid));
             return module.TryLookupMember(declaringTypeToken, out var member)
                 ? member as TypeDefinition
-                : null;
+                : _context.BadImageAndReturn<TypeDefinition>(
+                    $"Event {MetadataToken.ToString()} is not added to an event map of a declaring type.");
         }
 
         /// <inheritdoc />
@@ -79,7 +83,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

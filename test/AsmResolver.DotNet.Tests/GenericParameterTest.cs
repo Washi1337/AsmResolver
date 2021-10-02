@@ -1,5 +1,6 @@
 using System.Linq;
 using AsmResolver.DotNet.TestCases.Generics;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -12,7 +13,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == typeof(GenericType<,,>).Name);
 
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 "T1", "T2", "T3"
             }, type.GenericParameters.Select(p => p.Name));
@@ -33,7 +34,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadMethodOwner()
         {
             var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location);
-            var method = typeof(GenericType<,,>).GetMethod("GenericMethodInGenericType"); 
+            var method = typeof(GenericType<,,>).GetMethod("GenericMethodInGenericType");
             var token = method.GetGenericArguments()[0].MetadataToken;
 
             var genericParameter = (GenericParameter) module.LookupMember(token);
@@ -65,7 +66,7 @@ namespace AsmResolver.DotNet.Tests
                 .MetadataToken;
 
             var genericParameter = (GenericParameter) module.LookupMember(token);
-            Assert.Equal(new[]
+            Assert.Equal(new Utf8String[]
             {
                 nameof(IFoo),
                 nameof(IBar)

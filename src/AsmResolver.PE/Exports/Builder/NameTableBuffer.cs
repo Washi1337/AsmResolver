@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Exports.Builder
 {
@@ -8,27 +9,27 @@ namespace AsmResolver.PE.Exports.Builder
     /// </summary>
     public class NameTableBuffer : SegmentBase
     {
-        private readonly List<string> _entries = new List<string>();
-        private readonly IDictionary<string, uint> _nameOffsets = new Dictionary<string, uint>();
+        private readonly List<string> _entries = new();
+        private readonly Dictionary<string, uint> _nameOffsets = new();
         private uint _length;
 
         /// <summary>
         /// Adds the provided name to the buffer if it does not exist yet.
         /// </summary>
         /// <param name="name">The name to add.</param>
-        public void AddName(string name)
+        public void AddName(string? name)
         {
             if (string.IsNullOrEmpty(name))
                 return;
-            
-            if (!_nameOffsets.ContainsKey(name))
+
+            if (!_nameOffsets.ContainsKey(name!))
             {
                 // Register string.
-                _entries.Add(name);
-                _nameOffsets.Add(name, _length);
-                
+                _entries.Add(name!);
+                _nameOffsets.Add(name!, _length);
+
                 // Calculate length + zero terminator.
-                _length += (uint) Encoding.ASCII.GetByteCount(name) + 1u;
+                _length += (uint) Encoding.ASCII.GetByteCount(name!) + 1u;
             }
         }
 
@@ -36,12 +37,14 @@ namespace AsmResolver.PE.Exports.Builder
         /// When the name was registered in the buffer, obtains the relative virtual address (RVA) to the name.
         /// </summary>
         /// <param name="name">The name.</param>
-        /// <returns>The RVA.</returns> 
+        /// <returns>The RVA.</returns>
         /// <remarks>
         /// This method should only be used after the hint-name table has been relocated to the right location in the
         /// PE file.
         /// </remarks>
-        public uint GetNameRva(string name) => Rva + _nameOffsets[name];
+        public uint GetNameRva(string? name) => name is not null
+            ? Rva + _nameOffsets[name]
+            : 0;
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => _length;
@@ -55,6 +58,6 @@ namespace AsmResolver.PE.Exports.Builder
                 writer.WriteByte(0);
             }
         }
-        
+
     }
 }

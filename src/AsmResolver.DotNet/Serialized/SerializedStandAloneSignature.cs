@@ -10,13 +10,13 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="StandAloneSignature"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedStandAloneSignature : StandAloneSignature
-    {    
+    {
         private readonly ModuleReaderContext _context;
         private readonly StandAloneSignatureRow _row;
-        
+
         /// <summary>
         /// Creates a stand-alone signature from a stand-alone sig metadata row.
         /// </summary>
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="row">The metadata table row to base the signature on.</param>
         public SerializedStandAloneSignature(
             ModuleReaderContext context,
-            MetadataToken token, 
+            MetadataToken token,
             in StandAloneSignatureRow row)
             : base(token)
         {
@@ -34,17 +34,20 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override CallingConventionSignature GetSignature()
+        protected override CallingConventionSignature? GetSignature()
         {
-            var reader = _context.Image.DotNetDirectory.Metadata
-                .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(_row.Signature);
-            
-            return CallingConventionSignature.FromReader(new BlobReadContext(_context), reader);
+            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+                || !blobStream.TryGetBlobReaderByIndex(_row.Signature, out var reader))
+            {
+                return _context.BadImageAndReturn<CallingConventionSignature>(
+                    $"Invalid signature blob index in stand-alone signature {MetadataToken.ToString()}.");
+            }
+
+            return CallingConventionSignature.FromReader(new BlobReadContext(_context), ref reader);
         }
-        
+
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

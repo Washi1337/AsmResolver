@@ -34,21 +34,25 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
-            .GetStream<StringsStream>()
-            .GetStringByIndex(_row.Name);
+        protected override Utf8String? GetName()
+        {
+            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
+                ? stringsStream.GetStringByIndex(_row.Name)
+                : null;
+        }
 
         /// <inheritdoc />
-        protected override IHasGenericParameters GetOwner()
+        protected override IHasGenericParameters? GetOwner()
         {
-            var encoder = _context.Image.DotNetDirectory.Metadata
+            var ownerToken = _context.Metadata
                 .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.TypeOrMethodDef);
+                .GetIndexEncoder(CodedIndex.TypeOrMethodDef)
+                .DecodeIndex(_row.Owner);
 
-            var ownerToken = encoder.DecodeIndex(_row.Owner);
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)
                 ? member as IHasGenericParameters
-                : null;
+                : _context.BadImageAndReturn<IHasGenericParameters>(
+                    $"Invalid owner in generic parameter {MetadataToken.ToString()}.");
         }
 
         /// <inheritdoc />
