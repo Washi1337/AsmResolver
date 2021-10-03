@@ -24,6 +24,9 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             {
                 var impl = subject.MethodImplementations[i];
 
+                if (impl.Declaration is null || impl.Body is null)
+                    continue;
+
                 // Register relationship between explicit implementation and base method.
                 var declarationNode = index.GetOrCreateNode(impl.Declaration);
                 var bodyNode = index.GetOrCreateNode(impl.Body);
@@ -64,7 +67,9 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             // Register interface relations.
             for (int i = 0; i < subject.Interfaces.Count; i++)
             {
-                var relatedNode = index.GetOrCreateNode(subject.Interfaces[i].Interface);
+                if (subject.Interfaces[i].Interface is not { } @interface)
+                    continue;
+                var relatedNode = index.GetOrCreateNode(@interface);
                 node.ForwardRelations.Add(DotNetRelations.BaseType, relatedNode);
             }
         }

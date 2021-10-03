@@ -40,7 +40,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             }
 
             // Schedule signature for analysis.
-            if (context.HasAnalyzers(typeof(MethodSignature)))
+            if (subject.Signature is not null && context.HasAnalyzers(typeof(MethodSignature)))
             {
                 context.ScheduleForAnalysis(subject.Signature);
             }

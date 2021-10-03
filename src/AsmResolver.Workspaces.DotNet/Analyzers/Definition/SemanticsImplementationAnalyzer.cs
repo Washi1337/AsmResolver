@@ -24,7 +24,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             // Register the relations.
             foreach (var baseMethod in dominantMethod.FindBaseMethods(context.Workspace.Index))
             {
-                var baseAssociation = baseMethod.Semantics.Association;
+                if (baseMethod.Semantics?.Association is not { } baseAssociation)
+                    continue;
                 var candidateNode = index.GetOrCreateNode(baseAssociation);
                 node.ForwardRelations.Add(DotNetRelations.ImplementationSemantics, candidateNode);
             }
@@ -37,7 +38,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 
             for (int i = 0; i < subject.Semantics.Count; i++)
             {
-                var method = subject.Semantics[i].Method;
+                if (subject.Semantics[i].Method is not { } method)
+                    continue;
 
                 // Check if the method (and therefore the property) is actually overrideable.
                 if (method.IsStatic || !method.IsVirtual)
