@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using AsmResolver.DotNet.Builder.Metadata.Strings;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using Xunit;
 
@@ -132,6 +134,9 @@ namespace AsmResolver.DotNet.Tests.Builder
             var translationTable = buffer.Optimize();
             for (int i = 0; i < values.Length; i++)
                 Assert.Equal(translationTable[indices[i]], buffer.GetStringIndex(values[i]));
+            var stream = buffer.CreateStream();
+            for (int i = 0; i < values.Length; i++)
+                Assert.Equal(values[i], stream.GetStringByIndex(translationTable[indices[i]]));
         }
 
         [Fact]
@@ -266,6 +271,29 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             uint index = buffer.GetStringIndex(string1);
             Assert.Equal(index + 1, buffer.GetStringIndex(string2));
+        }
+
+        [Fact]
+        public void OptimizeWithCyrillicCharacters()
+        {
+            var originalStream = new SerializedStringsStream("#Strings", new byte[]
+            {
+                0x00,
+                0x67, 0x65, 0x74, 0x5F, 0xD0, 0xA1, 0x00,
+                0x41, 0x42, 0x43, 0x44, 0x00,
+                0x00, 0x00, 0x00
+            });
+            var string1 = new Utf8String(new byte[] { 0x67, 0x65, 0x74, 0x5F, 0xD0, 0xA1 });
+            var string2 = new Utf8String(new byte[] { 0xD0, 0xA1 });
+            var string3 = new Utf8String("ABCD");
+
+            var buffer = new StringsStreamBuffer();
+            buffer.ImportStream(originalStream);
+            OptimizeAndVerifyIndices(buffer, string1, string2, string3);
+
+            // Assert.Equal(1u, buffer.GetStringIndex(string1));
+            // Assert.Equal(5u, buffer.GetStringIndex(string2));
+            // Assert.Equal(8u, buffer.GetStringIndex(string3));
         }
     }
 }
