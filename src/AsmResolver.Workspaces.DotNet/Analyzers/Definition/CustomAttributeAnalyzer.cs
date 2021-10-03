@@ -61,7 +61,9 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             var index = context.Workspace.Index;
 
             var type = subject.Constructor?.DeclaringType?.Resolve();
-            if (type is not { Module : { Assembly : { } } } || !workspace.Assemblies.Contains(type.Module.Assembly) || subject.Signature is null)
+            if (type is not { Module: { Assembly: { } } })
+                return;
+            if (!workspace.Assemblies.Contains(type.Module.Assembly) || subject.Signature is null)
                 return;
 
             for (int i = 0; i < subject.Signature.NamedArguments.Count; i++)
