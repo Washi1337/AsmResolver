@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="type">The type providing type arguments.</param>
         /// <param name="method">The method providing type arguments.</param>
-        public GenericContext(IGenericArgumentsProvider type, IGenericArgumentsProvider method)
+        public GenericContext(IGenericArgumentsProvider? type, IGenericArgumentsProvider? method)
         {
             Type = type;
             Method = method;
@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Gets the object responsible for providing type arguments defined by the current generic type instantiation. 
         /// </summary>
-        public IGenericArgumentsProvider Type
+        public IGenericArgumentsProvider? Type
         {
             get;
         }
@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Gets the object responsible for providing type arguments defined by the current generic method instantiation. 
         /// </summary>
-        public IGenericArgumentsProvider Method
+        public IGenericArgumentsProvider? Method
         {
             get;
         }
