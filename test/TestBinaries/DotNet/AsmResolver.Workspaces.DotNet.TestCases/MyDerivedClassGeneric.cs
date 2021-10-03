@@ -11,7 +11,9 @@ namespace AsmResolver.Workspaces.DotNet.TestCases
         public override bool Implicit() => true;
 
         public new virtual int Shadowed(int x) => 1;
-        
+
+        public override int TestAboveAbstract() => 3;
+
         /// <inheritdoc />
         public override int ImplicitP { get; set; } = 1;
         
