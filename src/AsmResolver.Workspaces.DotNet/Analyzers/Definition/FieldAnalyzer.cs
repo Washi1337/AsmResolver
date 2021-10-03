@@ -12,7 +12,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         protected override void Analyze(AnalysisContext context, FieldDefinition subject)
         {
             // Schedule signature for analysis.
-            if (context.HasAnalyzers(typeof(FieldSignature)))
+            if (subject.Signature is not null && context.HasAnalyzers(typeof(FieldSignature)))
             {
                 context.ScheduleForAnalysis(subject.Signature);
             }

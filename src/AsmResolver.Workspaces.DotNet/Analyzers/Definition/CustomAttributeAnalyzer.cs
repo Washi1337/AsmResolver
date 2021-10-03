@@ -61,7 +61,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             var index = context.Workspace.Index;
 
             var type = subject.Constructor?.DeclaringType?.Resolve();
-            if (type is null || !workspace.Assemblies.Contains(type.Module.Assembly) || subject.Signature is null)
+            if (type is not { Module : { Assembly : { } } } || !workspace.Assemblies.Contains(type.Module.Assembly) || subject.Signature is null)
                 return;
 
             for (int i = 0; i < subject.Signature.NamedArguments.Count; i++)
@@ -90,6 +90,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             for (int i = 0; i < type.Properties.Count; i++)
             {
                 var field = type.Properties[i];
+                if (field.Signature is null)
+                    continue;
                 if (field.Name != argument.MemberName)
                     continue;
                 if (!_comparer.Equals(field.Signature.ReturnType, argument.ArgumentType))
@@ -107,6 +109,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             {
                 var field = type.Fields[i];
                 if (field.Name != argument.MemberName)
+                    continue;
+                if (field.Signature is null)
                     continue;
                 if (!_comparer.Equals(field.Signature.FieldType, argument.ArgumentType))
                     continue;

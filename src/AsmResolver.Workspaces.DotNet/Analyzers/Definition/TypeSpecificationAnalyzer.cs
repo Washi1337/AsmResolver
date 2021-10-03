@@ -12,7 +12,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         /// <inheritdoc />
         protected override void Analyze(AnalysisContext context, TypeSpecification subject)
         {
-            if (context.HasAnalyzers(typeof(TypeSignature)))
+            if (subject.Signature is not null && context.HasAnalyzers(typeof(TypeSignature)))
             {
                 context.ScheduleForAnalysis(subject.Signature);
             }

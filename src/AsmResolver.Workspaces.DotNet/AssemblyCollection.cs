@@ -83,7 +83,7 @@ namespace AsmResolver.Workspaces.DotNet
                     return workspaceAssembly;
 
                 // If not, resolve using the original assembly resolver of the module.
-                if (assembly is not AssemblyReference reference)
+                if (assembly is not AssemblyReference { Module : { } } reference)
                     return null;
 
                 if (!_collection._originalResolvers.TryGetValue(reference.Module, out var originalResolver))

@@ -16,7 +16,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
                 context.ScheduleForAnalysis(subject.DeclaringType);
             }
 
-            if (context.HasAnalyzers(subject.Signature.GetType()))
+            if (subject.Signature is not null && context.HasAnalyzers(subject.Signature.GetType()))
             {
                 context.ScheduleForAnalysis(subject.Signature);
             }
@@ -25,7 +25,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
                 return;
 
             var definition = subject.Resolve();
-            if (definition is null || !workspace.Assemblies.Contains(definition.Module.Assembly))
+            if (definition is not { Module: { Assembly: { } } } || !workspace.Assemblies.Contains(definition.Module.Assembly))
                 return; //TODO: Maybe add some warning log?
 
             var index = context.Workspace.Index;
