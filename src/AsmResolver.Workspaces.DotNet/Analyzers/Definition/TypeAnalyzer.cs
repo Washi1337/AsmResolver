@@ -54,11 +54,13 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             var index = context.Workspace.Index;
             var node = index.GetOrCreateNode(subject);
 
-            // Register base type relation.
-            if (subject.BaseType is { } baseType)
+            // Register base type relations.
+            var baseType = subject.BaseType;
+            while(baseType is not null)
             {
                 var relatedNode = index.GetOrCreateNode(baseType);
                 node.ForwardRelations.Add(DotNetRelations.BaseType, relatedNode);
+                baseType = baseType.Resolve()?.BaseType;
             }
 
             // Register interface relations.
