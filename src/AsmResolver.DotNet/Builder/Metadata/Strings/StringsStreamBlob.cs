@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         public bool IsFixed => (Flags & StringsStreamBlobFlags.Fixed) != 0;
 
         /// <inheritdoc />
-        public uint GetPhysicalSize() => (uint) (Blob.Length + (IsZeroTerminated ? 1 : 0));
+        public uint GetPhysicalSize() => (uint) (Blob.ByteCount + (IsZeroTerminated ? 1 : 0));
 
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
