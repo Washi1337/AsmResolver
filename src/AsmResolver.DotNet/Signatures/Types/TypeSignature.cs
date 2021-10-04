@@ -283,8 +283,10 @@ namespace AsmResolver.DotNet.Signatures.Types
             }
         }
 
-        internal static void WriteFieldOrPropType(IBinaryStreamWriter writer, TypeSignature type)
+        internal static void WriteFieldOrPropType(BlobSerializationContext context, TypeSignature type)
         {
+            var writer = context.Writer;
+
             switch (type.ElementType)
             {
                 case ElementType.Boolean:
@@ -314,7 +316,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                     writer.WriteByte((byte) ElementType.SzArray);
 
                     var arrayType = (SzArrayTypeSignature) type;
-                    WriteFieldOrPropType(writer, arrayType.BaseType);
+                    WriteFieldOrPropType(context, arrayType.BaseType);
                     break;
 
                 default:
@@ -325,14 +327,20 @@ namespace AsmResolver.DotNet.Signatures.Types
                     }
 
                     var typeDef = type.Resolve();
-                    if (typeDef is not null && typeDef.IsEnum)
+                    if (typeDef is null)
                     {
-                        writer.WriteByte((byte) ElementType.Enum);
-                        writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName(type));
-                        return;
+                        context.ErrorListener.MetadataBuilder(
+                            $"Custom attribute argument type {type.SafeToString()} could not be resolved.");
+                    }
+                    else if (!typeDef.IsEnum)
+                    {
+                        context.ErrorListener.MetadataBuilder(
+                            $"Custom attribute argument type {type.SafeToString()}is not an enum type.");
                     }
 
-                    throw new ArgumentOutOfRangeException();
+                    writer.WriteByte((byte) ElementType.Enum);
+                    writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName(type));
+                    return;
             }
         }
 

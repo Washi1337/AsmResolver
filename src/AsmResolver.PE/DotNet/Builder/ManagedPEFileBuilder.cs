@@ -233,7 +233,7 @@ namespace AsmResolver.PE.DotNet.Builder
 
         private static void CreateImportDirectory(IPEImage image, ManagedPEBuilderContext context)
         {
-            bool importEntrypointRequired = image.PEKind == OptionalHeaderMagic.Pe32;
+            bool importEntrypointRequired = image.MachineType == MachineType.I386;
             string entrypointName = (image.Characteristics & Characteristics.Dll) != 0
                 ? "_CorDllMain"
                 : "_CorExeMain";
