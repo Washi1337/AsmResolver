@@ -8,6 +8,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// </summary>
     public class CustomAttributeNamedArgumentAnalyzer : ObjectAnalyzer<CustomAttributeNamedArgument>
     {
+        /// <inheritdoc />
         protected override void Analyze(AnalysisContext context, CustomAttributeNamedArgument subject)
         {
             if (context.HasAnalyzers(typeof(CustomAttributeArgument)))

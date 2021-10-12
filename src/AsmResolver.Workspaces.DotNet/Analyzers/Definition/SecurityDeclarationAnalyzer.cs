@@ -14,7 +14,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         /// <inheritdoc />
         protected override void Analyze(AnalysisContext context, SecurityDeclaration subject)
         {
-            var permissionSet = subject.PermissionSet;
+            if (subject.PermissionSet is not { } permissionSet)
+                return;
             for (int j = 0; j < permissionSet.Attributes.Count; j++)
             {
                 var securityAttribute = permissionSet.Attributes[j];

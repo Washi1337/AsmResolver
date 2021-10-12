@@ -13,7 +13,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
         internal static IEnumerable<MethodDefinition> FindBaseMethods(this MethodDefinition subject,
             WorkspaceIndex index)
         {
-            var declaringType = subject.DeclaringType;
+            if (subject.DeclaringType is not { } declaringType)
+                yield break;
 
             var baseTypes = index
                 .GetOrCreateNode(declaringType) // Get indexed declaring type.
@@ -38,7 +39,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
 
                 foreach (var candidate in candidates)
                 {
-                    if (!candidate.IsVirtual)
+                    if (!candidate.IsVirtual || candidate.DeclaringType is null)
                         continue;
 
                     bool isImplementation = candidate.DeclaringType.IsInterface && candidate.IsNewSlot;
@@ -46,7 +47,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
                     if (!isImplementation && !isOverride)
                         continue;
                     var signature = candidate.Signature;
-                    if (context.HasValue)
+                    if (signature is not null && context.HasValue)
                         signature = signature.InstantiateGenericTypes(context.Value);
 
                     if (_comparer.Equals(signature, subject.Signature))

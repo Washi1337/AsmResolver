@@ -60,19 +60,19 @@ namespace AsmResolver.Workspaces
         }
 
         /// <summary>
-        /// Gets a stored data of type <see cref="T"/>.
+        /// Gets a stored data of provided generic type.
         /// </summary>
-        /// <returns>default value if data with type <see cref="T"/> is not stored, otherwise the data.</returns>
+        /// <returns>default value if data with provided generic type is not stored, otherwise the data.</returns>
         /// <typeparam name="T">The type of data to obtain.</typeparam>
         public T? GetData<T>() => Data
             .OfType<T>()
             .FirstOrDefault();
 
         /// <summary>
-        /// Gets a stored data of type <see cref="T"/>.
+        /// Gets a stored data of provided generic type.
         /// </summary>
         /// <param name="data">The data</param>
-        /// <returns>false if data with type <see cref="T"/> is not stored, otherwise true.</returns>
+        /// <returns>false if data with provided generic type is not stored, otherwise true.</returns>
         /// <typeparam name="T">The type of data to obtain.</typeparam>
         public bool TryGetData<T>([NotNullWhen(true)] out T? data)
         {
@@ -88,7 +88,7 @@ namespace AsmResolver.Workspaces
         }
 
         /// <summary>
-        /// Gets a stored data or creates new data of type <see cref="T"/>.
+        /// Gets a stored data or creates new data of provided generic type.
         /// </summary>
         /// <param name="defaultValue">Default value of new data.</param>
         /// <returns>The data.</returns>
@@ -104,7 +104,7 @@ namespace AsmResolver.Workspaces
         }
 
         /// <summary>
-        /// Gets a stored data or creates new data of type <see cref="T"/>.
+        /// Gets a stored data or creates new data of provided generic type.
         /// </summary>
         /// <param name="factory">Function that generates new data.</param>
         /// <returns>The data.</returns>
@@ -120,7 +120,7 @@ namespace AsmResolver.Workspaces
         }
 
         /// <summary>
-        /// Gets a stored data or creates new data of type <see cref="T"/>.
+        /// Gets a stored data or creates new data of provided generic type.
         /// </summary>
         /// <returns>The data.</returns>
         /// <typeparam name="T">The type of data to obtain.</typeparam>
@@ -135,7 +135,7 @@ namespace AsmResolver.Workspaces
         }
 
         /// <summary>
-        /// Stores the data of type <see cref="T"/>.
+        /// Stores the data of provided generic type.
         /// </summary>
         /// <param name="data">The data to store</param>
         /// <typeparam name="T">The type of data to store.</typeparam>
@@ -150,9 +150,9 @@ namespace AsmResolver.Workspaces
         }
 
         /// <summary>
-        /// Removes data of type <see cref="T"/>.
+        /// Removes data of provided generic type.
         /// </summary>
-        /// <returns>true if data with type <see cref="T"/> was removed, otherwise false.</returns>
+        /// <returns>true if data with provided generic type was removed, otherwise false.</returns>
         /// <typeparam name="T">The type of data to obtain.</typeparam>
         public bool RemoveData<T>()
             => TryGetData<T>(out var data)

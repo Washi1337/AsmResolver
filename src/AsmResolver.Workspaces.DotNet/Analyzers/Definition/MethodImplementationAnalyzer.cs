@@ -12,11 +12,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         /// <inheritdoc />
         protected override void Analyze(AnalysisContext context, MethodImplementation subject)
         {
-            if (context.HasAnalyzers(subject.Declaration.GetType()))
+            if (subject.Declaration is not null && context.HasAnalyzers(subject.Declaration.GetType()))
             {
                 context.ScheduleForAnalysis(subject.Declaration);
             }
-            if (context.HasAnalyzers(subject.Body.GetType()))
+            if (subject.Body is not null && context.HasAnalyzers(subject.Body.GetType()))
             {
                 context.ScheduleForAnalysis(subject.Body);
             }
