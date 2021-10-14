@@ -100,7 +100,7 @@ namespace AsmResolver.Tests.IO
             writer.WriteBinaryFormatterString(value);
 
             stream.Position = 0;
-            var reader = new BinaryReader(stream, Encoding.Unicode);
+            var reader = new BinaryReader(stream, Encoding.UTF8);
             Assert.Equal(value, reader.ReadString());
         }
 

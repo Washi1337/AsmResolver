@@ -9,9 +9,13 @@ namespace AsmResolver.DotNet.Resources
     public class ResourceSet : LazyList<ResourceSetEntry>
     {
         /// <summary>
-        /// Gets the magic number that every resource set starts with.
+        /// Gets or sets the resource manager header of the set.
         /// </summary>
-        public const uint Magic = 0xBEEFCACE;
+        public ResourceManagerHeader ManagerHeader
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets the version of the file format that is used for this resource set.

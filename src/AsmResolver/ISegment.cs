@@ -54,14 +54,27 @@ namespace AsmResolver
         /// </summary>
         /// <param name="value">The integer to determine the compressed size of.</param>
         /// <returns>The number of bytes the value would require.</returns>
-        public static uint GetCompressedSize(this uint value)
+        public static uint GetCompressedSize(this uint value) => value switch
         {
-            if (value < 0x80)
-                return sizeof(byte);
-            if (value < 0x4000)
-                return sizeof(ushort);
-            return sizeof(uint);
-        }
+            < 0x80 => sizeof(byte),
+            < 0x4000 => sizeof(ushort),
+            _ => sizeof(uint)
+        };
+
+        /// <summary>
+        /// Computes the number of bytes the provided integer would require after compressing it using the integer
+        /// compression using the 7-bit encoding.
+        /// </summary>
+        /// <param name="value">The integer to determine the compressed size of.</param>
+        /// <returns>The number of bytes the value would require.</returns>
+        public static uint Get7BitEncodedSize(this uint value) => value switch
+        {
+            < 0b1000_0000 => 1,
+            < 0b100_0000_0000_0000 => 2,
+            < 0b10_0000_0000_0000_0000_0000 => 3,
+            < 0b10000_0000_0000_0000_0000_0000_0000 => 4,
+            _ => 5
+        };
 
         /// <summary>
         /// Converts a string into an escaped string literal.

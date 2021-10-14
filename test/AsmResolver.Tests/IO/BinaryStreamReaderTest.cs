@@ -87,7 +87,7 @@ namespace AsmResolver.Tests.IO
         public void ReadBinaryFormatterString(string value)
         {
             using var stream = new MemoryStream();
-            var writer = new BinaryWriter(stream, Encoding.Unicode);
+            var writer = new BinaryWriter(stream, Encoding.UTF8);
             writer.Write(value);
 
             var reader = ByteArrayDataSource.CreateReader(stream.ToArray());

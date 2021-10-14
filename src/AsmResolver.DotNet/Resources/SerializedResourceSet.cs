@@ -23,23 +23,14 @@ namespace AsmResolver.DotNet.Resources
         public SerializedResourceSet(BinaryStreamReader reader, IResourceDataSerializer dataSerializer)
         {
             DataSerializer = dataSerializer;
-
-            if (reader.ReadUInt32() != Magic)
-                throw new FormatException("Invalid magic number.");
-
-            // Read resource manager header.
-            uint headerVersion = reader.ReadUInt32();
-            uint headerSize = reader.ReadUInt32();
             uint startOffset = reader.RelativeOffset;
 
-            ResourceReaderName = reader.ReadBinaryFormatterString(Encoding.UTF8);
-            ResourceSetName = reader.ReadBinaryFormatterString(Encoding.UTF8);
-
-            if (!ResourceReaderName.StartsWith("System.Resources.ResourceReader"))
-                throw new NotSupportedException($"Unsupported resource reader type {ResourceReaderName}.");
+            ManagerHeader = ResourceManagerHeader.FromReader(ref reader);
+            if (!ManagerHeader.ResourceReaderName.StartsWith("System.Resources.ResourceReader"))
+                throw new NotSupportedException($"Unsupported resource reader type {ManagerHeader.ResourceReaderName}.");
 
             // Move to resource set header.
-            reader.RelativeOffset = startOffset + headerSize;
+            reader.RelativeOffset = startOffset + ManagerHeader.GetPhysicalSize();
 
             FormatVersion = OriginalFormatVersion = reader.ReadInt32();
             if (OriginalFormatVersion != 1 && OriginalFormatVersion != 2)
@@ -71,22 +62,6 @@ namespace AsmResolver.DotNet.Resources
 
         /// <inheritdoc />
         public override int Count => IsInitialized ? Items.Count : _originalCount;
-
-        /// <summary>
-        /// Gets the name of the type that is used for reading the resource set.
-        /// </summary>
-        public string ResourceReaderName
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the name of the type that is used for representing the resource set.
-        /// </summary>
-        public string ResourceSetName
-        {
-            get;
-        }
 
         internal int OriginalFormatVersion
         {
