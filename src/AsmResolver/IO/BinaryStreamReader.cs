@@ -496,11 +496,11 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Reads a serialized UTF16 string that is prefixed by a 7-bit encoded length header.
+        /// Reads a serialized UTF-8 string that is prefixed by a 7-bit encoded length header.
         /// </summary>
         /// <returns>The string.</returns>
         /// <exception cref="FormatException">Occurs when the 7-bit encoded header is invalid.</exception>
-        public string ReadBinaryFormatterString() => ReadBinaryFormatterString(Encoding.Unicode);
+        public string ReadBinaryFormatterString() => ReadBinaryFormatterString(Encoding.UTF8);
 
         /// <summary>
         /// Reads a serialized string that is prefixed by a 7-bit encoded length header.
@@ -532,6 +532,12 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="alignment">The boundary to use.</param>
         public void Align(uint alignment) => Offset = Offset.Align(alignment);
+
+        /// <summary>
+        /// Aligns the reader to a specified boundary.
+        /// </summary>
+        /// <param name="alignment">The boundary to use.</param>
+        public void AlignRelative(uint alignment) => RelativeOffset = RelativeOffset.Align(alignment);
 
         /// <summary>
         /// Creates an exact copy of the reader.

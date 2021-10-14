@@ -254,12 +254,12 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Writes a serialized string using the UTF16 encoding that is prefixed by a 7-bit encoded length header.
+        /// Writes a serialized string using the UTF-8 encoding that is prefixed by a 7-bit encoded length header.
         /// </summary>
         /// <param name="writer">The output stream.</param>
         /// <param name="value">The string to write.</param>
         public static void WriteBinaryFormatterString(this IBinaryStreamWriter writer, string value) =>
-            WriteBinaryFormatterString(writer, value, Encoding.Unicode);
+            WriteBinaryFormatterString(writer, value, Encoding.UTF8);
 
         /// <summary>
         /// Writes a serialized string that is prefixed by a 7-bit encoded length header.

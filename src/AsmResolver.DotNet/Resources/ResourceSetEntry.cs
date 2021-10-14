@@ -20,6 +20,18 @@ namespace AsmResolver.DotNet.Resources
         }
 
         /// <summary>
+        /// Creates a new empty resource set entry.
+        /// </summary>
+        /// <param name="name">The name of the resource.</param>
+        /// <param name="type">The type of the element's value.</param>
+        public ResourceSetEntry(string name, ResourceType type)
+        {
+            Name = name;
+            Type = type;
+            _data = new LazyVariable<object?>(GetData);
+        }
+
+        /// <summary>
         /// Creates a new resource set entry.
         /// </summary>
         /// <param name="name">The name of the resource.</param>
@@ -29,6 +41,19 @@ namespace AsmResolver.DotNet.Resources
         {
             Name = name;
             Type = IntrinsicResourceType.Get(typeCode);
+            _data = new LazyVariable<object?>(data);
+        }
+
+        /// <summary>
+        /// Creates a new resource set entry.
+        /// </summary>
+        /// <param name="name">The name of the resource.</param>
+        /// <param name="type">The type of the element's value.</param>
+        /// <param name="data">The value of the element.</param>
+        public ResourceSetEntry(string name, ResourceType type, object? data)
+        {
+            Name = name;
+            Type = type;
             _data = new LazyVariable<object?>(data);
         }
 
@@ -65,5 +90,8 @@ namespace AsmResolver.DotNet.Resources
         /// This method is called upon initialization of the <see cref="Data"/> property.
         /// </remarks>
         protected virtual object? GetData() => null;
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Name} : {Type.FullName}";
     }
 }
