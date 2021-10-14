@@ -92,6 +92,12 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="value">The 64-bit floating point number to write.</param>
         void WriteDouble(double value);
+
+        /// <summary>
+        /// Writes a 128-bit decimal value to the stream.
+        /// </summary>
+        /// <param name="value">The 128-bit decimal value to write.</param>
+        void WriteDecimal(decimal value);
     }
 
     /// <summary>
@@ -210,6 +216,26 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
+        /// Writes a single 7-bit encoded 32-bit integer to the output stream.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        /// <param name="value">The value to write.</param>
+        public static void Write7BitEncodedInt32(this IBinaryStreamWriter writer, int value)
+        {
+            uint x = unchecked((uint) value);
+            do
+            {
+                byte b = (byte) (x & 0x7F);
+
+                if (x > 0x7F)
+                    b |= 0x80;
+
+                writer.WriteByte(b);
+                x >>= 7;
+            } while (x != 0);
+        }
+
+        /// <summary>
         /// Writes an UTF8 string to the stream.
         /// </summary>
         /// <param name="writer">The writer to use.</param>
@@ -225,6 +251,27 @@ namespace AsmResolver.IO
             byte[] bytes = Encoding.UTF8.GetBytes(value);
             writer.WriteCompressedUInt32((uint)bytes.Length);
             writer.WriteBytes(bytes);
+        }
+
+        /// <summary>
+        /// Writes a serialized string using the UTF16 encoding that is prefixed by a 7-bit encoded length header.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        /// <param name="value">The string to write.</param>
+        public static void WriteBinaryFormatterString(this IBinaryStreamWriter writer, string value) =>
+            WriteBinaryFormatterString(writer, value, Encoding.Unicode);
+
+        /// <summary>
+        /// Writes a serialized string that is prefixed by a 7-bit encoded length header.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        /// <param name="value">The string to write.</param>
+        /// <param name="encoding">The encoding to use.</param>
+        private static void WriteBinaryFormatterString(IBinaryStreamWriter writer, string value, Encoding encoding)
+        {
+            byte[] data = encoding.GetBytes(value);
+            writer.Write7BitEncodedInt32(data.Length);
+            writer.WriteBytes(data);
         }
 
         /// <summary>

@@ -10,6 +10,9 @@ namespace AsmResolver.IO
     /// </summary>
     public struct BinaryStreamReader
     {
+        [ThreadStatic]
+        private static int[]? _buffer;
+
         /// <summary>
         /// Creates a new binary stream reader on the provided data source.
         /// </summary>
@@ -268,6 +271,21 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
+        /// Reads a single 128-bit decimal value from the input stream, and advances the current offset by 16.
+        /// </summary>
+        /// <returns>The consumed value.</returns>
+        public decimal ReadDecimal()
+        {
+            AssertCanRead(4 * sizeof(int));
+
+            _buffer ??= new int[4];
+            for (int i = 0; i < 4; i++)
+                _buffer[i] = ReadInt32();
+
+            return new decimal(_buffer);
+        }
+
+        /// <summary>
         /// Attempts to read the provided amount of bytes from the input stream.
         /// </summary>
         /// <param name="buffer">The buffer that receives the read bytes.</param>
@@ -413,6 +431,32 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
+        /// Reads a 7-bit encoded 32-bit integer from the stream.
+        /// </summary>
+        /// <returns>The integer.</returns>
+        /// <exception cref="FormatException">Occurs when an invalid 7-bit encoding was encountered.</exception>
+        public int Read7BitEncodedInt32()
+        {
+            int result = 0;
+            byte currentByte;
+
+            for (int i = 0; i < 4; i++)
+            {
+                currentByte = ReadByte();
+                result |= (currentByte & 0x7F) << (i * 7);
+
+                if ((currentByte & 0x80) == 0)
+                    return result;
+            }
+
+            currentByte = ReadByte();
+            if (currentByte > 0b11111)
+                throw new FormatException("Invalid 7-bit encoded integer.");
+
+            return result | (currentByte << (4 * 7));
+        }
+
+        /// <summary>
         /// Reads a short or a long index from the stream.
         /// </summary>
         /// <param name="size">The size of the index to read.</param>
@@ -449,6 +493,38 @@ namespace AsmResolver.IO
             byte[] data = new byte[length];
             length = (uint) ReadBytes(data, 0, (int) length);
             return new Utf8String(data, 0, (int)length);
+        }
+
+        /// <summary>
+        /// Reads a serialized UTF16 string that is prefixed by a 7-bit encoded length header.
+        /// </summary>
+        /// <returns>The string.</returns>
+        /// <exception cref="FormatException">Occurs when the 7-bit encoded header is invalid.</exception>
+        public string ReadBinaryFormatterString() => ReadBinaryFormatterString(Encoding.Unicode);
+
+        /// <summary>
+        /// Reads a serialized string that is prefixed by a 7-bit encoded length header.
+        /// </summary>
+        /// <param name="encoding">The encoding to use for decoding the bytes into a string.</param>
+        /// <returns>The string.</returns>
+        /// <exception cref="FormatException">Occurs when the 7-bit encoded header is invalid.</exception>
+        public string ReadBinaryFormatterString(Encoding encoding)
+        {
+            int length = Read7BitEncodedInt32();
+
+            switch (length)
+            {
+                case < 0:
+                    throw new FormatException("Negative string length.");
+
+                case 0:
+                    return string.Empty;
+
+                case > 0:
+                    byte[] bytes = new byte[length];
+                    int actualLength = ReadBytes(bytes, 0, length);
+                    return encoding.GetString(bytes, 0, actualLength);
+            }
         }
 
         /// <summary>

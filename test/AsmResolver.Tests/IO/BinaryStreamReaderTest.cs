@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using AsmResolver.IO;
 using Xunit;
 
@@ -77,6 +78,20 @@ namespace AsmResolver.Tests.IO
             Assert.Equal(8u, reader.Offset);
             Assert.Equal(-8644366967197856241, reader.ReadInt64());
             Assert.Equal(16u, reader.Offset);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("Hello, world!")]
+        [InlineData("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789")]
+        public void ReadBinaryFormatterString(string value)
+        {
+            using var stream = new MemoryStream();
+            var writer = new BinaryWriter(stream, Encoding.Unicode);
+            writer.Write(value);
+
+            var reader = ByteArrayDataSource.CreateReader(stream.ToArray());
+            Assert.Equal(value, reader.ReadBinaryFormatterString());
         }
 
         [Fact]

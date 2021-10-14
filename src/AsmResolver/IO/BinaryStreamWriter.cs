@@ -117,5 +117,14 @@ namespace AsmResolver.IO
             WriteUInt64(*(ulong*) &value);
         }
 
+        /// <inheritdoc />
+        public void WriteDecimal(decimal value)
+        {
+            int[] bits = decimal.GetBits(value);
+            WriteInt32(bits[0]);
+            WriteInt32(bits[1]);
+            WriteInt32(bits[2]);
+            WriteInt32(bits[3]);
+        }
     }
 }
