@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Resources
             reader.RelativeOffset = startOffset + ManagerHeader.GetPhysicalSize();
 
             FormatVersion = OriginalFormatVersion = reader.ReadInt32();
-            if (OriginalFormatVersion != 1 && OriginalFormatVersion != 2)
+            if (OriginalFormatVersion is not 1 and not 2)
                 throw new NotSupportedException($"Invalid or unsupported resource set version {OriginalFormatVersion}.");
 
             _originalCount = reader.ReadInt32();
@@ -83,16 +83,12 @@ namespace AsmResolver.DotNet.Resources
         {
             base.Initialize();
 
-            var headers = new ResourceEntryHeader[_originalCount];
+            var headers = new ResourceSetEntryHeader[_originalCount];
 
             // Read all headers of every entry.
             var entryReader = _entryReader;
             for (int i = 0; i < _originalCount; i++)
-            {
-                headers[i] = new ResourceEntryHeader(
-                    entryReader.ReadBinaryFormatterString(Encoding.Unicode),
-                    entryReader.ReadUInt32());
-            }
+                headers[i] = ResourceSetEntryHeader.FromReader(ref entryReader);
 
             // Sort by offset.
             Array.Sort(headers, static (a, b) => a.Offset.CompareTo(b.Offset));
@@ -138,30 +134,6 @@ namespace AsmResolver.DotNet.Resources
             if (index >= OriginalUserTypes.Length)
                 throw new FormatException($"Invalid resource type code {typeCode}.");
             return OriginalUserTypes[index];
-        }
-
-        private readonly struct ResourceEntryHeader
-        {
-            public ResourceEntryHeader(string name, uint offset)
-            {
-                Name = name;
-                Offset = offset;
-            }
-
-            public string Name
-            {
-                get;
-            }
-
-            public uint Offset
-            {
-                get;
-            }
-
-#if DEBUG
-            /// <inheritdoc />
-            public override string ToString() => $"{nameof(Name)}: {Name}, {nameof(Offset)}: {Offset:X8}";
-#endif
         }
     }
 }

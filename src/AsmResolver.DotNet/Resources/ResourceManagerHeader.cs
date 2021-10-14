@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Resources
         /// <param name="resourceReaderName">The full name of the type that is responsible for reading the resource set file.</param>
         /// <param name="resourceSetName">The full name of the type that is responsible for representing the resource set.</param>
         public ResourceManagerHeader(string resourceReaderName, string resourceSetName)
-            : this(GetStringSize(resourceReaderName) + GetStringSize(resourceSetName),
+            : this(resourceReaderName.GetBinaryFormatterSize() + resourceSetName.GetBinaryFormatterSize(),
                 resourceReaderName,
                 resourceSetName)
         {
@@ -103,17 +103,12 @@ namespace AsmResolver.DotNet.Resources
                    + HeaderSize;
         }
 
-        private static uint GetStringSize(string value)
-        {
-            uint count = (uint) Encoding.UTF8.GetByteCount(value);
-            return count.Get7BitEncodedSize() + count;
-        }
-
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
+            writer.WriteUInt32(Magic);
             writer.WriteUInt32(1);
-            writer.WriteUInt32(GetPhysicalSize() - 2*sizeof(uint));
+            writer.WriteUInt32(GetPhysicalSize() - 3*sizeof(uint));
             writer.WriteBinaryFormatterString(ResourceReaderName);
             writer.WriteBinaryFormatterString(ResourceSetName);
         }

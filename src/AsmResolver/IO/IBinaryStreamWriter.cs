@@ -267,7 +267,7 @@ namespace AsmResolver.IO
         /// <param name="writer">The output stream.</param>
         /// <param name="value">The string to write.</param>
         /// <param name="encoding">The encoding to use.</param>
-        private static void WriteBinaryFormatterString(IBinaryStreamWriter writer, string value, Encoding encoding)
+        public static void WriteBinaryFormatterString(this IBinaryStreamWriter writer, string value, Encoding encoding)
         {
             byte[] data = encoding.GetBytes(value);
             writer.Write7BitEncodedInt32(data.Length);

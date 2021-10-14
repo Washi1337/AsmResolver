@@ -77,6 +77,25 @@ namespace AsmResolver
         };
 
         /// <summary>
+        /// Computes the number of bytes required to represent the provided string as a binary formatted string.
+        /// </summary>
+        /// <param name="value">The string to measure.</param>
+        /// <returns>The number of bytes.</returns>
+        public static uint GetBinaryFormatterSize(this string value) => value.GetBinaryFormatterSize(Encoding.UTF8);
+
+        /// <summary>
+        /// Computes the number of bytes required to represent the provided string as a binary formatted string.
+        /// </summary>
+        /// <param name="value">The string to measure.</param>
+        /// <param name="encoding">The encoding to use.</param>
+        /// <returns>The number of bytes.</returns>
+        public static uint GetBinaryFormatterSize(this string value, Encoding encoding)
+        {
+            uint count = (uint) encoding.GetByteCount(value);
+            return count.Get7BitEncodedSize() + count;
+        }
+
+        /// <summary>
         /// Converts a string into an escaped string literal.
         /// </summary>
         /// <param name="literal">The string to convert.</param>
