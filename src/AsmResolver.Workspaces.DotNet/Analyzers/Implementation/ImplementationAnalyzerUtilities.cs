@@ -10,16 +10,38 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Implementation
     {
         private static readonly SignatureComparer _comparer = new ();
 
+        private static IEnumerable<ITypeDefOrRef> GetBaseTypes(WorkspaceIndexNode baseNode)
+        {
+            var visited = new HashSet<WorkspaceIndexNode>();
+            var agenda = new Queue<WorkspaceIndexNode>();
+            agenda.Enqueue(baseNode);
+            while (agenda.Count != 0)
+            {
+                var node = agenda.Dequeue();
+                if(!visited.Add(node))
+                    continue;
+                var baseTypeNodes = node.ForwardRelations.GetNodes(DotNetRelations.BaseType);
+                foreach (var baseTypeNode in baseTypeNodes)
+                {
+                    var baseType = (ITypeDefOrRef)baseTypeNode.Subject;
+                    agenda.Enqueue(baseTypeNode);
+                    var baseTypeDefinitions = baseTypeNode.BackwardRelations.GetNodes(DotNetRelations.ReferenceType);
+                    foreach (var baseTypeDefinition in baseTypeDefinitions)
+                        agenda.Enqueue(baseTypeDefinition);
+                    yield return baseType;
+                }
+            }
+        }
+
         internal static IEnumerable<MethodDefinition> FindBaseMethods(this MethodDefinition subject,
             WorkspaceIndex index)
         {
             if (subject.DeclaringType is not { } declaringType)
                 yield break;
 
-            var baseTypes = index
-                .GetOrCreateNode(declaringType) // Get indexed declaring type.
-                .ForwardRelations.GetObjects(DotNetRelations.BaseType) // Get types that this declaring type is implementing.
-                .ToArray();
+            var declaringTypeNode = index.GetOrCreateNode(declaringType);
+
+            var baseTypes = GetBaseTypes(declaringTypeNode).ToArray();
 
             foreach (var baseType in baseTypes)
             {

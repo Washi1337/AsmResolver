@@ -23,13 +23,13 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             var abstractMethod = abstractType.Methods.First(m=>m.Name == nameof(MyAboveAbstractClass.TestAboveAbstract));
 
             var implType1 = (TypeDefinition)module.LookupMember(typeof(MyDerivedAboveClass).MetadataToken);
-            var implMethod1 = abstractType.Methods.First(m => m.Name == nameof(MyAboveAbstractClass.TestAboveAbstract));
+            var implMethod1 = implType1.Methods.First(m => m.Name == nameof(MyAboveAbstractClass.TestAboveAbstract));
 
             var implType2 = (TypeDefinition)module.LookupMember(typeof(MyDerivedInbetweenClass).MetadataToken);
-            var implMethod2 = abstractType.Methods.First(m => m.Name == nameof(MyAboveAbstractClass.TestAboveAbstract));
+            var implMethod2 = implType2.Methods.First(m => m.Name == nameof(MyAboveAbstractClass.TestAboveAbstract));
 
             var implType3 = (TypeDefinition)module.LookupMember(typeof(MyDerivedClassGeneric).MetadataToken);
-            var implMethod3 = abstractType.Methods.First(m => m.Name == nameof(MyAboveAbstractClass.TestAboveAbstract));
+            var implMethod3 = implType3.Methods.First(m => m.Name == nameof(MyAboveAbstractClass.TestAboveAbstract));
 
 
             var workspace = new DotNetWorkspace();
@@ -37,8 +37,9 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(abstractMethod);
-            var implMethods = node.BackwardRelations.GetObjects(DotNetRelations.ImplementationMethod);
+            var implMethods = node.BackwardRelations.GetObjects(DotNetRelations.ImplementationMethod).ToArray();
 
+            Assert.Equal(3, implMethods.Length);
             Assert.Contains(implMethod1, implMethods);
             Assert.Contains(implMethod2, implMethods);
             Assert.Contains(implMethod3, implMethods);
