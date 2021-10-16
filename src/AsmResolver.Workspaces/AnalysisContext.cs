@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver.Workspaces
 {
@@ -31,6 +32,7 @@ namespace AsmResolver.Workspaces
         public Queue<object> Agenda
         {
             get;
+            internal set;
         } = new();
 
         /// <summary>
@@ -41,6 +43,7 @@ namespace AsmResolver.Workspaces
             get;
         } = new HashSet<object>();
 
+        //TODO: Make some analyzer cache for faster HasAnalyzers check since this function is heavily used
         /// <summary>
         /// Determines whether the provided object type can be analyzed by at least one analyzer in this repository.
         /// </summary>
@@ -49,7 +52,7 @@ namespace AsmResolver.Workspaces
         /// <c>true</c> if there exists at least one analyzer that can analyze objects of the provided type,
         /// <c>false</c> otherwise.
         /// </returns>
-        public bool HasAnalyzers(Type type) => Workspace.Analyzers.HasAnalyzers(type);
+        public bool HasAnalyzers(Type type) => Workspace.Profiles.Any(profile => profile.Analyzers.HasAnalyzers(type));
 
         /// <summary>
         /// Schedules the provided object if it was not scheduled before.
