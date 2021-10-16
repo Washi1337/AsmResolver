@@ -51,6 +51,9 @@ namespace AsmResolver.Workspaces
                 foreach (var traversedObject in context.TraversedObjects)
                     traversedObjects.Add(traversedObject);
             }
+            
+            foreach (var traversedObject in traversedObjects)
+                context.TraversedObjects.Add(traversedObject);
         }
     }
 }
