@@ -1,6 +1,6 @@
 namespace AsmResolver.Workspaces.DotNet.TestCases
 {
-    public abstract class MyClassGeneric<T1,T2> : IMyInterfaceGeneric<bool,int,float>
+    public abstract class MyClassGeneric<T1,T2> : MyInbetweenAbstractClass, IMyInterfaceGeneric<bool,int,float>
     {
         /// <inheritdoc />
         void IMyInterfaceGeneric<bool,int,float>.Explicit()
