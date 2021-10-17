@@ -17,16 +17,24 @@ namespace AsmResolver.DotNet.Resources
         /// <summary>
         /// Gets the default header used for resource set files targeting .NET Framework 2.0.
         /// </summary>
-        public static readonly ResourceManagerHeader Framework20Header = new(
+        public static readonly ResourceManagerHeader Default_v2_0_0_0 = new(
             KnownResourceReaderNames.ResourceReader_mscorlib_v2_0_0_0,
             KnownResourceReaderNames.RuntimeResourceSet);
 
         /// <summary>
         /// Gets the default header used for resource set files targeting .NET Framework 4.0 and higher.
         /// </summary>
-        public static readonly ResourceManagerHeader Framework40Header = new(
+        public static readonly ResourceManagerHeader Default_v4_0_0_0 = new(
             KnownResourceReaderNames.ResourceReader_mscorlib_v4_0_0_0,
             KnownResourceReaderNames.RuntimeResourceSet);
+
+        /// <summary>
+        /// Gets the default header used for resource set files targeting .NET Framework 4.0 and higher, with
+        /// the System.Resources.Extensions.DeserializingResourceReader class as reader.
+        /// </summary>
+        public static readonly ResourceManagerHeader Deserializing_v4_0_0_0 = new(
+            KnownResourceReaderNames.DeserializingResourceReader_SystemResourcesExtensions_v4_0_0_0,
+            KnownResourceReaderNames.RuntimeResourceSet_SystemResourcesExtensions_v4_0_0_0);
 
         /// <summary>
         /// Creates a new instance of the <see cref="ResourceManagerHeader"/>.

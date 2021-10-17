@@ -13,12 +13,29 @@ namespace AsmResolver.DotNet.Resources
     /// </summary>
     public class ResourceSet : LazyList<ResourceSetEntry>
     {
+        /// <summary>
+        /// Creates a new empty resource set, targeting the default <c>System.Resources.ResourceReader</c> and
+        /// <c>System.Resources.RuntimeResourceSet</c> back-end classes, and using file format 2.
+        /// </summary>
         public ResourceSet()
-            : this(ResourceManagerHeader.Framework40Header, 2)
+            : this(ResourceManagerHeader.Default_v4_0_0_0, 2)
         {
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Creates a new empty resource set using file format 2.
+        /// </summary>
+        /// <param name="managerHeader">The header to target.</param>
+        public ResourceSet(ResourceManagerHeader managerHeader)
+            : this(managerHeader, 2)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new empty resource set.
+        /// </summary>
+        /// <param name="managerHeader">The header to target.</param>
+        /// <param name="formatVersion">The version of the file format.</param>
         public ResourceSet(ResourceManagerHeader managerHeader, int formatVersion)
         {
             ManagerHeader = managerHeader;

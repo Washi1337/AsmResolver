@@ -48,6 +48,20 @@ namespace AsmResolver.DotNet.Tests.Resources
             Assert.Equal(expectedValue, entry.Data);
         }
 
+        [Fact]
+        public void ReadUserDefinedTypeElement()
+        {
+            var entry = ReadResourceSet().First(e => e.Name == "Point");
+            Assert.Equal(
+                "System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
+                entry.Type.FullName);
+            Assert.Equal(
+                new byte[]
+                {
+                    0x03, 0x06, 0x31, 0x32, 0x2C, 0x20, 0x33, 0x34
+                }, entry.Data);
+        }
+
         [Theory]
         [InlineData("Null", ResourceTypeCode.Null, null)]
         [InlineData("String", ResourceTypeCode.String, "Hello, world!")]
@@ -76,6 +90,29 @@ namespace AsmResolver.DotNet.Tests.Resources
             var actualSet = ResourceSet.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
             var actualEntry = actualSet.First(e => e.Name == key);
             Assert.Equal(entry.Type, actualEntry.Type);
+            Assert.Equal(entry.Data, actualEntry.Data);
+        }
+
+        [Fact]
+        public void PersistentUserDefinedTypeElement()
+        {
+            var type = new UserDefinedResourceType(
+                "System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+
+            var set = new ResourceSet(ResourceManagerHeader.Deserializing_v4_0_0_0);
+            var entry = new ResourceSetEntry("Point", type,
+                new byte[]
+                {
+                    0x03, 0x06, 0x31, 0x32, 0x2C, 0x20, 0x33, 0x34
+                });
+            set.Add(entry);
+
+            using var stream = new MemoryStream();
+            set.Write(new BinaryStreamWriter(stream));
+
+            var actualSet = ResourceSet.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+            var actualEntry = actualSet.First(e => e.Name == "Point");
+            Assert.Equal(entry.Type.FullName, actualEntry.Type.FullName);
             Assert.Equal(entry.Data, actualEntry.Data);
         }
 

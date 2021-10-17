@@ -18,14 +18,15 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
+    <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
     <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
     <data name="Null" type="System.Resources.ResXNullRef, System.Windows.Forms">
         <value />
     </data>
     <data name="String" xml:space="preserve">
-    <value>Hello, world!</value>
-  </data>
-    <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+        <value>Hello, world!</value>
+    </data>
     <data name="BoolFalse" type="System.Boolean, mscorlib">
         <value>False</value>
     </data>
@@ -33,8 +34,8 @@
         <value>True</value>
     </data>
     <data name="Char" type="System.Char, mscorlib" xml:space="preserve">
-    <value>a</value>
-  </data>
+        <value>a</value>
+    </data>
     <data name="Byte" type="System.Byte, mscorlib">
         <value>18</value>
     </data>
@@ -73,5 +74,8 @@
     </data>
     <data name="ByteArray" type="System.Byte[], mscorlib">
         <value>AAECAwQFBgcICQ==</value>
+    </data>
+    <data name="Point" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+        <value>12, 34</value>
     </data>
 </root>

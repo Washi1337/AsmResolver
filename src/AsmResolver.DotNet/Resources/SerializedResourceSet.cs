@@ -26,8 +26,11 @@ namespace AsmResolver.DotNet.Resources
             uint startOffset = reader.RelativeOffset;
 
             ManagerHeader = ResourceManagerHeader.FromReader(ref reader);
-            if (!ManagerHeader.ResourceReaderName.StartsWith("System.Resources.ResourceReader"))
+            if (!ManagerHeader.ResourceReaderName.StartsWith("System.Resources.ResourceReader")
+                && !ManagerHeader.ResourceReaderName.StartsWith("System.Resources.Extensions.DeserializingResourceReader"))
+            {
                 throw new NotSupportedException($"Unsupported resource reader type {ManagerHeader.ResourceReaderName}.");
+            }
 
             // Move to resource set header.
             reader.RelativeOffset = startOffset + ManagerHeader.GetPhysicalSize();
