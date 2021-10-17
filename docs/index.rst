@@ -55,6 +55,7 @@ Table of Contents:
    dotnet/importing
    dotnet/managed-method-bodies
    dotnet/unmanaged-method-bodies
+   dotnet/managed-resources
    dotnet/cloning
    dotnet/token-allocation
    dotnet/type-memory-layout
