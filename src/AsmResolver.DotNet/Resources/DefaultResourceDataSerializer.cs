@@ -35,6 +35,6 @@ namespace AsmResolver.DotNet.Resources
         }
 
         /// <inheritdoc />
-        public virtual object? Deserialize(in BinaryStreamReader reader, ResourceType type) => reader.ReadToEnd();
+        public virtual object? Deserialize(ref BinaryStreamReader reader, ResourceType type) => reader.ReadToEnd();
     }
 }

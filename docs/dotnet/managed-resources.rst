@@ -142,7 +142,7 @@ By default, AsmResolver will read and deserialize entries in a resource set. How
     public class MyResourceDataSerializer : DefaultResourceDataSerializer
     {
         /// <inheritdoc />
-        public override object? Deserialize(in BinaryStreamReader reader, ResourceType type)
+        public override object? Deserialize(ref BinaryStreamReader reader, ResourceType type)
         {
             // ...
         }

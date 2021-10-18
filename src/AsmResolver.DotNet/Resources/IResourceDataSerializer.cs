@@ -20,6 +20,6 @@ namespace AsmResolver.DotNet.Resources
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <param name="type">The type of the resource.</param>
-        object? Deserialize(in BinaryStreamReader reader, ResourceType type);
+        object? Deserialize(ref BinaryStreamReader reader, ResourceType type);
     }
 }
