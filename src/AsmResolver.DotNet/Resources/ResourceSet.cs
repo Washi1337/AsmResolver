@@ -105,7 +105,7 @@ namespace AsmResolver.DotNet.Resources
 
             // Entry headers.
             var sortedEntries = Items.OrderBy(item => item.Name).ToArray();
-            var entryHeaders = new SortedDictionary<string, ResourceSetEntryHeader>();
+            var entryHeaders = new ResourceSetEntryHeader[Count];
             uint entryOffset = 0;
 
             // Hash table.
@@ -126,7 +126,6 @@ namespace AsmResolver.DotNet.Resources
                     && !typeNameToTypeCode.TryGetValue(item.Type.FullName, out int typeCode))
                 {
                     // New user-defined type. Add it to the list.
-
                     typeCode = userTypeNames.Count;
                     if (FormatVersion == 2)
                         typeCode += (int) ResourceTypeCode.StartOfUserTypes;
@@ -146,7 +145,7 @@ namespace AsmResolver.DotNet.Resources
 
                 // Create and add entry header to hash table.
                 var entryHeader = new ResourceSetEntryHeader(item.Name, (uint) dataWriter.Offset);
-                entryHeaders.Add(item.Name, entryHeader);
+                entryHeaders[i] = entryHeader;
                 nameHashes[i] = HashString(item.Name);
                 nameOffsets[i] = entryOffset;
                 entryOffset += entryHeader.GetPhysicalSize();
@@ -181,7 +180,7 @@ namespace AsmResolver.DotNet.Resources
             writer.WriteUInt32((uint) (writer.Offset + sizeof(uint) + entryOffset));
 
             // Write names in name table
-            foreach (var header in entryHeaders.Values)
+            foreach (var header in entryHeaders)
                 header.Write(writer);
 
             // Write data section.
@@ -194,8 +193,8 @@ namespace AsmResolver.DotNet.Resources
             // https://github.com/dotnet/runtime/blob/97ef512a7cbc21d982ce68de805fec2c42e3561c/src/libraries/System.Private.CoreLib/src/System/Resources/FastResourceComparer.cs#L42
 
             uint hash = 5381;
-            for (int i = 0; i < key.Length; i++)
-                hash = ((hash << 5) + hash) ^ key[i];
+            foreach (char c in key)
+                hash = ((hash << 5) + hash) ^ c;
             return hash;
         }
 
