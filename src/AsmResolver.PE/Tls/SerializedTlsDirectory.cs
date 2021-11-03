@@ -78,7 +78,7 @@ namespace AsmResolver.PE.Tls
 
             while (true)
             {
-                if (reader.CanRead((uint) (is32Bit ? sizeof(uint) : sizeof(ulong))))
+                if (!reader.CanRead((uint) (is32Bit ? sizeof(uint) : sizeof(ulong))))
                 {
                     _context.BadImage($"TLS callback function table does not end with a zero entry.");
                     break;
