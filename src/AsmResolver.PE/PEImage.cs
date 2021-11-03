@@ -10,6 +10,7 @@ using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
+using AsmResolver.PE.Tls;
 using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.PE
@@ -26,6 +27,7 @@ namespace AsmResolver.PE
         private IList<BaseRelocation>? _relocations;
         private readonly LazyVariable<IDotNetDirectory?> _dotNetDirectory;
         private IList<DebugDataEntry>? _debugData;
+        private readonly LazyVariable<ITlsDirectory?> _tlsDirectory;
 
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
@@ -160,6 +162,7 @@ namespace AsmResolver.PE
             _resources = new LazyVariable<IResourceDirectory?>(GetResources);
             _exceptions = new LazyVariable<IExceptionDirectory?>(GetExceptions);
             _dotNetDirectory = new LazyVariable<IDotNetDirectory?>(GetDotNetDirectory);
+            _tlsDirectory = new LazyVariable<ITlsDirectory?>(GetTlsDirectory);
         }
 
         /// <inheritdoc />
@@ -280,6 +283,13 @@ namespace AsmResolver.PE
             }
         }
 
+        /// <inheritdoc />
+        public ITlsDirectory? TlsDirectory
+        {
+            get => _tlsDirectory.Value;
+            set => _tlsDirectory.Value = value;
+        }
+
         /// <summary>
         /// Obtains the list of modules that were imported into the PE.
         /// </summary>
@@ -342,5 +352,14 @@ namespace AsmResolver.PE
         /// This method is called upon initialization of the <see cref="DebugData"/> property.
         /// </remarks>
         protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
+
+        /// <summary>
+        /// Obtains the data directory containing the Thread-Local Storage (TLS) data.
+        /// </summary>
+        /// <returns>The data directory.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="TlsDirectory"/> property.
+        /// </remarks>
+        protected virtual ITlsDirectory? GetTlsDirectory() => null;
     }
 }
