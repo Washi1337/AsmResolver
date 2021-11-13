@@ -94,6 +94,11 @@ AsmResolver supports parsing and building new resource sets using the ``Resource
     using AsmResolver.DotNet.Resources;
 
 
+.. warning::
+
+    Adding this ``using`` statement might introduce a name resolution conflict with the (original) ``ResourceSet`` class defined in ``System.Resources``. Generally speaking, you will not need both classes at the same time, as ``ResourceSet`` from AsmResolver is meant to replace the one from ``System.Resources``. However, if you do need to use both classes in the same file, make sure you are using the correct one for your use-case. This can for example be achieved by specifying the fully qualified name (e.g. ``System.Resources.ResourceSet``), or by introducing an alias (e.g. ``using SystemResourceSet = System.Resources.ResourceSet;``) instead.
+
+
 Creating new Resource Sets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
