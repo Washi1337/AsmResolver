@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.IO;
+using AsmResolver.PE.Relocations;
 
 namespace AsmResolver.PE.Tls
 {
@@ -90,6 +92,20 @@ namespace AsmResolver.PE.Tls
         /// This method is called upon initialization of the <see cref="CallbackFunctions"/> property.
         /// </remarks>
         protected virtual TlsCallbackCollection GetCallbackFunctions() => new(this);
+
+        /// <inheritdoc />
+        public IEnumerable<BaseRelocation> GetRequiredBaseRelocations()
+        {
+            int pointerSize = Is32Bit ? sizeof(uint) : sizeof(ulong);
+            var type = Is32Bit ? RelocationType.HighLow : RelocationType.Dir64;
+
+            var result = new List<BaseRelocation>(4 + CallbackFunctions.Count);
+            for (int i = 0; i < 4; i++)
+                result.Add(new BaseRelocation(type, this.ToReference(i * pointerSize)));
+            for (int i = 0; i < CallbackFunctions.Count; i++)
+                result.Add(new BaseRelocation(type, CallbackFunctions.ToReference(i * pointerSize)));
+            return result;
+        }
 
         /// <inheritdoc />
         public override uint GetPhysicalSize()

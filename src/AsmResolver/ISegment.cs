@@ -130,6 +130,8 @@ namespace AsmResolver
         /// <param name="segment">The segment to reference.</param>
         /// <param name="additive">The offset within the segment to reference.</param>
         /// <returns>The reference.</returns>
-        public static ISegmentReference ToReference(this ISegment segment, int additive) => new RelativeReference(segment, additive);
+        public static ISegmentReference ToReference(this ISegment segment, int additive) => additive == 0
+            ? new SegmentReference(segment)
+            : new RelativeReference(segment, additive);
     }
 }

@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using AsmResolver.PE.Relocations;
+
 namespace AsmResolver.PE.Tls
 {
     /// <summary>
@@ -68,5 +71,12 @@ namespace AsmResolver.PE.Tls
             get;
             set;
         }
+
+        /// <summary>
+        /// Obtains a collection of base address relocations that need to be applied to the TLS data directory
+        /// after the image was loaded into memory.
+        /// </summary>
+        /// <returns>The required base relocations.</returns>
+        IEnumerable<BaseRelocation> GetRequiredBaseRelocations();
     }
 }
