@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <data name="Null" type="System.Resources.ResXNullRef, System.Windows.Forms">
+        <value />
+    </data>
+    <data name="String" xml:space="preserve">
+        <value>Hello, world!</value>
+    </data>
+    <data name="BoolFalse" type="System.Boolean, mscorlib">
+        <value>False</value>
+    </data>
+    <data name="BoolTrue" type="System.Boolean, mscorlib">
+        <value>True</value>
+    </data>
+    <data name="Char" type="System.Char, mscorlib" xml:space="preserve">
+        <value>a</value>
+    </data>
+    <data name="Byte" type="System.Byte, mscorlib">
+        <value>18</value>
+    </data>
+    <data name="SByte" type="System.SByte, mscorlib">
+        <value>18</value>
+    </data>
+    <data name="UInt16" type="System.UInt16, mscorlib">
+        <value>4660</value>
+    </data>
+    <data name="Int16" type="System.Int16, mscorlib">
+        <value>4660</value>
+    </data>
+    <data name="UInt32" type="System.UInt32, mscorlib">
+        <value>305419896</value>
+    </data>
+    <data name="Int32" type="System.Int32, mscorlib">
+        <value>305419896</value>
+    </data>
+    <data name="UInt64" type="System.UInt64, mscorlib">
+        <value>81985529216486895</value>
+    </data>
+    <data name="Int64" type="System.Int64, mscorlib">
+        <value>81985529216486895</value>
+    </data>
+    <data name="Single" type="System.Single, mscorlib">
+        <value>1.234</value>
+    </data>
+    <data name="Double" type="System.Double, mscorlib">
+        <value>1.234</value>
+    </data>
+    <data name="DateTime" type="System.DateTime, mscorlib">
+        <value>2021-01-02</value>
+    </data>
+    <data name="TimeSpan" type="System.TimeSpan, mscorlib">
+        <value>10:01:02</value>
+    </data>
+    <data name="ByteArray" type="System.Byte[], mscorlib">
+        <value>AAECAwQFBgcICQ==</value>
+    </data>
+    <data name="Point" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+        <value>12, 34</value>
+    </data>
+</root>

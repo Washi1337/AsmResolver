@@ -417,7 +417,7 @@ namespace AsmResolver.PE.DotNet.Builder
                     continue;
 
                 methodTable[i] = new MethodDefinitionRow(
-                    new SegmentReference(bodySegment),
+                    bodySegment.ToReference(),
                     methodRow.ImplAttributes,
                     methodRow.Attributes,
                     methodRow.Name,

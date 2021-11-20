@@ -61,7 +61,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             // Replace body.
             var methodRow = methodTable[index];
             methodTable[index] = new MethodDefinitionRow(
-                new SegmentReference(body),
+                body.ToReference(),
                 methodRow.ImplAttributes | MethodImplAttributes.Native | MethodImplAttributes.Unmanaged
                 | MethodImplAttributes.PreserveSig,
                 methodRow.Attributes | MethodAttributes.PInvokeImpl,
@@ -189,7 +189,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
                 0xD, AddressFixupType.Absolute32BitAddress, function
             ));
             image.Relocations.Clear();
-            image.Relocations.Add(new BaseRelocation(RelocationType.HighLow, new RelativeReference(body, 0xD)));
+            image.Relocations.Add(new BaseRelocation(RelocationType.HighLow, body.ToReference(0xD)));
 
             // Replace body.
             ReplaceBodyWithNativeCode(image, body, true);

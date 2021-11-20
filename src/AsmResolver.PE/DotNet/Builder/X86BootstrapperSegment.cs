@@ -56,7 +56,7 @@ namespace AsmResolver.PE.DotNet.Builder
         {
             return new[]
             {
-                new BaseRelocation(RelocationType.HighLow, new RelativeReference(this, 2)),
+                new BaseRelocation(RelocationType.HighLow,  this.ToReference(2))
             };
         }
 
