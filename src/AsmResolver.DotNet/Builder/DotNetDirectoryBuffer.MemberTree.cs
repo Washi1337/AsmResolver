@@ -557,7 +557,7 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetSortedTable<FieldDefinition, FieldRvaRow>(TableIndex.FieldRva);
 
             var row = new FieldRvaRow(
-                new SegmentReference(field.FieldRva),
+                field.FieldRva.ToReference(),
                 ownerToken.Rid);
 
             table.Add(field, row);

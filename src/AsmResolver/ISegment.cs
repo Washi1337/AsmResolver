@@ -116,5 +116,20 @@ namespace AsmResolver
 
             return _buffer.ToString();
         }
+
+        /// <summary>
+        /// Constructs a reference to the start of the segment.
+        /// </summary>
+        /// <param name="segment">The segment to reference.</param>
+        /// <returns>The reference.</returns>
+        public static ISegmentReference ToReference(this ISegment segment) => new SegmentReference(segment);
+
+        /// <summary>
+        /// Constructs a reference to an offset within the segment.
+        /// </summary>
+        /// <param name="segment">The segment to reference.</param>
+        /// <param name="additive">The offset within the segment to reference.</param>
+        /// <returns>The reference.</returns>
+        public static ISegmentReference ToReference(this ISegment segment, int additive) => new RelativeReference(segment, additive);
     }
 }

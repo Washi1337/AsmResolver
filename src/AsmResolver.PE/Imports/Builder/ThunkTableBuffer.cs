@@ -52,7 +52,7 @@ namespace AsmResolver.PE.Imports.Builder
             uint relativeOffset = _length - ThunkSize;
 
             if (_isIat)
-                entry.AddressTableEntry = new RelativeReference(this, (int) relativeOffset);
+                entry.AddressTableEntry = this.ToReference((int) relativeOffset);
 
             _memberOffsets.Add(entry, relativeOffset);
             _members.Add(entry);

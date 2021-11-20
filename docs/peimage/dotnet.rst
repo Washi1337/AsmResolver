@@ -296,6 +296,7 @@ Every row structure defined in AsmResolver respects the specification described 
 
 ``ISegmentReference`` exposes a method ``CreateReader()``, which automatically resolves the RVA that was stored in the row, and creates a new input stream that can be used to parse e.g. method bodies or field data.
 
+
 Reading method bodies:
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -309,6 +310,7 @@ Reading a managed CIL method body can be done using ``CilRawMethodBody.FromReade
 
 It is important to note that the user is not bound to use ``CilRawMethodBody``. In the case that the ``Native`` (``0x0001``) flag is set in ``MethodDefinitionRow.ImplAttributes``, the implementation of the method body is not written in CIL, but using native code that uses an instruction set dependent on the platform that this application is targeting. Since the bounds of such a method body is not always well-defined, AsmResolver does not do any parsing on its own. However, using the ``CreateReader()`` method, it is still possible to decode instructions from this method body, using a custom instruction decoder.
 
+
 Reading field data:
 ~~~~~~~~~~~~~~~~~~~
 
@@ -320,15 +322,16 @@ Reading field data can be done in a similar fashion as reading method bodies. Ag
     var firstRva = fieldRvaTable[0];
     var reader = firstRva.Data.CreateReader();
 
+
 Creating new segment references:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Creating new segment references not present in the current PE image yet can for example be done by creating an instance of ``SegmentReference``, which is a wrapper for any ``IReadableSegment`` object.
+Creating new segment references not present in the current PE image yet can be done using the ``ISegment.ToReference`` extension method:
 
 .. code-block:: csharp
 
     var myData = new DataSegment(new byte[] {1, 2, 3, 4});
-    var fieldRva = new FieldRvaRow(new SegmentReference(myData), 0);
+    var fieldRva = new FieldRvaRow(myData.ToReference(), 0);
 
 
 

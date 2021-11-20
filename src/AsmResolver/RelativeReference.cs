@@ -6,7 +6,7 @@ namespace AsmResolver
     /// <summary>
     /// Represents a pointer or reference that is relative to the beginning of another segment or structure.
     /// </summary>
-    public readonly struct RelativeReference : ISegmentReference
+    public sealed class RelativeReference : ISegmentReference
     {
         /// <summary>
         /// Creates a new relative reference.
