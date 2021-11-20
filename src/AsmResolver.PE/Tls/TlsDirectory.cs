@@ -1,11 +1,12 @@
 using System.Threading;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Tls
 {
     /// <summary>
     /// Provides a basic implementation of the <see cref="ITlsDirectory"/> interface.
     /// </summary>
-    public class TlsDirectory : ITlsDirectory
+    public class TlsDirectory : SegmentBase, ITlsDirectory
     {
         private readonly LazyVariable<IReadableSegment?> _templateData;
         private TlsCallbackCollection? _callbackFunctions;
@@ -63,7 +64,7 @@ namespace AsmResolver.PE.Tls
         {
             get;
             set;
-        }
+        } = 0x00400000;
 
         /// <inheritdoc />
         public bool Is32Bit
@@ -89,5 +90,35 @@ namespace AsmResolver.PE.Tls
         /// This method is called upon initialization of the <see cref="CallbackFunctions"/> property.
         /// </remarks>
         protected virtual TlsCallbackCollection GetCallbackFunctions() => new(this);
+
+        /// <inheritdoc />
+        public override uint GetPhysicalSize()
+        {
+            int pointerSize = Is32Bit ? sizeof(uint) : sizeof(ulong);
+            return (uint) (pointerSize * 4 + 2 * sizeof(uint));
+        }
+
+        /// <inheritdoc />
+        public override void Write(IBinaryStreamWriter writer)
+        {
+            ulong imageBase = ImageBase;
+            bool is32Bit = Is32Bit;
+
+            if (TemplateData is { } data)
+            {
+                writer.WriteNativeInt(imageBase + data.Rva, is32Bit);
+                writer.WriteNativeInt(imageBase + data.Rva + data.GetPhysicalSize(), is32Bit);
+            }
+            else
+            {
+                writer.WriteNativeInt(0, is32Bit);
+                writer.WriteNativeInt(0, is32Bit);
+            }
+
+            writer.WriteNativeInt(imageBase + Index.Rva, is32Bit);
+            writer.WriteNativeInt(imageBase + CallbackFunctions.Rva, is32Bit);
+            writer.WriteUInt32(SizeOfZeroFill);
+            writer.WriteUInt32((uint) Characteristics);
+        }
     }
 }

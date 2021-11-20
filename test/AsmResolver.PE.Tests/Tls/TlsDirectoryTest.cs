@@ -1,3 +1,7 @@
+using System.IO;
+using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Tls;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.Tls
@@ -103,6 +107,106 @@ namespace AsmResolver.PE.Tests.Tls
         {
             var image = PEImage.FromBytes(Properties.Resources.TlsTest_x64);
             Assert.Single(image.TlsDirectory!.CallbackFunctions);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Persistent(bool is32Bit)
+        {
+            // Build PE file skeleton.
+            var text = new PESection(".text",
+                SectionFlags.ContentCode | SectionFlags.MemoryExecute | SectionFlags.MemoryRead);
+            var textBuilder = new SegmentBuilder();
+            text.Contents = textBuilder;
+
+            var rdata = new PESection(".rdata",
+                SectionFlags.ContentInitializedData | SectionFlags.MemoryRead);
+            var rdataBuilder = new SegmentBuilder();
+            rdata.Contents = rdataBuilder;
+
+            var data = new PESection(".data",
+                SectionFlags.ContentInitializedData | SectionFlags.MemoryRead | SectionFlags.MemoryWrite);
+            var dataBuilder = new SegmentBuilder();
+            data.Contents = dataBuilder;
+
+            var tls = new PESection(".tls",
+                SectionFlags.ContentInitializedData | SectionFlags.MemoryRead | SectionFlags.MemoryWrite);
+            var tlsBuilder = new SegmentBuilder();
+            tls.Contents = tlsBuilder;
+
+            var file = new PEFile
+            {
+                FileHeader =
+                {
+                    Machine = is32Bit ? MachineType.I386 : MachineType.Amd64,
+                },
+                OptionalHeader =
+                {
+                    Magic = is32Bit ? OptionalHeaderMagic.Pe32 : OptionalHeaderMagic.Pe32Plus
+                },
+                Sections =
+                {
+                    text,
+                    rdata,
+                    data,
+                    tls
+                },
+            };
+
+            // Create dummy functions and TLS data.
+            var callbackFunction1 = new DataSegment(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+            var callbackFunction2 = new DataSegment(new byte[] { 8, 9, 10, 11, 12, 13, 14, 15 });
+            var indexSegment = new DataSegment(new byte[] { 30, 31, 32, 33, 34, 35, 36, 37 });
+            var templateData = new DataSegment(new byte[] { 20, 21, 22, 23, 24, 25, 26, 27 });
+
+            var directory = new TlsDirectory
+            {
+                ImageBase = file.OptionalHeader.ImageBase,
+                Is32Bit = file.OptionalHeader.Magic == OptionalHeaderMagic.Pe32,
+                TemplateData = templateData,
+                Index = indexSegment.ToReference(),
+                Characteristics = TlsCharacteristics.Align4Bytes,
+                CallbackFunctions =
+                {
+                    callbackFunction1.ToReference(),
+                    callbackFunction2.ToReference(),
+                }
+            };
+
+            // Put dummy data into the sections.
+            textBuilder.Add(callbackFunction1, 4);
+            textBuilder.Add(callbackFunction2, 4);
+            rdataBuilder.Add(directory);
+            rdataBuilder.Add(directory.CallbackFunctions);
+            dataBuilder.Add(indexSegment);
+            tlsBuilder.Add(directory.TemplateData);
+
+            // Update TLS directory.
+            file.UpdateHeaders();
+            file.OptionalHeader.DataDirectories[(int) DataDirectoryIndex.TlsDirectory] =
+                new DataDirectory(directory.Rva, directory.GetPhysicalSize());
+
+            // Write.
+            using var s = new MemoryStream();
+            file.Write(s);
+
+            // Read.
+            var image = PEImage.FromBytes(s.ToArray());
+            var newDirectory = image.TlsDirectory!;
+            Assert.NotNull(newDirectory);
+
+            // Verify.
+            Assert.Equal(2, newDirectory.CallbackFunctions.Count);
+            byte[] buffer = new byte[8];
+            Assert.Equal(buffer.Length, newDirectory.Index.CreateReader().ReadBytes(buffer, 0, buffer.Length));
+            Assert.Equal(indexSegment.Data, buffer);
+            Assert.NotNull(newDirectory.TemplateData);
+            Assert.Equal(templateData.Data, newDirectory.TemplateData!.ToArray());
+            Assert.Equal(buffer.Length, newDirectory.CallbackFunctions[0].CreateReader().ReadBytes(buffer, 0, buffer.Length));
+            Assert.Equal(callbackFunction1.Data, buffer);
+            Assert.Equal(buffer.Length, newDirectory.CallbackFunctions[1].CreateReader().ReadBytes(buffer, 0, buffer.Length));
+            Assert.Equal(callbackFunction2.Data, buffer);
         }
     }
 }

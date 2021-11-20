@@ -35,8 +35,8 @@ namespace AsmResolver.PE.Tls
         /// <inheritdoc />
         public void UpdateOffsets(ulong newOffset, uint newRva)
         {
-            Offset = Offset;
-            Rva = Rva;
+            Offset = newOffset;
+            Rva = newRva;
         }
 
         /// <inheritdoc />

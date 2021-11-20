@@ -3,7 +3,7 @@ namespace AsmResolver.PE.Tls
     /// <summary>
     /// Represents the data directory containing Thread-Local Storage (TLS) data.
     /// </summary>
-    public interface ITlsDirectory
+    public interface ITlsDirectory : ISegment
     {
         /// <summary>
         /// Gets or sets the block of data that is used as a template to initialize TLS data.  The system copies all
