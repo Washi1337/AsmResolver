@@ -73,7 +73,7 @@ namespace AsmResolver.PE.Tls
         {
             get;
             set;
-        }
+        } = true;
 
         /// <summary>
         /// Obtains the block of template data.

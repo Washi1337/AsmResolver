@@ -39,6 +39,7 @@ Table of Contents:
    peimage/win32resources
    peimage/exceptions
    peimage/debug
+   peimage/tls
    peimage/dotnet
 
 
