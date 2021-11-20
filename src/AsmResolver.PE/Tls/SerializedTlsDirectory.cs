@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 
@@ -32,6 +31,9 @@ namespace AsmResolver.PE.Tls
             _addressOfCallbacks = reader.ReadNativeInt(is32Bit);
             SizeOfZeroFill = reader.ReadUInt32();
             Characteristics = (TlsCharacteristics) reader.ReadUInt32();
+
+            ImageBase = imageBase;
+            Is32Bit = is32Bit;
         }
 
         /// <inheritdoc />
@@ -61,9 +63,9 @@ namespace AsmResolver.PE.Tls
         }
 
         /// <inheritdoc />
-        protected override IList<ISegmentReference> GetCallbackFunctions()
+        protected override TlsCallbackCollection GetCallbackFunctions()
         {
-            var result = new List<ISegmentReference>();
+            var result = new TlsCallbackCollection(this);
 
             var file = _context.File;
             var optionalHeader = file.OptionalHeader;

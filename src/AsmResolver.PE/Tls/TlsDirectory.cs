@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading;
 
 namespace AsmResolver.PE.Tls
@@ -9,7 +8,7 @@ namespace AsmResolver.PE.Tls
     public class TlsDirectory : ITlsDirectory
     {
         private readonly LazyVariable<IReadableSegment?> _templateData;
-        private IList<ISegmentReference>? _callbackFunctions;
+        private TlsCallbackCollection? _callbackFunctions;
 
         /// <summary>
         /// Initializes a new empty TLS data directory.
@@ -35,7 +34,7 @@ namespace AsmResolver.PE.Tls
         }
 
         /// <inheritdoc />
-        public IList<ISegmentReference> CallbackFunctions
+        public TlsCallbackCollection CallbackFunctions
         {
             get
             {
@@ -59,6 +58,20 @@ namespace AsmResolver.PE.Tls
             set;
         }
 
+        /// <inheritdoc />
+        public ulong ImageBase
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public bool Is32Bit
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Obtains the block of template data.
         /// </summary>
@@ -75,6 +88,6 @@ namespace AsmResolver.PE.Tls
         /// <remarks>
         /// This method is called upon initialization of the <see cref="CallbackFunctions"/> property.
         /// </remarks>
-        protected virtual IList<ISegmentReference> GetCallbackFunctions() => new List<ISegmentReference>();
+        protected virtual TlsCallbackCollection GetCallbackFunctions() => new(this);
     }
 }

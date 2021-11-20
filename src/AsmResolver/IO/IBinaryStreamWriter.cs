@@ -100,6 +100,21 @@ namespace AsmResolver.IO
     public static partial class IOExtensions
     {
         /// <summary>
+        /// Writes either a 32-bit or a 64-bit number to the output stream.
+        /// </summary>
+        /// <param name="writer">The writer to use.</param>
+        /// <param name="value">The value to write.</param>
+        /// <param name="is32Bit">Indicates the integer to be written is 32-bit or 64-bit.</param>
+        /// <returns>The read number, zero extended if necessary.</returns>
+        public static void WriteNativeInt(this IBinaryStreamWriter writer, ulong value, bool is32Bit)
+        {
+            if (is32Bit)
+                writer.WriteUInt32((uint) value);
+            else
+                writer.WriteUInt64(value);
+        }
+
+        /// <summary>
         /// Writes a buffer of data to the stream.
         /// </summary>
         /// <param name="writer">The writer to use.</param>

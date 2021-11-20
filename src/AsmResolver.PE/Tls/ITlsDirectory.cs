@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace AsmResolver.PE.Tls
 {
     /// <summary>
@@ -29,7 +27,7 @@ namespace AsmResolver.PE.Tls
         /// <summary>
         /// Gets a table of function callbacks that need to be called upon every thread creation.
         /// </summary>
-        IList<ISegmentReference> CallbackFunctions
+        TlsCallbackCollection CallbackFunctions
         {
             get;
         }
@@ -48,6 +46,24 @@ namespace AsmResolver.PE.Tls
         /// Gets or sets the characteristics that are assigned to this directory.
         /// </summary>
         TlsCharacteristics Characteristics
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the image base address that the TLS directory assumes.
+        /// </summary>
+        public ulong ImageBase
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the TLS directory assumes a 32-bit or 64-bit format.
+        /// </summary>
+        public bool Is32Bit
         {
             get;
             set;
