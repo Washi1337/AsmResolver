@@ -216,23 +216,14 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <inheritdoc />
-        public void SetEntry(uint id, IResourceEntry entry)
+        public void AddOrReplaceEntry(IResourceEntry entry)
         {
-            int index = GetEntryIndex(id);
+            int index = GetEntryIndex(entry.Id);
             if (index == -1)
                 Entries.Add(entry);
             else
                 Entries[index] = entry;
         }
-
-        /// <inheritdoc />
-        public void SetDirectory(uint id, IResourceDirectory directory) => SetEntry(id, directory);
-
-        /// <inheritdoc />
-        public void SetDirectory(ResourceType type, IResourceDirectory directory) => SetEntry((uint) type, directory);
-
-        /// <inheritdoc />
-        public void SetData(uint id, IResourceData data) => SetEntry(id, data);
 
         /// <summary>
         /// Obtains the list of entries in the directory.

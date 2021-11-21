@@ -136,31 +136,9 @@ namespace AsmResolver.PE.Win32Resources
         bool TryGetData(uint id, [NotNullWhen(true)] out IResourceData? data);
 
         /// <summary>
-        /// Adds or replaces an existing entry in the directory.
+        /// Replaces an existing entry with the same ID with the provided entry, or adds the new entry to the directory.
         /// </summary>
-        /// <param name="id">The identifier of the entry to add or replace.</param>
         /// <param name="entry">The entry to store in the directory.</param>
-        void SetEntry(uint id, IResourceEntry entry);
-
-        /// <summary>
-        /// Adds or replaces an existing sub directory in the directory.
-        /// </summary>
-        /// <param name="id">The identifier of the entry to add or replace.</param>
-        /// <param name="directory">The sub-directory to store.</param>
-        void SetDirectory(uint id, IResourceDirectory directory);
-
-        /// <summary>
-        /// Adds or replaces an existing sub directory in the directory.
-        /// </summary>
-        /// <param name="type">The type of resources the sub-directory stores.</param>
-        /// <param name="directory">The sub-directory to store.</param>
-        void SetDirectory(ResourceType type, IResourceDirectory directory);
-
-        /// <summary>
-        /// Adds or replaces an existing data entry in the directory.
-        /// </summary>
-        /// <param name="id">The identifier of the data entry to add or replace.</param>
-        /// <param name="data">The data entry to store in the directory.</param>
-        void SetData(uint id, IResourceData data);
+        void AddOrReplaceEntry(IResourceEntry entry);
     }
 }
