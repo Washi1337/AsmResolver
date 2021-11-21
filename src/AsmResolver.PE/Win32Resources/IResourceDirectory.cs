@@ -140,5 +140,19 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         /// <param name="entry">The entry to store in the directory.</param>
         void AddOrReplaceEntry(IResourceEntry entry);
+
+        /// <summary>
+        /// Removes an entry in the directory by its unique identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the entry to remove.</param>
+        /// <returns><c>true</c> if the data entry was found and removed, <c>false</c> otherwise.</returns>
+        bool RemoveEntry(uint id);
+
+        /// <summary>
+        /// Removes a directory in the directory by its resource type.
+        /// </summary>
+        /// <param name="type">The type of resources to remove.</param>
+        /// <returns><c>true</c> if the directory was found and removed, <c>false</c> otherwise.</returns>
+        bool RemoveEntry(ResourceType type);
     }
 }

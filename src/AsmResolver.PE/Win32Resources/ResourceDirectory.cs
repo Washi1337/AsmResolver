@@ -225,6 +225,20 @@ namespace AsmResolver.PE.Win32Resources
                 Entries[index] = entry;
         }
 
+        /// <inheritdoc />
+        public bool RemoveEntry(uint id)
+        {
+            int index = GetEntryIndex(id);
+            if (index == -1)
+                return false;
+
+            Entries.RemoveAt(index);
+            return true;
+        }
+
+        /// <inheritdoc />
+        public bool RemoveEntry(ResourceType type) => RemoveEntry((uint) type);
+
         /// <summary>
         /// Obtains the list of entries in the directory.
         /// </summary>

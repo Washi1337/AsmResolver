@@ -272,5 +272,33 @@ namespace AsmResolver.PE.Tests.Win32Resources
             Assert.Same(newEntry, Assert.Single(root.Entries));
         }
 
+        [Fact]
+        public void RemoveNonExistingEntry()
+        {
+            var root = new ResourceDirectory(0u)
+            {
+                Entries = { new ResourceDirectory(1234u) }
+            };
+
+            Assert.False(root.RemoveEntry(5678u));
+            Assert.Single(root.Entries);
+        }
+
+        [Fact]
+        public void RemoveExistingEntry()
+        {
+            var root = new ResourceDirectory(0u)
+            {
+                Entries =
+                {
+                    new ResourceDirectory(1234u),
+                    new ResourceDirectory(5678u)
+                }
+            };
+
+            Assert.True(root.RemoveEntry(1234u));
+            Assert.Single(root.Entries);
+        }
+
     }
 }
