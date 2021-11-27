@@ -147,6 +147,43 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(expected, actual, _comparer);
         }
 
+        [Fact]
+        public void GenericTypeSingleBracketsMultiElements()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+
+            var elementType = new TypeReference(_module, ns, name);
+            var argumentType = _module.CorLibTypeFactory.Object;
+            var argumentType2 = _module.CorLibTypeFactory.Int32;
+
+            var expected = new GenericInstanceTypeSignature(elementType, false, argumentType, argumentType2);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[{argumentType.Namespace}.{argumentType.Name},{argumentType2.Namespace}.{argumentType2.Name}]");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+
+        [Fact]
+        public void GenericTypeSingleBracketsMultiElementsWithPlus()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+
+            const string escapedPName = "MyType\\+WithPlus";
+            const string pname = "MyType+WithPlus";
+
+
+            var elementType = new TypeReference(_module, ns, name);
+            var argumentType = _module.CorLibTypeFactory.Object;
+            var argumentType2 = new TypeReference(_module, ns, pname).ToTypeSignature(); ;
+
+            var expected = new GenericInstanceTypeSignature(elementType, false, argumentType, argumentType2);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[{argumentType.Namespace}.{argumentType.Name},{ns}.{escapedPName}]");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
         [Theory]
         [InlineData("System", "Object")]
         [InlineData("System", "#=abc")]
@@ -165,6 +202,23 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[[{argumentType.Namespace}.{argumentType.Name}]]");
             Assert.Equal(expected, actual, _comparer);
         }
+
+        [Fact]
+        public void GenericTypeMultiBracketsMultiElements()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+
+            var elementType = new TypeReference(_module, ns, name);
+            var argumentType = _module.CorLibTypeFactory.Object;
+            var argumentType2 = _module.CorLibTypeFactory.Int32;
+
+            var expected = new GenericInstanceTypeSignature(elementType, false, argumentType, argumentType2);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[[{argumentType.Namespace}.{argumentType.Name}],[{argumentType2.Namespace}.{argumentType2.Name}]]");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
 
         [Fact]
         public void SpacesInAssemblySpec()
