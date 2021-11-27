@@ -26,7 +26,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Traversal.Definition
             }
 
             // Schedule method body for analysis.
-            if (subject.CilMethodBody is not null && context.HasAnalyzers(typeof(CilMethodBody)))
+            if (subject.IsIL && subject.CilMethodBody is not null && context.HasAnalyzers(typeof(CilMethodBody)))
             {
                 context.ScheduleForAnalysis(subject.CilMethodBody);
             }
