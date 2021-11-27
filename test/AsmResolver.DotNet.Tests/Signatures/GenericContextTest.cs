@@ -20,22 +20,22 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Theory]
         [InlineData(GenericParameterType.Type)]
         [InlineData(GenericParameterType.Method)]
-        public void ResolveGenericParameterWithEmptyTypeShouldThrow(GenericParameterType parameterType)
+        public void ResolveGenericParameterWithEmptyType(GenericParameterType parameterType)
         {
             var context = new GenericContext();
 
             var parameter = new GenericParameterSignature(parameterType, 0);
-            Assert.Throws<ArgumentOutOfRangeException>(() => context.GetTypeArgument(parameter));
+            Assert.Equal(parameter, context.GetTypeArgument(parameter));
         }
-        
+
         [Fact]
         public void ResolveMethodGenericParameterWithMethod()
         {
             var genericInstance = new GenericInstanceMethodSignature();
             genericInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
-            
+
             var context = new GenericContext(null, genericInstance);
-            
+
             var parameter = new GenericParameterSignature(GenericParameterType.Method, 0);
             Assert.Equal("System.String", context.GetTypeArgument(parameter).FullName);
         }
@@ -45,9 +45,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var genericInstance = new GenericInstanceTypeSignature(_importer.ImportType(typeof(List<>)), false);
             genericInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
-            
+
             var context = new GenericContext(genericInstance, null);
-            
+
             var parameter = new GenericParameterSignature(GenericParameterType.Type, 0);
             Assert.Equal("System.String", context.GetTypeArgument(parameter).FullName);
         }
@@ -57,12 +57,12 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var genericType = new GenericInstanceTypeSignature(_importer.ImportType(typeof(List<>)), false);
             genericType.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
-            
+
             var genericMethod = new GenericInstanceMethodSignature();
             genericMethod.TypeArguments.Add(_importer.ImportTypeSignature(typeof(int)));
-            
+
             var context = new GenericContext(genericType, genericMethod);
-            
+
             var parameter = new GenericParameterSignature(GenericParameterType.Type, 0);
             Assert.Equal("System.String", context.GetTypeArgument(parameter).FullName);
         }
@@ -72,38 +72,38 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var genericType = new GenericInstanceTypeSignature(_importer.ImportType(typeof(List<>)), false);
             genericType.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
-            
+
             var genericMethod = new GenericInstanceMethodSignature();
             genericMethod.TypeArguments.Add(_importer.ImportTypeSignature(typeof(int)));
-            
+
             var context = new GenericContext(genericType, genericMethod);
-            
+
             var parameter = new GenericParameterSignature(GenericParameterType.Method, 0);
             Assert.Equal("System.Int32", context.GetTypeArgument(parameter).FullName);
         }
 
         [Fact]
-        public void ResolveTypeGenericParameterWithOnlyMethodShouldThrow()
+        public void ResolveTypeGenericParameterWithOnlyMethod()
         {
             var genericInstance = new GenericInstanceMethodSignature();
             genericInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
-            
+
             var context = new GenericContext(null, genericInstance);
-            
+
             var parameter = new GenericParameterSignature(GenericParameterType.Type, 0);
-            Assert.Throws<ArgumentOutOfRangeException>(() => context.GetTypeArgument(parameter));
+            Assert.Equal(parameter,context.GetTypeArgument(parameter));
         }
 
         [Fact]
-        public void ResolveMethodGenericParameterWithOnlyTypeShouldThrow()
+        public void ResolveMethodGenericParameterWithOnlyType()
         {
             var genericInstance = new GenericInstanceTypeSignature(_importer.ImportType(typeof(List<>)), false);
             genericInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
-            
+
             var context = new GenericContext(genericInstance, null);
-            
+
             var parameter = new GenericParameterSignature(GenericParameterType.Method, 0);
-            Assert.Throws<ArgumentOutOfRangeException>(() => context.GetTypeArgument(parameter));
+            Assert.Equal(parameter, context.GetTypeArgument(parameter));
         }
     }
 }
