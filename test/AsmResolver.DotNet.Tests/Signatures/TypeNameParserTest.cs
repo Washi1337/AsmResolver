@@ -204,7 +204,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
-        public void GenericTypeMultiBracketsMultiElements()
+        public void GenericTypeMultiBracketsMultiElementsVersion()
         {
             const string ns = "MyNamespace";
             const string name = "MyType";
@@ -212,10 +212,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var elementType = new TypeReference(_module, ns, name);
             var argumentType = _module.CorLibTypeFactory.Object;
             var argumentType2 = _module.CorLibTypeFactory.Int32;
+            var fullName = _module.CorLibTypeFactory.CorLibScope.GetAssembly().FullName;
 
             var expected = new GenericInstanceTypeSignature(elementType, false, argumentType, argumentType2);
 
-            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[[{argumentType.Namespace}.{argumentType.Name}],[{argumentType2.Namespace}.{argumentType2.Name}]]");
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[[{argumentType.Namespace}.{argumentType.Name}, {fullName}],[{argumentType2.Namespace}.{argumentType2.Name}, {fullName}]]");
             Assert.Equal(expected, actual, _comparer);
         }
 
