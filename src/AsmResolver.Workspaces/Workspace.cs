@@ -10,7 +10,7 @@ namespace AsmResolver.Workspaces
         /// <summary>
         /// Gets a ordered list of profiles for workspace analyzing.
         /// </summary>
-        public List<WorksapceProfile> Profiles
+        public List<WorkspaceProfile> Profiles
         {
             get;
         } = new();

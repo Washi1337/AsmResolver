@@ -3,7 +3,7 @@ using AsmResolver.Workspaces.DotNet.Analyzers.Implementation;
 
 namespace AsmResolver.Workspaces.DotNet.Analyzers
 {
-    public class DotNetInheritanceProfile : WorksapceProfile
+    public class DotNetInheritanceProfile : WorkspaceProfile
     {
         public DotNetInheritanceProfile()
         {

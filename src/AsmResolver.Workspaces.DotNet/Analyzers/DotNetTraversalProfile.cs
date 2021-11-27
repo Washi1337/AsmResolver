@@ -8,7 +8,7 @@ using AsmResolver.Workspaces.DotNet.Analyzers.Traversal.Signature;
 
 namespace AsmResolver.Workspaces.DotNet
 {
-    public class DotNetTraversalProfile : WorksapceProfile
+    public class DotNetTraversalProfile : WorkspaceProfile
     {
         public DotNetTraversalProfile()
         {
