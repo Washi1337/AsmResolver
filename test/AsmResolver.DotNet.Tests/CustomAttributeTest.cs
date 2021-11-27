@@ -86,6 +86,19 @@ namespace AsmResolver.DotNet.Tests
             return attribute;
         }
 
+        private static CustomAttribute GetCustomAttributeTestCase2(string methodName, bool rebuild = false)
+        {
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
+            var method = type.Methods.First(m => m.Name == methodName);
+            var attribute = method.CustomAttributes
+                .First(c => c.Constructor.DeclaringType.Name == nameof(TestCase2Attribute));
+
+            if (rebuild)
+                attribute = RebuildAndLookup(attribute);
+            return attribute;
+        }
+
         private static CustomAttribute RebuildAndLookup(CustomAttribute attribute)
         {
             var stream = new MemoryStream();
@@ -153,6 +166,20 @@ namespace AsmResolver.DotNet.Tests
                 attribute.Constructor.Module.CorLibTypeFactory.String,
                 argument.Element as TypeSignature, _comparer);
         }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FixedTypeArgumentNull(bool rebuild)
+        {
+            var attribute = GetCustomAttributeTestCase2(nameof(CustomAttributesTestClass.FixedTypeArgumentNull), rebuild);
+            Assert.Single(attribute.Signature.FixedArguments);
+            Assert.Empty(attribute.Signature.NamedArguments);
+
+            var argument = attribute.Signature.FixedArguments[0];
+            Assert.Null(argument.Element);
+        }
+
 
         [Theory]
         [InlineData(false)]

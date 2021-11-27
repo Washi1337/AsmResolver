@@ -48,7 +48,13 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         public void FixedTypeArgument()
         {
         }
-        
+
+        [TestCase2(null)]
+        public void FixedTypeArgumentNull()
+        {
+        }
+
+
         [TestCase(typeof(KeyValuePair<string[], int[]>))]
         public void FixedComplexTypeArgument()
         {
