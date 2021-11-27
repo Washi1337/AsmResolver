@@ -37,12 +37,12 @@ namespace AsmResolver.PE.DotNet.Builder
         {
             string entrypointName = _isDll ? "_CorDllMain" : "_CorExeMain";
             uint address = _imageBase + _thunkProvider.GetThunkRva("mscoree.dll", entrypointName);
-            
+
             return new byte[]
             {
-                0xFF, 0x25, 
-                (byte) (address & 0xFF), 
-                (byte) ((address >> 8) & 0xFF), 
+                0xFF, 0x25,
+                (byte) (address & 0xFF),
+                (byte) ((address >> 8) & 0xFF),
                 (byte) ((address >> 16) & 0xFF),
                 (byte) ((address >> 24) & 0xFF)
             };
@@ -56,9 +56,9 @@ namespace AsmResolver.PE.DotNet.Builder
         {
             return new[]
             {
-                new BaseRelocation(RelocationType.HighLow, new RelativeReference(this, 2)), 
+                new BaseRelocation(RelocationType.HighLow,  this.ToReference(2))
             };
         }
-        
+
     }
 }

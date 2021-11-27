@@ -34,13 +34,14 @@ namespace AsmResolver.DotNet.Code.Native
                 // TODO: keep architecture into account..
                 if (fixup.Type == AddressFixupType.Absolute32BitAddress)
                 {
-                    var relocation = new BaseRelocation(RelocationType.HighLow,
-                        new RelativeReference(segment, (int) fixup.Offset));
+                    var relocation = new BaseRelocation(
+                        RelocationType.HighLow,
+                        segment.ToReference((int) fixup.Offset));
                     provider.RegisterBaseRelocation(relocation);
                 }
             }
 
-            return new SegmentReference(segment);
+            return segment.ToReference();
         }
     }
 }

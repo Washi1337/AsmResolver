@@ -54,7 +54,7 @@ namespace AsmResolver.Collections
         /// <summary>
         /// Gets the underlying list.
         /// </summary>
-        public IList<TItem> Items => _items;
+        protected IList<TItem> Items => _items;
 
         /// <summary>
         /// Initializes the list. This method is called in a thread-safe manner.
