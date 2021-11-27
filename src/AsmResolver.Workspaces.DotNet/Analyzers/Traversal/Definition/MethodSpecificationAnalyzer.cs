@@ -24,6 +24,13 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Traversal.Definition
             {
                 context.ScheduleForAnalysis(subject.DeclaringType);
             }
+
+            if (subject.Resolve() is { } definition)
+            {
+                var specification = context.Workspace.Index.GetOrCreateNode(subject);
+                var definitionNode = context.Workspace.Index.GetOrCreateNode(definition);
+                definitionNode.ForwardRelations.Add(DotNetRelations.ReferenceMember, specification);
+            }
         }
     }
 }
