@@ -4,7 +4,7 @@ using AsmResolver.DotNet.Signatures.Types;
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
-    /// Provides a context within a generic instantiation, including the type arguments of the enclosing type and method. 
+    /// Provides a context within a generic instantiation, including the type arguments of the enclosing type and method.
     /// </summary>
     public readonly struct GenericContext
     {
@@ -18,9 +18,9 @@ namespace AsmResolver.DotNet.Signatures
             Type = type;
             Method = method;
         }
-        
+
         /// <summary>
-        /// Gets the object responsible for providing type arguments defined by the current generic type instantiation. 
+        /// Gets the object responsible for providing type arguments defined by the current generic type instantiation.
         /// </summary>
         public IGenericArgumentsProvider? Type
         {
@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
-        /// Gets the object responsible for providing type arguments defined by the current generic method instantiation. 
+        /// Gets the object responsible for providing type arguments defined by the current generic method instantiation.
         /// </summary>
         public IGenericArgumentsProvider? Method
         {
@@ -36,14 +36,14 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
-        /// Enters a new generic context with a new type providing type arguments. 
+        /// Enters a new generic context with a new type providing type arguments.
         /// </summary>
         /// <param name="type">The new type providing the type arguments.</param>
         /// <returns>The new generic context.</returns>
         public GenericContext WithType(IGenericArgumentsProvider type) => new GenericContext(type, Method);
-        
+
         /// <summary>
-        /// Enters a new generic context with a new method providing type arguments. 
+        /// Enters a new generic context with a new method providing type arguments.
         /// </summary>
         /// <param name="method">The new method providing the type arguments.</param>
         /// <returns>The new generic context.</returns>
@@ -62,9 +62,9 @@ namespace AsmResolver.DotNet.Signatures
                 GenericParameterType.Method => Method,
                 _ => throw new ArgumentOutOfRangeException()
             };
-            
+
             if (argumentProvider is null)
-                throw new ArgumentOutOfRangeException();
+                return parameter;
 
             if (parameter.Index >= 0 && parameter.Index < argumentProvider.TypeArguments.Count)
                 return argumentProvider.TypeArguments[parameter.Index];
