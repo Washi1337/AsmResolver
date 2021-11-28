@@ -51,6 +51,7 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <summary>
         /// Resolves a type parameter to a type argument, based on the current generic context.
+        /// If generic argument provider is not initialised for type parameter, than it will return itself.
         /// </summary>
         /// <param name="parameter">The parameter to get the argument value for.</param>
         /// <returns>The argument type.</returns>
