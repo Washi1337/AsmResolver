@@ -116,7 +116,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromType(genericInstance);
             var context2 = GenericContext.FromMember(genericInstance);
+            var context3 = GenericContext.FromType((ITypeDescriptor)genericInstance);
 
+            Assert.Equal(context, context3);
             Assert.Equal(context, context2);
             Assert.False(context.IsEmpty);
             Assert.Equal(genericInstance, context.Type);
@@ -145,7 +147,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromType(typeSpecification);
             var context2 = GenericContext.FromMember(typeSpecification);
+            var context3 = GenericContext.FromType((ITypeDescriptor)typeSpecification);
 
+            Assert.Equal(context, context3);
             Assert.Equal(context, context2);
             Assert.False(context.IsEmpty);
             Assert.Equal(genericInstance, context.Type);
@@ -164,7 +168,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);
+            var context3 = GenericContext.FromMethod((IMethodDescriptor)methodSpecification);
 
+            Assert.Equal(context, context3);
             Assert.Equal(context, context2);
             Assert.False(context.IsEmpty);
             Assert.Null(context.Type);
@@ -189,7 +195,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);
+            var context3 = GenericContext.FromMethod((IMethodDescriptor)methodSpecification);
 
+            Assert.Equal(context, context3);
             Assert.Equal(context, context2);
             Assert.False(context.IsEmpty);
             Assert.Equal(genericTypeInstance, context.Type);
@@ -206,7 +214,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromType(typeSpecification);
             var context2 = GenericContext.FromMember(typeSpecification);
+            var context3 = GenericContext.FromType((ITypeDescriptor)typeSpecification);
 
+            Assert.Equal(context, context3);
             Assert.Equal(context, context2);
             Assert.True(context.IsEmpty);
         }
@@ -223,7 +233,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);
+            var context3 = GenericContext.FromMethod((IMethodDescriptor)methodSpecification);
 
+            Assert.Equal(context, context3);
             Assert.Equal(context, context2);
             Assert.True(context.IsEmpty);
         }
@@ -244,7 +256,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);
+            var context3 = GenericContext.FromMethod((IMethodDescriptor)methodSpecification);
 
+            Assert.Equal(context, context3);
             Assert.Equal(context, context2);
             Assert.False(context.IsEmpty);
             Assert.Equal(genericTypeInstance, context.Type);
@@ -306,7 +320,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var member = new MemberReference(typeSpecification, method.Name, method.Signature);
 
-            var context = GenericContext.FromField(member);
+            var context = GenericContext.FromMethod(member);
             var context2 = GenericContext.FromMember(member);
 
             Assert.Equal(context, context2);
@@ -326,7 +340,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var member = new MemberReference(type, method.Name, method.Signature);
 
-            var context = GenericContext.FromField(member);
+            var context = GenericContext.FromMethod(member);
             var context2 = GenericContext.FromMember(member);
 
             Assert.Equal(context, context2);
@@ -347,7 +361,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var member = new MemberReference(typeSpecification, property.Name, property.Signature);
 
-            var context = GenericContext.FromField(member);
+            var context = GenericContext.FromMethod(member);
             var context2 = GenericContext.FromMember(member);
 
             Assert.Equal(context, context2);
@@ -367,7 +381,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var member = new MemberReference(type, property.Name, property.Signature);
 
-            var context = GenericContext.FromField(member);
+            var context = GenericContext.FromMethod(member);
             var context2 = GenericContext.FromMember(member);
 
             Assert.Equal(context, context2);
