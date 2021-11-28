@@ -52,6 +52,13 @@ namespace AsmResolver.DotNet.Signatures
         private void WriteNullElement(TypeSignature argumentType)
         {
             var writer = _context.Writer;
+
+            if (argumentType.IsTypeOf("System", "Type"))
+            {
+                writer.WriteSerString(default(string));
+                return;
+            }
+
             switch (argumentType.ElementType)
             {
                 case ElementType.String:
