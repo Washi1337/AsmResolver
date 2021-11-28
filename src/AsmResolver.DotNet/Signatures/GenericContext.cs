@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet.Signatures
@@ -57,8 +58,12 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <summary>
         /// Resolves a type parameter to a type argument, based on the current generic context.
-        /// If generic argument provider is not initialised for type parameter, than it will return itself.
         /// </summary>
+        /// <remarks>
+        /// If a type parameter within the signature references a parameter that is not captured by the context
+        /// (i.e. the corresponding generic argument provider is set to null),
+        /// then this type parameter will not be substituted.
+        /// </remarks>
         /// <param name="parameter">The parameter to get the argument value for.</param>
         /// <returns>The argument type.</returns>
         public TypeSignature GetTypeArgument(GenericParameterSignature parameter)
@@ -81,9 +86,9 @@ namespace AsmResolver.DotNet.Signatures
 
 
         /// <summary>
-        /// Gets type generic context from <see cref="TypeSpecification"/>.
+        /// Gets a type generic context from <see cref="TypeSpecification"/>.
         /// </summary>
-        /// <param name="type">Type specification to get generic context from.</param>
+        /// <param name="type">Type specification to get the generic context from.</param>
         /// <returns>Generic context.</returns>
         public static GenericContext FromType(TypeSpecification type) => type.Signature switch
         {
@@ -92,16 +97,16 @@ namespace AsmResolver.DotNet.Signatures
         };
 
         /// <summary>
-        /// Gets type generic context from <see cref="GenericInstanceTypeSignature"/>.
+        /// Gets a type generic context from <see cref="GenericInstanceTypeSignature"/>.
         /// </summary>
-        /// <param name="type">Generic type signature to get generic context from.</param>
+        /// <param name="type">Generic type signature to get the generic context from.</param>
         /// <returns>Generic context.</returns>
         public static GenericContext FromType(GenericInstanceTypeSignature type) => new(type, null);
 
         /// <summary>
-        /// Gets type generic context from <see cref="ITypeDescriptor"/>.
+        /// Gets a type generic context from <see cref="ITypeDescriptor"/>.
         /// </summary>
-        /// <param name="type">Type to get generic context from.</param>
+        /// <param name="type">Type to get the generic context from.</param>
         /// <returns>Generic context.</returns>
         public static GenericContext FromType(ITypeDescriptor type) => type switch
         {
@@ -111,24 +116,21 @@ namespace AsmResolver.DotNet.Signatures
         };
 
         /// <summary>
-        /// Gets method and/or type generic context from <see cref="MethodSpecification"/>.
+        /// Gets a method and/or type generic context from <see cref="MethodSpecification"/>.
         /// </summary>
-        /// <param name="method">Method specification to get generic context from.</param>
+        /// <param name="method">Method specification to get the generic context from.</param>
         /// <returns>Generic context.</returns>
-        public static GenericContext FromMethod(MethodSpecification method) =>
-            (method.DeclaringType, method.Signature) switch
-            {
-                (TypeSpecification {Signature: GenericInstanceTypeSignature typeSig}, { } methodSig) =>
-                    new GenericContext(typeSig, methodSig),
-                (_, { } methodSig) => new GenericContext(null, methodSig),
-                (TypeSpecification typeSpec, _) => FromType(typeSpec),
-                _ => default
-            };
+        public static GenericContext FromMethod(MethodSpecification method)
+        {
+            return method.DeclaringType is TypeSpecification {Signature: GenericInstanceTypeSignature typeSig}
+                ? new GenericContext(typeSig, method.Signature)
+                : new GenericContext(null, method.Signature);
+        }
 
         /// <summary>
-        /// Gets method and/or type generic context from <see cref="IMethodDescriptor"/>.
+        /// Gets a method and/or type generic context from <see cref="IMethodDescriptor"/>.
         /// </summary>
-        /// <param name="method">Method to get generic context from.</param>
+        /// <param name="method">Method to get the generic context from.</param>
         /// <returns>Generic context.</returns>
         public static GenericContext FromMethod(IMethodDescriptor method) =>
             method switch
@@ -139,9 +141,9 @@ namespace AsmResolver.DotNet.Signatures
             };
 
         /// <summary>
-        /// Gets type generic context from <see cref="IFieldDescriptor"/>.
+        /// Gets a type generic context from <see cref="IFieldDescriptor"/>.
         /// </summary>
-        /// <param name="field">Field to get generic context from.</param>
+        /// <param name="field">Field to get the generic context from.</param>
         /// <returns>Generic context.</returns>
         public static GenericContext FromField(IFieldDescriptor field) =>
             field switch
@@ -151,9 +153,9 @@ namespace AsmResolver.DotNet.Signatures
             };
 
         /// <summary>
-        /// Gets type generic context from <see cref="MemberReference"/>.
+        /// Gets a type generic context from <see cref="MemberReference"/>.
         /// </summary>
-        /// <param name="member">Member reference to get generic context from.</param>
+        /// <param name="member">Member reference to get the generic context from.</param>
         /// <returns>Generic context.</returns>
         public static GenericContext FromMember(MemberReference member) =>
             member.DeclaringType switch
@@ -163,9 +165,9 @@ namespace AsmResolver.DotNet.Signatures
             };
 
         /// <summary>
-        /// Gets type generic context from <see cref="IMemberDescriptor"/>.
+        /// Gets a type generic context from <see cref="IMemberDescriptor"/>.
         /// </summary>
-        /// <param name="member">Member to get generic context from.</param>
+        /// <param name="member">Member to get the generic context from.</param>
         /// <returns>Generic context.</returns>
         public static GenericContext FromMember(IMemberDescriptor member) =>
             member switch
