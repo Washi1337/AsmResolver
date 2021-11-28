@@ -115,7 +115,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var typeSpecification = new TypeSpecification(genericInstance);
 
             var context = GenericContext.FromType(typeSpecification);
+            var context2 = GenericContext.FromMember(typeSpecification);
 
+            Assert.Equal(context, context2);
             Assert.False(context.IsEmpty);
             Assert.Equal(genericInstance, context.Type);
             Assert.Null(context.Method);
@@ -132,7 +134,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var methodSpecification = new MethodSpecification(method, genericInstance);
 
             var context = GenericContext.FromMethod(methodSpecification);
+            var context2 = GenericContext.FromMember(methodSpecification);
 
+            Assert.Equal(context, context2);
             Assert.False(context.IsEmpty);
             Assert.Null(context.Type);
             Assert.Equal(genericInstance, context.Method);
@@ -155,7 +159,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
 
             var context = GenericContext.FromMethod(methodSpecification);
+            var context2 = GenericContext.FromMember(methodSpecification);
 
+            Assert.Equal(context, context2);
             Assert.False(context.IsEmpty);
             Assert.Equal(genericTypeInstance, context.Type);
             Assert.Equal(genericMethodInstance, context.Method);
@@ -170,7 +176,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var typeSpecification = new TypeSpecification(notGenericSignature);
 
             var context = GenericContext.FromType(typeSpecification);
+            var context2 = GenericContext.FromMember(typeSpecification);
 
+            Assert.Equal(context, context2);
             Assert.True(context.IsEmpty);
         }
 
@@ -185,7 +193,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var methodSpecification = new MethodSpecification(method, null);
 
             var context = GenericContext.FromMethod(methodSpecification);
+            var context2 = GenericContext.FromMember(methodSpecification);
 
+            Assert.Equal(context, context2);
             Assert.True(context.IsEmpty);
         }
 
@@ -204,10 +214,136 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var methodSpecification = new MethodSpecification(method, null);
 
             var context = GenericContext.FromMethod(methodSpecification);
+            var context2 = GenericContext.FromMember(methodSpecification);
 
+            Assert.Equal(context, context2);
             Assert.False(context.IsEmpty);
             Assert.Equal(genericTypeInstance, context.Type);
             Assert.Null(context.Method);
         }
+
+        [Fact]
+        public void ParseGenericFromField()
+        {
+            var genericTypeInstance = new GenericInstanceTypeSignature(_importer.ImportType(typeof(List<>)), false);
+            genericTypeInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
+            var typeSpecification = new TypeSpecification(genericTypeInstance);
+
+            var genericParameter = new GenericParameterSignature(GenericParameterType.Type, 0);
+
+            var field = new FieldDefinition("Field", FieldAttributes.Private,
+                FieldSignature.CreateStatic(genericParameter));
+
+            var member = new MemberReference(typeSpecification, field.Name, field.Signature);
+
+            var context = GenericContext.FromField(member);
+            var context2 = GenericContext.FromMember(member);
+
+            Assert.Equal(context, context2);
+            Assert.False(context.IsEmpty);
+            Assert.Equal(genericTypeInstance, context.Type);
+            Assert.Null(context.Method);
+        }
+
+        [Fact]
+        public void ParseGenericFromNotGenericField()
+        {
+            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var notGenericSignature = new TypeDefOrRefSignature(type);
+
+            var field = new FieldDefinition("Field", FieldAttributes.Private,
+                FieldSignature.CreateStatic(notGenericSignature));
+
+            var member = new MemberReference(type, field.Name, field.Signature);
+
+            var context = GenericContext.FromField(member);
+            var context2 = GenericContext.FromMember(member);
+
+            Assert.Equal(context, context2);
+            Assert.True(context.IsEmpty);
+        }
+
+        [Fact]
+        public void ParseGenericFromMethod()
+        {
+            var genericTypeInstance = new GenericInstanceTypeSignature(_importer.ImportType(typeof(List<>)), false);
+            genericTypeInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
+            var typeSpecification = new TypeSpecification(genericTypeInstance);
+
+            var genericParameter = new GenericParameterSignature(GenericParameterType.Type, 0);
+
+            var method = new MethodDefinition("Method", MethodAttributes.Private,
+                MethodSignature.CreateStatic(genericParameter));
+
+            var member = new MemberReference(typeSpecification, method.Name, method.Signature);
+
+            var context = GenericContext.FromField(member);
+            var context2 = GenericContext.FromMember(member);
+
+            Assert.Equal(context, context2);
+            Assert.False(context.IsEmpty);
+            Assert.Equal(genericTypeInstance, context.Type);
+            Assert.Null(context.Method);
+        }
+
+        [Fact]
+        public void ParseGenericFromNotGenericMethod()
+        {
+            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var notGenericSignature = new TypeDefOrRefSignature(type);
+
+            var method = new MethodDefinition("Method", MethodAttributes.Private,
+                MethodSignature.CreateStatic(notGenericSignature));
+
+            var member = new MemberReference(type, method.Name, method.Signature);
+
+            var context = GenericContext.FromField(member);
+            var context2 = GenericContext.FromMember(member);
+
+            Assert.Equal(context, context2);
+            Assert.True(context.IsEmpty);
+        }
+
+        [Fact]
+        public void ParseGenericFromProperty()
+        {
+            var genericTypeInstance = new GenericInstanceTypeSignature(_importer.ImportType(typeof(List<>)), false);
+            genericTypeInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
+            var typeSpecification = new TypeSpecification(genericTypeInstance);
+
+            var genericParameter = new GenericParameterSignature(GenericParameterType.Type, 0);
+
+            var property = new PropertyDefinition("Property", PropertyAttributes.None,
+                PropertySignature.CreateStatic(genericParameter));
+
+            var member = new MemberReference(typeSpecification, property.Name, property.Signature);
+
+            var context = GenericContext.FromField(member);
+            var context2 = GenericContext.FromMember(member);
+
+            Assert.Equal(context, context2);
+            Assert.False(context.IsEmpty);
+            Assert.Equal(genericTypeInstance, context.Type);
+            Assert.Null(context.Method);
+        }
+
+        [Fact]
+        public void ParseGenericFromNotGenericProperty()
+        {
+            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var notGenericSignature = new TypeDefOrRefSignature(type);
+
+            var property = new PropertyDefinition("Property", PropertyAttributes.None,
+                PropertySignature.CreateStatic(notGenericSignature));
+
+            var member = new MemberReference(type, property.Name, property.Signature);
+
+            var context = GenericContext.FromField(member);
+            var context2 = GenericContext.FromMember(member);
+
+            Assert.Equal(context, context2);
+            Assert.True(context.IsEmpty);
+        }
+
     }
 }
