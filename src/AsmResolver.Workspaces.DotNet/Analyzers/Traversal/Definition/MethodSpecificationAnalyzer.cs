@@ -29,7 +29,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Traversal.Definition
             {
                 var specification = context.Workspace.Index.GetOrCreateNode(subject);
                 var definitionNode = context.Workspace.Index.GetOrCreateNode(definition);
-                definitionNode.ForwardRelations.Add(DotNetRelations.ReferenceMember, specification);
+                definitionNode.ForwardRelations.Add(DotNetRelations.ReferenceSpecification, specification);
             }
         }
     }
