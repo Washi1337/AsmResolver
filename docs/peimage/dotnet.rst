@@ -1,7 +1,7 @@
 .NET Data Directories
 =====================
 
-Managed executables (applications written using a .NET language) contain an extra data directory in the optional header of the PE file format. This small data directory contains a header which is also known as the CLR 2.0 header, and references other structures such as the metadata directory, raw data for manifest resources and sometimes an extra native header in the case of mixed mode applications or zapped (ngen'ed) applications. 
+Managed executables (applications written using a .NET language) contain an extra data directory in the optional header of the PE file format. This small data directory contains a header which is also known as the CLR 2.0 header, and references other structures such as the metadata directory, raw data for manifest resources and sometimes an extra native header in the case of mixed mode applications or zapped (ngen'ed) applications.
 
 .NET directory / CLR 2.0 header
 -------------------------------
@@ -15,7 +15,7 @@ The .NET data directory can be accessed by the ``IPEImage.DotNetDirectory`` prop
     Console.WriteLine("Managed entrypoint: {0:X8}", peImage.DotNetDirectory.Entrypoint);
 
 
-Metadata directory 
+Metadata directory
 -----------------------
 
 The metadata data directory is perhaps the most important data directory that is referenced by the .NET directory. It contains the metadata streams, such as the table and the blob stream, which play a key role in the execution of a .NET binary.
@@ -141,7 +141,7 @@ The tables stream (``#~``, ``#-`` or ``#Schema``) is the main stream stored in t
 
     TablesStream tablesStream = metadata.GetStream<TablesStream>();
 
-Metadata tables are represented by the ``IMetadataTable`` interface. Individal tables can be accessed using the `GetTable` method:
+Metadata tables are represented by the ``IMetadataTable`` interface. Individal tables can be accessed using the ``GetTable`  method:
 
 .. code-block:: csharp
 
@@ -264,6 +264,12 @@ Metadata tables are similar to normal ``ICollection<T>`` instances. They provide
         // ...
     }
 
+Members can also be accessed by their RID using the ``GetByRid`` or ``TryGetByRid`` helper functions:
+
+.. code-block:: csharp
+
+    TypeDefinitionRow thirdTypeRow = typeDefTable.GetByRid(3);
+
 Using the other metadata streams, it is possible to resolve all columns. Below an example that prints the name and namespace of each type row in the type definition table in a file.
 
 .. code-block:: csharp
@@ -275,7 +281,7 @@ Using the other metadata streams, it is possible to resolve all columns. Below a
     var metadata = peImage.DotNetDirectory.Metadata;
     var tablesStream = metadata.GetStream<TablesStream>();
     var stringsStream = metadata.GetStream<StringsStream>();
-    
+
     // Go over each type definition in the file.
     var typeDefTable = tablesStream.GetTable<TypeDefinitionRow>();
     foreach (var typeRow in typeDefTable)
@@ -326,7 +332,7 @@ Reading field data can be done in a similar fashion as reading method bodies. Ag
 Creating new segment references:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Creating new segment references not present in the current PE image yet can be done using the ``ISegment.ToReference`` extension method:
+Creating new segment references not present in the current PE image yet can be done using the ``ISegment.ToReference()`` extension method:
 
 .. code-block:: csharp
 
@@ -349,7 +355,7 @@ AsmResolver includes a built-in implementation for this that is based on `the re
     IPEImage image = ...
     byte[] hash = image.GetTypeReferenceHash();
 
-    
+
 .. code-block:: csharp
 
     IMetadata metadata = ...
