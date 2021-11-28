@@ -1,16 +1,14 @@
-using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
-using Xunit.Sdk;
 
 namespace AsmResolver.DotNet.Tests.Signatures
 {
     public class GenericContextTest
     {
-        private ReferenceImporter _importer;
+        private readonly ReferenceImporter _importer;
 
         public GenericContextTest()
         {
@@ -92,7 +90,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var context = new GenericContext(null, genericInstance);
 
             var parameter = new GenericParameterSignature(GenericParameterType.Type, 0);
-            Assert.Equal(parameter,context.GetTypeArgument(parameter));
+            Assert.Equal(parameter, context.GetTypeArgument(parameter));
         }
 
         [Fact]
@@ -116,7 +114,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromType(genericInstance);
             var context2 = GenericContext.FromMember(genericInstance);
-            var context3 = GenericContext.FromType((ITypeDescriptor)genericInstance);
+            var context3 = GenericContext.FromType((ITypeDescriptor) genericInstance);
 
             Assert.Equal(context, context3);
             Assert.Equal(context, context2);
@@ -128,7 +126,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void ParseGenericFromNonGenericTypeSignature()
         {
-            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var type = new TypeDefinition("", "Test type", TypeAttributes.Public);
             var notGenericSignature = new TypeDefOrRefSignature(type);
 
             var context = GenericContext.FromType(notGenericSignature);
@@ -147,7 +145,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromType(typeSpecification);
             var context2 = GenericContext.FromMember(typeSpecification);
-            var context3 = GenericContext.FromType((ITypeDescriptor)typeSpecification);
+            var context3 = GenericContext.FromType((ITypeDescriptor) typeSpecification);
 
             Assert.Equal(context, context3);
             Assert.Equal(context, context2);
@@ -168,7 +166,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);
-            var context3 = GenericContext.FromMethod((IMethodDescriptor)methodSpecification);
+            var context3 = GenericContext.FromMethod((IMethodDescriptor) methodSpecification);
 
             Assert.Equal(context, context3);
             Assert.Equal(context, context2);
@@ -195,7 +193,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);
-            var context3 = GenericContext.FromMethod((IMethodDescriptor)methodSpecification);
+            var context3 = GenericContext.FromMethod((IMethodDescriptor) methodSpecification);
 
             Assert.Equal(context, context3);
             Assert.Equal(context, context2);
@@ -207,14 +205,14 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void ParseGenericFromNotGenericTypeSpecification()
         {
-            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var type = new TypeDefinition("", "Test type", TypeAttributes.Public);
             var notGenericSignature = new TypeDefOrRefSignature(type);
 
             var typeSpecification = new TypeSpecification(notGenericSignature);
 
             var context = GenericContext.FromType(typeSpecification);
             var context2 = GenericContext.FromMember(typeSpecification);
-            var context3 = GenericContext.FromType((ITypeDescriptor)typeSpecification);
+            var context3 = GenericContext.FromType((ITypeDescriptor) typeSpecification);
 
             Assert.Equal(context, context3);
             Assert.Equal(context, context2);
@@ -224,7 +222,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void ParseGenericFromNotGenericMethodSpecification()
         {
-            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var type = new TypeDefinition("", "Test type", TypeAttributes.Public);
             var notGenericSignature = new TypeDefOrRefSignature(type);
 
             var method = new MethodDefinition("TestMethod", MethodAttributes.Private,
@@ -233,7 +231,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);
-            var context3 = GenericContext.FromMethod((IMethodDescriptor)methodSpecification);
+            var context3 = GenericContext.FromMethod((IMethodDescriptor) methodSpecification);
 
             Assert.Equal(context, context3);
             Assert.Equal(context, context2);
@@ -247,7 +245,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             genericTypeInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
             var typeSpecification = new TypeSpecification(genericTypeInstance);
 
-            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var type = new TypeDefinition("", "Test type", TypeAttributes.Public);
             var notGenericSignature = new TypeDefOrRefSignature(type);
 
             var method = new MemberReference(typeSpecification, "TestMethod",
@@ -256,7 +254,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);
-            var context3 = GenericContext.FromMethod((IMethodDescriptor)methodSpecification);
+            var context3 = GenericContext.FromMethod((IMethodDescriptor) methodSpecification);
 
             Assert.Equal(context, context3);
             Assert.Equal(context, context2);
@@ -291,7 +289,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void ParseGenericFromNotGenericField()
         {
-            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var type = new TypeDefinition("", "Test type", TypeAttributes.Public);
             var notGenericSignature = new TypeDefOrRefSignature(type);
 
             var field = new FieldDefinition("Field", FieldAttributes.Private,
@@ -332,7 +330,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void ParseGenericFromNotGenericMethod()
         {
-            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var type = new TypeDefinition("", "Test type", TypeAttributes.Public);
             var notGenericSignature = new TypeDefOrRefSignature(type);
 
             var method = new MethodDefinition("Method", MethodAttributes.Private,
@@ -373,7 +371,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void ParseGenericFromNotGenericProperty()
         {
-            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var type = new TypeDefinition("", "Test type", TypeAttributes.Public);
             var notGenericSignature = new TypeDefOrRefSignature(type);
 
             var property = new PropertyDefinition("Property", PropertyAttributes.None,
@@ -387,6 +385,5 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(context, context2);
             Assert.True(context.IsEmpty);
         }
-
     }
 }
