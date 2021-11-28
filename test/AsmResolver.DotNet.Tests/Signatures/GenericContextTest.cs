@@ -114,11 +114,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
             genericInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
             var typeSpecification = new TypeSpecification(genericInstance);
 
-            var context = GenericContext.FromTypeSpecification(typeSpecification);
+            var context = GenericContext.FromType(typeSpecification);
 
-            Assert.True(context.HasValue);
-            Assert.Equal(genericInstance, context.Value.Type);
-            Assert.Null(context.Value.Method);
+            Assert.False(context.IsEmpty);
+            Assert.Equal(genericInstance, context.Type);
+            Assert.Null(context.Method);
         }
 
         [Fact]
@@ -131,11 +131,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
             genericInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(int)));
             var methodSpecification = new MethodSpecification(method, genericInstance);
 
-            var context = GenericContext.FromMethodSpecification(methodSpecification);
+            var context = GenericContext.FromMethod(methodSpecification);
 
-            Assert.True(context.HasValue);
-            Assert.Null(context.Value.Type);
-            Assert.Equal(genericInstance, context.Value.Method);
+            Assert.False(context.IsEmpty);
+            Assert.Null(context.Type);
+            Assert.Equal(genericInstance, context.Method);
         }
 
         [Fact]
@@ -154,11 +154,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var methodSpecification = new MethodSpecification(method, genericMethodInstance);
 
 
-            var context = GenericContext.FromMethodSpecification(methodSpecification);
+            var context = GenericContext.FromMethod(methodSpecification);
 
-            Assert.True(context.HasValue);
-            Assert.Equal(genericTypeInstance, context.Value.Type);
-            Assert.Equal(genericMethodInstance, context.Value.Method);
+            Assert.False(context.IsEmpty);
+            Assert.Equal(genericTypeInstance, context.Type);
+            Assert.Equal(genericMethodInstance, context.Method);
         }
 
         [Fact]
@@ -169,9 +169,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var typeSpecification = new TypeSpecification(notGenericSignature);
 
-            var context = GenericContext.FromTypeSpecification(typeSpecification);
+            var context = GenericContext.FromType(typeSpecification);
 
-            Assert.False(context.HasValue);
+            Assert.True(context.IsEmpty);
         }
 
         [Fact]
@@ -184,9 +184,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 MethodSignature.CreateStatic(notGenericSignature));
             var methodSpecification = new MethodSpecification(method, null);
 
-            var context = GenericContext.FromMethodSpecification(methodSpecification);
+            var context = GenericContext.FromMethod(methodSpecification);
 
-            Assert.False(context.HasValue);
+            Assert.True(context.IsEmpty);
         }
 
         [Fact]
@@ -203,11 +203,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 MethodSignature.CreateStatic(notGenericSignature));
             var methodSpecification = new MethodSpecification(method, null);
 
-            var context = GenericContext.FromMethodSpecification(methodSpecification);
+            var context = GenericContext.FromMethod(methodSpecification);
 
-            Assert.True(context.HasValue);
-            Assert.Equal(genericTypeInstance, context.Value.Type);
-            Assert.Null(context.Value.Method);
+            Assert.False(context.IsEmpty);
+            Assert.Equal(genericTypeInstance, context.Type);
+            Assert.Null(context.Method);
         }
     }
 }
