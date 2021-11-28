@@ -107,6 +107,35 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(parameter, context.GetTypeArgument(parameter));
         }
 
+
+        [Fact]
+        public void ParseGenericFromTypeSignature()
+        {
+            var genericInstance = new GenericInstanceTypeSignature(_importer.ImportType(typeof(List<>)), false);
+            genericInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
+
+            var context = GenericContext.FromType(genericInstance);
+            var context2 = GenericContext.FromMember(genericInstance);
+
+            Assert.Equal(context, context2);
+            Assert.False(context.IsEmpty);
+            Assert.Equal(genericInstance, context.Type);
+            Assert.Null(context.Method);
+        }
+
+        [Fact]
+        public void ParseGenericFromNonGenericTypeSignature()
+        {
+            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var notGenericSignature = new TypeDefOrRefSignature(type);
+
+            var context = GenericContext.FromType(notGenericSignature);
+            var context2 = GenericContext.FromMember(notGenericSignature);
+
+            Assert.Equal(context, context2);
+            Assert.True(context.IsEmpty);
+        }
+
         [Fact]
         public void ParseGenericFromTypeSpecification()
         {

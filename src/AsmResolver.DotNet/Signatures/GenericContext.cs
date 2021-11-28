@@ -163,11 +163,11 @@ namespace AsmResolver.DotNet.Signatures
             };
 
         /// <summary>
-        /// Gets type generic context from <see cref="MemberReference"/>.
+        /// Gets type generic context from <see cref="IMemberDescriptor"/>.
         /// </summary>
-        /// <param name="member">Metadata member to get generic context from.</param>
+        /// <param name="member">Member to get generic context from.</param>
         /// <returns>Generic context.</returns>
-        public static GenericContext FromMember(IMetadataMember member) =>
+        public static GenericContext FromMember(IMemberDescriptor member) =>
             member switch
             {
                 IMethodDescriptor method => FromMethod(method),
