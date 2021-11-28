@@ -142,6 +142,16 @@ namespace AsmResolver.DotNet.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        public void FixedNullTypeArgument(bool rebuild)
+        {
+            var attribute =  GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedNullTypeArgument), rebuild);
+            var fixedArg = Assert.Single(attribute.Signature.FixedArguments);
+            Assert.Null(fixedArg.Element);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         public void FixedTypeArgument(bool rebuild)
         {
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedTypeArgument), rebuild);
