@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Signatures
                 string? typeFullName = reader.ReadSerString();
                 var type = typeFullName is not null
                     ? TypeNameParser.Parse(module, typeFullName)
-                    : context.ReaderContext.BadImageAndReturn<TypeSignature>("Type full name in attribute argument is null.");
+                    : null;
 
                 Elements.Add(type);
                 return;
