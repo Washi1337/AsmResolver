@@ -71,5 +71,47 @@ namespace AsmResolver.DotNet.Signatures
 
             throw new ArgumentOutOfRangeException();
         }
+
+
+        /// <summary>
+        /// Tries to get type generic context from <see cref="TypeSpecification"/>.
+        /// </summary>
+        /// <param name="type">Type specification to get generic context from.</param>
+        /// <returns>Generic context.</returns>
+        public static GenericContext? FromTypeSpecification(TypeSpecification type) => type.Signature switch
+        {
+            GenericInstanceTypeSignature typeSig => new GenericContext(typeSig, null),
+            _ => null
+        };
+
+        /// <summary>
+        /// Tries to get method and/or type generic context from <see cref="MethodSpecification"/>.
+        /// </summary>
+        /// <param name="method">Method specification to get generic context from.</param>
+        /// <returns>Generic context.</returns>
+        public static GenericContext? FromMethodSpecification(MethodSpecification method) =>
+            (method.DeclaringType, method.Signature) switch
+            {
+                (TypeSpecification {Signature: GenericInstanceTypeSignature typeSig}, { } methodSig) =>
+                    new GenericContext(typeSig, methodSig),
+                (_, { } methodSig) => new GenericContext(null, methodSig),
+                (TypeSpecification typeSpec, _) => FromTypeSpecification(typeSpec),
+                _ => null
+            };
+
+        /// <summary>
+        /// Tries to get method and/or type generic context from <see cref="IMemberDescriptor"/>.
+        /// </summary>
+        /// <param name="member">Member to get generic context from.</param>
+        /// <returns>Generic context</returns>
+        public static GenericContext? FromMember(IMemberDescriptor member) =>
+            (member.DeclaringType, member) switch
+            {
+                (_, TypeSpecification typeSpec) => FromTypeSpecification(typeSpec),
+                (_, MethodSpecification methodSpec) => FromMethodSpecification(methodSpec),
+                (_, GenericInstanceTypeSignature typeSig) => new GenericContext(typeSig, null),
+                ({ } declaringType, _) => FromMember(declaringType),
+                _ => null
+            };
     }
 }
