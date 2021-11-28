@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 using Xunit.Sdk;
 
@@ -104,6 +105,109 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var parameter = new GenericParameterSignature(GenericParameterType.Method, 0);
             Assert.Equal(parameter, context.GetTypeArgument(parameter));
+        }
+
+        [Fact]
+        public void ParseGenericFromTypeSpecification()
+        {
+            var genericInstance = new GenericInstanceTypeSignature(_importer.ImportType(typeof(List<>)), false);
+            genericInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
+            var typeSpecification = new TypeSpecification(genericInstance);
+
+            var context = GenericContext.FromTypeSpecification(typeSpecification);
+
+            Assert.True(context.HasValue);
+            Assert.Equal(genericInstance, context.Value.Type);
+            Assert.Null(context.Value.Method);
+        }
+
+        [Fact]
+        public void ParseGenericFromMethodSpecification()
+        {
+            var genericParameter = new GenericParameterSignature(GenericParameterType.Method, 0);
+            var method = new MethodDefinition("TestMethod", MethodAttributes.Private,
+                MethodSignature.CreateStatic(genericParameter));
+            var genericInstance = new GenericInstanceMethodSignature();
+            genericInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(int)));
+            var methodSpecification = new MethodSpecification(method, genericInstance);
+
+            var context = GenericContext.FromMethodSpecification(methodSpecification);
+
+            Assert.True(context.HasValue);
+            Assert.Null(context.Value.Type);
+            Assert.Equal(genericInstance, context.Value.Method);
+        }
+
+        [Fact]
+        public void ParseGenericFromMethodSpecificationWithTypeSpecification()
+        {
+            var genericTypeInstance = new GenericInstanceTypeSignature(_importer.ImportType(typeof(List<>)), false);
+            genericTypeInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
+            var typeSpecification = new TypeSpecification(genericTypeInstance);
+
+            var genericParameter = new GenericParameterSignature(GenericParameterType.Method, 0);
+            var method = new MemberReference(typeSpecification, "TestMethod",
+                MethodSignature.CreateStatic(genericParameter));
+
+            var genericMethodInstance = new GenericInstanceMethodSignature();
+            genericMethodInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(int)));
+            var methodSpecification = new MethodSpecification(method, genericMethodInstance);
+
+
+            var context = GenericContext.FromMethodSpecification(methodSpecification);
+
+            Assert.True(context.HasValue);
+            Assert.Equal(genericTypeInstance, context.Value.Type);
+            Assert.Equal(genericMethodInstance, context.Value.Method);
+        }
+
+        [Fact]
+        public void ParseGenericFromNotGenericTypeSpecification()
+        {
+            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var notGenericSignature = new TypeDefOrRefSignature(type);
+
+            var typeSpecification = new TypeSpecification(notGenericSignature);
+
+            var context = GenericContext.FromTypeSpecification(typeSpecification);
+
+            Assert.False(context.HasValue);
+        }
+
+        [Fact]
+        public void ParseGenericFromNotGenericMethodSpecification()
+        {
+            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var notGenericSignature = new TypeDefOrRefSignature(type);
+
+            var method = new MethodDefinition("TestMethod", MethodAttributes.Private,
+                MethodSignature.CreateStatic(notGenericSignature));
+            var methodSpecification = new MethodSpecification(method, null);
+
+            var context = GenericContext.FromMethodSpecification(methodSpecification);
+
+            Assert.False(context.HasValue);
+        }
+
+        [Fact]
+        public void ParseGenericFromNotGenericMethodSpecificationWithTypeSpecification()
+        {
+            var genericTypeInstance = new GenericInstanceTypeSignature(_importer.ImportType(typeof(List<>)), false);
+            genericTypeInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(string)));
+            var typeSpecification = new TypeSpecification(genericTypeInstance);
+
+            var type = new TypeDefinition("","Test type", TypeAttributes.Public);
+            var notGenericSignature = new TypeDefOrRefSignature(type);
+
+            var method = new MemberReference(typeSpecification, "TestMethod",
+                MethodSignature.CreateStatic(notGenericSignature));
+            var methodSpecification = new MethodSpecification(method, null);
+
+            var context = GenericContext.FromMethodSpecification(methodSpecification);
+
+            Assert.True(context.HasValue);
+            Assert.Equal(genericTypeInstance, context.Value.Type);
+            Assert.Null(context.Value.Method);
         }
     }
 }
