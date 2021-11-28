@@ -1,6 +1,4 @@
 using System;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet.Signatures
@@ -8,7 +6,7 @@ namespace AsmResolver.DotNet.Signatures
     /// <summary>
     /// Provides a context within a generic instantiation, including the type arguments of the enclosing type and method.
     /// </summary>
-    public readonly struct GenericContext
+    public readonly struct GenericContext : IEquatable<GenericContext>
     {
         /// <summary>
         /// Creates a new instance of the <see cref="GenericContext"/> class.
@@ -177,5 +175,25 @@ namespace AsmResolver.DotNet.Signatures
                 ITypeDescriptor type => FromType(type),
                 _ => default
             };
+
+        /// <summary>
+        /// Determines whether two generic contexts have the same generic argument providers.
+        /// </summary>
+        /// <param name="other">The other context.</param>
+        /// <returns><c>true</c> if the contexts are considered equal, <c>false</c> otherwise.</returns>
+        public bool Equals(GenericContext other) => Equals(Type, other.Type) && Equals(Method, other.Method);
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj) => obj is GenericContext other && Equals(other);
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Type is { } type ? type.GetHashCode() : 0) * 397)
+                       ^ (Method is { } method ? method.GetHashCode() : 0);
+            }
+        }
     }
 }
