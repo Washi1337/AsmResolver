@@ -41,6 +41,7 @@ Table of Contents:
    peimage/debug
    peimage/tls
    peimage/dotnet
+   peimage/pe-building
 
 
 .. toctree::
