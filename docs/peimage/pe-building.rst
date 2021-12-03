@@ -15,7 +15,7 @@ It is still possible to build PE files from instances of ``IPEImage``, it might 
 Building Sections
 -----------------
 
-As discussed in :ref:`pe-file-sections`, the ``PESection`` class represents a single section in the PE file. This class exposes a property called ``Contents`` which is of type ``ISegment``. A lot of models in AsmResolver implement this interface, and as such, most models can directly be used as the contents of a new section.
+As discussed in :ref:`pe-file-sections`, the ``PESection`` class represents a single section in the PE file. This class exposes a property called ``Contents`` which is of type ``ISegment``. A lot of models in AsmResolver implement this interface, and as such, these models can directly be used as the contents of a new section.
 
 .. code-block:: csharp 
 
@@ -27,7 +27,7 @@ As discussed in :ref:`pe-file-sections`, the ``PESection`` class represents a si
     peFile.Sections.Add(text);
 
 
-In a lot of cases, however, sections do not consist of a single data structure, but often comprise many segments concatenated together, potentially with some padding in between. Assigning a single instance of ``ISegment`` might therefore not be ideal. To facilitate more complicated structures, the ``SegmentBuilder`` class can help a lot with building sections like these. This is a class that combines a collection of ``ISegment`` instances into one, allowing you to concatenate segments that belong together easily. Below an example that builds up a ``.text`` section that consists of a .NET data directory as well as some native code. In the example, the native code is aligned to a 4-byte boundary:
+In a lot of cases, however, sections do not consist of a single data structure, but often comprise many segments concatenated together, potentially with some padding in between. Assigning a single instance of ``ISegment`` might therefore not be as convenient. To facilitate more complicated structures, the ``SegmentBuilder`` class can help a lot with building sections like these. This is a class that combines a collection of ``ISegment`` instances into one, allowing you to concatenate segments that belong together easily. Below an example that builds up a ``.text`` section that consists of a .NET data directory as well as some native code. In the example, the native code is aligned to a 4-byte boundary:
 
 .. code-block:: csharp 
 
@@ -47,7 +47,7 @@ In a lot of cases, however, sections do not consist of a single data structure, 
 Using complex PE models 
 -----------------------
 
-The PE file format defines many complex data structures. While some these models are represented in AsmResolver using classes that derive from ``ISegment``, a lot of the classes that represent these data structures do not implement this interface, and as such cannot be used as a value for the ``Contents`` property of a ``PESection`` directly. This is due to the fact that most of these models are not required to be one single entity or chunk of continuous memory within the PE file. Instead, they are often scattered around the PE file by a compiler. For example, the Import Directory has a second component the Import Address Table which is often put in a completely different PE section (usually ``.text`` or ``.data``) than the Import Directory itself (in ``.idata`` or ``.rdata``). To make reading and interpreting these data structures more convenient for the end-user, the ``AsmResolver.PE`` package adopted some design choices to abstract these details away, make things more natural to work with. The downside of this is that writing these structures requires you to specify where AsmResolver should place these models.
+The PE file format defines many complex data structures. While some these models are represented in AsmResolver using classes that derive from ``ISegment``, a lot of the classes that represent these data structures do not implement this interface, and as such cannot be used as a value for the ``Contents`` property of a ``PESection`` directly. This is due to the fact that most of these models are not required to be one single entity or chunk of continuous memory within the PE file. Instead, they are often scattered around the PE file by a compiler. For example, the Import Directory has a second component the Import Address Table which is often put in a completely different PE section (usually ``.text`` or ``.data``) than the Import Directory itself (in ``.idata`` or ``.rdata``). To make reading and interpreting these data structures more convenient for the end-user, the ``AsmResolver.PE`` package adopted some design choices to abstract these details away to make things more natural to work with. The downside of this is that writing these structures requires you to specify where AsmResolver should place these models in the final PE file.
 
 In ``AsmResolver.PE``, most models for which is the case reside in their own namespace, and have their own set of classes dedicated to constructing new segments defined in a ``Builder`` sub namespace. For example, the Win32 resources directory models reside in ``AsmResolver.PE.Win32Resources``, but the actual builder classes are put in a sub namespace called ``AsmResolver.PE.Win32Resources.Builder``.
 
@@ -86,7 +86,7 @@ A more complicated structure such as the Imports Directory can be build like the
     file.Sections.Add(rdata);
 
     // Place the IAT in a writable section.
-    var data = new PESection(".rdata", SectionFlags.MemoryRead | SectionFlags.MemoryWrite | SectionFlags.ContentInitializedData);
+    var data = new PESection(".data", SectionFlags.MemoryRead | SectionFlags.MemoryWrite | SectionFlags.ContentInitializedData);
     data.Contents = buffer.ImportAddressDirectory;
     file.Sections.Add(ddata);
 
