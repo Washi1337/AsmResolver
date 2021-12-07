@@ -28,7 +28,7 @@ namespace AsmResolver.PE.DotNet.Builder
             AddIfPresent(dotNetDirectory.StrongName);
 
             if (dotNetDirectory.VTableFixups?.Count > 0)
-                _segments.Add(new VTableFixupsDirectoryBuffer(dotNetDirectory.VTableFixups));
+                _segments.Add(dotNetDirectory.VTableFixups);
 
             AddIfPresent(dotNetDirectory.ExportAddressTable);
             AddIfPresent(dotNetDirectory.ManagedNativeHeader);

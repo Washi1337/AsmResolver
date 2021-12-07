@@ -7,6 +7,7 @@ using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.VTableFixups;
 using AsmResolver.PE.Exports.Builder;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
@@ -168,6 +169,10 @@ namespace AsmResolver.PE.DotNet.Builder
                 CreateTextSection(image, context)
             };
 
+            // Add .sdata section when necessary.
+            if (image.Exports is not null || image.DotNetDirectory?.VTableFixups is not null)
+                sections.Add(CreateSDataSection(image, context));
+
             // Add .rsrc section when necessary.
             if (image.Resources is not null && image.Resources.Entries.Count > 0)
                 sections.Add(CreateRsrcSection(image, context));
@@ -176,11 +181,11 @@ namespace AsmResolver.PE.DotNet.Builder
             // Since the PE is rebuild in its entirety, all relocations that were originally in the PE are invalidated.
             // Therefore, we filter out all relocations that were added by the reader.
             var relocations = image.Relocations
-                .Where(r => !(r.Location is PESegmentReference))
+                .Where(r => r.Location is not PESegmentReference)
                 .ToList();
 
             // Add relocations of the bootstrapper stub if necessary.
-            if (context.Bootstrapper != null)
+            if (context.Bootstrapper is not null)
                 relocations.AddRange(context.Bootstrapper.GetRelocations());
 
             // Add .reloc section when necessary.
@@ -199,7 +204,6 @@ namespace AsmResolver.PE.DotNet.Builder
         protected virtual PESection CreateTextSection(IPEImage image, ManagedPEBuilderContext context)
         {
             CreateImportDirectory(image, context);
-            CreateExportDirectory(image, context);
             CreateDebugDirectory(image, context);
             ProcessRvasInMetadataTables(context);
 
@@ -221,8 +225,18 @@ namespace AsmResolver.PE.DotNet.Builder
                 contents.Add(context.DebugDirectory.ContentsTable);
             }
 
-            if (context.Bootstrapper != null)
+            if (context.Bootstrapper is not null)
                 contents.Add(context.Bootstrapper);
+
+            if (image.Exports is { Entries: { Count: > 0 } entries })
+            {
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    var export = entries[i];
+                    if (export.Address.IsBounded && export.Address.GetSegment() is { } segment)
+                        contents.Add(segment, 4);
+                }
+            }
 
             return new PESection(".text",
                 SectionFlags.ContentCode | SectionFlags.MemoryExecute | SectionFlags.MemoryRead)
@@ -293,16 +307,38 @@ namespace AsmResolver.PE.DotNet.Builder
             return modules;
         }
 
-        private static void CreateExportDirectory(IPEImage image, ManagedPEBuilderContext context)
-        {
-            if (image.Exports is {} exports && exports.Entries.Count > 0)
-                context.ExportDirectory.AddDirectory(exports);
-        }
-
         private static void CreateDebugDirectory(IPEImage image, ManagedPEBuilderContext context)
         {
             foreach (var entry in image.DebugData)
                 context.DebugDirectory.AddEntry(entry);
+        }
+
+        /// <summary>
+        /// Creates the .sdata section containing the exports and vtables directory of the new .NET PE file.
+        /// </summary>
+        /// <param name="image">The image to build.</param>
+        /// <param name="context">The working space of the builder.</param>
+        /// <returns>The section.</returns>
+        protected virtual PESection CreateSDataSection(IPEImage image, ManagedPEBuilderContext context)
+        {
+            var contents = new SegmentBuilder();
+
+            if (image.DotNetDirectory?.VTableFixups is { } fixups)
+            {
+                for (int i = 0; i < fixups.Count; i++)
+                    contents.Add(fixups[i].Tokens);
+            }
+
+            if (image.Exports is { Entries: { Count: > 0 } } exports)
+            {
+                context.ExportDirectory.AddDirectory(exports);
+                contents.Add(context.ExportDirectory, 4);
+            }
+
+            return new PESection(
+                ".sdata",
+                SectionFlags.MemoryRead | SectionFlags.MemoryWrite | SectionFlags.ContentInitializedData,
+                contents);
         }
 
         /// <summary>
@@ -315,10 +351,10 @@ namespace AsmResolver.PE.DotNet.Builder
         {
             context.ResourceDirectory.AddDirectory(image.Resources!);
 
-            return new PESection(".rsrc", SectionFlags.MemoryRead | SectionFlags.ContentInitializedData)
-            {
-                Contents = context.ResourceDirectory
-            };
+            return new PESection(
+                ".rsrc",
+                SectionFlags.MemoryRead | SectionFlags.ContentInitializedData,
+                context.ResourceDirectory);
         }
 
         /// <summary>
