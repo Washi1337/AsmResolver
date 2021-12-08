@@ -130,5 +130,39 @@ namespace AsmResolver.PE.Tests.Exports
             Assert.Equal(exportedSymbol.Ordinal, newExportedSymbol.Ordinal);
             Assert.Equal(exportedSymbol.Address.Rva, newExportedSymbol.Address.Rva);
         }
+
+        [Fact]
+        public void PersistentExportedSymbolMany()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+
+            // Prepare mock.
+            var exportDirectory = new ExportDirectory("HelloWorld.dll");
+            var exportedSymbol1 = new ExportedSymbol(new VirtualAddress(0x12345678), "TestExport1");
+            var exportedSymbol2 = new ExportedSymbol(new VirtualAddress(0xabcdef00), "TestExport2");
+            var exportedSymbol3 = new ExportedSymbol(new VirtualAddress(0x1337c0de), "TestExport3");
+            exportDirectory.Entries.Add(exportedSymbol1);
+            exportDirectory.Entries.Add(exportedSymbol2);
+            exportDirectory.Entries.Add(exportedSymbol3);
+            image.Exports = exportDirectory;
+
+            // Rebuild.
+            var newImage = RebuildAndReloadManagedPE(image);
+
+            // Verify.
+            Assert.Equal(3, newImage.Exports!.Entries.Count);
+            var newExportedSymbol = newImage.Exports.Entries[0];
+            Assert.Equal(exportedSymbol1.Name, newExportedSymbol.Name);
+            Assert.Equal(exportedSymbol1.Ordinal, newExportedSymbol.Ordinal);
+            Assert.Equal(exportedSymbol1.Address.Rva, newExportedSymbol.Address.Rva);
+            newExportedSymbol = newImage.Exports.Entries[1];
+            Assert.Equal(exportedSymbol2.Name, newExportedSymbol.Name);
+            Assert.Equal(exportedSymbol2.Ordinal, newExportedSymbol.Ordinal);
+            Assert.Equal(exportedSymbol2.Address.Rva, newExportedSymbol.Address.Rva);
+            newExportedSymbol = newImage.Exports.Entries[2];
+            Assert.Equal(exportedSymbol3.Name, newExportedSymbol.Name);
+            Assert.Equal(exportedSymbol3.Ordinal, newExportedSymbol.Ordinal);
+            Assert.Equal(exportedSymbol3.Address.Rva, newExportedSymbol.Address.Rva);
+        }
     }
 }
