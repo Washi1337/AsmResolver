@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.PE.DotNet;
 
 namespace AsmResolver.DotNet.Builder

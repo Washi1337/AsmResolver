@@ -33,6 +33,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<MethodBody?> _methodBody;
         private readonly LazyVariable<ImplementationMap?> _implementationMap;
         private readonly LazyVariable<MethodSemantics?> _semantics;
+        private readonly LazyVariable<UnmanagedExportInfo?> _exportInfo;
         private IList<ParameterDefinition>? _parameterDefinitions;
         private ParameterCollection? _parameters;
         private IList<CustomAttribute>? _customAttributes;
@@ -52,6 +53,7 @@ namespace AsmResolver.DotNet
             _methodBody = new LazyVariable<MethodBody?>(GetBody);
             _implementationMap = new LazyVariable<ImplementationMap?>(GetImplementationMap);
             _semantics = new LazyVariable<MethodSemantics?>(GetSemantics);
+            _exportInfo = new LazyVariable<UnmanagedExportInfo?>(GetExportInfo);
         }
 
         /// <summary>
@@ -677,6 +679,16 @@ namespace AsmResolver.DotNet
         /// </summary>
         public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && Name?.Value is ".cctor" or ".ctor";
 
+        /// <summary>
+        /// Gets or sets the unmanaged export info assigned to this method (if available). This can be used to indicate
+        /// that a method needs to be exported in the final PE file as an unmanaged symbol.
+        /// </summary>
+        public UnmanagedExportInfo? ExportInfo
+        {
+            get => _exportInfo.Value;
+            set => _exportInfo.Value = value;
+        }
+
         MethodDefinition IMethodDescriptor.Resolve() => this;
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
@@ -789,6 +801,12 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="Semantics"/> property.
         /// </remarks>
         protected virtual MethodSemantics? GetSemantics() => null;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        protected virtual UnmanagedExportInfo? GetExportInfo() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;

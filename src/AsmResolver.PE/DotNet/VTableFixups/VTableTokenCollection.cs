@@ -63,5 +63,19 @@ namespace AsmResolver.PE.DotNet.VTableFixups
 
         /// <inheritdoc />
         public uint GetVirtualSize() => GetPhysicalSize();
+
+        /// <summary>
+        /// Constructs a reference to an element within the collection.
+        /// </summary>
+        /// <param name="index">The index of the element to reference.</param>
+        /// <returns>The reference.</returns>
+        public ISegmentReference GetReferenceToIndex(int index)
+        {
+            int entrySize = (Type & VTableType.VTable32Bit) != 0
+                ? sizeof(uint)
+                : sizeof(ulong);
+
+            return this.ToReference(index * entrySize);
+        }
     }
 }

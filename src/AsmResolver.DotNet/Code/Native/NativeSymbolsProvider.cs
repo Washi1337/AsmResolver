@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using AsmResolver.PE.Exports;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
 
@@ -13,7 +14,8 @@ namespace AsmResolver.DotNet.Code.Native
     public class NativeSymbolsProvider : INativeSymbolsProvider
     {
         private readonly Dictionary<string, IImportedModule> _modules = new();
-        private readonly Dictionary<ISegmentReference, BaseRelocation> _relocations =new();
+        private readonly Dictionary<ISegmentReference, BaseRelocation> _relocations = new();
+        private readonly List<ExportedSymbol> _exportedSymbols = new();
 
         /// <summary>
         /// Creates a new instance of the <see cref="NativeSymbolsProvider"/> class.
@@ -120,6 +122,9 @@ namespace AsmResolver.DotNet.Code.Native
             }
         }
 
+        /// <inheritdoc />
+        public void RegisterExportedSymbol(ExportedSymbol symbol) => _exportedSymbols.Add(symbol);
+
         /// <summary>
         /// Gets a collection of all imported external modules.
         /// </summary>
@@ -129,7 +134,13 @@ namespace AsmResolver.DotNet.Code.Native
         /// <summary>
         /// Gets a collection of all base relocations that need to be applied in the final PE image.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The base relocations.</returns>
         public IEnumerable<BaseRelocation> GetBaseRelocations() => _relocations.Values;
+
+        /// <summary>
+        /// Gets a collection of all symbols that need to be exported in the final PE image.
+        /// </summary>
+        /// <returns>The exported symbols.</returns>
+        public IEnumerable<ExportedSymbol> GetExportedSymbols() => _exportedSymbols;
     }
 }

@@ -1,5 +1,4 @@
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.VTableFixups.Builder;
 
 namespace AsmResolver.PE.DotNet.Builder
 {

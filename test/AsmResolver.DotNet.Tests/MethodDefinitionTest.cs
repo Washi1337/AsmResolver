@@ -1,13 +1,33 @@
+using System;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.Properties;
+using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.VTableFixups;
+using AsmResolver.PE.File.Headers;
+using AsmResolver.Tests.Runners;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
 {
-    public class MethodDefinitionTest
+    public class MethodDefinitionTest: IClassFixture<TemporaryDirectoryFixture>
     {
+        private const string NonWindowsPlatform = "Test operates on native Windows binaries.";
+
+        private readonly TemporaryDirectoryFixture _fixture;
+
+        public MethodDefinitionTest(TemporaryDirectoryFixture fixture)
+        {
+            _fixture = fixture;
+        }
+
         [Fact]
         public void ReadName()
         {
@@ -94,17 +114,17 @@ namespace AsmResolver.DotNet.Tests
             var method = (MethodDefinition) module.LookupMember(
                 typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod)).MetadataToken);
             Assert.Equal(3, method.Parameters.Count);
-            
+
             Assert.Equal("intParameter", method.Parameters[0].Name);
-            Assert.True(method.Parameters[0].ParameterType.IsTypeOf("System", "Int32"), 
+            Assert.True(method.Parameters[0].ParameterType.IsTypeOf("System", "Int32"),
                 "Expected first parameter to be of type System.Int32.");
-            
+
             Assert.Equal("stringParameter", method.Parameters[1].Name);
-            Assert.True(method.Parameters[1].ParameterType.IsTypeOf("System", "String"), 
+            Assert.True(method.Parameters[1].ParameterType.IsTypeOf("System", "String"),
                 "Expected second parameter to be of type System.String.");
-            
+
             Assert.Equal("typeDefOrRefParameter", method.Parameters[2].Name);
-            Assert.True(method.Parameters[2].ParameterType.IsTypeOf("AsmResolver.DotNet.TestCases.Methods", "MultipleMethods"), 
+            Assert.True(method.Parameters[2].ParameterType.IsTypeOf("AsmResolver.DotNet.TestCases.Methods", "MultipleMethods"),
                 "Expected third parameter to be of type AsmResolver.TestCases.DotNet.MultipleMethods.");
         }
 
@@ -114,7 +134,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod)).MetadataToken);
-            
+
             Assert.False(method.IsGetMethod);
             Assert.False(method.IsSetMethod);
             Assert.False(method.IsAddMethod);
@@ -128,7 +148,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(SingleProperty).GetMethod("get_" + nameof(SingleProperty.IntProperty)).MetadataToken);
-            
+
             Assert.True(method.IsGetMethod);
         }
 
@@ -138,7 +158,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(SingleProperty).GetMethod("set_" + nameof(SingleProperty.IntProperty)).MetadataToken);
-            
+
             Assert.True(method.IsSetMethod);
         }
 
@@ -148,7 +168,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(SingleEvent).GetMethod("add_" + nameof(SingleEvent.SimpleEvent)).MetadataToken);
-            
+
             Assert.True(method.IsAddMethod);
         }
 
@@ -158,7 +178,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(SingleEvent).GetMethod("remove_" + nameof(SingleEvent.SimpleEvent)).MetadataToken);
-            
+
             Assert.True(method.IsRemoveMethod);
         }
 
@@ -180,6 +200,76 @@ namespace AsmResolver.DotNet.Tests
                 .First(t => t.Name == nameof(MultipleMethods)).Methods
                 .First(m => m.Name == nameof(MultipleMethods.VoidParameterlessMethod));
             Assert.False(method.Signature.ReturnsValue);
+        }
+
+        [SkippableFact]
+        public void ExportMethodByName32Bit()
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+
+            // Build new dummy lib.
+            var assembly = new AssemblyDefinition("MyLibrary", new Version(1, 0, 0, 0));
+            var module = new ModuleDefinition("MyLibrary.dll");
+            module.Attributes = DotNetDirectoryFlags.Bit32Required;
+            module.FileCharacteristics |= Characteristics.Dll | Characteristics.Machine32Bit;
+            assembly.Modules.Add(module);
+
+            // Import Console.WriteLine.
+            var importer = new ReferenceImporter(module);
+            var writeLine = importer.ImportMethod(new MemberReference(
+                new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Console"),
+                "WriteLine",
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void, module.CorLibTypeFactory.String)));
+
+            // Add a couple unmanaged exports.
+            const int methodCount = 3;
+            for (int i = 0; i < methodCount; i++)
+                AddExportedMethod($"MyMethod{i.ToString()}");
+
+            var runner = _fixture.GetRunner<NativePERunner>();
+
+            // Write library to temp dir.
+            string libraryPath = Path.ChangeExtension(runner.GetTestExecutablePath(
+                nameof(MethodDefinitionTest),
+                nameof(ExportMethodByName32Bit),
+                "MyLibrary.dll"), ".dll");
+            assembly.Write(libraryPath);
+
+            // Write caller to temp dir.
+            string callerPath = runner.GetTestExecutablePath(
+                nameof(MethodDefinitionTest),
+                nameof(ExportMethodByName32Bit),
+                "CallManagedExport");
+            File.WriteAllBytes(callerPath, Properties.Resources.CallManagedExport);
+
+            // Verify all exported methods.
+            for (int i = 0; i < methodCount; i++)
+            {
+                string methodName = $"MyMethod{i.ToString()}";
+                string output = runner.RunAndCaptureOutput(callerPath, new[]
+                {
+                    libraryPath,
+                    methodName
+                });
+                Assert.Contains($"Hello from {methodName}.", output);
+            }
+
+            void AddExportedMethod(string methodName)
+            {
+                var method = new MethodDefinition(
+                    methodName,
+                    MethodAttributes.Public | MethodAttributes.Static,
+                    MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
+
+                var body = new CilMethodBody(method);
+                method.MethodBody = body;
+                body.Instructions.Add(CilOpCodes.Ldstr, $"Hello from {methodName}.");
+                body.Instructions.Add(CilOpCodes.Call, writeLine);
+                body.Instructions.Add(CilOpCodes.Ret);
+
+                method.ExportInfo = new UnmanagedExportInfo(methodName, VTableType.VTable32Bit);
+                module.GetOrCreateModuleType().Methods.Add(method);
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using AsmResolver.PE.Exports;
 using AsmResolver.PE.Relocations;
 
 namespace AsmResolver.DotNet.Code.Native
@@ -8,13 +9,13 @@ namespace AsmResolver.DotNet.Code.Native
     public interface INativeSymbolsProvider
     {
         /// <summary>
-        /// Gets or sets the image base the final PE image is using. 
+        /// Gets or sets the image base the final PE image is using.
         /// </summary>
         ulong ImageBase
         {
             get;
         }
-        
+
         /// <summary>
         /// Adds a single symbol to the prototype.
         /// </summary>
@@ -27,5 +28,11 @@ namespace AsmResolver.DotNet.Code.Native
         /// </summary>
         /// <param name="relocation">The relocation.</param>
         void RegisterBaseRelocation(BaseRelocation relocation);
+
+        /// <summary>
+        /// Adds an exported symbol to the prototype.
+        /// </summary>
+        /// <param name="symbol">The symbol to export.</param>
+        void RegisterExportedSymbol(ExportedSymbol symbol);
     }
 }
