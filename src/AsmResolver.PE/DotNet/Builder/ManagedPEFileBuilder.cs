@@ -7,7 +7,6 @@ using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using AsmResolver.PE.DotNet.VTableFixups;
 using AsmResolver.PE.Exports.Builder;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
@@ -39,11 +38,13 @@ namespace AsmResolver.PE.DotNet.Builder
     /// depending on the machine type specified by the <see cref="IPEImage.MachineType"/> property.
     /// </para>
     /// <para>
-    /// This class builds up at most three PE sections; .text, .rsrc and .reloc, similar to what a normal .NET language
-    /// compiler would emit. Almost everything is put into the .text section, including the import and debug directories.
-    /// The win32 resources are put into .rsrc section, and this section will only be added if there is at least one entry
-    /// in the root resource directory of the <see cref="IPEImage.Resources"/> property. Similarly, the .reloc section
-    /// is only added if at least one base relocation was put into the directory, or when the CLR bootstrapper required one.
+    /// This class builds up at most four PE sections; <c>.text</c>, <c>.sdata</c>, <c>.rsrc</c> and <c>.reloc</c>,
+    /// similar to what a normal .NET language compiler would emit. Almost everything is put into the .text section,
+    /// including the import and debug directories. The win32 resources are put into <c>.rsrc</c> section, and this
+    /// section will only be added if there is at least one entry in the root resource directory of the
+    /// <see cref="IPEImage.Resources"/> property. Similarly, the <c>.sdata</c> section is only added if at least
+    /// one unmanaged export is added to the PE image. Finally, the <c>.reloc</c> section is only added if at least
+    /// one base relocation was put into the directory, or when the CLR bootstrapper requires one.
     /// </para>
     /// </remarks>
     public class ManagedPEFileBuilder : PEFileBuilderBase<ManagedPEFileBuilder.ManagedPEBuilderContext>

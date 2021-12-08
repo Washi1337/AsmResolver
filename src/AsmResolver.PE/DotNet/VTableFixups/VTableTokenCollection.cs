@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -34,6 +35,14 @@ namespace AsmResolver.PE.DotNet.VTableFixups
 
         /// <inheritdoc />
         public bool CanUpdateOffsets => true;
+
+        /// <inheritdoc />
+        protected override void InsertItem(int index, MetadataToken item)
+        {
+            if (Count >= 0xFFFF)
+                throw new InvalidOperationException("Number of VTable tokens exceeds the maximum of 65535.");
+            base.InsertItem(index, item);
+        }
 
         /// <inheritdoc />
         public void UpdateOffsets(ulong newOffset, uint newRva)
