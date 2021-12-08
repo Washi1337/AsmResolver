@@ -81,4 +81,7 @@
     <data name="FieldRvaTest" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\FieldRvaTest.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="CallManagedExport" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\CallManagedExport.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
 </root>

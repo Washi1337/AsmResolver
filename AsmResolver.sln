@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29306.81
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34A95168-A162-4F6A-803B-B6F221FE9EA6}"
 EndProject
@@ -68,6 +68,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.PE.Exports.OrdinalMapper", "tools\AsmResolver.PE.Exports.OrdinalMapper\AsmResolver.PE.Exports.OrdinalMapper.csproj", "{3E4B6896-269F-4129-9746-965338779C31}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TlsTest", "test\TestBinaries\Native\TlsTest\TlsTest.vcxproj", "{E7D186F7-B2BC-451D-98CC-427866CABE54}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CallManagedExport", "test\TestBinaries\Native\CallManagedExport\CallManagedExport.vcxproj", "{40483E28-C703-4933-BA5B-9512EF6E6A21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -371,6 +373,18 @@ Global
 		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Release|x64.Build.0 = Release|x64
 		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Release|x86.ActiveCfg = Release|Win32
 		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Release|x86.Build.0 = Release|Win32
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|Any CPU.Build.0 = Debug|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|x64.ActiveCfg = Debug|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|x64.Build.0 = Debug|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|x86.ActiveCfg = Debug|Win32
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|x86.Build.0 = Debug|Win32
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|Any CPU.ActiveCfg = Release|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|Any CPU.Build.0 = Release|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|x64.ActiveCfg = Release|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|x64.Build.0 = Release|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|x86.ActiveCfg = Release|Win32
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -405,6 +419,7 @@ Global
 		{CB766958-8D07-4E2D-8A38-C21617B1C45D} = {786C1732-8C96-45DD-97BB-639C9AA7F45B}
 		{3E4B6896-269F-4129-9746-965338779C31} = {0D04B5DF-8D16-488F-8767-E49803D3AF46}
 		{E7D186F7-B2BC-451D-98CC-427866CABE54} = {EA971BB0-94BA-44DB-B16C-212D2DB27E17}
+		{40483E28-C703-4933-BA5B-9512EF6E6A21} = {EA971BB0-94BA-44DB-B16C-212D2DB27E17}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3302AC79-6D23-4E7D-8C5F-C0C7261044D0}
