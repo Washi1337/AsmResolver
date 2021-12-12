@@ -59,6 +59,8 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         /// <inheritdoc />
         public override string? GetStringByIndex(uint index)
         {
+            index &= 0x00FFFFFF;
+
             if (!_cachedStrings.TryGetValue(index, out string value) && index < _reader.Length)
             {
                 var stringsReader = _reader.ForkRelative(index);

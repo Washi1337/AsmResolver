@@ -1,3 +1,5 @@
+using AsmResolver.PE.DotNet.Metadata.Tables;
+
 namespace AsmResolver.PE.DotNet.Metadata.UserStrings
 {
     /// <summary>
@@ -46,5 +48,23 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         /// <param name="index">When the function returns <c>true</c>, contains the index at which the string was found.</param>
         /// <returns><c>true</c> if the string index was found, <c>false</c> otherwise.</returns>
         public abstract bool TryFindStringIndex(string value, out uint index);
+
+        /// <summary>
+        /// Searches the stream for the provided string.
+        /// </summary>
+        /// <param name="value">The string to search for.</param>
+        /// <param name="token">When the function returns <c>true</c>, contains the token for which the string was found.</param>
+        /// <returns><c>true</c> if the string token was found, <c>false</c> otherwise.</returns>
+        public bool TryFindStringToken(string value, out MetadataToken token)
+        {
+            if (TryFindStringIndex(value, out uint index))
+            {
+                token = new MetadataToken(TableIndex.String, index);
+                return true;
+            }
+
+            token = MetadataToken.Zero;
+            return false;
+        }
     }
 }
