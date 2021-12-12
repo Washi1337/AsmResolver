@@ -8,7 +8,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
     /// </summary>
     public class SerializedGuidStream : GuidStream
     {
+        [ThreadStatic]
+        private static byte[]? _readBuffer;
+
         private readonly BinaryStreamReader _reader;
+
+        /// <summary>
+        /// Creates a new GUID stream based on a byte array.
+        /// </summary>
+        /// <param name="rawData">The raw contents of the stream.</param>
+        public SerializedGuidStream(byte[] rawData)
+            : this(DefaultName, ByteArrayDataSource.CreateReader(rawData))
+        {
+        }
 
         /// <summary>
         /// Creates a new GUID stream based on a byte array.
@@ -51,17 +63,37 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
             if (index == 0)
                 return System.Guid.Empty;
 
+            _readBuffer ??= new byte[GuidSize];
+
             uint offset = (index - 1) * GuidSize;
             if (offset < _reader.Length)
             {
                 var guidReader = _reader.ForkRelative(offset);
-                byte[] data = new byte[16];
-                guidReader.ReadBytes(data, 0, data.Length);
-                return new System.Guid(data);
+                guidReader.ReadBytes(_readBuffer, 0, _readBuffer.Length);
+                return new System.Guid(_readBuffer);
             }
 
             return System.Guid.Empty;
         }
 
+        /// <inheritdoc />
+        public override bool TryFindGuidIndex(System.Guid guid, out uint index)
+        {
+            _readBuffer ??= new byte[GuidSize];
+
+            index = 1;
+            var reader = _reader.Fork();
+            while (reader.RelativeOffset < reader.Length && reader.CanRead(GuidSize))
+            {
+                int count = reader.ReadBytes(_readBuffer, 0, _readBuffer.Length);
+                if (count == GuidSize && new System.Guid(_readBuffer) == guid)
+                    return true;
+
+                index++;
+            }
+
+            index = 0;
+            return false;
+        }
     }
 }
