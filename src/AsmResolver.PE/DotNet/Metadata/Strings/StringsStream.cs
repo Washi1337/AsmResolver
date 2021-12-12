@@ -38,5 +38,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <param name="index">The offset into the heap to start reading.</param>
         /// <returns>The string, or <c>null</c> if the index was invalid.</returns>
         public abstract Utf8String? GetStringByIndex(uint index);
+
+        /// <summary>
+        /// Searches the stream for the provided string.
+        /// </summary>
+        /// <param name="value">The string to search for.</param>
+        /// <param name="index">When the function returns <c>true</c>, contains the index at which the string was found.</param>
+        /// <returns><c>true</c> if the string index was found, <c>false</c> otherwise.</returns>
+        public abstract bool TryFindStringIndex(Utf8String value, out uint index);
     }
 }

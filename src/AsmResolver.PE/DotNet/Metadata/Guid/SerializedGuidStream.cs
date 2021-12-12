@@ -83,7 +83,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
 
             index = 1;
             var reader = _reader.Fork();
-            while (reader.RelativeOffset < reader.Length && reader.CanRead(GuidSize))
+            while (reader.CanRead(GuidSize))
             {
                 int count = reader.ReadBytes(_readBuffer, 0, _readBuffer.Length);
                 if (count == GuidSize && new System.Guid(_readBuffer) == guid)

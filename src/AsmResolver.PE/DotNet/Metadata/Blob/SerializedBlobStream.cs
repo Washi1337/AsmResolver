@@ -82,8 +82,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// <inheritdoc />
         public override bool TryFindBlobIndex(byte[] blob, out uint index)
         {
+            uint totalLength = (uint) blob.Length + ((uint) blob.Length).GetCompressedSize();
+
             var reader = _reader.Fork();
-            while (reader.RelativeOffset < reader.Length)
+            while (reader.CanRead(totalLength))
             {
                 index = reader.RelativeOffset;
 
@@ -92,8 +94,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
                     int i = 0;
                     for (; i < blob.Length; i++)
                     {
-                        byte b = blob[i];
-                        if (b != reader.ReadByte())
+                        if (blob[i] != reader.ReadByte())
                             break;
                     }
 
