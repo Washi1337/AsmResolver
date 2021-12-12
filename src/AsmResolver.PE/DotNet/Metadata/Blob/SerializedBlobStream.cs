@@ -13,6 +13,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// <summary>
         /// Creates a new blob stream based on a byte array.
         /// </summary>
+        /// <param name="rawData">The raw contents of the stream.</param>
+        public SerializedBlobStream(byte[] rawData)
+            : this(DefaultName, ByteArrayDataSource.CreateReader(rawData))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new blob stream based on a byte array.
+        /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedBlobStream(string name, byte[] rawData)
@@ -70,5 +79,33 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
             return false;
         }
 
+        /// <inheritdoc />
+        public override bool TryFindBlobIndex(byte[] blob, out uint index)
+        {
+            var reader = _reader.Fork();
+            while (reader.RelativeOffset < reader.Length)
+            {
+                index = reader.RelativeOffset;
+
+                if (reader.TryReadCompressedUInt32(out uint length) && length == blob.Length && reader.CanRead(length))
+                {
+                    int i = 0;
+                    for (; i < blob.Length; i++)
+                    {
+                        byte b = blob[i];
+                        if (b != reader.ReadByte())
+                            break;
+                    }
+
+                    if (i == blob.Length)
+                        return true;
+                }
+
+                reader.RelativeOffset = index + 1;
+            }
+
+            index = 0;
+            return false;
+        }
     }
 }

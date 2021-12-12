@@ -53,5 +53,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// <c>true</c> if a blob reader could be created at the provided index, <c>false</c> otherwise.
         /// </returns>
         public abstract bool TryGetBlobReaderByIndex(uint index, out BinaryStreamReader reader);
+
+        /// <summary>
+        /// Searches the stream for the provided blob.
+        /// </summary>
+        /// <param name="blob">The blob to search for.</param>
+        /// <param name="index">When the function returns <c>true</c>, contains the index at which the blob was found..</param>
+        /// <returns><c>true</c> if the blob index was found, <c>false</c> otherwise.</returns>
+        public abstract bool TryFindBlobIndex(byte[] blob, out uint index);
     }
 }
