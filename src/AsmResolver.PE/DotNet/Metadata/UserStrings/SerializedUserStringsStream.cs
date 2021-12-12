@@ -86,6 +86,12 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         /// <inheritdoc />
         public override bool TryFindStringIndex(string value, out uint index)
         {
+            if (value == string.Empty)
+            {
+                index = 0;
+                return true;
+            }
+
             uint byteCount = (uint) (value.Length * sizeof(ushort)) + sizeof(byte);
             uint totalLength = byteCount.GetCompressedSize() + byteCount;
 

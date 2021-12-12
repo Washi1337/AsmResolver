@@ -45,6 +45,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <param name="value">The string to search for.</param>
         /// <param name="index">When the function returns <c>true</c>, contains the index at which the string was found.</param>
         /// <returns><c>true</c> if the string index was found, <c>false</c> otherwise.</returns>
-        public abstract bool TryFindStringIndex(Utf8String value, out uint index);
+        public abstract bool TryFindStringIndex(Utf8String? value, out uint index);
     }
 }

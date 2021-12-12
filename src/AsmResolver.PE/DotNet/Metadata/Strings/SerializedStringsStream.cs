@@ -88,8 +88,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         }
 
         /// <inheritdoc />
-        public override bool TryFindStringIndex(Utf8String value, out uint index)
+        public override bool TryFindStringIndex(Utf8String? value, out uint index)
         {
+            if (value is null)
+            {
+                index = 0;
+                return true;
+            }
+
             byte[] bytes = value.GetBytesUnsafe();
 
             var reader = _reader.Fork();

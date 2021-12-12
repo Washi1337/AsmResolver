@@ -80,8 +80,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         }
 
         /// <inheritdoc />
-        public override bool TryFindBlobIndex(byte[] blob, out uint index)
+        public override bool TryFindBlobIndex(byte[]? blob, out uint index)
         {
+            if (blob is null)
+            {
+                index = 0;
+                return true;
+            }
+
             uint totalLength = (uint) blob.Length + ((uint) blob.Length).GetCompressedSize();
 
             var reader = _reader.Fork();

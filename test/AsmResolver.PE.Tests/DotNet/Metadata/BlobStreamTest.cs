@@ -11,12 +11,19 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             Assert.False(stream.TryFindBlobIndex(needle, out _));
         }
 
-        private static void AssertHasBlob(byte[] streamData, byte[] needle)
+        private static void AssertHasBlob(byte[] streamData, byte[]? needle)
         {
             var stream = new SerializedBlobStream(streamData);
             Assert.True(stream.TryFindBlobIndex(needle, out uint actualIndex));
             Assert.Equal(needle, stream.GetBlobByIndex(actualIndex));
         }
+
+        [Fact]
+        public void FindNullBlob() => AssertHasBlob(new byte[]
+            {
+                0x00, 0x05, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06
+            },
+            null);
 
         [Fact]
         public void FindSmallExistingBlob() => AssertHasBlob(new byte[]

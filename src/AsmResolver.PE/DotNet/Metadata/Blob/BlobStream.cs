@@ -60,6 +60,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// <param name="blob">The blob to search for.</param>
         /// <param name="index">When the function returns <c>true</c>, contains the index at which the blob was found.</param>
         /// <returns><c>true</c> if the blob index was found, <c>false</c> otherwise.</returns>
-        public abstract bool TryFindBlobIndex(byte[] blob, out uint index);
+        public abstract bool TryFindBlobIndex(byte[]? blob, out uint index);
     }
 }
