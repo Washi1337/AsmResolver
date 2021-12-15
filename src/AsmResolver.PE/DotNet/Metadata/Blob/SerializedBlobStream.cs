@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
-        /// Creates a new blob stream based on a byte array.
+        /// Creates a new blob stream with the provided byte array as the raw contents of the stream.
         /// </summary>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedBlobStream(byte[] rawData)
@@ -20,7 +20,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         }
 
         /// <summary>
-        /// Creates a new blob stream based on a byte array.
+        /// Creates a new blob stream with the provided byte array as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
@@ -30,7 +30,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         }
 
         /// <summary>
-        /// Creates a new blob stream based on a segment in a file.
+        /// Creates a new blob stream with the provided segment in a file as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="reader">The raw contents of the stream.</param>

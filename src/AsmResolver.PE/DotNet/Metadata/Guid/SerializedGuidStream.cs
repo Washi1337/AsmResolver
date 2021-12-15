@@ -14,7 +14,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
-        /// Creates a new GUID stream based on a byte array.
+        /// Creates a new GUID stream with the provided byte array as the raw contents of the stream.
         /// </summary>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedGuidStream(byte[] rawData)
@@ -23,7 +23,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
         }
 
         /// <summary>
-        /// Creates a new GUID stream based on a byte array.
+        /// Creates a new GUID stream with the provided byte array as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
@@ -33,7 +33,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
         }
 
         /// <summary>
-        /// Creates a new GUID stream based on a segment in a file.
+        /// Creates a new GUID stream with the provided file segment reader as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="reader">The raw contents of the stream.</param>

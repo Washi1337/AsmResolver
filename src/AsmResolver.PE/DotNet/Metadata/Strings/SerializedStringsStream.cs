@@ -13,7 +13,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
-        /// Creates a new strings stream based on a byte array.
+        /// Creates a new strings stream with the provided byte array as the raw contents of the stream.
         /// </summary>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedStringsStream(byte[] rawData)
@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         }
 
         /// <summary>
-        /// Creates a new strings stream based on a byte array.
+        /// Creates a new strings stream with the provided byte array as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
@@ -32,7 +32,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         }
 
         /// <summary>
-        /// Creates a new strings stream based on a segment in a file.
+        /// Creates a new strings stream with the provided file segment reader as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="reader">The raw contents of the stream.</param>
