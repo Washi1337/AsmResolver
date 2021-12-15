@@ -13,7 +13,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
-        /// Creates a new strings stream based on a byte array.
+        /// Creates a new strings stream with the provided byte array as the raw contents of the stream.
+        /// </summary>
+        /// <param name="rawData">The raw contents of the stream.</param>
+        public SerializedStringsStream(byte[] rawData)
+            : this(DefaultName, ByteArrayDataSource.CreateReader(rawData))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new strings stream with the provided byte array as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
@@ -23,7 +32,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         }
 
         /// <summary>
-        /// Creates a new strings stream based on a segment in a file.
+        /// Creates a new strings stream with the provided file segment reader as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="reader">The raw contents of the stream.</param>
@@ -78,5 +87,37 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
             return value;
         }
 
+        /// <inheritdoc />
+        public override bool TryFindStringIndex(Utf8String? value, out uint index)
+        {
+            if (value is null)
+            {
+                index = 0;
+                return true;
+            }
+
+            byte[] bytes = value.GetBytesUnsafe();
+
+            var reader = _reader.Fork();
+            while (reader.CanRead((uint) value.ByteCount))
+            {
+                index = reader.RelativeOffset;
+
+                int i = 0;
+                for (; i < bytes.Length; i++)
+                {
+                    if (bytes[i] != reader.ReadByte())
+                        break;
+                }
+
+                if (i == value.Length && reader.CanRead(sizeof(byte)) && reader.ReadByte() == 0)
+                    return true;
+
+                reader.RelativeOffset = index + 1;
+            }
+
+            index = 0;
+            return false;
+        }
     }
 }

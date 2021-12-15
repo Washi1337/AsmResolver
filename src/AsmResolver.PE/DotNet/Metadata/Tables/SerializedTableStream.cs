@@ -21,7 +21,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private bool _tablesInitialized;
 
         /// <summary>
-        /// Creates a new tables stream based on a byte array.
+        /// Creates a new tables stream with the provided byte array as the raw contents of the stream.
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="name">The name of the stream.</param>
@@ -32,7 +32,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
-        /// Creates a new tables stream based on a segment in a file.
+        /// Creates a new tables stream with the provided file segment reader as the raw contents of the stream.
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="name">The name of the stream.</param>
