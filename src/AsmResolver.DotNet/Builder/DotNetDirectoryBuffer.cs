@@ -10,6 +10,7 @@ using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.DotNet.VTableFixups;
+using AsmResolver.PE.Platforms;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -42,7 +43,7 @@ namespace AsmResolver.DotNet.Builder
             Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
             Resources = new DotNetResourcesDirectoryBuffer();
-            VTableFixups = new VTableFixupsBuffer(symbolsProvider);
+            VTableFixups = new VTableFixupsBuffer(Platform.Get(module.MachineType), symbolsProvider);
         }
 
         /// <summary>
