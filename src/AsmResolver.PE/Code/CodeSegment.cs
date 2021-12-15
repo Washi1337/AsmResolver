@@ -84,6 +84,9 @@ namespace AsmResolver.PE.Code
                 case AddressFixupType.Relative32BitAddress:
                     writer.WriteInt32((int) (targetRva - (writerRva + 4)));
                     break;
+                case AddressFixupType.Absolute64BitAddress:
+                    writer.WriteUInt64(ImageBase + targetRva);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

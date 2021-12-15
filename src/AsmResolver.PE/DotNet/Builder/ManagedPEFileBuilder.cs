@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.Builder;
+using AsmResolver.PE.Code;
 using AsmResolver.PE.Debug.Builder;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
@@ -12,6 +13,7 @@ using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Imports.Builder;
+using AsmResolver.PE.Platforms;
 using AsmResolver.PE.Relocations;
 using AsmResolver.PE.Relocations.Builder;
 using AsmResolver.PE.Win32Resources.Builder;
@@ -70,7 +72,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 RelocationsDirectory = new RelocationsDirectoryBuffer();
                 FieldRvaDataReader = new FieldRvaDataReader();
                 DebugDirectory= new DebugDirectoryBuffer();
-                Bootstrapper = CreateBootstrapper(image);
+                Platform = Platform.Get(image.MachineType);
             }
 
             /// <summary>
@@ -122,6 +124,11 @@ namespace AsmResolver.PE.DotNet.Builder
                 get;
             }
 
+            public Platform Platform
+            {
+                get;
+            }
+
             /// <summary>
             /// Gets the code segment used as a native entrypoint of the resulting PE file.
             /// </summary>
@@ -130,9 +137,10 @@ namespace AsmResolver.PE.DotNet.Builder
             /// bootstrapper is a legacy feature from older versions of the CLR, we do not see this segment in
             /// managed PE files targeting 64-bit architectures.
             /// </remarks>
-            public BootstrapperSegment? Bootstrapper
+            public RelocatableSegment? Bootstrapper
             {
                 get;
+                set;
             }
 
             /// <summary>
@@ -142,24 +150,10 @@ namespace AsmResolver.PE.DotNet.Builder
             {
                 get;
             }
-
-            private X86BootstrapperSegment? CreateBootstrapper(IPEImage image)
-            {
-                return image.MachineType switch
-                {
-                    MachineType.I386 => new X86BootstrapperSegment(
-                        (image.Characteristics & Characteristics.Dll) != 0,
-                        (uint) image.ImageBase, ImportDirectory.ImportAddressDirectory),
-
-                    MachineType.Amd64 => null,
-
-                    _ => throw new NotSupportedException($"Machine type {image.MachineType} is not supported.")
-                };
-            }
         }
 
         /// <inheritdoc />
-        protected override ManagedPEBuilderContext CreateContext(IPEImage image) => new ManagedPEBuilderContext(image);
+        protected override ManagedPEBuilderContext CreateContext(IPEImage image) => new(image);
 
         /// <inheritdoc />
         protected override IEnumerable<PESection> CreateSections(IPEImage image, ManagedPEBuilderContext context)
@@ -186,8 +180,8 @@ namespace AsmResolver.PE.DotNet.Builder
                 .ToList();
 
             // Add relocations of the bootstrapper stub if necessary.
-            if (context.Bootstrapper is not null)
-                relocations.AddRange(context.Bootstrapper.GetRelocations());
+            if (context.Bootstrapper.HasValue)
+                relocations.AddRange(context.Bootstrapper.Value.Relocations);
 
             // Add .reloc section when necessary.
             if (relocations.Count > 0)
@@ -226,8 +220,8 @@ namespace AsmResolver.PE.DotNet.Builder
                 contents.Add(context.DebugDirectory.ContentsTable);
             }
 
-            if (context.Bootstrapper is not null)
-                contents.Add(context.Bootstrapper);
+            if (context.Bootstrapper.HasValue)
+                contents.Add(context.Bootstrapper.Value.Segment);
 
             if (image.Exports is { Entries: { Count: > 0 } entries })
             {
@@ -248,23 +242,36 @@ namespace AsmResolver.PE.DotNet.Builder
 
         private static void CreateImportDirectory(IPEImage image, ManagedPEBuilderContext context)
         {
-            bool importEntrypointRequired = image.MachineType == MachineType.I386;
+            bool importEntrypointRequired = context.Platform.IsClrBootstrapperRequired
+                                            || (image.DotNetDirectory!.Flags & DotNetDirectoryFlags.ILOnly) == 0;
             string entrypointName = (image.Characteristics & Characteristics.Dll) != 0
                 ? "_CorDllMain"
                 : "_CorExeMain";
 
-            var modules = CollectImportedModules(image, importEntrypointRequired, entrypointName);
+            var modules = CollectImportedModules(image, importEntrypointRequired, entrypointName, out var entrypointSymbol);
 
             foreach (var module in modules)
                 context.ImportDirectory.AddModule(module);
+
+            if (importEntrypointRequired)
+            {
+                if (entrypointSymbol is null)
+                    throw new InvalidOperationException("Entrypoint symbol was required but not imported.");
+
+                context.Bootstrapper = context.Platform.CreateThunkStub(image.ImageBase, entrypointSymbol);
+            }
         }
 
-        private static List<IImportedModule> CollectImportedModules(IPEImage image, bool entryRequired, string mscoreeEntryName)
+        private static List<IImportedModule> CollectImportedModules(
+            IPEImage image,
+            bool entryRequired,
+            string mscoreeEntryName,
+            out ImportedSymbol? entrypointSymbol)
         {
             var modules = new List<IImportedModule>();
 
             IImportedModule? mscoreeModule = null;
-            ImportedSymbol? entrypointSymbol = null;
+            entrypointSymbol = null;
 
             foreach (var module in image.Imports)
             {
@@ -413,7 +420,7 @@ namespace AsmResolver.PE.DotNet.Builder
 
         /// <inheritdoc />
         protected override uint GetEntrypointAddress(PEFile peFile, IPEImage image, ManagedPEBuilderContext context)
-            => context.Bootstrapper?.Rva ?? 0;
+            => context.Bootstrapper?.Segment.Rva ?? 0;
 
         /// <inheritdoc />
         protected override uint GetFileAlignment(PEFile peFile, IPEImage image, ManagedPEBuilderContext context)
