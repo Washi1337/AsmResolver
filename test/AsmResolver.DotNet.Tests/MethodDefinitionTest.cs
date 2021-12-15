@@ -202,16 +202,27 @@ namespace AsmResolver.DotNet.Tests
             Assert.False(method.Signature.ReturnsValue);
         }
 
-        [SkippableFact]
-        public void ExportMethodByName32Bit()
+        private static AssemblyDefinition CreateDummyLibraryWithExport(int methodCount, bool is32Bit)
         {
-            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
-
             // Build new dummy lib.
             var assembly = new AssemblyDefinition("MyLibrary", new Version(1, 0, 0, 0));
             var module = new ModuleDefinition("MyLibrary.dll");
-            module.Attributes = DotNetDirectoryFlags.Bit32Required;
-            module.FileCharacteristics |= Characteristics.Dll | Characteristics.Machine32Bit;
+            module.Attributes &= ~DotNetDirectoryFlags.ILOnly;
+
+            if (is32Bit)
+            {
+                module.Attributes |= DotNetDirectoryFlags.Bit32Required;
+                module.FileCharacteristics |= Characteristics.Dll | Characteristics.Machine32Bit;
+                module.PEKind = OptionalHeaderMagic.Pe32;
+                module.MachineType = MachineType.I386;
+            }
+            else
+            {
+                module.FileCharacteristics |= Characteristics.Dll;
+                module.PEKind = OptionalHeaderMagic.Pe32Plus;
+                module.MachineType = MachineType.Amd64;
+            }
+
             assembly.Modules.Add(module);
 
             // Import Console.WriteLine.
@@ -222,25 +233,64 @@ namespace AsmResolver.DotNet.Tests
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void, module.CorLibTypeFactory.String)));
 
             // Add a couple unmanaged exports.
-            const int methodCount = 3;
             for (int i = 0; i < methodCount; i++)
                 AddExportedMethod($"MyMethod{i.ToString()}");
 
+            return assembly;
+
+            void AddExportedMethod(string methodName)
+            {
+                // New static method.
+                var method = new MethodDefinition(
+                    methodName,
+                    MethodAttributes.Public | MethodAttributes.Static,
+                    MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
+
+                // Add a Console.WriteLine call
+                var body = new CilMethodBody(method);
+                method.MethodBody = body;
+                body.Instructions.Add(CilOpCodes.Ldstr, $"Hello from {methodName}.");
+                body.Instructions.Add(CilOpCodes.Call, writeLine);
+                body.Instructions.Add(CilOpCodes.Ret);
+
+                // Add to <Module>
+                module.GetOrCreateModuleType().Methods.Add(method);
+
+                // Register as unmanaged export.
+                method.ExportInfo = new UnmanagedExportInfo(methodName,
+                    is32Bit ? VTableType.VTable32Bit : VTableType.VTable64Bit);
+            }
+        }
+
+        [SkippableTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ExportMethodByName(bool is32Bit)
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+
+            const int methodCount = 3;
+
+            var assembly = CreateDummyLibraryWithExport(methodCount, is32Bit);
             var runner = _fixture.GetRunner<NativePERunner>();
+
+            string suffix = is32Bit ? "x86" : "x64";
 
             // Write library to temp dir.
             string libraryPath = Path.ChangeExtension(runner.GetTestExecutablePath(
                 nameof(MethodDefinitionTest),
-                nameof(ExportMethodByName32Bit),
-                "MyLibrary.dll"), ".dll");
+                nameof(ExportMethodByName),
+                $"MyLibrary.{suffix}"), ".dll");
             assembly.Write(libraryPath);
 
             // Write caller to temp dir.
             string callerPath = runner.GetTestExecutablePath(
                 nameof(MethodDefinitionTest),
-                nameof(ExportMethodByName32Bit),
-                "CallManagedExport");
-            File.WriteAllBytes(callerPath, Properties.Resources.CallManagedExport);
+                nameof(ExportMethodByName),
+                $"CallManagedExport.{suffix}");
+            File.WriteAllBytes(callerPath, is32Bit
+                ? Properties.Resources.CallManagedExport_X86
+                : Properties.Resources.CallManagedExport_X64);
 
             // Verify all exported methods.
             for (int i = 0; i < methodCount; i++)
@@ -253,23 +303,7 @@ namespace AsmResolver.DotNet.Tests
                 });
                 Assert.Contains($"Hello from {methodName}.", output);
             }
-
-            void AddExportedMethod(string methodName)
-            {
-                var method = new MethodDefinition(
-                    methodName,
-                    MethodAttributes.Public | MethodAttributes.Static,
-                    MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
-
-                var body = new CilMethodBody(method);
-                method.MethodBody = body;
-                body.Instructions.Add(CilOpCodes.Ldstr, $"Hello from {methodName}.");
-                body.Instructions.Add(CilOpCodes.Call, writeLine);
-                body.Instructions.Add(CilOpCodes.Ret);
-
-                method.ExportInfo = new UnmanagedExportInfo(methodName, VTableType.VTable32Bit);
-                module.GetOrCreateModuleType().Methods.Add(method);
-            }
         }
+
     }
 }
