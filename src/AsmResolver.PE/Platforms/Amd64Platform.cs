@@ -1,3 +1,4 @@
+using AsmResolver.IO;
 using AsmResolver.PE.Code;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Relocations;
@@ -37,6 +38,19 @@ namespace AsmResolver.PE.Platforms
             {
                 new BaseRelocation(RelocationType.Dir64, segment.ToReference(2))
             });
+        }
+
+        /// <inheritdoc />
+        public override bool TryExtractThunkAddress(IPEImage image, BinaryStreamReader reader, out uint rva)
+        {
+            if (reader.ReadUInt16() != 0xA148)
+            {
+                rva = 0;
+                return false;
+            }
+
+            rva = (uint) (reader.ReadUInt64() - image.ImageBase);
+            return reader.ReadUInt16() == 0xE0FF;
         }
     }
 }

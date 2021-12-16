@@ -262,10 +262,35 @@ namespace AsmResolver.DotNet.Tests
             }
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReadExportMethodByName(bool is32Bit)
+        {
+            var module = ModuleDefinition.FromBytes(is32Bit
+                ? Properties.Resources.MyLibrary_X86
+                : Properties.Resources.MyLibrary_X64);
+
+            const int methodCount = 3;
+
+            int matchedMethods = 0;
+            foreach (var method in module.GetOrCreateModuleType().Methods)
+            {
+                if (method.Name!.Value.StartsWith("MyMethod"))
+                {
+                    Assert.True(method.ExportInfo.HasValue);
+                    Assert.Equal(method.Name, method.ExportInfo.Value.Name);
+                    matchedMethods++;
+                }
+            }
+
+            Assert.Equal(methodCount, matchedMethods);
+        }
+
         [SkippableTheory]
         [InlineData(false)]
         [InlineData(true)]
-        public void ExportMethodByName(bool is32Bit)
+        public void PersistExportMethodByName(bool is32Bit)
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
 
@@ -279,15 +304,15 @@ namespace AsmResolver.DotNet.Tests
             // Write library to temp dir.
             string libraryPath = Path.ChangeExtension(runner.GetTestExecutablePath(
                 nameof(MethodDefinitionTest),
-                nameof(ExportMethodByName),
-                $"MyLibrary.{suffix}"), ".dll");
+                nameof(PersistExportMethodByName),
+                $"MyLibrary.{suffix}.dll"), ".dll");
             assembly.Write(libraryPath);
 
             // Write caller to temp dir.
             string callerPath = runner.GetTestExecutablePath(
                 nameof(MethodDefinitionTest),
-                nameof(ExportMethodByName),
-                $"CallManagedExport.{suffix}");
+                nameof(PersistExportMethodByName),
+                $"CallManagedExport.{suffix}.exe");
             File.WriteAllBytes(callerPath, is32Bit
                 ? Properties.Resources.CallManagedExport_X86
                 : Properties.Resources.CallManagedExport_X64);

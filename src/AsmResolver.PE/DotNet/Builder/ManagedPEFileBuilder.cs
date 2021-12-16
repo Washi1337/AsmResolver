@@ -124,6 +124,9 @@ namespace AsmResolver.PE.DotNet.Builder
                 get;
             }
 
+            /// <summary>
+            /// Gets the target platform of the image.
+            /// </summary>
             public Platform Platform
             {
                 get;

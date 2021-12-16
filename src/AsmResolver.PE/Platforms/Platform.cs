@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Relocations;
 
@@ -16,12 +18,27 @@ namespace AsmResolver.PE.Platforms
         /// <param name="machineType">The machine type.</param>
         /// <returns>The target platform.</returns>
         /// <exception cref="NotSupportedException">Occurs when the platform is not supported.</exception>
-        public static Platform Get(MachineType machineType) => machineType switch
+        public static Platform Get(MachineType machineType) => TryGet(machineType, out var platform)
+            ? platform
+            : throw new NotSupportedException($"Unsupported machine type {machineType}.");
+
+        /// <summary>
+        /// Gets a target platform by its machine type.
+        /// </summary>
+        /// <param name="machineType">The machine type.</param>
+        /// <param name="platform">The target platform.</param>
+        /// <returns><c>true</c> if the platform was found, <c>false</c> otherwise.</returns>
+        public static bool TryGet(MachineType machineType, [NotNullWhen(true)] out Platform? platform)
         {
-            MachineType.I386 => I386Platform.Instance,
-            MachineType.Amd64 => Amd64Platform.Instance,
-            _ => throw new NotSupportedException($"Unsupported machine type {machineType}.")
-        };
+            platform = machineType switch
+            {
+                MachineType.I386 => I386Platform.Instance,
+                MachineType.Amd64 => Amd64Platform.Instance,
+                _ => null
+            };
+
+            return platform is not null;
+        }
 
         /// <summary>
         /// Gets the machine type associated to the platform.
@@ -46,5 +63,14 @@ namespace AsmResolver.PE.Platforms
         /// <param name="entrypoint">The symbol to jump to.</param>
         /// <returns>The created stub.</returns>
         public abstract RelocatableSegment CreateThunkStub(ulong imageBase, ISymbol entrypoint);
+
+        /// <summary>
+        /// Attempts to extract the original RVA from the code at the provided thunk address reader.
+        /// </summary>
+        /// <param name="image">The image containing the thunk.</param>
+        /// <param name="reader">The thunk reader.</param>
+        /// <param name="rva">The extracted RVA.</param>
+        /// <returns><c>true</c> if the RVA was extracted successfully from the code, <c>false</c> otherwise.</returns>
+        public abstract bool TryExtractThunkAddress(IPEImage image, BinaryStreamReader reader, out uint rva);
     }
 }

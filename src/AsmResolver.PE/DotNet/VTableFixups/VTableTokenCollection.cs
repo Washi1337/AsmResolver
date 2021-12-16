@@ -61,8 +61,9 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
-            foreach (var token in Items)
+            for (int i = 0; i < Items.Count; i++)
             {
+                var token = Items[i];
                 if ((Type & VTableType.VTable32Bit) != 0)
                     writer.WriteUInt32(token.ToUInt32());
                 else
@@ -78,13 +79,20 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         /// </summary>
         /// <param name="index">The index of the element to reference.</param>
         /// <returns>The reference.</returns>
-        public ISegmentReference GetReferenceToIndex(int index)
+        public ISegmentReference GetReferenceToIndex(int index) => this.ToReference((int) GetOffsetToIndex(index));
+
+        /// <summary>
+        /// Gets the byte offset to an element within the collection that is relative to the start of the list.
+        /// </summary>
+        /// <param name="index">The index of the element to reference.</param>
+        /// <returns>The offset.</returns>
+        public uint GetOffsetToIndex(int index)
         {
             int entrySize = (Type & VTableType.VTable32Bit) != 0
                 ? sizeof(uint)
                 : sizeof(ulong);
 
-            return this.ToReference(index * entrySize);
+            return (uint) (index * entrySize);
         }
     }
 }

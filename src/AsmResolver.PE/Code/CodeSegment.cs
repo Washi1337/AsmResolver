@@ -13,7 +13,7 @@ namespace AsmResolver.PE.Code
         /// Creates a new segment of native code.
         /// </summary>
         /// <param name="code">The raw native code stream.</param>
-        public CodeSegment( byte[] code)
+        public CodeSegment(byte[] code)
         {
             Code = code;
         }
