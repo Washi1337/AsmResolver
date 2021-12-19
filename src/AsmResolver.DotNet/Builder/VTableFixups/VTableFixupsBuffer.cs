@@ -65,9 +65,10 @@ namespace AsmResolver.DotNet.Builder.VTableFixups
 
             // Register exported symbol.
             var stubReference = thunkStub.Segment.ToReference();
-            _symbolsProvider.RegisterExportedSymbol(exportInfo.IsByName
+            var newSymbol = exportInfo.IsByName
                 ? new ExportedSymbol(stubReference, exportInfo.Name)
-                : new ExportedSymbol(stubReference));
+                : new ExportedSymbol(stubReference);
+            _symbolsProvider.RegisterExportedSymbol(newSymbol, exportInfo.Ordinal);
 
             // Register relocations.
             for (int i = 0; i < thunkStub.Relocations.Count; i++)

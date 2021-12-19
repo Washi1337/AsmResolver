@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
@@ -15,7 +16,11 @@ namespace AsmResolver.DotNet.Code.Native
     {
         private readonly Dictionary<string, IImportedModule> _modules = new();
         private readonly Dictionary<ISegmentReference, BaseRelocation> _relocations = new();
-        private readonly List<ExportedSymbol> _exportedSymbols = new();
+
+        private readonly Dictionary<uint, ExportedSymbol> _fixedExportedSymbols = new();
+        private uint _minExportedOrdinal = uint.MaxValue;
+        private uint _maxExportedOrdinal = 0;
+        private readonly List<ExportedSymbol> _floatingExportedSymbols = new();
 
         /// <summary>
         /// Creates a new instance of the <see cref="NativeSymbolsProvider"/> class.
@@ -123,7 +128,26 @@ namespace AsmResolver.DotNet.Code.Native
         }
 
         /// <inheritdoc />
-        public void RegisterExportedSymbol(ExportedSymbol symbol) => _exportedSymbols.Add(symbol);
+        public void RegisterExportedSymbol(ExportedSymbol symbol) => RegisterExportedSymbol(symbol, null);
+
+        /// <inheritdoc />
+        public void RegisterExportedSymbol(ExportedSymbol symbol, uint? newOrdinal)
+        {
+            if (!newOrdinal.HasValue)
+            {
+                _floatingExportedSymbols.Add(symbol);
+                return;
+            }
+
+            uint ordinal = newOrdinal.Value;
+
+            if (_fixedExportedSymbols.ContainsKey(ordinal))
+                throw new ArgumentException($"Ordinal {ordinal.ToString()} was already claimed by another exported symbol.");
+
+            _fixedExportedSymbols.Add(ordinal, symbol);
+            _minExportedOrdinal = Math.Min(ordinal, _minExportedOrdinal);
+            _maxExportedOrdinal = Math.Max(ordinal, _maxExportedOrdinal);
+        }
 
         /// <summary>
         /// Gets a collection of all imported external modules.
@@ -141,6 +165,63 @@ namespace AsmResolver.DotNet.Code.Native
         /// Gets a collection of all symbols that need to be exported in the final PE image.
         /// </summary>
         /// <returns>The exported symbols.</returns>
-        public IEnumerable<ExportedSymbol> GetExportedSymbols() => _exportedSymbols;
+        public IEnumerable<ExportedSymbol> GetExportedSymbols(out uint baseOrdinal)
+        {
+            baseOrdinal = 1;
+            if (_fixedExportedSymbols.Count == 0 && _floatingExportedSymbols.Count == 0)
+                return Array.Empty<ExportedSymbol>();
+
+            // Check if no fixed symbols at all, then just return the floating exports.
+            if (_fixedExportedSymbols.Count == 0)
+                return _floatingExportedSymbols;
+
+            // Pre-allocate a buffer of symbols.
+            baseOrdinal = _minExportedOrdinal;
+            var result = new ExportedSymbol?[_maxExportedOrdinal - _minExportedOrdinal + 1].ToList();
+
+            // Put in all the symbols with fixed ordinals.
+            foreach (var fixedEntry in _fixedExportedSymbols)
+                result[(int) (fixedEntry.Key - _minExportedOrdinal)] = fixedEntry.Value;
+
+            int slotIndex = (int) _minExportedOrdinal;
+
+            // Prefer filling in gaps for the floating exported symbols.
+            int floatingIndex = 0;
+            for (; floatingIndex < _floatingExportedSymbols.Count && slotIndex < result.Count; floatingIndex++)
+            {
+                var floatingEntry = _floatingExportedSymbols[floatingIndex];
+                while (slotIndex < result.Count && result[slotIndex] is not null)
+                    slotIndex++;
+                if (slotIndex < result.Count)
+                    result[slotIndex] = floatingEntry;
+            }
+
+            // Are there still floating symbols left?
+            if (floatingIndex != _floatingExportedSymbols.Count)
+            {
+                // Prefer inserting the remainder before first ordinal, and just decrease base ordinal.
+                int insertBeforeCount = Math.Min((int) _minExportedOrdinal - 1,
+                    _floatingExportedSymbols.Count - floatingIndex);
+                if (insertBeforeCount > 0)
+                {
+                    baseOrdinal -= (uint) insertBeforeCount;
+                    result.InsertRange(0, new ExportedSymbol?[insertBeforeCount]);
+
+                    slotIndex = 0;
+                    for (; floatingIndex < insertBeforeCount; floatingIndex++)
+                        result[slotIndex++] = _floatingExportedSymbols[floatingIndex];
+                }
+
+                // If we still have anything left, add them to the end.
+                for (; floatingIndex < _floatingExportedSymbols.Count; floatingIndex++)
+                    result.Add(_floatingExportedSymbols[floatingIndex]);
+            }
+
+            // We might still have gaps in the table, fill those up with dummy symbols.
+            for (slotIndex = 0; slotIndex < result.Count; slotIndex++)
+                result[slotIndex] ??= new ExportedSymbol(SegmentReference.Null);
+
+            return result!;
+        }
     }
 }

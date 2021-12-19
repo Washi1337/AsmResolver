@@ -34,5 +34,12 @@ namespace AsmResolver.DotNet.Code.Native
         /// </summary>
         /// <param name="symbol">The symbol to export.</param>
         void RegisterExportedSymbol(ExportedSymbol symbol);
+
+        /// <summary>
+        /// Adds an exported symbol to the prototype.
+        /// </summary>
+        /// <param name="symbol">The symbol to export.</param>
+        /// <param name="newOrdinal"></param>
+        void RegisterExportedSymbol(ExportedSymbol symbol, uint? newOrdinal);
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -11,6 +12,7 @@ using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.DotNet.VTableFixups;
+using AsmResolver.PE.Exports;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.Tests.Runners;
 using Xunit;
@@ -330,5 +332,173 @@ namespace AsmResolver.DotNet.Tests
             }
         }
 
+        [Fact]
+        public void SingleExportWithOrdinalShouldUpdateBaseOrdinal()
+        {
+            const uint ordinal = 100u;
+
+            var module = CreateDummyLibraryWithExport(1, false).ManifestModule!;
+
+            var method = module.GetModuleType()!.Methods.First(m => m.Name == "MyMethod0");
+            method.ExportInfo = new UnmanagedExportInfo(ordinal, "MyMethod0", VTableType.VTable32Bit);
+
+            var image = module.ToPEImage();
+            Assert.NotNull(image.Exports);
+            var entry = Assert.Single(image.Exports.Entries);
+            Assert.Equal(ordinal, entry.Ordinal);
+            Assert.Equal(ordinal, image.Exports.BaseOrdinal);
+        }
+
+        [Theory]
+        [InlineData(new[] {0, 1, 2})]
+        [InlineData(new[] {2, 1, 0})]
+        [InlineData(new[] {1, 0, 2})]
+        public void MultipleExportsWithFixedOrdinalInSequenceShouldUpdateBaseOrdinal(int[] order)
+        {
+            string[] names =
+            {
+                "MyMethod0",
+                "MyMethod1",
+                "MyMethod2",
+            };
+            const uint baseOrdinal = 100u;
+
+            var module = CreateDummyLibraryWithExport(3, false).ManifestModule!;
+
+            var methods = module.GetModuleType()!.Methods;
+            var method1 = methods.First(m => m.Name == names[order[0]]);
+            var method2 = methods.First(m => m.Name == names[order[1]]);
+            var method3 = methods.First(m => m.Name == names[order[2]]);
+            method1.ExportInfo = new UnmanagedExportInfo(baseOrdinal, names[order[0]], VTableType.VTable32Bit);
+            method2.ExportInfo = new UnmanagedExportInfo(baseOrdinal + 1, names[order[1]], VTableType.VTable32Bit);
+            method3.ExportInfo = new UnmanagedExportInfo(baseOrdinal + 2, names[order[2]], VTableType.VTable32Bit);
+
+            var image = module.ToPEImage();
+            Assert.NotNull(image.Exports);
+            Assert.Equal(3, image.Exports.Entries.Count);
+            Assert.Equal(baseOrdinal, image.Exports.Entries[0].Ordinal);
+            Assert.Equal(names[order[0]], image.Exports.Entries[0].Name);
+            Assert.Equal(baseOrdinal + 1, image.Exports.Entries[1].Ordinal);
+            Assert.Equal(names[order[1]], image.Exports.Entries[1].Name);
+            Assert.Equal(baseOrdinal + 2, image.Exports.Entries[2].Ordinal);
+            Assert.Equal(names[order[2]], image.Exports.Entries[2].Name);
+            Assert.Equal(baseOrdinal, image.Exports.BaseOrdinal);
+        }
+
+        [Fact]
+        public void PreferInsertingFloatingExportsBeforeFixedExports()
+        {
+            const uint ordinal = 100u;
+
+            var module = CreateDummyLibraryWithExport(2, false).ManifestModule!;
+
+            var methods = module.GetModuleType()!.Methods;
+            var method1 = methods.First(m => m.Name == "MyMethod0");
+            var method2 = methods.First(m => m.Name == "MyMethod1");
+            method1.ExportInfo = new UnmanagedExportInfo(ordinal, "MyMethod0", VTableType.VTable32Bit);
+            method2.ExportInfo = new UnmanagedExportInfo("MyMethod1", VTableType.VTable32Bit);
+
+            var image = module.ToPEImage();
+            Assert.NotNull(image.Exports);
+            Assert.Equal(2, image.Exports.Entries.Count);
+            Assert.Equal("MyMethod1", image.Exports.Entries[0].Name);
+            Assert.Equal("MyMethod0", image.Exports.Entries[1].Name);
+            Assert.Equal(ordinal - 1, image.Exports.BaseOrdinal);
+        }
+
+        [Fact]
+        public void AppendFloatingExportsToEndIfNoSpaceBeforeFixedExports()
+        {
+            const uint ordinal = 2u;
+
+            var module = CreateDummyLibraryWithExport(4, false).ManifestModule!;
+
+            var methods = module.GetModuleType()!.Methods;
+            var method1 = methods.First(m => m.Name == "MyMethod0");
+            var method2 = methods.First(m => m.Name == "MyMethod1");
+            var method3 = methods.First(m => m.Name == "MyMethod2");
+            var method4 = methods.First(m => m.Name == "MyMethod3");
+            method1.ExportInfo = new UnmanagedExportInfo(ordinal, "MyMethod0", VTableType.VTable32Bit);
+            method2.ExportInfo = new UnmanagedExportInfo("MyMethod1", VTableType.VTable32Bit);
+            method3.ExportInfo = new UnmanagedExportInfo("MyMethod2", VTableType.VTable32Bit);
+            method4.ExportInfo = new UnmanagedExportInfo("MyMethod3", VTableType.VTable32Bit);
+
+            var image = module.ToPEImage();
+            Assert.NotNull(image.Exports);
+            Assert.Equal(4, image.Exports.Entries.Count);
+            Assert.Equal("MyMethod0", image.Exports.Entries[1].Name);
+            Assert.Equal(1u, image.Exports.BaseOrdinal);
+        }
+
+        [Fact]
+        public void PreferInsertingFloatingExportsInGapsBetweenFixedExports()
+        {
+            const uint ordinal1 = 1u;
+            const uint ordinal2 = 3u;
+
+            var module = CreateDummyLibraryWithExport(3, false).ManifestModule!;
+
+            var methods = module.GetModuleType()!.Methods;
+            var method1 = methods.First(m => m.Name == "MyMethod0");
+            var method2 = methods.First(m => m.Name == "MyMethod1");
+            var method3 = methods.First(m => m.Name == "MyMethod2");
+            method1.ExportInfo = new UnmanagedExportInfo(ordinal1, "MyMethod0", VTableType.VTable32Bit);
+            method2.ExportInfo = new UnmanagedExportInfo(ordinal2, "MyMethod1", VTableType.VTable32Bit);
+            method3.ExportInfo = new UnmanagedExportInfo( "MyMethod2", VTableType.VTable32Bit);
+
+            var image = module.ToPEImage();
+            Assert.NotNull(image.Exports);
+            Assert.Equal("MyMethod0", image.Exports.Entries[0].Name);
+            Assert.Equal("MyMethod2", image.Exports.Entries[1].Name);
+            Assert.Equal("MyMethod1", image.Exports.Entries[2].Name);
+            Assert.Equal(ordinal1, image.Exports.BaseOrdinal);
+        }
+
+        [Fact]
+        public void FillUpExportGapsWithDummyExports()
+        {
+            const uint ordinal1 = 25u;
+            const uint ordinal2 = 50u;
+            const uint ordinal3 = 75u;
+
+            var module = CreateDummyLibraryWithExport(3, false).ManifestModule!;
+
+            var methods = module.GetModuleType()!.Methods;
+            var method1 = methods.First(m => m.Name == "MyMethod0");
+            var method2 = methods.First(m => m.Name == "MyMethod1");
+            var method3 = methods.First(m => m.Name == "MyMethod2");
+            method1.ExportInfo = new UnmanagedExportInfo(ordinal1, "MyMethod0", VTableType.VTable32Bit);
+            method2.ExportInfo = new UnmanagedExportInfo(ordinal2, "MyMethod1", VTableType.VTable32Bit);
+            method3.ExportInfo = new UnmanagedExportInfo(ordinal3, "MyMethod2", VTableType.VTable32Bit);
+
+            var image = module.ToPEImage();
+            Assert.NotNull(image.Exports);
+            Assert.Equal(51, image.Exports.Entries.Count);
+
+            foreach (var entry in image.Exports.Entries)
+            {
+                switch (entry.Ordinal)
+                {
+                    case ordinal1:
+                        Assert.Equal("MyMethod0", entry.Name);
+                        Assert.NotNull(entry.Address.GetSegment());
+                        break;
+                    case ordinal2:
+                        Assert.Equal("MyMethod1", entry.Name);
+                        Assert.NotNull(entry.Address.GetSegment());
+                        break;
+                    case ordinal3:
+                        Assert.Equal("MyMethod2", entry.Name);
+                        Assert.NotNull(entry.Address.GetSegment());
+                        break;
+                    default:
+                        Assert.False(entry.IsByName);
+                        Assert.Null(entry.Address.GetSegment());
+                        break;
+                }
+            }
+
+            Assert.Equal(ordinal1, image.Exports.BaseOrdinal);
+        }
     }
 }

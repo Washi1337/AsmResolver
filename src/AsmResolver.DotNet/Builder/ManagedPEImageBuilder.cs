@@ -83,12 +83,15 @@ namespace AsmResolver.DotNet.Builder
                     image.Imports.Add(import);
 
                 // Copy any collected exported native symbols over to the image.
-                var exportedSymbols = symbolProvider.GetExportedSymbols().ToArray();
+                var exportedSymbols = symbolProvider.GetExportedSymbols(out uint baseOrdinal).ToArray();
                 if (exportedSymbols.Length > 0)
                 {
                     image.Exports = new ExportDirectory(!Utf8String.IsNullOrEmpty(module.Name)
                         ? module.Name
-                        : string.Empty);
+                        : string.Empty)
+                    {
+                        BaseOrdinal = baseOrdinal
+                    };
 
                     foreach (var export in exportedSymbols)
                         image.Exports.Entries.Add(export);
