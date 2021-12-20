@@ -32,8 +32,18 @@ namespace AsmResolver.PE.Platforms
         {
             platform = machineType switch
             {
-                MachineType.I386 => I386Platform.Instance,
-                MachineType.Amd64 => Amd64Platform.Instance,
+                MachineType.I386
+                    or MachineType.I386DotNetApple
+                    or MachineType.I386DotNetLinux
+                    or MachineType.I386DotNetSun
+                    or MachineType.I386DotNetFreeBsd
+                    or MachineType.I386DotNetNetBsd => I386Platform.Instance,
+                MachineType.Amd64
+                    or MachineType.Amd64DotNetApple
+                    or MachineType.Amd64DotNetLinux
+                    or MachineType.Amd64DotNetSun
+                    or MachineType.Amd64DotNetFreeBsd
+                    or MachineType.Amd64DotNetNetBsd => Amd64Platform.Instance,
                 _ => null
             };
 
