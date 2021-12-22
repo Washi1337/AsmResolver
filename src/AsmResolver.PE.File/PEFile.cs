@@ -137,6 +137,16 @@ namespace AsmResolver.PE.File
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static unsafe PEFile FromModuleBaseAddress(IntPtr hInstance)
+            => FromModuleBaseAddress(hInstance, PEMappingMode.Mapped);
+
+        /// <summary>
+        /// Reads a PE file starting at the provided module base address (HINSTANCE).
+        /// </summary>
+        /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
+        /// <param name="mode">Indicates how the input PE file is mapped.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static unsafe PEFile FromModuleBaseAddress(IntPtr hInstance, PEMappingMode mode)
         {
             // Perform some minimal parsing to get the size of the image from the optional header.
             uint nextHeaderOffset = *(uint*) ((byte*) hInstance + DosHeader.NextHeaderFieldOffset);
@@ -145,7 +155,7 @@ namespace AsmResolver.PE.File
                 + sizeof(uint)
                 + FileHeader.FileHeaderSize
                 + OptionalHeader.OptionalHeaderSizeOfImageFieldOffset);
-            return FromDataSource(new UnmanagedDataSource(hInstance, sizeOfImage), PEMappingMode.Mapped);
+            return FromDataSource(new UnmanagedDataSource(hInstance, sizeOfImage), mode);
         }
 
         /// <summary>
