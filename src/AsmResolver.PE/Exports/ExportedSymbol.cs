@@ -6,7 +6,7 @@ namespace AsmResolver.PE.Exports
     /// <summary>
     /// Represents a single symbol that is exported by a dynamically linked library.
     /// </summary>
-    public class ExportedSymbol : IOwnedCollectionElement<IExportDirectory>
+    public class ExportedSymbol : IOwnedCollectionElement<IExportDirectory>, ISymbol
     {
         /// <summary>
         /// Creates a new symbol that is exported by ordinal.
@@ -97,5 +97,8 @@ namespace AsmResolver.PE.Exports
                 ? displayName
                 : $"{ParentDirectory.Name}!{displayName}";
         }
+
+        /// <inheritdoc />
+        public ISegmentReference GetReference() => Address;
     }
 }

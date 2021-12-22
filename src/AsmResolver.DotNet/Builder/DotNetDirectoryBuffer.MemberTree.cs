@@ -213,6 +213,10 @@ namespace AsmResolver.DotNet.Builder
 
                 var token = table.Add(row);
                 _tokenMapping.Register(method, token);
+
+                // If the method is supposed to be exported as an unmanaged symbol, register it.
+                if (method.ExportInfo.HasValue)
+                    VTableFixups.MapTokenToExport(method.ExportInfo.Value, token);
             }
         }
 

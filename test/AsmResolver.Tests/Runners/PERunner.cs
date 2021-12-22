@@ -14,7 +14,7 @@ namespace AsmResolver.Tests.Runners
         {
             BasePath = basePath ?? throw new ArgumentNullException(nameof(basePath));
         }
-        
+
         public string BasePath
         {
             get;
@@ -30,7 +30,7 @@ namespace AsmResolver.Tests.Runners
             [CallerMemberName] string testMethod = "Test")
         {
             string fullPath = Rebuild(peFile, fileName, testClass, testMethod);
-            string actualOutput = RunAndCaptureOutput(fullPath, timeout);
+            string actualOutput = RunAndCaptureOutput(fullPath, null, timeout);
             Assert.Equal(expectedOutput, actualOutput);
         }
 
@@ -58,19 +58,19 @@ namespace AsmResolver.Tests.Runners
             return fullPath;
         }
 
-        public string RunAndCaptureOutput(string filePath, int timeout=5000)
+        public string RunAndCaptureOutput(string filePath, string[]? arguments = null, int timeout = 5000)
         {
-            var info = GetStartInfo(filePath);
+            var info = GetStartInfo(filePath, arguments);
             info.RedirectStandardError = true;
             info.RedirectStandardOutput = true;
             info.UseShellExecute = false;
             info.WorkingDirectory = Path.GetDirectoryName(filePath);
-         
+
             using var process = new Process();
-            
+
             process.StartInfo = info;
             process.Start();
-            
+
             if (!process.WaitForExit(timeout))
             {
                 try
@@ -81,12 +81,11 @@ namespace AsmResolver.Tests.Runners
                 {
                     // Process has already exited.
                 }
-                
+
                 throw new TimeoutException();
             }
 
             process.WaitForExit();
-
 
             if (process.ExitCode != 0)
             {
@@ -97,6 +96,6 @@ namespace AsmResolver.Tests.Runners
             return process.StandardOutput.ReadToEnd();
         }
 
-        protected abstract ProcessStartInfo GetStartInfo(string filePath);
+        protected abstract ProcessStartInfo GetStartInfo(string filePath, string[]? arguments);
     }
 }
