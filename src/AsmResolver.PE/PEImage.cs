@@ -85,7 +85,7 @@ namespace AsmResolver.PE
             FromFile(PEFile.FromModuleBaseAddress(hInstance), readerParameters);
 
         /// <summary>
-        /// Reads a mapped PE image starting at the provided module base address (HINSTANCE).
+        /// Reads a PE image starting at the provided module base address (HINSTANCE).
         /// </summary>
         /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
         /// <param name="mode">Indicates how the input PE file is mapped.</param>

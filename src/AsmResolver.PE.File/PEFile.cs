@@ -140,7 +140,7 @@ namespace AsmResolver.PE.File
             => FromModuleBaseAddress(hInstance, PEMappingMode.Mapped);
 
         /// <summary>
-        /// Reads a mapped PE file starting at the provided module base address (HINSTANCE).
+        /// Reads a PE file starting at the provided module base address (HINSTANCE).
         /// </summary>
         /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
         /// <param name="mode">Indicates how the input PE file is mapped.</param>
