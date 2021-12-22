@@ -803,9 +803,12 @@ namespace AsmResolver.DotNet
         protected virtual MethodSemantics? GetSemantics() => null;
 
         /// <summary>
-        ///
+        /// Obtains the unmanaged export information associated to the method (if available).
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The export information or <c>null</c> if the method was not exported as a native symbol.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="ExportInfo"/> property.
+        /// </remarks>
         protected virtual UnmanagedExportInfo? GetExportInfo() => null;
 
         /// <inheritdoc />

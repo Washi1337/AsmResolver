@@ -46,7 +46,7 @@ namespace AsmResolver.PE.DotNet.VTableFixups
 
             for (int i = 0; i < entries; i++)
             {
-                vtable.Tokens.Add(vtable.Tokens.Type.HasFlag(VTableType.VTable32Bit)
+                vtable.Tokens.Add((vtable.Tokens.Type & VTableType.VTable32Bit) != 0
                     ? new MetadataToken(tableReader.ReadUInt32())
                     : new MetadataToken((uint) tableReader.ReadInt64()));
             }

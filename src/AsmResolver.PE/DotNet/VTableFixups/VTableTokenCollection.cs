@@ -54,9 +54,9 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         /// <inheritdoc />
         public uint GetPhysicalSize() =>
             (uint) Count *
-            (uint) (Type.HasFlag(VTableType.VTable32Bit)
-                ? 4
-                : 8);
+            (uint) ((Type & VTableType.VTable32Bit) != 0
+                ? sizeof(uint)
+                : sizeof(ulong));
 
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)

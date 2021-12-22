@@ -35,6 +35,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Creates a new instance of the export information, exporting the method by name.
         /// </summary>
+        /// <param name="ordinal">The new ordinal to use.</param>
         /// <param name="name">The unmanaged name, as it appears in the export directory.</param>
         /// <param name="vTableType">The type of VTable fixup to apply.</param>
         public UnmanagedExportInfo(uint ordinal, string name, VTableType vTableType)
@@ -45,7 +46,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// When <see cref="IsByOrdinal"/> is <c>true</c>, gets the ordinal that is used to export the method.
+        /// When <see cref="HasFixedOrdinal"/> is <c>true</c>, gets the ordinal that is used to export the method.
         /// </summary>
         public uint? Ordinal
         {
@@ -60,6 +61,9 @@ namespace AsmResolver.DotNet
             get;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the export is fixed to an ordinal.
+        /// </summary>
         [MemberNotNullWhen(true, nameof(Ordinal))]
         public bool HasFixedOrdinal => Ordinal.HasValue;
 

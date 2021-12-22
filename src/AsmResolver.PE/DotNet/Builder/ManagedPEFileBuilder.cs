@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.Code;
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.Debug.Builder;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
@@ -320,8 +321,8 @@ namespace AsmResolver.PE.DotNet.Builder
 
         private static void CreateDebugDirectory(IPEImage image, ManagedPEBuilderContext context)
         {
-            foreach (var entry in image.DebugData)
-                context.DebugDirectory.AddEntry(entry);
+            for (int i = 0; i < image.DebugData.Count; i++)
+                context.DebugDirectory.AddEntry(image.DebugData[i]);
         }
 
         /// <summary>

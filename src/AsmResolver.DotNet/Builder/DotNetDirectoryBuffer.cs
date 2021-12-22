@@ -105,7 +105,7 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <summary>
-        /// Gets the buffer used to store VTable fixups.
+        /// Gets the buffer used to store VTable fixups and register unmanaged symbols.
         /// </summary>
         public VTableFixupsBuffer VTableFixups
         {

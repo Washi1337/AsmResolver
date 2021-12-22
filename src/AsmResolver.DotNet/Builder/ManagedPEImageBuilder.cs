@@ -108,7 +108,7 @@ namespace AsmResolver.DotNet.Builder
             }
             catch (Exception ex)
             {
-                context.DiagnosticBag.Exceptions.Add(ex);
+                context.DiagnosticBag.RegisterException(ex);
                 context.DiagnosticBag.MarkAsFatal();
             }
 
