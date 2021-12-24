@@ -23,7 +23,13 @@ namespace AsmResolver.IO
         public ulong Offset
         {
             get => (uint) _stream.Position;
-            set => _stream.Position = (long) value;
+            set
+            {
+                // Check if position actually changed before actually setting. If we don't do this, this can cause
+                // performance issues on some systems. See https://github.com/Washi1337/AsmResolver/issues/232
+                if (_stream.Position != (long) value)
+                    _stream.Position = (long) value;
+            }
         }
 
         /// <inheritdoc />
