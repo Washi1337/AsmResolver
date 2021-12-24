@@ -274,7 +274,7 @@ namespace AsmResolver.DotNet
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void Write(string filePath, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            string? directory = Path.GetDirectoryName(filePath);
+            string? directory = Path.GetDirectoryName(Path.GetFullPath(filePath));
             if (directory is null || !Directory.Exists(directory))
                 throw new DirectoryNotFoundException();
 
