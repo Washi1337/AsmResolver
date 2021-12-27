@@ -1,4 +1,4 @@
-Generic Methods
+Methods
 ===============
 
 Non-Generic Methods on Generic Types

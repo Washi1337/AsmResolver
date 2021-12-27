@@ -55,7 +55,7 @@ Table of Contents:
    dotnet/member-tree
    dotnet/type-signatures
    dotnet/importing
-   dotnet/generic-methods
+   dotnet/methods
    dotnet/managed-method-bodies
    dotnet/unmanaged-method-bodies
    dotnet/managed-resources
