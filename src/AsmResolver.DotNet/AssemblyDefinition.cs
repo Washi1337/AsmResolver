@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents an assembly of self-describing modules of an executable file hosted by a common language runtime (CLR).
     /// </summary>
-    public class AssemblyDefinition : AssemblyDescriptor, IHasSecurityDeclaration
+    public class AssemblyDefinition : AssemblyDescriptor, IModuleProvider, IHasSecurityDeclaration
     {
         private IList<ModuleDefinition>? _modules;
         private IList<SecurityDeclaration>? _securityDeclarations;
@@ -132,6 +132,8 @@ namespace AsmResolver.DotNet
         /// Gets the main module of the .NET assembly containing the assembly's manifest.
         /// </summary>
         public ModuleDefinition? ManifestModule => Modules.Count > 0 ? Modules[0] : null;
+
+        ModuleDefinition? IModuleProvider.Module => ManifestModule;
 
         /// <summary>
         /// Gets a collection of modules that this .NET assembly defines.

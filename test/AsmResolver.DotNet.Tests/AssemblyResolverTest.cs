@@ -168,7 +168,6 @@ namespace AsmResolver.DotNet.Tests
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
 
-            var assembly = new AssemblyDefinition("SomeAssembly", new Version(1, 0, 0, 0));
             var module = new ModuleDefinition("SomeAssembly", legacy
                 ? KnownCorLibs.MsCorLib_v2_0_0_0
                 : KnownCorLibs.MsCorLib_v4_0_0_0);
@@ -190,7 +189,6 @@ namespace AsmResolver.DotNet.Tests
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
 
-            var assembly = new AssemblyDefinition("SomeAssembly", new Version(1, 0, 0, 0));
             var module = new ModuleDefinition("SomeAssembly", legacy
                 ? KnownCorLibs.MsCorLib_v2_0_0_0
                 : KnownCorLibs.MsCorLib_v4_0_0_0);

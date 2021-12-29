@@ -118,17 +118,10 @@ namespace AsmResolver.DotNet
             bool is32BitRequired;
 
             // Try infer from declaring module which GAC directory would be preferred.
-            var declaringModule = assembly switch
+            if (assembly is IModuleProvider {Module: { } module})
             {
-                IModuleProvider { Module: { } module } => module,
-                AssemblyDefinition definition => definition.ManifestModule,
-                _ => null
-            };
-
-            if (declaringModule is not null)
-            {
-                is32BitPreferred = declaringModule.IsBit32Preferred;
-                is32BitRequired = declaringModule.IsBit32Required;
+                is32BitPreferred = module.IsBit32Preferred;
+                is32BitRequired = module.IsBit32Required;
             }
             else
             {
