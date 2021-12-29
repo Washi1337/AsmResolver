@@ -160,5 +160,145 @@ namespace AsmResolver.PE.Tests.Win32Resources
             Assert.Null(data.Contents);
         }
 
+        [Fact]
+        public void GetNonExistingDirectory()
+        {
+            var root = new ResourceDirectory(0u);
+            Assert.Throws<KeyNotFoundException>(() => root.GetDirectory(1));
+            Assert.False(root.TryGetDirectory(1, out _));
+        }
+
+        [Fact]
+        public void GetNonExistingData()
+        {
+            var root = new ResourceDirectory(0u);
+            Assert.Throws<KeyNotFoundException>(() => root.GetData(1));
+            Assert.False(root.TryGetData(1, out _));
+        }
+
+        [Fact]
+        public void GetExistingDirectory()
+        {
+            var root = new ResourceDirectory(0u);
+            var stringDirectory = new ResourceDirectory(ResourceType.String);
+            root.Entries.Add(stringDirectory);
+
+            Assert.Same(stringDirectory, root.GetDirectory(ResourceType.String));
+            Assert.Same(stringDirectory, root.GetDirectory((uint) ResourceType.String));
+            Assert.True(root.TryGetDirectory(ResourceType.String, out var result));
+            Assert.Same(stringDirectory, result);
+            Assert.True(root.TryGetDirectory((uint) ResourceType.String, out result));
+            Assert.Same(stringDirectory, result);
+
+            Assert.Throws<KeyNotFoundException>(() => root.GetData((uint) ResourceType.String));
+            Assert.False(root.TryGetData((uint) ResourceType.String, out _));
+        }
+
+        [Fact]
+        public void GetExistingData()
+        {
+            var root = new ResourceDirectory(0u);
+            var dataEntry = new ResourceData(1234u, new DataSegment(new byte[] { 1, 2, 3, 4 }));
+            root.Entries.Add(dataEntry);
+
+            Assert.Throws<KeyNotFoundException>(() => root.GetDirectory(1234u));
+            Assert.False(root.TryGetDirectory(1234u, out _));
+
+            Assert.Same(dataEntry, root.GetData(1234u));
+            Assert.True(root.TryGetData(1234u, out var result));
+            Assert.Same(dataEntry, result);
+        }
+
+        [Fact]
+        public void AddNewDirectory()
+        {
+            var root = new ResourceDirectory(0u);
+
+            Assert.Empty(root.Entries);
+
+            var directory = new ResourceDirectory(ResourceType.String);
+            root.AddOrReplaceEntry(directory);
+
+            Assert.Same(directory, Assert.Single(root.Entries));
+        }
+
+        [Fact]
+        public void AddSecondDirectory()
+        {
+            var root = new ResourceDirectory(0u)
+            {
+                Entries = { new ResourceDirectory(1234u) }
+            };
+
+            Assert.Single(root.Entries);
+
+            var directory = new ResourceDirectory(5678u);
+            root.AddOrReplaceEntry(directory);
+
+            Assert.Equal(2, root.Entries.Count);
+        }
+
+        [Fact]
+        public void ReplaceDirectoryWithDirectory()
+        {
+            var root = new ResourceDirectory(0u)
+            {
+                Entries = { new ResourceDirectory(1234u) }
+            };
+
+            var oldDirectory = root.GetDirectory(1234u);
+
+            var newDirectory = new ResourceDirectory(1234u);
+            root.AddOrReplaceEntry(newDirectory);
+
+            Assert.NotSame(oldDirectory, root.GetEntry(1234u));
+            Assert.Same(newDirectory, Assert.Single(root.Entries));
+        }
+
+        [Fact]
+        public void ReplaceDirectoryWithData()
+        {
+            var root = new ResourceDirectory(0u)
+            {
+                Entries = { new ResourceDirectory(1234u) }
+            };
+
+            var oldDirectory = root.GetDirectory(1234u);
+
+            var newEntry = new ResourceData(1234u, new DataSegment(new byte[] { 1, 2, 3, 4 }));
+            root.AddOrReplaceEntry(newEntry);
+
+            Assert.NotSame(oldDirectory, root.GetEntry(1234u));
+            Assert.Same(newEntry, Assert.Single(root.Entries));
+        }
+
+        [Fact]
+        public void RemoveNonExistingEntry()
+        {
+            var root = new ResourceDirectory(0u)
+            {
+                Entries = { new ResourceDirectory(1234u) }
+            };
+
+            Assert.False(root.RemoveEntry(5678u));
+            Assert.Single(root.Entries);
+        }
+
+        [Fact]
+        public void RemoveExistingEntry()
+        {
+            var root = new ResourceDirectory(0u)
+            {
+                Entries =
+                {
+                    new ResourceDirectory(1234u),
+                    new ResourceDirectory(5678u)
+                }
+            };
+
+            Assert.True(root.RemoveEntry(1234u));
+            Assert.Single(root.Entries);
+        }
+
     }
 }

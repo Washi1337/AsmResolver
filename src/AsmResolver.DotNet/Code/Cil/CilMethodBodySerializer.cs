@@ -95,7 +95,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 ? BuildFatMethodBody(context, body, code)
                 : BuildTinyMethodBody(code);
 
-            return new SegmentReference(rawBody);
+            return rawBody.ToReference();
         }
 
         private static CilRawMethodBody BuildTinyMethodBody(byte[] code) =>

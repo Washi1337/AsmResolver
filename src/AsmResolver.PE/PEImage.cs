@@ -10,6 +10,7 @@ using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
+using AsmResolver.PE.Tls;
 using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.PE
@@ -26,6 +27,7 @@ namespace AsmResolver.PE
         private IList<BaseRelocation>? _relocations;
         private readonly LazyVariable<IDotNetDirectory?> _dotNetDirectory;
         private IList<DebugDataEntry>? _debugData;
+        private readonly LazyVariable<ITlsDirectory?> _tlsDirectory;
 
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
@@ -70,7 +72,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromModuleBaseAddress(IntPtr hInstance) =>
-            FromModuleBaseAddress(hInstance, new PEReaderParameters());
+            FromModuleBaseAddress(hInstance, PEMappingMode.Mapped, new PEReaderParameters());
 
         /// <summary>
         /// Reads a mapped PE image starting at the provided module base address (HINSTANCE).
@@ -81,6 +83,17 @@ namespace AsmResolver.PE
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromModuleBaseAddress(IntPtr hInstance, PEReaderParameters readerParameters) =>
             FromFile(PEFile.FromModuleBaseAddress(hInstance), readerParameters);
+
+        /// <summary>
+        /// Reads a PE image starting at the provided module base address (HINSTANCE).
+        /// </summary>
+        /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
+        /// <param name="mode">Indicates how the input PE file is mapped.</param>
+        /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
+        /// <returns>The PE image that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static IPEImage FromModuleBaseAddress(IntPtr hInstance, PEMappingMode mode, PEReaderParameters readerParameters) =>
+            FromFile(PEFile.FromModuleBaseAddress(hInstance, mode), readerParameters);
 
         /// <summary>
         /// Reads a PE image from the provided data source.
@@ -160,6 +173,7 @@ namespace AsmResolver.PE
             _resources = new LazyVariable<IResourceDirectory?>(GetResources);
             _exceptions = new LazyVariable<IExceptionDirectory?>(GetExceptions);
             _dotNetDirectory = new LazyVariable<IDotNetDirectory?>(GetDotNetDirectory);
+            _tlsDirectory = new LazyVariable<ITlsDirectory?>(GetTlsDirectory);
         }
 
         /// <inheritdoc />
@@ -280,6 +294,13 @@ namespace AsmResolver.PE
             }
         }
 
+        /// <inheritdoc />
+        public ITlsDirectory? TlsDirectory
+        {
+            get => _tlsDirectory.Value;
+            set => _tlsDirectory.Value = value;
+        }
+
         /// <summary>
         /// Obtains the list of modules that were imported into the PE.
         /// </summary>
@@ -342,5 +363,14 @@ namespace AsmResolver.PE
         /// This method is called upon initialization of the <see cref="DebugData"/> property.
         /// </remarks>
         protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
+
+        /// <summary>
+        /// Obtains the data directory containing the Thread-Local Storage (TLS) data.
+        /// </summary>
+        /// <returns>The data directory.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="TlsDirectory"/> property.
+        /// </remarks>
+        protected virtual ITlsDirectory? GetTlsDirectory() => null;
     }
 }

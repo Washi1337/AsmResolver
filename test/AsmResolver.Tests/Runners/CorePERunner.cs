@@ -27,7 +27,7 @@ namespace AsmResolver.Tests.Runners
 
         protected override string ExecutableExtension => ".dll";
 
-        protected override ProcessStartInfo GetStartInfo(string filePath)
+        protected override ProcessStartInfo GetStartInfo(string filePath, string[]? arguments)
         {
             string deps = _template
                     .Replace("%tfm%", "netcoreapp3.1")
@@ -37,14 +37,22 @@ namespace AsmResolver.Tests.Runners
 
             File.WriteAllText(Path.ChangeExtension(filePath, ".runtimeconfig.json"), deps);
 
-            return new ProcessStartInfo
+            var result = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                ArgumentList = { filePath },
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             };
+
+            result.ArgumentList.Add(filePath);
+            if (arguments is not null)
+            {
+                foreach (string argument in arguments)
+                    result.ArgumentList.Add(argument);
+            }
+
+            return result;
         }
     }
 }

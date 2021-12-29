@@ -13,7 +13,7 @@ namespace AsmResolver.PE.Code
         /// Creates a new segment of native code.
         /// </summary>
         /// <param name="code">The raw native code stream.</param>
-        public CodeSegment( byte[] code)
+        public CodeSegment(byte[] code)
         {
             Code = code;
         }
@@ -83,6 +83,9 @@ namespace AsmResolver.PE.Code
                     break;
                 case AddressFixupType.Relative32BitAddress:
                     writer.WriteInt32((int) (targetRva - (writerRva + 4)));
+                    break;
+                case AddressFixupType.Absolute64BitAddress:
+                    writer.WriteUInt64(ImageBase + targetRva);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

@@ -7,6 +7,9 @@ using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.VTableFixups;
+using AsmResolver.PE.Exports;
+using AsmResolver.PE.Platforms;
 
 namespace AsmResolver.DotNet.Serialized
 {
@@ -34,6 +37,8 @@ namespace AsmResolver.DotNet.Serialized
         private OneToOneRelation<MetadataToken, uint>? _fieldRvas;
         private OneToOneRelation<MetadataToken, uint>? _fieldMarshals;
         private OneToOneRelation<MetadataToken, uint>? _fieldLayouts;
+
+        private Dictionary<MetadataToken, UnmanagedExportInfo>? _exportInfos;
 
         [MemberNotNull(nameof(_typeDefTree))]
         private void EnsureTypeDefinitionTreeInitialized()
@@ -581,6 +586,75 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureFieldLayoutsInitialized();
             return _fieldLayouts.GetValue(fieldToken);
+        }
+
+        [MemberNotNull(nameof(_exportInfos))]
+        private void EnsureExportInfosInitialized()
+        {
+            if (_exportInfos is null)
+                Interlocked.CompareExchange(ref _exportInfos, InitializeExportInfos(), null);
+        }
+
+        private Dictionary<MetadataToken, UnmanagedExportInfo> InitializeExportInfos()
+        {
+            var result = new Dictionary<MetadataToken, UnmanagedExportInfo>();
+
+            // Get relevant data directories.
+            var exportDirectory = ReaderContext.Image.Exports;
+            if (exportDirectory is null)
+                return result;
+
+            var vtableDirectory = ReaderContext.Image.DotNetDirectory?.VTableFixups;
+            if (vtableDirectory is null || vtableDirectory.Count == 0)
+                return result;
+
+            // Check if PE machine type is supported.
+            if (!Platform.TryGet(ReaderContext.Image.MachineType, out var platform))
+                return result;
+
+            // Try to extract from all thunks the VA that was referenced in the stub code.
+            // This is not guaranteed to work since an unmanaged export does not necessarily have to be
+            // using the exact same code every time. However, every .NET compiler or assembler always
+            // emits a thunk stub that is very similar, which we can pattern match.
+            var exportedThunks = new Dictionary<uint, ExportedSymbol>();
+            for (int i = 0; i < exportDirectory.Entries.Count; i++)
+            {
+                var export = exportDirectory.Entries[i];
+                if (export.Address.CanRead)
+                {
+                    var reader = export.Address.CreateReader();
+                    if (platform.TryExtractThunkAddress(ReaderContext.Image, reader, out uint thunkRva))
+                        exportedThunks.Add(thunkRva, export);
+                }
+            }
+
+            // Map the extracted addresses to vtable slots, and assign export infos.
+            for (int i = 0; i < vtableDirectory.Count; i++)
+            {
+                var fixup = vtableDirectory[i];
+                var tokens = fixup.Tokens;
+
+                for (int j = 0; j < tokens.Count; j++)
+                {
+                    uint rva = tokens.Rva + tokens.GetOffsetToIndex(j);
+                    if (exportedThunks.TryGetValue(rva, out var symbol))
+                    {
+                        result[tokens[j]] = symbol.IsByName
+                            ? new UnmanagedExportInfo(symbol.Name, tokens.Type)
+                            : new UnmanagedExportInfo((ushort) symbol.Ordinal, tokens.Type);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        internal UnmanagedExportInfo? GetExportInfo(MetadataToken methodToken)
+        {
+            EnsureExportInfosInitialized();
+            return _exportInfos.TryGetValue(methodToken, out var result)
+                ? result
+                : null;
         }
     }
 }

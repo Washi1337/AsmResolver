@@ -39,7 +39,9 @@ Table of Contents:
    peimage/win32resources
    peimage/exceptions
    peimage/debug
+   peimage/tls
    peimage/dotnet
+   peimage/pe-building
 
 
 .. toctree::
@@ -55,6 +57,7 @@ Table of Contents:
    dotnet/importing
    dotnet/managed-method-bodies
    dotnet/unmanaged-method-bodies
+   dotnet/managed-resources
    dotnet/cloning
    dotnet/token-allocation
    dotnet/type-memory-layout

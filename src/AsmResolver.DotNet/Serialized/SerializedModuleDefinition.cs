@@ -324,17 +324,14 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IManagedEntrypoint? GetManagedEntrypoint()
         {
-            if ((DotNetDirectory.Flags & DotNetDirectoryFlags.ILLibrary) == 0)
+            if ((DotNetDirectory.Flags & DotNetDirectoryFlags.NativeEntrypoint) != 0)
             {
-                if ((DotNetDirectory.Flags & DotNetDirectoryFlags.NativeEntrypoint) != 0)
-                {
-                    // TODO: native entrypoints.
-                    return null;
-                }
-
-                if (DotNetDirectory.Entrypoint != 0)
-                    return LookupMember(DotNetDirectory.Entrypoint) as IManagedEntrypoint;
+                // TODO: native entrypoints.
+                return null;
             }
+
+            if (DotNetDirectory.Entrypoint != 0)
+                return LookupMember(DotNetDirectory.Entrypoint) as IManagedEntrypoint;
 
             return null;
         }

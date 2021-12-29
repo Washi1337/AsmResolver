@@ -24,6 +24,15 @@ namespace AsmResolver.PE.DotNet.Cil
         {
         }
 
+        /// <summary>
+        /// Creates a new method body using a buffer of assembled CIL instructions.
+        /// </summary>
+        /// <param name="code">The buffer containing the raw CIL instructions.</param>
+        public CilRawTinyMethodBody(IReadableSegment code)
+            : base(code)
+        {
+        }
+
         /// <inheritdoc />
         public override bool IsFat => false;
 
@@ -47,13 +56,17 @@ namespace AsmResolver.PE.DotNet.Cil
                 return null;
             }
 
-            int codeSize = (byte) flag >> 2;
-            byte[] code = new byte[codeSize];
-            reader.ReadBytes(code, 0, codeSize);
-
-            var methodBody = new CilRawTinyMethodBody(code);
+            uint codeSize = (uint) flag >> 2;
+            var methodBody = new CilRawTinyMethodBody(reader.ReadSegment(codeSize));
             methodBody.UpdateOffsets(fileOffset, rva);
             return methodBody;
+        }
+
+        /// <inheritdoc />
+        public override void UpdateOffsets(ulong newOffset, uint newRva)
+        {
+            base.UpdateOffsets(newOffset, newRva);
+            Code.UpdateOffsets(newOffset + 1, newRva + 1);
         }
 
         /// <inheritdoc />

@@ -60,7 +60,7 @@ namespace AsmResolver.PE.File
 
                 (ulong offset, uint size) = MappingMode switch
                 {
-                    PEMappingMode.Unmapped => (header.PointerToRawData, header.SizeOfRawData),
+                    PEMappingMode.Unmapped => (_reader.StartOffset + header.PointerToRawData, header.SizeOfRawData),
                     PEMappingMode.Mapped => (_reader.StartOffset + header.VirtualAddress, header.VirtualSize),
                     _ => throw new ArgumentOutOfRangeException()
                 };

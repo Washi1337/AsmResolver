@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -36,6 +37,14 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
+        protected override void InsertItem(int index, MetadataToken item)
+        {
+            if (Count >= 0xFFFF)
+                throw new InvalidOperationException("Number of VTable tokens exceeds the maximum of 65535.");
+            base.InsertItem(index, item);
+        }
+
+        /// <inheritdoc />
         public void UpdateOffsets(ulong newOffset, uint newRva)
         {
             Offset = newOffset;
@@ -45,15 +54,16 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         /// <inheritdoc />
         public uint GetPhysicalSize() =>
             (uint) Count *
-            (uint) (Type.HasFlag(VTableType.VTable32Bit)
-                ? 4
-                : 8);
+            (uint) ((Type & VTableType.VTable32Bit) != 0
+                ? sizeof(uint)
+                : sizeof(ulong));
 
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
-            foreach (var token in Items)
+            for (int i = 0; i < Items.Count; i++)
             {
+                var token = Items[i];
                 if ((Type & VTableType.VTable32Bit) != 0)
                     writer.WriteUInt32(token.ToUInt32());
                 else
@@ -63,5 +73,26 @@ namespace AsmResolver.PE.DotNet.VTableFixups
 
         /// <inheritdoc />
         public uint GetVirtualSize() => GetPhysicalSize();
+
+        /// <summary>
+        /// Constructs a reference to an element within the collection.
+        /// </summary>
+        /// <param name="index">The index of the element to reference.</param>
+        /// <returns>The reference.</returns>
+        public ISegmentReference GetReferenceToIndex(int index) => this.ToReference((int) GetOffsetToIndex(index));
+
+        /// <summary>
+        /// Gets the byte offset to an element within the collection that is relative to the start of the list.
+        /// </summary>
+        /// <param name="index">The index of the element to reference.</param>
+        /// <returns>The offset.</returns>
+        public uint GetOffsetToIndex(int index)
+        {
+            int entrySize = (Type & VTableType.VTable32Bit) != 0
+                ? sizeof(uint)
+                : sizeof(ulong);
+
+            return (uint) (index * entrySize);
+        }
     }
 }

@@ -91,11 +91,10 @@ namespace AsmResolver
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
-            ulong start = writer.Offset;
             for (int i = 0; i < _items.Count; i++)
             {
                 var current = _items[i];
-                writer.Offset = current.Segment.Offset - Offset + start;
+                writer.Align(current.Alignment);
                 current.Segment.Write(writer);
             }
         }

@@ -10,15 +10,23 @@ namespace AsmResolver.Tests.Runners
 
         protected override string ExecutableExtension => ".exe";
 
-        protected override ProcessStartInfo GetStartInfo(string filePath)
+        protected override ProcessStartInfo GetStartInfo(string filePath, string[]? arguments)
         {
-            return new ProcessStartInfo
+            var info = new ProcessStartInfo
             {
                 FileName = filePath,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             };
+
+            if (arguments is not null)
+            {
+                foreach (string argument in arguments)
+                    info.ArgumentList.Add(argument);
+            }
+
+            return info;
         }
     }
 }

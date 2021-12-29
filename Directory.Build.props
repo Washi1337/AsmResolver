@@ -7,7 +7,7 @@
         <RepositoryUrl>https://github.com/Washi1337/AsmResolver</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <LangVersion>9</LangVersion>
-        <Version>4.7.1</Version>
+        <Version>4.8.0</Version>
     </PropertyGroup>
 
 </Project>
