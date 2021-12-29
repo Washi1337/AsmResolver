@@ -5,15 +5,16 @@ using AsmResolver.DotNet.Config.Json;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.IO;
+using AsmResolver.PE.File.Headers;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
 {
     public class AssemblyResolverTest
     {
-        private const string NonWindowsPlatform = "Test checks for the presence of the Microsoft.WindowsDesktop.App runtime, which is only available on Windows.";
+        private const string NonWindowsPlatform = "Test checks for the presence of Windows specific runtime libraries.";
 
-        private readonly SignatureComparer _comparer = new SignatureComparer();
+        private readonly SignatureComparer _comparer = new();
 
         [Fact]
         public void ResolveCorLib()
@@ -21,7 +22,7 @@ namespace AsmResolver.DotNet.Tests
             var assemblyName = typeof(object).Assembly.GetName();
             var assemblyRef = new AssemblyReference(
                 assemblyName.Name,
-                assemblyName.Version,
+                assemblyName.Version!,
                 false,
                 assemblyName.GetPublicKeyToken());
 
@@ -30,7 +31,7 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.NotNull(assemblyDef);
             Assert.Equal(assemblyName.Name, assemblyDef.Name);
-            Assert.NotNull(assemblyDef.ManifestModule.FilePath);
+            Assert.NotNull(assemblyDef.ManifestModule!.FilePath);
         }
 
         [Fact]
@@ -41,7 +42,7 @@ namespace AsmResolver.DotNet.Tests
             var assemblyName = typeof(object).Assembly.GetName();
             var assemblyRef = new AssemblyReference(
                 assemblyName.Name,
-                assemblyName.Version,
+                assemblyName.Version!,
                 false,
                 assemblyName.GetPublicKeyToken());
 
@@ -61,7 +62,7 @@ namespace AsmResolver.DotNet.Tests
             var assemblyRef = new AssemblyReference(assemblyDef);
 
             Assert.Equal(assemblyDef, resolver.Resolve(assemblyRef), _comparer);
-            Assert.NotNull(assemblyDef.ManifestModule.FilePath);
+            Assert.NotNull(assemblyDef.ManifestModule!.FilePath);
 
             resolver.ClearCache();
             Assert.False(resolver.HasCached(assemblyRef));
@@ -80,7 +81,7 @@ namespace AsmResolver.DotNet.Tests
             var assemblyName = typeof(object).Assembly.GetName();
             var assemblyRef = new AssemblyReference(
                 assemblyName.Name,
-                assemblyName.Version,
+                assemblyName.Version!,
                 false,
                 assemblyName.GetPublicKeyToken());
 
@@ -98,7 +99,7 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.NotNull(assemblyDef);
             Assert.Equal(assemblyName.Name, assemblyDef.Name);
-            Assert.NotNull(assemblyDef.ManifestModule.FilePath);
+            Assert.NotNull(assemblyDef.ManifestModule!.FilePath);
             Assert.Contains("Microsoft.NETCore.App", assemblyDef.ManifestModule.FilePath);
         }
 
@@ -128,7 +129,7 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.NotNull(assemblyDef);
             Assert.Equal(assemblyName.Name, assemblyDef.Name);
-            Assert.NotNull(assemblyDef.ManifestModule.FilePath);
+            Assert.NotNull(assemblyDef.ManifestModule!.FilePath);
         }
 
         [SkippableFact]
@@ -156,8 +157,52 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.NotNull(assemblyDef);
             Assert.Equal("WindowsBase", assemblyDef.Name);
-            Assert.NotNull(assemblyDef.ManifestModule.FilePath);
+            Assert.NotNull(assemblyDef.ManifestModule!.FilePath);
             Assert.Contains("Microsoft.WindowsDesktop.App", assemblyDef.ManifestModule.FilePath);
+        }
+
+        [SkippableTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PreferResolveFromGac32If32BitAssembly(bool legacy)
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+
+            var assembly = new AssemblyDefinition("SomeAssembly", new Version(1, 0, 0, 0));
+            var module = new ModuleDefinition("SomeAssembly", legacy
+                ? KnownCorLibs.MsCorLib_v2_0_0_0
+                : KnownCorLibs.MsCorLib_v4_0_0_0);
+
+            module.IsBit32Preferred = true;
+            module.IsBit32Required = true;
+            module.MachineType = MachineType.I386;
+            module.PEKind = OptionalHeaderMagic.Pe32;
+
+            var resolved = module.CorLibTypeFactory.CorLibScope.GetAssembly()!.Resolve();
+            Assert.NotNull(resolved);
+            Assert.Contains("GAC_32", resolved.ManifestModule!.FilePath!);
+        }
+
+        [SkippableTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PreferResolveFromGac64If64BitAssembly(bool legacy)
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+
+            var assembly = new AssemblyDefinition("SomeAssembly", new Version(1, 0, 0, 0));
+            var module = new ModuleDefinition("SomeAssembly", legacy
+                ? KnownCorLibs.MsCorLib_v2_0_0_0
+                : KnownCorLibs.MsCorLib_v4_0_0_0);
+
+            module.IsBit32Preferred = false;
+            module.IsBit32Required = false;
+            module.MachineType = MachineType.Amd64;
+            module.PEKind = OptionalHeaderMagic.Pe32Plus;
+
+            var resolved = module.CorLibTypeFactory.CorLibScope.GetAssembly()!.Resolve();
+            Assert.NotNull(resolved);
+            Assert.Contains("GAC_64", resolved.ManifestModule!.FilePath!);
         }
     }
 }
