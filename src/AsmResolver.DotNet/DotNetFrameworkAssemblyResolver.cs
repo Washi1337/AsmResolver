@@ -31,10 +31,28 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets a collection of global assembly cache (GAC) directories that are probed upon resolving a reference
-        /// to an assembly.
+        /// Gets a collection of 32-bit global assembly cache (GAC_32) directories that are probed upon resolving a
+        /// reference to an assembly.
         /// </summary>
-        public IList<GacDirectory> GacDirectories
+        public IList<GacDirectory> Gac32Directories
+        {
+            get;
+        } = new List<GacDirectory>();
+
+        /// <summary>
+        /// Gets a collection of 64-bit global assembly cache (GAC_64) directories that are probed upon resolving a
+        /// reference to an assembly.
+        /// </summary>
+        public IList<GacDirectory> Gac64Directories
+        {
+            get;
+        } = new List<GacDirectory>();
+
+        /// <summary>
+        /// Gets a collection of MSIL global assembly cache (GAC_MSIL) directories that are probed upon resolving a
+        /// reference to an assembly.
+        /// </summary>
+        public IList<GacDirectory> GacMsilDirectories
         {
             get;
         } = new List<GacDirectory>();
@@ -65,7 +83,7 @@ namespace AsmResolver.DotNet
         private void DetectMonoGacDirectories()
         {
             if (Directory.Exists("/usr/lib/mono/gac"))
-                GacDirectories.Add(new GacDirectory("/usr/lib/mono/gac"));
+                GacMsilDirectories.Add(new GacDirectory("/usr/lib/mono/gac"));
 
             string? mostRecentMonoDirectory = Directory
                 .EnumerateDirectories("/usr/lib/mono")
@@ -83,24 +101,75 @@ namespace AsmResolver.DotNet
                 return;
 
             foreach (string directory in Directory.EnumerateDirectories(windowsGac))
+                GetGacDirectoryCollection(directory).Add(new GacDirectory(directory, prefix));
+
+            IList<GacDirectory> GetGacDirectoryCollection(string directory) => Path.GetFileName(directory) switch
             {
-                string name = Path.GetFileName(directory);
-                if (name.StartsWith("GAC"))
-                    GacDirectories.Add(new GacDirectory(directory, prefix));
-            }
+                "GAC_32" => Gac32Directories,
+                "GAC_64" => Gac64Directories,
+                _ => GacMsilDirectories
+            };
         }
 
         /// <inheritdoc />
         protected override string? ProbeRuntimeDirectories(AssemblyDescriptor assembly)
         {
-            for (int i = 0; i < GacDirectories.Count; i++)
+            bool is32BitPreferred;
+            bool is32BitRequired;
+
+            // Try infer from declaring module which GAC directory would be preferred.
+            var declaringModule = assembly switch
             {
-                string? path = GacDirectories[i].Probe(assembly);
-                if (!string.IsNullOrEmpty(path))
-                    return path;
+                IModuleProvider { Module: { } module } => module,
+                AssemblyDefinition definition => definition.ManifestModule,
+                _ => null
+            };
+
+            if (declaringModule is not null)
+            {
+                is32BitPreferred = declaringModule.IsBit32Preferred;
+                is32BitRequired = declaringModule.IsBit32Required;
+            }
+            else
+            {
+                // If declaring module could not be obtained, assume AnyCPU since it is the most common case.
+                is32BitPreferred = false;
+                is32BitRequired = false;
             }
 
-            return null;
+            string? path;
+
+            if (is32BitRequired)
+            {
+                // If this assembly only runs on 32-bit, then we should only try resolve from GAC_32 or GAC_MSIL.
+                path = ProbeGacDirectories(Gac32Directories);
+            }
+            else if (is32BitPreferred)
+            {
+                // If this assembly can run on 64-bit but prefers 32-bit, then prefer GAC_32 over GAC_64.
+                path = ProbeGacDirectories(Gac32Directories);
+                path ??= ProbeGacDirectories(Gac64Directories);
+            }
+            else
+            {
+                // Otherwise assume a 64-bit environment first.
+                path = ProbeGacDirectories(Gac64Directories);
+                path ??= ProbeGacDirectories(Gac32Directories);
+            }
+
+            // Fallback: probe GAC_MSIL.
+            return path ?? ProbeGacDirectories(GacMsilDirectories);
+
+            string? ProbeGacDirectories(IList<GacDirectory> directories)
+            {
+                for (int i = 0; i < directories.Count; i++)
+                {
+                    if (directories[i].Probe(assembly) is { } p)
+                        return p;
+                }
+
+                return null;
+            }
         }
     }
 }
