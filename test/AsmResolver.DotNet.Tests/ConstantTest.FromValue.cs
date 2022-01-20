@@ -1,9 +1,9 @@
 using AsmResolver.DotNet.TestCases.Fields;
 using Xunit;
 
-namespace AsmResolver.DotNet.Tests.Signatures
+namespace AsmResolver.DotNet.Tests
 {
-    public class DataBlobSignatureTest
+    public partial class ConstantTest
     {
         [Fact]
         public void ReadingAndWritingGiveTheSameValueBoolean()
