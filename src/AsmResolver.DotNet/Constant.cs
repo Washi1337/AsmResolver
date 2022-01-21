@@ -81,5 +81,161 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="Value"/> property.
         /// </remarks>
         protected virtual DataBlobSignature? GetValue() => null;
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(bool value)
+        {
+            return new Constant(ElementType.Boolean, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(char value)
+        {
+            return new Constant(ElementType.Char, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(byte value)
+        {
+            return new Constant(ElementType.U1, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(sbyte value)
+        {
+            return new Constant(ElementType.I1, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(ushort value)
+        {
+            return new Constant(ElementType.U2, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(short value)
+        {
+            return new Constant(ElementType.I2, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(uint value)
+        {
+            return new Constant(ElementType.U4, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(int value)
+        {
+            return new Constant(ElementType.I4, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(ulong value)
+        {
+            return new Constant(ElementType.U8, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(long value)
+        {
+            return new Constant(ElementType.I8, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(float value)
+        {
+            return new Constant(ElementType.R4, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(double value)
+        {
+            return new Constant(ElementType.R8, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(string value)
+        {
+            return new Constant(ElementType.String, DataBlobSignature.FromValue(value));
+        }
     }
 }
