@@ -44,8 +44,8 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="returnType">The return type of the method.</param>
         /// <returns>The signature.</returns>
-        public static MethodSignature CreateStatic(TypeSignature returnType)
-            => new MethodSignature(0, returnType, Enumerable.Empty<TypeSignature>());
+        public static MethodSignature CreateStatic(TypeSignature returnType) =>
+            new(0, returnType, Enumerable.Empty<TypeSignature>());
 
         /// <summary>
         /// Creates a method signature for a static method that has a number of parameters.
@@ -54,7 +54,22 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
         public static MethodSignature CreateStatic(TypeSignature returnType, params TypeSignature[] parameterTypes)
-            => new MethodSignature(0, returnType, parameterTypes);
+            => new(0, returnType, parameterTypes);
+
+        /// <summary>
+        /// Creates a generic method signature for a static method that has a number of parameters.
+        /// </summary>
+        /// <param name="returnType">The return type of the method.</param>
+        /// <param name="genericParameterCount">The number of generic parameters this method defines.</param>
+        /// <param name="parameterTypes">The parameter types.</param>
+        /// <returns>The signature.</returns>
+        public static MethodSignature CreateStatic(TypeSignature returnType, int genericParameterCount, params TypeSignature[] parameterTypes)
+        {
+            return new MethodSignature(0, returnType, parameterTypes)
+            {
+                GenericParameterCount = genericParameterCount
+            };
+        }
 
         /// <summary>
         /// Creates a method signature for a static method that has a number of parameters.
@@ -63,7 +78,22 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
         public static MethodSignature CreateStatic(TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes)
-            => new MethodSignature(0, returnType, parameterTypes);
+            => new(0, returnType, parameterTypes);
+
+        /// <summary>
+        /// Creates a generic method signature for a static method that has a number of parameters.
+        /// </summary>
+        /// <param name="returnType">The return type of the method.</param>
+        /// <param name="genericParameterCount">The number of generic parameters this method defines.</param>
+        /// <param name="parameterTypes">The parameter types.</param>
+        /// <returns>The signature.</returns>
+        public static MethodSignature CreateStatic(TypeSignature returnType, int genericParameterCount, IEnumerable<TypeSignature> parameterTypes)
+        {
+            return new MethodSignature(0, returnType, parameterTypes)
+            {
+                GenericParameterCount = genericParameterCount
+            };
+        }
 
         /// <summary>
         /// Creates a new parameter-less method signature for an instance method.
@@ -71,7 +101,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="returnType">The return type of the method.</param>
         /// <returns>The signature.</returns>
         public static MethodSignature CreateInstance(TypeSignature returnType)
-            => new MethodSignature(CallingConventionAttributes.HasThis, returnType, Enumerable.Empty<TypeSignature>());
+            => new(CallingConventionAttributes.HasThis, returnType, Enumerable.Empty<TypeSignature>());
 
         /// <summary>
         /// Creates a method signature for an instance method that has a number of parameters.
@@ -80,7 +110,22 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
         public static MethodSignature CreateInstance(TypeSignature returnType, params TypeSignature[] parameterTypes)
-            => new MethodSignature(CallingConventionAttributes.HasThis, returnType, parameterTypes);
+            => new(CallingConventionAttributes.HasThis, returnType, parameterTypes);
+
+        /// <summary>
+        /// Creates a generic method signature for an instance method that has a number of parameters.
+        /// </summary>
+        /// <param name="returnType">The return type of the method.</param>
+        /// <param name="genericParameterCount">The number of generic parameters this method defines.</param>
+        /// <param name="parameterTypes">The parameter types.</param>
+        /// <returns>The signature.</returns>
+        public static MethodSignature CreateInstance(TypeSignature returnType, int genericParameterCount, params TypeSignature[] parameterTypes)
+        {
+            return new MethodSignature(CallingConventionAttributes.HasThis, returnType, parameterTypes)
+            {
+                GenericParameterCount = genericParameterCount
+            };
+        }
 
         /// <summary>
         /// Creates a method signature for an instance method  that has a number of parameters.
@@ -89,7 +134,22 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
         public static MethodSignature CreateInstance(TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes)
-            => new MethodSignature(CallingConventionAttributes.HasThis, returnType, parameterTypes);
+            => new(CallingConventionAttributes.HasThis, returnType, parameterTypes);
+
+        /// <summary>
+        /// Creates a generic method signature for an instance method that has a number of parameters.
+        /// </summary>
+        /// <param name="returnType">The return type of the method.</param>
+        /// <param name="genericParameterCount">The number of generic parameters this method defines.</param>
+        /// <param name="parameterTypes">The parameter types.</param>
+        /// <returns>The signature.</returns>
+        public static MethodSignature CreateInstance(TypeSignature returnType, int genericParameterCount, IEnumerable<TypeSignature> parameterTypes)
+        {
+            return new MethodSignature(CallingConventionAttributes.HasThis, returnType, parameterTypes)
+            {
+                GenericParameterCount = genericParameterCount
+            };
+        }
 
         /// <summary>
         /// Creates a new method signature with the provided return and parameter types.
