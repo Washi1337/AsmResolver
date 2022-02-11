@@ -50,8 +50,8 @@ namespace AsmResolver.Workspaces.DotNet
         /// <summary>
         /// Describes the relationship between a method definition and its specification.
         /// </summary>
-        public static readonly ObjectRelation<MethodDefinition, MethodSpecification> ReferenceSpecification = new(
-            "ReferenceSpecification",
+        public static readonly ObjectRelation<MethodDefinition, MethodSpecification> ReferenceMethodSpecification = new(
+            "ReferenceMethodSpecification",
             new Guid("3824566f-3df4-4188-8e67-ed2d745df84a"));
 
 
@@ -61,6 +61,13 @@ namespace AsmResolver.Workspaces.DotNet
         public static readonly ObjectRelation<TypeDefinition, TypeReference> ReferenceType = new(
             "ReferenceType",
             new Guid("3cc86779-338c-4165-a00c-da547a2e8549"));
+
+        /// <summary>
+        /// Describes the relationship between a type definition and its specification.
+        /// </summary>
+        public static readonly ObjectRelation<TypeDefinition, TypeSpecification> ReferenceTypeSpecification = new(
+            "ReferenceTypeSpecification",
+            new Guid("e60a2deb-b608-4775-93ad-c073eac934e5"));
 
         /// <summary>
         /// Describes the relationship between a exported type and its definition.

@@ -30,7 +30,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             {
                 var specification = context.Workspace.Index.GetOrCreateNode(subject);
                 var definitionNode = context.Workspace.Index.GetOrCreateNode(definition);
-                definitionNode.ForwardRelations.Add(DotNetRelations.ReferenceSpecification, specification);
+                definitionNode.ForwardRelations.Add(DotNetRelations.ReferenceMethodSpecification, specification);
             }
         }
     }
