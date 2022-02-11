@@ -9,7 +9,7 @@ namespace AsmResolver.Workspaces.DotNet.Profiles
     public class DotNetImplementationProfile : WorksapceProfile
     {
         /// <summary>
-        /// Provides a default implementation of profile to connect all abstract, virtual and interface members.
+        /// Creates a new instance of the <see cref="DotNetImplementationProfile"/> class.
         /// </summary>
         public DotNetImplementationProfile()
         {

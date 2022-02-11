@@ -14,7 +14,7 @@ namespace AsmResolver.Workspaces.DotNet.Profiles
     public class DotNetTraversalProfile : WorksapceProfile
     {
         /// <summary>
-        /// Provides a default implementation of profile to traverse all .net members.
+        /// Creates a new instance of the <see cref="DotNetTraversalProfile"/> class.
         /// </summary>
         public DotNetTraversalProfile()
         {
