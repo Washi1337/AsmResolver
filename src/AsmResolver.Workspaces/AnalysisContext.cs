@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver.Workspaces
 {
@@ -49,7 +50,7 @@ namespace AsmResolver.Workspaces
         /// <c>true</c> if there exists at least one analyzer that can analyze objects of the provided type,
         /// <c>false</c> otherwise.
         /// </returns>
-        public bool HasAnalyzers(Type type) => Workspace.Analyzers.HasAnalyzers(type);
+        public bool HasAnalyzers(Type type) => Workspace.Profiles.Any(profile => profile.Analyzers.HasAnalyzers(type));
 
         /// <summary>
         /// Schedules the provided object if it was not scheduled before.
