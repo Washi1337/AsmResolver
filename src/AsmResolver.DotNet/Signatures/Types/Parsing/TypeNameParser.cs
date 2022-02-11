@@ -225,6 +225,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private TypeSignature ParseGenericTypeSpec(TypeSignature typeName)
         {
             var result = new GenericInstanceTypeSignature(typeName.ToTypeDefOrRef(), typeName.IsValueType);
+
             result.TypeArguments.Add(ParseGenericTypeArgument(result));
 
             bool stop = false;
@@ -248,7 +249,9 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private TypeSignature ParseGenericTypeArgument(GenericInstanceTypeSignature genericInstance)
         {
             var extraBracketToken = TryExpect(TypeNameTerminal.OpenBracket);
-            var result = ParseTypeSpec();
+            var result = !extraBracketToken.HasValue
+                ? ParseSimpleTypeSpec()
+                : ParseTypeSpec();
             if (extraBracketToken.HasValue)
                 Expect(TypeNameTerminal.CloseBracket);
             return result;

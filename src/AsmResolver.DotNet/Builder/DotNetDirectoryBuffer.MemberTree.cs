@@ -213,6 +213,10 @@ namespace AsmResolver.DotNet.Builder
 
                 var token = table.Add(row);
                 _tokenMapping.Register(method, token);
+
+                // If the method is supposed to be exported as an unmanaged symbol, register it.
+                if (method.ExportInfo.HasValue)
+                    VTableFixups.MapTokenToExport(method.ExportInfo.Value, token);
             }
         }
 
@@ -557,7 +561,7 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetSortedTable<FieldDefinition, FieldRvaRow>(TableIndex.FieldRva);
 
             var row = new FieldRvaRow(
-                new SegmentReference(field.FieldRva),
+                field.FieldRva.ToReference(),
                 ownerToken.Rid);
 
             table.Add(field, row);

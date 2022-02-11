@@ -1,7 +1,7 @@
 .NET Data Directories
 =====================
 
-Managed executables (applications written using a .NET language) contain an extra data directory in the optional header of the PE file format. This small data directory contains a header which is also known as the CLR 2.0 header, and references other structures such as the metadata directory, raw data for manifest resources and sometimes an extra native header in the case of mixed mode applications or zapped (ngen'ed) applications. 
+Managed executables (applications written using a .NET language) contain an extra data directory in the optional header of the PE file format. This small data directory contains a header which is also known as the CLR 2.0 header, and references other structures such as the metadata directory, raw data for manifest resources and sometimes an extra native header in the case of mixed mode applications or zapped (ngen'ed) applications.
 
 .NET directory / CLR 2.0 header
 -------------------------------
@@ -15,7 +15,7 @@ The .NET data directory can be accessed by the ``IPEImage.DotNetDirectory`` prop
     Console.WriteLine("Managed entrypoint: {0:X8}", peImage.DotNetDirectory.Entrypoint);
 
 
-Metadata directory 
+Metadata directory
 -----------------------
 
 The metadata data directory is perhaps the most important data directory that is referenced by the .NET directory. It contains the metadata streams, such as the table and the blob stream, which play a key role in the execution of a .NET binary.
@@ -141,7 +141,7 @@ The tables stream (``#~``, ``#-`` or ``#Schema``) is the main stream stored in t
 
     TablesStream tablesStream = metadata.GetStream<TablesStream>();
 
-Metadata tables are represented by the ``IMetadataTable`` interface. Individal tables can be accessed using the `GetTable` method:
+Metadata tables are represented by the ``IMetadataTable`` interface. Individal tables can be accessed using the ``GetTable`  method:
 
 .. code-block:: csharp
 
@@ -264,6 +264,12 @@ Metadata tables are similar to normal ``ICollection<T>`` instances. They provide
         // ...
     }
 
+Members can also be accessed by their RID using the ``GetByRid`` or ``TryGetByRid`` helper functions:
+
+.. code-block:: csharp
+
+    TypeDefinitionRow thirdTypeRow = typeDefTable.GetByRid(3);
+
 Using the other metadata streams, it is possible to resolve all columns. Below an example that prints the name and namespace of each type row in the type definition table in a file.
 
 .. code-block:: csharp
@@ -275,7 +281,7 @@ Using the other metadata streams, it is possible to resolve all columns. Below a
     var metadata = peImage.DotNetDirectory.Metadata;
     var tablesStream = metadata.GetStream<TablesStream>();
     var stringsStream = metadata.GetStream<StringsStream>();
-    
+
     // Go over each type definition in the file.
     var typeDefTable = tablesStream.GetTable<TypeDefinitionRow>();
     foreach (var typeRow in typeDefTable)
@@ -296,6 +302,7 @@ Every row structure defined in AsmResolver respects the specification described 
 
 ``ISegmentReference`` exposes a method ``CreateReader()``, which automatically resolves the RVA that was stored in the row, and creates a new input stream that can be used to parse e.g. method bodies or field data.
 
+
 Reading method bodies:
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -309,6 +316,7 @@ Reading a managed CIL method body can be done using ``CilRawMethodBody.FromReade
 
 It is important to note that the user is not bound to use ``CilRawMethodBody``. In the case that the ``Native`` (``0x0001``) flag is set in ``MethodDefinitionRow.ImplAttributes``, the implementation of the method body is not written in CIL, but using native code that uses an instruction set dependent on the platform that this application is targeting. Since the bounds of such a method body is not always well-defined, AsmResolver does not do any parsing on its own. However, using the ``CreateReader()`` method, it is still possible to decode instructions from this method body, using a custom instruction decoder.
 
+
 Reading field data:
 ~~~~~~~~~~~~~~~~~~~
 
@@ -320,15 +328,16 @@ Reading field data can be done in a similar fashion as reading method bodies. Ag
     var firstRva = fieldRvaTable[0];
     var reader = firstRva.Data.CreateReader();
 
+
 Creating new segment references:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Creating new segment references not present in the current PE image yet can for example be done by creating an instance of ``SegmentReference``, which is a wrapper for any ``IReadableSegment`` object.
+Creating new segment references not present in the current PE image yet can be done using the ``ISegment.ToReference()`` extension method:
 
 .. code-block:: csharp
 
     var myData = new DataSegment(new byte[] {1, 2, 3, 4});
-    var fieldRva = new FieldRvaRow(new SegmentReference(myData), 0);
+    var fieldRva = new FieldRvaRow(myData.ToReference(), 0);
 
 
 
@@ -346,7 +355,7 @@ AsmResolver includes a built-in implementation for this that is based on `the re
     IPEImage image = ...
     byte[] hash = image.GetTypeReferenceHash();
 
-    
+
 .. code-block:: csharp
 
     IMetadata metadata = ...

@@ -52,6 +52,13 @@ namespace AsmResolver.DotNet.Signatures
         private void WriteNullElement(TypeSignature argumentType)
         {
             var writer = _context.Writer;
+
+            if (argumentType.IsTypeOf("System", "Type"))
+            {
+                writer.WriteSerString(default(string));
+                return;
+            }
+
             switch (argumentType.ElementType)
             {
                 case ElementType.String:
@@ -60,7 +67,7 @@ namespace AsmResolver.DotNet.Signatures
 
                 case ElementType.Object:
                     // Most efficient way to store "null" is writing null as a string (two bytes).
-                    TypeSignature.WriteFieldOrPropType(writer, argumentType.Module!.CorLibTypeFactory.String);
+                    TypeSignature.WriteFieldOrPropType(_context, argumentType.Module!.CorLibTypeFactory.String);
                     break;
 
                 case ElementType.SzArray:
@@ -166,7 +173,7 @@ namespace AsmResolver.DotNet.Signatures
                         value = null;
                     }
 
-                    TypeSignature.WriteFieldOrPropType(writer, innerTypeSig);
+                    TypeSignature.WriteFieldOrPropType(_context, innerTypeSig);
                     WriteElement(innerTypeSig, value);
                     break;
 

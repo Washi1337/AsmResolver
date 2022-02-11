@@ -9,6 +9,7 @@ using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
+using AsmResolver.PE.Tls;
 using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.PE
@@ -134,6 +135,16 @@ namespace AsmResolver.PE
             }
 
             return result;
+        }
+
+        /// <inheritdoc />
+        protected override ITlsDirectory? GetTlsDirectory()
+        {
+            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.TlsDirectory);
+            if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
+                return null;
+
+            return new SerializedTlsDirectory(ReaderContext, ref reader);
         }
     }
 }

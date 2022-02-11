@@ -379,7 +379,7 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
         {
-            if (DeclaringType is not { } declaringType || declaringType.IsAccessibleFromType(type))
+            if (DeclaringType is not { } declaringType || !declaringType.IsAccessibleFromType(type))
                 return false;
 
             var comparer = new SignatureComparer();

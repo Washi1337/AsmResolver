@@ -122,9 +122,7 @@ namespace AsmResolver.DotNet
             for (int i = 0; i < declaringType.Methods.Count; i++)
             {
                 var candidate = declaringType.Methods[i];
-                if (candidate.Name != method.Name)
-                    continue;
-                if (!candidate.IsHideBySig || _comparer.Equals(method.Signature, candidate.Signature))
+                if (candidate.Name == method.Name && _comparer.Equals(method.Signature, candidate.Signature))
                     return candidate;
             }
 

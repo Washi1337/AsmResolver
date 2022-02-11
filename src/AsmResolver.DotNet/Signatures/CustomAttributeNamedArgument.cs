@@ -90,7 +90,7 @@ namespace AsmResolver.DotNet.Signatures
             var writer = context.Writer;
 
             writer.WriteByte((byte) MemberType);
-            TypeSignature.WriteFieldOrPropType(writer, ArgumentType);
+            TypeSignature.WriteFieldOrPropType(context, ArgumentType);
             writer.WriteSerString(MemberName);
             Argument.Write(context);
         }

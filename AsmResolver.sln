@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29306.81
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34A95168-A162-4F6A-803B-B6F221FE9EA6}"
 EndProject
@@ -31,35 +31,35 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.PE.Tests", "tes
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleDll", "test\TestBinaries\Native\SimpleDll\SimpleDll.vcxproj", "{194CD932-0C63-47AA-ABA0-1B5E8328033E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet", "src\AsmResolver.DotNet\AsmResolver.DotNet.csproj", "{A09E7AE7-34E0-476A-8A3D-188FCAD1BD90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet", "src\AsmResolver.DotNet\AsmResolver.DotNet.csproj", "{A09E7AE7-34E0-476A-8A3D-188FCAD1BD90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.Tests", "test\AsmResolver.DotNet.Tests\AsmResolver.DotNet.Tests.csproj", "{D35B7FB9-F1B2-4963-9D56-B7A7B2EF3198}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet.Tests", "test\AsmResolver.DotNet.Tests\AsmResolver.DotNet.Tests.csproj", "{D35B7FB9-F1B2-4963-9D56-B7A7B2EF3198}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.NestedClasses", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.NestedClasses\AsmResolver.DotNet.TestCases.NestedClasses.csproj", "{7FB01382-5454-4AC4-A2C2-CAF62A2B21E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet.TestCases.NestedClasses", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.NestedClasses\AsmResolver.DotNet.TestCases.NestedClasses.csproj", "{7FB01382-5454-4AC4-A2C2-CAF62A2B21E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.Fields", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Fields\AsmResolver.DotNet.TestCases.Fields.csproj", "{A95F1D67-462E-4F6A-96C5-20739405932B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet.TestCases.Fields", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Fields\AsmResolver.DotNet.TestCases.Fields.csproj", "{A95F1D67-462E-4F6A-96C5-20739405932B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.Methods", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Methods\AsmResolver.DotNet.TestCases.Methods.csproj", "{055C0598-6C29-4897-9708-E1D7157AD2F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet.TestCases.Methods", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Methods\AsmResolver.DotNet.TestCases.Methods.csproj", "{055C0598-6C29-4897-9708-E1D7157AD2F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.Properties", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Properties\AsmResolver.DotNet.TestCases.Properties.csproj", "{BA7C370B-8C77-44C4-B02E-2400BAE3D40E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet.TestCases.Properties", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Properties\AsmResolver.DotNet.TestCases.Properties.csproj", "{BA7C370B-8C77-44C4-B02E-2400BAE3D40E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.Events", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Events\AsmResolver.DotNet.TestCases.Events.csproj", "{99E54926-E205-4F7F-AC95-53D178876CDD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet.TestCases.Events", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Events\AsmResolver.DotNet.TestCases.Events.csproj", "{99E54926-E205-4F7F-AC95-53D178876CDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.CustomAttributes", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.CustomAttributes\AsmResolver.DotNet.TestCases.CustomAttributes.csproj", "{724C24F9-0F49-41CF-A4FE-1F5A79C72693}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet.TestCases.CustomAttributes", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.CustomAttributes\AsmResolver.DotNet.TestCases.CustomAttributes.csproj", "{724C24F9-0F49-41CF-A4FE-1F5A79C72693}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.Generics", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Generics\AsmResolver.DotNet.TestCases.Generics.csproj", "{8C51B143-CE13-47C9-AC7D-700013965888}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet.TestCases.Generics", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Generics\AsmResolver.DotNet.TestCases.Generics.csproj", "{8C51B143-CE13-47C9-AC7D-700013965888}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.MultiModules", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.MultiModules\AsmResolver.DotNet.TestCases.MultiModules.csproj", "{18AD5344-262D-430F-B380-78ED35F97460}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet.TestCases.MultiModules", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.MultiModules\AsmResolver.DotNet.TestCases.MultiModules.csproj", "{18AD5344-262D-430F-B380-78ED35F97460}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.Types", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Types\AsmResolver.DotNet.TestCases.Types.csproj", "{E56DE12B-7880-4344-B98B-0545686D44EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet.TestCases.Types", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Types\AsmResolver.DotNet.TestCases.Types.csproj", "{E56DE12B-7880-4344-B98B-0545686D44EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.Resources", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Resources\AsmResolver.DotNet.TestCases.Resources.csproj", "{4197C9D4-A5F1-473F-8EB8-29CC5663D212}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.DotNet.TestCases.Resources", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Resources\AsmResolver.DotNet.TestCases.Resources.csproj", "{4197C9D4-A5F1-473F-8EB8-29CC5663D212}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.PE.Win32Resources", "src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj", "{05F83C2F-E591-4443-BA84-31412E41790D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.PE.Win32Resources", "src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj", "{05F83C2F-E591-4443-BA84-31412E41790D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.PE.Win32Resources.Tests", "test\AsmResolver.PE.Win32Resources.Tests\AsmResolver.PE.Win32Resources.Tests.csproj", "{A2D97B54-884C-46CA-BB42-9F87D5AA0A87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.PE.Win32Resources.Tests", "test\AsmResolver.PE.Win32Resources.Tests\AsmResolver.PE.Win32Resources.Tests.csproj", "{A2D97B54-884C-46CA-BB42-9F87D5AA0A87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheAnswer", "test\TestBinaries\DotNet\TheAnswer\TheAnswer.csproj", "{BC3C945E-0AB5-4039-B6D9-43A265CC703A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheAnswer", "test\TestBinaries\DotNet\TheAnswer\TheAnswer.csproj", "{BC3C945E-0AB5-4039-B6D9-43A265CC703A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Workspaces", "src\AsmResolver.Workspaces\AsmResolver.Workspaces.csproj", "{44FA7F58-18B8-4BC3-91FF-9C37721ADAEB}"
 EndProject
@@ -71,11 +71,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Workspaces.DotN
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Workspaces.DotNet.TestCases", "test\TestBinaries\DotNet\AsmResolver.Workspaces.DotNet.TestCases\AsmResolver.Workspaces.DotNet.TestCases.csproj", "{1B178E8D-1B3F-4148-84F8-DBA7B2EC312D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Benchmarks", "test\AsmResolver.Benchmarks\AsmResolver.Benchmarks.csproj", "{CB766958-8D07-4E2D-8A38-C21617B1C45D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.Benchmarks", "test\AsmResolver.Benchmarks\AsmResolver.Benchmarks.csproj", "{CB766958-8D07-4E2D-8A38-C21617B1C45D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{0D04B5DF-8D16-488F-8767-E49803D3AF46}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.PE.Exports.OrdinalMapper", "tools\AsmResolver.PE.Exports.OrdinalMapper\AsmResolver.PE.Exports.OrdinalMapper.csproj", "{3E4B6896-269F-4129-9746-965338779C31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsmResolver.PE.Exports.OrdinalMapper", "tools\AsmResolver.PE.Exports.OrdinalMapper\AsmResolver.PE.Exports.OrdinalMapper.csproj", "{3E4B6896-269F-4129-9746-965338779C31}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TlsTest", "test\TestBinaries\Native\TlsTest\TlsTest.vcxproj", "{E7D186F7-B2BC-451D-98CC-427866CABE54}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CallManagedExport", "test\TestBinaries\Native\CallManagedExport\CallManagedExport.vcxproj", "{40483E28-C703-4933-BA5B-9512EF6E6A21}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "HelloWorldVB", "test\TestBinaries\DotNet\HelloWorldVB\HelloWorldVB.vbproj", "{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ClassLibraryVB", "test\TestBinaries\DotNet\ClassLibraryVB\ClassLibraryVB.vbproj", "{2D1DF5DA-7367-4490-B3F0-B996348E150B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -429,6 +437,52 @@ Global
 		{3E4B6896-269F-4129-9746-965338779C31}.Release|x64.Build.0 = Release|Any CPU
 		{3E4B6896-269F-4129-9746-965338779C31}.Release|x86.ActiveCfg = Release|Any CPU
 		{3E4B6896-269F-4129-9746-965338779C31}.Release|x86.Build.0 = Release|Any CPU
+		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Debug|x64.ActiveCfg = Debug|x64
+		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Debug|x64.Build.0 = Debug|x64
+		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Debug|x86.ActiveCfg = Debug|Win32
+		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Debug|x86.Build.0 = Debug|Win32
+		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Release|Any CPU.ActiveCfg = Release|Win32
+		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Release|x64.ActiveCfg = Release|x64
+		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Release|x64.Build.0 = Release|x64
+		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Release|x86.ActiveCfg = Release|Win32
+		{E7D186F7-B2BC-451D-98CC-427866CABE54}.Release|x86.Build.0 = Release|Win32
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|Any CPU.Build.0 = Debug|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|x64.ActiveCfg = Debug|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|x64.Build.0 = Debug|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|x86.ActiveCfg = Debug|Win32
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Debug|x86.Build.0 = Debug|Win32
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|Any CPU.ActiveCfg = Release|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|Any CPU.Build.0 = Release|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|x64.ActiveCfg = Release|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|x64.Build.0 = Release|x64
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|x86.ActiveCfg = Release|Win32
+		{40483E28-C703-4933-BA5B-9512EF6E6A21}.Release|x86.Build.0 = Release|Win32
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Debug|x64.Build.0 = Debug|Any CPU
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Debug|x86.Build.0 = Debug|Any CPU
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Release|x64.ActiveCfg = Release|Any CPU
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Release|x64.Build.0 = Release|Any CPU
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Release|x86.ActiveCfg = Release|Any CPU
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A}.Release|x86.Build.0 = Release|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Debug|x64.Build.0 = Debug|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Debug|x86.Build.0 = Debug|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Release|x64.ActiveCfg = Release|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Release|x64.Build.0 = Release|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Release|x86.ActiveCfg = Release|Any CPU
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -467,6 +521,10 @@ Global
 		{1B178E8D-1B3F-4148-84F8-DBA7B2EC312D} = {B3AF102B-ABE1-41B2-AE48-C40702F45AB0}
 		{CB766958-8D07-4E2D-8A38-C21617B1C45D} = {786C1732-8C96-45DD-97BB-639C9AA7F45B}
 		{3E4B6896-269F-4129-9746-965338779C31} = {0D04B5DF-8D16-488F-8767-E49803D3AF46}
+		{E7D186F7-B2BC-451D-98CC-427866CABE54} = {EA971BB0-94BA-44DB-B16C-212D2DB27E17}
+		{40483E28-C703-4933-BA5B-9512EF6E6A21} = {EA971BB0-94BA-44DB-B16C-212D2DB27E17}
+		{CF6A7E02-37DC-4963-AC14-76D74ADCD87A} = {B3AF102B-ABE1-41B2-AE48-C40702F45AB0}
+		{2D1DF5DA-7367-4490-B3F0-B996348E150B} = {B3AF102B-ABE1-41B2-AE48-C40702F45AB0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3302AC79-6D23-4E7D-8C5F-C0C7261044D0}

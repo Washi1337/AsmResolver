@@ -15,14 +15,14 @@ namespace AsmResolver.DotNet.Tests
             testClass = Path.GetFileNameWithoutExtension(testClass);
             string path = runner.GetTestExecutablePath(testClass, testMethod, fileName);
             module.Write(path);
-            string actualOutput = runner.RunAndCaptureOutput(path, timeout);
+            string actualOutput = runner.RunAndCaptureOutput(path, null, timeout);
             Assert.Equal(expectedOutput, actualOutput);
         }
 
         public static FieldDefinition FindInitializerField(this FieldDefinition field)
         {
             var cctor = field.DeclaringType.GetStaticConstructor();
-            
+
             var instructions = cctor.CilMethodBody.Instructions;
             for (int i = 0; i < instructions.Count; i++)
             {

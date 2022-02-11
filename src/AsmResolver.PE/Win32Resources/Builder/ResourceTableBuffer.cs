@@ -29,7 +29,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// This property should only be used after the table has been relocated to the right location in the PE file.
         /// </remarks>
         public uint RelativeOffset => Rva - _parentBuffer.Rva;
-        
+
         /// <summary>
         /// Gets an ordered collection of entries that are put into the table.
         /// </summary>
@@ -58,7 +58,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// <param name="entry">The item to measure.</param>
         /// <returns>The size in bytes.</returns>
         public abstract uint GetEntrySize(TEntry entry);
-        
+
         /// <summary>
         /// Determines the offset of an entry stored in the table, relative to the start of the resource directory.
         /// </summary>
@@ -72,6 +72,6 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// <inheritdoc />
         public override uint GetPhysicalSize() => _length;
 
-        
+
     }
 }

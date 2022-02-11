@@ -430,6 +430,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var module = ModuleDefinition.FromBytes(Properties.Resources.HandlerEndAtEndOfMethodBody);
             var body = module.ManagedEntrypointMethod.CilMethodBody;
             Assert.Same(body.Instructions.EndLabel, body.ExceptionHandlers[0].HandlerEnd);
+            body.VerifyLabels();
         }
 
         [Fact]

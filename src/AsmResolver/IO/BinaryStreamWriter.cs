@@ -23,7 +23,13 @@ namespace AsmResolver.IO
         public ulong Offset
         {
             get => (uint) _stream.Position;
-            set => _stream.Position = (long) value;
+            set
+            {
+                // Check if position actually changed before actually setting. If we don't do this, this can cause
+                // performance issues on some systems. See https://github.com/Washi1337/AsmResolver/issues/232
+                if (_stream.Position != (long) value)
+                    _stream.Position = (long) value;
+            }
         }
 
         /// <inheritdoc />
@@ -117,5 +123,14 @@ namespace AsmResolver.IO
             WriteUInt64(*(ulong*) &value);
         }
 
+        /// <inheritdoc />
+        public void WriteDecimal(decimal value)
+        {
+            int[] bits = decimal.GetBits(value);
+            WriteInt32(bits[0]);
+            WriteInt32(bits[1]);
+            WriteInt32(bits[2]);
+            WriteInt32(bits[3]);
+        }
     }
 }

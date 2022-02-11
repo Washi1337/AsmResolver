@@ -1,3 +1,5 @@
+.. _pe-file-sections:
+
 PE sections
 ===========
 
@@ -42,3 +44,6 @@ Some sections (such as `.data` or `.bss`) contain uninitialized data, and might 
         section.Contents = new VirtualSegment(physicalContents, 0x1000); // Create a new segment with a virtual size of 0x1000 bytes.
         
         peFile.Sections.Add(section);
+
+
+For more advanced section building, see :ref:`pe-building-sections`.

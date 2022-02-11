@@ -142,5 +142,19 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] TlsTest_x86 {
+            get {
+                object obj = ResourceManager.GetObject("TlsTest_x86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] TlsTest_x64 {
+            get {
+                object obj = ResourceManager.GetObject("TlsTest_x64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

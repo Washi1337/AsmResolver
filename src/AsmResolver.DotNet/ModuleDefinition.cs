@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
@@ -31,6 +33,8 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<AssemblyDefinition>
     {
+        private static MethodInfo? GetHINSTANCEMethod;
+
         private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<Guid> _mvid;
         private readonly LazyVariable<Guid> _encId;
@@ -133,6 +137,51 @@ namespace AsmResolver.DotNet
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromModuleBaseAddress(IntPtr hInstance, ModuleReaderParameters readerParameters) =>
             FromImage(PEImage.FromModuleBaseAddress(hInstance, readerParameters.PEReaderParameters), readerParameters);
+
+        /// <summary>
+        /// Reads a .NET module starting at the provided module base address (HINSTANCE).
+        /// </summary>
+        /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
+        /// <param name="mode">Indicates how the input PE file is mapped.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromModuleBaseAddress(IntPtr hInstance, PEMappingMode mode, ModuleReaderParameters readerParameters) =>
+            FromImage(PEImage.FromModuleBaseAddress(hInstance, mode, readerParameters.PEReaderParameters), readerParameters);
+
+        /// <summary>
+        /// Opens a module from an instance of a <see cref="System.Reflection.Module"/>.
+        /// </summary>
+        /// <param name="module">The reflection module to load.</param>
+        /// <returns>The module.</returns>
+        public static ModuleDefinition FromModule(Module module) => FromModule(module, new ModuleReaderParameters());
+
+        /// <summary>
+        /// Opens a module from an instance of a <see cref="System.Reflection.Module"/>.
+        /// </summary>
+        /// <param name="module">The reflection module to load.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        public static ModuleDefinition FromModule(Module module, ModuleReaderParameters readerParameters)
+        {
+            // We get the base address using GetHINSTANCE, but this method is unfortunately not shipped with
+            // .NET Standard 2.0, so we need to resort to reflection for this.
+            GetHINSTANCEMethod ??= typeof(Marshal).GetMethod("GetHINSTANCE", new[] { typeof(Module) });
+
+            var handle = (IntPtr) GetHINSTANCEMethod?.Invoke(null, new object[] { module })!;
+            if (handle == IntPtr.Zero)
+                throw new NotSupportedException("The current platform does not support getting the base address of an instance of System.Reflection.Module.");
+
+            // Dynamically loaded modules are in their unmapped form, as opposed to modules loaded normally by the
+            // Windows PE loader. They also have a fully qualified name "<Unknown>" or similar.
+            string name = module.FullyQualifiedName;
+            var mappingMode = name[0] == '<' && name[name.Length - 1] == '>'
+                ? PEMappingMode.Unmapped
+                : PEMappingMode.Mapped;
+
+            // Load from base address.
+            return FromModuleBaseAddress(handle, mappingMode, readerParameters);
+        }
 
         /// <summary>
         /// Reads a .NET module from the provided data source.
