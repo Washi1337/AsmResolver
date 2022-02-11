@@ -189,6 +189,47 @@ namespace AsmResolver.Workspaces.DotNet.Tests
                 node.ForwardRelations.GetObjects(DotNetRelations.ReferenceMember));
         }
 
+
+        [Fact]
+        public void TypeSpecificationTest()
+        {
+            var assembly1 = new AssemblyDefinition("Assembly1", new Version(1, 0, 0, 0));
+            var module1 = new ModuleDefinition("Assembly1");
+            var assembly2 = new AssemblyDefinition("Assembly1", new Version(1, 0, 0, 0));
+            var module2 = new ModuleDefinition("Assembly2");
+
+            var type1 = new TypeDefinition("Namespace", "Type", TypeAttributes.Class);
+            var type2 = new TypeDefinition("Namespace", "Type2", TypeAttributes.Class);
+
+            var factory = module2.CorLibTypeFactory;
+            var method = new MethodDefinition("Method", MethodAttributes.Static, MethodSignature.CreateInstance(factory.Void));
+            var body = new CilMethodBody(method);
+
+            assembly1.Modules.Add(module1);
+            assembly2.Modules.Add(module2);
+
+            module1.TopLevelTypes.Add(type1);
+            module2.TopLevelTypes.Add(type2);
+
+            type2.Methods.Add(method);
+
+            var typeSpecification = new TypeSpecification(type1.ToTypeSignature());
+
+            body.Instructions.Add(new CilInstruction(CilOpCodes.Sizeof, typeSpecification));
+            body.Instructions.Add(new CilInstruction(CilOpCodes.Pop));
+            method.MethodBody = body;
+
+            var workspace = new DotNetWorkspace();
+            workspace.Assemblies.Add(assembly1);
+            workspace.Assemblies.Add(assembly2);
+
+            workspace.Analyze();
+
+            var node = workspace.Index.GetOrCreateNode(type1);
+            Assert.Contains(typeSpecification,
+                node.ForwardRelations.GetObjects(DotNetRelations.ReferenceTypeSpecification));
+        }
+
         [Fact]
         public void FieldTest()
         {
