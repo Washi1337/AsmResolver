@@ -136,8 +136,6 @@ namespace AsmResolver.DotNet
             }
         }
 
-        public object Scope { get; set; }
-
         /// <summary>
         /// Resolves the reference to a member definition.
         /// </summary>
