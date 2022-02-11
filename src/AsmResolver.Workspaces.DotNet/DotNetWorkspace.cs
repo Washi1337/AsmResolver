@@ -23,6 +23,7 @@ namespace AsmResolver.Workspaces.DotNet
         public DotNetWorkspace()
         {
             Profiles.Add(new DotNetTraversalProfile());
+            Profiles.Add(new DotNetImplementationProfile());
         }
 
         /// <summary>

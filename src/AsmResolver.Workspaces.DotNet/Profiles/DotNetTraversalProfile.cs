@@ -8,8 +8,14 @@ using AsmResolver.Workspaces.DotNet.Analyzers.Signature;
 
 namespace AsmResolver.Workspaces.DotNet.Profiles
 {
-    internal class DotNetTraversalProfile : WorksapceProfile
+    /// <summary>
+    /// Provides a default implementation of profile to traverse all .net members.
+    /// </summary>
+    public class DotNetTraversalProfile : WorksapceProfile
     {
+        /// <summary>
+        /// Provides a default implementation of profile to traverse all .net members.
+        /// </summary>
         public DotNetTraversalProfile()
         {
             Analyzers.Register(typeof(AssemblyDefinition), new AssemblyAnalyzer());
@@ -17,7 +23,6 @@ namespace AsmResolver.Workspaces.DotNet.Profiles
             Analyzers.Register(typeof(TypeDefinition), new TypeAnalyzer());
             Analyzers.Register(typeof(MethodDefinition), new MethodAnalyzer());
             Analyzers.Register(typeof(MethodImplementation), new MethodImplementationAnalyzer());
-            Analyzers.Register(typeof(IHasSemantics), new SemanticsImplementationAnalyzer());
             Analyzers.Register(typeof(TypeReference), new TypeReferenceAnalyzer());
             Analyzers.Register(typeof(MemberReference), new MemberReferenceAnalyzer());
             Analyzers.Register(typeof(IHasCustomAttribute), new HasCustomAttributeAnalyzer());

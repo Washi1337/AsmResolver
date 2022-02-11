@@ -4,9 +4,9 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 
-namespace AsmResolver.Workspaces.DotNet.Analyzers
+namespace AsmResolver.Workspaces.DotNet.Analyzers.Implementation
 {
-    internal static class AnalyzerUtilities
+    internal static class ImplementationUtilities
     {
         private static readonly SignatureComparer _comparer = new ();
 
