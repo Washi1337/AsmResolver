@@ -130,5 +130,8 @@ namespace AsmResolver.DotNet.Serialized
                 ? member as MethodSemantics
                 : null;
         }
+
+        /// <inheritdoc />
+        protected override UnmanagedExportInfo? GetExportInfo() => _context.ParentModule.GetExportInfo(MetadataToken);
     }
 }

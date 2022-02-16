@@ -30,6 +30,8 @@
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Properties\AsmResolver.DotNet.TestCases.Properties.csproj" />
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Resources\AsmResolver.DotNet.TestCases.Resources.csproj" />
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Types\AsmResolver.DotNet.TestCases.Types.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\ClassLibraryVB\ClassLibraryVB.vbproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\HelloWorldVB\HelloWorldVB.vbproj" />
     </ItemGroup>
 
     <ItemGroup>

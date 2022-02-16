@@ -11,7 +11,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
-        /// Creates a new blob stream based on a byte array.
+        /// Creates a new blob stream with the provided byte array as the raw contents of the stream.
+        /// </summary>
+        /// <param name="rawData">The raw contents of the stream.</param>
+        public SerializedBlobStream(byte[] rawData)
+            : this(DefaultName, ByteArrayDataSource.CreateReader(rawData))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new blob stream with the provided byte array as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
@@ -21,7 +30,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         }
 
         /// <summary>
-        /// Creates a new blob stream based on a segment in a file.
+        /// Creates a new blob stream with the provided segment in a file as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="reader">The raw contents of the stream.</param>
@@ -70,5 +79,40 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
             return false;
         }
 
+        /// <inheritdoc />
+        public override bool TryFindBlobIndex(byte[]? blob, out uint index)
+        {
+            if (blob is null)
+            {
+                index = 0;
+                return true;
+            }
+
+            uint totalLength = (uint) blob.Length + ((uint) blob.Length).GetCompressedSize();
+
+            var reader = _reader.Fork();
+            while (reader.CanRead(totalLength))
+            {
+                index = reader.RelativeOffset;
+
+                if (reader.TryReadCompressedUInt32(out uint length) && length == blob.Length && reader.CanRead(length))
+                {
+                    int i = 0;
+                    for (; i < blob.Length; i++)
+                    {
+                        if (blob[i] != reader.ReadByte())
+                            break;
+                    }
+
+                    if (i == blob.Length)
+                        return true;
+                }
+
+                reader.RelativeOffset = index + 1;
+            }
+
+            index = 0;
+            return false;
+        }
     }
 }

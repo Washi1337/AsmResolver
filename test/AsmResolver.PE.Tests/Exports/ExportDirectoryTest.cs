@@ -130,5 +130,79 @@ namespace AsmResolver.PE.Tests.Exports
             Assert.Equal(exportedSymbol.Ordinal, newExportedSymbol.Ordinal);
             Assert.Equal(exportedSymbol.Address.Rva, newExportedSymbol.Address.Rva);
         }
+
+        [Fact]
+        public void PersistentExportedSymbolByOrdinal()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+
+            // Prepare mock.
+            var exportDirectory = new ExportDirectory("HelloWorld.dll");
+            var exportedSymbol = new ExportedSymbol(new VirtualAddress(0x12345678));
+            exportDirectory.Entries.Add(exportedSymbol);
+            image.Exports = exportDirectory;
+
+            // Rebuild.
+            var newImage = RebuildAndReloadManagedPE(image);
+
+            // Verify.
+            Assert.Equal(1, newImage.Exports!.Entries.Count);
+            var newExportedSymbol = newImage.Exports.Entries[0];
+            Assert.True(exportedSymbol.IsByOrdinal);
+            Assert.Equal(exportedSymbol.Ordinal, newExportedSymbol.Ordinal);
+            Assert.Equal(exportedSymbol.Address.Rva, newExportedSymbol.Address.Rva);
+        }
+
+        [Fact]
+        public void PersistentExportedSymbolMany()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+
+            // Prepare mock.
+            var exportDirectory = new ExportDirectory("HelloWorld.dll");
+            var namedSymbol1 = new ExportedSymbol(new VirtualAddress(0x12345678), "TestExport1");
+            var unnamedSymbol1 = new ExportedSymbol(new VirtualAddress(0x11112222));
+            var namedSymbol2 = new ExportedSymbol(new VirtualAddress(0xabcdef00), "TestExport2");
+            var unnamedSymbol2 = new ExportedSymbol(new VirtualAddress(0x33334444));
+            var namedSymbol3 = new ExportedSymbol(new VirtualAddress(0x1337c0de), "TestExport3");
+            var unnamedSymbol3 = new ExportedSymbol(new VirtualAddress(0x55556666));
+            exportDirectory.Entries.Add(namedSymbol1);
+            exportDirectory.Entries.Add(unnamedSymbol1);
+            exportDirectory.Entries.Add(namedSymbol2);
+            exportDirectory.Entries.Add(unnamedSymbol2);
+            exportDirectory.Entries.Add(namedSymbol3);
+            exportDirectory.Entries.Add(unnamedSymbol3);
+            image.Exports = exportDirectory;
+
+            // Rebuild.
+            var newImage = RebuildAndReloadManagedPE(image);
+
+            // Verify.
+            Assert.Equal(6, newImage.Exports!.Entries.Count);
+            var newSymbol = newImage.Exports.Entries[0];
+            Assert.Equal(namedSymbol1.Name, newSymbol.Name);
+            Assert.Equal(namedSymbol1.Ordinal, newSymbol.Ordinal);
+            Assert.Equal(namedSymbol1.Address.Rva, newSymbol.Address.Rva);
+            newSymbol = newImage.Exports.Entries[1];
+            Assert.True(newSymbol.IsByOrdinal);
+            Assert.Equal(unnamedSymbol1.Ordinal, newSymbol.Ordinal);
+            Assert.Equal(unnamedSymbol1.Address.Rva, newSymbol.Address.Rva);
+            newSymbol = newImage.Exports.Entries[2];
+            Assert.Equal(namedSymbol2.Name, newSymbol.Name);
+            Assert.Equal(namedSymbol2.Ordinal, newSymbol.Ordinal);
+            Assert.Equal(namedSymbol2.Address.Rva, newSymbol.Address.Rva);
+            newSymbol = newImage.Exports.Entries[3];
+            Assert.True(newSymbol.IsByOrdinal);
+            Assert.Equal(unnamedSymbol2.Ordinal, newSymbol.Ordinal);
+            Assert.Equal(unnamedSymbol2.Address.Rva, newSymbol.Address.Rva);
+            newSymbol = newImage.Exports.Entries[4];
+            Assert.Equal(namedSymbol3.Name, newSymbol.Name);
+            Assert.Equal(namedSymbol3.Ordinal, newSymbol.Ordinal);
+            Assert.Equal(namedSymbol3.Address.Rva, newSymbol.Address.Rva);
+            newSymbol = newImage.Exports.Entries[5];
+            Assert.True(newSymbol.IsByOrdinal);
+            Assert.Equal(unnamedSymbol3.Ordinal, newSymbol.Ordinal);
+            Assert.Equal(unnamedSymbol3.Address.Rva, newSymbol.Address.Rva);
+        }
     }
 }

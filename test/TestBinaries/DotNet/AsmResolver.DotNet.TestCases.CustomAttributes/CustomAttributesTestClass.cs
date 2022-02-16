@@ -139,5 +139,10 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         {
         }
 
+        [TestCase((Type) null)]
+        public void FixedNullTypeArgument()
+        {
+        }
+
     }
 }

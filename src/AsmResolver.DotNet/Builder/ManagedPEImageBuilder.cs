@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE;
+using AsmResolver.PE.Exports;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -76,9 +78,24 @@ namespace AsmResolver.DotNet.Builder
                 image.DotNetDirectory = result.Directory;
                 tokenMapping = result.TokenMapping;
 
-                // Copy any collected native symbols over to the image.
+                // Copy any collected imported native symbol over to the image.
                 foreach (var import in symbolProvider.GetImportedModules())
                     image.Imports.Add(import);
+
+                // Copy any collected exported native symbols over to the image.
+                var exportedSymbols = symbolProvider.GetExportedSymbols(out uint baseOrdinal).ToArray();
+                if (exportedSymbols.Length > 0)
+                {
+                    image.Exports = new ExportDirectory(!Utf8String.IsNullOrEmpty(module.Name)
+                        ? module.Name
+                        : string.Empty)
+                    {
+                        BaseOrdinal = baseOrdinal
+                    };
+
+                    foreach (var export in exportedSymbols)
+                        image.Exports.Entries.Add(export);
+                }
 
                 // Copy any collected base relocations over to the image.
                 foreach (var relocation in symbolProvider.GetBaseRelocations())
@@ -87,10 +104,11 @@ namespace AsmResolver.DotNet.Builder
                 // Copy over debug data.
                 for (int i = 0; i < module.DebugData.Count; i++)
                     image.DebugData.Add(module.DebugData[i]);
+
             }
             catch (Exception ex)
             {
-                context.DiagnosticBag.Exceptions.Add(ex);
+                context.DiagnosticBag.RegisterException(ex);
                 context.DiagnosticBag.MarkAsFatal();
             }
 

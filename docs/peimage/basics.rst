@@ -61,7 +61,7 @@ On Windows, if a module is loaded and mapped in memory (e.g. as a native depende
 Writing a PE image
 -------------------
 
-Building an image back to a PE file can be done by using one of the classes that implement the ``IPEFileBuilder`` interface. 
+Building an image back to a PE file can be done manually by constructing a ``PEFile``, or by using one of the classes that implement the ``IPEFileBuilder`` interface. 
 
 .. note::
     
@@ -84,7 +84,11 @@ Once a ``PEFile`` instance has been generated from the image, you can use it to 
         var writer = new BinaryStreamWriter(stream);
         newPEFile.Write(writer);
     }
-    
+
+
+For more information on how to construct arbitrary ``PEFile`` instances for native images, look at :ref:`pe-building`.
+
+
 Strong name signing
 -------------------
 

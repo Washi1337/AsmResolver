@@ -7,6 +7,7 @@ using AsmResolver.PE.Exports;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
+using AsmResolver.PE.Tls;
 using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.PE
@@ -171,6 +172,15 @@ namespace AsmResolver.PE
         IList<DebugDataEntry> DebugData
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets or sets the data directory containing the Thread-Local Storage (TLS) data.
+        /// </summary>
+        ITlsDirectory? TlsDirectory
+        {
+            get;
+            set;
         }
     }
 }

@@ -103,6 +103,8 @@ namespace AsmResolver.PE.DotNet.Cil
         {
             var section = new CilExtraSection
             {
+                Offset = reader.Offset,
+                Rva = reader.Rva,
                 Attributes = (CilExtraSectionAttributes) reader.ReadByte()
             };
 

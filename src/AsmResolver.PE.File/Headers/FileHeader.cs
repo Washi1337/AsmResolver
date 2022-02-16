@@ -19,21 +19,18 @@ namespace AsmResolver.PE.File.Headers
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The read file header.</returns>
-        public static FileHeader FromReader(ref BinaryStreamReader reader)
+        public static FileHeader FromReader(ref BinaryStreamReader reader) => new()
         {
-            return new()
-            {
-                Offset = reader.Offset,
-                Rva = reader.Rva,
-                Machine = (MachineType) reader.ReadUInt16(),
-                NumberOfSections = reader.ReadUInt16(),
-                TimeDateStamp = reader.ReadUInt32(),
-                PointerToSymbolTable = reader.ReadUInt32(),
-                NumberOfSymbols = reader.ReadUInt32(),
-                SizeOfOptionalHeader = reader.ReadUInt16(),
-                Characteristics = (Characteristics) reader.ReadUInt16()
-            };
-        }
+            Offset = reader.Offset,
+            Rva = reader.Rva,
+            Machine = (MachineType) reader.ReadUInt16(),
+            NumberOfSections = reader.ReadUInt16(),
+            TimeDateStamp = reader.ReadUInt32(),
+            PointerToSymbolTable = reader.ReadUInt32(),
+            NumberOfSymbols = reader.ReadUInt32(),
+            SizeOfOptionalHeader = reader.ReadUInt16(),
+            Characteristics = (Characteristics) reader.ReadUInt16()
+        };
 
         /// <summary>
         /// Gets or sets the machine the portable executable file is compiled for.
@@ -42,7 +39,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = MachineType.I386;
 
         /// <summary>
         /// Gets or sets the number of sections defined in the portable executable file.
@@ -90,7 +87,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0xE0;
 
         /// <summary>
         /// Gets or sets the characteristics of the portable executable file.
@@ -99,7 +96,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = Characteristics.Image | Characteristics.Machine32Bit;
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => FileHeaderSize;

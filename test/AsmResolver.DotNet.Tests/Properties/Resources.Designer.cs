@@ -191,5 +191,33 @@ namespace AsmResolver.DotNet.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] CallManagedExport_X86 {
+            get {
+                object obj = ResourceManager.GetObject("CallManagedExport_X86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] CallManagedExport_X64 {
+            get {
+                object obj = ResourceManager.GetObject("CallManagedExport_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] MyLibrary_X86 {
+            get {
+                object obj = ResourceManager.GetObject("MyLibrary_X86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] MyLibrary_X64 {
+            get {
+                object obj = ResourceManager.GetObject("MyLibrary_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
