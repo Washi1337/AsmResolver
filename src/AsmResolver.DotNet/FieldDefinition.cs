@@ -4,6 +4,7 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Marshal;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -56,17 +57,28 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the field.</param>
         /// <param name="attributes">The attributes.</param>
         /// <param name="signature">The signature of the field.</param>
-        /// <remarks>
-        /// For a valid .NET image, if <see cref="CallingConventionSignature.HasThis"/> of the signature referenced by
-        /// <paramref name="signature"/> is set, the <see cref="FieldAttributes.Static"/> bit should be unset in
-        /// <paramref name="attributes"/> and vice versa.
-        /// </remarks>
         public FieldDefinition(string? name, FieldAttributes attributes, FieldSignature? signature)
             : this(new MetadataToken(TableIndex.Field, 0))
         {
             Name = name;
             Attributes = attributes;
             Signature = signature;
+        }
+
+        /// <summary>
+        /// Creates a new field definition.
+        /// </summary>
+        /// <param name="name">The name of the field.</param>
+        /// <param name="attributes">The attributes.</param>
+        /// <param name="signature">The type of values the field contains.</param>
+        public FieldDefinition(string? name, FieldAttributes attributes, TypeSignature? signature)
+            : this(new MetadataToken(TableIndex.Field, 0))
+        {
+            Name = name;
+            Attributes = attributes;
+            Signature = signature is not null
+                ? new FieldSignature(signature)
+                : null;
         }
 
         /// <summary>
