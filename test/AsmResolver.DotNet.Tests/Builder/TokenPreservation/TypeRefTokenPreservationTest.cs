@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
             var originalTypeRefs = GetMembers<TypeReference>(module, TableIndex.TypeRef);
 
-            var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
+            var instructions = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions;
             instructions.Clear();
             instructions.Add(CilOpCodes.Ret);
 
@@ -48,9 +48,9 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var originalTypeRefs = GetMembers<TypeReference>(module, TableIndex.TypeRef);
 
             var importer = new ReferenceImporter(module);
-            var readKey = importer.ImportMethod(typeof(Console).GetMethod("ReadKey", Type.EmptyTypes));
+            var readKey = importer.ImportMethod(typeof(Console).GetMethod("ReadKey", Type.EmptyTypes)!);
 
-            var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
+            var instructions = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions;
             instructions.RemoveAt(instructions.Count - 1);
             instructions.Add(CilOpCodes.Call, readKey);
             instructions.Add(CilOpCodes.Pop);
@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveDuplicatedTypeRefs()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
             var metadata = image.DotNetDirectory!.Metadata!;
             var strings = metadata.GetStream<StringsStream>();
             var table = metadata
@@ -80,12 +80,12 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var module = ModuleDefinition.FromImage(image);
 
             // Obtain references to Object.
-            var objectReferences = module
+            var references = module
                 .GetImportedTypeReferences()
                 .Where(t => t.Name == "Object")
                 .ToArray();
 
-            Assert.Equal(2, objectReferences.Length);
+            Assert.Equal(2, references.Length);
 
             // Rebuild with preservation.
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveTypeReferenceIndices);
@@ -96,7 +96,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 .ToArray();
 
             Assert.Equal(
-                objectReferences.Select(r => r.MetadataToken).ToHashSet(),
+                references.Select(r => r.MetadataToken).ToHashSet(),
                 newObjectReferences.Select(r => r.MetadataToken).ToHashSet());
         }
     }
