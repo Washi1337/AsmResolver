@@ -224,7 +224,9 @@ namespace AsmResolver.DotNet.Tests
         public void ImportFieldFromExternalModuleShouldResultInMemberRef()
         {
             var type = new TypeReference(_dummyAssembly, null, "Type");
-            var field = new MemberReference(type, "Field",
+            var field = new MemberReference(
+                type,
+                "Field",
                 new FieldSignature(_module.CorLibTypeFactory.String));
 
             var result = _importer.ImportField(field);
@@ -239,8 +241,11 @@ namespace AsmResolver.DotNet.Tests
             var type = new TypeDefinition(null, "Type", TypeAttributes.Public);
             _module.TopLevelTypes.Add(type);
 
-            var field = new FieldDefinition("Field", FieldAttributes.Public | FieldAttributes.Static,
-                new FieldSignature(_module.CorLibTypeFactory.Int32));
+            var field = new FieldDefinition(
+                "Field",
+                FieldAttributes.Public | FieldAttributes.Static,
+                _module.CorLibTypeFactory.Int32);
+
             type.Fields.Add(field);
 
             var result = _importer.ImportField(field);
