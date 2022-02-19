@@ -56,18 +56,11 @@ namespace AsmResolver.Workspaces.DotNet
 
 
         /// <summary>
-        /// Describes the relationship between a type definition and its reference.
+        /// Describes the relationship between a type definition and its reference or specification.
         /// </summary>
-        public static readonly ObjectRelation<TypeDefinition, TypeReference> ReferenceType = new(
+        public static readonly ObjectRelation<TypeDefinition, ITypeDefOrRef> ReferenceType = new(
             "ReferenceType",
             new Guid("3cc86779-338c-4165-a00c-da547a2e8549"));
-
-        /// <summary>
-        /// Describes the relationship between a type definition and its specification.
-        /// </summary>
-        public static readonly ObjectRelation<TypeDefinition, TypeSpecification> ReferenceTypeSpecification = new(
-            "ReferenceTypeSpecification",
-            new Guid("e60a2deb-b608-4775-93ad-c073eac934e5"));
 
         /// <summary>
         /// Describes the relationship between a exported type and its definition.

@@ -226,7 +226,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(type1);
             Assert.Contains(typeSpecification,
-                node.ForwardRelations.GetObjects(DotNetRelations.ReferenceTypeSpecification));
+                node.ForwardRelations.GetObjects(DotNetRelations.ReferenceType));
         }
 
         [Fact]
@@ -270,10 +270,12 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             var typeNode = workspace.Index.GetOrCreateNode(type1);
             var methodNode = workspace.Index.GetOrCreateNode(method1);
 
+            var methodRefNode = methodNode.ForwardRelations.GetNodes(DotNetRelations.ReferenceMember).First();
+
             Assert.Contains(mehtodSpecification,
-                methodNode.ForwardRelations.GetObjects(DotNetRelations.ReferenceMethodSpecification));
+                methodRefNode.ForwardRelations.GetObjects(DotNetRelations.ReferenceMethodSpecification));
             Assert.Contains(typeSpecification,
-                typeNode.ForwardRelations.GetObjects(DotNetRelations.ReferenceTypeSpecification));
+                typeNode.ForwardRelations.GetObjects(DotNetRelations.ReferenceType));
         }
 
         [Fact]

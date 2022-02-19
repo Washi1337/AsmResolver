@@ -3,7 +3,7 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 
-namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
+namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
 {
     /// <summary>
     /// Provides a default implementation for an <see cref="TypeSpecification"/> analyzer.
@@ -42,7 +42,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 
             var specification = context.Workspace.Index.GetOrCreateNode(subject);
             var typeNode = context.Workspace.Index.GetOrCreateNode(definition);
-            typeNode.ForwardRelations.Add(DotNetRelations.ReferenceTypeSpecification, specification);
+            typeNode.ForwardRelations.Add(DotNetRelations.ReferenceType, specification);
         }
     }
 }
