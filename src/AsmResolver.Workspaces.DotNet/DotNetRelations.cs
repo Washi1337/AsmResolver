@@ -48,9 +48,9 @@ namespace AsmResolver.Workspaces.DotNet
             new Guid("ce11d2f6-a423-429d-ad37-2f073fdf63be"));
 
         /// <summary>
-        /// Describes the relationship between a method definition and its specification.
+        /// Describes the relationship between a method and its specification.
         /// </summary>
-        public static readonly ObjectRelation<MethodDefinition, MethodSpecification> ReferenceMethodSpecification = new(
+        public static readonly ObjectRelation<IMethodDefOrRef, MethodSpecification> ReferenceMethodSpecification = new(
             "ReferenceMethodSpecification",
             new Guid("3824566f-3df4-4188-8e67-ed2d745df84a"));
 

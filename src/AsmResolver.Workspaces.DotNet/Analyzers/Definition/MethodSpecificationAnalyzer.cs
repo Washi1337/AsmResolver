@@ -26,10 +26,10 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 context.ScheduleForAnalysis(subject.DeclaringType);
             }
 
-            if (subject.Resolve() is { } definition)
+            if (subject.Method is not null)
             {
                 var specification = context.Workspace.Index.GetOrCreateNode(subject);
-                var definitionNode = context.Workspace.Index.GetOrCreateNode(definition);
+                var definitionNode = context.Workspace.Index.GetOrCreateNode(subject.Method);
                 definitionNode.ForwardRelations.Add(DotNetRelations.ReferenceMethodSpecification, specification);
             }
         }
