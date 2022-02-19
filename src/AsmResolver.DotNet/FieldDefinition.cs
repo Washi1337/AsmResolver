@@ -70,14 +70,14 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the field.</param>
         /// <param name="attributes">The attributes.</param>
-        /// <param name="signature">The type of values the field contains.</param>
-        public FieldDefinition(string? name, FieldAttributes attributes, TypeSignature? signature)
+        /// <param name="fieldType">The type of values the field contains.</param>
+        public FieldDefinition(string? name, FieldAttributes attributes, TypeSignature? fieldType)
             : this(new MetadataToken(TableIndex.Field, 0))
         {
             Name = name;
             Attributes = attributes;
-            Signature = signature is not null
-                ? new FieldSignature(signature)
+            Signature = fieldType is not null
+                ? new FieldSignature(fieldType)
                 : null;
         }
 
