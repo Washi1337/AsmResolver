@@ -14,9 +14,9 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="fieldType">The value type of the field.</param>
         /// <returns>The signature.</returns>
-        [Obsolete("The HasThis bit in field signatures is ignored by the CLR. Use the constructor instead, or"
-                  + " when this call is used in an argument of a FieldDefinition constructor, use the overload taking "
-                  + "a TypeSignature instead.")]
+        [Obsolete("The HasThis bit in field signatures is ignored by the CLR. Use the constructor instead,"
+                  + " or when this call is used in an argument of a FieldDefinition constructor, use the overload"
+                  + " taking TypeSignature instead.")]
         public static FieldSignature CreateStatic(TypeSignature fieldType)
             => new(CallingConventionAttributes.Field, fieldType);
 
@@ -25,9 +25,9 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="fieldType">The value type of the field.</param>
         /// <returns>The signature.</returns>
-        [Obsolete("The HasThis bit in field signatures is ignored by the CLR. Use the constructor instead, or"
-                  + " when this call is used in an argument of a FieldDefinition constructor, use the overload taking "
-                  + "a TypeSignature instead.")]
+        [Obsolete("The HasThis bit in field signatures is ignored by the CLR. Use the constructor instead,"
+                  + " or when this call is used in an argument of a FieldDefinition constructor, use the overload"
+                  + " taking TypeSignature instead.")]
         public static FieldSignature CreateInstance(TypeSignature fieldType)
             => new(CallingConventionAttributes.Field | CallingConventionAttributes.HasThis, fieldType);
 

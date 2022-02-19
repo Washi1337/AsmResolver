@@ -272,8 +272,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var genericParameter = new GenericParameterSignature(GenericParameterType.Type, 0);
 
-            var field = new FieldDefinition("Field", FieldAttributes.Private,
-                FieldSignature.CreateStatic(genericParameter));
+            var field = new FieldDefinition("Field", FieldAttributes.Private, genericParameter);
 
             var member = new MemberReference(typeSpecification, field.Name, field.Signature);
 
@@ -292,8 +291,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var type = new TypeDefinition("", "Test type", TypeAttributes.Public);
             var notGenericSignature = new TypeDefOrRefSignature(type);
 
-            var field = new FieldDefinition("Field", FieldAttributes.Private,
-                FieldSignature.CreateStatic(notGenericSignature));
+            var field = new FieldDefinition("Field", FieldAttributes.Private, notGenericSignature);
 
             var member = new MemberReference(type, field.Name, field.Signature);
 

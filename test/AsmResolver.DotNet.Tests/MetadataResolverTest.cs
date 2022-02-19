@@ -161,8 +161,10 @@ namespace AsmResolver.DotNet.Tests
             var module = new ModuleDefinition("SomeModule.dll");
 
             var stringType = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "String");
-            var emptyField = new MemberReference(stringType, "Empty",
-                FieldSignature.CreateStatic(module.CorLibTypeFactory.String));
+            var emptyField = new MemberReference(
+                stringType,
+                "Empty",
+                new FieldSignature(module.CorLibTypeFactory.String));
 
             var definition = _fwResolver.ResolveField(emptyField);
 

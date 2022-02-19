@@ -98,10 +98,14 @@ namespace AsmResolver.DotNet.Tests
 
             // Create two dummy fields.
             var fieldType = module.CorLibTypeFactory.Object;
-            var field1 = new FieldDefinition("NonAssignedField", FieldAttributes.Static,
-                FieldSignature.CreateStatic(fieldType));
-            var field2 = new FieldDefinition("AssignedField", FieldAttributes.Static,
-                FieldSignature.CreateStatic(fieldType));
+            var field1 = new FieldDefinition(
+                "NonAssignedField",
+                FieldAttributes.Static,
+                new FieldSignature(fieldType));
+            var field2 = new FieldDefinition(
+                "AssignedField",
+                FieldAttributes.Static,
+                new FieldSignature(fieldType));
 
             // Add both.
             var moduleType = module.GetOrCreateModuleType();
