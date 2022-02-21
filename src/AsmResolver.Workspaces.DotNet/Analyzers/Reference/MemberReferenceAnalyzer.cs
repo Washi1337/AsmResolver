@@ -9,7 +9,6 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
     /// </summary>
     public class MemberReferenceAnalyzer : ObjectAnalyzer<MemberReference>
     {
-        private readonly SignatureComparer _comparer = new();
 
         /// <inheritdoc />
         protected override void Analyze(AnalysisContext context, MemberReference subject)
@@ -25,33 +24,15 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
                 context.ScheduleForAnalysis(subject.Signature);
             }
 
-            if (context.Workspace is not DotNetWorkspace workspace)
+            if(!context.Workspace.ContainsSubjectAssembly(subject))
                 return;
-
-            if (GetParentAssembly(subject.Parent) is not { } assembly)
+            if (subject.Resolve() is not {} definition)
                 return;
-            if (!workspace.Assemblies.Any(a => _comparer.Equals(a, assembly)))
-                return;
-
-            var definition = subject.Resolve();
-            if (definition is not { Module: { Assembly: { } } })
-                return;
-            if (!workspace.Assemblies.Contains(definition.Module.Assembly))
-                return; //TODO: Maybe add some warning log?
 
             var index = context.Workspace.Index;
             var node = index.GetOrCreateNode(definition);
             var candidateNode = index.GetOrCreateNode(subject);
             node.ForwardRelations.Add(DotNetRelations.ReferenceMember, candidateNode);
         }
-
-        private AssemblyDescriptor? GetParentAssembly(IMemberRefParent? parent)
-            => parent switch
-            {
-                ITypeDescriptor type => type.Scope?.GetAssembly(),
-                MethodDefinition method => method.Module?.Assembly,
-                IResolutionScope scope => scope.GetAssembly(),
-                _ => null
-            };
-}
+    }
 }

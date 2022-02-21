@@ -19,18 +19,9 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
                 context.ScheduleForAnalysis(subject.DeclaringType);
             }
 
-            if (context.Workspace is not DotNetWorkspace workspace)
+            if(!context.Workspace.ContainsSubjectAssembly(subject))
                 return;
-
-            if (subject.Scope?.GetAssembly() is not { } assembly)
-                return;
-            if (!workspace.Assemblies.Any(a => _comparer.Equals(a, assembly)))
-                return;
-
-            var definition = subject.Resolve();
-            if (definition is not { Module: { Assembly: { } } })
-                return;
-            if (!workspace.Assemblies.Contains(definition.Module.Assembly))
+            if (subject.Resolve() is not {} definition)
                 return;
 
             var index = context.Workspace.Index;
