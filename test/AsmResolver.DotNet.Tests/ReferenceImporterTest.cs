@@ -16,18 +16,18 @@ namespace AsmResolver.DotNet.Tests
         private readonly AssemblyReference _dummyAssembly = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
         private readonly ModuleDefinition _module;
         private readonly ReferenceImporter _importer;
-        
+
         public ReferenceImporterTest()
         {
             _module = new ModuleDefinition("SomeModule.dll");
             _importer = new ReferenceImporter(_module);
         }
-        
+
         [Fact]
         public void ImportNewAssemblyShouldAddToModule()
         {
             var result = _importer.ImportScope(_dummyAssembly);
-            
+
             Assert.Equal(_dummyAssembly, result, _comparer);
             Assert.Contains(result, _module.AssemblyReferences);
         }
@@ -38,10 +38,10 @@ namespace AsmResolver.DotNet.Tests
             _module.AssemblyReferences.Add(_dummyAssembly);
 
             int count = _module.AssemblyReferences.Count;
-            
+
             var copy = new AssemblyReference(_dummyAssembly);
             var result = _importer.ImportScope(copy);
-            
+
             Assert.Same(_dummyAssembly, result);
             Assert.Equal(count, _module.AssemblyReferences.Count);
         }
@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var type = new TypeReference(_dummyAssembly, "SomeNamespace", "SomeName");
             var importedType = _importer.ImportType(type);
-            
+
             var result = _importer.ImportType(importedType);
 
             Assert.Same(importedType, result);
@@ -80,13 +80,13 @@ namespace AsmResolver.DotNet.Tests
             Assert.IsAssignableFrom<TypeReference>(result);
             Assert.Equal(definition, result, _comparer);
         }
-        
+
         [Fact]
         public void ImportTypeDefInSameModuleShouldReturnSameInstance()
         {
             var definition = new TypeDefinition("SomeNamespace", "SomeName", TypeAttributes.Public);
             _module.TopLevelTypes.Add(definition);
-            
+
             var importedType = _importer.ImportType(definition);
 
             Assert.Same(definition, importedType);
@@ -127,7 +127,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.IsAssignableFrom<TypeSpecification>(result);
             Assert.IsAssignableFrom<SzArrayTypeSignature>(((TypeSpecification) result).Signature);
         }
-        
+
         [Fact]
         public void ImportCorLibTypeAsSignatureShouldResultInCorLibTypeSignature()
         {
@@ -179,7 +179,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var type = new TypeDefinition(null, "Type", TypeAttributes.Public);
             _module.TopLevelTypes.Add(type);
-            
+
             var method = new MethodDefinition("Method", MethodAttributes.Public | MethodAttributes.Static,
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
             type.Methods.Add(method);
@@ -224,8 +224,10 @@ namespace AsmResolver.DotNet.Tests
         public void ImportFieldFromExternalModuleShouldResultInMemberRef()
         {
             var type = new TypeReference(_dummyAssembly, null, "Type");
-            var field = new MemberReference(type, "Field",
-                FieldSignature.CreateStatic(_module.CorLibTypeFactory.String));
+            var field = new MemberReference(
+                type,
+                "Field",
+                new FieldSignature(_module.CorLibTypeFactory.String));
 
             var result = _importer.ImportField(field);
 
@@ -238,9 +240,12 @@ namespace AsmResolver.DotNet.Tests
         {
             var type = new TypeDefinition(null, "Type", TypeAttributes.Public);
             _module.TopLevelTypes.Add(type);
-            
-            var field = new FieldDefinition("Method", FieldAttributes.Public | FieldAttributes.Static,
-                FieldSignature.CreateStatic(_module.CorLibTypeFactory.Void));
+
+            var field = new FieldDefinition(
+                "Field",
+                FieldAttributes.Public | FieldAttributes.Static,
+                _module.CorLibTypeFactory.Int32);
+
             type.Fields.Add(field);
 
             var result = _importer.ImportField(field);
@@ -254,7 +259,7 @@ namespace AsmResolver.DotNet.Tests
             var field = typeof(string).GetField("Empty");
 
             var result = _importer.ImportField(field);
-            
+
             Assert.Equal(field.Name, result.Name);
             Assert.Equal(field.DeclaringType.FullName, result.DeclaringType.FullName);
             Assert.Equal(field.FieldType.FullName, ((FieldSignature) result.Signature).FieldType.FullName);
