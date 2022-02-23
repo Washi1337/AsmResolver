@@ -8,27 +8,27 @@ This section covers referencing methods such as ``System.Collections.Generic.Lis
 
 .. code-block:: csharp
 
-    var listTypeRef = new TypeReference(corlibScope, "System.Collections.Generic", "List`1");
-    
-    var listOfInt32 = new GenericInstanceTypeSignature(listTypeRef, 
-        isValueType: false, 
-        typeArguments: new[] { module.CorLibTypeFactory.Int32 });
+    var corlibScope = moduleDefinition.CorLibTypeFactory.CorLibScope;
 
-    var addMethodDefinition = listTypeRef.Resolve().Methods.Single(m => m.Name == "Add" && m.Parameters.Count == 1);
+    var listTypeReference = new TypeReference(corlibScope, "System.Collections.Generic", "List`1");
+    
+    var listOfInt32 = listTypeReference.MakeGenericInstanceType(moduleDefinition.CorLibTypeFactory.Int32);
+
+    var addMethodDefinition = listTypeReference.Resolve().Methods.Single(m => m.Name == "Add" && m.Parameters.Count == 1);
 
     var reference = new MemberReference(listOfInt32.ToTypeDefOrRef(), addMethodDefinition.Name, addMethodDefinition.Signature);
 
 Generic Methods on Non-Generic Types
 ------------------------------------------
 
-This section covers referencing methods such as ``System.Array.Empty<System.Int32>``. They can be referenced with the ``MethodSpecification`` class.
+This section covers referencing methods such as ``System.Array.Empty<System.Int32>``. They can be referenced with the ``MethodSpecification`` class via the ``MakeGenericInstanceMethod`` extension method on ``IMethodDefOrRef``.
 
 .. code-block:: csharp
 
-    var arrayRef = new TypeReference(corlibScope, "System", "Array");
+    var corlibScope = moduleDefinition.CorLibTypeFactory.CorLibScope;
 
-    var emptyMethodDefinition = arrayRef.Resolve().Methods.Single(m => m.Name == "Empty" && m.Parameters.Count == 0);
+    var arrayTypeReference = new TypeReference(corlibScope, "System", "Array");
 
-    var genericInstanceMethodSignature = new GenericInstanceMethodSignature(module.CorLibTypeFactory.Int32);
+    var emptyMethodDefinition = arrayTypeReference.Resolve().Methods.Single(m => m.Name == "Empty" && m.Parameters.Count == 0);
 
-    var reference = new MethodSpecification(emptyMethodDefinition, genericInstanceMethodSignature);
+    var reference = emptyMethodDefinition.MakeGenericInstanceMethod(moduleDefinition.CorLibTypeFactory.Int32);
