@@ -1,7 +1,8 @@
 namespace AsmResolver.DotNet.Code
 {
     /// <summary>
-    /// Represents a method body that was not resolved into
+    /// Provides a wrapper around a <see cref="ISegmentReference"/>, pointing to the beginning of a method body.
+    /// The interpretation of the data behind the pointer was left to the user.
     /// </summary>
     public class UnresolvedMethodBody : MethodBody
     {

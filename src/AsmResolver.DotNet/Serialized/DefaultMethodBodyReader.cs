@@ -23,17 +23,18 @@ namespace AsmResolver.DotNet.Serialized
 
             try
             {
-                if (bodyReference.IsBounded)
-                {
-                    if (bodyReference.GetSegment() is CilRawMethodBody rawMethodBody)
-                        result = CilMethodBody.FromRawMethodBody(context, owner, rawMethodBody);
-                }
-                else if (bodyReference.CanRead && owner.IsIL)
+                if (bodyReference.CanRead && owner.IsIL)
                 {
                     var reader = bodyReference.CreateReader();
                     var rawBody = CilRawMethodBody.FromReader(context, ref reader);
                     if (rawBody is not null)
                         result = CilMethodBody.FromRawMethodBody(context, owner, rawBody);
+                }
+
+                if (result is null && bodyReference.IsBounded)
+                {
+                    if (bodyReference.GetSegment() is CilRawMethodBody rawMethodBody)
+                        result = CilMethodBody.FromRawMethodBody(context, owner, rawMethodBody);
                 }
             }
             catch (Exception ex)
