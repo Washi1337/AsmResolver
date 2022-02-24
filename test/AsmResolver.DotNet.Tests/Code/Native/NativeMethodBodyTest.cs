@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Signatures;
@@ -18,7 +19,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
         private static NativeMethodBody CreateDummyBody(bool isVoid, bool is32Bit)
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.TheAnswer_NetFx);
-            
+
             module.Attributes &= DotNetDirectoryFlags.ILOnly;
             if (is32Bit)
             {
@@ -41,13 +42,13 @@ namespace AsmResolver.DotNet.Tests.Code.Native
                                      | MethodImplAttributes.PreserveSig;
             method.DeclaringType.Methods.Remove(method);
             module.GetOrCreateModuleType().Methods.Add(method);
-            
+
             return method.NativeMethodBody = new NativeMethodBody(method);
         }
 
         private static CodeSegment GetNewCodeSegment(IPEImage image)
         {
-            var methodTable = image.DotNetDirectory.Metadata
+            var methodTable = image.DotNetDirectory!.Metadata!
                 .GetStream<TablesStream>()
                 .GetTable<MethodDefinitionRow>(TableIndex.Method);
             var row = methodTable.First(r => (r.ImplAttributes & MethodImplAttributes.Native) != 0);
@@ -99,18 +100,18 @@ namespace AsmResolver.DotNet.Tests.Code.Native
                 0x67, 0x65, 0x64, 0x20, 0x77, 0x6f, 0x72,   // "ed worl"
                 0x6c, 0x64, 0x21, 0x00                      // "d!"
             };
-            
+
             // Fix up reference to ucrtbased.dll!puts
             var ucrtbased = new ImportedModule("ucrtbased.dll");
             var puts = new ImportedSymbol(0x4fc, "puts");
             ucrtbased.Symbols.Add(puts);
-            
+
             body.AddressFixups.Add(new AddressFixup(
                 0xD, AddressFixupType.Relative32BitAddress, puts
             ));
 
             // Serialize module to PE image.
-            var module = body.Owner.Module;
+            var module = body.Owner.Module!;
             var image = module.ToPEImage();
 
             // Verify import is added to PE image.
@@ -136,24 +137,24 @@ namespace AsmResolver.DotNet.Tests.Code.Native
                 /* 19: */  0x5D,                                 // pop ebp
                 /* 1A: */  0xC3,                                 // ret
             };
-            
+
             // Fix up reference to ucrtbased.dll!puts
             var ucrtbased = new ImportedModule("ucrtbased.dll");
             var puts = new ImportedSymbol(0x4fc, "puts");
             ucrtbased.Symbols.Add(puts);
-            
+
             body.AddressFixups.Add(new AddressFixup(
                 0xD, AddressFixupType.Absolute32BitAddress, puts
             ));
 
             // Serialize module to PE image.
-            var module = body.Owner.Module;
+            var module = body.Owner.Module!;
             var image = module.ToPEImage();
 
             // Verify import is added to PE image.
             Assert.Contains(image.Imports, m =>
                 m.Name == ucrtbased.Name && m.Symbols.Any(s => s.Name == puts.Name));
-            
+
             // Verify relocation is added.
             var segment = GetNewCodeSegment(image);
             Assert.Contains(image.Relocations, r =>
@@ -183,7 +184,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
                 0x67, 0x65, 0x64, 0x20, 0x77, 0x6f, 0x72,   // "ed worl"
                 0x6c, 0x64, 0x21, 0x00                      // "d!"
             };
-            
+
             // Add reference to ucrtbased.dll!puts at offset 0xD.
             var ucrtbased1 = new ImportedModule("ucrtbased.dll");
             var puts1 = new ImportedSymbol(0x4fc, "puts");
@@ -191,7 +192,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             body.AddressFixups.Add(new AddressFixup(
                 0xD, AddressFixupType.Relative32BitAddress, puts1
             ));
-            
+
             // Add second (duplicated) reference to ucrtbased.dll!puts at offset 0x20.
             var ucrtbased2 = new ImportedModule("ucrtbased.dll");
             var puts2 = new ImportedSymbol(0x4fc, "puts");
@@ -201,7 +202,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             ));
 
             // Serialize module to PE image.
-            var module = body.Owner.Module;
+            var module = body.Owner.Module!;
             var image = module.ToPEImage();
 
             // Verify import is added to PE image.
@@ -211,6 +212,36 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             var importedSymbol = Assert.Single(importedModule.Symbols);
             Assert.NotNull(importedSymbol);
             Assert.Equal(puts1.Name, importedSymbol.Name);
+        }
+
+        [Fact]
+        public void ReadNativeMethodShouldResultInReferenceWithRightContents()
+        {
+            // Create native body.
+            var body = CreateDummyBody(false, false);
+            body.Code = new byte[]
+            {
+                0xb8, 0x39, 0x05, 0x00, 0x00, // mov rax, 1337
+                0xc3                          // ret
+            };
+
+            // Serialize module.
+            var module = body.Owner.Module!;
+            using var stream = new MemoryStream();
+            module.Write(stream);
+
+            // Reload and look up native method.
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var method = newModule.GetAllTypes().SelectMany(t => t.Methods).First(m => m.IsNative);
+
+            // Verify if code behind the entry address is consistent.
+            var reference = method.MethodBody?.Address;
+            Assert.NotNull(reference);
+            Assert.True(reference.CanRead);
+
+            byte[] newBuffer = new byte[body.Code.Length];
+            reference.CreateReader().ReadBytes(newBuffer, 0, newBuffer.Length);
+            Assert.Equal(body.Code, newBuffer);
         }
     }
 }
