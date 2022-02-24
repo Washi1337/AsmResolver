@@ -273,7 +273,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             var methodRefNode = methodNode.ForwardRelations.GetNodes(DotNetRelations.ReferenceMember).First();
 
             Assert.Contains(mehtodSpecification,
-                methodRefNode.ForwardRelations.GetObjects(DotNetRelations.ReferenceMethodSpecification));
+                methodRefNode.ForwardRelations.GetObjects(DotNetRelations.ReferenceMember));
             Assert.Contains(typeSpecification,
                 typeNode.ForwardRelations.GetObjects(DotNetRelations.ReferenceType));
         }
