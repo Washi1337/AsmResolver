@@ -1,4 +1,5 @@
 using AsmResolver.DotNet;
+using AsmResolver.Workspaces.DotNet.Analyzers.Implementation;
 
 namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
 {
@@ -13,8 +14,9 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
             if (context.Workspace is not DotNetWorkspace workspace)
                 return;
 
-            var definition = subject.Resolve();
-            if (definition is null || !workspace.Assemblies.Contains(definition))
+            if(!context.Workspace.ContainsSubjectAssembly(subject))
+                return;
+            if (subject.Resolve() is not {} definition)
                 return;
 
             var index = context.Workspace.Index;

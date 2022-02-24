@@ -1,8 +1,7 @@
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 
-namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
+namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
 {
     /// <summary>
     /// Provides a default implementation for an <see cref="MethodSpecification"/> analyzer.
@@ -26,11 +25,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 context.ScheduleForAnalysis(subject.DeclaringType);
             }
 
-            if (subject.Resolve() is { } definition)
+            if (subject.Method is not null)
             {
                 var specification = context.Workspace.Index.GetOrCreateNode(subject);
-                var definitionNode = context.Workspace.Index.GetOrCreateNode(definition);
-                definitionNode.ForwardRelations.Add(DotNetRelations.ReferenceMethodSpecification, specification);
+                var methodNode = context.Workspace.Index.GetOrCreateNode(subject.Method);
+                methodNode.ForwardRelations.Add(DotNetRelations.ReferenceMethodSpecification, specification);
             }
         }
     }

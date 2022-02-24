@@ -69,8 +69,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Implementation
                 {
                     var baseType = (ITypeDefOrRef)baseTypeNode.Subject;
                     agenda.Enqueue(baseTypeNode);
-                    var baseTypeDefinitions = baseTypeNode.BackwardRelations.GetNodes(DotNetRelations.ReferenceType
-                        , DotNetRelations.ReferenceTypeSpecification);
+                    var baseTypeDefinitions = baseTypeNode.BackwardRelations.GetNodes(DotNetRelations.ReferenceType);
                     foreach (var baseTypeDefinition in baseTypeDefinitions)
                         agenda.Enqueue(baseTypeDefinition);
                     yield return baseType;
