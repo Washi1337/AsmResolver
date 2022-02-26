@@ -29,7 +29,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
             {
                 var specification = context.Workspace.Index.GetOrCreateNode(subject);
                 var methodNode = context.Workspace.Index.GetOrCreateNode(subject.Method);
-                methodNode.ForwardRelations.Add(DotNetRelations.ReferenceMethodSpecification, specification);
+                methodNode.ForwardRelations.Add(DotNetRelations.ReferenceMember, specification);
             }
         }
     }
