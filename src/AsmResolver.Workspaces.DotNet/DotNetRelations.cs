@@ -41,16 +41,18 @@ namespace AsmResolver.Workspaces.DotNet
             new Guid("52a81339-0850-4f81-b059-30d7aacc430f"));
 
         /// <summary>
-        /// Describes the relationship between a method or field definition and its reference.
+        /// Describes the relationship between a method or field definition and its reference
+        /// or method definition/reference to its specification.
         /// </summary>
-        public static readonly ObjectRelation<IMemberDefinition, MemberReference> ReferenceMember = new(
+        public static readonly ObjectRelation<IMemberDescriptor , IMemberDescriptor> ReferenceMember = new(
             "ReferenceMember",
             new Guid("ce11d2f6-a423-429d-ad37-2f073fdf63be"));
 
+
         /// <summary>
-        /// Describes the relationship between a type definition and its reference.
+        /// Describes the relationship between a type definition and its reference or specification.
         /// </summary>
-        public static readonly ObjectRelation<TypeDefinition, TypeReference> ReferenceType = new(
+        public static readonly ObjectRelation<TypeDefinition, ITypeDefOrRef> ReferenceType = new(
             "ReferenceType",
             new Guid("3cc86779-338c-4165-a00c-da547a2e8549"));
 

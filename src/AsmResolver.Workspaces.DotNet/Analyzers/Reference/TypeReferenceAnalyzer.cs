@@ -1,4 +1,6 @@
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
+using System.Linq;
 
 namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
 {
@@ -7,6 +9,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
     /// </summary>
     public class TypeReferenceAnalyzer : ObjectAnalyzer<TypeReference>
     {
+        private readonly SignatureComparer _comparer = new();
+
         /// <inheritdoc />
         protected override void Analyze(AnalysisContext context, TypeReference subject)
         {
@@ -15,13 +19,9 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
                 context.ScheduleForAnalysis(subject.DeclaringType);
             }
 
-            if (context.Workspace is not DotNetWorkspace workspace)
+            if(!context.Workspace.ContainsSubjectAssembly(subject))
                 return;
-
-            var definition = subject.Resolve();
-            if (definition is not { Module: { Assembly: { } } })
-                return;
-            if (!workspace.Assemblies.Contains(definition.Module.Assembly))
+            if (subject.Resolve() is not {} definition)
                 return;
 
             var index = context.Workspace.Index;
