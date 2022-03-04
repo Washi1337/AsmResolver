@@ -373,5 +373,39 @@ namespace AsmResolver.PE.DotNet.Cil
             CilCode.Ldc_I4_M1 => -1,
             _ => throw new ArgumentOutOfRangeException()
         };
+
+        /// <summary>
+        /// Replaces the operation code used by the instruction with a new one, and clears the operand.
+        /// </summary>
+        /// <param name="opCode">The new operation code.</param>
+        /// <remarks>
+        /// This method may be useful when patching a method body, where reusing the instruction object is favourable.
+        /// This can prevent breaking any references to the instruction (e.g. branch or exception handler targets).
+        /// </remarks>
+        public void ReplaceWith(CilOpCode opCode) => ReplaceWith(opCode, null);
+
+        /// <summary>
+        /// Replaces the operation code and operand used by the instruction with new ones.
+        /// </summary>
+        /// <param name="opCode">The new operation code.</param>
+        /// <param name="operand">The new operand.</param>
+        /// <remarks>
+        /// This method may be useful when patching a method body, where reusing the instruction object is favourable.
+        /// This can prevent breaking any references to the instruction (e.g. branch or exception handler targets).
+        /// </remarks>
+        public void ReplaceWith(CilOpCode opCode, object? operand)
+        {
+            OpCode = opCode;
+            Operand = operand;
+        }
+
+        /// <summary>
+        /// Clears the operand and replaces the operation code with a <see cref="CilOpCodes.Nop"/> (No-Operation).
+        /// </summary>
+        /// <remarks>
+        /// This method may be useful when patching a method body, where reusing the instruction object is favourable.
+        /// This can prevent breaking any references to the instruction (e.g. branch or exception handler targets).
+        /// </remarks>
+        public void ReplaceWithNop() => ReplaceWith(CilOpCodes.Nop);
     }
 }
