@@ -213,7 +213,7 @@ namespace AsmResolver.PE.DotNet.Cil
             if (isShort && delta is < sbyte.MinValue or > sbyte.MaxValue)
             {
                 _errorListener.RegisterException(new OverflowException(
-                    $"{_diagnosticPrefix}Branch target at IL_{instruction.Offset:X4} is too far away for a ShortInlineBr instruction."));
+                    $"{DiagnosticPrefix}Branch target at IL_{instruction.Offset:X4} is too far away for a ShortInlineBr instruction."));
             }
 
             return delta;
