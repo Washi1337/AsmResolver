@@ -9,6 +9,7 @@ namespace AsmResolver.DotNet.Serialized
     internal class CachedSerializedMemberFactory
     {
         private readonly ModuleReaderContext _context;
+        private readonly TablesStream _tablesStream;
 
         private TypeReference?[]? _typeReferences;
         private TypeDefinition?[]? _typeDefinitions;
@@ -38,6 +39,7 @@ namespace AsmResolver.DotNet.Serialized
         internal CachedSerializedMemberFactory(ModuleReaderContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _tablesStream = _context.Image.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
         }
 
         internal bool TryLookupMember(MetadataToken token, [NotNullWhen(true)] out IMetadataMember? member)
@@ -247,9 +249,7 @@ namespace AsmResolver.DotNet.Serialized
             where TMember : class, IMetadataMember
         {
             // Obtain table.
-            var table = (MetadataTable<TRow>) _context.Image.DotNetDirectory!.Metadata
-                !.GetStream<TablesStream>()
-                .GetTable(token.Table);
+            var table = (MetadataTable<TRow>) _tablesStream.GetTable(token.Table);
 
             // Check if within bounds.
             if (token.Rid == 0 || token.Rid > table.Count)
