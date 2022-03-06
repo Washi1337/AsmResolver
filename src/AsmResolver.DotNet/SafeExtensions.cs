@@ -1,4 +1,3 @@
-using System;
 using AsmResolver.DotNet.Builder;
 
 namespace AsmResolver.DotNet
@@ -19,7 +18,7 @@ namespace AsmResolver.DotNet
                     value = $"{value} (0x{self.MetadataToken.ToString()})";
                 return value;
             }
-            catch (Exception)
+            catch
             {
                 return $"0x{self.MetadataToken.ToString()}";
             }
@@ -34,7 +33,7 @@ namespace AsmResolver.DotNet
             {
                 return self.ToString();
             }
-            catch (Exception)
+            catch
             {
                 return self.GetType().ToString();
             }

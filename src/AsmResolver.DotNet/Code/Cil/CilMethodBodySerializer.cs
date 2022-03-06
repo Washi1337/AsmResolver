@@ -146,7 +146,7 @@ namespace AsmResolver.DotNet.Code.Cil
             var assembler = new CilAssembler(
                 writer,
                 new CilOperandBuilder(context.TokenProvider, bag),
-                body.Owner.SafeToString(),
+                body.Owner.SafeToString,
                 bag);
 
             assembler.WriteInstructions(body.Instructions);
