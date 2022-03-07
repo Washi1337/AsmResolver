@@ -44,13 +44,11 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(ElementType.Object, signature.ElementType);
         }
 
-        [Theory]
-        [InlineData("mscorlib", "System.IO", "Stream")]
-        [InlineData("not-mscorlib", "System", "Object")]
-        public void NonCorLibTypeToTypeSignatureShouldReturnTypeDefOrRef(string corlibName, string ns, string name)
+        [Fact]
+        public void NonCorLibTypeToTypeSignatureShouldReturnTypeDefOrRef()
         {
             var module = new ModuleDefinition("SomeModule");
-            var reference = new TypeReference(module, new AssemblyReference(corlibName, new Version(4, 0, 0, 0)), ns, name);
+            var reference = new TypeReference(module, module.CorLibTypeFactory.CorLibScope, "System", "Array");
             var signature = Assert.IsAssignableFrom<TypeDefOrRefSignature>(reference.ToTypeSignature());
             Assert.Equal(signature.Type, reference, Comparer);
         }

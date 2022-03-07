@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 SetScope(reference, scope);
 
             // Ensure corlib type sigs are used.
-            if (Comparer.Equals(scope, _module.CorLibTypeFactory.CorLibScope))
+            if (Comparer.Equals(typeSpec.Scope, _module.CorLibTypeFactory.CorLibScope))
             {
                 var corlibType = _module.CorLibTypeFactory.FromType(typeSpec);
                 if (corlibType != null)
