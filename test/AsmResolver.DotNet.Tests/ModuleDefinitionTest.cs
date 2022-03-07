@@ -22,6 +22,7 @@ namespace AsmResolver.DotNet.Tests
 {
     public class ModuleDefinitionTest
     {
+        private static readonly SignatureComparer Comparer = new();
         private const string NonWindowsPlatform = "Test loads a module from a base address, which is only supported on Windows.";
 
         private static ModuleDefinition Rebuild(ModuleDefinition module)
@@ -346,6 +347,14 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(ISegment).Assembly.Location);
             Assert.Contains(DotNetRuntimeInfo.NetStandard, module.OriginalTargetRuntime.Name);
             Assert.Equal(2, module.OriginalTargetRuntime.Version.Major);
+        }
+
+        [Fact]
+        public void NewModuleShouldContainSingleReferenceToCorLib()
+        {
+            var module = new ModuleDefinition("SomeModule", KnownCorLibs.NetStandard_v2_0_0_0);
+            var reference = Assert.Single(module.AssemblyReferences);
+            Assert.Equal(KnownCorLibs.NetStandard_v2_0_0_0, reference, Comparer);
         }
     }
 }
