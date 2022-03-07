@@ -328,7 +328,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private AssemblyReference ParseAssemblyNameSpec()
         {
             string assemblyName = string.Join(".", ParseDottedExpression(TypeNameTerminal.Identifier));
-            var assemblyRef = new AssemblyReference(assemblyName, new Version());
+            var newReference = new AssemblyReference(assemblyName, new Version());
 
             while (TryExpect(TypeNameTerminal.Comma).HasValue)
             {
@@ -337,22 +337,22 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 switch (propertyToken.Text.ToLowerInvariant())
                 {
                     case "version":
-                        assemblyRef.Version = ParseVersion();
+                        newReference.Version = ParseVersion();
                         break;
 
                     case "publickey":
-                        assemblyRef.PublicKeyOrToken = ParseHexBlob();
-                        assemblyRef.HasPublicKey = true;
+                        newReference.PublicKeyOrToken = ParseHexBlob();
+                        newReference.HasPublicKey = true;
                         break;
 
                     case "publickeytoken":
-                        assemblyRef.PublicKeyOrToken = ParseHexBlob();
-                        assemblyRef.HasPublicKey = false;
+                        newReference.PublicKeyOrToken = ParseHexBlob();
+                        newReference.HasPublicKey = false;
                         break;
 
                     case "culture":
                         string culture = ParseCulture();
-                        assemblyRef.Culture = !culture.Equals("neutral", StringComparison.OrdinalIgnoreCase)
+                        newReference.Culture = !culture.Equals("neutral", StringComparison.OrdinalIgnoreCase)
                             ? culture
                             : null;
                         break;
@@ -362,7 +362,15 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 }
             }
 
-            return assemblyRef;
+            // Reuse imported assembly reference instance if possible.
+            for (int i = 0; i < _module.AssemblyReferences.Count; i++)
+            {
+                var existingReference = _module.AssemblyReferences[i];
+                if (Comparer.Equals((AssemblyDescriptor) existingReference, newReference))
+                    return existingReference;
+            }
+
+            return newReference;
         }
 
         private Version ParseVersion()
