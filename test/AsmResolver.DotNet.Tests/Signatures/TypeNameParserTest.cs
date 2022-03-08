@@ -272,5 +272,32 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var actual = TypeNameParser.Parse(_module, $"{ns}.{name}");
             Assert.Equal(expected, actual, _comparer);
         }
+
+        [Fact]
+        public void ReadCorLibTypeShouldNotUpdateScopesOfUnderlyingTypes()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/263
+
+            var scope = _module.CorLibTypeFactory.Object.Type.Scope;
+            TypeNameParser.Parse(_module,
+                "System.Object, System.Runtime, Version=4.2.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            Assert.Same(scope, _module.CorLibTypeFactory.Object.Type.Scope);
+        }
+
+        [Fact]
+        public void ReadTypeShouldReuseScopeInstanceWhenAvailable()
+        {
+            var type = TypeNameParser.Parse(_module,
+                "System.Array, System.Runtime, Version=4.2.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+            Assert.Contains(type.Scope!.GetAssembly(), _module.AssemblyReferences);
+        }
+
+        [Fact]
+        public void ReadTypeShouldUseNewScopeInstanceIfNotImportedYet()
+        {
+            var type = TypeNameParser.Parse(_module,
+                "SomeNamespace.SomeType, SomeAssembly, Version=1.2.3.4, Culture=neutral, PublicKeyToken=0123456789abcdef");
+            Assert.DoesNotContain(type.Scope!.GetAssembly(), _module.AssemblyReferences);
+        }
     }
 }

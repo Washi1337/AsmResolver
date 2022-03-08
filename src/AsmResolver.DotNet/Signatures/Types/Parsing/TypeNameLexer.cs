@@ -5,9 +5,10 @@ using System.Text;
 
 namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
-    internal class TypeNameLexer
+    internal struct TypeNameLexer
     {
         internal static readonly ISet<char> ReservedChars = new HashSet<char>("*+.,&[]…");
+        private static readonly char[] TrimCharacters = " ".ToCharArray();
 
         private readonly TextReader _reader;
         private readonly StringBuilder _buffer = new();
@@ -16,6 +17,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         public TypeNameLexer(TextReader reader)
         {
             _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            HasConsumedTypeName = false;
+            _bufferedToken = default;
         }
 
         public bool HasConsumedTypeName
@@ -125,7 +128,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     _buffer.Append(currentChar);
             }
 
-            return new TypeNameToken(terminal, _buffer.ToString().Trim(' '));
+            return new TypeNameToken(terminal, _buffer.ToString().Trim(TrimCharacters));
         }
 
         private TypeNameToken ReadIdentifierToken()
@@ -159,7 +162,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     _buffer.Append(currentChar);
             }
 
-            return new TypeNameToken(TypeNameTerminal.Identifier, _buffer.ToString().Trim(' '));
+            return new TypeNameToken(TypeNameTerminal.Identifier, _buffer.ToString().Trim(TrimCharacters));
         }
 
         private TypeNameToken ReadSymbolToken(TypeNameTerminal terminal)
