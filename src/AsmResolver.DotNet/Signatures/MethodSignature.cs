@@ -207,16 +207,13 @@ namespace AsmResolver.DotNet.Signatures
         public override string ToString()
         {
             string prefix = HasThis ? "instance " : string.Empty;
+            string fullName = ReturnType?.FullName ?? TypeSignature.NullTypeToString;
             string genericsString = GenericParameterCount > 0
                 ? $"<{string.Join(", ", new string('?', GenericParameterCount))}>"
                 : string.Empty;
             string parameterTypesString = string.Join(", ", ParameterTypes) + (IsSentinel ? ", ..." : string.Empty);
 
-            return string.Format("{0}{1} *{2}({3})",
-                prefix,
-                ReturnType?.FullName ?? TypeSignature.NullTypeToString,
-                genericsString,
-                parameterTypesString);
+            return $"{prefix}{fullName} *{genericsString}({parameterTypesString})";
         }
     }
 }

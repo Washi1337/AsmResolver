@@ -107,7 +107,6 @@ namespace AsmResolver.DotNet.Signatures.Security
 
 
         /// <inheritdoc />
-        public override string ToString() =>
-            string.Format("{0}({1})", AttributeType, string.Join(", ", NamedArguments));
+        public override string ToString() => $"{AttributeType}({string.Join(", ", NamedArguments)})";
     }
 }
