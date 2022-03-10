@@ -30,9 +30,9 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override string ToString()
         {
-            return string.Format("{0}{1}",
-                HasThis ? "instance " : string.Empty,
-                MemberReturnType?.FullName ?? TypeSignature.NullTypeToString);
+            string prefix = HasThis ? "instance " : string.Empty;
+            string fullName = MemberReturnType?.FullName ?? TypeSignature.NullTypeToString;
+            return $"{prefix}{fullName}";
         }
     }
 }
