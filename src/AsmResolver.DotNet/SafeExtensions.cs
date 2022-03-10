@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet
 
             try
             {
-                string value = self.ToString();
+                string value = self.ToString()!;
                 if (value.Length > 200)
                     value = $"{value.Remove(197)}... (truncated)";
                 if (self.MetadataToken.Rid != 0)
@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet
 
             try
             {
-                return self.ToString();
+                return self.ToString()!;
             }
             catch
             {

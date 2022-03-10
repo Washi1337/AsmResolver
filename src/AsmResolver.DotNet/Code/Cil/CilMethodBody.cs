@@ -147,7 +147,7 @@ namespace AsmResolver.DotNet.Code.Cil
             //Get Runtime Fields
             byte[] code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code")!;
             object scope = FieldReader.ReadField<object>(dynamicMethodObj, "m_scope")!;
-            var tokenList = FieldReader.ReadField<List<object>>(scope, "m_tokens")!;
+            var tokenList = FieldReader.ReadField<List<object?>>(scope, "m_tokens")!;
             byte[] localSig = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_localSignature")!;
             byte[] ehHeader = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_exceptionHeader")!;
             var ehInfos = FieldReader.ReadField<IList<object>>(dynamicMethodObj, "m_exceptions")!;

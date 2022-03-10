@@ -183,6 +183,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         private ISortedMetadataTableBuffer<TKey, TRow> Sorted<TKey, TRow>(TableIndex table, int primaryColumn)
+            where TKey : notnull
             where TRow : struct, IMetadataRow
         {
             return new SortedMetadataTableBuffer<TKey, TRow>(
@@ -191,6 +192,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         private ISortedMetadataTableBuffer<TKey, TRow> Sorted<TKey, TRow>(TableIndex table, int primaryColumn, int secondaryColumn)
+            where TKey : notnull
             where TRow : struct, IMetadataRow
         {
             return new SortedMetadataTableBuffer<TKey, TRow>(
