@@ -343,7 +343,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void DetectTargetStandard()
         {
-            var module = ModuleDefinition.FromFile(typeof(ISegment).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TestCases.Types.Class).Assembly.Location);
             Assert.Contains(DotNetRuntimeInfo.NetStandard, module.OriginalTargetRuntime.Name);
             Assert.Equal(2, module.OriginalTargetRuntime.Version.Major);
         }

@@ -8,6 +8,8 @@ namespace AsmResolver.Collections
     /// <typeparam name="TKey">The type of objects to map.</typeparam>
     /// <typeparam name="TValue">The type of objects to map to.</typeparam>
     public sealed class OneToManyRelation<TKey, TValue>
+        where TKey : notnull
+        where TValue : notnull
     {
         private readonly Dictionary<TKey, ICollection<TValue>> _memberLists = new();
         private readonly Dictionary<TValue, TKey> _memberOwners = new();
