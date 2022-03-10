@@ -92,16 +92,19 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// </summary>
         /// <param name="parameters">The RSA parameters to import.</param>
         public StrongNamePrivateKey(in RSAParameters parameters)
-            : base(parameters.Modulus, ByteSwap(parameters))
+            : base(parameters.Modulus ?? throw new ArgumentException("The provided RSA parameters do not define a modulus."),
+                ByteSwap(parameters))
         {
             Modulus = parameters.Modulus;
-            P = parameters.P;
-            Q = parameters.Q;
-            DP = parameters.DP;
-            DQ = parameters.DQ;
+            P = parameters.P ?? throw new ArgumentException("The provided RSA parameters do not define prime P.");
+            Q = parameters.Q ?? throw new ArgumentException("The provided RSA parameters do not define prime Q.");;
+            DP = parameters.DP ?? throw new ArgumentException("The provided RSA parameters do not define DP.");;
+            DQ = parameters.DQ ?? throw new ArgumentException("The provided RSA parameters do not define DQ.");;
 
-            InverseQ = parameters.InverseQ;
-            PrivateExponent = parameters.D;
+            InverseQ = parameters.InverseQ
+                       ?? throw new ArgumentException("The provided RSA parameters do not define InverseQ.");
+            PrivateExponent =
+                parameters.D ?? throw new ArgumentException("The provided RSA parameters do not define D.");
         }
 
         /// <inheritdoc />
@@ -223,6 +226,9 @@ namespace AsmResolver.PE.DotNet.StrongName
 
         private static uint ByteSwap(RSAParameters parameters)
         {
+            if (parameters.Exponent is null)
+                throw new ArgumentException("The provided RSA parameters do not define an exponent.");
+
             uint exponent = 0;
             for (int i = 0; i < Math.Min(sizeof(uint), parameters.Exponent.Length); i++)
                 exponent |= (uint) (parameters.Exponent[i] << (8 * i));

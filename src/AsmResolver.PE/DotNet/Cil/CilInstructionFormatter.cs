@@ -87,7 +87,7 @@ namespace AsmResolver.PE.DotNet.Cil
             short longIndex => $"A_{longIndex.ToString()}",
             byte shortIndex => $"A_{shortIndex.ToString()}",
             null => InvalidOperandString,
-            _ => operand.ToString()
+            _ => operand.ToString() ?? string.Empty
         };
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace AsmResolver.PE.DotNet.Cil
             short longIndex => $"V_{longIndex.ToString()}",
             byte shortIndex => $"V_{shortIndex.ToString()}",
             null => InvalidOperandString,
-            _ => operand.ToString()
+            _ => operand.ToString() ?? string.Empty
         };
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace AsmResolver.PE.DotNet.Cil
         {
             MetadataToken token => FormatToken(token),
             null => InvalidOperandString,
-            _ => operand.ToString()
+            _ => operand.ToString() ?? string.Empty
         };
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace AsmResolver.PE.DotNet.Cil
             IEnumerable<ICilLabel> target => $"({string.Join(", ", target.Select(FormatBranchTarget))})",
             IEnumerable<int> offsets => $"({string.Join(", ", offsets.Select(x => FormatBranchTarget(x)))})",
             null => InvalidOperandString,
-            _ => operand.ToString()
+            _ => operand.ToString() ?? string.Empty
         };
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace AsmResolver.PE.DotNet.Cil
             ICilLabel target => FormatLabel(target.Offset),
             int offset => FormatLabel(offset),
             null => InvalidOperandString,
-            _ => operand.ToString()
+            _ => operand.ToString() ?? string.Empty
         };
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace AsmResolver.PE.DotNet.Cil
         {
             MetadataToken token => FormatToken(token),
             null => InvalidOperandString,
-            _ => operand.ToString()
+            _ => operand.ToString() ?? string.Empty
         };
 
     }

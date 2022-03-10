@@ -65,7 +65,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                 _ => throw new NotSupportedException($"Invalid or unsupported hashing algorithm {_hashAlgorithm}.")
             };
 
-            var buffer = new byte[0x1000];
+            byte[] buffer = new byte[0x1000];
 
             foreach (var range in _includedRanges)
             {
@@ -85,7 +85,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             }
 
             algorithm.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
-            return algorithm.Hash;
+            return algorithm.Hash!;
         }
 
         private void ZeroRangesIfApplicable(byte[] buffer, OffsetRange currentRange)

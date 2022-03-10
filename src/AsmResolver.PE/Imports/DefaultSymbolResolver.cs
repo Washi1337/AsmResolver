@@ -676,7 +676,7 @@ namespace AsmResolver.PE.Imports
             if (!_staticMappings.TryGetValue(moduleName, out var staticMapping))
                 return null;
 
-            return staticMapping.TryGetValue(symbol.Ordinal, out string exportName)
+            return staticMapping.TryGetValue(symbol.Ordinal, out string? exportName)
                 ? new ExportedSymbol(SegmentReference.Null, exportName)
                 : null;
         }
