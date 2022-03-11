@@ -251,10 +251,8 @@ namespace AsmResolver.DotNet.Memory
                 // All fields in an explicitly laid out structure need to have a field offset assigned.
                 if (!field.FieldOffset.HasValue)
                 {
-                    throw new ArgumentException(string.Format(
-                        "{0} ({1}) is defined in a type with explicit layout, but does not have a field offset assigned.",
-                        field.FullName,
-                        field.MetadataToken.ToString()));
+                    throw new ArgumentException(
+                        $"{field.FullName} ({field.MetadataToken}) is defined in a type with explicit layout, but does not have a field offset assigned.");
                 }
 
                 uint offset = (uint) field.FieldOffset.Value;

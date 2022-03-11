@@ -129,6 +129,13 @@ namespace AsmResolver.DotNet.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_WithAttribute {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_WithAttribute", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] Assembly1_Forwarder {
             get {
                 object obj = ResourceManager.GetObject("Assembly1_Forwarder", resourceCulture);

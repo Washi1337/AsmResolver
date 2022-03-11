@@ -16,11 +16,11 @@ namespace AsmResolver.DotNet.Code.Cil
     public class DynamicCilOperandResolver : PhysicalCilOperandResolver
     {
         private readonly ModuleReaderContext _readerContext;
-        private readonly IList<object> _tokens;
+        private readonly IList<object?> _tokens;
         private readonly ReferenceImporter _importer;
 
         /// <inheritdoc />
-        public DynamicCilOperandResolver(SerializedModuleDefinition contextModule, CilMethodBody methodBody, IList<object> tokens)
+        public DynamicCilOperandResolver(SerializedModuleDefinition contextModule, CilMethodBody methodBody, IList<object?> tokens)
             : base(contextModule, methodBody)
         {
             _tokens = tokens ?? throw new ArgumentNullException(nameof(tokens));
@@ -34,13 +34,13 @@ namespace AsmResolver.DotNet.Code.Cil
             switch (token.Table)
             {
                 case TableIndex.TypeDef:
-                    var type = _tokens[(int) token.Rid];
+                    object? type = _tokens[(int) token.Rid];
                     if (type is RuntimeTypeHandle runtimeTypeHandle)
                         return _importer.ImportType(Type.GetTypeFromHandle(runtimeTypeHandle));
                     break;
 
                 case TableIndex.Field:
-                    var field = _tokens[(int) token.Rid];
+                    object? field = _tokens[(int) token.Rid];
 
                     if (field is null)
                         return null;
@@ -61,10 +61,18 @@ namespace AsmResolver.DotNet.Code.Cil
 
                 case TableIndex.Method:
                 case TableIndex.MemberRef:
-                    var obj = _tokens[(int) token.Rid];
+                    object? obj = _tokens[(int) token.Rid];
+
+                    if (obj is null)
+                        return null;
 
                     if (obj is RuntimeMethodHandle methodHandle)
-                        return _importer.ImportMethod(MethodBase.GetMethodFromHandle(methodHandle));
+                    {
+                        var method = MethodBase.GetMethodFromHandle(methodHandle);
+                        return method is not null
+                            ? _importer.ImportMethod(method)
+                            : null;
+                    }
 
                     if (obj.GetType().FullName == "System.Reflection.Emit.GenericMethodInfo")
                     {
@@ -75,7 +83,9 @@ namespace AsmResolver.DotNet.Code.Cil
                             hasHandle ? mMethod : mHandle,
                             context);
 
-                        return _importer.ImportMethod(method);
+                        return method is not null
+                            ? _importer.ImportMethod(method)
+                            : null;
                     }
 
                     if (obj.GetType().FullName == "System.Reflection.Emit.VarArgMethod")
@@ -84,7 +94,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     break;
 
                 case TableIndex.StandAloneSig:
-                    var reader = ByteArrayDataSource.CreateReader((byte[]) _tokens[(int) token.Rid]);
+                    var reader = ByteArrayDataSource.CreateReader((byte[]) _tokens[(int) token.Rid]!);
                     return CallingConventionSignature.FromReader(new BlobReadContext(_readerContext), ref reader);
             }
 

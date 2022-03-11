@@ -3,8 +3,8 @@
     only:
       - master
 
-  image: Visual Studio 2019
-  version: 4.8.0-master-build.{build}
+  image: Visual Studio 2022
+  version: 4.9.0-master-build.{build}
   configuration: Release
 
   skip_commits:
@@ -32,8 +32,8 @@
     only:
       - development
 
-  image: Visual Studio 2019
-  version: 4.8.0-dev-build.{build}
+  image: Visual Studio 2022
+  version: 4.9.0-dev-build.{build}
   configuration: Release
 
   skip_commits:

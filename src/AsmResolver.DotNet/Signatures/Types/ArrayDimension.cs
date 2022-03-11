@@ -3,7 +3,7 @@
 namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
-    /// Represents a single dimension in an array specification. 
+    /// Represents a single dimension in an array specification.
     /// </summary>
     public readonly struct ArrayDimension : IEquatable<ArrayDimension>
     {
@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <summary>
-        /// Gets or sets the lower bound for each index in the dimension (if specified). 
+        /// Gets or sets the lower bound for each index in the dimension (if specified).
         /// </summary>
         /// <remarks>
         /// When this value is not specified (<c>null</c>), a lower bound of 0 is assumed by the CLR.
@@ -52,12 +52,10 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <summary>
         /// Determines whether two dimensions are considered equal.
         /// </summary>
-        public bool Equals(ArrayDimension other) => 
-            Size == other.Size && LowerBound == other.LowerBound;
+        public bool Equals(ArrayDimension other) => Size == other.Size && LowerBound == other.LowerBound;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => 
-            obj is ArrayDimension other && Equals(other);
+        public override bool Equals(object? obj) => obj is ArrayDimension other && Equals(other);
 
         /// <inheritdoc />
         public override int GetHashCode()
@@ -67,6 +65,6 @@ namespace AsmResolver.DotNet.Signatures.Types
                 return (Size.GetHashCode() * 397) ^ LowerBound.GetHashCode();
             }
         }
-        
+
     }
 }

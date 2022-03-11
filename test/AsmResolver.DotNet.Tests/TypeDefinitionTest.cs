@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Events;
@@ -20,6 +21,8 @@ namespace AsmResolver.DotNet.Tests
 {
     public class TypeDefinitionTest
     {
+        private static readonly SignatureComparer Comparer = new();
+
         private TypeDefinition RebuildAndLookup(TypeDefinition type)
         {
             var stream = new MemoryStream();
@@ -546,6 +549,27 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.False(typeB.IsValueType);
             Assert.False(typeB.IsEnum);
+        }
+
+        [Fact]
+        public void AddTypeWithCorLibBaseTypeToAssemblyWithCorLibTypeReferenceInAttribute()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/263
+
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_WithAttribute);
+            var corlib = module.CorLibTypeFactory;
+
+            var type = new TypeDefinition(null, "Test", TypeAttributes.Class, corlib.Object.Type);
+            module.TopLevelTypes.Add(type);
+
+            var scope = corlib.Object.Scope;
+
+            var newType = RebuildAndLookup(type);
+            Assert.Equal(newType.BaseType, type.BaseType, Comparer);
+
+            Assert.Same(scope, corlib.Object.Scope);
+            var reference = Assert.IsAssignableFrom<AssemblyReference>(corlib.Object.Scope!.GetAssembly());
+            Assert.Same(module, reference.Module);
         }
     }
 }

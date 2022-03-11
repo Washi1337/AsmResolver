@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AsmResolver.DotNet.Config.Json
 {
@@ -12,7 +13,7 @@ namespace AsmResolver.DotNet.Config.Json
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true,
-            IgnoreNullValues = true
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
         /// <summary>

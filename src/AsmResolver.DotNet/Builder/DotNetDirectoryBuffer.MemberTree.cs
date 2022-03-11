@@ -302,7 +302,7 @@ namespace AsmResolver.DotNet.Builder
             for (uint rid = 1; rid <= typeDefTable.Count; rid++)
             {
                 var typeToken = new MetadataToken(TableIndex.TypeDef, rid);
-                var type = _tokenMapping.GetTypeByToken(typeToken);
+                var type = _tokenMapping.GetTypeByToken(typeToken)!;
 
                 // Update extends, field list and method list columns.
                 ref var typeRow = ref typeDefTable.GetRowRef(rid);
@@ -409,7 +409,7 @@ namespace AsmResolver.DotNet.Builder
             for (uint rid = 1; rid <= definitionTable.Count; rid++)
             {
                 var newToken = new MetadataToken(TableIndex.Method, rid);
-                var method = _tokenMapping.GetMethodByToken(newToken);
+                var method = _tokenMapping.GetMethodByToken(newToken)!;
 
                 // Serialize method body and update column.
                 ref var row = ref definitionTable.GetRowRef(rid);

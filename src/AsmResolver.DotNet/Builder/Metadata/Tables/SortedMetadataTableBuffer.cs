@@ -12,6 +12,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
     /// <typeparam name="TKey">The type of members that are assigned new metadata rows.</typeparam>
     /// <typeparam name="TRow">The type of rows to store.</typeparam>
     public class SortedMetadataTableBuffer<TKey, TRow> : ISortedMetadataTableBuffer<TKey, TRow>
+        where TKey : notnull
         where TRow : struct, IMetadataRow
     {
         private readonly List<(TKey Key, TRow Row)> _entries = new();

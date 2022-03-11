@@ -98,10 +98,8 @@ namespace AsmResolver.DotNet.Tests
 
             // Create two dummy fields.
             var fieldType = module.CorLibTypeFactory.Object;
-            var field1 = new FieldDefinition("NonAssignedField", FieldAttributes.Static,
-                FieldSignature.CreateStatic(fieldType));
-            var field2 = new FieldDefinition("AssignedField", FieldAttributes.Static,
-                FieldSignature.CreateStatic(fieldType));
+            var field1 = new FieldDefinition("NonAssignedField", FieldAttributes.Static, fieldType);
+            var field2 = new FieldDefinition("AssignedField", FieldAttributes.Static, fieldType);
 
             // Add both.
             var moduleType = module.GetOrCreateModuleType();
@@ -141,7 +139,34 @@ namespace AsmResolver.DotNet.Tests
             allocator.AssignNextAvailableToken(method);
 
             targetModule.GetOrCreateModuleConstructor();
-            var image = targetModule.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
+            _ = targetModule.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
         }
+
+        [Fact]
+        public void Issue252()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/252
+
+            var module = ModuleDefinition.FromFile(typeof(TokenAllocatorTest).Assembly.Location);
+            var asmResRef = module.AssemblyReferences.First(a => a.Name == "AsmResolver.DotNet");
+
+            var reference  = new TypeReference(module, asmResRef, "AsmResolver.DotNet", "MethodDefinition");
+            var reference2 = new TypeReference(module, asmResRef, "AsmResolver.DotNet", "ModuleDefinition");
+
+            module.TokenAllocator.AssignNextAvailableToken(reference);
+            module.TokenAllocator.AssignNextAvailableToken(reference2);
+
+            var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
+            var newModule = ModuleDefinition.FromImage(image);
+
+            var newReference = (TypeReference) newModule.LookupMember(reference.MetadataToken);
+            var newReference2 = (TypeReference) newModule.LookupMember(reference2.MetadataToken);
+
+            Assert.Equal(reference.Namespace, newReference.Namespace);
+            Assert.Equal(reference.Name, newReference.Name);
+            Assert.Equal(reference2.Namespace, newReference2.Namespace);
+            Assert.Equal(reference2.Name, newReference2.Name);
+        }
+
     }
 }

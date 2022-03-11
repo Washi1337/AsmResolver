@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace AsmResolver.DotNet.Code.Cil
 {
@@ -13,8 +13,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <param name="body">The method body in which the inconsistency was detected.</param>
         /// <param name="offset">The offset at which the inconsistency was detected.</param>
         public StackImbalanceException(CilMethodBody body, int offset)
-            : base(string.Format("Stack imbalance was detected at offset IL_{0:X4} in method body of {1}",
-                offset, body.Owner))
+            : base($"Stack imbalance was detected at offset IL_{offset:X4} in method body of {body.Owner}")
         {
             Body = body;
             Offset = offset;

@@ -1,14 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <Title>AsmResolver.DotNet</Title>
         <Description>High level .NET image models for the AsmResolver executable file inspection toolsuite.</Description>
         <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
-        <TargetFramework>netstandard2.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
-        <LangVersion>9</LangVersion>
         <Nullable>enable</Nullable>
+        <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -28,7 +27,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="System.Text.Json" Version="5.0.0" />
+      <PackageReference Include="System.Text.Json" Version="6.0.2" />
     </ItemGroup>
 
 </Project>

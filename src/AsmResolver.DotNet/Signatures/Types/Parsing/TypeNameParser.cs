@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -9,19 +8,19 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
     /// <summary>
     /// Provides a mechanism for parsing a fully assembly qualified name of a type.
     /// </summary>
-    public sealed class TypeNameParser
+    public struct TypeNameParser
     {
         // src/coreclr/src/vm/typeparse.cpp
         // https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names
 
         private static readonly SignatureComparer Comparer = new();
         private readonly ModuleDefinition _module;
-        private readonly TypeNameLexer _lexer;
+        private TypeNameLexer _lexer;
 
         private TypeNameParser(ModuleDefinition module, TypeNameLexer lexer)
         {
             _module = module ?? throw new ArgumentNullException(nameof(module));
-            _lexer = lexer ?? throw new ArgumentNullException(nameof(lexer));
+            _lexer = lexer;
         }
 
         /// <summary>
@@ -57,7 +56,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 SetScope(reference, scope);
 
             // Ensure corlib type sigs are used.
-            if (Comparer.Equals(scope, _module.CorLibTypeFactory.CorLibScope))
+            if (Comparer.Equals(typeSpec.Scope, _module.CorLibTypeFactory.CorLibScope))
             {
                 var corlibType = _module.CorLibTypeFactory.FromType(typeSpec);
                 if (corlibType != null)
@@ -320,7 +319,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             }
 
             if (result.Count == 0)
-                throw new FormatException($"Expected {string.Join(", ",terminal)}.");
+                throw new FormatException($"Expected {terminal}.");
 
             return result;
         }
@@ -328,41 +327,48 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private AssemblyReference ParseAssemblyNameSpec()
         {
             string assemblyName = string.Join(".", ParseDottedExpression(TypeNameTerminal.Identifier));
-            var assemblyRef = new AssemblyReference(assemblyName, new Version());
+            var newReference = new AssemblyReference(assemblyName, new Version());
 
             while (TryExpect(TypeNameTerminal.Comma).HasValue)
             {
-                var propertyToken = Expect(TypeNameTerminal.Identifier);
+                string propertyName = Expect(TypeNameTerminal.Identifier).Text;
                 Expect(TypeNameTerminal.Equals);
-                switch (propertyToken.Text.ToLowerInvariant())
+                if (propertyName.Equals("version", StringComparison.OrdinalIgnoreCase))
                 {
-                    case "version":
-                        assemblyRef.Version = ParseVersion();
-                        break;
-
-                    case "publickey":
-                        assemblyRef.PublicKeyOrToken = ParseHexBlob();
-                        assemblyRef.HasPublicKey = true;
-                        break;
-
-                    case "publickeytoken":
-                        assemblyRef.PublicKeyOrToken = ParseHexBlob();
-                        assemblyRef.HasPublicKey = false;
-                        break;
-
-                    case "culture":
-                        string culture = ParseCulture();
-                        assemblyRef.Culture = !culture.Equals("neutral", StringComparison.OrdinalIgnoreCase)
-                            ? culture
-                            : null;
-                        break;
-
-                    default:
-                        throw new FormatException($"Unsupported {propertyToken.Text} assembly property.");
+                    newReference.Version = ParseVersion();
+                }
+                else if (propertyName.Equals("publickey", StringComparison.OrdinalIgnoreCase))
+                {
+                    newReference.PublicKeyOrToken = ParseHexBlob();
+                    newReference.HasPublicKey = true;
+                }
+                else if (propertyName.Equals("publickeytoken", StringComparison.OrdinalIgnoreCase))
+                {
+                    newReference.PublicKeyOrToken = ParseHexBlob();
+                    newReference.HasPublicKey = false;
+                }
+                else if (propertyName.Equals("culture", StringComparison.OrdinalIgnoreCase))
+                {
+                    string culture = ParseCulture();
+                    newReference.Culture = !culture.Equals("neutral", StringComparison.OrdinalIgnoreCase)
+                        ? culture
+                        : null;
+                }
+                else
+                {
+                    throw new FormatException($"Unsupported {propertyName} assembly property.");
                 }
             }
 
-            return assemblyRef;
+            // Reuse imported assembly reference instance if possible.
+            for (int i = 0; i < _module.AssemblyReferences.Count; i++)
+            {
+                var existingReference = _module.AssemblyReferences[i];
+                if (Comparer.Equals((AssemblyDescriptor) existingReference, newReference))
+                    return existingReference;
+            }
+
+            return newReference;
         }
 
         private Version ParseVersion()
@@ -373,17 +379,30 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private byte[]? ParseHexBlob()
         {
-            var hexString = Expect(TypeNameTerminal.Identifier, TypeNameTerminal.Number).Text;
+            string hexString = Expect(TypeNameTerminal.Identifier, TypeNameTerminal.Number).Text;
             if (hexString == "null")
                 return null;
             if (hexString.Length % 2 != 0)
                 throw new FormatException("Provided hex string does not have an even length.");
 
             byte[] result = new byte[hexString.Length / 2];
-            for (int i = 0; i < hexString.Length; i+=2)
-                result[i / 2] = byte.Parse(hexString.Substring(i, 2), NumberStyles.HexNumber);
+            for (int i = 0; i < hexString.Length; i += 2)
+                result[i / 2] = ParseHexByte(hexString, i);
             return result;
         }
+
+        private static byte ParseHexByte(string hexString, int index)
+        {
+            return (byte) ((ParseHexNibble(hexString[index]) << 4) | ParseHexNibble(hexString[index + 1]));
+        }
+
+        private static byte ParseHexNibble(char nibble) => nibble switch
+        {
+            >= '0' and <= '9' => (byte) (nibble - '0'),
+            >= 'A' and <= 'F' => (byte) (nibble - 'A' + 10),
+            >= 'a' and <= 'f' => (byte) (nibble - 'a' + 10),
+            _ => throw new FormatException()
+        };
 
         private string ParseCulture()
         {

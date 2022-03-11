@@ -303,10 +303,9 @@ namespace AsmResolver.DotNet
             Name = name;
 
             var importer = new ReferenceImporter(this);
-            corLib = (AssemblyReference)importer.ImportScope(corLib);
+            corLib = (AssemblyReference) importer.ImportScope(corLib);
 
             CorLibTypeFactory = new CorLibTypeFactory(corLib);
-            AssemblyReferences.Add(corLib);
 
             OriginalTargetRuntime = DetectTargetRuntime();
             MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver(UncachedFileService.Instance));
