@@ -268,22 +268,25 @@ namespace AsmResolver
         /// <remarks>
         /// This operation performs a byte-level comparison of the two strings.
         /// </remarks>
-        public bool Equals(Utf8String other) => ByteArrayEqualityComparer.Instance.Equals(_data, other._data);
+        public bool Equals(Utf8String? other) =>
+            other is not null && ByteArrayEqualityComparer.Instance.Equals(_data, other._data);
 
         /// <inheritdoc />
         /// <remarks>
         /// This operation performs a byte-level comparison of the two strings.
         /// </remarks>
-        public bool Equals(byte[] other) => ByteArrayEqualityComparer.Instance.Equals(_data, other);
+        public bool Equals(byte[]? other) => other is not null && ByteArrayEqualityComparer.Instance.Equals(_data, other);
 
         /// <inheritdoc />
         /// <remarks>
         /// This operation performs a byte-level comparison of the two strings.
         /// </remarks>
-        public bool Equals(string other) => Value.Equals(other);
+        public bool Equals(string? other) =>other is not null && Value.Equals(other);
 
         /// <inheritdoc />
-        public int CompareTo(Utf8String other) => ByteArrayEqualityComparer.Instance.Compare(_data, other._data);
+        public int CompareTo(Utf8String? other) => other is not null
+            ? ByteArrayEqualityComparer.Instance.Compare(_data, other._data)
+            : 1;
 
         /// <inheritdoc />
         public IEnumerator<char> GetEnumerator() => Value.GetEnumerator();

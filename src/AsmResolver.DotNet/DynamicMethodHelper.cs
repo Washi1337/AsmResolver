@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet
                 int tryEnd = FieldReader.ReadField<int>(ehInfo, "m_endAddr");
                 int handlerStart = FieldReader.ReadField<int[]>(ehInfo, "m_catchAddr")![i];
                 int handlerEnd = FieldReader.ReadField<int[]>(ehInfo, "m_catchEndAddr")![i];
-                var exceptionType = FieldReader.ReadField<Type[]>(ehInfo, "m_catchClass")![i];
+                var exceptionType = FieldReader.ReadField<Type?[]>(ehInfo, "m_catchClass")![i];
                 var handlerType = (CilExceptionHandlerType) FieldReader.ReadField<int[]>(ehInfo, "m_type")![i];
 
                 var endTryLabel = instructions.GetByOffset(tryEnd)?.CreateLabel() ?? new CilOffsetLabel(tryEnd);
@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet
                     FilterStart = null,
                     HandlerStart = instructions.GetLabel(handlerStart),
                     HandlerEnd = instructions.GetLabel(handlerEnd),
-                    ExceptionType = exceptionType != null ? importer.ImportType(exceptionType) : null
+                    ExceptionType = exceptionType is not null ? importer.ImportType(exceptionType) : null
                 };
 
                 methodBody.ExceptionHandlers.Add(handler);
@@ -113,7 +113,7 @@ namespace AsmResolver.DotNet
                 dynamicMethodObj = Activator.CreateInstance(dynamicResolver, (BindingFlags) (-1), null, new[]
                 {
                     ilGenerator
-                }, null);
+                }, null)!;
             }
             return dynamicMethodObj;
         }

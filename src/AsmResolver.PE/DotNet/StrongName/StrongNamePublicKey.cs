@@ -76,6 +76,11 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <param name="parameters">The RSA parameters to import.</param>
         public StrongNamePublicKey(in RSAParameters parameters)
         {
+            if (parameters.Modulus is null)
+                throw new ArgumentException("RSA parameters does not define a modulus.");
+            if (parameters.Exponent is null)
+                throw new ArgumentException("RSA parameters does not define an exponent.");
+
             Modulus = CopyReversed(parameters.Modulus);
             uint exponent = 0;
             for (int i = 0; i < Math.Min(sizeof(uint), parameters.Exponent.Length); i++)

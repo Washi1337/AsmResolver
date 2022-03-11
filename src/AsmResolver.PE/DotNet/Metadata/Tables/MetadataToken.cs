@@ -3,7 +3,7 @@ using System;
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     /// <summary>
-    /// Represents a metadata token, referencing a member using a table and a row index. 
+    /// Represents a metadata token, referencing a member using a table and a row index.
     /// </summary>
     public readonly struct MetadataToken : IComparable<MetadataToken>
     {
@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Represents the zero metadata token, or the absence of a metadata token.
         /// </summary>
         public static readonly MetadataToken Zero = new MetadataToken(0);
-        
+
         /// <summary>
         /// Converts a 32-bit integer to a metadata token.
         /// </summary>
@@ -43,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return a.Equals(b);
         }
-        
+
         /// <summary>
         /// Determines whether two metadata tokens are not considered equal. That is, either the table index or the row
         /// identifier (or both) does not match the other.
@@ -119,7 +119,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is MetadataToken other && Equals(other);
         }
@@ -135,6 +135,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return _value.CompareTo(other._value);
         }
-        
+
     }
 }

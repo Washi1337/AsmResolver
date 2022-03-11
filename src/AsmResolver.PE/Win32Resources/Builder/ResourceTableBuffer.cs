@@ -8,8 +8,9 @@ namespace AsmResolver.PE.Win32Resources.Builder
     /// </summary>
     /// <typeparam name="TEntry">The type of entries to store in the table.</typeparam>
     public abstract class ResourceTableBuffer<TEntry> : SegmentBase
+        where TEntry : notnull
     {
-        private readonly IDictionary<TEntry, uint> _entryOffsets = new Dictionary<TEntry, uint>();
+        private readonly Dictionary<TEntry, uint> _entryOffsets = new();
         private readonly ISegment _parentBuffer;
         private uint _length;
 

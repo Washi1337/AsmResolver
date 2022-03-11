@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -22,7 +23,7 @@ namespace AsmResolver.DotNet
         {
             _parentModule = parentModule;
             _assemblyName = assemblyName;
-            Version = assemblyName.Version;
+            Version = assemblyName.Version ?? new Version();
         }
 
         /// <inheritdoc />

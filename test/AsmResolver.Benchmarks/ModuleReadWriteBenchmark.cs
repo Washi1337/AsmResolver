@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using AsmResolver.DotNet;
 using BenchmarkDotNet.Attributes;
@@ -11,8 +12,16 @@ namespace AsmResolver.Benchmarks
         private static readonly byte[] HelloWorldApp = HelloWorld;
         private static readonly byte[] CrackMeApp = Test;
         private static readonly byte[] ManyMethods = Utilities.DecompressDeflate(HelloWorld_ManyMethods);
+        private static readonly byte[] CoreLib;
 
         private readonly MemoryStream _outputStream = new();
+
+        static ModuleReadWriteBenchmark()
+        {
+            var resolver = new DotNetCoreAssemblyResolver(new Version(3, 1, 0));
+            string path = resolver.Resolve(KnownCorLibs.SystemPrivateCoreLib_v4_0_0_0)!.ManifestModule!.FilePath;
+            CoreLib = File.ReadAllBytes(path);
+        }
 
         [Benchmark]
         public void HelloWorld_Read()
@@ -51,6 +60,13 @@ namespace AsmResolver.Benchmarks
         {
             var file = ModuleDefinition.FromBytes(ManyMethods);
             file.Write(_outputStream);
+        }
+
+        [Benchmark]
+        public void CoreLib_ReadWrite()
+        {
+            var module = ModuleDefinition.FromBytes(CoreLib);
+            module.Write(_outputStream);
         }
     }
 }

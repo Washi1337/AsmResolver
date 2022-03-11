@@ -105,7 +105,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => obj is CustomAttributeRow other && Equals(other);
+        public override bool Equals(object? obj) => obj is CustomAttributeRow other && Equals(other);
 
         /// <inheritdoc />
         public override int GetHashCode()

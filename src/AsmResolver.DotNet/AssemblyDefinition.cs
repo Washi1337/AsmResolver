@@ -280,11 +280,14 @@ namespace AsmResolver.DotNet
             if (directory is null || !Directory.Exists(directory))
                 throw new DirectoryNotFoundException();
 
-            foreach (var module in Modules)
+            for (int i = 0; i < Modules.Count; i++)
             {
-                string modulePath = module == ManifestModule
-                    ? filePath
-                    : Path.Combine(directory, module.Name);
+                var module = Modules[i];
+                string modulePath;
+                if (module == ManifestModule)
+                    modulePath = filePath;
+                else
+                    modulePath = Path.Combine(directory, module.Name ?? $"module{i}.bin");
 
                 module.Write(modulePath, imageBuilder, fileBuilder);
             }
