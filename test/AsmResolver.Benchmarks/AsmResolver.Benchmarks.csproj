@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <LangVersion>10</LangVersion>
         <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
     </PropertyGroup>
 
