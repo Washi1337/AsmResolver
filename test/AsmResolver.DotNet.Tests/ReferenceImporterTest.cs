@@ -113,8 +113,18 @@ namespace AsmResolver.DotNet.Tests
             otherAssembly.Modules.Add(otherModule);
 
             var objectType = otherModule.CorLibTypeFactory.Object.ToTypeDefOrRef();
-            var declaringType = new TypeDefinition("SomeNamespace", "SomeName", TypeAttributes.Class | TypeAttributes.Public, objectType);
-            var nestedType = new TypeDefinition(null, "NestedType", TypeAttributes.Class | TypeAttributes.NestedPublic, objectType);
+
+            var declaringType = new TypeDefinition(
+                "SomeNamespace",
+                "SomeName",
+                TypeAttributes.Class | TypeAttributes.Public,
+                objectType);
+            var nestedType = new TypeDefinition(
+                null,
+                "NestedType",
+                TypeAttributes.Class | TypeAttributes.NestedPublic,
+                objectType);
+
             declaringType.NestedTypes.Add(nestedType);
             otherModule.TopLevelTypes.Add(declaringType);
 
