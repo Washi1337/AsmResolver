@@ -264,5 +264,47 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(field.DeclaringType.FullName, result.DeclaringType.FullName);
             Assert.Equal(field.FieldType.FullName, ((FieldSignature) result.Signature).FieldType.FullName);
         }
+
+        [Fact]
+        public void ImportTypeSigWithNonImportedEmbeddedReferenceShouldResultInNewInstance()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/268
+
+            var genericType = new TypeDefinition("SomeNamespace", "SomeName", TypeAttributes.Class);
+            genericType.GenericParameters.Add(new GenericParameter("T"));
+            _module.TopLevelTypes.Add(genericType);
+
+            var instance = genericType.MakeGenericInstanceType(
+                new TypeDefOrRefSignature(
+                    new TypeReference(_module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream"), false)
+            );
+
+            var imported = _importer.ImportTypeSignature(instance);
+
+            var newInstance = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(imported);
+            Assert.NotSame(instance, newInstance);
+            Assert.Equal(_module, newInstance.Module);
+            Assert.Equal(_module, newInstance.TypeArguments[0].Module);
+        }
+
+        [Fact]
+        public void ImportTypeSigWithImportedEmbeddedReferenceShouldResultInSameInstance()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/268
+
+            var genericType = new TypeDefinition("SomeNamespace", "SomeName", TypeAttributes.Class);
+            genericType.GenericParameters.Add(new GenericParameter("T"));
+            _module.TopLevelTypes.Add(genericType);
+
+            var instance = genericType.MakeGenericInstanceType(
+                new TypeDefOrRefSignature(
+                    new TypeReference(_module, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream"), false)
+            );
+
+            var imported = _importer.ImportTypeSignature(instance);
+
+            var newInstance = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(imported);
+            Assert.Same(instance, newInstance);
+        }
     }
 }
