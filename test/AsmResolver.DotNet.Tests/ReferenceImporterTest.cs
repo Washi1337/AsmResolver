@@ -266,7 +266,30 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
-        public void ImportTypeSigWithNonImportedEmbeddedReferenceShouldResultInNewInstance()
+        public void ImportNonImportedTypeDefOrRefShouldResultInNewInstance()
+        {
+            var signature = new TypeReference(_module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
+                .ToTypeSignature();
+
+            var imported = _importer.ImportTypeSignature(signature);
+
+            Assert.NotSame(signature, imported);
+            Assert.Equal(signature, imported, _comparer);
+            Assert.Equal(_module, imported.Module);
+        }
+
+        [Fact]
+        public void ImportFullyImportedTypeDefOrRefShouldResultInSameInstance()
+        {
+            var signature = new TypeReference(_module, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
+                .ToTypeSignature();
+
+            var imported = _importer.ImportTypeSignature(signature);
+            Assert.Same(signature, imported);
+        }
+
+        [Fact]
+        public void ImportGenericTypeSigWithNonImportedTypeArgumentShouldResultInNewInstance()
         {
             // https://github.com/Washi1337/AsmResolver/issues/268
 
@@ -288,7 +311,7 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
-        public void ImportTypeSigWithImportedEmbeddedReferenceShouldResultInSameInstance()
+        public void ImportFullyImportedGenericTypeSigShouldResultInSameInstance()
         {
             // https://github.com/Washi1337/AsmResolver/issues/268
 
@@ -305,6 +328,85 @@ namespace AsmResolver.DotNet.Tests
 
             var newInstance = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(imported);
             Assert.Same(instance, newInstance);
+        }
+
+        [Fact]
+        public void ImportCustomModifierTypeWithNonImportedModifierTypeShouldResultInNewInstance()
+        {
+            var signature = new TypeReference(_module, _dummyAssembly, "SomeNamespace", "SomeType")
+                .ToTypeSignature()
+                .MakeModifierType(new TypeReference(_dummyAssembly, "SomeNamespace", "SomeModifierType"), true);
+
+            var imported = _importer.ImportTypeSignature(signature);
+
+            var newInstance = Assert.IsAssignableFrom<CustomModifierTypeSignature>(imported);
+            Assert.NotSame(signature, newInstance);
+            Assert.Equal(_module, newInstance.Module);
+            Assert.Equal(_module, newInstance.ModifierType.Module);
+        }
+
+        [Fact]
+        public void ImportFullyImportedCustomModifierTypeShouldResultInSameInstance()
+        {
+            var signature = new TypeReference(_module, _dummyAssembly, "SomeNamespace", "SomeType")
+                .ToTypeSignature()
+                .MakeModifierType(new TypeReference(_module, _dummyAssembly, "SomeNamespace", "SomeModifierType"), true);
+
+            var imported = _importer.ImportTypeSignature(signature);
+
+            var newInstance = Assert.IsAssignableFrom<CustomModifierTypeSignature>(imported);
+            Assert.Same(signature, newInstance);
+        }
+
+        [Fact]
+        public void ImportFunctionPointerTypeWithNonImportedParameterShouldResultInNewInstance()
+        {
+            var signature = MethodSignature
+                .CreateStatic(
+                    _module.CorLibTypeFactory.Void,
+                    new TypeReference(_dummyAssembly, "SomeNamespace", "SomeType").ToTypeSignature())
+                .MakeFunctionPointerType();
+
+            var imported = _importer.ImportTypeSignature(signature);
+
+            var newInstance = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(imported);
+            Assert.NotSame(signature, newInstance);
+            Assert.Equal(signature, newInstance, _comparer);
+            Assert.Equal(_module, newInstance.Module);
+            Assert.Equal(_module, newInstance.Signature.ParameterTypes[0].Module);
+        }
+
+        [Fact]
+        public void ImportFunctionPointerTypeWithNonImportedReturnTypeShouldResultInNewInstance()
+        {
+            var signature = MethodSignature
+                .CreateStatic(
+                    new TypeReference(_dummyAssembly, "SomeNamespace", "SomeType").ToTypeSignature(),
+                    _module.CorLibTypeFactory.Int32)
+                .MakeFunctionPointerType();
+
+            var imported = _importer.ImportTypeSignature(signature);
+
+            var newInstance = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(imported);
+            Assert.NotSame(signature, newInstance);
+            Assert.Equal(signature, newInstance, _comparer);
+            Assert.Equal(_module, newInstance.Module);
+            Assert.Equal(_module, newInstance.Signature.ReturnType.Module);
+        }
+
+        [Fact]
+        public void ImportFullyImportedFunctionPointerTypeShouldResultInSameInstance()
+        {
+            var signature = MethodSignature
+                .CreateStatic(
+                    _module.CorLibTypeFactory.Void,
+                    new TypeReference(_module, _dummyAssembly, "SomeNamespace", "SomeType").ToTypeSignature())
+                .MakeFunctionPointerType();
+
+            var imported = _importer.ImportTypeSignature(signature);
+
+            var newInstance = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(imported);
+            Assert.Same(signature, newInstance);
         }
     }
 }
