@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
@@ -24,7 +25,7 @@ namespace AsmResolver.DotNet
         public DefaultMetadataResolver(IAssemblyResolver assemblyResolver)
         {
             AssemblyResolver = assemblyResolver ?? throw new ArgumentNullException(nameof(assemblyResolver));
-            _typeCache = new Dictionary<ITypeDescriptor, TypeDefinition>();
+            _typeCache = new ConcurrentDictionary<ITypeDescriptor, TypeDefinition>();
         }
 
         /// <inheritdoc />
