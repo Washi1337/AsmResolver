@@ -38,6 +38,9 @@ namespace AsmResolver.DotNet.Signatures.Types
             BaseType.GetUnderlyingTypeDefOrRef();
 
         /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module) => BaseType.IsImportedInModule(module);
+
+        /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {
             context.Writer.WriteByte((byte) ElementType);

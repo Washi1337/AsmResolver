@@ -170,6 +170,13 @@ namespace AsmResolver.DotNet
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module)
+        {
+            return Module == module
+                   && (EventType?.IsImportedInModule(module) ?? false);
+        }
+
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
         /// </summary>

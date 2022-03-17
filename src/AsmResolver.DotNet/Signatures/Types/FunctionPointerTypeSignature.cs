@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -47,6 +48,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() =>
             Signature?.ReturnType?.Module?.CorLibTypeFactory.IntPtr.Type;
+
+        /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module) => Signature.IsImportedInModule(module);
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

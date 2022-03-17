@@ -3,7 +3,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides members for describing a (reference to a) member defined in a .NET assembly.
     /// </summary>
-    public interface IMemberDescriptor : IFullNameProvider, IModuleProvider
+    public interface IMemberDescriptor : IFullNameProvider, IModuleProvider, IImportable
     {
         /// <summary>
         /// When this member is defined in a type, gets the enclosing type.

@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet
         {
             if (scope is null)
                 throw new ArgumentNullException(nameof(scope));
-            if (scope.Module == TargetModule)
+            if (scope.IsImportedInModule(TargetModule))
                 return scope;
 
             return scope switch
@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet
         {
             if (assembly is null)
                 throw new ArgumentNullException(nameof(assembly));
-            if (assembly is AssemblyReference r && r.Module == TargetModule)
+            if (assembly is AssemblyReference r && assembly.IsImportedInModule(TargetModule))
                 return r;
 
             var reference = TargetModule.AssemblyReferences.FirstOrDefault(a => _comparer.Equals(a, assembly));
@@ -92,7 +92,7 @@ namespace AsmResolver.DotNet
         {
             if (module is null)
                 throw new ArgumentNullException(nameof(module));
-            if (module.Module == TargetModule)
+            if (module.IsImportedInModule(TargetModule))
                 return module;
 
             var reference = TargetModule.ModuleReferences.FirstOrDefault(a => _comparer.Equals(a, module));
@@ -139,7 +139,7 @@ namespace AsmResolver.DotNet
         {
             AssertTypeIsValid(type);
 
-            if (type.Module == TargetModule)
+            if (type.IsImportedInModule(TargetModule))
                 return type;
 
             return new TypeReference(TargetModule, ImportScope(type.Module!), type.Namespace, type.Name);
@@ -154,7 +154,7 @@ namespace AsmResolver.DotNet
         {
             AssertTypeIsValid(type);
 
-            if (type.Module == TargetModule)
+            if (type.IsImportedInModule(TargetModule))
                 return type;
 
             return new TypeReference(TargetModule, ImportScope(type.Scope!), type.Namespace, type.Name);
@@ -171,7 +171,7 @@ namespace AsmResolver.DotNet
             if (type.Signature is null)
                 throw new ArgumentNullException(nameof(type));
 
-            if (type.Module == TargetModule)
+            if (type.IsImportedInModule(TargetModule))
                 return type;
 
             return new TypeSpecification(ImportTypeSignature(type.Signature));
@@ -186,7 +186,7 @@ namespace AsmResolver.DotNet
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
-            if (type.Module == TargetModule)
+            if (type.IsImportedInModule(TargetModule))
                 return type;
 
             return type.AcceptVisitor(this);
@@ -212,11 +212,8 @@ namespace AsmResolver.DotNet
                 throw new ArgumentNullException(nameof(type));
 
             var importedTypeSig = ImportTypeSignature(type);
-            if (importedTypeSig is TypeDefOrRefSignature
-                || importedTypeSig is CorLibTypeSignature)
-            {
+            if (importedTypeSig is TypeDefOrRefSignature or CorLibTypeSignature)
                 return importedTypeSig.GetUnderlyingTypeDefOrRef()!;
-            }
 
             return new TypeSpecification(importedTypeSig);
         }
@@ -266,6 +263,7 @@ namespace AsmResolver.DotNet
             var result = new ArrayTypeSignature(baseType);
             for (int i = 0; i < rank; i++)
                 result.Dimensions.Add(new ArrayDimension());
+
             return result;
         }
 
@@ -318,7 +316,7 @@ namespace AsmResolver.DotNet
             if (method.Signature is null)
                 throw new ArgumentException("Cannot import a method that does not have a signature.");
 
-            if (method.Module == TargetModule)
+            if (method.IsImportedInModule(TargetModule))
                 return method;
 
             return new MemberReference(
@@ -406,7 +404,7 @@ namespace AsmResolver.DotNet
             if (method.DeclaringType is null)
                 throw new ArgumentException("Cannot import a method that is not added to a type.");
 
-            if (method.Module == TargetModule)
+            if (method.IsImportedInModule(TargetModule))
                 return method;
 
             var memberRef = ImportMethod(method.Method);
@@ -479,7 +477,7 @@ namespace AsmResolver.DotNet
             if (field.Signature is null)
                 throw new ArgumentException("Cannot import a field that does not have a signature.");
 
-            if (field.Module == TargetModule)
+            if (field.IsImportedInModule(TargetModule))
                 return field;
 
             return new MemberReference(

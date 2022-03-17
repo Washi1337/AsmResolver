@@ -1104,6 +1104,9 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public override string ToString() => Name ?? string.Empty;
 
+        /// <inheritdoc />
+        bool IImportable.IsImportedInModule(ModuleDefinition module) => this == module;
+
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and writes it to the file system.
         /// </summary>
