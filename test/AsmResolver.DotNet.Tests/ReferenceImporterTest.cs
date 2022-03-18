@@ -310,10 +310,35 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ImportTypeSpecWithNonImportedBaseTypeShouldResultInNewInstance()
+        {
+            var signature = new TypeReference(_module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
+                .ToTypeSignature()
+                .MakeSzArrayType();
+
+            var imported = _importer.ImportTypeSignature(signature);
+            var newInstance = Assert.IsAssignableFrom<SzArrayTypeSignature>(imported);
+            Assert.NotSame(signature, newInstance);
+            Assert.Equal(signature, newInstance, Comparer);
+            Assert.Equal(_module, newInstance.BaseType.Module);
+        }
+
+        [Fact]
         public void ImportFullyImportedTypeDefOrRefShouldResultInSameInstance()
         {
             var signature = new TypeReference(_module, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
                 .ToTypeSignature();
+
+            var imported = _importer.ImportTypeSignature(signature);
+            Assert.Same(signature, imported);
+        }
+
+        [Fact]
+        public void ImportFullyImportedTypeSpecShouldResultInSameInstance()
+        {
+            var signature = new TypeReference(_module, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
+                .ToTypeSignature()
+                .MakeSzArrayType();
 
             var imported = _importer.ImportTypeSignature(signature);
             Assert.Same(signature, imported);
