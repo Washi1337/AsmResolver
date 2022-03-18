@@ -11,7 +11,8 @@ namespace AsmResolver.DotNet
         /// <param name="module">The module that is supposed to import the member.</param>
         /// <returns><c>true</c> if the descriptor of the member is fully imported by the module, <c>false</c> otherwise.</returns>
         /// <remarks>
-        /// This method verifies all references in the descriptor of the member, but does not verify the contents (e.g. a method body).
+        /// This method verifies all references in the descriptor of the member only. It does not verify any additional
+        /// data or contents (such as a method body) associated to the member.
         /// </remarks>
         bool IsImportedInModule(ModuleDefinition module);
     }
