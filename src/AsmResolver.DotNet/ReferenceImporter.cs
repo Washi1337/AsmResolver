@@ -142,7 +142,11 @@ namespace AsmResolver.DotNet
             if (type.IsImportedInModule(TargetModule))
                 return type;
 
-            return new TypeReference(TargetModule, ImportScope(type.Module!), type.Namespace, type.Name);
+            return new TypeReference(
+                TargetModule,
+                ImportScope(((ITypeDescriptor) type).Scope),
+                type.Namespace,
+                type.Name);
         }
 
         /// <summary>
