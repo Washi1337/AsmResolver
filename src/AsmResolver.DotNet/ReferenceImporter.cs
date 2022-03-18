@@ -144,7 +144,7 @@ namespace AsmResolver.DotNet
 
             return new TypeReference(
                 TargetModule,
-                ImportScope(((ITypeDescriptor) type).Scope!),
+                ImportScope(((ITypeDescriptor) type).Scope),
                 type.Namespace,
                 type.Name);
         }
