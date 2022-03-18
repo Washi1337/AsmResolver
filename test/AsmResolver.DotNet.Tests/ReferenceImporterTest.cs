@@ -305,7 +305,7 @@ namespace AsmResolver.DotNet.Tests
             var imported = _importer.ImportTypeSignature(signature);
 
             Assert.NotSame(signature, imported);
-            Assert.Equal(signature, imported, _comparer);
+            Assert.Equal(signature, imported, Comparer);
             Assert.Equal(_module, imported.Module);
         }
 
@@ -402,7 +402,7 @@ namespace AsmResolver.DotNet.Tests
 
             var newInstance = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(imported);
             Assert.NotSame(signature, newInstance);
-            Assert.Equal(signature, newInstance, _comparer);
+            Assert.Equal(signature, newInstance, Comparer);
             Assert.Equal(_module, newInstance.Module);
             Assert.Equal(_module, newInstance.Signature.ParameterTypes[0].Module);
         }
@@ -420,7 +420,7 @@ namespace AsmResolver.DotNet.Tests
 
             var newInstance = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(imported);
             Assert.NotSame(signature, newInstance);
-            Assert.Equal(signature, newInstance, _comparer);
+            Assert.Equal(signature, newInstance, Comparer);
             Assert.Equal(_module, newInstance.Module);
             Assert.Equal(_module, newInstance.Signature.ReturnType.Module);
         }
