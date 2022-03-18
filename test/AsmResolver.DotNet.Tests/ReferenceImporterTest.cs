@@ -11,9 +11,9 @@ namespace AsmResolver.DotNet.Tests
 {
     public class ReferenceImporterTest
     {
-        private static readonly SignatureComparer _comparer = new SignatureComparer();
+        private static readonly SignatureComparer Comparer = new();
 
-        private readonly AssemblyReference _dummyAssembly = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
+        private readonly AssemblyReference _dummyAssembly = new("SomeAssembly", new Version(1, 2, 3, 4));
         private readonly ModuleDefinition _module;
         private readonly ReferenceImporter _importer;
 
@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var result = _importer.ImportScope(_dummyAssembly);
 
-            Assert.Equal(_dummyAssembly, result, _comparer);
+            Assert.Equal(_dummyAssembly, result, Comparer);
             Assert.Contains(result, _module.AssemblyReferences);
         }
 
@@ -52,7 +52,7 @@ namespace AsmResolver.DotNet.Tests
             var type = new TypeReference(_dummyAssembly, "SomeNamespace", "SomeName");
             var result = _importer.ImportType(type);
 
-            Assert.Equal(type, result, _comparer);
+            Assert.Equal(type, result, Comparer);
             Assert.Equal(_module, result.Module);
         }
 
@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet.Tests
             var result = _importer.ImportType(definition);
 
             Assert.IsAssignableFrom<TypeReference>(result);
-            Assert.Equal(definition, result, _comparer);
+            Assert.Equal(definition, result, Comparer);
         }
 
         [Fact]
@@ -100,9 +100,40 @@ namespace AsmResolver.DotNet.Tests
 
             var result = _importer.ImportType(nested);
 
-            Assert.Equal(nested, result, _comparer);
+            Assert.Equal(nested, result, Comparer);
             Assert.Equal(_module, result.Module);
             Assert.Equal(_module, result.DeclaringType.Module);
+        }
+
+        [Fact]
+        public void ImportNestedTypeDefinitionShouldImportParentType()
+        {
+            var otherAssembly = new AssemblyDefinition(_dummyAssembly.Name, _dummyAssembly.Version);
+            var otherModule = new ModuleDefinition("OtherModule");
+            otherAssembly.Modules.Add(otherModule);
+
+            var objectType = otherModule.CorLibTypeFactory.Object.ToTypeDefOrRef();
+
+            var declaringType = new TypeDefinition(
+                "SomeNamespace",
+                "SomeName",
+                TypeAttributes.Class | TypeAttributes.Public,
+                objectType);
+            var nestedType = new TypeDefinition(
+                null,
+                "NestedType",
+                TypeAttributes.Class | TypeAttributes.NestedPublic,
+                objectType);
+
+            declaringType.NestedTypes.Add(nestedType);
+            otherModule.TopLevelTypes.Add(declaringType);
+
+            var reference = _importer.ImportType(nestedType);
+
+            Assert.NotNull(reference.DeclaringType);
+            Assert.Equal(declaringType, reference.DeclaringType, Comparer);
+            Assert.Equal(_module, reference.Module);
+            Assert.Equal(_module, reference.DeclaringType.Module);
         }
 
         [Fact]
@@ -170,7 +201,7 @@ namespace AsmResolver.DotNet.Tests
 
             var result = _importer.ImportMethod(method);
 
-            Assert.Equal(method, result, _comparer);
+            Assert.Equal(method, result, Comparer);
             Assert.Same(_module, result.Module);
         }
 
@@ -217,7 +248,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(new TypeSignature[]
             {
                 _module.CorLibTypeFactory.String
-            }, specification.Signature.TypeArguments, _comparer);
+            }, specification.Signature.TypeArguments, Comparer);
         }
 
         [Fact]
@@ -231,7 +262,7 @@ namespace AsmResolver.DotNet.Tests
 
             var result = _importer.ImportField(field);
 
-            Assert.Equal(field, result, _comparer);
+            Assert.Equal(field, result, Comparer);
             Assert.Same(_module, result.Module);
         }
 
