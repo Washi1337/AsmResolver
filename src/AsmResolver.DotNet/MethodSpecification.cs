@@ -99,6 +99,13 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public MethodDefinition? Resolve() => Method?.Resolve();
 
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module)
+        {
+            return (Method?.IsImportedInModule(module) ?? false)
+                   && (Signature?.IsImportedInModule(module) ?? false);
+        }
+
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 
         /// <summary>

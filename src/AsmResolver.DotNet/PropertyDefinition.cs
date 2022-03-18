@@ -187,6 +187,13 @@ namespace AsmResolver.DotNet
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module)
+        {
+            return Module == module
+                   && (Signature?.IsImportedInModule(module) ?? false);
+        }
+
         /// <summary>
         /// Obtains the name of the property definition.
         /// </summary>

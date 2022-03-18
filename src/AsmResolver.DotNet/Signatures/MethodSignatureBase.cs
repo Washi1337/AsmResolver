@@ -78,6 +78,29 @@ namespace AsmResolver.DotNet.Signatures
             get;
         } = new List<TypeSignature>();
 
+        /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module)
+        {
+            if (!ReturnType.IsImportedInModule(module))
+                return false;
+
+            for (int i = 0; i < ParameterTypes.Count; i++)
+            {
+                var x = ParameterTypes[i];
+                if (!x.IsImportedInModule(module))
+                    return false;
+            }
+
+            for (int i = 0; i < SentinelParameterTypes.Count; i++)
+            {
+                var x = SentinelParameterTypes[i];
+                if (!x.IsImportedInModule(module))
+                    return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Initializes the <see cref="ParameterTypes"/> and <see cref="ReturnType"/> properties by reading
         /// the parameter count, return type and parameter fields of the signature from the provided input stream.

@@ -28,8 +28,8 @@ namespace AsmResolver.DotNet
         protected ExportedType(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(() => GetName());
-            _namespace = new LazyVariable<Utf8String?>(() => GetNamespace());
+            _name = new LazyVariable<Utf8String?>(GetName);
+            _namespace = new LazyVariable<Utf8String?>(GetNamespace);
             _implementation = new LazyVariable<IImplementation?>(GetImplementation);
         }
 
@@ -144,6 +144,13 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
+
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module)
+        {
+            return Module == module
+                   && (Implementation?.IsImportedInModule(module) ?? false);
+        }
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 

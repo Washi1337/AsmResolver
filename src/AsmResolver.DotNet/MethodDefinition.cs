@@ -691,6 +691,13 @@ namespace AsmResolver.DotNet
 
         MethodDefinition IMethodDescriptor.Resolve() => this;
 
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module)
+        {
+            return Module == module
+                   && (Signature?.IsImportedInModule(module) ?? false);
+        }
+
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <inheritdoc />

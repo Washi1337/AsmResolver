@@ -681,6 +681,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module) => Module == module;
+
+        /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
         {
             // TODO: Check types of the same family.

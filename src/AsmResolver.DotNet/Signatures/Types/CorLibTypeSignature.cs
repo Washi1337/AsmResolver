@@ -79,6 +79,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module) => Module == module;
+
+        /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef()
         {
             return Type;

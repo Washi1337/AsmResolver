@@ -120,6 +120,9 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module) => Module == module;
+
         /// <summary>
         /// Obtains the name of the referenced file.
         /// </summary>

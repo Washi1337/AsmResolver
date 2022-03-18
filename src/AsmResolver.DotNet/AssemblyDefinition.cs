@@ -223,6 +223,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module) => ManifestModule == module;
+
+        /// <inheritdoc />
         public override AssemblyDefinition Resolve() => this;
 
         /// <summary>
