@@ -4,6 +4,8 @@ namespace AsmResolver.PE.DotNet.Bundles
 {
     public class SerializedBundleFile : BundleFile
     {
+        private readonly BinaryStreamReader _contentsReader;
+
         public SerializedBundleFile(ref BinaryStreamReader reader, uint bundleVersionFormat)
         {
             ulong offset = reader.ReadUInt64();
@@ -12,11 +14,19 @@ namespace AsmResolver.PE.DotNet.Bundles
             if (bundleVersionFormat >= 6)
             {
                 ulong compressedSize = reader.ReadUInt64();
-                IsCompressed = compressedSize != 0;
+                if (compressedSize != 0)
+                {
+                    size = compressedSize;
+                    IsCompressed = true;
+                }
             }
 
             Type = (BundleFileType) reader.ReadByte();
             RelativePath = reader.ReadBinaryFormatterString();
+
+            _contentsReader = reader.ForkAbsolute(offset, (uint) size);
         }
+
+        protected override ISegment GetContents() => _contentsReader.ReadSegment(_contentsReader.Length);
     }
 }
