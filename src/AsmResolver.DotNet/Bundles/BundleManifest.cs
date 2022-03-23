@@ -232,6 +232,13 @@ namespace AsmResolver.DotNet.Bundles
         }
 
         /// <summary>
+        /// Gets a value indicating whether the provided data source contains a conventional bundled assembly signature.
+        /// </summary>
+        /// <param name="source">The file to locate the bundle header in.</param>
+        /// <returns><c>true</c> if a bundle signature was found, <c>false</c> otherwise.</returns>
+        public static bool IsBundledAssembly(IDataSource source) => FindBundleManifestAddress(source) != -1;
+
+        /// <summary>
         /// Obtains the list of files stored in the bundle.
         /// </summary>
         /// <returns>The files</returns>
@@ -239,6 +246,22 @@ namespace AsmResolver.DotNet.Bundles
         /// This method is called upon initialization of the <see cref="Files"/> property.
         /// </remarks>
         protected virtual IList<BundleFile> GetFiles() => new OwnedCollection<BundleManifest, BundleFile>(this);
+
+        /// <summary>
+        /// Constructs a new application host file based on the bundle manifest.
+        /// </summary>
+        /// <param name="appHostTemplatePath">
+        /// The path to the application host file template to use. By default this is stored in
+        /// <c>&lt;DOTNET-INSTALLATION-PATH&gt;/sdk/&lt;version&gt;/AppHostTemplate</c> or
+        /// <c>&lt;DOTNET-INSTALLATION-PATH&gt;/packs/Microsoft.NETCore.App.Host.&lt;runtime-identifier&gt;/&lt;version&gt;/runtimes/&lt;runtime-identifier&gt;/native</c>.
+        /// </param>
+        /// <param name="outputPath">The output path to write to.</param>
+        /// <param name="appBinaryPath">The name of the file in the bundle that contains the entry point of the application.</param>
+        public void WriteUsingTemplate(string appHostTemplatePath, string outputPath, string appBinaryPath)
+        {
+            using var fs = File.Create(outputPath);
+            WriteUsingTemplate(appHostTemplatePath, fs, appBinaryPath);
+        }
 
         /// <summary>
         /// Constructs a new application host file based on the bundle manifest.
