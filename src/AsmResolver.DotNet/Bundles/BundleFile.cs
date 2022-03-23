@@ -24,6 +24,30 @@ namespace AsmResolver.DotNet.Bundles
         }
 
         /// <summary>
+        /// Creates a new bundle file.
+        /// </summary>
+        /// <param name="relativePath">The path of the file, relative to the root of the bundle.</param>
+        /// <param name="type">The type of the file.</param>
+        /// <param name="contents">The contents of the file.</param>
+        public BundleFile(string relativePath, BundleFileType type, byte[] contents)
+            : this(relativePath, type, new DataSegment(contents))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new empty bundle file.
+        /// </summary>
+        /// <param name="relativePath">The path of the file, relative to the root of the bundle.</param>
+        /// <param name="type">The type of the file.</param>
+        /// <param name="contents">The contents of the file.</param>
+        public BundleFile(string relativePath, BundleFileType type, ISegment contents)
+        {
+            RelativePath = relativePath;
+            Type = type;
+            _contents = new LazyVariable<ISegment>(contents);
+        }
+
+        /// <summary>
         /// Gets the parent manifest this file was added to.
         /// </summary>
         public BundleManifest? ParentManifest
