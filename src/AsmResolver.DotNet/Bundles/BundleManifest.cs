@@ -108,17 +108,27 @@ namespace AsmResolver.DotNet.Bundles
 
         private static long FindInFile(IDataSource source, byte[] data)
         {
-            for (ulong i = sizeof(ulong); i < source.Length - (ulong) data.Length; i++)
+            byte[] buffer = new byte[0x1000];
+
+            ulong start = 0;
+            while (start < source.Length)
             {
-                bool fullMatch = true;
-                for (int j = 0; fullMatch && j < data.Length; j++)
+                int read = source.ReadBytes(start, buffer, 0, buffer.Length);
+
+                for (int i = sizeof(ulong); i < read - data.Length; i++)
                 {
-                    if (source[i + (ulong) j] != data[j])
-                        fullMatch = false;
+                    bool fullMatch = true;
+                    for (int j = 0; fullMatch && j < data.Length; j++)
+                    {
+                        if (buffer[i + j] != data[j])
+                            fullMatch = false;
+                    }
+
+                    if (fullMatch)
+                        return (long) start + i;
                 }
 
-                if (fullMatch)
-                    return (long) i;
+                start += (ulong) read;
             }
 
             return -1;

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Bundles;
 using AsmResolver.IO;
@@ -107,7 +108,9 @@ namespace AsmResolver.DotNet.Tests.Bundles
             BundleManifest manifest,
             string sdkVersion,
             string fileName,
-            string expectedOutput)
+            string expectedOutput,
+            [CallerFilePath] string className = "File",
+            [CallerMemberName] string methodName = "Method")
         {
             string sdkPath = Path.Combine(DotNetCorePathProvider.DefaultInstallationPath!, "sdk");
             string? sdkVersionPath = null;
@@ -136,7 +139,10 @@ namespace AsmResolver.DotNet.Tests.Bundles
 
             string output = _fixture
                 .GetRunner<NativePERunner>()
-                .RunAndCaptureOutput(Path.ChangeExtension(fileName, ".exe"), stream.ToArray());
+                .RunAndCaptureOutput(Path.ChangeExtension(fileName, ".exe"), stream.ToArray(), null,
+                    5000,
+                    className,
+                    methodName);
             Assert.Equal(expectedOutput, output);
         }
 
