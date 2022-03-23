@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Builder.Resources
     public class DotNetResourcesDirectoryBuffer
     {
         private readonly MemoryStream _rawStream = new();
-        private readonly IBinaryStreamWriter _writer;
+        private readonly BinaryStreamWriter _writer;
         private readonly Dictionary<byte[], uint> _dataOffsets = new(ByteArrayEqualityComparer.Instance);
 
         /// <summary>

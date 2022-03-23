@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
     public class BlobStreamBuffer : IMetadataStreamBuffer
     {
         private readonly MemoryStream _rawStream = new();
-        private readonly IBinaryStreamWriter _writer;
+        private readonly BinaryStreamWriter _writer;
         private readonly Dictionary<byte[], uint> _blobs = new(ByteArrayEqualityComparer.Instance);
 
         /// <summary>

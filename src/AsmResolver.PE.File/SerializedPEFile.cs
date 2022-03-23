@@ -10,7 +10,7 @@ namespace AsmResolver.PE.File
     /// </summary>
     public class SerializedPEFile : PEFile
     {
-        private readonly IList<SectionHeader> _sectionHeaders;
+        private readonly List<SectionHeader> _sectionHeaders;
         private readonly BinaryStreamReader _reader;
 
         /// <summary>

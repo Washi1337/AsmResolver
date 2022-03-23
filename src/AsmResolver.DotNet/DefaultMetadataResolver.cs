@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class DefaultMetadataResolver : IMetadataResolver
     {
-        private readonly IDictionary<ITypeDescriptor, TypeDefinition> _typeCache;
+        private readonly ConcurrentDictionary<ITypeDescriptor, TypeDefinition> _typeCache;
         private readonly SignatureComparer _comparer = new()
         {
             AcceptNewerAssemblyVersionNumbers = true
@@ -55,7 +55,7 @@ namespace AsmResolver.DotNet
                 // Check if type definition has changed since last lookup.
                 if (typeDef.IsTypeOf(type.Namespace, type.Name))
                     return typeDef;
-                _typeCache.Remove(type);
+                _typeCache.TryRemove(type, out _);
             }
 
             return null;
