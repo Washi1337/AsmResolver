@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Bundles;
+using AsmResolver.IO;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -57,8 +58,8 @@ namespace AsmResolver.DotNet.Tests.Bundles
         public void WriteBundleManifestV1Windows()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-            AssertReadWriteManifestWindowsPreservesOutput(
-                Properties.Resources.HelloWorld_SingleFile_V1,
+            AssertWriteManifestWindowsPreservesOutput(
+                 BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V1),
                 "3.1",
                 "HelloWorld.dll",
                 $"Hello, World!{Environment.NewLine}");
@@ -68,8 +69,8 @@ namespace AsmResolver.DotNet.Tests.Bundles
         public void WriteBundleManifestV2Windows()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-            AssertReadWriteManifestWindowsPreservesOutput(
-                Properties.Resources.HelloWorld_SingleFile_V2,
+            AssertWriteManifestWindowsPreservesOutput(
+                BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V2),
                 "5.0",
                 "HelloWorld.dll",
                 $"Hello, World!{Environment.NewLine}");
@@ -79,21 +80,35 @@ namespace AsmResolver.DotNet.Tests.Bundles
         public void WriteBundleManifestV6Windows()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-            AssertReadWriteManifestWindowsPreservesOutput(
-                Properties.Resources.HelloWorld_SingleFile_V6,
+            AssertWriteManifestWindowsPreservesOutput(
+                BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6),
                 "6.0",
                 "HelloWorld.dll",
                 $"Hello, World!{Environment.NewLine}");
         }
 
-        private void AssertReadWriteManifestWindowsPreservesOutput(
-            byte[] inputFile,
+        [SkippableFact]
+        public void MarkFilesAsCompressed()
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6);
+            manifest.Files.First(f => f.RelativePath == "HelloWorld.dll").Compress();
+
+            using var stream = new MemoryStream();
+            ulong address = manifest.WriteManifest(new BinaryStreamWriter(stream), false);
+
+            var reader = ByteArrayDataSource.CreateReader(stream.ToArray());
+            reader.Offset = address;
+            var newManifest = BundleManifest.FromReader(reader);
+            AssertBundlesAreEqual(manifest, newManifest);
+        }
+
+        private void AssertWriteManifestWindowsPreservesOutput(
+            BundleManifest manifest,
             string sdkVersion,
             string fileName,
             string expectedOutput)
         {
-            var manifest = BundleManifest.FromBytes(inputFile);
-
             string sdkPath = Path.Combine(DotNetCorePathProvider.DefaultInstallationPath!, "sdk");
             string? sdkVersionPath = null;
             foreach (string dir in Directory.GetDirectories(sdkPath))
@@ -120,7 +135,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             AssertBundlesAreEqual(manifest, newManifest);
 
             string output = _fixture
-                .GetRunner<PERunner>()
+                .GetRunner<NativePERunner>()
                 .RunAndCaptureOutput(Path.ChangeExtension(fileName, ".exe"), stream.ToArray());
             Assert.Equal(expectedOutput, output);
         }

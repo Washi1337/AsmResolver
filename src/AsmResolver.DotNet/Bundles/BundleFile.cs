@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet.Bundles
                     using var outputStream = new MemoryStream();
 
                     using var inputStream = new MemoryStream(contents);
-                    using var deflate = new DeflateStream(inputStream, CompressionMode.Decompress);
+                    using (var deflate = new DeflateStream(inputStream, CompressionMode.Decompress))
                     {
                         deflate.CopyTo(outputStream);
                     }
@@ -92,6 +92,32 @@ namespace AsmResolver.DotNet.Bundles
             }
 
             throw new InvalidOperationException("Contents of file is not readable.");
+        }
+
+        public void Compress()
+        {
+            if (IsCompressed)
+                throw new InvalidOperationException("File is already compressed.");
+
+            using var inputStream = new MemoryStream(GetData());
+
+            using var outputStream = new MemoryStream();
+            using (var deflate = new DeflateStream(outputStream, CompressionLevel.Optimal))
+            {
+                inputStream.CopyTo(deflate);
+            }
+
+            Contents = new DataSegment(outputStream.ToArray());
+            IsCompressed = true;
+        }
+
+        public void Decompress()
+        {
+            if (!IsCompressed)
+                throw new InvalidOperationException("File is not compressed.");
+
+            Contents = new DataSegment(GetData(true));
+            IsCompressed = false;
         }
 
         public override string ToString() => RelativePath;

@@ -182,7 +182,7 @@ namespace AsmResolver.DotNet.Bundles
 
             writer.WriteBytes(appHostTemplate);
             writer.Offset = writer.Length;
-            ulong headerAddress = Write(writer, isArm64Linux);
+            ulong headerAddress = WriteManifest(writer, isArm64Linux);
 
             writer.Offset = (ulong) signatureAddress - sizeof(ulong);
             writer.WriteUInt64(headerAddress);
@@ -193,7 +193,7 @@ namespace AsmResolver.DotNet.Bundles
                 writer.WriteZeroes(AppBinaryPathPlaceholder.Length - appBinaryPathBytes.Length);
         }
 
-        public ulong Write(IBinaryStreamWriter writer, bool isArm64Linux)
+        public ulong WriteManifest(IBinaryStreamWriter writer, bool isArm64Linux)
         {
             WriteFileContents(writer, isArm64Linux
                 ? 4096u
