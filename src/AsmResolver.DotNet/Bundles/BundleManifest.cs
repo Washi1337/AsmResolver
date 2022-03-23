@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.IO;
 
-namespace AsmResolver.PE.DotNet.Bundles
+namespace AsmResolver.DotNet.Bundles
 {
     public class BundleManifest
     {

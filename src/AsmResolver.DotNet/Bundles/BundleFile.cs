@@ -3,7 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using AsmResolver.IO;
 
-namespace AsmResolver.PE.DotNet.Bundles
+namespace AsmResolver.DotNet.Bundles
 {
     public class BundleFile
     {

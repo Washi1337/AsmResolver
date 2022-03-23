@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using AsmResolver.IO;
 
-namespace AsmResolver.PE.DotNet.Bundles
+namespace AsmResolver.DotNet.Bundles
 {
     public class SerializedBundleManifest : BundleManifest
     {

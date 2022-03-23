@@ -1,4 +1,4 @@
-namespace AsmResolver.PE.DotNet.Bundles
+namespace AsmResolver.DotNet.Bundles
 {
     public enum BundleFileType
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace AsmResolver.PE.DotNet.Bundles
+namespace AsmResolver.DotNet.Bundles
 {
     [Flags]
     public enum BundleManifestFlags : ulong

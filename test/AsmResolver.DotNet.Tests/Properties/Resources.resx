@@ -57,6 +57,15 @@
     <data name="HelloWorld_WithAttribute" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.WithAttribute.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="HelloWorld_SingleFile_V1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.SingleFile.v1.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="HelloWorld_SingleFile_V2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.SingleFile.v2.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="HelloWorld_SingleFile_V6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.SingleFile.v6.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
     <data name="Assembly1_Forwarder" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\Assembly1_Forwarder.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>

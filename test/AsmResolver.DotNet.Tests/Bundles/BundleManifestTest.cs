@@ -1,8 +1,8 @@
 using System.Linq;
-using AsmResolver.PE.DotNet.Bundles;
+using AsmResolver.DotNet.Bundles;
 using Xunit;
 
-namespace AsmResolver.PE.Tests.DotNet.Bundles
+namespace AsmResolver.DotNet.Tests.Bundles
 {
     public class BundleManifestTest
     {

@@ -94,27 +94,6 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
 
-        public static byte[] HelloWorld_SingleFile_V1 {
-            get {
-                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V1", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-
-        public static byte[] HelloWorld_SingleFile_V2 {
-            get {
-                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V2", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-
-        public static byte[] HelloWorld_SingleFile_V6 {
-            get {
-                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V6", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-
         public static byte[] SimpleDll {
             get {
                 object obj = ResourceManager.GetObject("SimpleDll", resourceCulture);

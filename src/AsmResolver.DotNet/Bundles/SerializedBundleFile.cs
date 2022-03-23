@@ -1,6 +1,6 @@
 using AsmResolver.IO;
 
-namespace AsmResolver.PE.DotNet.Bundles
+namespace AsmResolver.DotNet.Bundles
 {
     public class SerializedBundleFile : BundleFile
     {
