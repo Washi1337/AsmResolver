@@ -4,12 +4,19 @@ using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Bundles
 {
+    /// <summary>
+    /// Represents a lazily initialized implementation of <see cref="BundleManifest"/>  that is read from an existing file.
+    /// </summary>
     public class SerializedBundleManifest : BundleManifest
     {
         private readonly uint _originalMajorVersion;
         private readonly BinaryStreamReader _fileEntriesReader;
         private readonly int _originalFileCount;
 
+        /// <summary>
+        /// Reads a bundle manifest from the provided input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
         public SerializedBundleManifest(BinaryStreamReader reader)
         {
             MajorVersion = _originalMajorVersion = reader.ReadUInt32();
@@ -26,6 +33,7 @@ namespace AsmResolver.DotNet.Bundles
             _fileEntriesReader = reader;
         }
 
+        /// <inheritdoc />
         protected override IList<BundleFile> GetFiles()
         {
             var reader = _fileEntriesReader;

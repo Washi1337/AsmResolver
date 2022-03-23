@@ -10,6 +10,9 @@ using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Bundles
 {
+    /// <summary>
+    /// Represents a set of bundled files embedded in a .NET application host or single-file host.
+    /// </summary>
     public class BundleManifest
     {
         private static readonly byte[] BundleSignature =
@@ -25,41 +28,76 @@ namespace AsmResolver.DotNet.Bundles
 
         private IList<BundleFile>? _files;
 
+        /// <summary>
+        /// Initializes an empty bundle manifest.
+        /// </summary>
         protected BundleManifest()
         {
+            BundleID = string.Empty;
         }
 
-        public BundleManifest(uint version, string bundleId)
+        /// <summary>
+        /// Creates a new bundle manifest.
+        /// </summary>
+        /// <param name="majorVersionNumber">The file format version.</param>
+        /// <param name="bundleId">The unique bundle manifest identifier.</param>
+        public BundleManifest(uint majorVersionNumber, string bundleId)
         {
-            MajorVersion = version;
+            MajorVersion = majorVersionNumber;
             MinorVersion = 0;
             BundleID = bundleId;
         }
 
+        /// <summary>
+        /// Gets or sets the major file format version of the bundle.
+        /// </summary>
+        /// <remarks>
+        /// Version numbers recognized by the CLR are:
+        /// <list type="bullet">
+        ///     <item>1 for .NET Core 3.1</item>
+        ///     <item>2 for .NET 5.0</item>
+        ///     <item>6 for .NET 6.0</item>
+        /// </list>
+        /// </remarks>
         public uint MajorVersion
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the minor file format version of the bundle.
+        /// </summary>
+        /// <remarks>
+        /// This value is ignored by the CLR and should be set to 0.
+        /// </remarks>
         public uint MinorVersion
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the unique identifier for the bundle manifest.
+        /// </summary>
         public string BundleID
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets flags associated to the bundle.
+        /// </summary>
         public BundleManifestFlags Flags
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets a collection of files stored in the bundle.
+        /// </summary>
         public IList<BundleFile> Files
         {
             get
@@ -70,21 +108,42 @@ namespace AsmResolver.DotNet.Bundles
             }
         }
 
+        /// <summary>
+        /// Attempts to automatically locate and parse the bundle header in the provided file.
+        /// </summary>
+        /// <param name="filePath">The path to the file to read.</param>
+        /// <returns>The read manifest.</returns>
         public static BundleManifest FromFile(string filePath)
         {
-            return FromBytes(System.IO.File.ReadAllBytes(filePath));
+            return FromBytes(File.ReadAllBytes(filePath));
         }
 
+        /// <summary>
+        /// Attempts to automatically locate and parse the bundle header in the provided file.
+        /// </summary>
+        /// <param name="data">The raw contents of the file to read.</param>
+        /// <returns>The read manifest.</returns>
         public static BundleManifest FromBytes(byte[] data)
         {
             return FromDataSource(new ByteArrayDataSource(data));
         }
 
+        /// <summary>
+        /// Parses the bundle header in the provided file at the provided address.
+        /// </summary>
+        /// <param name="data">The raw contents of the file to read.</param>
+        /// <param name="offset">The address within the file to start reading the bundle at.</param>
+        /// <returns>The read manifest.</returns>
         public static BundleManifest FromBytes(byte[] data, ulong offset)
         {
             return FromDataSource(new ByteArrayDataSource(data), offset);
         }
 
+        /// <summary>
+        /// Attempts to automatically locate and parse the bundle header in the provided file.
+        /// </summary>
+        /// <param name="source">The raw contents of the file to read.</param>
+        /// <returns>The read manifest.</returns>
         public static BundleManifest FromDataSource(IDataSource source)
         {
             long address = FindBundleManifestAddress(source);
@@ -94,6 +153,12 @@ namespace AsmResolver.DotNet.Bundles
             return FromDataSource(source, (ulong) address);
         }
 
+        /// <summary>
+        /// Parses the bundle header in the provided file at the provided address.
+        /// </summary>
+        /// <param name="source">The raw contents of the file to read.</param>
+        /// <param name="offset">The address within the file to start reading the bundle at.</param>
+        /// <returns>The read manifest.</returns>
         public static BundleManifest FromDataSource(IDataSource source, ulong offset)
         {
             var reader = new BinaryStreamReader(source, 0, 0, (uint) source.Length)
@@ -104,10 +169,18 @@ namespace AsmResolver.DotNet.Bundles
             return FromReader(reader);
         }
 
+        /// <summary>
+        /// Parses the bundle header from the provided input stream.
+        /// </summary>
+        /// <param name="reader">The input stream pointing to the start of the bundle to read.</param>
+        /// <returns>The read manifest.</returns>
         public static BundleManifest FromReader(BinaryStreamReader reader) => new SerializedBundleManifest(reader);
 
         private static long FindInFile(IDataSource source, byte[] data)
         {
+            // Note: For performance reasons, we read data from the data source in blocks, such that we avoid
+            // virtual-dispatch calls and do the searching directly on a byte array instead.
+
             byte[] buffer = new byte[0x1000];
 
             ulong start = 0;
@@ -144,6 +217,11 @@ namespace AsmResolver.DotNet.Bundles
                 : -1;
         }
 
+        /// <summary>
+        /// Attempts to find the start of the bundle header in the provided file.
+        /// </summary>
+        /// <param name="source">The file to locate the bundle header in.</param>
+        /// <returns>The offset, or -1 if none was found.</returns>
         public static long FindBundleManifestAddress(IDataSource source)
         {
             long signatureAddress = FindInFile(source, BundleSignature);
@@ -153,8 +231,25 @@ namespace AsmResolver.DotNet.Bundles
             return ReadBundleManifestAddress(source, signatureAddress);
         }
 
+        /// <summary>
+        /// Obtains the list of files stored in the bundle.
+        /// </summary>
+        /// <returns>The files</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Files"/> property.
+        /// </remarks>
         protected virtual IList<BundleFile> GetFiles() => new OwnedCollection<BundleManifest, BundleFile>(this);
 
+        /// <summary>
+        /// Constructs a new application host file based on the bundle manifest.
+        /// </summary>
+        /// <param name="appHostTemplatePath">
+        /// The path to the application host file template to use. By default this is stored in
+        /// <c>&lt;DOTNET-INSTALLATION-PATH&gt;/sdk/&lt;version&gt;/AppHostTemplate</c> or
+        /// <c>&lt;DOTNET-INSTALLATION-PATH&gt;/packs/Microsoft.NETCore.App.Host.&lt;runtime-identifier&gt;/&lt;version&gt;/runtimes/&lt;runtime-identifier&gt;/native</c>.
+        /// </param>
+        /// <param name="outputStream">The output stream to write to.</param>
+        /// <param name="appBinaryPath">The name of the file in the bundle that contains the entry point of the application.</param>
         public void WriteUsingTemplate(string appHostTemplatePath, Stream outputStream, string appBinaryPath)
         {
             WriteUsingTemplate(System.IO.File.ReadAllBytes(appHostTemplatePath), outputStream, appBinaryPath,
@@ -163,6 +258,12 @@ namespace AsmResolver.DotNet.Bundles
                 == Architecture.Arm64);
         }
 
+        /// <summary>
+        /// Constructs a new application host file based on the bundle manifest.
+        /// </summary>
+        /// <param name="appHostTemplate">The application host template file to use.</param>
+        /// <param name="outputStream">The output stream to write to.</param>
+        /// <param name="appBinaryPath">The name of the file in the bundle that contains the entry point of the application.</param>
         public void WriteUsingTemplate(byte[] appHostTemplate, Stream outputStream, string appBinaryPath)
         {
             WriteUsingTemplate(appHostTemplate, outputStream, appBinaryPath,
@@ -171,11 +272,25 @@ namespace AsmResolver.DotNet.Bundles
                 == Architecture.Arm64);
         }
 
+        /// <summary>
+        /// Constructs a new application host file based on the bundle manifest.
+        /// </summary>
+        /// <param name="appHostTemplate">The application host template file to use.</param>
+        /// <param name="outputStream">The output stream to write to.</param>
+        /// <param name="appBinaryPath">The name of the file in the bundle that contains the entry point of the application.</param>
+        /// <param name="isArm64Linux"><c>true</c> if the application host is a Linux ELF binary targeting ARM64.</param>
         public void WriteUsingTemplate(byte[] appHostTemplate, Stream outputStream, string appBinaryPath, bool isArm64Linux)
         {
             WriteUsingTemplate(appHostTemplate, new BinaryStreamWriter(outputStream), appBinaryPath, isArm64Linux);
         }
 
+        /// <summary>
+        /// Constructs a new application host file based on the bundle manifest.
+        /// </summary>
+        /// <param name="appHostTemplate">The application host template file to use.</param>
+        /// <param name="writer">The output stream to write to.</param>
+        /// <param name="appBinaryPath">The name of the file in the bundle that contains the entry point of the application.</param>
+        /// <param name="isArm64Linux"><c>true</c> if the application host is a Linux ELF binary targeting ARM64.</param>
         public void WriteUsingTemplate(byte[] appHostTemplate, IBinaryStreamWriter writer, string appBinaryPath, bool isArm64Linux)
         {
             byte[] appBinaryPathBytes = Encoding.UTF8.GetBytes(appBinaryPath);
@@ -203,6 +318,17 @@ namespace AsmResolver.DotNet.Bundles
                 writer.WriteZeroes(AppBinaryPathPlaceholder.Length - appBinaryPathBytes.Length);
         }
 
+        /// <summary>
+        /// Writes the manifest to an output stream.
+        /// </summary>
+        /// <param name="writer">The output stream to write to.</param>
+        /// <param name="isArm64Linux"><c>true</c> if the application host is a Linux ELF binary targeting ARM64.</param>
+        /// <returns>The address of the bundle header.</returns>
+        /// <remarks>
+        /// This does not necessarily produce a working executable file, it only writes the contents of the entire manifest,
+        /// without a host application that invokes the manifest. If you want to produce a runnable executable, use one
+        /// of the <see cref="WriteUsingTemplate(string,System.IO.Stream,string)"/> or one of its overloads instead.
+        /// </remarks>
         public ulong WriteManifest(IBinaryStreamWriter writer, bool isArm64Linux)
         {
             WriteFileContents(writer, isArm64Linux
