@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet.Signatures
             switch ((CallingConventionAttributes) flag & SignatureTypeMask)
             {
                 case CallingConventionAttributes.Default:
-                case CallingConventionAttributes.C:
+                case CallingConventionAttributes.Cdecl:
                 case CallingConventionAttributes.ExplicitThis:
                 case CallingConventionAttributes.FastCall:
                 case CallingConventionAttributes.StdCall:

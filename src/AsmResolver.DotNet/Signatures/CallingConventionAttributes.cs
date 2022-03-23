@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Indicates a method is using the cdecl calling convention.
         /// </summary>
-        C = 0x1,
+        Cdecl = 0x1,
 
         /// <summary>
         /// Indicates a method is using the stdcall calling convention.
