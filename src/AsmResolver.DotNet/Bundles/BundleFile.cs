@@ -1,17 +1,31 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using AsmResolver.Collections;
 using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Bundles
 {
-    public class BundleFile
+    public class BundleFile : IOwnedCollectionElement<BundleManifest>
     {
         private readonly LazyVariable<ISegment> _contents;
 
         public BundleFile()
         {
             _contents = new LazyVariable<ISegment>(GetContents);
+        }
+
+        public BundleManifest? ParentManifest
+        {
+            get;
+            private set;
+        }
+
+        /// <inheritdoc />
+        BundleManifest? IOwnedCollectionElement<BundleManifest>.Owner
+        {
+            get => ParentManifest;
+            set => ParentManifest = value;
         }
 
         public string RelativePath

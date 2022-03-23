@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AsmResolver.Collections;
 using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Bundles
@@ -7,13 +8,13 @@ namespace AsmResolver.DotNet.Bundles
     {
         private readonly uint _originalMajorVersion;
         private readonly BinaryStreamReader _fileEntriesReader;
-        private readonly uint _originalFileCount;
+        private readonly int _originalFileCount;
 
         public SerializedBundleManifest(BinaryStreamReader reader)
         {
             MajorVersion = _originalMajorVersion = reader.ReadUInt32();
             MinorVersion = reader.ReadUInt32();
-            _originalFileCount = reader.ReadUInt32();
+            _originalFileCount = reader.ReadInt32();
             BundleID = reader.ReadBinaryFormatterString();
 
             if (MajorVersion >= 2)
@@ -28,7 +29,7 @@ namespace AsmResolver.DotNet.Bundles
         protected override IList<BundleFile> GetFiles()
         {
             var reader = _fileEntriesReader;
-            var result = new List<BundleFile>();
+            var result = new OwnedCollection<BundleManifest, BundleFile>(this);
 
             for (int i = 0; i < _originalFileCount; i++)
                 result.Add(new SerializedBundleFile(ref reader, _originalMajorVersion));
