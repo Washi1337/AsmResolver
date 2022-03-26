@@ -40,5 +40,13 @@ namespace AsmResolver.DotNet.Cloning
                 ? (IMethodDefOrRef) clonedMethod
                 : base.ImportMethod(method);
         }
+
+        /// <inheritdoc />
+        protected override ITypeDefOrRef ImportType(TypeReference type)
+        {
+            return type.Namespace == "System" && type.Name == nameof(System.Object)
+                ? _context.Module.CorLibTypeFactory.Object.Type
+                : base.ImportType(type);
+        }
     }
 }
