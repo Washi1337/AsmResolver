@@ -44,7 +44,9 @@ namespace AsmResolver.DotNet.Cloning
         /// <inheritdoc />
         protected override ITypeDefOrRef ImportType(TypeReference type)
         {
-            return type.Namespace == "System" && type.Name == nameof(System.Object)
+            return type.Namespace == "System"
+                && type.Name == nameof(System.Object)
+                && (type.Scope?.GetAssembly()?.IsCorLib ?? false)
                 ? _context.Module.CorLibTypeFactory.Object.Type
                 : base.ImportType(type);
         }
