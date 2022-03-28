@@ -126,9 +126,11 @@ namespace AsmResolver.DotNet.Tests.Bundles
             Assert.Equal(subSystem, newFile.OptionalHeader.SubSystem);
         }
 
-        [Fact]
+        [SkippableFact]
         public void WriteWithWin32Resources()
         {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
             var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6_WithResources);
             string appHostTemplatePath = FindAppHostTemplate("6.0");
 
@@ -142,13 +144,6 @@ namespace AsmResolver.DotNet.Tests.Bundles
                 File.ReadAllBytes(appHostTemplatePath),
                 "HelloWorld.dll",
                 oldImage));
-
-            manifest.WriteUsingTemplate(
-                @"C:\Path\To\Output\File.exe",
-                new BundlerParameters(
-                    appHostTemplatePath: @"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\6.0.0\runtimes\win-x64\native\apphost.exe",
-                    appBinaryPath: @"HelloWorld.dll",
-                    imagePathToCopyHeadersFrom: @"C:\Path\To\HelloWorld.exe"));
 
             // Verify new file still runs as expected.
             string output = _fixture
