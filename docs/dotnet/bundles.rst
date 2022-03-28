@@ -82,18 +82,38 @@ AsmResolver does not provide built-in alternative heuristics for finding the rig
 Writing Bundles
 ---------------
 
-Constructing new bundled executable files requires a template file that AsmResolver can base the final output on. This is similar how .NET compilers themselves do this as well. By default, the .NET SDK installs template binaries in either ``<DOTNET-INSTALLATION-PATH>/sdk/<version>/AppHostTemplate`` or ``<DOTNET-INSTALLATION-PATH>/packs/Microsoft.NETCore.App.Host.<runtime-identifier>/<version>/runtimes/<runtime-identifier>/native``. It is then possible to use ``WriteUsingTemplate`` to construct a new binary.
+Constructing new bundled executable files requires a template file that AsmResolver can base the final output on. This is similar how .NET compilers themselves do this as well. By default, the .NET SDK installs template binaries in one of the following directories:
+
+- ``<DOTNET-INSTALLATION-PATH>/sdk/<version>/AppHostTemplate``
+- ``<DOTNET-INSTALLATION-PATH>/packs/Microsoft.NETCore.App.Host.<runtime-identifier>/<version>/runtimes/<runtime-identifier>/native``
+
+Using this template file, it is then possible to write a new bundled executable file using ``WriteUsingTemplate``:
 
 .. code-block:: csharp
 
     BundleManifest manifest = ...
-    var manifest = manifest.WriteUsingTemplate(
-        @"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\6.0.0\runtimes\win-x64\native\apphost.exe",
-        @"C:\User\Admin\HelloWorld.exe",
-        @"HelloWorld.dll");
+    manifest.WriteUsingTemplate(
+        @"C:\Path\To\Output\File.exe",
+        new BundlerParameters(
+            appHostTemplatePath: @"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\6.0.0\runtimes\win-x64\native\apphost.exe",
+            appBinaryPath: @"HelloWorld.dll"));
 
 
-Typically on Windows, use an ```apphost.exe`` template if you want to construct a native binary that is framework dependent, and ``singlefilehost.exe`` for a fully self-contained binary.
+Typically on Windows, use an ```apphost.exe`` template if you want to construct a native binary that is framework dependent, and ``singlefilehost.exe`` for a fully self-contained binary. On Linux, use the ``apphost`` and ``singlefilehost`` ELF equivalents.
+
+For bundle executable files targeting Windows, it may be required to copy over some values from the original PE file into the final bundle executable file. Usually these values include fields from the PE headers (such as the executable's sub-system target) and Win32 resources (such as application icons and version information). AsmResolver can automatically update these headers by specifying a source image in the ``BundlerParameters``:
+
+.. code-block:: csharp
+
+    BundleManifest manifest = ...
+    manifest.WriteUsingTemplate(
+        @"C:\Path\To\Output\File.exe",
+        new BundlerParameters(
+            appHostTemplatePath: @"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\6.0.0\runtimes\win-x64\native\apphost.exe",
+            appBinaryPath: @"HelloWorld.dll",
+            imagePathToCopyHeadersFrom: @"C:\Path\To\Original\HelloWorld.exe"));
+
+``BundleManifest`` also defines other ```WriteUsingTemplate`` overloads taking ``byte[]``, ``IDataSource`` or ``IPEImage`` instances instead of paths.
 
 
 Managing Files
