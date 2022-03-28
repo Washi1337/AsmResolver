@@ -157,6 +157,13 @@ namespace AsmResolver.DotNet.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_SingleFile_V6_WithResources {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V6_WithResources", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] Assembly1_Forwarder {
             get {
                 object obj = ResourceManager.GetObject("Assembly1_Forwarder", resourceCulture);

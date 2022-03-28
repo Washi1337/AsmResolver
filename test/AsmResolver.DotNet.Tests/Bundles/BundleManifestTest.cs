@@ -5,6 +5,10 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Bundles;
 using AsmResolver.IO;
+using AsmResolver.PE;
+using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Win32Resources.Version;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -104,6 +108,56 @@ namespace AsmResolver.DotNet.Tests.Bundles
             AssertBundlesAreEqual(manifest, newManifest);
         }
 
+        [Theory]
+        [InlineData(SubSystem.WindowsCui)]
+        [InlineData(SubSystem.WindowsGui)]
+        public void WriteWithSubSystem(SubSystem subSystem)
+        {
+            var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6);
+            string appHostTemplatePath = FindAppHostTemplate("6.0");
+
+            using var stream = new MemoryStream();
+            manifest.WriteUsingTemplate(stream, new BundlerParameters(appHostTemplatePath, "HelloWorld.dll")
+            {
+                SubSystem = subSystem
+            });
+
+            var newFile = PEFile.FromBytes(stream.ToArray());
+            Assert.Equal(subSystem, newFile.OptionalHeader.SubSystem);
+        }
+
+        [Fact]
+        public void WriteWithWin32Resources()
+        {
+            var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6_WithResources);
+            string appHostTemplatePath = FindAppHostTemplate("6.0");
+
+            // Obtain expected version info.
+            var oldImage = PEImage.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6_WithResources);
+            var versionInfo = VersionInfoResource.FromDirectory(oldImage.Resources!)!;
+
+            // Bundle with PE image as template for PE headers and resources.
+            using var stream = new MemoryStream();
+            manifest.WriteUsingTemplate(stream, new BundlerParameters(
+                File.ReadAllBytes(appHostTemplatePath),
+                "HelloWorld.dll",
+                oldImage));
+
+            // Verify new file still runs as expected.
+            string output = _fixture
+                .GetRunner<NativePERunner>()
+                .RunAndCaptureOutput("HelloWorld.exe", stream.ToArray());
+
+            Assert.Equal($"Hello, World!{Environment.NewLine}", output);
+
+            // Verify that resources were added properly.
+            var newImage = PEImage.FromBytes(stream.ToArray());
+            Assert.NotNull(newImage.Resources);
+            var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources);
+            Assert.NotNull(newVersionInfo);
+            Assert.Equal(versionInfo.FixedVersionInfo.FileVersion, newVersionInfo.FixedVersionInfo.FileVersion);
+        }
+
         private void AssertWriteManifestWindowsPreservesOutput(
             BundleManifest manifest,
             string sdkVersion,
@@ -111,6 +165,29 @@ namespace AsmResolver.DotNet.Tests.Bundles
             string expectedOutput,
             [CallerFilePath] string className = "File",
             [CallerMemberName] string methodName = "Method")
+        {
+            string appHostTemplatePath = FindAppHostTemplate(sdkVersion);
+
+            using var stream = new MemoryStream();
+            manifest.WriteUsingTemplate(stream, new BundlerParameters(appHostTemplatePath, fileName));
+
+            var newManifest = BundleManifest.FromBytes(stream.ToArray());
+            AssertBundlesAreEqual(manifest, newManifest);
+
+            string output = _fixture
+                .GetRunner<NativePERunner>()
+                .RunAndCaptureOutput(
+                    Path.ChangeExtension(fileName, ".exe"),
+                    stream.ToArray(),
+                    null,
+                    5000,
+                    className,
+                    methodName);
+
+            Assert.Equal(expectedOutput, output);
+        }
+
+        private static string FindAppHostTemplate(string sdkVersion)
         {
             string sdkPath = Path.Combine(DotNetCorePathProvider.DefaultInstallationPath!, "sdk");
             string? sdkVersionPath = null;
@@ -130,20 +207,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             }
 
             string appHostPathTemplate = Path.Combine(sdkVersionPath, "AppHostTemplate", "apphost.exe");
-
-            using var stream = new MemoryStream();
-            manifest.WriteUsingTemplate(stream, new BundlerParameters(appHostPathTemplate, fileName));
-
-            var newManifest = BundleManifest.FromBytes(stream.ToArray());
-            AssertBundlesAreEqual(manifest, newManifest);
-
-            string output = _fixture
-                .GetRunner<NativePERunner>()
-                .RunAndCaptureOutput(Path.ChangeExtension(fileName, ".exe"), stream.ToArray(), null,
-                    5000,
-                    className,
-                    methodName);
-            Assert.Equal(expectedOutput, output);
+            return appHostPathTemplate;
         }
 
         private static void AssertBundlesAreEqual(BundleManifest manifest, BundleManifest newManifest)

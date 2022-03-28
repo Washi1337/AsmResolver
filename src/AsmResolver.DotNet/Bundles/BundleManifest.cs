@@ -344,7 +344,7 @@ namespace AsmResolver.DotNet.Bundles
                 var rsrc = new PESection(".rsrc", SectionFlags.MemoryRead | SectionFlags.ContentInitializedData);
                 rsrc.Contents = buffer;
 
-                // Find .reloc section, and insert .rsrc before it if it is present.
+                // Find .reloc section, and insert .rsrc before it if it is present. Otherwise just append to the end.
                 int sectionIndex = file.Sections.Count - 1;
                 for (int i = file.Sections.Count - 1; i >= 0; i--)
                 {
@@ -356,6 +356,13 @@ namespace AsmResolver.DotNet.Bundles
                 }
 
                 file.Sections.Insert(sectionIndex, rsrc);
+
+                // Update resource data directory va + size.
+                file.AlignSections();
+                file.OptionalHeader.DataDirectories[(int) DataDirectoryIndex.ResourceDirectory] = new DataDirectory(
+                    buffer.Rva,
+                    buffer.GetPhysicalSize());
+
                 changed = true;
             }
 
