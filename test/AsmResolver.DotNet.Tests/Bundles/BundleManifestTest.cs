@@ -132,7 +132,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             string appHostPathTemplate = Path.Combine(sdkVersionPath, "AppHostTemplate", "apphost.exe");
 
             using var stream = new MemoryStream();
-            manifest.WriteUsingTemplate(appHostPathTemplate, stream, fileName);
+            manifest.WriteUsingTemplate(stream, new BundlerParameters(appHostPathTemplate, fileName));
 
             var newManifest = BundleManifest.FromBytes(stream.ToArray());
             AssertBundlesAreEqual(manifest, newManifest);

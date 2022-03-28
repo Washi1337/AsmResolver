@@ -7,6 +7,10 @@ using System.Text;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.IO;
+using AsmResolver.PE;
+using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Win32Resources.Builder;
 
 namespace AsmResolver.DotNet.Bundles
 {
@@ -250,87 +254,54 @@ namespace AsmResolver.DotNet.Bundles
         /// <summary>
         /// Constructs a new application host file based on the bundle manifest.
         /// </summary>
-        /// <param name="appHostTemplatePath">
-        /// The path to the application host file template to use. By default this is stored in
-        /// <c>&lt;DOTNET-INSTALLATION-PATH&gt;/sdk/&lt;version&gt;/AppHostTemplate</c> or
-        /// <c>&lt;DOTNET-INSTALLATION-PATH&gt;/packs/Microsoft.NETCore.App.Host.&lt;runtime-identifier&gt;/&lt;version&gt;/runtimes/&lt;runtime-identifier&gt;/native</c>.
-        /// </param>
-        /// <param name="outputPath">The output path to write to.</param>
-        /// <param name="appBinaryPath">The name of the file in the bundle that contains the entry point of the application.</param>
-        public void WriteUsingTemplate(string appHostTemplatePath, string outputPath, string appBinaryPath)
+        /// <param name="outputPath">The path of the file to write to.</param>
+        /// <param name="parameters">The parameters to use for bundling all files into a single executable.</param>
+        public void WriteUsingTemplate(string outputPath, in BundlerParameters parameters)
         {
             using var fs = File.Create(outputPath);
-            WriteUsingTemplate(appHostTemplatePath, fs, appBinaryPath);
+            WriteUsingTemplate(fs, parameters);
         }
 
         /// <summary>
         /// Constructs a new application host file based on the bundle manifest.
         /// </summary>
-        /// <param name="appHostTemplatePath">
-        /// The path to the application host file template to use. By default this is stored in
-        /// <c>&lt;DOTNET-INSTALLATION-PATH&gt;/sdk/&lt;version&gt;/AppHostTemplate</c> or
-        /// <c>&lt;DOTNET-INSTALLATION-PATH&gt;/packs/Microsoft.NETCore.App.Host.&lt;runtime-identifier&gt;/&lt;version&gt;/runtimes/&lt;runtime-identifier&gt;/native</c>.
-        /// </param>
         /// <param name="outputStream">The output stream to write to.</param>
-        /// <param name="appBinaryPath">The name of the file in the bundle that contains the entry point of the application.</param>
-        public void WriteUsingTemplate(string appHostTemplatePath, Stream outputStream, string appBinaryPath)
+        /// <param name="parameters">The parameters to use for bundling all files into a single executable.</param>
+        public void WriteUsingTemplate(Stream outputStream, in BundlerParameters parameters)
         {
-            WriteUsingTemplate(System.IO.File.ReadAllBytes(appHostTemplatePath), outputStream, appBinaryPath,
-                RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
-                && RuntimeInformation.ProcessArchitecture
-                == Architecture.Arm64);
+            WriteUsingTemplate(new BinaryStreamWriter(outputStream), parameters);
         }
 
         /// <summary>
         /// Constructs a new application host file based on the bundle manifest.
         /// </summary>
-        /// <param name="appHostTemplate">The application host template file to use.</param>
-        /// <param name="outputStream">The output stream to write to.</param>
-        /// <param name="appBinaryPath">The name of the file in the bundle that contains the entry point of the application.</param>
-        public void WriteUsingTemplate(byte[] appHostTemplate, Stream outputStream, string appBinaryPath)
-        {
-            WriteUsingTemplate(appHostTemplate, outputStream, appBinaryPath,
-                RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
-                && RuntimeInformation.ProcessArchitecture
-                == Architecture.Arm64);
-        }
-
-        /// <summary>
-        /// Constructs a new application host file based on the bundle manifest.
-        /// </summary>
-        /// <param name="appHostTemplate">The application host template file to use.</param>
-        /// <param name="outputStream">The output stream to write to.</param>
-        /// <param name="appBinaryPath">The name of the file in the bundle that contains the entry point of the application.</param>
-        /// <param name="isArm64Linux"><c>true</c> if the application host is a Linux ELF binary targeting ARM64.</param>
-        public void WriteUsingTemplate(byte[] appHostTemplate, Stream outputStream, string appBinaryPath, bool isArm64Linux)
-        {
-            WriteUsingTemplate(appHostTemplate, new BinaryStreamWriter(outputStream), appBinaryPath, isArm64Linux);
-        }
-
-        /// <summary>
-        /// Constructs a new application host file based on the bundle manifest.
-        /// </summary>
-        /// <param name="appHostTemplate">The application host template file to use.</param>
         /// <param name="writer">The output stream to write to.</param>
-        /// <param name="appBinaryPath">The name of the file in the bundle that contains the entry point of the application.</param>
-        /// <param name="isArm64Linux"><c>true</c> if the application host is a Linux ELF binary targeting ARM64.</param>
-        public void WriteUsingTemplate(byte[] appHostTemplate, IBinaryStreamWriter writer, string appBinaryPath, bool isArm64Linux)
+        /// <param name="parameters">The parameters to use for bundling all files into a single executable.</param>
+        public void WriteUsingTemplate(IBinaryStreamWriter writer, BundlerParameters parameters)
         {
-            byte[] appBinaryPathBytes = Encoding.UTF8.GetBytes(appBinaryPath);
+            var appBinaryEntry = Files.FirstOrDefault(f => f.RelativePath == parameters.ApplicationBinaryPath);
+            if (appBinaryEntry is null)
+                throw new ArgumentException($"Application {parameters.ApplicationBinaryPath} does not exist within the bundle.");
+
+            if (!parameters.IsArm64Linux)
+                EnsureAppHostPEHeadersAreUpToDate(ref parameters);
+
+            byte[] appBinaryPathBytes = Encoding.UTF8.GetBytes(parameters.ApplicationBinaryPath);
             if (appBinaryPathBytes.Length > 1024)
                 throw new ArgumentException("Application binary path cannot exceed 1024 bytes.");
 
-            long signatureAddress = FindInFile(new ByteArrayDataSource(appHostTemplate), BundleSignature);
+            var appHostTemplateSource = new ByteArrayDataSource(parameters.ApplicationHostTemplate);
+            long signatureAddress = FindInFile(appHostTemplateSource, BundleSignature);
             if (signatureAddress == -1)
                 throw new ArgumentException("AppHost template does not contain the bundle signature.");
 
-            long appBinaryPathAddress = FindInFile(new ByteArrayDataSource(appHostTemplate), AppBinaryPathPlaceholder);
+            long appBinaryPathAddress = FindInFile(appHostTemplateSource, AppBinaryPathPlaceholder);
             if (appBinaryPathAddress == -1)
                 throw new ArgumentException("AppHost template does not contain the application binary path placeholder.");
 
-            writer.WriteBytes(appHostTemplate);
+            writer.WriteBytes(parameters.ApplicationHostTemplate);
             writer.Offset = writer.Length;
-            ulong headerAddress = WriteManifest(writer, isArm64Linux);
+            ulong headerAddress = WriteManifest(writer, parameters.IsArm64Linux);
 
             writer.Offset = (ulong) signatureAddress - sizeof(ulong);
             writer.WriteUInt64(headerAddress);
@@ -339,6 +310,62 @@ namespace AsmResolver.DotNet.Bundles
             writer.WriteBytes(appBinaryPathBytes);
             if (AppBinaryPathPlaceholder.Length > appBinaryPathBytes.Length)
                 writer.WriteZeroes(AppBinaryPathPlaceholder.Length - appBinaryPathBytes.Length);
+        }
+
+        private static void EnsureAppHostPEHeadersAreUpToDate(ref BundlerParameters parameters)
+        {
+            PEFile file;
+            try
+            {
+                file = PEFile.FromBytes(parameters.ApplicationHostTemplate);
+            }
+            catch (BadImageFormatException)
+            {
+                // Template is not a PE file.
+                return;
+            }
+
+            bool changed = false;
+
+            // Ensure same Windows subsystem is used (typically required for GUI applications).
+            if (file.OptionalHeader.SubSystem != parameters.SubSystem)
+            {
+                file.OptionalHeader.SubSystem = parameters.SubSystem;
+                changed = true;
+            }
+
+            // If the app binary has resources (such as an icon or version info), we need to copy it into the
+            // AppHost template so that they are also visible from the final packed executable.
+            if (parameters.Resources is { } directory)
+            {
+                // Put original resource directory in a new .rsrc section.
+                var buffer = new ResourceDirectoryBuffer();
+                buffer.AddDirectory(directory);
+                var rsrc = new PESection(".rsrc", SectionFlags.MemoryRead | SectionFlags.ContentInitializedData);
+                rsrc.Contents = buffer;
+
+                // Find .reloc section, and insert .rsrc before it if it is present.
+                int sectionIndex = file.Sections.Count - 1;
+                for (int i = file.Sections.Count - 1; i >= 0; i--)
+                {
+                    if (file.Sections[i].Name == ".reloc")
+                    {
+                        sectionIndex = i;
+                        break;
+                    }
+                }
+
+                file.Sections.Insert(sectionIndex, rsrc);
+                changed = true;
+            }
+
+            // Rebuild AppHost PE file if necessary.
+            if (changed)
+            {
+                using var stream = new MemoryStream();
+                file.Write(stream);
+                parameters.ApplicationHostTemplate = stream.ToArray();
+            }
         }
 
         /// <summary>
