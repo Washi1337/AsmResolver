@@ -12,9 +12,15 @@ namespace AsmResolver.DotNet.Cloning
         /// Creates a new instance of the <see cref="MemberCloneContext"/> class.
         /// </summary>
         /// <param name="module">The target module to copy the cloned members into.</param>
+        public MemberCloneContext(ModuleDefinition module) : this(module, null) { }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="MemberCloneContext"/> class.
+        /// </summary>
+        /// <param name="module">The target module to copy the cloned members into.</param>
         /// <param name="importerInstantiator">The instantiator for creating the reference importer</param>
         public MemberCloneContext(ModuleDefinition module,
-            Func<MemberCloneContext, CloneContextAwareReferenceImporter>? importerInstantiator = null)
+            Func<MemberCloneContext, CloneContextAwareReferenceImporter>? importerInstantiator)
         {
             Module = module ?? throw new ArgumentNullException(nameof(module));
             Importer = importerInstantiator?.Invoke(this) ?? new CloneContextAwareReferenceImporter(this);
