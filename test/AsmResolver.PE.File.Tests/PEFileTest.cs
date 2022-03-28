@@ -181,8 +181,64 @@ namespace AsmResolver.PE.File.Tests
         public void ReadEofData()
         {
             var file = PEFile.FromBytes(Properties.Resources.HelloWorld_EOF);
-            var readable = Assert.IsAssignableFrom<IReadableSegment>(file.EofData);
-            Assert.Equal(Encoding.ASCII.GetBytes("abcdefghijklmnopqrstuvwxyz"), readable.ToArray());
+            byte[] data = Assert.IsAssignableFrom<IReadableSegment>(file.EofData).ToArray();
+            Assert.Equal(Encoding.ASCII.GetBytes("abcdefghijklmnopqrstuvwxyz"), data);
+        }
+
+        [Fact]
+        public void AddNewEofData()
+        {
+            byte[] expected = { 1, 2, 3, 4 };
+
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            Assert.Null(file.EofData);
+            file.EofData = new DataSegment(expected);
+
+            using var stream = new MemoryStream();
+            file.Write(stream);
+            byte[] newFileBytes = stream.ToArray();
+
+            Assert.Equal(expected, newFileBytes[^expected.Length..]);
+
+            var newFile = PEFile.FromBytes(newFileBytes);
+            var readable = Assert.IsAssignableFrom<IReadableSegment>(newFile.EofData);
+            Assert.Equal(expected, readable.ToArray());
+        }
+
+        [Fact]
+        public void ModifyExistingEofData()
+        {
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld_EOF);
+            byte[] data = Assert.IsAssignableFrom<IReadableSegment>(file.EofData).ToArray();
+            Array.Reverse(data);
+            file.EofData = new DataSegment(data);
+
+            using var stream = new MemoryStream();
+            file.Write(stream);
+            byte[] newFileBytes = stream.ToArray();
+
+            Assert.Equal(data, newFileBytes[^data.Length..]);
+
+            var newFile = PEFile.FromBytes(newFileBytes);
+            byte[] newData = Assert.IsAssignableFrom<IReadableSegment>(newFile.EofData).ToArray();
+            Assert.Equal(data, newData);
+        }
+
+        [Fact]
+        public void RemoveExistingEofData()
+        {
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld_EOF);
+            byte[] originalData = Assert.IsAssignableFrom<IReadableSegment>(file.EofData).ToArray();
+            file.EofData = null;
+
+            using var stream = new MemoryStream();
+            file.Write(stream);
+            byte[] newFileBytes = stream.ToArray();
+
+            Assert.NotEqual(originalData, newFileBytes[^originalData.Length..]);
+
+            var newFile = PEFile.FromBytes(newFileBytes);
+            Assert.Null(newFile.EofData);
         }
     }
 }
