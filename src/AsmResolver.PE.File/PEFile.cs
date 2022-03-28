@@ -538,6 +538,6 @@ namespace AsmResolver.PE.File
         /// <remarks>
         /// This method is called upon the initialization of the <see cref="EofData"/> property.
         /// </remarks>
-        private ISegment? GetEofData() => null;
+        protected virtual ISegment? GetEofData() => null;
     }
 }

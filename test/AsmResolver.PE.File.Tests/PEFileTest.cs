@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.Tests.Runners;
@@ -167,6 +168,21 @@ namespace AsmResolver.PE.File.Tests
                 memorySection.CreateReader().ReadBytes(actual, 0, actual.Length);
                 Assert.Equal(expected, actual);
             }
+        }
+
+        [Fact]
+        public void PEWithNoEofData()
+        {
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            Assert.Null(file.EofData);
+        }
+
+        [Fact]
+        public void ReadEofData()
+        {
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld_EOF);
+            var readable = Assert.IsAssignableFrom<IReadableSegment>(file.EofData);
+            Assert.Equal(Encoding.ASCII.GetBytes("abcdefghijklmnopqrstuvwxyz"), readable.ToArray());
         }
     }
 }
