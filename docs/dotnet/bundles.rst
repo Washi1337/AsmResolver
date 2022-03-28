@@ -99,9 +99,9 @@ Using this template file, it is then possible to write a new bundled executable 
             appBinaryPath: @"HelloWorld.dll"));
 
 
-Typically on Windows, use an ```apphost.exe`` template if you want to construct a native binary that is framework dependent, and ``singlefilehost.exe`` for a fully self-contained binary. On Linux, use the ``apphost`` and ``singlefilehost`` ELF equivalents.
+Typically on Windows, use an ``apphost.exe`` template if you want to construct a native binary that is framework dependent, and ``singlefilehost.exe`` for a fully self-contained binary. On Linux, use the ``apphost`` and ``singlefilehost`` ELF equivalents.
 
-For bundle executable files targeting Windows, it may be required to copy over some values from the original PE file into the final bundle executable file. Usually these values include fields from the PE headers (such as the executable's sub-system target) and Win32 resources (such as application icons and version information). AsmResolver can automatically update these headers by specifying a source image in the ``BundlerParameters``:
+For bundle executable files targeting Windows, it may be required to copy over some values from the original PE file into the final bundle executable file. Usually these values include fields from the PE headers (such as the executable's sub-system target) and Win32 resources (such as application icons and version information). AsmResolver can automatically update these headers by specifying a source image to pull this data from in the ``BundlerParameters``:
 
 .. code-block:: csharp
 

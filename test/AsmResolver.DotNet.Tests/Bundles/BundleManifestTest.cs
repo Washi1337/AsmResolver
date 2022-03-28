@@ -208,8 +208,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
                     $"Could not find the apphost template for .NET SDK version {sdkVersion}. This is an indication that the test environment does not have this SDK installed.");
             }
 
-            string appHostPathTemplate = Path.Combine(sdkVersionPath, "AppHostTemplate", "apphost.exe");
-            return appHostPathTemplate;
+            return Path.Combine(sdkVersionPath, "AppHostTemplate", "apphost.exe");
         }
 
         private static void AssertBundlesAreEqual(BundleManifest manifest, BundleManifest newManifest)

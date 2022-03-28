@@ -384,7 +384,7 @@ namespace AsmResolver.DotNet.Bundles
         /// <remarks>
         /// This does not necessarily produce a working executable file, it only writes the contents of the entire manifest,
         /// without a host application that invokes the manifest. If you want to produce a runnable executable, use one
-        /// of the <see cref="WriteUsingTemplate(string,System.IO.Stream,string)"/> or one of its overloads instead.
+        /// of the <c>WriteUsingTemplate</c> methods instead.
         /// </remarks>
         public ulong WriteManifest(IBinaryStreamWriter writer, bool isArm64Linux)
         {
