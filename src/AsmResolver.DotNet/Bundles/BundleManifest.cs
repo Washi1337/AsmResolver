@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.IO;
-using AsmResolver.PE;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Win32Resources.Builder;
@@ -283,12 +281,12 @@ namespace AsmResolver.DotNet.Bundles
             if (appBinaryEntry is null)
                 throw new ArgumentException($"Application {parameters.ApplicationBinaryPath} does not exist within the bundle.");
 
-            if (!parameters.IsArm64Linux)
-                EnsureAppHostPEHeadersAreUpToDate(ref parameters);
-
             byte[] appBinaryPathBytes = Encoding.UTF8.GetBytes(parameters.ApplicationBinaryPath);
             if (appBinaryPathBytes.Length > 1024)
                 throw new ArgumentException("Application binary path cannot exceed 1024 bytes.");
+
+            if (!parameters.IsArm64Linux)
+                EnsureAppHostPEHeadersAreUpToDate(ref parameters);
 
             var appHostTemplateSource = new ByteArrayDataSource(parameters.ApplicationHostTemplate);
             long signatureAddress = FindInFile(appHostTemplateSource, BundleSignature);
