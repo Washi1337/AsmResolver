@@ -62,6 +62,24 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
+        /// Gets or sets the padding data in between the last section header and the first section.
+        /// </summary>
+        public ISegment? ExtraSectionData
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the data appended to the end of the file (EoF), if available.
+        /// </summary>
+        public ISegment? EofData
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Finds the section containing the provided virtual address.
         /// </summary>
         /// <param name="rva">The virtual address.</param>
