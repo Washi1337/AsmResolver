@@ -94,18 +94,14 @@ namespace AsmResolver.PE.File
             protected set;
         }
 
-        /// <summary>
-        /// Gets or sets the padding data in between the last section header and the first section.
-        /// </summary>
+        /// <inheritdoc />
         public ISegment? ExtraSectionData
         {
             get => _extraSectionData.Value;
             set => _extraSectionData.Value = value;
         }
 
-        /// <summary>
-        /// Gets or sets the data appended to the end of the file (EoF), if available.
-        /// </summary>
+        /// <inheritdoc />
         public ISegment? EofData
         {
             get => _eofData.Value;
