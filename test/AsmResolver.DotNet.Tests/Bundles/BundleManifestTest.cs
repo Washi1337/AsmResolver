@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using AsmResolver.DotNet.Bundles;
 using AsmResolver.IO;
 using AsmResolver.PE;
@@ -158,6 +159,48 @@ namespace AsmResolver.DotNet.Tests.Bundles
             var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources);
             Assert.NotNull(newVersionInfo);
             Assert.Equal(versionInfo.FixedVersionInfo.FileVersion, newVersionInfo.FixedVersionInfo.FileVersion);
+        }
+
+        [Fact]
+        public void NewManifestShouldGenerateBundleIdIfUnset()
+        {
+            var manifest = new BundleManifest(6);
+
+            manifest.Files.Add(new BundleFile("HelloWorld.dll", BundleFileType.Assembly,
+                Properties.Resources.HelloWorld_NetCore));
+            manifest.Files.Add(new BundleFile("HelloWorld.runtimeconfig.json", BundleFileType.RuntimeConfigJson,
+                Encoding.UTF8.GetBytes(@"{
+    ""runtimeOptions"": {
+        ""tfm"": ""net6.0"",
+        ""includedFrameworks"": [
+            {
+                ""name"": ""Microsoft.NETCore.App"",
+                ""version"": ""6.0.0""
+            }
+        ]
+    }
+}")));
+
+            Assert.Null(manifest.BundleID);
+
+            using var stream = new MemoryStream();
+            manifest.WriteUsingTemplate(stream, new BundlerParameters(
+                FindAppHostTemplate("6.0"),
+                "HelloWorld.dll"));
+
+            Assert.NotNull(manifest.BundleID);
+        }
+
+        [Fact]
+        public void SameManifestContentsShouldResultInSameBundleID()
+        {
+            var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6);
+
+            var newManifest = new BundleManifest(manifest.MajorVersion);
+            foreach (var file in manifest.Files)
+                newManifest.Files.Add(new BundleFile(file.RelativePath, file.Type, file.GetData()));
+
+            Assert.Equal(manifest.BundleID, newManifest.GenerateDeterministicBundleID());
         }
 
         private void AssertWriteManifestWindowsPreservesOutput(

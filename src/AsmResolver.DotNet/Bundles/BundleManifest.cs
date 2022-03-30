@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using AsmResolver.Collections;
@@ -17,6 +18,8 @@ namespace AsmResolver.DotNet.Bundles
     /// </summary>
     public class BundleManifest
     {
+        private const int DefaultBundleIDLength = 12;
+
         private static readonly byte[] BundleSignature =
         {
             0x8b, 0x12, 0x02, 0xb9, 0x6a, 0x61, 0x20, 0x38,
@@ -35,11 +38,20 @@ namespace AsmResolver.DotNet.Bundles
         /// </summary>
         protected BundleManifest()
         {
-            BundleID = string.Empty;
         }
 
         /// <summary>
         /// Creates a new bundle manifest.
+        /// </summary>
+        /// <param name="majorVersionNumber">The file format version.</param>
+        public BundleManifest(uint majorVersionNumber)
+        {
+            MajorVersion = majorVersionNumber;
+            MinorVersion = 0;
+        }
+
+        /// <summary>
+        /// Creates a new bundle manifest with a specific bundle identifier.
         /// </summary>
         /// <param name="majorVersionNumber">The file format version.</param>
         /// <param name="bundleId">The unique bundle manifest identifier.</param>
@@ -82,7 +94,11 @@ namespace AsmResolver.DotNet.Bundles
         /// <summary>
         /// Gets or sets the unique identifier for the bundle manifest.
         /// </summary>
-        public string BundleID
+        /// <remarks>
+        /// When this property is set to <c>null</c>, the bundle identifier will be generated upon writing the manifest
+        /// based on the contents of the manifest.
+        /// </remarks>
+        public string? BundleID
         {
             get;
             set;
@@ -250,6 +266,30 @@ namespace AsmResolver.DotNet.Bundles
         protected virtual IList<BundleFile> GetFiles() => new OwnedCollection<BundleManifest, BundleFile>(this);
 
         /// <summary>
+        /// Generates a bundle identifier based on the SHA-256 hashes of all files in the manifest.
+        /// </summary>
+        /// <returns>The generated bundle identifier.</returns>
+        public string GenerateDeterministicBundleID()
+        {
+            using var manifestHasher = SHA256.Create();
+
+            for (int i = 0; i < Files.Count; i++)
+            {
+                var file = Files[i];
+                using var fileHasher = SHA256.Create();
+                byte[] fileHash = fileHasher.ComputeHash(file.GetData());
+                manifestHasher.TransformBlock(fileHash, 0, fileHash.Length, fileHash, 0);
+            }
+
+            manifestHasher.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+            byte[] manifestHash = manifestHasher.Hash;
+
+            return Convert.ToBase64String(manifestHash)
+                .Substring(DefaultBundleIDLength)
+                .Replace('/', '_');
+        }
+
+        /// <summary>
         /// Constructs a new application host file based on the bundle manifest.
         /// </summary>
         /// <param name="outputPath">The path of the file to write to.</param>
@@ -415,6 +455,8 @@ namespace AsmResolver.DotNet.Bundles
             writer.WriteUInt32(MajorVersion);
             writer.WriteUInt32(MinorVersion);
             writer.WriteInt32(Files.Count);
+
+            BundleID ??= GenerateDeterministicBundleID();
             writer.WriteBinaryFormatterString(BundleID);
 
             if (MajorVersion >= 2)
