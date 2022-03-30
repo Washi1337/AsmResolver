@@ -170,7 +170,7 @@ namespace AsmResolver.DotNet
         /// <param name="addMethod">The method definition representing the add accessor of this event definition.</param>
         /// <param name="removeMethod">The method definition representing the remove accessor of this event definition.</param>
         /// <param name="fireMethod">The method definition representing the fire accessor of this event definition.</param>
-        public void ApplyMethods(MethodDefinition? addMethod, MethodDefinition? removeMethod, MethodDefinition? fireMethod)
+        public void SetSemanticMethods(MethodDefinition? addMethod, MethodDefinition? removeMethod, MethodDefinition? fireMethod)
         {
             Semantics.Clear();
             if (addMethod is not null)

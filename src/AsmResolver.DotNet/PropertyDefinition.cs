@@ -186,7 +186,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="getMethod">The method definition representing the get accessor of this property definition.</param>
         /// <param name="setMethod">The method definition representing the set accessor of this property definition.</param>
-        public void ApplyMethods(MethodDefinition? getMethod, MethodDefinition? setMethod)
+        public void SetSemanticMethods(MethodDefinition? getMethod, MethodDefinition? setMethod)
         {
             Semantics.Clear();
             if (getMethod is not null)
