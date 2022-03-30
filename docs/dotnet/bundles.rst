@@ -17,9 +17,7 @@ Creating Bundles
 
 .. code-block:: csharp
 
-    var manifest = new BundleManifest(
-        majorVersionNumber: 6,
-        bundleId: "<random bundle ID>");
+    var manifest = new BundleManifest(majorVersionNumber: 6);
 
 
 The major version number refers to the file format that should be used when saving the manifest. Below an overview of the values that are recognized by the CLR:
@@ -34,12 +32,23 @@ The major version number refers to the file format that should be used when savi
 | .NET 6.0             | 6                          |
 +----------------------+----------------------------+
 
+To create a new bundle with a specific bundle identifier, use the overloaded constructor
+
+.. code-block:: csharp
+
+    var manifest = new BundleManifest(6, "MyBundleID");
+
+
 It is also possible to change the version number as well as the bundle ID later, since these values are exposed as mutable properties ``MajorVersion`` and ``BundleID``
 
 .. code-block:: csharp
 
     manifest.MajorVersion = 6;
-    manifest.BundleID = GenerateRandomID();
+    manifest.BundleID = manifest.GenerateDeterministicBundleID();
+
+.. note::
+
+    If ``BundleID`` is left unset (``null``), it will be automatically assigned a new one using ``GenerateDeterministicBundleID`` upon writing.
 
 
 Reading Bundles
