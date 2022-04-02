@@ -20,6 +20,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
+      <ProjectReference Include="..\..\src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj" />
       <ProjectReference Include="..\AsmResolver.Tests\AsmResolver.Tests.csproj" />
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.CustomAttributes\AsmResolver.DotNet.TestCases.CustomAttributes.csproj" />
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Events\AsmResolver.DotNet.TestCases.Events.csproj" />
