@@ -84,6 +84,13 @@ namespace AsmResolver.DotNet.Bundles
         /// <summary>
         /// Gets or sets a value indicating whether the data stored in <see cref="Contents"/> is compressed or not.
         /// </summary>
+        /// <remarks>
+        /// The default implementation of the application host by Microsoft only supports compressing files if it is
+        /// a fully self-contained binary and the file is not the <c>.deps.json</c> nor the <c>.runtmeconfig.json</c>
+        /// file. This property does not do validation on any of these conditions. As such, if the file is supposed to be
+        /// compressed with any of these conditions not met, a custom application host template needs to be provided
+        /// upon serializing the bundle for it to be runnable.
+        /// </remarks>
         public bool IsCompressed
         {
             get;
@@ -170,6 +177,13 @@ namespace AsmResolver.DotNet.Bundles
         /// with the result.
         /// </summary>
         /// <exception cref="InvalidOperationException">Occurs when the file was already compressed.</exception>
+        /// <remarks>
+        /// The default implementation of the application host by Microsoft only supports compressing files if it is
+        /// a fully self-contained binary and the file is not the <c>.deps.json</c> nor the <c>.runtmeconfig.json</c>
+        /// file. This method does not do validation on any of these conditions. As such, if the file is supposed to be
+        /// compressed with any of these conditions not met, a custom application host template needs to be provided
+        /// upon serializing the bundle for it to be runnable.
+        /// </remarks>
         public void Compress()
         {
             if (IsCompressed)
@@ -191,7 +205,7 @@ namespace AsmResolver.DotNet.Bundles
         /// Marks the file as uncompressed, decompresses the file contents, and replaces the value of
         /// <see cref="Contents"/> with the result.
         /// </summary>
-        /// <exception cref="InvalidOperationException">Occurs when the file was already compressed.</exception>
+        /// <exception cref="InvalidOperationException">Occurs when the file was not compressed.</exception>
         public void Decompress()
         {
             if (!IsCompressed)
