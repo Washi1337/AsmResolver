@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -81,6 +81,7 @@ namespace AsmResolver.DotNet
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls GetTypes")]
         public static object ResolveDynamicResolver(object dynamicMethodObj)
         {
             //Convert dynamicMethodObj to DynamicResolver
