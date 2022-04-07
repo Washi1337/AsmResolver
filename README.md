@@ -1,7 +1,11 @@
 AsmResolver
 ===========
 
- [![Master branch build status](https://img.shields.io/appveyor/ci/Washi1337/AsmResolver/master.svg)](https://ci.appveyor.com/project/Washi1337/asmresolver/branch/master) [![Nuget feed](https://img.shields.io/nuget/v/AsmResolver.svg)](https://www.nuget.org/packages/AsmResolver/)  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Documentation Status](https://readthedocs.org/projects/asmresolver/badge/?version=latest)](https://asmresolver.readthedocs.io/en/latest/?badge=latest)
+ [![Master branch build status](https://img.shields.io/appveyor/ci/Washi1337/AsmResolver/master.svg)](https://ci.appveyor.com/project/Washi1337/asmresolver/branch/master)
+ [![Nuget feed](https://img.shields.io/nuget/v/AsmResolver.svg)](https://www.nuget.org/packages/AsmResolver/)
+ [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+ [![Documentation Status](https://readthedocs.org/projects/asmresolver/badge/?version=latest)](https://asmresolver.readthedocs.io/en/latest/?badge=latest)
+ [![Discord](https://img.shields.io/discord/961647807591243796.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/Y7DTBkbhJJ)
 
 AsmResolver is a PE inspection library allowing .NET programmers to read, modify and write executable files. This includes .NET as well as native images. The library exposes high-level representations of the PE, while still allowing the user to access low-level structures.
 
@@ -53,6 +57,12 @@ Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on general workflow and code style.
 
 
+Found a bug or have questions?
+------------------------------
+Please use the [issue tracker](https://github.com/Washi1337/AsmResolver/issues). Try to be as descriptive as possible.
+
+You can also join the [Discord](https://discord.gg/Y7DTBkbhJJ) to engage more directly with the community.
+
 Acknowledgements
 ----------------
 
@@ -60,12 +70,7 @@ AsmResolver started out as a hobby project, but has grown into a community proje
 
 - Special thanks to all the people who contributed [directly with code commits](https://github.com/Washi1337/AsmResolver/graphs/contributors).
 
-- Another big thank you to all the people that suggested new features, provided feedback on the API design, have done extensive testing, and/or reported bugs on the [issue board](https://github.com/Washi1337/AsmResolver/issues), by e-mail, or through DMs. 
+- Another big thank you to all the people that suggested new features, provided feedback on the API design, have done extensive testing, and/or reported bugs on the [issue board](https://github.com/Washi1337/AsmResolver/issues), by e-mail, or through DMs.
 
 If you feel you have been under-represented in these acknowledgements, feel free to contact me.
-
-
-Found a bug or have questions?
-------------------------------
-Please use the [issue tracker](https://github.com/Washi1337/AsmResolver/issues). Try to be as descriptive as possible.
 
