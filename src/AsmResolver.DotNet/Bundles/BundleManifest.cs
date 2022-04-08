@@ -282,7 +282,7 @@ namespace AsmResolver.DotNet.Bundles
             }
 
             manifestHasher.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
-            byte[] manifestHash = manifestHasher.Hash;
+            byte[] manifestHash = manifestHasher.Hash!;
 
             return Convert.ToBase64String(manifestHash)
                 .Substring(DefaultBundleIDLength)
