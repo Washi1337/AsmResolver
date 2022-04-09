@@ -109,11 +109,13 @@ namespace AsmResolver.DotNet.Tests.Bundles
             AssertBundlesAreEqual(manifest, newManifest);
         }
 
-        [Theory]
+        [SkippableTheory()]
         [InlineData(SubSystem.WindowsCui)]
         [InlineData(SubSystem.WindowsGui)]
         public void WriteWithSubSystem(SubSystem subSystem)
         {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
             var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6);
             string appHostTemplatePath = FindAppHostTemplate("6.0");
 
@@ -251,7 +253,18 @@ namespace AsmResolver.DotNet.Tests.Bundles
                     $"Could not find the apphost template for .NET SDK version {sdkVersion}. This is an indication that the test environment does not have this SDK installed.");
             }
 
-            return Path.Combine(sdkVersionPath, "AppHostTemplate", "apphost.exe");
+            string fileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? "apphost.exe"
+                : "apphost";
+
+            string finalPath = Path.Combine(sdkVersionPath, "AppHostTemplate", fileName);
+            if (!File.Exists(finalPath))
+            {
+                throw new InvalidOperationException(
+                    $"Could not find the apphost template for .NET SDK version {sdkVersion}. This is an indication that the test environment does not have this SDK installed.");
+            }
+
+            return finalPath;
         }
 
         private static void AssertBundlesAreEqual(BundleManifest manifest, BundleManifest newManifest)
