@@ -31,7 +31,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         public const string UncompressedStreamName = "#Schema";
 
-        private readonly IDictionary<CodedIndex, IndexEncoder> _indexEncoders;
+        private readonly Dictionary<CodedIndex, IndexEncoder> _indexEncoders;
         private readonly LazyVariable<IList<IMetadataTable>> _tables;
         private readonly LazyVariable<IList<TableLayout>> _layouts;
 

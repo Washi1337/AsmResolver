@@ -376,6 +376,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         public TypeSignature InstantiateGenericTypes(GenericContext context)
             => AcceptVisitor(GenericTypeActivator.Instance, context);
 
+        /// <inheritdoc />
+        public abstract bool IsImportedInModule(ModuleDefinition module);
+
         /// <summary>
         /// Visit the current type signature using the provided visitor.
         /// </summary>

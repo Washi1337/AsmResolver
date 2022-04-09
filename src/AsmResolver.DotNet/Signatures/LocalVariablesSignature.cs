@@ -69,6 +69,18 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module)
+        {
+            for (int i = 0; i < VariableTypes.Count; i++)
+            {
+                if (!VariableTypes[i].IsImportedInModule(module))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;

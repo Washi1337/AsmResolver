@@ -58,6 +58,17 @@ namespace AsmResolver.Tests.Runners
             return fullPath;
         }
 
+        public string RunAndCaptureOutput(string fileName, byte[] contents, string[]? arguments = null,
+            int timeout = 5000,
+            [CallerFilePath] string testClass = "File",
+            [CallerMemberName] string testMethod = "Test")
+        {
+            testClass = Path.GetFileNameWithoutExtension(testClass);
+            string testExecutablePath = GetTestExecutablePath(testClass, testMethod, fileName);
+            File.WriteAllBytes(testExecutablePath, contents);
+            return RunAndCaptureOutput(testExecutablePath, arguments, timeout);
+        }
+
         public string RunAndCaptureOutput(string filePath, string[]? arguments = null, int timeout = 5000)
         {
             var info = GetStartInfo(filePath, arguments);

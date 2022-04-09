@@ -4,7 +4,7 @@
       - master
 
   image: Visual Studio 2022
-  version: 4.9.0-master-build.{build}
+  version: 4.10.0-master-build.{build}
   configuration: Release
 
   skip_commits:
@@ -33,7 +33,7 @@
       - development
 
   image: Visual Studio 2022
-  version: 4.9.0-dev-build.{build}
+  version: 4.10.0-dev-build.{build}
   configuration: Release
 
   skip_commits:

@@ -137,6 +137,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module) => Module == module;
+
+        /// <inheritdoc />
         public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();

@@ -170,22 +170,43 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the method definition representing the get accessor of this property definition.
+        /// Gets the method definition representing the first get accessor of this property definition.
         /// </summary>
         public MethodDefinition? GetMethod =>
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Getter)?.Method;
 
         /// <summary>
-        /// Gets the method definition representing the set accessor of this property definition.
+        /// Gets the method definition representing the first set accessor of this property definition.
         /// </summary>
         public MethodDefinition? SetMethod =>
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Setter)?.Method;
+
+        /// <summary>
+        /// Clear <see cref="Semantics"/> and apply these methods to the property definition.
+        /// </summary>
+        /// <param name="getMethod">The method definition representing the get accessor of this property definition.</param>
+        /// <param name="setMethod">The method definition representing the set accessor of this property definition.</param>
+        public void SetSemanticMethods(MethodDefinition? getMethod, MethodDefinition? setMethod)
+        {
+            Semantics.Clear();
+            if (getMethod is not null)
+                Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
+            if (setMethod is not null)
+                Semantics.Add(new MethodSemantics(setMethod, MethodSemanticsAttributes.Setter));
+        }
 
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type) =>
             Semantics.Any(s => s.Method?.IsAccessibleFromType(type) ?? false);
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
+
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module)
+        {
+            return Module == module
+                   && (Signature?.IsImportedInModule(module) ?? false);
+        }
 
         /// <summary>
         /// Obtains the name of the property definition.

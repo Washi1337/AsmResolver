@@ -34,6 +34,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => null;
 
         /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module) => true;
+
+        /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context) =>
             context.Writer.WriteByte((byte) ElementType);
 

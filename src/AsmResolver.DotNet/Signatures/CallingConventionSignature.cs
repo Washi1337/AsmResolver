@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Signatures
     /// Provides a base for all signature that deal with a calling convention. This includes most member signatures,
     /// such as method and field signatures.
     /// </summary>
-    public abstract class CallingConventionSignature : ExtendableBlobSignature
+    public abstract class CallingConventionSignature : ExtendableBlobSignature, IImportable
     {
         private const CallingConventionAttributes SignatureTypeMask = (CallingConventionAttributes)0xF;
 
@@ -148,5 +148,8 @@ namespace AsmResolver.DotNet.Signatures
             set => Attributes = (Attributes & ~CallingConventionAttributes.Sentinel)
                                 | (value ? CallingConventionAttributes.Sentinel : 0);
         }
+
+        /// <inheritdoc />
+        public abstract bool IsImportedInModule(ModuleDefinition module);
     }
 }

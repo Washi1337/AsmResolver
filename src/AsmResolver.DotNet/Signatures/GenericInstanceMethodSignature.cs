@@ -92,6 +92,18 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module)
+        {
+            for (int i = 0; i < TypeArguments.Count; i++)
+            {
+                if (!TypeArguments[i].IsImportedInModule(module))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"<{string.Join(", ", TypeArguments)}>";

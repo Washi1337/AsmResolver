@@ -73,6 +73,9 @@ namespace AsmResolver.DotNet
             return instance;
         }
 
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module) => false;
+
         IMemberDefinition? IMemberDescriptor.Resolve() => null;
 
         TypeDefinition? ITypeDescriptor.Resolve() => null;

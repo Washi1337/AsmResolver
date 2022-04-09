@@ -153,6 +153,13 @@ namespace AsmResolver.DotNet
             throw new ArgumentOutOfRangeException();
         }
 
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module)
+        {
+            return Module == module
+                   && (Signature?.IsImportedInModule(module) ?? false);
+        }
+
         FieldDefinition? IFieldDescriptor.Resolve()
         {
             if (!IsField)

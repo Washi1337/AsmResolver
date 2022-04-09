@@ -62,4 +62,5 @@ Table of Contents:
    dotnet/cloning
    dotnet/token-allocation
    dotnet/type-memory-layout
+   dotnet/bundles
    dotnet/advanced-pe-image-building.rst

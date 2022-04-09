@@ -96,6 +96,9 @@ namespace AsmResolver.DotNet
             Signature ?? throw new ArgumentException("Signature embedded into the type specification is null.");
 
         /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module) => Signature?.IsImportedInModule(module) ?? false;
+
+        /// <inheritdoc />
         public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();

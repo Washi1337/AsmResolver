@@ -33,6 +33,9 @@ namespace AsmResolver.DotNet
         protected override Utf8String? GetCulture() => _assemblyName.CultureName;
 
         /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module) => false;
+
+        /// <inheritdoc />
         public override bool IsCorLib => Name is not null && KnownCorLibs.KnownCorLibNames.Contains(Name);
 
         /// <inheritdoc />
