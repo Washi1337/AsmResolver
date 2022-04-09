@@ -1,6 +1,5 @@
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace AsmResolver.DotNet.Config.Json
 {
@@ -9,13 +8,6 @@ namespace AsmResolver.DotNet.Config.Json
     /// </summary>
     public class RuntimeConfiguration
     {
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-
         /// <summary>
         /// Parses runtime configuration from a JSON file.
         /// </summary>
@@ -33,7 +25,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// <returns>The parsed runtime configuration.</returns>
         public static RuntimeConfiguration? FromJson(string json)
         {
-            return JsonSerializer.Deserialize<RuntimeConfiguration>(json, JsonSerializerOptions);
+            return JsonSerializer.Deserialize(json, RuntimeConfigurationSerializerContext.Default.RuntimeConfiguration);
         }
 
         /// <summary>
@@ -67,7 +59,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// <returns>The JSON string.</returns>
         public string ToJson()
         {
-            return JsonSerializer.Serialize(this, JsonSerializerOptions);
+            return JsonSerializer.Serialize(this, RuntimeConfigurationSerializerContext.Default.RuntimeConfiguration);
         }
 
         /// <summary>

@@ -136,6 +136,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <param name="method">The method that owns the method body.</param>
         /// <param name="dynamicMethodObj">The Dynamic Method/Delegate/DynamicResolver.</param>
         /// <returns>The method body.</returns>
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls ResolveDynamicResolver")]
         public static CilMethodBody FromDynamicMethod(MethodDefinition method, object dynamicMethodObj)
         {
             if (!(method.Module is SerializedModuleDefinition module))
