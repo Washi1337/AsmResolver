@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet
         IHasSecurityDeclaration,
         IManagedEntrypoint
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<TypeDefinition?> _declaringType;
         private readonly LazyVariable<MethodSignature?> _signature;
         private readonly LazyVariable<MethodBody?> _methodBody;
@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet
         protected MethodDefinition(MetadataToken token)
             : base(token)
         {
-            _name  =new LazyVariable<string?>(GetName);
+            _name  =new LazyVariable<Utf8String?>(GetName);
             _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
             _signature = new LazyVariable<MethodSignature?>(GetSignature);
             _methodBody = new LazyVariable<MethodBody?>(GetBody);
@@ -722,7 +722,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the declaring type of the method definition.
