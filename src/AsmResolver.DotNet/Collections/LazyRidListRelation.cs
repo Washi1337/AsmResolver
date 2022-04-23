@@ -54,22 +54,24 @@ namespace AsmResolver.DotNet.Collections
                 var tablesStream = _metadata.GetStream<TablesStream>();
                 var associationTable = tablesStream.GetTable<TAssociationRow>(_associationTable);
 
-                _memberLists = new Dictionary<uint, MetadataRange>();
-                _memberOwners = new Dictionary<uint, uint>();
+                var memberLists = new Dictionary<uint, MetadataRange>();
+                var memberOwners = new Dictionary<uint, uint>();
 
                 for (int i = 0; i < associationTable.Count; i++)
                 {
-                    uint rid = (uint) (i + 1);
-                    InitializeMemberList(_getOwnerRid(rid, associationTable[i]), _getMemberList(rid));
-                }
-            }
-        }
+                    uint currentRid = (uint) (i + 1);
 
-        private void InitializeMemberList(uint ownerRid, MetadataRange memberRange)
-        {
-            _memberLists![ownerRid] = memberRange;
-            foreach (var token in memberRange)
-                _memberOwners![token.Rid] = ownerRid;
+                    uint ownerRid = _getOwnerRid(currentRid, associationTable[i]);
+                    var memberRange = _getMemberList(currentRid);
+
+                    memberLists[ownerRid] = memberRange;
+                    foreach (var token in memberRange)
+                        memberOwners[token.Rid] = ownerRid;
+                }
+
+                _memberLists = memberLists;
+                _memberOwners = memberOwners;
+            }
         }
 
         public MetadataRange GetMemberRange(uint ownerRid)
