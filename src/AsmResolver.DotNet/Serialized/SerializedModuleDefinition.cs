@@ -77,15 +77,15 @@ namespace AsmResolver.DotNet.Serialized
                 readerParameters.PEReaderParameters.FileService));
 
             // Prepare lazy RID lists.
-            _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,
+            _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.Field, TableIndex.TypeDef,
                 (rid, _) => rid, tablesStream.GetFieldRange);
-            _methodLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,
+            _methodLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.Method, TableIndex.TypeDef,
                 (rid, _) => rid, tablesStream.GetMethodRange);
-            _paramLists = new LazyRidListRelation<MethodDefinitionRow>(metadata, TableIndex.Method,
+            _paramLists = new LazyRidListRelation<MethodDefinitionRow>(metadata, TableIndex.Param, TableIndex.Method,
                 (rid, _) => rid, tablesStream.GetParameterRange);
-            _propertyLists = new LazyRidListRelation<PropertyMapRow>(metadata, TableIndex.PropertyMap,
+            _propertyLists = new LazyRidListRelation<PropertyMapRow>(metadata, TableIndex.Property, TableIndex.PropertyMap,
                 (_, map) => map.Parent, tablesStream.GetPropertyRange);
-            _eventLists = new LazyRidListRelation<EventMapRow>(metadata, TableIndex.EventMap,
+            _eventLists = new LazyRidListRelation<EventMapRow>(metadata, TableIndex.Event, TableIndex.EventMap,
                 (_, map) => map.Parent, tablesStream.GetEventRange);
         }
 

@@ -755,7 +755,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="typeDefRid">The row identifier of the type definition to obtain the fields from.</param>
         /// <returns>The range of metadata tokens.</returns>
         public MetadataRange GetFieldRange(uint typeDefRid) =>
-            GetMemberRange(TableIndex.TypeDef, typeDefRid, 4,
+            GetMemberRange<TypeDefinitionRow>(TableIndex.TypeDef, typeDefRid, 4,
                 TableIndex.Field, TableIndex.FieldPtr);
 
         /// <summary>
@@ -764,7 +764,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="typeDefRid">The row identifier of the type definition to obtain the methods from.</param>
         /// <returns>The range of metadata tokens.</returns>
         public MetadataRange GetMethodRange(uint typeDefRid) =>
-            GetMemberRange(TableIndex.TypeDef, typeDefRid, 5,
+            GetMemberRange<TypeDefinitionRow>(TableIndex.TypeDef, typeDefRid, 5,
                 TableIndex.Method, TableIndex.MethodPtr);
 
         /// <summary>
@@ -773,7 +773,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="methodDefRid">The row identifier of the method definition to obtain the parameters from.</param>
         /// <returns>The range of metadata tokens.</returns>
         public MetadataRange GetParameterRange(uint methodDefRid) =>
-            GetMemberRange(TableIndex.Method, methodDefRid, 5,
+            GetMemberRange<MethodDefinitionRow>(TableIndex.Method, methodDefRid, 5,
                 TableIndex.Param, TableIndex.ParamPtr);
 
         /// <summary>
@@ -782,7 +782,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="propertyMapRid">The row identifier of the property map to obtain the properties from.</param>
         /// <returns>The range of metadata tokens.</returns>
         public MetadataRange GetPropertyRange(uint propertyMapRid) =>
-            GetMemberRange(TableIndex.PropertyMap, propertyMapRid, 1,
+            GetMemberRange<PropertyMapRow>(TableIndex.PropertyMap, propertyMapRid, 1,
                 TableIndex.Property, TableIndex.PropertyPtr);
 
         /// <summary>
@@ -791,16 +791,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="eventMapRid">The row identifier of the event map to obtain the events from.</param>
         /// <returns>The range of metadata tokens.</returns>
         public MetadataRange GetEventRange(uint eventMapRid) =>
-            GetMemberRange(TableIndex.EventMap, eventMapRid, 1,
+            GetMemberRange<EventMapRow>(TableIndex.EventMap, eventMapRid, 1,
                 TableIndex.Event, TableIndex.EventPtr);
 
-        private MetadataRange GetMemberRange(TableIndex ownerTableIndex, uint ownerRid, int ownerColumnIndex,
-            TableIndex memberTableIndex, TableIndex redirectTableIndex)
+        private MetadataRange GetMemberRange<TOwnerRow>(
+            TableIndex ownerTableIndex,
+            uint ownerRid,
+            int ownerColumnIndex,
+            TableIndex memberTableIndex,
+            TableIndex redirectTableIndex)
+            where TOwnerRow : struct, IMetadataRow
         {
             int index = (int) (ownerRid - 1);
 
             // Check if valid owner RID.
-            var ownerTable = GetTable(ownerTableIndex);
+            var ownerTable = GetTable<TOwnerRow>(ownerTableIndex);
             if (index < 0 || index >= ownerTable.Count)
                 return MetadataRange.Empty;
 
