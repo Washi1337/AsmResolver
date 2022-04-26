@@ -1,6 +1,6 @@
-﻿using System.Reflection;
+using System.Reflection;
 
-namespace AsmResolver.DotNet
+namespace AsmResolver.DotNet.Dynamic
 {
     internal static class FieldReader
     {
