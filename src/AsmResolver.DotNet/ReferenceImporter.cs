@@ -425,7 +425,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="method">The method to import.</param>
         /// <returns>The imported method.</returns>
-        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls ResolveMethod")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls System.Reflection.Module.ResolveMethod(int)")]
         public virtual IMethodDescriptor ImportMethod(MethodBase method)
         {
             if (method is null)
@@ -456,7 +456,7 @@ namespace AsmResolver.DotNet
             return new MemberReference(ImportType(method.DeclaringType), method.Name, result);
         }
 
-        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls ImportMethod")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls AsmResolver.DotNet.ReferenceImporter.ImportMethod(System.Reflection.MethodBase)")]
         private IMethodDescriptor ImportGenericMethod(MethodInfo method)
         {
             var memberRef = (IMethodDefOrRef) ImportMethod(method.GetGenericMethodDefinition());
@@ -511,7 +511,7 @@ namespace AsmResolver.DotNet
         /// <param name="field">The field to import.</param>
         /// <returns>The imported field.</returns>
         /// <exception cref="ArgumentException">Occurs when a field is not added to a type.</exception>
-        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls ResolveField")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls System.Reflection.Module.ResolveField(int)")]
         public MemberReference ImportField(FieldInfo field)
         {
             if (field is null)
