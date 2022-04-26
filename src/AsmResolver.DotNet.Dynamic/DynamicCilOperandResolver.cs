@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
-namespace AsmResolver.DotNet.Code.Cil
+namespace AsmResolver.DotNet.Dynamic
 {
     /// <summary>
     /// Provides an implementation of <see cref="ICilOperandResolver"/> that resolves operands based on
@@ -34,13 +35,13 @@ namespace AsmResolver.DotNet.Code.Cil
             switch (token.Table)
             {
                 case TableIndex.TypeDef:
-                    object? type = _tokens[(int) token.Rid];
+                    object? type = _tokens[(int)token.Rid];
                     if (type is RuntimeTypeHandle runtimeTypeHandle)
                         return _importer.ImportType(Type.GetTypeFromHandle(runtimeTypeHandle));
                     break;
 
                 case TableIndex.Field:
-                    object? field = _tokens[(int) token.Rid];
+                    object? field = _tokens[(int)token.Rid];
 
                     if (field is null)
                         return null;
@@ -61,7 +62,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
                 case TableIndex.Method:
                 case TableIndex.MemberRef:
-                    object? obj = _tokens[(int) token.Rid];
+                    object? obj = _tokens[(int)token.Rid];
 
                     if (obj is null)
                         return null;
@@ -94,7 +95,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     break;
 
                 case TableIndex.StandAloneSig:
-                    var reader = ByteArrayDataSource.CreateReader((byte[]) _tokens[(int) token.Rid]!);
+                    var reader = ByteArrayDataSource.CreateReader((byte[])_tokens[(int)token.Rid]!);
                     return CallingConventionSignature.FromReader(new BlobReadContext(_readerContext), ref reader);
             }
 
@@ -104,7 +105,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <inheritdoc />
         public override object? ResolveString(MetadataToken token)
         {
-            return _tokens[(int) token.Rid] as string;
+            return _tokens[(int)token.Rid] as string;
         }
     }
 }

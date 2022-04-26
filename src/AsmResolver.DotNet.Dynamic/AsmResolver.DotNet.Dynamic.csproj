@@ -1,14 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <Title>AsmResolver.DotNet</Title>
-        <Description>High level .NET image models for the AsmResolver executable file inspection toolsuite.</Description>
-        <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
+        <Title>AsmResolver.DotNet.Dynamic</Title>
+        <Description>Dynamic method support for the AsmResolver executable file inspection toolsuite.</Description>
+        <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly dynamic</PackageTags>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
-        <Nullable>enable</Nullable>
         <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
-        <IsTrimmable>true</IsTrimmable>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -20,7 +19,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AsmResolver.PE\AsmResolver.PE.csproj" />
+        <ProjectReference Include="..\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
     </ItemGroup>
 
     <ItemGroup>

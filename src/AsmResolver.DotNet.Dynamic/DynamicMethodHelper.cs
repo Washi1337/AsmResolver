@@ -9,7 +9,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 
-namespace AsmResolver.DotNet
+namespace AsmResolver.DotNet.Dynamic
 {
     internal static class DynamicMethodHelper
     {
@@ -34,10 +34,10 @@ namespace AsmResolver.DotNet
             IList<object>? ehInfos, byte[] ehHeader, ReferenceImporter importer)
         {
             //Sample needed!
-            if (ehHeader is {Length: > 4})
+            if (ehHeader is { Length: > 4 })
                 throw new NotImplementedException("Exception handlers from ehHeader not supported yet.");
 
-            if (ehInfos is {Count: > 0})
+            if (ehInfos is { Count: > 0 })
             {
                 foreach (var ehInfo in ehInfos)
                     InterpretEHInfo(methodBody, importer, ehInfo);
@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet
                 int handlerStart = FieldReader.ReadField<int[]>(ehInfo, "m_catchAddr")![i];
                 int handlerEnd = FieldReader.ReadField<int[]>(ehInfo, "m_catchEndAddr")![i];
                 var exceptionType = FieldReader.ReadField<Type?[]>(ehInfo, "m_catchClass")![i];
-                var handlerType = (CilExceptionHandlerType) FieldReader.ReadField<int[]>(ehInfo, "m_type")![i];
+                var handlerType = (CilExceptionHandlerType)FieldReader.ReadField<int[]>(ehInfo, "m_type")![i];
 
                 var endTryLabel = instructions.GetByOffset(tryEnd)?.CreateLabel() ?? new CilOffsetLabel(tryEnd);
 
@@ -81,7 +81,6 @@ namespace AsmResolver.DotNet
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls GetTypes")]
         public static object ResolveDynamicResolver(object dynamicMethodObj)
         {
             //Convert dynamicMethodObj to DynamicResolver
@@ -111,7 +110,7 @@ namespace AsmResolver.DotNet
                     .Invoke(dynamicMethodObj, null);
 
                 //Create instance of dynamicResolver
-                dynamicMethodObj = Activator.CreateInstance(dynamicResolver, (BindingFlags) (-1), null, new[]
+                dynamicMethodObj = Activator.CreateInstance(dynamicResolver, (BindingFlags)(-1), null, new[]
                 {
                     ilGenerator
                 }, null)!;
