@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Dynamic
             Name = methodBase.Name;
             Attributes = (MethodAttributes)methodBase.Attributes;
             Signature = new ReferenceImporter(module).ImportMethodSignature(ResolveSig(methodBase, module));
-            CilMethodBody = ToCilMethodBody(this, dynamicMethodObj);
+            CilMethodBody = CreateDynamicMethodBody(this, dynamicMethodObj);
         }
 
         private MethodSignature ResolveSig(MethodBase methodBase, ModuleDefinition module)
@@ -62,12 +62,12 @@ namespace AsmResolver.DotNet.Dynamic
         public override ModuleDefinition Module { get; }
 
         /// <summary>
-        ///     Creates a CIL method body from a dynamic method.
+        /// Creates a CIL method body from a dynamic method.
         /// </summary>
         /// <param name="method">The method that owns the method body.</param>
         /// <param name="dynamicMethodObj">The Dynamic Method/Delegate/DynamicResolver.</param>
         /// <returns>The method body.</returns>
-        public static CilMethodBody ToCilMethodBody(MethodDefinition method, object dynamicMethodObj)
+        private static CilMethodBody CreateDynamicMethodBody(MethodDefinition method, object dynamicMethodObj)
         {
             if (!(method.Module is SerializedModuleDefinition module))
                 throw new ArgumentException("Method body should reference a serialized module.");
