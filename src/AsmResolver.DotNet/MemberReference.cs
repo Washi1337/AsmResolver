@@ -160,6 +160,11 @@ namespace AsmResolver.DotNet
                    && (Signature?.IsImportedInModule(module) ?? false);
         }
 
+        /// <inheritdoc />
+        public IImportable ImportWith(ReferenceImporter importer) => IsMethod
+            ? importer.ImportMethod(this)
+            : importer.ImportField(this);
+
         FieldDefinition? IFieldDescriptor.Resolve()
         {
             if (!IsField)

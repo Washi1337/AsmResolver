@@ -152,6 +152,16 @@ namespace AsmResolver.DotNet
                    && (Implementation?.IsImportedInModule(module) ?? false);
         }
 
+        /// <summary>
+        /// Imports the exported type using the provided importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported type.</returns>
+        public ExportedType ImportWith(ReferenceImporter importer) => importer.ImportType(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 
         /// <inheritdoc />

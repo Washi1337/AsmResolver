@@ -698,6 +698,16 @@ namespace AsmResolver.DotNet
                    && (Signature?.IsImportedInModule(module) ?? false);
         }
 
+        /// <summary>
+        /// Imports the method using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported method.</returns>
+        public IMethodDefOrRef ImportWith(ReferenceImporter importer) => importer.ImportMethod(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <inheritdoc />

@@ -1122,6 +1122,16 @@ namespace AsmResolver.DotNet
         bool IImportable.IsImportedInModule(ModuleDefinition module) => this == module;
 
         /// <summary>
+        /// Imports the module using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported module.</returns>
+        public ModuleReference ImportWith(ReferenceImporter importer) => importer.ImportModule(new ModuleReference(Name));
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <summary>
         /// Rebuilds the .NET module to a portable executable file and writes it to the file system.
         /// </summary>
         /// <param name="filePath">The output path of the manifest module file.</param>

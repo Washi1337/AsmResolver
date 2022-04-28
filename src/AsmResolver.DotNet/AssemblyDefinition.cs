@@ -226,6 +226,10 @@ namespace AsmResolver.DotNet
         public override bool IsImportedInModule(ModuleDefinition module) => ManifestModule == module;
 
         /// <inheritdoc />
+        public override AssemblyReference ImportWith(ReferenceImporter importer) =>
+            (AssemblyReference) importer.ImportScope(new AssemblyReference(this));
+
+        /// <inheritdoc />
         public override AssemblyDefinition Resolve() => this;
 
         /// <summary>

@@ -124,6 +124,17 @@ namespace AsmResolver.DotNet
         public bool IsImportedInModule(ModuleDefinition module) => Module == module;
 
         /// <summary>
+        /// Imports the file using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported file reference.</returns>
+        public FileReference ImportWith(ReferenceImporter importer) =>
+            (FileReference) importer.ImportImplementation(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <summary>
         /// Obtains the name of the referenced file.
         /// </summary>
         /// <returns>The name.</returns>

@@ -76,6 +76,9 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module) => false;
 
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => throw new InvalidOperationException();
+
         IMemberDefinition? IMemberDescriptor.Resolve() => null;
 
         TypeDefinition? ITypeDescriptor.Resolve() => null;
@@ -86,7 +89,6 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public override string ToString() =>  ((IFullNameProvider) this).Name!;
-
 
     }
 }

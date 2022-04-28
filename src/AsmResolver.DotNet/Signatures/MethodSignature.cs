@@ -215,5 +215,15 @@ namespace AsmResolver.DotNet.Signatures
 
             return $"{prefix}{fullName} *{genericsString}({parameterTypesString})";
         }
+
+        /// <summary>
+        /// Imports the method signature using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to us.</param>
+        /// <returns>The imported signature.</returns>
+        public MemberSignature ImportWith(ReferenceImporter importer) => importer.ImportMethodSignature(this);
+
+        /// <inheritdoc />
+        protected override CallingConventionSignature ImportWithInternal(ReferenceImporter importer) => ImportWith(importer);
     }
 }

@@ -15,5 +15,12 @@ namespace AsmResolver.DotNet
         /// data or contents (such as a method body) associated to the member.
         /// </remarks>
         bool IsImportedInModule(ModuleDefinition module);
+
+        /// <summary>
+        /// Imports the member using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use for importing the object.</param>
+        /// <returns>The imported member.</returns>
+        IImportable ImportWith(ReferenceImporter importer);
     }
 }

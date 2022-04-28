@@ -94,5 +94,15 @@ namespace AsmResolver.DotNet.Signatures
             context.Writer.WriteByte((byte) Attributes);
             FieldType.Write(context);
         }
+
+        /// <summary>
+        /// Imports the field signature using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to us.</param>
+        /// <returns>The imported field signature.</returns>
+        public FieldSignature ImportWith(ReferenceImporter importer) => importer.ImportFieldSignature(this);
+
+        /// <inheritdoc />
+        protected override CallingConventionSignature ImportWithInternal(ReferenceImporter importer) => ImportWith(importer);
     }
 }
