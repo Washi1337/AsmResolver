@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet
             : base(token)
         {
             _name = new LazyVariable<Utf8String?>(GetName);
-            _culture = new LazyVariable<Utf8String?>(() => GetCulture());
+            _culture = new LazyVariable<Utf8String?>(GetCulture);
             Version = new Version(0, 0, 0, 0);
         }
 
