@@ -54,6 +54,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _runtimeVersion;
         private readonly LazyVariable<IResourceDirectory?> _nativeResources;
         private IList<DebugDataEntry>? _debugData;
+        private ReferenceImporter? _defaultImporter;
 
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
@@ -759,6 +760,19 @@ namespace AsmResolver.DotNet
         {
             get => _managedEntrypoint.Value;
             set => _managedEntrypoint.Value = value;
+        }
+
+        /// <summary>
+        /// Gets the default importer instance for this module.
+        /// </summary>
+        public ReferenceImporter DefaultImporter
+        {
+            get
+            {
+                if (_defaultImporter is null)
+                    Interlocked.CompareExchange(ref _defaultImporter, new ReferenceImporter(this), null);
+                return _defaultImporter;
+            }
         }
 
         /// <summary>
