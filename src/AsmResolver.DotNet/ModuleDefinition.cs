@@ -770,7 +770,7 @@ namespace AsmResolver.DotNet
             get
             {
                 if (_defaultImporter is null)
-                    Interlocked.CompareExchange(ref _defaultImporter, new ReferenceImporter(this), null);
+                    Interlocked.CompareExchange(ref _defaultImporter, GetDefaultImporter(), null);
                 return _defaultImporter;
             }
         }
@@ -1061,6 +1061,15 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="DebugData"/> property.
         /// </remarks>
         protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
+
+        /// <summary>
+        /// Obtains the default reference importer assigned to this module.
+        /// </summary>
+        /// <returns>The importer.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="DefaultImporter"/> property.
+        /// </remarks>
+        protected virtual ReferenceImporter GetDefaultImporter() => new(this);
 
         /// <summary>
         /// Detects the runtime that this module targets.
