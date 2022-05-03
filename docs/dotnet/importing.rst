@@ -5,13 +5,24 @@ Reference Importing
 
 .NET modules use entries in the TypeRef or MemberRef tables to reference types or members from external assemblies. Importing references into the current module therefore form a key role when creating new- or modifying existing .NET modules. When a member is not imported into the current module, a ``MemberNotImportedException`` will be thrown when you are trying to create a PE image or write the module to the disk.
 
-AsmResolver provides the ``ReferenceImporter`` class that does most of the heavy lifting.
+AsmResolver provides the ``ReferenceImporter`` class that does most of the heavy lifting. Obtaining an instance of ``ReferenceImporter`` can be done in two ways.
 
-All samples in this document assume there is an instance of ``ReferenceImporter`` created using the following code:
+Either instantiate one yourself:
 
 .. code-block:: csharp
 
+    ModuleDefinition module = ...
     var importer = new ReferenceImporter(module);
+
+Or obtain the default instance that comes with every ``ModuleDefinition`` object. This avoids allocating new reference importers every time.
+
+.. code-block:: csharp
+    
+    ModuleDefinition module = ...
+    var importer = module.DefaultImporter;
+
+
+The example snippets that will follow in this articule assume that there is such a ``ReferenceImporter`` object instantiated using either of these two methods, and is stored in an ``importer`` variable.
 
 
 Importing metadata members
@@ -123,9 +134,6 @@ As a result, trying to import from for example a library part of the .NET Framew
 This is a common mistake when trying to import using metadata provided by ``System.Reflection``. For example, if the host application that uses AsmResolver targets .NET Core but the input file is targeting .NET Framework, then you will run in the exact issue described in the above.
 
 .. code-block:: csharp
-
-    var targetModule = ModuleDefinition.FromFile(...);
-    var importer = new ReferenceImporter(targetModule);
 
     var reference = importer.ImportType(typeof(DateTime));
 

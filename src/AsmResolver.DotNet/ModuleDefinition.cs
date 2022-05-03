@@ -54,6 +54,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _runtimeVersion;
         private readonly LazyVariable<IResourceDirectory?> _nativeResources;
         private IList<DebugDataEntry>? _debugData;
+        private ReferenceImporter? _defaultImporter;
 
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
@@ -762,6 +763,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets the default importer instance for this module.
+        /// </summary>
+        public ReferenceImporter DefaultImporter
+        {
+            get
+            {
+                if (_defaultImporter is null)
+                    Interlocked.CompareExchange(ref _defaultImporter, GetDefaultImporter(), null);
+                return _defaultImporter;
+            }
+        }
+
+        /// <summary>
         /// Looks up a member by its metadata token.
         /// </summary>
         /// <param name="token">The token of the member to lookup.</param>
@@ -1047,6 +1061,15 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="DebugData"/> property.
         /// </remarks>
         protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
+
+        /// <summary>
+        /// Obtains the default reference importer assigned to this module.
+        /// </summary>
+        /// <returns>The importer.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="DefaultImporter"/> property.
+        /// </remarks>
+        protected virtual ReferenceImporter GetDefaultImporter() => new(this);
 
         /// <summary>
         /// Detects the runtime that this module targets.
