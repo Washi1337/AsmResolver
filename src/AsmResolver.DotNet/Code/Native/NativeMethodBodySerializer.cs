@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Code.Native
             {
                 // Import symbol.
                 var fixup = nativeMethodBody.AddressFixups[i];
-                var symbol = provider.ImportSymbol(fixup.Symbol);
+                var symbol = TransformSymbol(segment, provider, fixup.Symbol);
 
                 // Create new fixup with imported symbol.
                 segment.AddressFixups.Add(new AddressFixup(fixup.Offset, fixup.Type, symbol));
@@ -42,6 +42,14 @@ namespace AsmResolver.DotNet.Code.Native
             }
 
             return segment.ToReference();
+        }
+
+        protected virtual ISymbol TransformSymbol(CodeSegment result, INativeSymbolsProvider provider, ISymbol symbol)
+        {
+            if (symbol is NativeLocalSymbol local)
+                return new Symbol(result.ToReference(local.Offset));
+
+            return provider.ImportSymbol(symbol);
         }
     }
 }

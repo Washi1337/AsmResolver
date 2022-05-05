@@ -6,21 +6,30 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
 using AsmResolver.PE.Code;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
+using AsmResolver.Tests.Runners;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Code.Native
 {
-    public class NativeMethodBodyTest
+    public class NativeMethodBodyTest : IClassFixture<TemporaryDirectoryFixture>
     {
+        private TemporaryDirectoryFixture _fixture;
+
+        public NativeMethodBodyTest(TemporaryDirectoryFixture fixture)
+        {
+            _fixture = fixture;
+        }
+
         private static NativeMethodBody CreateDummyBody(bool isVoid, bool is32Bit)
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.TheAnswer_NetFx);
 
-            module.Attributes &= DotNetDirectoryFlags.ILOnly;
+            module.Attributes &= ~DotNetDirectoryFlags.ILOnly;
             if (is32Bit)
             {
                 module.PEKind = OptionalHeaderMagic.Pe32;
@@ -242,6 +251,57 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             byte[] newBuffer = new byte[body.Code.Length];
             reference.CreateReader().ReadBytes(newBuffer, 0, newBuffer.Length);
             Assert.Equal(body.Code, newBuffer);
+        }
+
+        [Fact]
+        public void NativeBodyWithLocalSymbols()
+        {
+            // Create native body.
+            var body = CreateDummyBody(false, true);
+            body.Code = new byte[]
+            {
+                /* 00: */ 0xB8, 0x00, 0x00, 0x00, 0x00, // mov eax, message
+                /* 05: */ 0xc3,                         // ret
+
+                // message:
+                0x48, 0x00, 0x65, 0x00, 0x6c, 0x00, 0x6c, 0x00, 0x6f, 0x00, 0x2c, 0x00, 0x20, 0x00, // "Hello, "
+                0x77, 0x00, 0x6f, 0x00, 0x72, 0x00, 0x6c, 0x00, 0x64, 0x00, 0x21, 0x00, 0x00, 0x00  // "world!."
+            };
+
+            // Define local symbol.
+            var messageSymbol = new NativeLocalSymbol(body, 6);
+
+            // Fixup address in mov instruction.
+            body.AddressFixups.Add(new AddressFixup(1, AddressFixupType.Absolute32BitAddress, messageSymbol));
+
+            // Update main to call native method, convert the returned pointer to a String, and write to stdout.
+            var module = body.Owner.Module;
+            var stringConstructor = new MemberReference(
+                module!.CorLibTypeFactory.String.Type,
+                ".ctor",
+                MethodSignature.CreateInstance(
+                    module.CorLibTypeFactory.Void,
+                    module.CorLibTypeFactory.Char.MakePointerType())
+            );
+            var writeLine = new MemberReference(
+                new TypeReference(module, module.CorLibTypeFactory.CorLibScope, "System", "Console"),
+                "WriteLine",
+                MethodSignature.CreateStatic(
+                    module.CorLibTypeFactory.Void,
+                    module.CorLibTypeFactory.String)
+            );
+
+            var instructions = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions;
+            instructions.Clear();
+            instructions.Add(CilOpCodes.Call, body.Owner);
+            instructions.Add(CilOpCodes.Newobj, stringConstructor);
+            instructions.Add(CilOpCodes.Call, writeLine);
+            instructions.Add(CilOpCodes.Ret);
+
+            // Verify.
+            _fixture
+                .GetRunner<FrameworkPERunner>()
+                .RebuildAndRun(module, "StringPointer.exe", $"Hello, world!{Environment.NewLine}");
         }
     }
 }
