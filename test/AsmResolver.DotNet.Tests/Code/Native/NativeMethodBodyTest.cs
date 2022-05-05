@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Code.Native;
@@ -253,29 +254,42 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             Assert.Equal(body.Code, newBuffer);
         }
 
-        [Fact]
-        public void NativeBodyWithLocalSymbols()
+        [Theory]
+        [InlineData(
+            true,
+            new byte[] {0xB8, 0x00, 0x00, 0x00, 0x00}, // mov eax, message
+            1u, AddressFixupType.Absolute32BitAddress,
+            6u)]
+        [InlineData(
+            false,
+            new byte[] {0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // mov rax, message
+            2u, AddressFixupType.Absolute64BitAddress,
+            11u)]
+        public void NativeBodyWithLocalSymbols(bool is32Bit, byte[] movInstruction, uint fixupOffset, AddressFixupType fixupType, uint symbolOffset)
         {
             // Create native body.
-            var body = CreateDummyBody(false, true);
-            body.Code = new byte[]
+            var code = new List<byte>(movInstruction);
+            code.AddRange(new byte[]
             {
-                /* 00: */ 0xB8, 0x00, 0x00, 0x00, 0x00, // mov eax, message
-                /* 05: */ 0xc3,                         // ret
+                0xc3, // ret
 
                 // message:
                 0x48, 0x00, 0x65, 0x00, 0x6c, 0x00, 0x6c, 0x00, 0x6f, 0x00, 0x2c, 0x00, 0x20, 0x00, // "Hello, "
                 0x77, 0x00, 0x6f, 0x00, 0x72, 0x00, 0x6c, 0x00, 0x64, 0x00, 0x21, 0x00, 0x00, 0x00  // "world!."
-            };
+            });
+
+            var body = CreateDummyBody(false, is32Bit);
+            body.Code = code.ToArray();
 
             // Define local symbol.
-            var messageSymbol = new NativeLocalSymbol(body, 6);
+            var messageSymbol = new NativeLocalSymbol(body, symbolOffset);
 
             // Fixup address in mov instruction.
-            body.AddressFixups.Add(new AddressFixup(1, AddressFixupType.Absolute32BitAddress, messageSymbol));
+            body.AddressFixups.Add(new AddressFixup(fixupOffset, fixupType, messageSymbol));
 
             // Update main to call native method, convert the returned pointer to a String, and write to stdout.
             var module = body.Owner.Module;
+            body.Owner!.Signature!.ReturnType = body.Owner.Module!.CorLibTypeFactory.IntPtr;
             var stringConstructor = new MemberReference(
                 module!.CorLibTypeFactory.String.Type,
                 ".ctor",

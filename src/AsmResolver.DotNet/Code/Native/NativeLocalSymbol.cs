@@ -2,7 +2,7 @@ namespace AsmResolver.DotNet.Code.Native;
 
 public class NativeLocalSymbol : ISymbol
 {
-    public NativeLocalSymbol(NativeMethodBody body, int offset)
+    public NativeLocalSymbol(NativeMethodBody body, uint offset)
     {
         Body = body;
         Offset = offset;
@@ -13,13 +13,13 @@ public class NativeLocalSymbol : ISymbol
         get;
     }
 
-    public int Offset
+    public uint Offset
     {
         get;
     }
 
     /// <inheritdoc />
     public ISegmentReference? GetReference() => Body.Address is not null
-        ? new RelativeReference(Body.Address, Offset)
+        ? new RelativeReference(Body.Address, (int) Offset)
         : null;
 }

@@ -31,13 +31,19 @@ namespace AsmResolver.DotNet.Code.Native
                 segment.AddressFixups.Add(new AddressFixup(fixup.Offset, fixup.Type, symbol));
 
                 // Add base relocation when necessary.
-                // TODO: keep architecture into account..
-                if (fixup.Type == AddressFixupType.Absolute32BitAddress)
+                switch (fixup.Type)
                 {
-                    var relocation = new BaseRelocation(
-                        RelocationType.HighLow,
-                        segment.ToReference((int) fixup.Offset));
-                    provider.RegisterBaseRelocation(relocation);
+                    case AddressFixupType.Absolute32BitAddress:
+                        provider.RegisterBaseRelocation(new BaseRelocation(
+                            RelocationType.HighLow,
+                            segment.ToReference((int) fixup.Offset)));
+                        break;
+
+                    case AddressFixupType.Absolute64BitAddress:
+                        provider.RegisterBaseRelocation(new BaseRelocation(
+                            RelocationType.Dir64,
+                            segment.ToReference((int) fixup.Offset)));
+                        break;
                 }
             }
 
@@ -47,7 +53,7 @@ namespace AsmResolver.DotNet.Code.Native
         protected virtual ISymbol TransformSymbol(CodeSegment result, INativeSymbolsProvider provider, ISymbol symbol)
         {
             if (symbol is NativeLocalSymbol local)
-                return new Symbol(result.ToReference(local.Offset));
+                return new Symbol(result.ToReference((int) local.Offset));
 
             return provider.ImportSymbol(symbol);
         }
