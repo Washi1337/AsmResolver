@@ -484,7 +484,7 @@ namespace AsmResolver.DotNet.Tests
             var resolved = imported.Resolve();
 
             Assert.NotNull(resolved);
-            Assert.Equal(field, resolved);
+            Assert.Equal(field, Assert.IsAssignableFrom<IFieldDescriptor>(resolved), Comparer);
         }
     }
 }
