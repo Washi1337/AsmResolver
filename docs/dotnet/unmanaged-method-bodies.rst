@@ -20,7 +20,7 @@ Allowing native code in modules
 
 To make the CLR treat the output file as a mixed mode application, the ``ILOnly`` flag needs to be unset:
 
-.. code-block:: csharp 
+.. code-block:: csharp
 
     ModuleDefinition module = ...
     module.Attributes &= ~DotNetDirectoryFlags.ILOnly;
@@ -92,14 +92,20 @@ The contents of a native method body can be set through the ``Code`` property. T
 
 
 .. note::
-    
+
     Since native method bodies are platform dependent, AsmResolver does not provide a standard way to encode these instructions. To construct the byte array that you need for a particular implementation of a method body, consider using a third-party assembler or assembler library.
 
 
-References to external symbols
-------------------------------
+Symbols and Address Fixups
+--------------------------
 
-In a lot of cases, methods require making calls to functions defined in external libraries and native method bodies are no exception. In the PE file format, these kinds of symbols are often put into the imports directory. This is essentially a table of names that the Windows PE loader will go through, look up the actual address of each name, and put it in the import address table. Typically, when a piece of code is meant to make a call to an external function, the code will make an indirect call to an entry stored in this table. In x86 64-bit, using nasm syntax, a call to the ``puts`` function might look like the following snippet: 
+In a lot of cases, native method bodies that references symbols (such as imported functions) require direct addresses to be referenced within its instructions. Since the addresses of these symbols are not known yet upon creating a ``NativeMethodBody``, it is not possible to encode such an operand. To support these kinds of references regardless, AsmResolver can be instructed to apply address fixups just before writing the body to the disk. These are essentially small pieces of information that tell AsmResolver that at a particular offset the bytes should be replaced with a reference to a symbol in the final PE. This can be applied to any object that implements ``ISymbol``. In the following, two of the most commonly used symbols will be discussed.
+
+
+Imported Symbols
+~~~~~~~~~~~~~~~~
+
+In the PE file format, symbols from external modules are often imported by placing an entry into the imports directory. This is essentially a table of names that the Windows PE loader will go through, look up the actual address of each name, and put it in the import address table. Typically, when a piece of code is meant to make a call to an external function, the code will make an indirect call to an entry stored in this table. In x86 64-bit, using nasm syntax, a call to the ``puts`` function might look like the following snippet:
 
 .. code-block:: csharp
 
@@ -107,10 +113,6 @@ In a lot of cases, methods require making calls to functions defined in external
     lea rcx, [rel message]
     call qword [rel puts]
     ...
-
-Since the import directory is not constructed yet when we are operating on the abstraction level of a ``ModuleDefinition``, the address of the import address entry is still unknown. Therefore, it is not possible to encode an operand like the one in the call instruction of the above example.
-
-To support these kinds of references in native method bodies regardless, it is possible to instruct AsmResolver to apply address fixups just before writing the body to the disk. These are essentially small pieces of information that tell AsmResolver that at a particular offset the bytes should be replaced with a reference to a symbol in the final PE.
 
 Consider the following example x86 64-bit code, that is printing the text ``Hello from the unmanaged world!`` to the standard output stream using the ``puts`` function.
 
@@ -135,16 +137,16 @@ Consider the following example x86 64-bit code, that is printing the text ``Hell
         0x67, 0x65, 0x64, 0x20, 0x77, 0x6f, 0x72,   // "ged wor"
         0x6c, 0x64, 0x21, 0x00                      // "ld!"
     };
-    
 
-Notice how the operand of the call instruction is left at zero (`0x00`) bytes. To let AsmResolver know that these 4 bytes are to be replaced by an address to an entry in the import address table, we first create a new instance of ``ImportedSymbol``, representing the ``puts`` symbol:
+
+Notice how the operand of the ``call`` instruction is left at zero (``0x00``) bytes. To let AsmResolver know that these 4 bytes are to be replaced by an address to an entry in the import address table, we first create a new instance of ``ImportedSymbol``, representing the ``puts`` symbol:
 
 .. code-block:: csharp
 
     var ucrtbased = new ImportedModule("ucrtbased.dll");
     var puts = new ImportedSymbol(0x4fc, "puts");
     ucrtbased.Symbols.Add(puts);
-    
+
 
 We can then add it as a fixup to the method body:
 
@@ -155,12 +157,44 @@ We can then add it as a fixup to the method body:
     ));
 
 
+Local Symbols
+~~~~~~~~~~~~~
+
+If a native body is supposed to process or return some data that is defined within the body itself, the ``NativeLocalSymbol`` class can be used instead.
+
+Consider the following example x86 32-bit snippet, that returns the virtual address of a string.
+
+.. code-block:: csharp
+
+    0xB8, 0x00, 0x00, 0x00, 0x00 // mov eax, message
+    0xc3,                        // ret
+
+    // message (unicode):
+    0x48, 0x00, 0x65, 0x00, 0x6c, 0x00, 0x6c, 0x00, 0x6f, 0x00, 0x2c, 0x00, 0x20, 0x00, // "Hello, "
+    0x77, 0x00, 0x6f, 0x00, 0x72, 0x00, 0x6c, 0x00, 0x64, 0x00, 0x21, 0x00, 0x00, 0x00  // "world!."
+
+
+Notice how the operand of the ``mov`` instruction is left at zero (``0x00``) bytes. To let AsmResolver know that these 4 bytes are to be replaced by the actual virtual address to ``message``, we can define a local symbol and register an address fixup in the following manner:
+
+.. code-block:: csharp
+
+    var message = new NativeLocalSymbol(body, offset: 0x6);
+    body.AddressFixups.Add(new AddressFixup(
+        0x1, AddressFixupType.Absolute32BitAddress, message
+    ));
+
+
+Fixup Types
+~~~~~~~~~~~
+
 The type of fixup that is required will depend on the architecture and instruction that is used. Below an overview:
 
 +--------------------------+-----------------------------------------------------------------------+---------------------------------+
 | Fixup type               | Description                                                           | Example instructions            |
 +==========================+=======================================================================+=================================+
-| ``Absolute32BitAddress`` | The operand is an absolute virtual address                            | ``call dword [address]``        |
+| ``Absolute32BitAddress`` | The operand is a 32-bit absolute virtual address                      | ``call dword [address]``        |
++--------------------------+-----------------------------------------------------------------------+---------------------------------+
+| ``Absolute64BitAddress`` | The operand is a 64-bit absolute virtual address                      | ``mov rax, address``            |
 +--------------------------+-----------------------------------------------------------------------+---------------------------------+
 | ``Relative32BitAddress`` | The operand is an address relative to the current instruction pointer | ``call qword [rip+offset]``     |
 +--------------------------+-----------------------------------------------------------------------+---------------------------------+
