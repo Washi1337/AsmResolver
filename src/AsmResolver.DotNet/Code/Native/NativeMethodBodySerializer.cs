@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Code.Native
         /// <inheritdoc />
         public ISegmentReference SerializeMethodBody(MethodBodySerializationContext context, MethodDefinition method)
         {
-            if (!(method.MethodBody is NativeMethodBody nativeMethodBody))
+            if (method.MethodBody is not NativeMethodBody nativeMethodBody)
                 return SegmentReference.Null;
 
             var provider = context.SymbolsProvider;
@@ -25,32 +25,50 @@ namespace AsmResolver.DotNet.Code.Native
             {
                 // Import symbol.
                 var fixup = nativeMethodBody.AddressFixups[i];
-                var symbol = TransformSymbol(segment, provider, fixup.Symbol);
+                var symbol = FinalizeSymbol(segment, provider, fixup.Symbol);
 
                 // Create new fixup with imported symbol.
                 segment.AddressFixups.Add(new AddressFixup(fixup.Offset, fixup.Type, symbol));
 
                 // Add base relocation when necessary.
-                switch (fixup.Type)
-                {
-                    case AddressFixupType.Absolute32BitAddress:
-                        provider.RegisterBaseRelocation(new BaseRelocation(
-                            RelocationType.HighLow,
-                            segment.ToReference((int) fixup.Offset)));
-                        break;
-
-                    case AddressFixupType.Absolute64BitAddress:
-                        provider.RegisterBaseRelocation(new BaseRelocation(
-                            RelocationType.Dir64,
-                            segment.ToReference((int) fixup.Offset)));
-                        break;
-                }
+                AddBaseRelocations(segment, provider, fixup);
             }
 
             return segment.ToReference();
         }
 
-        protected virtual ISymbol TransformSymbol(CodeSegment result, INativeSymbolsProvider provider, ISymbol symbol)
+        /// <summary>
+        /// Registers base relocations for the provided address fixup, if required.
+        /// </summary>
+        /// <param name="segment">The code segment that is being constructed.</param>
+        /// <param name="provider">The object responsible for providing symbols referenced by the native method body.</param>
+        /// <param name="fixup">The fixup to build base relocations for.</param>
+        protected virtual void AddBaseRelocations(CodeSegment segment, INativeSymbolsProvider provider, AddressFixup fixup)
+        {
+            switch (fixup.Type)
+            {
+                case AddressFixupType.Absolute32BitAddress:
+                    provider.RegisterBaseRelocation(new BaseRelocation(
+                        RelocationType.HighLow,
+                        segment.ToReference((int) fixup.Offset)));
+                    break;
+
+                case AddressFixupType.Absolute64BitAddress:
+                    provider.RegisterBaseRelocation(new BaseRelocation(
+                        RelocationType.Dir64,
+                        segment.ToReference((int) fixup.Offset)));
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Ensures the right symbol is used within the method body.
+        /// </summary>
+        /// <param name="result">The code segment that is being constructed.</param>
+        /// <param name="provider">The object responsible for providing symbols referenced by the native method body.</param>
+        /// <param name="symbol">The symbol to reference.</param>
+        /// <returns>The symbol.</returns>
+        protected virtual ISymbol FinalizeSymbol(CodeSegment result, INativeSymbolsProvider provider, ISymbol symbol)
         {
             if (symbol is NativeLocalSymbol local)
                 return new Symbol(result.ToReference((int) local.Offset));
