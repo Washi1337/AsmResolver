@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
@@ -463,6 +464,27 @@ namespace AsmResolver.DotNet.Tests
 
             var newInstance = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(imported);
             Assert.Same(signature, newInstance);
+        }
+
+        [Fact]
+        public void ImportInstanceFieldByReflectionShouldConstructValidFieldSignature()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/307
+
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var field = module.GetAllTypes()
+                .First(t => t.Name == nameof(SingleField))
+                .Fields
+                .First(f => f.Name == nameof(SingleField.IntField));
+
+            var fieldInfo = typeof(SingleField).GetField(nameof(SingleField.IntField))!;
+
+            var importer = new ReferenceImporter(module);
+            var imported = importer.ImportField(fieldInfo);
+            var resolved = imported.Resolve();
+
+            Assert.NotNull(resolved);
+            Assert.Equal(field, resolved);
         }
     }
 }
