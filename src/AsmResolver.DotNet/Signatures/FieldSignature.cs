@@ -94,5 +94,7 @@ namespace AsmResolver.DotNet.Signatures
             context.Writer.WriteByte((byte) Attributes);
             FieldType.Write(context);
         }
+        /// <inheritdoc />
+        public override string ToString() => FieldType.FullName;
     }
 }
