@@ -36,5 +36,8 @@ namespace AsmResolver.DotNet.Code.Native
         public ISegmentReference? GetReference() => Body.Address is not null
             ? new RelativeReference(Body.Address, (int) Offset)
             : null;
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Body.Owner.SafeToString()}+{Offset:X}";
     }
 }
