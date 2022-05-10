@@ -29,13 +29,5 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public override bool IsImportedInModule(ModuleDefinition module) => MemberReturnType.IsImportedInModule(module);
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            string prefix = HasThis ? "instance " : string.Empty;
-            string fullName = MemberReturnType?.FullName ?? TypeSignature.NullTypeToString;
-            return $"{prefix}{fullName}";
-        }
     }
 }

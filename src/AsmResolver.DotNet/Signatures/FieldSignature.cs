@@ -104,5 +104,8 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         protected override CallingConventionSignature ImportWithInternal(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
+        public override string ToString() => FieldType.FullName;
     }
 }

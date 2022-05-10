@@ -588,9 +588,7 @@ namespace AsmResolver.DotNet
                 ? ImportType(field.DeclaringType)
                 : TargetModule.GetModuleType();
 
-            var signature = new FieldSignature(field.IsStatic ? 0 : CallingConventionAttributes.HasThis,
-                ImportTypeSignature(field.FieldType));
-
+            var signature = new FieldSignature(ImportTypeSignature(field.FieldType));
             return new MemberReference(scope, field.Name, signature);
         }
 
