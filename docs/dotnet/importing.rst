@@ -14,8 +14,8 @@ All samples in this document assume there is an instance of ``ReferenceImporter`
     var importer = new ReferenceImporter(module);
 
 
-Importing metadata members
---------------------------
+Importing existing metadata members
+-----------------------------------
 
 Metadata members from external modules can be imported using the ``ReferenceImporter`` class using one of the following members:
 
@@ -59,18 +59,28 @@ Below an example of how to import a type definition called ``SomeType``:
     ITypeDefOrRef importedType = importer.ImportType(typeToImport);
 
 
-Importing type signatures
--------------------------
+These types also implement the ``IImportable`` interface. This means you can also use the ``member.ImportWith`` method instead:
+
+.. code-block:: csharp
+
+    ModuleDefinition externalModule = ModuleDefinition.FromFile(...);
+    TypeDefinition typeToImport = externalModule.TopLevelTypes.First(t => t.Name == "SomeType");
+
+    ITypeDefOrRef importedType = typeToImport.ImportWith(importer);
+
+
+Importing existing type signatures
+----------------------------------
 
 Type signatures can also be imported using the ``ReferenceImporter`` class, but these should be imported using the ``ImportTypeSignature`` method instead.
 
-.. note:: 
+.. note::
 
     If a corlib type signature is imported, the appropriate type from the ``CorLibTypeFactory`` of the target module will be selected, regardless of whether CorLib versions are compatible with each other.
 
 
-Importing using reflection
---------------------------
+Importing using System.Reflection
+---------------------------------
 
 Types and members can also be imported by passing on an instance of various ``System.Reflection`` classes.
 
@@ -90,22 +100,75 @@ Types and members can also be imported by passing on an instance of various ``Sy
 | ``FieldInfo``             | ``ImportScope``        | ``MemberReference``  |
 +---------------------------+------------------------+----------------------+
 
-
-There is limited support for importing compound types. Types that can be imported through reflection include:
+There is limited support for importing complex types. Types that can be imported through reflection include:
 
 - Pointer types.
 - By-reference types.
-- Array types:
-    - If an array contains only one dimension, a ``SzArrayTypeSignature`` is returned. Otherwise a ``ArrayTypeSignature`` is created.
+- Array types (If an array contains only one dimension, a ``SzArrayTypeSignature`` is returned. Otherwise a ``ArrayTypeSignature`` is created).
 - Generic parameters.
 - Generic type instantiations.
 
-Instantiations of generic methods are supported.
+Instantiations of generic methods are also supported.
+
+
+Creating new references using Fluent Syntax
+-------------------------------------------
+
+Member references can also be created and imported without having direct access to its member definition or ``System.Reflection`` instance. It is possible to create new instances of ``TypeReference`` and ``MemberReference`` using the constructors, but the preferred way is to use the factory methods that allow for a more fluent syntax. Below an example on how to create a fully imported reference to ``void System.Console.WriteLine(string)``:
+
+.. code-block:: csharp
+
+    var factory = module.CorLibTypeFactory;
+    var importedMethod = factory.CorLibScope
+        .CreateTypeReference("System", "Console")
+        .CreateMemberReference("WriteLine",
+            MethodSignature.CreateStatic(factory.Void, factory.String))
+        .ImportWith(importer);
+
+    // importedMethod now references "void System.Console.WriteLine(string)"
+
+Generic type instantiations can also be created using ``MakeGenericInstanceType``:
+
+.. code-block:: csharp
+
+    ModuleDefinition module = ...
+
+    var factory = module.CorLibTypeFactory;
+    var importedMethod = factory.CorLibScope
+        .CreateTypeReference("System.Collections.Generic", "List`1")
+        .MakeGenericInstanceType(factory.Int32)
+        .ToTypeDefOrRef()
+        .CreateMemberReference("Add",
+            MethodSignature.CreateInstance(
+                factory.Void,
+                new GenericParameterSignature(GenericParameterType.Type, 0)))
+        .ImportWith(importer);
+
+    // importedMethod now references "System.Collections.Generic.List`1<System.Int32>.Add(!0)"
+
+
+Similarly, generic method instantiations can be constructed using ``MakeGenericInstanceMethod``:
+
+.. code-block:: csharp
+
+    ModuleDefinition module = ...
+
+    var arrayType = module.CorLibTypeFactory.CorLibScope
+        .CreateTypeReference("System", "Array")
+        .ImportWith(importer);
+
+    var emptyMethod = arrayType.Resolve().Methods.Single(m => m.Name == "Empty" && m.Parameters.Count == 0);
+
+    var importedMethod = emptyMethod
+        .MakeGenericInstanceMethod(moduleDefinition.CorLibTypeFactory.Int32)
+        .ImportWith(importer);
+
+    // importedMethod now references "!0[] System.Array.Empty<System.Int32>()"
 
 
 .. _dotnet-importer-common-caveats:
 
-Common Caveats using the Importer 
+Common Caveats using the Importer
 ---------------------------------
 
 Caching and reuse of instances
@@ -116,9 +179,9 @@ The default implementation of ``ReferenceImporter`` does not maintain a cache. E
 Importing cross-framework versions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``ReferenceImporter`` does not support importing across different versions of the target framework. Members are being imported as-is, and are not automatically adjusted to conform with other versions of a library. 
+The ``ReferenceImporter`` does not support importing across different versions of the target framework. Members are being imported as-is, and are not automatically adjusted to conform with other versions of a library.
 
-As a result, trying to import from for example a library part of the .NET Framework into a module targeting .NET Core or vice versa has a high chance of producing an invalid .NET binary that cannot be executed by the runtime. For example, attempting to import a reference to ``[System.Runtime] System.DateTime`` into a module targeting .NET Framework will result in a new reference targeting a .NET Core library (``System.Runtime``) as opposed to the appropriate .NET Framework library (``mscorlib``). 
+As a result, trying to import from for example a library part of the .NET Framework into a module targeting .NET Core or vice versa has a high chance of producing an invalid .NET binary that cannot be executed by the runtime. For example, attempting to import a reference to ``[System.Runtime] System.DateTime`` into a module targeting .NET Framework will result in a new reference targeting a .NET Core library (``System.Runtime``) as opposed to the appropriate .NET Framework library (``mscorlib``).
 
 This is a common mistake when trying to import using metadata provided by ``System.Reflection``. For example, if the host application that uses AsmResolver targets .NET Core but the input file is targeting .NET Framework, then you will run in the exact issue described in the above.
 
