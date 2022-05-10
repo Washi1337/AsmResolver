@@ -121,8 +121,8 @@ Member references can also be created and imported without having direct access 
     var factory = module.CorLibTypeFactory;
     var importedMethod = factory.CorLibScope
         .CreateTypeReference("System", "Console")
-        .CreateMemberReference("WriteLine",
-            MethodSignature.CreateStatic(factory.Void, factory.String))
+        .CreateMemberReference("WriteLine", MethodSignature.CreateStatic(
+            factory.Void, factory.String))
         .ImportWith(importer);
 
     // importedMethod now references "void System.Console.WriteLine(string)"
@@ -138,10 +138,9 @@ Generic type instantiations can also be created using ``MakeGenericInstanceType`
         .CreateTypeReference("System.Collections.Generic", "List`1")
         .MakeGenericInstanceType(factory.Int32)
         .ToTypeDefOrRef()
-        .CreateMemberReference("Add",
-            MethodSignature.CreateInstance(
-                factory.Void,
-                new GenericParameterSignature(GenericParameterType.Type, 0)))
+        .CreateMemberReference("Add", MethodSignature.CreateInstance(
+            factory.Void,
+            new GenericParameterSignature(GenericParameterType.Type, 0)))
         .ImportWith(importer);
 
     // importedMethod now references "System.Collections.Generic.List`1<System.Int32>.Add(!0)"
@@ -153,14 +152,12 @@ Similarly, generic method instantiations can be constructed using ``MakeGenericI
 
     ModuleDefinition module = ...
 
-    var arrayType = module.CorLibTypeFactory.CorLibScope
+    var factory = module.CorLibTypeFactory;
+    var importedMethod = factory.CorLibScope
         .CreateTypeReference("System", "Array")
-        .ImportWith(importer);
-
-    var emptyMethod = arrayType.Resolve().Methods.Single(m => m.Name == "Empty" && m.Parameters.Count == 0);
-
-    var importedMethod = emptyMethod
-        .MakeGenericInstanceMethod(moduleDefinition.CorLibTypeFactory.Int32)
+        .CreateMemberReference("Empty", MethodSignature.CreateStatic(
+            new GenericParameterSignature(GenericParameterType.Method, 0).MakeSzArrayType(), 1))
+        .MakeGenericInstanceMethod(factory.String)
         .ImportWith(importer);
 
     // importedMethod now references "!0[] System.Array.Empty<System.Int32>()"
