@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Code.Native;
@@ -6,21 +7,30 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
 using AsmResolver.PE.Code;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
+using AsmResolver.Tests.Runners;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Code.Native
 {
-    public class NativeMethodBodyTest
+    public class NativeMethodBodyTest : IClassFixture<TemporaryDirectoryFixture>
     {
+        private TemporaryDirectoryFixture _fixture;
+
+        public NativeMethodBodyTest(TemporaryDirectoryFixture fixture)
+        {
+            _fixture = fixture;
+        }
+
         private static NativeMethodBody CreateDummyBody(bool isVoid, bool is32Bit)
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.TheAnswer_NetFx);
 
-            module.Attributes &= DotNetDirectoryFlags.ILOnly;
+            module.Attributes &= ~DotNetDirectoryFlags.ILOnly;
             if (is32Bit)
             {
                 module.PEKind = OptionalHeaderMagic.Pe32;
@@ -242,6 +252,70 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             byte[] newBuffer = new byte[body.Code.Length];
             reference.CreateReader().ReadBytes(newBuffer, 0, newBuffer.Length);
             Assert.Equal(body.Code, newBuffer);
+        }
+
+        [Theory]
+        [InlineData(
+            true,
+            new byte[] {0xB8, 0x00, 0x00, 0x00, 0x00}, // mov eax, message
+            1u, AddressFixupType.Absolute32BitAddress,
+            6u)]
+        [InlineData(
+            false,
+            new byte[] {0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // mov rax, message
+            2u, AddressFixupType.Absolute64BitAddress,
+            11u)]
+        public void NativeBodyWithLocalSymbols(bool is32Bit, byte[] movInstruction, uint fixupOffset, AddressFixupType fixupType, uint symbolOffset)
+        {
+            // Create native body.
+            var code = new List<byte>(movInstruction);
+            code.AddRange(new byte[]
+            {
+                0xc3, // ret
+
+                // message:
+                0x48, 0x00, 0x65, 0x00, 0x6c, 0x00, 0x6c, 0x00, 0x6f, 0x00, 0x2c, 0x00, 0x20, 0x00, // "Hello, "
+                0x77, 0x00, 0x6f, 0x00, 0x72, 0x00, 0x6c, 0x00, 0x64, 0x00, 0x21, 0x00, 0x00, 0x00  // "world!."
+            });
+
+            var body = CreateDummyBody(false, is32Bit);
+            body.Code = code.ToArray();
+
+            // Define local symbol.
+            var messageSymbol = new NativeLocalSymbol(body, symbolOffset);
+
+            // Fixup address in mov instruction.
+            body.AddressFixups.Add(new AddressFixup(fixupOffset, fixupType, messageSymbol));
+
+            // Update main to call native method, convert the returned pointer to a String, and write to stdout.
+            var module = body.Owner.Module;
+            body.Owner!.Signature!.ReturnType = body.Owner.Module!.CorLibTypeFactory.IntPtr;
+            var stringConstructor = new MemberReference(
+                module!.CorLibTypeFactory.String.Type,
+                ".ctor",
+                MethodSignature.CreateInstance(
+                    module.CorLibTypeFactory.Void,
+                    module.CorLibTypeFactory.Char.MakePointerType())
+            );
+            var writeLine = new MemberReference(
+                new TypeReference(module, module.CorLibTypeFactory.CorLibScope, "System", "Console"),
+                "WriteLine",
+                MethodSignature.CreateStatic(
+                    module.CorLibTypeFactory.Void,
+                    module.CorLibTypeFactory.String)
+            );
+
+            var instructions = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions;
+            instructions.Clear();
+            instructions.Add(CilOpCodes.Call, body.Owner);
+            instructions.Add(CilOpCodes.Newobj, stringConstructor);
+            instructions.Add(CilOpCodes.Call, writeLine);
+            instructions.Add(CilOpCodes.Ret);
+
+            // Verify.
+            _fixture
+                .GetRunner<FrameworkPERunner>()
+                .RebuildAndRun(module, "StringPointer.exe", $"Hello, world!{Environment.NewLine}");
         }
     }
 }
