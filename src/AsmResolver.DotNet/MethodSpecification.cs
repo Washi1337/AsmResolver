@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet
             Name,
             DeclaringType,
             Method?.Signature,
-            Signature?.TypeArguments ?? Enumerable.Empty<TypeSignature>());
+            Signature?.TypeArguments.Select(x => x.FullName) ?? Enumerable.Empty<string>());
 
         /// <inheritdoc />
         public ModuleDefinition? Module => Method?.Module;
