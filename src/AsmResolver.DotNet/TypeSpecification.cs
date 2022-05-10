@@ -103,7 +103,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="importer">The reference importer to use.</param>
         /// <returns>The imported type.</returns>
-        public TypeSpecification ImportWith(ReferenceImporter importer) => (TypeSpecification) importer.ImportType(this);
+        public ITypeDefOrRef ImportWith(ReferenceImporter importer) => (TypeSpecification) importer.ImportType(this);
 
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);

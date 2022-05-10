@@ -160,10 +160,17 @@ namespace AsmResolver.DotNet
                    && (Signature?.IsImportedInModule(module) ?? false);
         }
 
+        /// <summary>
+        /// Imports the member using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use for importing the object.</param>
+        /// <returns>The imported member.</returns>
+        public MemberReference ImportWith(ReferenceImporter importer) => IsMethod
+            ? (MemberReference) importer.ImportMethod(this)
+            : (MemberReference) importer.ImportField(this);
+
         /// <inheritdoc />
-        public IImportable ImportWith(ReferenceImporter importer) => IsMethod
-            ? importer.ImportMethod(this)
-            : importer.ImportField(this);
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         FieldDefinition? IFieldDescriptor.Resolve()
         {
