@@ -80,7 +80,7 @@ In the following sections, we will briefly go over each of them.
 Writing native code
 -------------------
 
-The contents of a native method body can be set through the ``Code`` property. This is a ``byte[]`` that represents the raw code stream to be executed. Below an example of a simple method body written in x86 64-bit assembly code, that returns the constant ``0x1337``:
+The contents of a native method body can be set through the ``Code`` property. This is a ``byte[]`` that represents the raw code stream to be executed. Below an example of a simple method body written in x86 64-bit assembly code, that returns the constant ``1337``:
 
 .. code-block:: csharp
 
@@ -99,7 +99,7 @@ The contents of a native method body can be set through the ``Code`` property. T
 Symbols and Address Fixups
 --------------------------
 
-In a lot of cases, native method bodies that references symbols (such as imported functions) require direct addresses to be referenced within its instructions. Since the addresses of these symbols are not known yet upon creating a ``NativeMethodBody``, it is not possible to encode such an operand. To support these kinds of references regardless, AsmResolver can be instructed to apply address fixups just before writing the body to the disk. These are essentially small pieces of information that tell AsmResolver that at a particular offset the bytes should be replaced with a reference to a symbol in the final PE. This can be applied to any object that implements ``ISymbol``. In the following, two of the most commonly used symbols will be discussed.
+In a lot of cases, native method bodies that references symbols (such as imported functions) require direct addresses to be referenced within its instructions. Since the addresses of these symbols are not known yet upon creating a ``NativeMethodBody``, it is not possible to encode such an operand directly in the ``Code`` byte array. To support these kinds of references regardless, AsmResolver can be instructed to apply address fixups just before writing the body to the disk. These instructions are essentially small pieces of information that tell AsmResolver that at a particular offset the bytes should be replaced with a reference to a symbol in the final PE. This can be applied to any object that implements ``ISymbol``. In the following, two of the most commonly used symbols will be discussed.
 
 
 Imported Symbols
@@ -160,7 +160,7 @@ We can then add it as a fixup to the method body:
 Local Symbols
 ~~~~~~~~~~~~~
 
-If a native body is supposed to process or return some data that is defined within the body itself, the ``NativeLocalSymbol`` class can be used instead.
+If a native body is supposed to process or return some data that is defined within the body itself, the ``NativeLocalSymbol`` class can be used.
 
 Consider the following example x86 32-bit snippet, that returns the virtual address of a string.
 
@@ -184,10 +184,15 @@ Notice how the operand of the ``mov`` instruction is left at zero (``0x00``) byt
     ));
 
 
+.. warning::
+
+    The ``NativeLocalSymbol`` can only be used within the code of the native method body itself. This is due to the fact that these types of symbols are not processed further after serializing a ``NativeMethodBody`` to a ``CodeSegment`` by the default method body serializer.
+
+
 Fixup Types
 ~~~~~~~~~~~
 
-The type of fixup that is required will depend on the architecture and instruction that is used. Below an overview:
+The type of fixup that is required will depend on the architecture and instruction that is used. Below an overview of all fixups that AsmResolver is able to apply:
 
 +--------------------------+-----------------------------------------------------------------------+---------------------------------+
 | Fixup type               | Description                                                           | Example instructions            |
