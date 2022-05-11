@@ -151,6 +151,10 @@ namespace AsmResolver.DotNet
         public override bool IsImportedInModule(ModuleDefinition module) => Module == module;
 
         /// <inheritdoc />
+        public override AssemblyReference ImportWith(ReferenceImporter importer) =>
+            (AssemblyReference) importer.ImportScope(this);
+
+        /// <inheritdoc />
         public override AssemblyDefinition? Resolve() => Module?.MetadataResolver.AssemblyResolver.Resolve(this);
 
         AssemblyDescriptor IResolutionScope.GetAssembly() => this;

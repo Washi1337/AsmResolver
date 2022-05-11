@@ -28,5 +28,12 @@ namespace AsmResolver.DotNet
         {
             get;
         }
+
+        /// <summary>
+        /// Imports the type using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use for importing the type.</param>
+        /// <returns>The imported type.</returns>
+        new ITypeDefOrRef ImportWith(ReferenceImporter importer);
     }
 }

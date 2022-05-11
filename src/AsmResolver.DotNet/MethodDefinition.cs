@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code;
@@ -100,7 +101,13 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetMethodFullName(Name, DeclaringType, Signature);
+        public string FullName => FullNameGenerator.GetMethodFullName(
+            Name,
+            DeclaringType,
+            Signature,
+            GenericParameters.Count > 0
+                ? GenericParameters.Select(x => x.Name?.Value ?? NullName)
+                : Enumerable.Empty<string>());
 
         /// <summary>
         /// Gets or sets the attributes associated to the method.
@@ -697,6 +704,16 @@ namespace AsmResolver.DotNet
             return Module == module
                    && (Signature?.IsImportedInModule(module) ?? false);
         }
+
+        /// <summary>
+        /// Imports the method using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported method.</returns>
+        public IMethodDefOrRef ImportWith(ReferenceImporter importer) => importer.ImportMethod(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 

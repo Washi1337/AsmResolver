@@ -380,6 +380,16 @@ namespace AsmResolver.DotNet.Signatures.Types
         public abstract bool IsImportedInModule(ModuleDefinition module);
 
         /// <summary>
+        /// Imports the type signature using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to us.</param>
+        /// <returns>The imported type.</returns>
+        public TypeSignature ImportWith(ReferenceImporter importer) => importer.ImportTypeSignature(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <summary>
         /// Visit the current type signature using the provided visitor.
         /// </summary>
         /// <param name="visitor">The visitor to accept.</param>

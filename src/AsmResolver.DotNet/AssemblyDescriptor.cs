@@ -218,6 +218,16 @@ namespace AsmResolver.DotNet
         public abstract bool IsImportedInModule(ModuleDefinition module);
 
         /// <summary>
+        /// Imports the assembly descriptor using the provided reference importer.
+        /// </summary>
+        /// <param name="importer">The importer object to use.</param>
+        /// <returns>The imported assembly reference.</returns>
+        public abstract AssemblyReference ImportWith(ReferenceImporter importer);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <summary>
         /// Computes the token of a public key using the provided hashing algorithm.
         /// </summary>
         /// <param name="publicKey">The public key to obtain the token from.</param>

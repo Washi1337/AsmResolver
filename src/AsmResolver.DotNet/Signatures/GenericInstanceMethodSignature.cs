@@ -103,6 +103,18 @@ namespace AsmResolver.DotNet.Signatures
             return true;
         }
 
+        /// <summary>
+        /// Imports the generic method instantiation signature using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to us.</param>
+        /// <returns>The imported signature.</returns>
+        public GenericInstanceMethodSignature ImportWith(ReferenceImporter importer) =>
+            importer.ImportGenericInstanceMethodSignature(this);
+
+        /// <inheritdoc />
+        protected override CallingConventionSignature ImportWithInternal(ReferenceImporter importer) =>
+            ImportWith(importer);
+
         /// <inheritdoc />
         public override string ToString()
         {

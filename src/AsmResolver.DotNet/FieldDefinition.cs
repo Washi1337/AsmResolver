@@ -393,6 +393,16 @@ namespace AsmResolver.DotNet
                    && (Signature?.IsImportedInModule(module) ?? false);
         }
 
+        /// <summary>
+        /// Imports the field using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported field.</returns>
+        public IFieldDescriptor ImportWith(ReferenceImporter importer) => importer.ImportField(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <inheritdoc />

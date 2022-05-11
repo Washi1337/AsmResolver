@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 
@@ -36,6 +37,12 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetMethodFullName(string? name, ITypeDescriptor? declaringType, MethodSignature? signature)
         {
+            if (signature?.GenericParameterCount > 0)
+            {
+                return GetMethodFullName(name, declaringType, signature,
+                    Enumerable.Repeat<string>("?", signature.GenericParameterCount));
+            }
+
             string returnTypeString = signature?.ReturnType.FullName ?? TypeSignature.NullTypeToString;
             string parameterTypesString = GetParameterTypesString(signature);
 
@@ -54,7 +61,7 @@ namespace AsmResolver.DotNet
         /// <param name="typeArguments">The type arguments.</param>
         /// <returns>The full name</returns>
         public static string GetMethodFullName(string? name, ITypeDescriptor? declaringType, MethodSignature? signature,
-            IEnumerable<TypeSignature> typeArguments)
+            IEnumerable<string> typeArguments)
         {
             string returnTypeString = signature?.ReturnType.FullName ?? TypeSignature.NullTypeToString;
             string parameterTypesString = GetParameterTypesString(signature);

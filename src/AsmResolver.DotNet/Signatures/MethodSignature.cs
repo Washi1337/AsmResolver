@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The signature.</returns>
         public static MethodSignature CreateStatic(TypeSignature returnType, int genericParameterCount, params TypeSignature[] parameterTypes)
         {
-            return new MethodSignature(0, returnType, parameterTypes)
+            return new MethodSignature(genericParameterCount > 0 ? CallingConventionAttributes.Generic : 0, returnType, parameterTypes)
             {
                 GenericParameterCount = genericParameterCount
             };
@@ -89,7 +89,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The signature.</returns>
         public static MethodSignature CreateStatic(TypeSignature returnType, int genericParameterCount, IEnumerable<TypeSignature> parameterTypes)
         {
-            return new MethodSignature(0, returnType, parameterTypes)
+            return new MethodSignature(genericParameterCount > 0 ? CallingConventionAttributes.Generic : 0, returnType, parameterTypes)
             {
                 GenericParameterCount = genericParameterCount
             };
@@ -121,7 +121,11 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The signature.</returns>
         public static MethodSignature CreateInstance(TypeSignature returnType, int genericParameterCount, params TypeSignature[] parameterTypes)
         {
-            return new MethodSignature(CallingConventionAttributes.HasThis, returnType, parameterTypes)
+            var attributes = genericParameterCount > 0
+                ? CallingConventionAttributes.HasThis | CallingConventionAttributes.Generic
+                : CallingConventionAttributes.HasThis;
+
+            return new MethodSignature(attributes, returnType, parameterTypes)
             {
                 GenericParameterCount = genericParameterCount
             };
@@ -145,7 +149,11 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The signature.</returns>
         public static MethodSignature CreateInstance(TypeSignature returnType, int genericParameterCount, IEnumerable<TypeSignature> parameterTypes)
         {
-            return new MethodSignature(CallingConventionAttributes.HasThis, returnType, parameterTypes)
+            var attributes = genericParameterCount > 0
+                ? CallingConventionAttributes.HasThis | CallingConventionAttributes.Generic
+                : CallingConventionAttributes.HasThis;
+
+            return new MethodSignature(attributes, returnType, parameterTypes)
             {
                 GenericParameterCount = genericParameterCount
             };
@@ -228,5 +236,15 @@ namespace AsmResolver.DotNet.Signatures
 
             return $"{prefix}{fullName} *{genericsString}({parameterTypesString}{sentinelSuffix})";
         }
+
+        /// <summary>
+        /// Imports the method signature using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to us.</param>
+        /// <returns>The imported signature.</returns>
+        public MemberSignature ImportWith(ReferenceImporter importer) => importer.ImportMethodSignature(this);
+
+        /// <inheritdoc />
+        protected override CallingConventionSignature ImportWithInternal(ReferenceImporter importer) => ImportWith(importer);
     }
 }

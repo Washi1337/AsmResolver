@@ -61,6 +61,27 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Imports an implementation reference.
+        /// </summary>
+        /// <param name="implementation">The implementation reference to import.</param>
+        /// <returns>The imported implementation reference.</returns>
+        public IImplementation ImportImplementation(IImplementation? implementation)
+        {
+            if (implementation is null)
+                throw new ArgumentNullException(nameof(implementation));
+            if (implementation.IsImportedInModule(TargetModule))
+                return implementation;
+
+            return implementation switch
+            {
+                AssemblyReference assembly => ImportAssembly(assembly),
+                ExportedType type => ImportType(type),
+                FileReference file => ImportFile(file),
+                _ => throw new ArgumentOutOfRangeException(nameof(implementation))
+            };
+        }
+
+        /// <summary>
         /// Imports a reference to an assembly.
         /// </summary>
         /// <param name="assembly">The assembly to import.</param>
@@ -78,6 +99,29 @@ namespace AsmResolver.DotNet
             {
                 reference = new AssemblyReference(assembly);
                 TargetModule.AssemblyReferences.Add(reference);
+            }
+
+            return reference;
+        }
+
+        /// <summary>
+        /// Imports a file reference.
+        /// </summary>
+        /// <param name="file">The file to import.</param>
+        /// <returns>The imported file.</returns>
+        protected virtual FileReference ImportFile(FileReference file)
+        {
+            if (file is null)
+                throw new ArgumentNullException(nameof(file));
+            if (file.IsImportedInModule(TargetModule))
+                return file;
+
+            var reference = TargetModule.FileReferences.FirstOrDefault(a => a.Name == file.Name);
+
+            if (reference is null)
+            {
+                reference = new FileReference(file.Name, file.Attributes);
+                TargetModule.FileReferences.Add(reference);
             }
 
             return reference;
@@ -179,6 +223,29 @@ namespace AsmResolver.DotNet
                 return type;
 
             return new TypeSpecification(ImportTypeSignature(type.Signature));
+        }
+
+        /// <summary>
+        /// Imports a forwarded type.
+        /// </summary>
+        /// <param name="type">The type to import.</param>
+        /// <returns>The imported type.</returns>
+        public virtual ExportedType ImportType(ExportedType type)
+        {
+            if (type is null)
+                throw new ArgumentNullException(nameof(type));
+            if (type.IsImportedInModule(TargetModule))
+                return type;
+
+            var result = TargetModule.ExportedTypes.FirstOrDefault(a => _comparer.Equals(a, type));
+
+            if (result is null)
+            {
+                result = new ExportedType(ImportImplementation(type.Implementation), type.Namespace, type.Name);
+                TargetModule.ExportedTypes.Add(result);
+            }
+
+            return result;
         }
 
         /// <summary>
