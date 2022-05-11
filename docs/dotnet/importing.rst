@@ -17,7 +17,7 @@ Either instantiate one yourself:
 Or obtain the default instance that comes with every ``ModuleDefinition`` object. This avoids allocating new reference importers every time.
 
 .. code-block:: csharp
-    
+
     ModuleDefinition module = ...
     var importer = module.DefaultImporter;
 
@@ -25,8 +25,8 @@ Or obtain the default instance that comes with every ``ModuleDefinition`` object
 The example snippets that will follow in this articule assume that there is such a ``ReferenceImporter`` object instantiated using either of these two methods, and is stored in an ``importer`` variable.
 
 
-Importing existing metadata members
------------------------------------
+Importing existing members
+--------------------------
 
 Metadata members from external modules can be imported using the ``ReferenceImporter`` class using one of the following members:
 
@@ -122,8 +122,8 @@ There is limited support for importing complex types. Types that can be imported
 Instantiations of generic methods are also supported.
 
 
-Creating new references using Fluent Syntax
--------------------------------------------
+Creating new references
+-----------------------
 
 Member references can also be created and imported without having direct access to its member definition or ``System.Reflection`` instance. It is possible to create new instances of ``TypeReference`` and ``MemberReference`` using the constructors, but the preferred way is to use the factory methods that allow for a more fluent syntax. Below an example on how to create a fully imported reference to ``void System.Console.WriteLine(string)``:
 
@@ -171,7 +171,7 @@ Similarly, generic method instantiations can be constructed using ``MakeGenericI
         .MakeGenericInstanceMethod(factory.String)
         .ImportWith(importer);
 
-    // importedMethod now references "!0[] System.Array.Empty<System.Int32>()"
+    // importedMethod now references "!0[] System.Array.Empty<System.String>()"
 
 
 .. _dotnet-importer-common-caveats:
