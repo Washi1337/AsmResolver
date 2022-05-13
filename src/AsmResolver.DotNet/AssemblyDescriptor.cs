@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet
             : base(token)
         {
             _name = new LazyVariable<Utf8String?>(GetName);
-            _culture = new LazyVariable<Utf8String?>(() => GetCulture());
+            _culture = new LazyVariable<Utf8String?>(GetCulture);
             Version = new Version(0, 0, 0, 0);
         }
 
@@ -216,6 +216,16 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public abstract bool IsImportedInModule(ModuleDefinition module);
+
+        /// <summary>
+        /// Imports the assembly descriptor using the provided reference importer.
+        /// </summary>
+        /// <param name="importer">The importer object to use.</param>
+        /// <returns>The imported assembly reference.</returns>
+        public abstract AssemblyReference ImportWith(ReferenceImporter importer);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <summary>
         /// Computes the token of a public key using the provided hashing algorithm.

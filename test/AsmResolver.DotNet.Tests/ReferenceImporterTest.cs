@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
@@ -73,7 +74,7 @@ namespace AsmResolver.DotNet.Tests
             var assembly = new AssemblyDefinition("ExternalAssembly", new Version(1, 2, 3, 4));
             assembly.Modules.Add(new ModuleDefinition("ExternalAssembly.dll"));
             var definition = new TypeDefinition("SomeNamespace", "SomeName", TypeAttributes.Public);
-            assembly.ManifestModule.TopLevelTypes.Add(definition);
+            assembly.ManifestModule!.TopLevelTypes.Add(definition);
 
             var result = _importer.ImportType(definition);
 
@@ -102,7 +103,7 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal(nested, result, Comparer);
             Assert.Equal(_module, result.Module);
-            Assert.Equal(_module, result.DeclaringType.Module);
+            Assert.Equal(_module, result.DeclaringType?.Module);
         }
 
         [Fact]
@@ -145,7 +146,7 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.IsAssignableFrom<TypeReference>(result);
             Assert.Equal(type.FullName, result.FullName);
-            Assert.Equal(type.Assembly.GetName().Name, result.Scope.Name);
+            Assert.Equal(type.Assembly.GetName().Name, result.Scope?.Name);
         }
 
         [Fact]
@@ -223,11 +224,11 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportMethodFromGenericTypeThroughReflectionShouldIncludeGenericParamSig()
         {
-            var method = typeof(List<string>).GetMethod("Add");
+            var method = typeof(List<string>).GetMethod("Add")!;
 
             var result = _importer.ImportMethod(method);
 
-            Assert.IsAssignableFrom<GenericParameterSignature>(result.Signature.ParameterTypes[0]);
+            Assert.IsAssignableFrom<GenericParameterSignature>(result.Signature?.ParameterTypes[0]);
             var genericParameter = (GenericParameterSignature) result.Signature.ParameterTypes[0];
             Assert.Equal(0, genericParameter.Index);
             Assert.Equal(GenericParameterType.Type, genericParameter.ParameterType);
@@ -237,7 +238,7 @@ namespace AsmResolver.DotNet.Tests
         public void ImportGenericMethodFromReflectionShouldResultInMethodSpec()
         {
             var method = typeof(Enumerable)
-                .GetMethod("Empty")
+                .GetMethod("Empty")!
                 .MakeGenericMethod(typeof(string));
 
             var result = _importer.ImportMethod(method);
@@ -248,7 +249,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(new TypeSignature[]
             {
                 _module.CorLibTypeFactory.String
-            }, specification.Signature.TypeArguments, Comparer);
+            }, specification.Signature?.TypeArguments, Comparer);
         }
 
         [Fact]
@@ -287,13 +288,13 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportFieldFromReflectionShouldResultInMemberRef()
         {
-            var field = typeof(string).GetField("Empty");
+            var field = typeof(string).GetField("Empty")!;
 
             var result = _importer.ImportField(field);
 
             Assert.Equal(field.Name, result.Name);
-            Assert.Equal(field.DeclaringType.FullName, result.DeclaringType.FullName);
-            Assert.Equal(field.FieldType.FullName, ((FieldSignature) result.Signature).FieldType.FullName);
+            Assert.Equal(field.DeclaringType!.FullName, result.DeclaringType?.FullName);
+            Assert.Equal(field.FieldType.FullName, ((FieldSignature) result.Signature)?.FieldType.FullName);
         }
 
         [Fact]
@@ -463,6 +464,27 @@ namespace AsmResolver.DotNet.Tests
 
             var newInstance = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(imported);
             Assert.Same(signature, newInstance);
+        }
+
+        [Fact]
+        public void ImportInstanceFieldByReflectionShouldConstructValidFieldSignature()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/307
+
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var field = module.GetAllTypes()
+                .First(t => t.Name == nameof(SingleField))
+                .Fields
+                .First(f => f.Name == nameof(SingleField.IntField));
+
+            var fieldInfo = typeof(SingleField).GetField(nameof(SingleField.IntField))!;
+
+            var importer = new ReferenceImporter(module);
+            var imported = importer.ImportField(fieldInfo);
+            var resolved = imported.Resolve();
+
+            Assert.NotNull(resolved);
+            Assert.Equal(field, Assert.IsAssignableFrom<IFieldDescriptor>(resolved), Comparer);
         }
     }
 }

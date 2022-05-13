@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -193,6 +194,9 @@ namespace AsmResolver.DotNet
             return Module == module
                    && (EventType?.IsImportedInModule(module) ?? false);
         }
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => throw new NotSupportedException();
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.

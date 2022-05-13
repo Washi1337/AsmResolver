@@ -151,5 +151,15 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public abstract bool IsImportedInModule(ModuleDefinition module);
+
+        /// <summary>
+        /// Imports the signature using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to us.</param>
+        /// <returns>The imported signature.</returns>
+        protected abstract CallingConventionSignature ImportWithInternal(ReferenceImporter importer);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWithInternal(importer);
     }
 }

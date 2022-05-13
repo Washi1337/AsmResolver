@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -207,6 +208,9 @@ namespace AsmResolver.DotNet
             return Module == module
                    && (Signature?.IsImportedInModule(module) ?? false);
         }
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => throw new NotSupportedException();
 
         /// <summary>
         /// Obtains the name of the property definition.

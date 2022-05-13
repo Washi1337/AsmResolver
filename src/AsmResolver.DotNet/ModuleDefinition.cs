@@ -54,6 +54,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _runtimeVersion;
         private readonly LazyVariable<IResourceDirectory?> _nativeResources;
         private IList<DebugDataEntry>? _debugData;
+        private ReferenceImporter? _defaultImporter;
 
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
@@ -762,6 +763,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets the default importer instance for this module.
+        /// </summary>
+        public ReferenceImporter DefaultImporter
+        {
+            get
+            {
+                if (_defaultImporter is null)
+                    Interlocked.CompareExchange(ref _defaultImporter, GetDefaultImporter(), null);
+                return _defaultImporter;
+            }
+        }
+
+        /// <summary>
         /// Looks up a member by its metadata token.
         /// </summary>
         /// <param name="token">The token of the member to lookup.</param>
@@ -1049,6 +1063,15 @@ namespace AsmResolver.DotNet
         protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
 
         /// <summary>
+        /// Obtains the default reference importer assigned to this module.
+        /// </summary>
+        /// <returns>The importer.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="DefaultImporter"/> property.
+        /// </remarks>
+        protected virtual ReferenceImporter GetDefaultImporter() => new(this);
+
+        /// <summary>
         /// Detects the runtime that this module targets.
         /// </summary>
         /// <remarks>
@@ -1106,6 +1129,16 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         bool IImportable.IsImportedInModule(ModuleDefinition module) => this == module;
+
+        /// <summary>
+        /// Imports the module using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported module.</returns>
+        public ModuleReference ImportWith(ReferenceImporter importer) => importer.ImportModule(new ModuleReference(Name));
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and writes it to the file system.

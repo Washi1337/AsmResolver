@@ -80,6 +80,18 @@ namespace AsmResolver.DotNet.Signatures
             return true;
         }
 
+        /// <summary>
+        /// Imports the local variables signature using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to us.</param>
+        /// <returns>The imported signature.</returns>
+        public LocalVariablesSignature ImportWith(ReferenceImporter importer) =>
+            importer.ImportLocalVariablesSignature(this);
+
+        /// <inheritdoc />
+        protected override CallingConventionSignature ImportWithInternal(ReferenceImporter importer) =>
+            ImportWith(importer);
+
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {

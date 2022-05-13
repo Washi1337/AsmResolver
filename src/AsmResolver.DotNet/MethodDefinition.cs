@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code;
@@ -27,7 +28,7 @@ namespace AsmResolver.DotNet
         IHasSecurityDeclaration,
         IManagedEntrypoint
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<TypeDefinition?> _declaringType;
         private readonly LazyVariable<MethodSignature?> _signature;
         private readonly LazyVariable<MethodBody?> _methodBody;
@@ -47,7 +48,7 @@ namespace AsmResolver.DotNet
         protected MethodDefinition(MetadataToken token)
             : base(token)
         {
-            _name  =new LazyVariable<string?>(GetName);
+            _name  =new LazyVariable<Utf8String?>(GetName);
             _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
             _signature = new LazyVariable<MethodSignature?>(GetSignature);
             _methodBody = new LazyVariable<MethodBody?>(GetBody);
@@ -100,7 +101,13 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetMethodFullName(Name, DeclaringType, Signature);
+        public string FullName => FullNameGenerator.GetMethodFullName(
+            Name,
+            DeclaringType,
+            Signature,
+            GenericParameters.Count > 0
+                ? GenericParameters.Select(x => x.Name?.Value ?? NullName)
+                : Enumerable.Empty<string>());
 
         /// <summary>
         /// Gets or sets the attributes associated to the method.
@@ -698,6 +705,16 @@ namespace AsmResolver.DotNet
                    && (Signature?.IsImportedInModule(module) ?? false);
         }
 
+        /// <summary>
+        /// Imports the method using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported method.</returns>
+        public IMethodDefOrRef ImportWith(ReferenceImporter importer) => importer.ImportMethod(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <inheritdoc />
@@ -722,7 +739,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the declaring type of the method definition.
