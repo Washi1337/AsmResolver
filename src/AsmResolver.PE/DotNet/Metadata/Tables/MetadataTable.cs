@@ -88,6 +88,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc cref="ICollection{T}.Count" />
         public virtual int Count => Rows.Count;
 
+        /// <summary>
+        /// Gets or sets the total number of rows that the underlying array can store.
+        /// </summary>
+        public int Capacity
+        {
+            get => Rows.Capacity;
+            set => Rows.Capacity = value;
+        }
+
         /// <inheritdoc />
         public bool IsReadOnly => false; // TODO: it might be necessary later to make this configurable.
 

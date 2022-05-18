@@ -37,6 +37,13 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         /// <inheritdoc />
+        public void EnsureCapacity(int capacity)
+        {
+            if (_entries.Capacity < capacity)
+                _entries.Capacity = capacity;
+        }
+
+        /// <inheritdoc />
         public ref TRow GetRowRef(uint rid) => ref _entries.GetElementRef((int)(rid - 1));
 
         /// <inheritdoc />
@@ -49,6 +56,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// <inheritdoc />
         public void FlushToTable()
         {
+            if (_table.Capacity < _entries.Count)
+                _table.Capacity = _entries.Count;
+
             foreach (var row in _entries)
                 _table.Add(row);
         }
