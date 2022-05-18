@@ -27,6 +27,17 @@ namespace AsmResolver.Collections
         }
 
         /// <summary>
+        /// Creates a new empty collection that is owned by an object.
+        /// </summary>
+        /// <param name="owner">The owner of the collection.</param>
+        /// <param name="capacity">The initial number of elements the collection can store.</param>
+        public OwnedCollection(TOwner owner, int capacity)
+            : base(capacity)
+        {
+            Owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        /// <summary>
         /// Gets the owner of the collection.
         /// </summary>
         public TOwner Owner

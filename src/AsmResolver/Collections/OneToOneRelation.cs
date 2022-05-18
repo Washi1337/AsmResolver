@@ -11,8 +11,27 @@ namespace AsmResolver.Collections
         where TKey : notnull
         where TValue : notnull
     {
-        private readonly Dictionary<TKey, TValue> _keyToValue = new();
-        private readonly Dictionary<TValue, TKey> _valueToKey = new();
+        private readonly Dictionary<TKey, TValue> _keyToValue;
+        private readonly Dictionary<TValue, TKey> _valueToKey;
+
+        /// <summary>
+        /// Creates a new, empty one-to-one mapping.
+        /// </summary>
+        public OneToOneRelation()
+        {
+            _keyToValue = new Dictionary<TKey, TValue>();
+            _valueToKey = new Dictionary<TValue, TKey>();
+        }
+
+        /// <summary>
+        /// Creates a new, empty one-to-one mapping.
+        /// </summary>
+        /// <param name="capacity">The initial number of elements the relation can store.</param>
+        public OneToOneRelation(int capacity)
+        {
+            _keyToValue = new Dictionary<TKey, TValue>(capacity);
+            _valueToKey = new Dictionary<TValue, TKey>(capacity);
+        }
 
         /// <summary>
         /// Registers a one-to-one relation between two objects.
