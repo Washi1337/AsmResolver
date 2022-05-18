@@ -8,6 +8,9 @@ namespace AsmResolver.IO
     /// Provides a pool of reusable instances of <see cref="BinaryStreamWriter"/> that are meant to be used for
     /// constructing byte arrays.
     /// </summary>
+    /// <remarks>
+    /// This class is thread-safe. All threads are allowed to rent and return writers from this pool simultaneously.
+    /// </remarks>
     public class MemoryStreamWriterPool
     {
         private readonly ConcurrentQueue<BinaryStreamWriter> _writers = new();
