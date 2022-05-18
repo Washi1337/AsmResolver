@@ -59,7 +59,7 @@ namespace AsmResolver.Collections
                 if (value < _count)
                     throw new ArgumentException("Capacity must be equal or larger than the current number of elements in the list.");
 
-                EnsureEnoughCapacity(value);
+                EnsureCapacity(value);
                 IncrementVersion();
             }
         }
@@ -141,7 +141,7 @@ namespace AsmResolver.Collections
         /// <param name="item">The element.</param>
         public void Add(in T item)
         {
-            EnsureEnoughCapacity(_count + 1);
+            EnsureCapacity(_count + 1);
             _items[_count] = item;
             _count++;
             IncrementVersion();
@@ -208,7 +208,7 @@ namespace AsmResolver.Collections
         /// <param name="item">The element to insert.</param>
         public void Insert(int index, in T item)
         {
-            EnsureEnoughCapacity(_count + 1);
+            EnsureCapacity(_count + 1);
 
             if (index < _count)
                 Array.Copy(_items, index, _items, index + 1, _count - index);
@@ -260,9 +260,9 @@ namespace AsmResolver.Collections
                 throw new IndexOutOfRangeException();
         }
 
-        private void EnsureEnoughCapacity(int requiredCount)
+        private void EnsureCapacity(int requiredCount)
         {
-            if (_items.Length >= requiredCount) 
+            if (_items.Length >= requiredCount)
                 return;
 
             int newCapacity = _items.Length == 0 ? 1 : _items.Length * 2;
