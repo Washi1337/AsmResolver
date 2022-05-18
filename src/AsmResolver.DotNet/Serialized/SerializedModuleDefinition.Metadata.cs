@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet.Serialized
             return typeDefTree;
         }
 
-        internal IEnumerable<uint> GetNestedTypeRids(uint enclosingTypeRid)
+        internal ICollection<uint> GetNestedTypeRids(uint enclosingTypeRid)
         {
             EnsureTypeDefinitionTreeInitialized();
             return _typeDefTree.GetValues(enclosingTypeRid);
@@ -107,8 +107,8 @@ namespace AsmResolver.DotNet.Serialized
             var semanticsTable = tablesStream.GetTable<MethodSemanticsRow>(TableIndex.MethodSemantics);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
 
-            var semantics = new OneToManyRelation<MetadataToken, uint>();
-            var semanticMethods = new Dictionary<uint, MetadataToken>();
+            var semantics = new OneToManyRelation<MetadataToken, uint>(semanticsTable.Count);
+            var semanticMethods = new Dictionary<uint, MetadataToken>(semanticsTable.Count);
             for (int i = 0; i < semanticsTable.Count; i++)
             {
                 var methodSemanticsRow = semanticsTable[i];
@@ -123,7 +123,7 @@ namespace AsmResolver.DotNet.Serialized
             Interlocked.CompareExchange(ref _semanticMethods, semanticMethods, null);
         }
 
-        internal IEnumerable<uint> GetMethodSemantics(MetadataToken owner)
+        internal ICollection<uint> GetMethodSemantics(MetadataToken owner)
         {
             EnsureMethodSemanticsInitialized();
             return _semantics.GetValues(owner);
@@ -155,7 +155,7 @@ namespace AsmResolver.DotNet.Serialized
             var constantTable = tablesStream.GetTable<ConstantRow>(TableIndex.Constant);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasConstant);
 
-            var constants = new OneToOneRelation<MetadataToken, uint>();
+            var constants = new OneToOneRelation<MetadataToken, uint>(constantTable.Count);
             for (int i = 0; i < constantTable.Count; i++)
             {
                 var ownerToken = encoder.DecodeIndex(constantTable[i].Parent);
@@ -199,7 +199,7 @@ namespace AsmResolver.DotNet.Serialized
             var attributeTable = tablesStream.GetTable<CustomAttributeRow>(TableIndex.CustomAttribute);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
 
-            var customAttributes = new OneToManyRelation<MetadataToken, uint>();
+            var customAttributes = new OneToManyRelation<MetadataToken, uint>(attributeTable.Count);
             for (int i = 0; i < attributeTable.Count; i++)
             {
                 var ownerToken = encoder.DecodeIndex(attributeTable[i].Parent);
@@ -228,9 +228,10 @@ namespace AsmResolver.DotNet.Serialized
         internal IList<CustomAttribute> GetCustomAttributeCollection(IHasCustomAttribute owner)
         {
             EnsureCustomAttributesInitialized();
-            var result = new OwnedCollection<IHasCustomAttribute, CustomAttribute>(owner);
+            var rids = _customAttributes.GetValues(owner.MetadataToken);
+            var result = new OwnedCollection<IHasCustomAttribute, CustomAttribute>(owner, rids.Count);
 
-            foreach (uint rid in _customAttributes.GetValues(owner.MetadataToken))
+            foreach (uint rid in rids)
             {
                 var attribute = (CustomAttribute) LookupMember(new MetadataToken(TableIndex.CustomAttribute, rid));
                 result.Add(attribute);
@@ -252,7 +253,7 @@ namespace AsmResolver.DotNet.Serialized
             var declarationTable = tablesStream.GetTable<SecurityDeclarationRow>(TableIndex.DeclSecurity);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasDeclSecurity);
 
-            var securityDeclarations = new OneToManyRelation<MetadataToken, uint>();
+            var securityDeclarations = new OneToManyRelation<MetadataToken, uint>(declarationTable.Count);
             for (int i = 0; i < declarationTable.Count; i++)
             {
                 var ownerToken = encoder.DecodeIndex(declarationTable[i].Parent);
@@ -272,9 +273,10 @@ namespace AsmResolver.DotNet.Serialized
         internal IList<SecurityDeclaration> GetSecurityDeclarationCollection(IHasSecurityDeclaration owner)
         {
             EnsureSecurityDeclarationsInitialized();
-            var result = new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(owner);
+            var rids = _securityDeclarations.GetValues(owner.MetadataToken);
+            var result = new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(owner, rids.Count);
 
-            foreach (uint rid in _securityDeclarations.GetValues(owner.MetadataToken))
+            foreach (uint rid in rids)
             {
                 var attribute = (SecurityDeclaration) LookupMember(new MetadataToken(TableIndex.DeclSecurity, rid));
                 result.Add(attribute);
@@ -296,7 +298,7 @@ namespace AsmResolver.DotNet.Serialized
             var parameterTable = tablesStream.GetTable<GenericParameterRow>(TableIndex.GenericParam);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
 
-            var genericParameters = new OneToManyRelation<MetadataToken, uint>();
+            var genericParameters = new OneToManyRelation<MetadataToken, uint>(parameterTable.Count);
             for (int i = 0; i < parameterTable.Count; i++)
             {
                 var ownerToken = encoder.DecodeIndex(parameterTable[i].Owner);
@@ -331,7 +333,7 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var constraintTable = tablesStream.GetTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint);
 
-            var constraints = new OneToManyRelation<MetadataToken, uint>();
+            var constraints = new OneToManyRelation<MetadataToken, uint>(constraintTable.Count);
             for (int i = 0; i < constraintTable.Count; i++)
             {
                 var ownerToken = new MetadataToken(TableIndex.GenericParam, constraintTable[i].Owner);
@@ -366,7 +368,7 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var interfaceImplTable = tablesStream.GetTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl);
 
-            var interfaces = new OneToManyRelation<MetadataToken, uint>();
+            var interfaces = new OneToManyRelation<MetadataToken, uint>(interfaceImplTable.Count);
             for (int i = 0; i < interfaceImplTable.Count; i++)
             {
                 var ownerToken = new MetadataToken(TableIndex.TypeDef, interfaceImplTable[i].Class);
@@ -401,7 +403,7 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var methodImplTable = tablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
 
-            var methodImplementations = new OneToManyRelation<MetadataToken, uint>();
+            var methodImplementations = new OneToManyRelation<MetadataToken, uint>(methodImplTable.Count);
             for (int i = 0; i < methodImplTable.Count; i++)
             {
                 var ownerToken = new MetadataToken(TableIndex.TypeDef, methodImplTable[i].Class);
@@ -430,7 +432,7 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var layoutTable = tablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);
 
-            var layouts = new OneToOneRelation<MetadataToken, uint>();
+            var layouts = new OneToOneRelation<MetadataToken, uint>(layoutTable.Count);
             for (int i = 0; i < layoutTable.Count; i++)
             {
                 var ownerToken = new MetadataToken(TableIndex.TypeDef, layoutTable[i].Parent);
@@ -460,7 +462,7 @@ namespace AsmResolver.DotNet.Serialized
             var mapTable = tablesStream.GetTable<ImplementationMapRow>(TableIndex.ImplMap);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
 
-            var maps = new OneToOneRelation<MetadataToken, uint>();
+            var maps = new OneToOneRelation<MetadataToken, uint>(mapTable.Count);
             for (int i = 0; i < mapTable.Count; i++)
             {
                 var ownerToken = encoder.DecodeIndex(mapTable[i].MemberForwarded);
@@ -495,7 +497,7 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var rvaTable = tablesStream.GetTable<FieldRvaRow>(TableIndex.FieldRva);
 
-            var rvas = new OneToOneRelation<MetadataToken, uint>();
+            var rvas = new OneToOneRelation<MetadataToken, uint>(rvaTable.Count);
             for (int i = 0; i < rvaTable.Count; i++)
             {
                 var ownerToken = new MetadataToken(TableIndex.Field, rvaTable[i].Field);
@@ -525,7 +527,7 @@ namespace AsmResolver.DotNet.Serialized
             var marshalTable = tablesStream.GetTable<FieldMarshalRow>(TableIndex.FieldMarshal);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasFieldMarshal);
 
-            var marshals = new OneToOneRelation<MetadataToken, uint>();
+            var marshals = new OneToOneRelation<MetadataToken, uint>(marshalTable.Count);
             for (int i = 0; i < marshalTable.Count; i++)
             {
                 var ownerToken = encoder.DecodeIndex(marshalTable[i].Parent);
@@ -571,7 +573,7 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata!.GetStream<TablesStream>();
             var layoutTable = tablesStream.GetTable<FieldLayoutRow>(TableIndex.FieldLayout);
 
-            var fieldLayouts = new OneToOneRelation<MetadataToken, uint>();
+            var fieldLayouts = new OneToOneRelation<MetadataToken, uint>(layoutTable.Count);
             for (int i = 0; i < layoutTable.Count; i++)
             {
                 var ownerToken = new MetadataToken(TableIndex.Field, layoutTable[i].Field);
