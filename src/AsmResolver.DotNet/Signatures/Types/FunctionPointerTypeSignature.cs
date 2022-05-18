@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() =>
-            Signature?.ReturnType?.Module?.CorLibTypeFactory.IntPtr.Type;
+            Signature.ReturnType.Module?.CorLibTypeFactory.IntPtr.Type;
 
         /// <inheritdoc />
         public override bool IsImportedInModule(ModuleDefinition module) => Signature.IsImportedInModule(module);

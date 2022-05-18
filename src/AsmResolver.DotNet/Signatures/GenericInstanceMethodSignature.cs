@@ -21,14 +21,14 @@ namespace AsmResolver.DotNet.Signatures
             }
 
             var attributes = (CallingConventionAttributes) reader.ReadByte();
-            var result = new GenericInstanceMethodSignature(attributes);
 
             if (!reader.TryReadCompressedUInt32(out uint count))
             {
                 context.ReaderContext.BadImage("Invalid number of type arguments in generic method signature.");
-                return result;
+                return new GenericInstanceMethodSignature(attributes);
             }
 
+            var result = new GenericInstanceMethodSignature(attributes, (int) count);
             for (int i = 0; i < count; i++)
                 result.TypeArguments.Add(TypeSignature.FromReader(context, ref reader));
 
@@ -42,6 +42,17 @@ namespace AsmResolver.DotNet.Signatures
         public GenericInstanceMethodSignature(CallingConventionAttributes attributes)
             : this(attributes, Enumerable.Empty<TypeSignature>())
         {
+        }
+
+        /// <summary>
+        /// Creates a new instantiation signature for a generic method.
+        /// </summary>
+        /// <param name="attributes">The attributes.</param>
+        /// <param name="capacity">The initial number of elements that the <see cref="TypeArguments"/> property can store.</param>
+        public GenericInstanceMethodSignature(CallingConventionAttributes attributes, int capacity)
+            : base(attributes)
+        {
+            TypeArguments = new List<TypeSignature>(capacity);
         }
 
         /// <summary>
