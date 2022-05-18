@@ -46,9 +46,23 @@ namespace AsmResolver.Collections
         public int Count => _count;
 
         /// <summary>
-        /// Gets the capacity of the underlying array.
+        /// Gets or sets the total number of elements that the underlying array can store.
         /// </summary>
-        public int Capacity => _items.Length;
+        public int Capacity
+        {
+            get => _items.Length;
+            set
+            {
+                if (value == _items.Length)
+                    return;
+
+                if (value < _count)
+                    throw new ArgumentException("Capacity must be equal or larger than the current number of elements in the list.");
+
+                EnsureEnoughCapacity(value);
+                IncrementVersion();
+            }
+        }
 
         /// <summary>
         /// Gets a number indicating the current version of the list.
@@ -248,7 +262,7 @@ namespace AsmResolver.Collections
 
         private void EnsureEnoughCapacity(int requiredCount)
         {
-            if (_items.Length >= requiredCount)
+            if (_items.Length >= requiredCount) 
                 return;
 
             int newCapacity = _items.Length == 0 ? 1 : _items.Length * 2;
