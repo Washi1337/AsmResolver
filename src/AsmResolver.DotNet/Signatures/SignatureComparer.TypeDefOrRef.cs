@@ -43,8 +43,11 @@ namespace AsmResolver.DotNet.Signatures
 
         private bool SimpleTypeEquals(ITypeDescriptor x, ITypeDescriptor y)
         {
+            // Namespace can be null if It is a nested type so we need to check declaring type too
+            if (x.DeclaringType?.Name != y.DeclaringType?.Name)
+                return false;
             // Check the basic properties first.
-            if (!x.IsTypeOf(y.Namespace, y.Name))
+            else if (!x.IsTypeOf(y.Namespace, y.Name))
                 return false;
 
             // If scope matches, it is a perfect match.
