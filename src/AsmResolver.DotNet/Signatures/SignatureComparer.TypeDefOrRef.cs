@@ -43,21 +43,15 @@ namespace AsmResolver.DotNet.Signatures
 
         private bool SimpleTypeEquals(ITypeDescriptor x, ITypeDescriptor y)
         {
-            // Namespace can be null if It is a nested type so we need to check declaring type too
-            if (x.DeclaringType?.Name != y.DeclaringType?.Name)
-                return false;
             // Check the basic properties first.
-            else if (!x.IsTypeOf(y.Namespace, y.Name))
+            if (!x.IsTypeOf(y.Namespace, y.Name))
                 return false;
-
             // If scope matches, it is a perfect match.
             if (Equals(x.Scope, y.Scope))
                 return true;
-
-            // If scope does not match, it can still be a reference to an exported type.
-            return x.Resolve() is { } definition1
-                   && y.Resolve() is { } definition2
-                   && Equals(definition1.Module!.Assembly, definition2.Module!.Assembly);
+            if (!Equals(x.Module, y.Module))
+                return x.Resolve() is { } definition1 && y.Resolve() is { } definition2 && Equals(definition1.Module!.Assembly, definition2.Module!.Assembly);
+            return false;
         }
 
         /// <inheritdoc />
