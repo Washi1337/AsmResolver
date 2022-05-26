@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.Collections;
 using Xunit;
 
@@ -9,6 +10,47 @@ namespace AsmResolver.Tests.Collections
         public void EmptyList()
         {
             Assert.Empty(new RefList<int>());
+        }
+
+        [Fact]
+        public void SetCapacityToCount()
+        {
+            var list = new RefList<int>
+            {
+                1,
+                2,
+                3
+            };
+
+            list.Capacity = 3;
+            Assert.True(list.Capacity >= 3);
+        }
+
+        [Fact]
+        public void SetCapacityToLargerThanCount()
+        {
+            var list = new RefList<int>
+            {
+                1,
+                2,
+                3
+            };
+
+            list.Capacity = 6;
+            Assert.True(list.Capacity >= 6);
+        }
+
+        [Fact]
+        public void SetCapacityToSmallerThanCountShouldThrow()
+        {
+            var list = new RefList<int>
+            {
+                1,
+                2,
+                3
+            };
+
+            Assert.Throws<ArgumentException>(() => list.Capacity = 2);
         }
 
         [Fact]

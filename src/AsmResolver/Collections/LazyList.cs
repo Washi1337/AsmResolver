@@ -12,7 +12,24 @@ namespace AsmResolver.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public abstract class LazyList<TItem> : IList<TItem>
     {
-        private readonly List<TItem> _items = new();
+        private readonly List<TItem> _items;
+
+        /// <summary>
+        /// Creates a new, empty, uninitialized list.
+        /// </summary>
+        public LazyList()
+        {
+            _items = new List<TItem>();
+        }
+
+        /// <summary>
+        /// Creates a new, empty, uninitialized list.
+        /// </summary>
+        /// <param name="capacity">The initial number of elements the list can store.</param>
+        public LazyList(int capacity)
+        {
+            _items = new List<TItem>(capacity);
+        }
 
         /// <inheritdoc />
         public TItem this[int index]
@@ -37,6 +54,15 @@ namespace AsmResolver.Collections
                 EnsureIsInitialized();
                 return Items.Count;
             }
+        }
+
+        /// <summary>
+        /// Gets or sets the total number of elements the list can contain before it has to resize its internal buffer.
+        /// </summary>
+        public int Capacity
+        {
+            get => _items.Capacity;
+            set => _items.Capacity = value;
         }
 
         /// <inheritdoc />
