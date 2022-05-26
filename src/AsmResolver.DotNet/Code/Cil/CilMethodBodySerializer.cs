@@ -15,6 +15,8 @@ namespace AsmResolver.DotNet.Code.Cil
     /// </summary>
     public class CilMethodBodySerializer : IMethodBodySerializer
     {
+        private readonly MemoryStreamWriterPool _writerPool = new();
+
         /// <summary>
         /// Gets or sets the value of an override switch indicating whether the max stack should always be recalculated
         /// or should always be preserved.
@@ -88,7 +90,7 @@ namespace AsmResolver.DotNet.Code.Cil
             }
 
             // Serialize CIL stream.
-            var code = BuildRawCodeStream(context, body);
+            byte[] code = BuildRawCodeStream(context, body);
 
             // Build method body.
             var rawBody = body.IsFat
@@ -98,8 +100,7 @@ namespace AsmResolver.DotNet.Code.Cil
             return rawBody.ToReference();
         }
 
-        private static CilRawMethodBody BuildTinyMethodBody(byte[] code) =>
-            new CilRawTinyMethodBody(code);
+        private static CilRawMethodBody BuildTinyMethodBody(byte[] code) => new CilRawTinyMethodBody(code);
 
         private CilRawMethodBody BuildFatMethodBody(MethodBodySerializationContext context, CilMethodBody body, byte[] code)
         {
@@ -137,35 +138,33 @@ namespace AsmResolver.DotNet.Code.Cil
             return fatBody;
         }
 
-        private static byte[] BuildRawCodeStream(MethodBodySerializationContext context, CilMethodBody body)
+        private byte[] BuildRawCodeStream(MethodBodySerializationContext context, CilMethodBody body)
         {
-            using var codeStream = new MemoryStream();
             var bag = context.ErrorListener;
 
-            var writer = new BinaryStreamWriter(codeStream);
+            using var rentedWriter = _writerPool.Rent();
             var assembler = new CilAssembler(
-                writer,
+                rentedWriter.Writer,
                 new CilOperandBuilder(context.TokenProvider, bag),
                 body.Owner.SafeToString,
                 bag);
 
             assembler.WriteInstructions(body.Instructions);
 
-            return codeStream.ToArray();
+            return rentedWriter.GetData();
         }
 
         private byte[] SerializeExceptionHandlers(MethodBodySerializationContext context, IList<CilExceptionHandler> exceptionHandlers, bool needsFatFormat)
         {
-            using var sectionStream = new MemoryStream();
-            var writer = new BinaryStreamWriter(sectionStream);
+            using var rentedWriter = _writerPool.Rent();
 
             for (int i = 0; i < exceptionHandlers.Count; i++)
             {
                 var handler = exceptionHandlers[i];
-                WriteExceptionHandler(context, writer, handler, needsFatFormat);
+                WriteExceptionHandler(context, rentedWriter.Writer, handler, needsFatFormat);
             }
 
-            return sectionStream.ToArray();
+            return rentedWriter.GetData();
         }
 
         private void WriteExceptionHandler(MethodBodySerializationContext context, IBinaryStreamWriter writer, CilExceptionHandler handler, bool useFatFormat)
