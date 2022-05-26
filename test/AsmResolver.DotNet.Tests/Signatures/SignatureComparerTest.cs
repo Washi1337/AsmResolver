@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -113,6 +114,36 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var signature2 = PropertySignature.CreateStatic(type.ToTypeSignature());
 
             Assert.Equal(signature1, signature2, _comparer);
+        }
+
+        [Fact]
+        public void MatchNestedTypes()
+        {
+            var nestedTypes = ModuleDefinition.FromModule(typeof(SignatureComparerTest).Assembly.ManifestModule).GetAllTypes().FirstOrDefault(c => c.Name == "SignatureComparerTest").NestedTypes.FirstOrDefault();
+            var firstType = nestedTypes.NestedTypes[0].NestedTypes[0];
+            var secondType = nestedTypes.NestedTypes[1].NestedTypes[0];
+            Assert.NotEqual(firstType, secondType, _comparer);
+        }
+        public class NestedTypes
+        {
+            public class FirstType
+            {
+                public class TypeWithCommonName
+                {
+                    public string stringValue { get; set; }
+                    public bool boolValue { get; set; }
+                }
+
+            }
+            public class SecondType
+            {
+
+                public class TypeWithCommonName
+                {
+                    public int intValue { get; set; }
+                    public byte byteValue { get; set; }
+                }
+            }
         }
     }
 }

@@ -85,7 +85,7 @@ namespace AsmResolver.DotNet.Signatures
 
             return versionMatch
                    && x.Name == y.Name
-                   && x.Culture == y.Culture
+                   && (x.Culture == y.Culture || (Utf8String.IsNullOrEmpty(x.Culture) && Utf8String.IsNullOrEmpty(y.Culture)))
                    && Equals(x.GetPublicKeyToken(), y.GetPublicKeyToken());
         }
 

@@ -47,14 +47,14 @@ namespace AsmResolver.DotNet.Signatures
             if (!x.IsTypeOf(y.Namespace, y.Name))
                 return false;
 
-            // If scope matches, it is a perfect match.
-            if (Equals(x.Scope, y.Scope))
-                return true;
+            if (x.DeclaringType != null && y.DeclaringType != null && !Equals(x.DeclaringType, y.DeclaringType))
+                return false;
 
-            // If scope does not match, it can still be a reference to an exported type.
-            return x.Resolve() is { } definition1
-                   && y.Resolve() is { } definition2
-                   && Equals(definition1.Module!.Assembly, definition2.Module!.Assembly);
+            var scopeCheck = Equals(x.Scope, y.Scope);
+            // If scope matches, it is a perfect match.
+            if (scopeCheck || (!scopeCheck && x.Resolve() is { } definition1 && y.Resolve() is { } definition2 && Equals(definition1.Module!.Assembly, definition2.Module!.Assembly)))
+                return true;
+            return false;
         }
 
         /// <inheritdoc />
