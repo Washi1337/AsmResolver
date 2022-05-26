@@ -33,12 +33,15 @@ namespace AsmResolver.IO
         /// <summary>
         /// Represents a single instance of a <see cref="BinaryStreamWriter"/> that is rented by a writer pool.
         /// </summary>
-        public readonly struct RentedWriter : IDisposable
+        public ref struct RentedWriter
         {
+            private bool _isDisposed = false;
+            private readonly BinaryStreamWriter _writer;
+
             internal RentedWriter(MemoryStreamWriterPool pool, BinaryStreamWriter writer)
             {
                 Pool = pool;
-                Writer = writer;
+                _writer = writer;
             }
 
             /// <summary>
@@ -54,7 +57,12 @@ namespace AsmResolver.IO
             /// </summary>
             public BinaryStreamWriter Writer
             {
-                get;
+                get
+                {
+                    if (_isDisposed)
+                        throw new ObjectDisposedException(nameof(Writer));
+                    return _writer;
+                }
             }
 
             /// <summary>
@@ -63,8 +71,17 @@ namespace AsmResolver.IO
             /// <returns></returns>
             public byte[] GetData() => ((MemoryStream) Writer.BaseStream).ToArray();
 
-            /// <inheritdoc />
-            public void Dispose() => Pool.Return(Writer);
+            /// <summary>
+            /// Returns the stream writer to the pool.
+            /// </summary>
+            public void Dispose()
+            {
+                if (_isDisposed)
+                    return;
+
+                Pool.Return(Writer);
+                _isDisposed = true;
+            }
         }
     }
 }
