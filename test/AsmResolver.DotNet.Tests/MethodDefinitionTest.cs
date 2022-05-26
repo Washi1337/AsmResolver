@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Events;
+using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.PE.DotNet;
@@ -499,6 +500,23 @@ namespace AsmResolver.DotNet.Tests
             }
 
             Assert.Equal(ordinal1, image.Exports.BaseOrdinal);
+        }
+
+        [Theory]
+        [InlineData("NonGenericMethodInNonGenericType",
+            "System.Void AsmResolver.DotNet.TestCases.Generics.NonGenericType::NonGenericMethodInNonGenericType()")]
+        [InlineData("GenericMethodInNonGenericType",
+            "System.Void AsmResolver.DotNet.TestCases.Generics.NonGenericType::GenericMethodInNonGenericType<U1, U2, U3>()")]
+        [InlineData("GenericMethodWithConstraints",
+            "System.Void AsmResolver.DotNet.TestCases.Generics.NonGenericType::GenericMethodWithConstraints<T1, T2>()")]
+        public void MethodFullNameTests(string methodName, string expectedFullName)
+        {
+            var module = ModuleDefinition.FromFile(typeof(NonGenericType).Assembly.Location);
+            var method = module
+                .TopLevelTypes.First(t => t.Name == nameof(NonGenericType))
+                .Methods.First(m => m.Name == methodName);
+
+            Assert.Equal(expectedFullName, method.FullName);
         }
     }
 }
