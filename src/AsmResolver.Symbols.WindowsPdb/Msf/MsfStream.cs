@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Collections;
 using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.WindowsPdb.Msf;
@@ -8,7 +9,7 @@ namespace AsmResolver.Symbols.WindowsPdb.Msf;
 /// <summary>
 /// Represents a single stream in an Multi-Stream Format (MSF) file.
 /// </summary>
-public class MsfStream
+public class MsfStream : IOwnedCollectionElement<MsfFile>
 {
     /// <summary>
     /// Creates a new MSF stream with the provided contents.
@@ -26,18 +27,33 @@ public class MsfStream
     public MsfStream(IDataSource contents)
     {
         Contents = contents;
-        Blocks = Array.Empty<int>();
+        OriginalBlockIndices = Array.Empty<int>();
     }
 
     /// <summary>
     /// Initializes an MSF stream with a data source and a list of original block indices that the stream was based on.
     /// </summary>
     /// <param name="contents">The data source containing the raw data of the stream.</param>
-    /// <param name="blocks">The original block indices.</param>
-    public MsfStream(IDataSource contents, IEnumerable<int> blocks)
+    /// <param name="originalBlockIndices">The original block indices that this MSF stream was based on.</param>
+    public MsfStream(IDataSource contents, IEnumerable<int> originalBlockIndices)
     {
         Contents = contents;
-        Blocks = blocks.ToArray();
+        OriginalBlockIndices = originalBlockIndices.ToArray();
+    }
+
+    /// <summary>
+    /// Gets the parent MSF file that this stream is embedded in.
+    /// </summary>
+    public MsfFile Parent
+    {
+        get;
+        private set;
+    }
+
+    MsfFile? IOwnedCollectionElement<MsfFile>.Owner
+    {
+        get => Parent;
+        set => Parent = value;
     }
 
     /// <summary>
@@ -52,7 +68,7 @@ public class MsfStream
     /// <summary>
     /// Gets a collection of block indices that this stream was based of (if available).
     /// </summary>
-    public IReadOnlyList<int> Blocks
+    public IReadOnlyList<int> OriginalBlockIndices
     {
         get;
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.WindowsPdb.Msf;
@@ -93,7 +94,7 @@ public class SerializedMsfFile : MsfFile
             streamSizes[i] = directoryReader.ReadUInt32();
 
         // Construct streams.
-        var result = new List<MsfStream>(streamCount);
+        var result = new OwnedCollection<MsfFile, MsfStream>(this, streamCount);
         for (int i = 0; i < streamCount; i++)
         {
             // A size of 0xFFFFFFFF indicates the stream does not exist.

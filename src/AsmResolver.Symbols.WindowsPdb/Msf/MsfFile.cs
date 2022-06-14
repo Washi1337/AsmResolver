@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.WindowsPdb.Msf;
@@ -116,5 +117,5 @@ public class MsfFile
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Streams"/> property.
     /// </remarks>
-    protected virtual IList<MsfStream> GetStreams() => new List<MsfStream>();
+    protected virtual IList<MsfStream> GetStreams() => new OwnedCollection<MsfFile, MsfStream>(this);
 }
