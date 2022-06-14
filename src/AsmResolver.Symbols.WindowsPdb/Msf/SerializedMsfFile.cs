@@ -7,7 +7,7 @@ using AsmResolver.IO;
 namespace AsmResolver.Symbols.WindowsPdb.Msf;
 
 /// <summary>
-/// Provides an implementation for an MSF file version, read from an input file.
+/// Provides an implementation for an MSF file that is read from an input file.
 /// </summary>
 /// <remarks>
 /// Currently, this model only supports version 7.0 of the file format.
@@ -15,11 +15,9 @@ namespace AsmResolver.Symbols.WindowsPdb.Msf;
 public class SerializedMsfFile : MsfFile
 {
     private readonly BinaryStreamReader _reader;
-    private readonly uint _originalBlockSize;
+    private readonly MsfSuperBlock _originalSuperBlock;
 
     private readonly IDataSource?[] _blocks;
-    private readonly uint _directoryByteCount;
-    private readonly int _blockMapIndex;
 
     /// <summary>
     /// Interprets an input stream as an MSF file version 7.0.
@@ -28,28 +26,10 @@ public class SerializedMsfFile : MsfFile
     /// <exception cref="BadImageFormatException">Occurs when the MSF file is malformed.</exception>
     public SerializedMsfFile(BinaryStreamReader reader)
     {
-        // Check MSF header.
-        byte[] signature = new byte[BigMsfSignature.Length];
-        int count = reader.ReadBytes(signature, 0, signature.Length);
-        if (count != BigMsfSignature.Length || !ByteArrayEqualityComparer.Instance.Equals(signature, BigMsfSignature))
-            throw new BadImageFormatException("File does not start with a valid or supported MSF file signature.");
+        _originalSuperBlock = MsfSuperBlock.FromReader(ref reader);
 
-        // BlockSize property also validates, so no need to do it again.
-        BlockSize = _originalBlockSize = reader.ReadUInt32();
-
-        // We don't really use the free block map as we are not fully implementing the NTFS-esque file system, but we
-        // validate its contents regardless as a sanity check.
-        int freeBlockMapIndex = reader.ReadInt32();
-        if (freeBlockMapIndex is not (1 or 2))
-            throw new BadImageFormatException($"Free block map index must be 1 or 2, but was {freeBlockMapIndex}.");
-
-        int blockCount = reader.ReadInt32();
-        _blocks = new IDataSource?[blockCount];
-
-        _directoryByteCount = reader.ReadUInt32();
-        reader.Offset += sizeof(uint);
-        _blockMapIndex = reader.ReadInt32();
-
+        BlockSize = _originalSuperBlock.BlockSize;
+        _blocks = new IDataSource?[_originalSuperBlock.BlockCount];
         _reader = reader;
     }
 
@@ -60,8 +40,8 @@ public class SerializedMsfFile : MsfFile
             // We lazily initialize all blocks by slicing the original data source of the reader.
             var block = new DataSourceSlice(
                 _reader.DataSource,
-                _reader.DataSource.BaseAddress + (ulong) (index * _originalBlockSize),
-                _originalBlockSize);
+                _reader.DataSource.BaseAddress + (ulong) (index * _originalSuperBlock.BlockSize),
+                _originalSuperBlock.BlockSize);
 
             Interlocked.CompareExchange(ref _blocks[index], block, null);
         }
@@ -73,12 +53,12 @@ public class SerializedMsfFile : MsfFile
     protected override IList<MsfStream> GetStreams()
     {
         // Get the block indices of the Stream Directory stream.
-        var indicesBlock = GetBlock(_blockMapIndex);
+        var indicesBlock = GetBlock((int) _originalSuperBlock.DirectoryMapIndex);
         var indicesReader = new BinaryStreamReader(indicesBlock, indicesBlock.BaseAddress, 0,
-            GetBlockCount(_directoryByteCount) * sizeof(uint));
+            GetBlockCount(_originalSuperBlock.DirectoryByteCount) * sizeof(uint));
 
         // Access the Stream Directory stream.
-        var directoryStream = CreateStreamFromIndicesReader(ref indicesReader, _directoryByteCount);
+        var directoryStream = CreateStreamFromIndicesReader(ref indicesReader, _originalSuperBlock.DirectoryByteCount);
         var directoryReader = directoryStream.CreateReader();
 
         // Stream Directory format is as follows:
@@ -120,9 +100,9 @@ public class SerializedMsfFile : MsfFile
             blocks[i] = GetBlock(indices[i]);
 
         // Construct stream.
-        var dataSource = new MsfStreamDataSource(streamSize, _originalBlockSize, blocks);
+        var dataSource = new MsfStreamDataSource(streamSize, _originalSuperBlock.BlockSize, blocks);
         return new MsfStream(dataSource, indices);
     }
 
-    private uint GetBlockCount(uint streamSize) => (streamSize + _originalBlockSize - 1) / _originalBlockSize;
+    private uint GetBlockCount(uint streamSize) => (streamSize + _originalSuperBlock.BlockSize - 1) / _originalSuperBlock.BlockSize;
 }

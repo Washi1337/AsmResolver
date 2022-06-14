@@ -44,7 +44,7 @@ public class MsfStream : IOwnedCollectionElement<MsfFile>
     /// <summary>
     /// Gets the parent MSF file that this stream is embedded in.
     /// </summary>
-    public MsfFile Parent
+    public MsfFile? Parent
     {
         get;
         private set;
@@ -71,6 +71,32 @@ public class MsfStream : IOwnedCollectionElement<MsfFile>
     public IReadOnlyList<int> OriginalBlockIndices
     {
         get;
+    }
+
+    /// <summary>
+    /// Gets the amount of blocks that is required to store this MSF stream.
+    /// </summary>
+    /// <returns>The number of blocks.</returns>
+    /// <exception cref="InvalidOperationException">Occurs when the stream is not added to a file.</exception>
+    public int GetRequiredBlockCount()
+    {
+        if (Parent is null)
+        {
+            throw new InvalidOperationException(
+                "Determining the required block count of a stream requires the stream to be added to an MSF file.");
+        }
+
+        return GetRequiredBlockCount(Parent.BlockSize);
+    }
+
+    /// <summary>
+    /// Gets the amount of blocks that is required to store this MSF stream, given the provided block size.
+    /// </summary>
+    /// <param name="blockSize">The block size.</param>
+    /// <returns>The number of blocks.</returns>
+    public int GetRequiredBlockCount(uint blockSize)
+    {
+        return (int) ((Contents.Length + blockSize - 1) / blockSize);
     }
 
     /// <summary>

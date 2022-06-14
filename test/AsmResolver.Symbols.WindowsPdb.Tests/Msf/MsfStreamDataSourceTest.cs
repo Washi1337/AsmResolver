@@ -16,7 +16,7 @@ public class MsfStreamDataSourceTest
         byte[] buffer = new byte[0x1000];
         int readCount = source.ReadBytes(0, buffer, 0, buffer.Length);
         Assert.Equal(0, readCount);
-        Assert.All(buffer, b => Assert.Equal(b, 0));
+        Assert.All(buffer, b => Assert.Equal(0, b));
     }
 
     [Theory]

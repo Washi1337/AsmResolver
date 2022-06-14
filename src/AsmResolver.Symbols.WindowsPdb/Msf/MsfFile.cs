@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.IO;
+using AsmResolver.Symbols.WindowsPdb.Msf.Builder;
 
 namespace AsmResolver.Symbols.WindowsPdb.Msf;
 
@@ -11,21 +13,6 @@ namespace AsmResolver.Symbols.WindowsPdb.Msf;
 /// </summary>
 public class MsfFile
 {
-    // Used in MSF v2.0
-    internal static readonly byte[] SmallMsfSignature =
-    {
-        0x4d, 0x69, 0x63, 0x72, 0x6f, 0x73, 0x6f, 0x66, 0x74, 0x20, 0x43, 0x2f, 0x43, 0x2b, 0x2b, 0x20, 0x70, 0x72,
-        0x6f, 0x67, 0x72, 0x61, 0x6d, 0x20, 0x64, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x20, 0x32, 0x2e, 0x30,
-        0x30, 0x0d, 0x0a, 0x1a, 0x4a, 0x47
-    };
-
-    // Used in MSF v7.0
-    internal static readonly byte[] BigMsfSignature =
-    {
-        0x4d, 0x69, 0x63, 0x72, 0x6f, 0x73, 0x6f, 0x66, 0x74, 0x20, 0x43, 0x2f, 0x43, 0x2b, 0x2b, 0x20,
-        0x4d, 0x53, 0x46, 0x20, 0x37, 0x2e, 0x30, 0x30, 0x0d, 0x0a, 0x1a, 0x44, 0x53, 0x00, 0x00, 0x00
-    };
-
     private uint _blockSize;
     private IList<MsfStream>? _streams;
 
@@ -40,7 +27,7 @@ public class MsfFile
         get => _blockSize;
         set
         {
-            if (_blockSize is 512 or 1024 or 2048 or 4096)
+            if (value is not (512 or 1024 or 2048 or 4096))
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(value),
@@ -118,4 +105,33 @@ public class MsfFile
     /// This method is called upon initialization of the <see cref="Streams"/> property.
     /// </remarks>
     protected virtual IList<MsfStream> GetStreams() => new OwnedCollection<MsfFile, MsfStream>(this);
+
+    /// <summary>
+    /// Reconstructs and writes the MSF file to the disk.
+    /// </summary>
+    /// <param name="path">The path of the file to write to.</param>
+    public void Write(string path)
+    {
+        using var fs = File.Create(path);
+        Write(fs);
+    }
+
+    /// <summary>
+    /// Reconstructs and writes the MSF file to an output stream.
+    /// </summary>
+    /// <param name="stream">The output stream.</param>
+    public void Write(Stream stream) => Write(new BinaryStreamWriter(stream));
+
+    /// <summary>
+    /// Reconstructs and writes the MSF file to an output stream.
+    /// </summary>
+    /// <param name="writer">The output stream.</param>
+    public void Write(IBinaryStreamWriter writer) => Write(writer, SequentialMsfFileBuilder.Instance);
+
+    /// <summary>
+    /// Reconstructs and writes the MSF file to an output stream.
+    /// </summary>
+    /// <param name="writer">The output stream.</param>
+    /// <param name="builder">The builder to use for reconstructing the MSF file.</param>
+    public void Write(IBinaryStreamWriter writer, IMsfFileBuilder builder) => builder.CreateFile(this).Write(writer);
 }
