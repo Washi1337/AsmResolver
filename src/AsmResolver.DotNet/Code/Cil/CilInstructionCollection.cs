@@ -260,7 +260,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     break;
 
                 case CilCode.Ldarga_S:
-                    instruction.OpCode = CilOpCodes.Ldarga_S;
+                    instruction.OpCode = CilOpCodes.Ldarga;
                     break;
 
                 case CilCode.Starg_S:
@@ -314,7 +314,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     instruction.OpCode = CilOpCodes.Brtrue;
                     break;
                 case CilCode.Bge_Un_S:
-                    instruction.OpCode = CilOpCodes.Bge_Un_S;
+                    instruction.OpCode = CilOpCodes.Bge_Un;
                     break;
                 case CilCode.Bgt_Un_S:
                     instruction.OpCode = CilOpCodes.Bgt_Un;
