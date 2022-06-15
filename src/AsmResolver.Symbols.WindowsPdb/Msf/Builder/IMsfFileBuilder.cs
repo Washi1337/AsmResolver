@@ -6,7 +6,7 @@ namespace AsmResolver.Symbols.WindowsPdb.Msf.Builder;
 public interface IMsfFileBuilder
 {
     /// <summary>
-    /// Reconstructs a new writable MSF file from an instance of <see cref="MsfFile"/>.
+    /// Reconstructs a new writable MSF file buffer from an instance of <see cref="MsfFile"/>.
     /// </summary>
     /// <param name="file">The file to reconstruct.</param>
     /// <returns>The reconstructed buffer.</returns>

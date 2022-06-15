@@ -43,14 +43,20 @@ public class SequentialMsfFileBuilder : IMsfFileBuilder
     {
         int blockCount = stream.GetRequiredBlockCount(buffer.SuperBlock.BlockSize);
 
-        for (int j = 0; j < blockCount; j++)
+        for (int j = 0; j < blockCount; j++, currentIndex++)
         {
-            buffer.InsertBlock(currentIndex, stream, j);
+            // Skip over any of the FPM indices.
+            switch (currentIndex % 4096)
+            {
+                case 1:
+                    currentIndex += 2;
+                    break;
+                case 2:
+                    currentIndex++;
+                    break;
+            }
 
-            // Move to next available block, and skip over the FPMs.
-            currentIndex++;
-            if (currentIndex % 4096 == 1)
-                currentIndex += 2;
+            buffer.InsertBlock(currentIndex, stream, j);
         }
     }
 }

@@ -11,8 +11,8 @@ namespace AsmResolver.Symbols.WindowsPdb.Msf.Builder;
 public class MsfFileBuffer : SegmentBase
 {
     private readonly Dictionary<MsfStream, int[]> _blockIndices = new();
-    private readonly List<FreeBlockMap> _freeBlockMaps = new();
-    private readonly List<ISegment?> _blocks = new();
+    private readonly List<FreeBlockMap> _freeBlockMaps = new(2);
+    private readonly List<ISegment?> _blocks;
 
     /// <summary>
     /// Creates a new empty MSF file buffer.
@@ -27,6 +27,8 @@ public class MsfFileBuffer : SegmentBase
             FreeBlockMapIndex = 1,
             BlockCount = 3,
         };
+
+        _blocks = new List<ISegment?>((int) blockSize);
 
         InsertBlock(0, SuperBlock);
         var fpm = GetOrCreateFreeBlockMap(1, out _);
@@ -90,9 +92,11 @@ public class MsfFileBuffer : SegmentBase
 
     private void InsertBlock(int blockIndex, ISegment? segment)
     {
+        // Ensure enough blocks are present in the backing-buffer.
         while (_blocks.Count <= blockIndex)
             _blocks.Add(null);
 
+        // Insert block and update super block.
         _blocks[blockIndex] = segment;
         SuperBlock.BlockCount = (uint) _blocks.Count;
     }
@@ -156,8 +160,7 @@ public class MsfFileBuffer : SegmentBase
                 writer.WriteInt32(index);
         }
 
-        byte[] bytes = contents.ToArray();
-        return new MsfStream(bytes);
+        return new MsfStream(contents.ToArray());
     }
 
     /// <summary>
@@ -177,8 +180,7 @@ public class MsfFileBuffer : SegmentBase
         foreach (int index in indices)
             writer.WriteInt32(index);
 
-        byte[] bytes = contents.ToArray();
-        return new MsfStream(bytes);
+        return new MsfStream(contents.ToArray());
     }
 
     /// <inheritdoc />

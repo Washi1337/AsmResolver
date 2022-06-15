@@ -28,9 +28,7 @@ public class MsfStreamDataSourceTest
         for (int i = 0; i < blockSize; i++)
             block[i] = (byte) (i & 0xFF);
 
-        var source = new MsfStreamDataSource((ulong) actualSize, (uint) blockSize, new[] {
-            block
-        });
+        var source = new MsfStreamDataSource((ulong) actualSize, (uint) blockSize, new[] {block});
 
         byte[] buffer = new byte[0x1000];
         int readCount = source.ReadBytes(0, buffer, 0, buffer.Length);

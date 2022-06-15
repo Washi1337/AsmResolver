@@ -16,7 +16,6 @@ public class SerializedMsfFile : MsfFile
 {
     private readonly BinaryStreamReader _reader;
     private readonly MsfSuperBlock _originalSuperBlock;
-
     private readonly IDataSource?[] _blocks;
 
     /// <summary>
@@ -104,5 +103,8 @@ public class SerializedMsfFile : MsfFile
         return new MsfStream(dataSource, indices);
     }
 
-    private uint GetBlockCount(uint streamSize) => (streamSize + _originalSuperBlock.BlockSize - 1) / _originalSuperBlock.BlockSize;
+    private uint GetBlockCount(uint streamSize)
+    {
+        return (streamSize + _originalSuperBlock.BlockSize - 1) / _originalSuperBlock.BlockSize;
+    }
 }
