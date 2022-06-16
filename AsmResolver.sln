@@ -85,9 +85,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Symbols.WindowsPdb", "src\AsmResolver.Symbols.WindowsPdb\AsmResolver.Symbols.WindowsPdb.csproj", "{9E311832-D0F2-42CA-84DD-9A91B88F0287}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Symbols.Pdb", "src\AsmResolver.Symbols.Pdb\AsmResolver.Symbols.Pdb.csproj", "{9E311832-D0F2-42CA-84DD-9A91B88F0287}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Symbols.WindowsPdb.Tests", "test\AsmResolver.Symbols.WindowsPdb.Tests\AsmResolver.Symbols.WindowsPdb.Tests.csproj", "{AAD604B6-ABE5-4DBC-A2D9-4EF8E815B2EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Symbols.Pdb.Tests", "test\AsmResolver.Symbols.Pdb.Tests\AsmResolver.Symbols.Pdb.Tests.csproj", "{AAD604B6-ABE5-4DBC-A2D9-4EF8E815B2EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

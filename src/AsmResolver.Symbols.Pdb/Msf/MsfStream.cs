@@ -4,7 +4,7 @@ using System.Linq;
 using AsmResolver.Collections;
 using AsmResolver.IO;
 
-namespace AsmResolver.Symbols.WindowsPdb.Msf;
+namespace AsmResolver.Symbols.Pdb.Msf;
 
 /// <summary>
 /// Represents a single stream in an Multi-Stream Format (MSF) file.

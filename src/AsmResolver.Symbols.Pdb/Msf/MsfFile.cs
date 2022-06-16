@@ -4,9 +4,9 @@ using System.IO;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.IO;
-using AsmResolver.Symbols.WindowsPdb.Msf.Builder;
+using AsmResolver.Symbols.Pdb.Msf.Builder;
 
-namespace AsmResolver.Symbols.WindowsPdb.Msf;
+namespace AsmResolver.Symbols.Pdb.Msf;
 
 /// <summary>
 /// Models a file that is in the Microsoft Multi-Stream Format (MSF).

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using AsmResolver.IO;
 
-namespace AsmResolver.Symbols.WindowsPdb.Msf.Builder;
+namespace AsmResolver.Symbols.Pdb.Msf.Builder;
 
 /// <summary>
 /// Represents a mutable buffer for building up a new MSF file.

@@ -1,4 +1,4 @@
-namespace AsmResolver.Symbols.WindowsPdb.Msf.Builder;
+namespace AsmResolver.Symbols.Pdb.Msf.Builder;
 
 /// <summary>
 /// Provides an implementation of the <see cref="IMsfFileBuilder"/> that places all blocks of every stream in sequence,

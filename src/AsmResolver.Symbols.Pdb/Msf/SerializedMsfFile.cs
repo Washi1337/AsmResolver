@@ -4,7 +4,7 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.IO;
 
-namespace AsmResolver.Symbols.WindowsPdb.Msf;
+namespace AsmResolver.Symbols.Pdb.Msf;
 
 /// <summary>
 /// Provides an implementation for an MSF file that is read from an input file.

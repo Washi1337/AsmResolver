@@ -1,7 +1,7 @@
 using System.Collections;
 using AsmResolver.IO;
 
-namespace AsmResolver.Symbols.WindowsPdb.Msf.Builder;
+namespace AsmResolver.Symbols.Pdb.Msf.Builder;
 
 /// <summary>
 /// Represents a block within a MSF file that contains information on which blocks in the MSF file are free to use.

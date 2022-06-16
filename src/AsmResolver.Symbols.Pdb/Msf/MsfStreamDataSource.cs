@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using AsmResolver.IO;
 
-namespace AsmResolver.Symbols.WindowsPdb.Msf;
+namespace AsmResolver.Symbols.Pdb.Msf;
 
 /// <summary>
 /// Implements a data source for a single MSF stream that pulls data from multiple (fragmented) blocks.

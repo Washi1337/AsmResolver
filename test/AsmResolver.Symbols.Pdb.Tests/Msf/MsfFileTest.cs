@@ -1,9 +1,9 @@
 using System.IO;
 using System.Linq;
-using AsmResolver.Symbols.WindowsPdb.Msf;
+using AsmResolver.Symbols.Pdb.Msf;
 using Xunit;
 
-namespace AsmResolver.Symbols.WindowsPdb.Tests.Msf;
+namespace AsmResolver.Symbols.Pdb.Tests.Msf;
 
 public class MsfFileTest
 {

@@ -1,7 +1,7 @@
 using System;
 using AsmResolver.IO;
 
-namespace AsmResolver.Symbols.WindowsPdb.Msf;
+namespace AsmResolver.Symbols.Pdb.Msf;
 
 /// <summary>
 /// Represents the first block in a Multi-Stream Format (MSF) file.

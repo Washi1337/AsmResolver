@@ -1,4 +1,4 @@
-namespace AsmResolver.Symbols.WindowsPdb.Msf.Builder;
+namespace AsmResolver.Symbols.Pdb.Msf.Builder;
 
 /// <summary>
 /// Provides members for constructing new MSF files.
