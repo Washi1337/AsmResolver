@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 
@@ -12,6 +14,8 @@ public class DbiStream : SegmentBase
     /// Gets the default fixed MSF stream index for the DBI stream.
     /// </summary>
     public const int StreamIndex = 3;
+
+    private IList<ModuleDescriptor>? _modules;
 
     /// <summary>
     /// Gets or sets the version signature assigned to the DBI stream.
@@ -126,6 +130,25 @@ public class DbiStream : SegmentBase
         get;
         set;
     }
+
+    /// <summary>
+    /// Gets a collection of modules (object files) that were linked together into the program.
+    /// </summary>
+    public IList<ModuleDescriptor> Modules
+    {
+        get
+        {
+            if (_modules is null)
+                Interlocked.CompareExchange(ref _modules, GetModules(), null);
+            return _modules;
+        }
+    }
+
+    /// <summary>
+    /// Obtains the list of modules
+    /// </summary>
+    /// <returns></returns>
+    protected virtual IList<ModuleDescriptor> GetModules() => new List<ModuleDescriptor>();
 
     /// <summary>
     /// Reads a single DBI stream from the provided input stream.
