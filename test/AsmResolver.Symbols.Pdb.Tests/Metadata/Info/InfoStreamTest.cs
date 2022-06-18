@@ -16,7 +16,7 @@ public class InfoStreamTest
     public void ReadWrite(bool rebuild)
     {
         var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
-        var infoStream = InfoStream.FromReader(file.Streams[1].CreateReader());
+        var infoStream = InfoStream.FromReader(file.Streams[InfoStream.StreamIndex].CreateReader());
         if (rebuild)
         {
             using var stream = new MemoryStream();

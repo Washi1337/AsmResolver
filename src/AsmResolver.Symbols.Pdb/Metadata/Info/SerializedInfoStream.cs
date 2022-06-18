@@ -5,7 +5,7 @@ using AsmResolver.IO;
 namespace AsmResolver.Symbols.Pdb.Metadata.Info;
 
 /// <summary>
-/// Models an PDB info stream by pulling its data from an input stream.
+/// Implements an PDB info stream that pulls its data from an input stream.
 /// </summary>
 public class SerializedInfoStream : InfoStream
 {

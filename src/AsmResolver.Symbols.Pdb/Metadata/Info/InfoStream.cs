@@ -11,6 +11,11 @@ namespace AsmResolver.Symbols.Pdb.Metadata.Info;
 /// </summary>
 public class InfoStream : SegmentBase
 {
+    /// <summary>
+    /// Gets the default fixed MSF stream index for the PDB Info stream.
+    /// </summary>
+    public const int StreamIndex = 1;
+
     private IDictionary<Utf8String, int>? _streamIndices;
     private IList<PdbFeature>? _features;
 
@@ -24,7 +29,7 @@ public class InfoStream : SegmentBase
     {
         get;
         set;
-    }
+    } = InfoStreamVersion.VC70;
 
     /// <summary>
     /// Gets or sets the 32-bit UNIX time-stamp of the PDB file.
@@ -42,7 +47,7 @@ public class InfoStream : SegmentBase
     {
         get;
         set;
-    }
+    } = 1;
 
     /// <summary>
     /// Gets or sets the unique identifier assigned to the PDB file.

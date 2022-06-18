@@ -16,4 +16,5 @@ public enum InfoStreamVersion
     VC80 = 20030901,
     VC110 = 20091201,
     VC140 = 20140508,
+#pragma warning restore CS1591
 }
