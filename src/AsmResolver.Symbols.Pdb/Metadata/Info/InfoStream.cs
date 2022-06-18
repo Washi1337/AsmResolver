@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using AsmResolver.IO;
 
@@ -119,6 +120,42 @@ public class InfoStream : SegmentBase
     /// <inheritdoc />
     public override void Write(IBinaryStreamWriter writer)
     {
-        throw new NotImplementedException();
+        // Write basic info stream header.
+        writer.WriteUInt32((uint) Version);
+        writer.WriteUInt32(Signature);
+        writer.WriteUInt32(Age);
+        writer.WriteBytes(UniqueId.ToByteArray());
+
+        // Construct name buffer, keeping track of the offsets of every name.
+        using var nameBuffer = new MemoryStream();
+        var nameWriter = new BinaryStreamWriter(nameBuffer);
+
+        var stringOffsets = new Dictionary<Utf8String, uint>();
+        foreach (var entry in StreamIndices)
+        {
+            uint offset = (uint) nameWriter.Offset;
+            nameWriter.WriteBytes(entry.Key.GetBytesUnsafe());
+            nameWriter.WriteByte(0);
+            stringOffsets.Add(entry.Key, offset);
+        }
+
+        writer.WriteUInt32((uint) nameBuffer.Length);
+        writer.WriteBytes(nameBuffer.ToArray());
+
+        // Write the hash table.
+        // Note: The hash of a single entry is **deliberately** truncated to a 16 bit number. This is because
+        // the reference implementation of the name table returns a number of type HASH, which is a typedef
+        // for "unsigned short". If we don't do this, this will result in wrong buckets being filled in the
+        // hash table, and thus the serialization would fail. See NMTNI::hash() in Microsoft/microsoft-pdb.
+        StreamIndices.WriteAsPdbHashTable(writer,
+            str => (ushort) PdbHash.ComputeV1(str),
+            (key, value) => (stringOffsets[key], (uint) value));
+
+        // last NI, safe to put always zero.
+        writer.WriteUInt32(0);
+
+        // Write feature codes.
+        foreach (var feature in Features)
+            writer.WriteUInt32((uint) feature);
     }
 }

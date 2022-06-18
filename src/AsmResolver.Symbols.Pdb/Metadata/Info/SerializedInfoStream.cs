@@ -62,6 +62,8 @@ public class SerializedInfoStream : InfoStream
             return (keyString, (int) value);
         });
 
+        uint lastNi = hashTableReader.ReadUInt32(); // Unused.
+
         _featureOffset = hashTableReader.Offset;
         return result;
     }

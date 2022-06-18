@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using AsmResolver.IO;
 using AsmResolver.Symbols.Pdb.Metadata.Info;
 using AsmResolver.Symbols.Pdb.Msf;
 using Xunit;
@@ -8,11 +10,19 @@ namespace AsmResolver.Symbols.Pdb.Tests.Metadata.Info;
 
 public class InfoStreamTest
 {
-    [Fact]
-    public void Read()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ReadWrite(bool rebuild)
     {
         var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
         var infoStream = InfoStream.FromReader(file.Streams[1].CreateReader());
+        if (rebuild)
+        {
+            using var stream = new MemoryStream();
+            infoStream.Write(new BinaryStreamWriter(stream));
+            infoStream = InfoStream.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+        }
 
         Assert.Equal(InfoStreamVersion.VC70, infoStream.Version);
         Assert.Equal(1u, infoStream.Age);
