@@ -76,4 +76,22 @@ public class SerializedDbiStream : DbiStream
 
         return result;
     }
+
+    /// <inheritdoc />
+    protected override IList<SectionContribution> GetSectionContributions()
+    {
+        var result = new List<SectionContribution>();
+
+        var reader = _sectionContributionReader.Fork();
+        var version = (SectionContributionStreamVersion) reader.ReadUInt32();
+
+        while (reader.CanRead(1))
+        {
+            result.Add(SectionContribution.FromReader(ref reader));
+            if (version == SectionContributionStreamVersion.V2)
+                reader.ReadUInt32();
+        }
+
+        return result;
+    }
 }

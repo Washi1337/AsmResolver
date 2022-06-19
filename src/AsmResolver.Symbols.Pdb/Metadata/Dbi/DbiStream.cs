@@ -16,6 +16,7 @@ public class DbiStream : SegmentBase
     public const int StreamIndex = 3;
 
     private IList<ModuleDescriptor>? _modules;
+    private IList<SectionContribution>? _sectionContributions;
 
     /// <summary>
     /// Gets or sets the version signature assigned to the DBI stream.
@@ -145,10 +146,35 @@ public class DbiStream : SegmentBase
     }
 
     /// <summary>
-    /// Obtains the list of modules
+    /// Gets a collection of section contributions describing the layout of the sections of the final executable file.
     /// </summary>
-    /// <returns></returns>
+    public IList<SectionContribution> SectionContributions
+    {
+        get
+        {
+            if (_sectionContributions is null)
+                Interlocked.CompareExchange(ref _sectionContributions, GetSectionContributions(), null);
+            return _sectionContributions;
+        }
+    }
+
+    /// <summary>
+    /// Obtains the list of module descriptors.
+    /// </summary>
+    /// <returns>The module descriptors</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="Modules"/> property.
+    /// </remarks>
     protected virtual IList<ModuleDescriptor> GetModules() => new List<ModuleDescriptor>();
+
+    /// <summary>
+    /// Obtains the list of section contributions.
+    /// </summary>
+    /// <returns>The section contributions.</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="SectionContributions"/> property.
+    /// </remarks>
+    protected virtual IList<SectionContribution> GetSectionContributions() => new List<SectionContribution>();
 
     /// <summary>
     /// Reads a single DBI stream from the provided input stream.
