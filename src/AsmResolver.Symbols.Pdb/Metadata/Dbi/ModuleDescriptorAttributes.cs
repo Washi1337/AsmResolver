@@ -14,7 +14,7 @@ public enum ModuleDescriptorAttributes : ushort
     Dirty = 1,
 
     /// <summary>
-    /// Indicates the module contains Edit & Continue information.
+    /// Indicates the module contains Edit &amp; Continue information.
     /// </summary>
     EC = 2,
 

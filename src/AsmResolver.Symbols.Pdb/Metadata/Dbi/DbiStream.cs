@@ -17,6 +17,7 @@ public class DbiStream : SegmentBase
 
     private IList<ModuleDescriptor>? _modules;
     private IList<SectionContribution>? _sectionContributions;
+    private IList<SectionMap>? _sectionMaps;
 
     /// <summary>
     /// Gets or sets the version signature assigned to the DBI stream.
@@ -159,6 +160,24 @@ public class DbiStream : SegmentBase
     }
 
     /// <summary>
+    /// Gets a collection of section mappings stored in the section mapping sub stream.
+    /// </summary>
+    /// <remarks>
+    /// The exact purpose of this is unknown, but it seems to be always containing a copy of the sections in the final
+    /// executable file.
+    /// </remarks>
+    public IList<SectionMap> SectionMaps
+    {
+        get
+        {
+            if (_sectionMaps is null)
+                Interlocked.CompareExchange(ref _sectionMaps, GetSectionMaps(), null);
+            return _sectionMaps;
+
+        }
+    }
+
+    /// <summary>
     /// Obtains the list of module descriptors.
     /// </summary>
     /// <returns>The module descriptors</returns>
@@ -175,6 +194,15 @@ public class DbiStream : SegmentBase
     /// This method is called upon initialization of the <see cref="SectionContributions"/> property.
     /// </remarks>
     protected virtual IList<SectionContribution> GetSectionContributions() => new List<SectionContribution>();
+
+    /// <summary>
+    /// Obtains the list of section maps.
+    /// </summary>
+    /// <returns>The section maps.</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="SectionMaps"/> property.
+    /// </remarks>
+    protected virtual IList<SectionMap> GetSectionMaps() => new List<SectionMap>();
 
     /// <summary>
     /// Reads a single DBI stream from the provided input stream.

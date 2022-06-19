@@ -94,4 +94,20 @@ public class SerializedDbiStream : DbiStream
 
         return result;
     }
+
+    /// <inheritdoc />
+    protected override IList<SectionMap> GetSectionMaps()
+    {
+        var result = new List<SectionMap>();
+
+        var reader = _sectionMapReader.Fork();
+
+        ushort count = reader.ReadUInt16();
+        ushort logCount = reader.ReadUInt16();
+
+        for (int i = 0; i < count; i++)
+            result.Add(SectionMap.FromReader(ref reader));
+
+        return result;
+    }
 }

@@ -93,4 +93,24 @@ public class DbiStreamTest
             (24, 0), (10, 0), (14, 0), (2, 0), (31, 0), (3, 0), (3, 0)
         }, dbiStream.SectionContributions.Select(x => (x.ModuleIndex, x.DataCrc)));
     }
+
+    [Fact]
+    public void ReadSectionMap()
+    {
+        var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
+        var dbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
+
+        Assert.Equal(new (ushort, ushort, ushort, ushort, ushort, ushort, uint, uint)[]
+            {
+                (0x010d, 0x0000, 0x0000, 0x0001, 0xffff, 0xffff, 0x00000000, 0x00000ce8),
+                (0x0109, 0x0000, 0x0000, 0x0002, 0xffff, 0xffff, 0x00000000, 0x00000834),
+                (0x010b, 0x0000, 0x0000, 0x0003, 0xffff, 0xffff, 0x00000000, 0x00000394),
+                (0x0109, 0x0000, 0x0000, 0x0004, 0xffff, 0xffff, 0x00000000, 0x000000f8),
+                (0x0109, 0x0000, 0x0000, 0x0005, 0xffff, 0xffff, 0x00000000, 0x0000013c),
+                (0x0208, 0x0000, 0x0000, 0x0000, 0xffff, 0xffff, 0x00000000, 0xffffffff),
+            },
+            dbiStream.SectionMaps.Select(m => ((ushort)
+                m.Attributes, m.LogicalOverlayNumber, m.Group, m.Frame,
+                m.SectionName, m.ClassName, m.Offset, m.SectionLength)));
+    }
 }
