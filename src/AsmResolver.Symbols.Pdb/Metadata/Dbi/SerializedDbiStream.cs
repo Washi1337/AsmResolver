@@ -98,13 +98,12 @@ public class SerializedDbiStream : DbiStream
     /// <inheritdoc />
     protected override IList<SectionMap> GetSectionMaps()
     {
-        var result = new List<SectionMap>();
-
         var reader = _sectionMapReader.Fork();
 
         ushort count = reader.ReadUInt16();
         ushort logCount = reader.ReadUInt16();
 
+        var result = new List<SectionMap>(count);
         for (int i = 0; i < count; i++)
             result.Add(SectionMap.FromReader(ref reader));
 
@@ -132,8 +131,6 @@ public class SerializedDbiStream : DbiStream
     /// <inheritdoc />
     protected override IList<SourceFileCollection> GetSourceFiles()
     {
-        var result = new List<SourceFileCollection>();
-
         var reader = _sourceInfoReader.Fork();
 
         ushort moduleCount = reader.ReadUInt16();
@@ -158,6 +155,7 @@ public class SerializedDbiStream : DbiStream
         var stringReaderBuffer = reader.ForkRelative((uint) (reader.RelativeOffset + actualFileCount * sizeof(uint)));
 
         // Construct source file lists.
+        var result = new List<SourceFileCollection>(moduleCount);
         for (int i = 0; i < moduleCount; i++)
         {
             var files = new SourceFileCollection(moduleIndices[i]);
@@ -173,6 +171,19 @@ public class SerializedDbiStream : DbiStream
 
             result.Add(files);
         }
+
+        return result;
+    }
+
+    /// <inheritdoc />
+    protected override IList<ushort> GetExtraStreamIndices()
+    {
+        var reader = _optionalDebugHeaderReader.Fork();
+
+        var result = new List<ushort>((int) (reader.Length / sizeof(ushort)));
+
+        while (reader.CanRead(sizeof(ushort)))
+            result.Add(reader.ReadUInt16());
 
         return result;
     }

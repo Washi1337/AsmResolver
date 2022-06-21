@@ -158,4 +158,15 @@ public class DbiStreamTest
             },
             firstThreeActualFileLists);
     }
+
+    [Fact]
+    public void ReadExtraDebugIndices()
+    {
+        var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
+        var dbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
+        Assert.Equal(new ushort[]
+        {
+            0x7, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xB, 0xFFFF, 0xFFFF, 0xFFFF, 0xD, 0xFFFF
+        }, dbiStream.ExtraStreamIndices);
+    }
 }

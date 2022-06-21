@@ -21,6 +21,7 @@ public class DbiStream : SegmentBase
     private readonly LazyVariable<ISegment> _typeServerMapStream;
     private readonly LazyVariable<ISegment> _ecStream;
     private IList<SourceFileCollection>? _sourceFiles;
+    private IList<ushort>? _extraStreamIndices;
 
     /// <summary>
     /// Creates a new empty DBI stream.
@@ -233,6 +234,19 @@ public class DbiStream : SegmentBase
     }
 
     /// <summary>
+    /// Gets a collection of indices referring to additional debug streams in the MSF file.
+    /// </summary>
+    public IList<ushort> ExtraStreamIndices
+    {
+        get
+        {
+            if (_extraStreamIndices is null)
+                Interlocked.CompareExchange(ref _extraStreamIndices, GetExtraStreamIndices(), null);
+            return _extraStreamIndices;
+        }
+    }
+
+    /// <summary>
     /// Reads a single DBI stream from the provided input stream.
     /// </summary>
     /// <param name="reader">The input stream.</param>
@@ -292,6 +306,15 @@ public class DbiStream : SegmentBase
     /// This method is called upon initialization of the <see cref="SourceFiles"/> property.
     /// </remarks>
     protected virtual IList<SourceFileCollection> GetSourceFiles() => new List<SourceFileCollection>();
+
+    /// <summary>
+    /// Obtains the list of indices referring to additional debug streams in the MSF file.
+    /// </summary>
+    /// <returns>The list of indices.</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="ExtraStreamIndices"/> property.
+    /// </remarks>
+    protected virtual IList<ushort> GetExtraStreamIndices() => new List<ushort>();
 
     /// <inheritdoc />
     public override uint GetPhysicalSize()
