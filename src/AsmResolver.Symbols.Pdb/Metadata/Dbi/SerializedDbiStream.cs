@@ -128,4 +128,52 @@ public class SerializedDbiStream : DbiStream
             ? reader.ReadSegment(reader.Length)
             : null;
     }
+
+    /// <inheritdoc />
+    protected override IList<SourceFileCollection> GetSourceFiles()
+    {
+        var result = new List<SourceFileCollection>();
+
+        var reader = _sourceInfoReader.Fork();
+
+        ushort moduleCount = reader.ReadUInt16();
+        ushort sourceFileCount = reader.ReadUInt16();
+
+        // Read module indices.
+        ushort[] moduleIndices = new ushort[moduleCount];
+        for (int i = 0; i < moduleCount; i++)
+            moduleIndices[i] = reader.ReadUInt16();
+
+        // Read module source file counts.
+        int actualFileCount = 0;
+        ushort[] moduleFileCounts = new ushort[moduleCount];
+        for (int i = 0; i < moduleCount; i++)
+        {
+            ushort count = reader.ReadUInt16();
+            moduleFileCounts[i] = count;
+            actualFileCount += count;
+        }
+
+        // Scope on the name buffer.
+        var stringReaderBuffer = reader.ForkRelative((uint) (reader.RelativeOffset + actualFileCount * sizeof(uint)));
+
+        // Construct source file lists.
+        for (int i = 0; i < moduleCount; i++)
+        {
+            var files = new SourceFileCollection(moduleIndices[i]);
+            ushort fileCount = moduleFileCounts[i];
+
+            // Read all file paths for this module.
+            for (int j = 0; j < fileCount; j++)
+            {
+                uint nameOffset = reader.ReadUInt32();
+                var nameReader = stringReaderBuffer.ForkRelative(nameOffset);
+                files.Add(new Utf8String(nameReader.ReadBytesUntil(0, false)));
+            }
+
+            result.Add(files);
+        }
+
+        return result;
+    }
 }

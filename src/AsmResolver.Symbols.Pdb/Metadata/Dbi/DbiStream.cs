@@ -20,7 +20,11 @@ public class DbiStream : SegmentBase
     private IList<SectionMap>? _sectionMaps;
     private readonly LazyVariable<ISegment> _typeServerMapStream;
     private readonly LazyVariable<ISegment> _ecStream;
+    private IList<SourceFileCollection>? _sourceFiles;
 
+    /// <summary>
+    /// Creates a new empty DBI stream.
+    /// </summary>
     public DbiStream()
     {
         _typeServerMapStream = new LazyVariable<ISegment>(GetTypeServerMapStream);
@@ -181,7 +185,6 @@ public class DbiStream : SegmentBase
             if (_sectionMaps is null)
                 Interlocked.CompareExchange(ref _sectionMaps, GetSectionMaps(), null);
             return _sectionMaps;
-
         }
     }
 
@@ -209,6 +212,24 @@ public class DbiStream : SegmentBase
     {
         get => _ecStream.Value;
         set => _ecStream.Value = value;
+    }
+
+    /// <summary>
+    /// Gets a collection of source files assigned to each module in <see cref="Modules"/>.
+    /// </summary>
+    /// <remarks>
+    /// Every collection of source files within this list corresponds to exactly the module within <see cref="Modules"/>
+    /// at the same index. For example, the first source file list in this collection is the source file list of the
+    /// first module.
+    /// </remarks>
+    public IList<SourceFileCollection> SourceFiles
+    {
+        get
+        {
+            if (_sourceFiles is null)
+                Interlocked.CompareExchange(ref _sourceFiles, GetSourceFiles(), null);
+            return _sourceFiles;
+        }
     }
 
     /// <summary>
@@ -262,6 +283,15 @@ public class DbiStream : SegmentBase
     /// This method is called upon initialization of the <see cref="ECStream"/> property.
     /// </remarks>
     protected virtual ISegment? GetECStream() => null;
+
+    /// <summary>
+    /// Obtains a table that assigns a list of source files to every module referenced in the PDB file.
+    /// </summary>
+    /// <returns>The table.</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="SourceFiles"/> property.
+    /// </remarks>
+    protected virtual IList<SourceFileCollection> GetSourceFiles() => new List<SourceFileCollection>();
 
     /// <inheritdoc />
     public override uint GetPhysicalSize()

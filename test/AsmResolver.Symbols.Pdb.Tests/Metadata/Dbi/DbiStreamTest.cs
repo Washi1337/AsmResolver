@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.Symbols.Pdb.Metadata.Dbi;
@@ -112,5 +113,49 @@ public class DbiStreamTest
             dbiStream.SectionMaps.Select(m => ((ushort)
                 m.Attributes, m.LogicalOverlayNumber, m.Group, m.Frame,
                 m.SectionName, m.ClassName, m.Offset, m.SectionLength)));
+    }
+
+    [Fact]
+    public void ReadSourceFiles()
+    {
+        var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
+        var dbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
+
+        string[][] firstThreeActualFileLists = dbiStream.SourceFiles
+            .Take(3)
+            .Select(x => x
+                .Select(y => y.ToString())
+                .ToArray()
+            ).ToArray();
+
+        Assert.Equal(new[]
+            {
+                Array.Empty<string>(),
+                new[]
+                {
+                    @"C:\Users\Admin\source\repos\AsmResolver\test\TestBinaries\Native\SimpleDll\pch.h",
+                    @"C:\Users\Admin\source\repos\AsmResolver\test\TestBinaries\Native\SimpleDll\dllmain.cpp",
+                    @"C:\Users\Admin\source\repos\AsmResolver\test\TestBinaries\Native\SimpleDll\Release\SimpleDll.pch",
+                },
+                new[]
+                {
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\winuser.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\basetsd.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\winbase.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\stralign.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\guiddef.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\winerror.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\corecrt_wstring.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\processthreadsapi.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\winnt.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\ctype.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\string.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\corecrt_memory.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\memoryapi.h",
+                    @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\corecrt_memcpy_s.h",
+                    @"C:\Users\Admin\source\repos\AsmResolver\test\TestBinaries\Native\SimpleDll\Release\SimpleDll.pch",
+                }
+            },
+            firstThreeActualFileLists);
     }
 }
