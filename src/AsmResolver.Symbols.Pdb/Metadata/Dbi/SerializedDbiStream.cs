@@ -110,4 +110,11 @@ public class SerializedDbiStream : DbiStream
 
         return result;
     }
+
+    /// <inheritdoc />
+    protected override ISegment? GetTypeServerMap()
+    {
+        var reader = _typeServerMapReader;
+        return reader.ReadSegment(reader.Length);
+    }
 }

@@ -18,6 +18,12 @@ public class DbiStream : SegmentBase
     private IList<ModuleDescriptor>? _modules;
     private IList<SectionContribution>? _sectionContributions;
     private IList<SectionMap>? _sectionMaps;
+    private readonly LazyVariable<ISegment> _typeServerMap;
+
+    public DbiStream()
+    {
+        _typeServerMap = new LazyVariable<ISegment>(GetTypeServerMap);
+    }
 
     /// <summary>
     /// Gets or sets the version signature assigned to the DBI stream.
@@ -178,6 +184,25 @@ public class DbiStream : SegmentBase
     }
 
     /// <summary>
+    /// Gets or sets the contents of the type server map sub stream.
+    /// </summary>
+    /// <remarks>
+    /// The exact purpose of this sub stream is unknown.
+    /// </remarks>
+    public ISegment TypeServerMap
+    {
+        get => _typeServerMap.Value;
+        set => _typeServerMap.Value = value;
+    }
+
+    /// <summary>
+    /// Reads a single DBI stream from the provided input stream.
+    /// </summary>
+    /// <param name="reader">The input stream.</param>
+    /// <returns>The parsed DBI stream.</returns>
+    public static DbiStream FromReader(BinaryStreamReader reader) => new SerializedDbiStream(reader);
+
+    /// <summary>
     /// Obtains the list of module descriptors.
     /// </summary>
     /// <returns>The module descriptors</returns>
@@ -205,11 +230,13 @@ public class DbiStream : SegmentBase
     protected virtual IList<SectionMap> GetSectionMaps() => new List<SectionMap>();
 
     /// <summary>
-    /// Reads a single DBI stream from the provided input stream.
+    /// Obtains the contents of the type server map sub stream.
     /// </summary>
-    /// <param name="reader">The input stream.</param>
-    /// <returns>The parsed DBI stream.</returns>
-    public static DbiStream FromReader(BinaryStreamReader reader) => new SerializedDbiStream(reader);
+    /// <returns>The contents of the sub stream.</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="TypeServerMap"/> property.
+    /// </remarks>
+    protected virtual ISegment? GetTypeServerMap() => null;
 
     /// <inheritdoc />
     public override uint GetPhysicalSize()
