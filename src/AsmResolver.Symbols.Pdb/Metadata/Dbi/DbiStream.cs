@@ -18,11 +18,13 @@ public class DbiStream : SegmentBase
     private IList<ModuleDescriptor>? _modules;
     private IList<SectionContribution>? _sectionContributions;
     private IList<SectionMap>? _sectionMaps;
-    private readonly LazyVariable<ISegment> _typeServerMap;
+    private readonly LazyVariable<ISegment> _typeServerMapStream;
+    private readonly LazyVariable<ISegment> _ecStream;
 
     public DbiStream()
     {
-        _typeServerMap = new LazyVariable<ISegment>(GetTypeServerMap);
+        _typeServerMapStream = new LazyVariable<ISegment>(GetTypeServerMapStream);
+        _ecStream = new LazyVariable<ISegment>(GetECStream);
     }
 
     /// <summary>
@@ -187,12 +189,26 @@ public class DbiStream : SegmentBase
     /// Gets or sets the contents of the type server map sub stream.
     /// </summary>
     /// <remarks>
-    /// The exact purpose of this sub stream is unknown.
+    /// The exact purpose and layout of this sub stream is unknown, hence this property exposes the stream as
+    /// a raw segment.
     /// </remarks>
-    public ISegment TypeServerMap
+    public ISegment TypeServerMapStream
     {
-        get => _typeServerMap.Value;
-        set => _typeServerMap.Value = value;
+        get => _typeServerMapStream.Value;
+        set => _typeServerMapStream.Value = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the contents of the Edit-and-Continue sub stream.
+    /// </summary>
+    /// <remarks>
+    /// The exact purpose and layout of this sub stream is unknown, hence this property exposes the stream as
+    /// a raw segment.
+    /// </remarks>
+    public ISegment ECStream
+    {
+        get => _ecStream.Value;
+        set => _ecStream.Value = value;
     }
 
     /// <summary>
@@ -234,9 +250,18 @@ public class DbiStream : SegmentBase
     /// </summary>
     /// <returns>The contents of the sub stream.</returns>
     /// <remarks>
-    /// This method is called upon initialization of the <see cref="TypeServerMap"/> property.
+    /// This method is called upon initialization of the <see cref="TypeServerMapStream"/> property.
     /// </remarks>
-    protected virtual ISegment? GetTypeServerMap() => null;
+    protected virtual ISegment? GetTypeServerMapStream() => null;
+
+    /// <summary>
+    /// Obtains the contents of the EC sub stream.
+    /// </summary>
+    /// <returns>The contents of the sub stream.</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="ECStream"/> property.
+    /// </remarks>
+    protected virtual ISegment? GetECStream() => null;
 
     /// <inheritdoc />
     public override uint GetPhysicalSize()

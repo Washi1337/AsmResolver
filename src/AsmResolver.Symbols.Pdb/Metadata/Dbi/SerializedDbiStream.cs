@@ -112,9 +112,20 @@ public class SerializedDbiStream : DbiStream
     }
 
     /// <inheritdoc />
-    protected override ISegment? GetTypeServerMap()
+    protected override ISegment? GetTypeServerMapStream()
     {
-        var reader = _typeServerMapReader;
-        return reader.ReadSegment(reader.Length);
+        var reader = _typeServerMapReader.Fork();
+        return reader.Length != 0
+            ? reader.ReadSegment(reader.Length)
+            : null;
+    }
+
+    /// <inheritdoc />
+    protected override ISegment? GetECStream()
+    {
+        var reader = _ecReader.Fork();
+        return reader.Length != 0
+            ? reader.ReadSegment(reader.Length)
+            : null;
     }
 }
