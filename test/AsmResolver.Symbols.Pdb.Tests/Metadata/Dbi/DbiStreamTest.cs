@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Linq;
+using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.Symbols.Pdb.Metadata.Dbi;
 using AsmResolver.Symbols.Pdb.Msf;
@@ -9,22 +11,39 @@ namespace AsmResolver.Symbols.Pdb.Tests.Metadata.Dbi;
 
 public class DbiStreamTest
 {
-    [Fact]
-    public void ReadHeader()
+    private DbiStream GetDbiStream(bool rebuild)
     {
         var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
         var dbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
+
+        if (rebuild)
+        {
+            using var stream = new MemoryStream();
+            dbiStream.Write(new BinaryStreamWriter(stream));
+            dbiStream = DbiStream.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+        }
+
+        return dbiStream;
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Header(bool rebuild)
+    {
+        var dbiStream = GetDbiStream(rebuild);
 
         Assert.Equal(1u, dbiStream.Age);
         Assert.Equal(DbiAttributes.None, dbiStream.Attributes);
         Assert.Equal(MachineType.I386, dbiStream.Machine);
     }
 
-    [Fact]
-    public void ReadModuleNames()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ModuleNames(bool rebuild)
     {
-        var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
-        var dbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
+        var dbiStream = GetDbiStream(rebuild);
 
         Assert.Equal(new[]
         {
@@ -63,11 +82,12 @@ public class DbiStreamTest
         }, dbiStream.Modules.Select(m => m.ModuleName?.Value));
     }
 
-    [Fact]
-    public void ReadSectionContributions()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SectionContributions(bool rebuild)
     {
-        var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
-        var dbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
+        var dbiStream = GetDbiStream(rebuild);
 
         Assert.Equal(new (ushort, uint)[]
         {
@@ -95,11 +115,12 @@ public class DbiStreamTest
         }, dbiStream.SectionContributions.Select(x => (x.ModuleIndex, x.DataCrc)));
     }
 
-    [Fact]
-    public void ReadSectionMap()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SectionMaps(bool rebuild)
     {
-        var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
-        var dbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
+        var dbiStream = GetDbiStream(rebuild);
 
         Assert.Equal(new (ushort, ushort, ushort, ushort, ushort, ushort, uint, uint)[]
             {
@@ -115,11 +136,12 @@ public class DbiStreamTest
                 m.SectionName, m.ClassName, m.Offset, m.SectionLength)));
     }
 
-    [Fact]
-    public void ReadSourceFiles()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SourceFiles(bool rebuild)
     {
-        var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
-        var dbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
+        var dbiStream = GetDbiStream(rebuild);
 
         string[][] firstThreeActualFileLists = dbiStream.SourceFiles
             .Take(3)
@@ -159,11 +181,13 @@ public class DbiStreamTest
             firstThreeActualFileLists);
     }
 
-    [Fact]
-    public void ReadExtraDebugIndices()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ExtraDebugIndices(bool rebuild)
     {
-        var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
-        var dbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
+        var dbiStream = GetDbiStream(rebuild);
+
         Assert.Equal(new ushort[]
         {
             0x7, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xB, 0xFFFF, 0xFFFF, 0xFFFF, 0xD, 0xFFFF

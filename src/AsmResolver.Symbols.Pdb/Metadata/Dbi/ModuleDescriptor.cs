@@ -161,21 +161,21 @@ public class ModuleDescriptor : IWritable
     /// <inheritdoc />
     public uint GetPhysicalSize()
     {
-        return sizeof(uint) // Unused1
-               + SectionContribution.GetPhysicalSize() // SectionContribution
-               + sizeof(ModuleDescriptorAttributes) // Attributes
-               + sizeof(ushort) // SymbolStreamIndex
-               + sizeof(uint) // SymbolDataSize
-               + sizeof(uint) // SymbolC11DataSize
-               + sizeof(uint) // SymbolC13DataSize
-               + sizeof(ushort) // SourceFileCount
-               + sizeof(char) * 2 // Padding
-               + sizeof(uint) // Unused2
-               + sizeof(uint) // SourceFileNameIndex
-               + sizeof(uint) // PdbFilePathNameIndex
-               + (uint) (ModuleName?.ByteCount ?? 0) + 1 // ModuleName
-               + (uint) (ObjectFileName?.ByteCount ?? 0) + 1 // ObjectFileName
-            ;
+        return (sizeof(uint) // Unused1
+                + SectionContribution.GetPhysicalSize() // SectionContribution
+                + sizeof(ModuleDescriptorAttributes) // Attributes
+                + sizeof(ushort) // SymbolStreamIndex
+                + sizeof(uint) // SymbolDataSize
+                + sizeof(uint) // SymbolC11DataSize
+                + sizeof(uint) // SymbolC13DataSize
+                + sizeof(ushort) // SourceFileCount
+                + sizeof(ushort) // Padding
+                + sizeof(uint) // Unused2
+                + sizeof(uint) // SourceFileNameIndex
+                + sizeof(uint) // PdbFilePathNameIndex
+                + (uint) (ModuleName?.ByteCount ?? 0) + 1 // ModuleName
+                + (uint) (ObjectFileName?.ByteCount ?? 0) + 1 // ObjectFileName
+            ).Align(4);
     }
 
     /// <inheritdoc />

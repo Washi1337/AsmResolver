@@ -10,6 +10,21 @@ namespace AsmResolver.Symbols.Pdb.Metadata.Dbi;
 public class SectionContribution : IWritable
 {
     /// <summary>
+    /// The total size in bytes of a single <see cref="SectionContribution"/> on the disk.
+    /// </summary>
+    public const int EntrySize =
+            sizeof(ushort) // Section
+            + sizeof(ushort) // Padding1
+            + sizeof(uint) // Offset
+            + sizeof(uint) // Size
+            + sizeof(uint) // Characteristics
+            + sizeof(ushort) // ModuleIndex
+            + sizeof(ushort) // Padding2
+            + sizeof(uint) // DataCrc
+            + sizeof(uint) // RelocCrc
+        ;
+
+    /// <summary>
     /// Gets or sets the index of the section.
     /// </summary>
     public ushort Section
@@ -95,19 +110,7 @@ public class SectionContribution : IWritable
     }
 
     /// <inheritdoc />
-    public uint GetPhysicalSize()
-    {
-        return sizeof(ushort) // Section
-               + sizeof(ushort) // Padding1
-               + sizeof(uint) // Offset
-               + sizeof(uint) // Size
-               + sizeof(uint) // Characteristics
-               + sizeof(ushort) // ModuleIndex
-               + sizeof(ushort) // Padding2
-               + sizeof(uint) // DataCrc
-               + sizeof(uint) // RelocCrc
-            ;
-    }
+    public uint GetPhysicalSize() => EntrySize;
 
     /// <inheritdoc />
     public void Write(IBinaryStreamWriter writer)

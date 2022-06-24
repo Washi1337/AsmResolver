@@ -8,6 +8,20 @@ namespace AsmResolver.Symbols.Pdb.Metadata.Dbi;
 public class SectionMap : IWritable
 {
     /// <summary>
+    /// The total size in bytes of a single <see cref="SectionMap"/> on the disk.
+    /// </summary>
+    public const int EntrySize =
+            sizeof(ushort) // Attributes
+            + sizeof(ushort) // Ovl
+            + sizeof(ushort) // Group
+            + sizeof(ushort) // Frame
+            + sizeof(ushort) // SectionName
+            + sizeof(ushort) // ClassName
+            + sizeof(uint) // Offset
+            + sizeof(uint) // SectionLength
+        ;
+
+    /// <summary>
     /// Gets or sets the attributes assigned to this section map.
     /// </summary>
     public SectionMapAttributes Attributes
@@ -100,18 +114,7 @@ public class SectionMap : IWritable
     }
 
     /// <inheritdoc />
-    public uint GetPhysicalSize()
-    {
-        return sizeof(ushort) // Attributes
-               + sizeof(ushort) // Ovl
-               + sizeof(ushort) // Group
-               + sizeof(ushort) // Frame
-               + sizeof(ushort) // SectionName
-               + sizeof(ushort) // ClassName
-               + sizeof(uint) // Offset
-               + sizeof(uint) // SectionLength
-            ;
-    }
+    public uint GetPhysicalSize() => EntrySize;
 
     /// <inheritdoc />
     public void Write(IBinaryStreamWriter writer)

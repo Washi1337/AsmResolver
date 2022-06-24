@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
@@ -18,8 +20,8 @@ public class DbiStream : SegmentBase
     private IList<ModuleDescriptor>? _modules;
     private IList<SectionContribution>? _sectionContributions;
     private IList<SectionMap>? _sectionMaps;
-    private readonly LazyVariable<ISegment> _typeServerMapStream;
-    private readonly LazyVariable<ISegment> _ecStream;
+    private readonly LazyVariable<ISegment?> _typeServerMapStream;
+    private readonly LazyVariable<ISegment?> _ecStream;
     private IList<SourceFileCollection>? _sourceFiles;
     private IList<ushort>? _extraStreamIndices;
 
@@ -28,8 +30,8 @@ public class DbiStream : SegmentBase
     /// </summary>
     public DbiStream()
     {
-        _typeServerMapStream = new LazyVariable<ISegment>(GetTypeServerMapStream);
-        _ecStream = new LazyVariable<ISegment>(GetECStream);
+        _typeServerMapStream = new LazyVariable<ISegment?>(GetTypeServerMapStream);
+        _ecStream = new LazyVariable<ISegment?>(GetECStream);
     }
 
     /// <summary>
@@ -196,7 +198,7 @@ public class DbiStream : SegmentBase
     /// The exact purpose and layout of this sub stream is unknown, hence this property exposes the stream as
     /// a raw segment.
     /// </remarks>
-    public ISegment TypeServerMapStream
+    public ISegment? TypeServerMapStream
     {
         get => _typeServerMapStream.Value;
         set => _typeServerMapStream.Value = value;
@@ -209,7 +211,7 @@ public class DbiStream : SegmentBase
     /// The exact purpose and layout of this sub stream is unknown, hence this property exposes the stream as
     /// a raw segment.
     /// </remarks>
-    public ISegment ECStream
+    public ISegment? ECStream
     {
         get => _ecStream.Value;
         set => _ecStream.Value = value;
@@ -319,12 +321,247 @@ public class DbiStream : SegmentBase
     /// <inheritdoc />
     public override uint GetPhysicalSize()
     {
-        throw new System.NotImplementedException();
+        return GetHeaderSize()
+               + GetModuleStreamSize()
+               + GetSectionContributionStreamSize()
+               + GetSectionMapStreamSize()
+               + GetSourceInfoStreamSize()
+               + GetTypeServerMapStreamSize()
+               + GetECStreamSize()
+               + GetOptionalDebugStreamSize()
+            ;
+    }
+
+    private static uint GetHeaderSize()
+    {
+        return sizeof(int) // VersionSignature
+               + sizeof(DbiStreamVersion) // VersionHeader
+               + sizeof(uint) // Age
+               + sizeof(ushort) // GlobalStreamIndex
+               + sizeof(ushort) // BuildNumber
+               + sizeof(ushort) // PublicStreamIndex
+               + sizeof(ushort) // PdbDllVersion
+               + sizeof(ushort) // SymbolRecordStreamIndex
+               + sizeof(ushort) // PdbDllRbld
+               + sizeof(uint) // ModuleInfoSize
+               + sizeof(uint) // SectionContributionSize
+               + sizeof(uint) // SectionMapSize
+               + sizeof(uint) // SourceInfoSize
+               + sizeof(uint) // TypeServerMapSize
+               + sizeof(uint) // MfcTypeServerIndex
+               + sizeof(uint) // OptionalDebugStreamSize
+               + sizeof(uint) // ECStreamSize
+               + sizeof(DbiAttributes) // Attributes
+               + sizeof(MachineType) // MachineType
+               + sizeof(uint) // Padding
+            ;
+    }
+
+    private uint GetModuleStreamSize()
+    {
+        return ((uint) Modules.Sum(m => m.GetPhysicalSize())).Align(sizeof(uint));
+    }
+
+    private uint GetSectionContributionStreamSize()
+    {
+        return sizeof(uint) // version
+               + SectionContribution.EntrySize * (uint) SectionContributions.Count;
+    }
+
+    private uint GetSectionMapStreamSize()
+    {
+        return sizeof(ushort) // Count
+               + sizeof(ushort) // LogCount
+               + SectionMap.EntrySize * (uint) SectionMaps.Count;
+    }
+
+    private uint GetSourceInfoStreamSize()
+    {
+        uint totalFileCount = 0;
+        uint nameBufferSize = 0;
+        var stringOffsets = new Dictionary<Utf8String, uint>();
+
+        // Simulate the construction of name buffer
+        for (int i = 0; i < SourceFiles.Count; i++)
+        {
+            var collection = SourceFiles[i];
+            totalFileCount += (uint) collection.Count;
+
+            for (int j = 0; j < collection.Count; j++)
+            {
+                // If name is not added yet, "append" to the name buffer.
+                var name = collection[j];
+                if (!stringOffsets.ContainsKey(name))
+                {
+                    stringOffsets[name] = nameBufferSize;
+                    nameBufferSize += (uint) name.ByteCount + 1u;
+                }
+            }
+        }
+
+        return (sizeof(ushort) // ModuleCount
+                + sizeof(ushort) // SourceFileCount
+                + sizeof(ushort) * (uint) SourceFiles.Count // ModuleIndices
+                + sizeof(ushort) * (uint) SourceFiles.Count // SourceFileCounts
+                + sizeof(uint) * totalFileCount // NameOffsets
+                + nameBufferSize // NameBuffer
+            ).Align(4);
+    }
+
+    private uint GetTypeServerMapStreamSize()
+    {
+        return TypeServerMapStream?.GetPhysicalSize().Align(sizeof(uint)) ?? 0u;
+    }
+
+    private uint GetOptionalDebugStreamSize()
+    {
+        return (uint) (ExtraStreamIndices.Count * sizeof(ushort));
+    }
+
+    private uint GetECStreamSize()
+    {
+        return ECStream?.GetPhysicalSize() ?? 0u;
     }
 
     /// <inheritdoc />
     public override void Write(IBinaryStreamWriter writer)
     {
-        throw new System.NotImplementedException();
+        WriteHeader(writer);
+        WriteModuleStream(writer);
+        WriteSectionContributionStream(writer);
+        WriteSectionMapStream(writer);
+        WriteSourceInfoStream(writer);
+        WriteTypeServerMapStream(writer);
+        WriteECStream(writer);
+        WriteOptionalDebugStream(writer);
     }
+
+    private void WriteHeader(IBinaryStreamWriter writer)
+    {
+        writer.WriteInt32(VersionSignature);
+        writer.WriteUInt32((uint) VersionHeader);
+        writer.WriteUInt32(Age);
+        writer.WriteUInt16(GlobalStreamIndex);
+        writer.WriteUInt16(BuildNumber);
+        writer.WriteUInt16(PublicStreamIndex);
+        writer.WriteUInt16(PdbDllVersion);
+        writer.WriteUInt16(SymbolRecordStreamIndex);
+        writer.WriteUInt16(PdbDllRbld);
+
+        writer.WriteUInt32(GetModuleStreamSize());
+        writer.WriteUInt32(GetSectionContributionStreamSize());
+        writer.WriteUInt32(GetSectionMapStreamSize());
+        writer.WriteUInt32(GetSourceInfoStreamSize());
+        writer.WriteUInt32(GetTypeServerMapStreamSize());
+
+        writer.WriteUInt32(MfcTypeServerIndex);
+
+        writer.WriteUInt32(GetOptionalDebugStreamSize());
+        writer.WriteUInt32(GetECStreamSize());
+
+        writer.WriteUInt16((ushort) Attributes);
+        writer.WriteUInt16((ushort) Machine);
+
+        writer.WriteUInt32(0);
+    }
+
+    private void WriteModuleStream(IBinaryStreamWriter writer)
+    {
+        var modules = Modules;
+        for (int i = 0; i < modules.Count; i++)
+            modules[i].Write(writer);
+
+        writer.Align(sizeof(uint));
+    }
+
+    private void WriteSectionContributionStream(IBinaryStreamWriter writer)
+    {
+        // TODO: make customizable
+        writer.WriteUInt32((uint) SectionContributionStreamVersion.Ver60);
+
+        var contributions = SectionContributions;
+        for (int i = 0; i < contributions.Count; i++)
+            contributions[i].Write(writer);
+
+        writer.Align(sizeof(uint));
+    }
+
+    private void WriteSectionMapStream(IBinaryStreamWriter writer)
+    {
+        var maps = SectionMaps;
+
+        // Count and LogCount.
+        writer.WriteUInt16((ushort) maps.Count);
+        writer.WriteUInt16((ushort) maps.Count);
+
+        // Entries.
+        for (int i = 0; i < maps.Count; i++)
+            maps[i].Write(writer);
+
+        writer.Align(sizeof(uint));
+    }
+
+    private void WriteSourceInfoStream(IBinaryStreamWriter writer)
+    {
+        var sourceFiles = SourceFiles;
+        int totalFileCount = sourceFiles.Sum(x => x.Count);
+
+        // Module and total file count (truncated to 16 bits)
+        writer.WriteUInt16((ushort) (sourceFiles.Count & 0xFFFF));
+        writer.WriteUInt16((ushort) (totalFileCount & 0xFFFF));
+
+        // Module indices. Unsure if this is correct, but this array does not seem to be really used by the ref impl.
+        for (ushort i = 0; i < sourceFiles.Count; i++)
+            writer.WriteUInt16(i);
+
+        // Source file counts.
+        for (int i = 0; i < sourceFiles.Count; i++)
+            writer.WriteUInt16((ushort) sourceFiles[i].Count);
+
+        // Build up string buffer and name offset table.
+        using var stringBuffer = new MemoryStream();
+        var stringWriter = new BinaryStreamWriter(stringBuffer);
+        var stringOffsets = new Dictionary<Utf8String, uint>();
+
+        for (int i = 0; i < sourceFiles.Count; i++)
+        {
+            var collection = sourceFiles[i];
+            for (int j = 0; j < collection.Count; j++)
+            {
+                // If not present already, append to string buffer.
+                var name = collection[j];
+                if (!stringOffsets.TryGetValue(name, out uint offset))
+                {
+                    offset = (uint) stringWriter.Offset;
+                    stringOffsets[name] = offset;
+                    stringWriter.WriteBytes(name.GetBytesUnsafe());
+                    stringWriter.WriteByte(0);
+                }
+
+                // Write name offset
+                writer.WriteUInt32(offset);
+            }
+        }
+
+        // Write string buffer.
+        writer.WriteBytes(stringBuffer.ToArray());
+
+        writer.Align(sizeof(uint));
+    }
+
+    private void WriteTypeServerMapStream(IBinaryStreamWriter writer)
+    {
+        TypeServerMapStream?.Write(writer);
+        writer.Align(sizeof(uint));
+    }
+
+    private void WriteOptionalDebugStream(IBinaryStreamWriter writer)
+    {
+        var extraIndices = ExtraStreamIndices;
+
+        for (int i = 0; i < extraIndices.Count; i++)
+            writer.WriteUInt16(extraIndices[i]);
+    }
+
+    private void WriteECStream(IBinaryStreamWriter writer) => ECStream?.Write(writer);
 }
