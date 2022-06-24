@@ -151,8 +151,8 @@ public class ModuleDescriptor : IWritable
         reader.ReadUInt32();
         result.SourceFileNameIndex = reader.ReadUInt32();
         result.PdbFilePathNameIndex = reader.ReadUInt32();
-        result.ModuleName = new Utf8String(reader.ReadBytesUntil(0, false));
-        result.ObjectFileName = new Utf8String(reader.ReadBytesUntil(0, false));
+        result.ModuleName = reader.ReadUtf8String();
+        result.ObjectFileName = reader.ReadUtf8String();
         reader.Align(4);
 
         return result;

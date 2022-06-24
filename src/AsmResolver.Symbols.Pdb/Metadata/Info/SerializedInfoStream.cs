@@ -42,12 +42,7 @@ public class SerializedInfoStream : InfoStream
         var result = PdbHashTable.FromReader(ref hashTableReader, (key, value) =>
         {
             var stringReader = stringsReader.ForkRelative(key);
-            byte[] rawData = stringReader.ReadBytesUntil(0, false);
-
-            var keyString = rawData.Length != 0
-                ? new Utf8String(rawData)
-                : Utf8String.Empty;
-
+            var keyString = stringReader.ReadUtf8String();
             return (keyString, (int) value);
         });
 

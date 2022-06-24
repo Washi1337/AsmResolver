@@ -166,7 +166,7 @@ public class SerializedDbiStream : DbiStream
             {
                 uint nameOffset = reader.ReadUInt32();
                 var nameReader = stringReaderBuffer.ForkRelative(nameOffset);
-                files.Add(new Utf8String(nameReader.ReadBytesUntil(0, false)));
+                files.Add(nameReader.ReadUtf8String());
             }
 
             result.Add(files);

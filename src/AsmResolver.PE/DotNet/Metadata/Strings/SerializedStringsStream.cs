@@ -65,12 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
             if (!_cachedStrings.TryGetValue(index, out var value) && index < _reader.Length)
             {
                 var stringsReader = _reader.ForkRelative(index);
-                byte[] rawData = stringsReader.ReadBytesUntil(0, false);
-
-                value = rawData.Length != 0
-                    ? new Utf8String(rawData)
-                    : Utf8String.Empty;
-
+                value = stringsReader.ReadUtf8String();
                 _cachedStrings[index] = value;
             }
 

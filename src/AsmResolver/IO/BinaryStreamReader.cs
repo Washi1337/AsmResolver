@@ -396,6 +396,18 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
+        /// Reads a null-terminated UTF-8 string from the input stream.
+        /// </summary>
+        /// <returns>The read UTF-8 string, excluding the null terminator.</returns>
+        public Utf8String ReadUtf8String()
+        {
+            byte[] data = ReadBytesUntil(0, false);
+            return data.Length != 0
+                ? new Utf8String(data)
+                : Utf8String.Empty;
+        }
+
+        /// <summary>
         /// Reads either a 32-bit or a 64-bit number from the input stream.
         /// </summary>
         /// <param name="is32Bit">Indicates the integer to be read is 32-bit or 64-bit.</param>
