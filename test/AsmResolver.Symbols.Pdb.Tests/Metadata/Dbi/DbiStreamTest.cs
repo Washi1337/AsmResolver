@@ -36,6 +36,9 @@ public class DbiStreamTest
         Assert.Equal(1u, dbiStream.Age);
         Assert.Equal(DbiAttributes.None, dbiStream.Attributes);
         Assert.Equal(MachineType.I386, dbiStream.Machine);
+        Assert.Equal(14, dbiStream.BuildMajorVersion);
+        Assert.Equal(29, dbiStream.BuildMinorVersion);
+        Assert.True(dbiStream.IsNewVersionFormat);
     }
 
     [Theory]

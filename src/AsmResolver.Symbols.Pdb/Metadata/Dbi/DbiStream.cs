@@ -32,6 +32,7 @@ public class DbiStream : SegmentBase
     {
         _typeServerMapStream = new LazyVariable<ISegment?>(GetTypeServerMapStream);
         _ecStream = new LazyVariable<ISegment?>(GetECStream);
+        IsNewVersionFormat = true;
     }
 
     /// <summary>
@@ -83,6 +84,33 @@ public class DbiStream : SegmentBase
     {
         get;
         set;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating that the DBI stream is using the new file format (NewDBI).
+    /// </summary>
+    public bool IsNewVersionFormat
+    {
+        get => (BuildNumber & 0x8000) != 0;
+        set => BuildNumber = (ushort) ((BuildNumber & ~0x8000) | (value ? 0x8000 : 0));
+    }
+
+    /// <summary>
+    /// Gets or sets the major version of the toolchain that was used to build the program.
+    /// </summary>
+    public byte BuildMajorVersion
+    {
+        get => (byte) ((BuildNumber >> 8) & 0x7F);
+        set => BuildNumber = (ushort) ((BuildNumber & ~0x7F00) | (value << 8));
+    }
+
+    /// <summary>
+    /// Gets or sets the minor version of the toolchain that was used to build the program.
+    /// </summary>
+    public byte BuildMinorVersion
+    {
+        get => (byte) (BuildNumber & 0xFF);
+        set => BuildNumber = (ushort) ((BuildNumber & ~0x00FF) | value);
     }
 
     /// <summary>

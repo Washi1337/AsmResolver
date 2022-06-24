@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
@@ -28,6 +29,9 @@ public class SerializedDbiStream : DbiStream
         Age = reader.ReadUInt32();
         GlobalStreamIndex = reader.ReadUInt16();
         BuildNumber = reader.ReadUInt16();
+        if (!IsNewVersionFormat)
+            throw new NotSupportedException("The DBI stream uses the legacy file format, which is not supported.");
+
         PublicStreamIndex = reader.ReadUInt16();
         PdbDllVersion = reader.ReadUInt16();
         SymbolRecordStreamIndex = reader.ReadUInt16();
