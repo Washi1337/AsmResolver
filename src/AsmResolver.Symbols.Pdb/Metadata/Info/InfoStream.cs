@@ -175,8 +175,9 @@ public class InfoStream : SegmentBase
         writer.WriteUInt32(0);
 
         // Write feature codes.
-        foreach (var feature in Features)
-            writer.WriteUInt32((uint) feature);
+        var features = Features;
+        for (int i = 0; i < features.Count; i++)
+            writer.WriteUInt32((uint) features[i]);
     }
 
     private static uint ComputeStringHash(Utf8String str)
