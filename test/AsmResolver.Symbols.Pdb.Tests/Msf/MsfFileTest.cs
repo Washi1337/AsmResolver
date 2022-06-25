@@ -1,6 +1,5 @@
 using System.IO;
 using System.Linq;
-using AsmResolver.IO;
 using AsmResolver.Symbols.Pdb.Msf;
 using Xunit;
 

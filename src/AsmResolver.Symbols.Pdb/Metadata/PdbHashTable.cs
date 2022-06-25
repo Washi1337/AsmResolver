@@ -26,8 +26,8 @@ public static class PdbHashTable
         Func<uint, uint, (TKey, TValue)> mapper)
         where TKey : notnull
     {
-        uint size = reader.ReadUInt32();
-        uint capacity = reader.ReadUInt32();
+        uint count = reader.ReadUInt32();
+        reader.ReadUInt32(); // Capacity
 
         uint presentWordCount = reader.ReadUInt32();
         reader.RelativeOffset += presentWordCount * sizeof(uint);
@@ -35,8 +35,8 @@ public static class PdbHashTable
         uint deletedWordCount = reader.ReadUInt32();
         reader.RelativeOffset += deletedWordCount * sizeof(uint);
 
-        var result = new Dictionary<TKey, TValue>();
-        for (int i = 0; i < size; i++)
+        var result = new Dictionary<TKey, TValue>((int) count);
+        for (int i = 0; i < count; i++)
         {
             (uint rawKey, uint rawValue) = (reader.ReadUInt32(), reader.ReadUInt32());
             var (key, value) = mapper(rawKey, rawValue);
@@ -47,7 +47,31 @@ public static class PdbHashTable
     }
 
     /// <summary>
-    /// Serializes a dictionary to a PDB hash table.
+    /// Computes the number of bytes required to store the provided dictionary as a PDB hash table.
+    /// </summary>
+    /// <param name="dictionary">The dictionary to serialize.</param>
+    /// <param name="hasher">A function that computes the hash code for a single key within the dictionary.</param>
+    /// <typeparam name="TKey">The type of keys in the input dictionary.</typeparam>
+    /// <typeparam name="TValue">The type of values in the input dictionary.</typeparam>
+    /// <returns>The number of bytes required.</returns>
+    public static uint GetPdbHashTableSize<TKey, TValue>(
+        this IDictionary<TKey, TValue> dictionary,
+        Func<TKey, uint> hasher)
+        where TKey : notnull
+    {
+        var info = dictionary.ToPdbHashTable(hasher, null);
+
+        return sizeof(uint) // Count
+               + sizeof(uint) // Capacity
+               + sizeof(uint) // Present bitvector word count
+               + info.PresentWordCount * sizeof(uint) // Present bitvector words
+               + sizeof(uint) // Deleted bitvector word count (== 0)
+               + (sizeof(uint) + sizeof(uint)) * (uint) dictionary.Count
+            ;
+    }
+
+    /// <summary>
+    /// Serializes a dictionary to a PDB hash table to an output stream.
     /// </summary>
     /// <param name="dictionary">The dictionary to serialize.</param>
     /// <param name="writer">The output stream to write to.</param>
@@ -84,12 +108,12 @@ public static class PdbHashTable
         writer.WriteUInt32(0);
 
         // Write all buckets.
-        for (int i = 0; i < hashTable.Keys.Length; i++)
+        for (int i = 0; i < hashTable.Keys!.Length; i++)
         {
             if (hashTable.Present.Get(i))
             {
-                writer.WriteUInt32(hashTable.Keys[i]);
-                writer.WriteUInt32(hashTable.Values[i]);
+                writer.WriteUInt32(hashTable.Keys![i]);
+                writer.WriteUInt32(hashTable.Values![i]);
             }
         }
     }
@@ -97,13 +121,66 @@ public static class PdbHashTable
     private static HashTableInfo ToPdbHashTable<TKey, TValue>(
         this IDictionary<TKey, TValue> dictionary,
         Func<TKey, uint> hasher,
-        Func<TKey, TValue, (uint, uint)> mapper)
+        Func<TKey, TValue, (uint, uint)>? mapper)
         where TKey : notnull
+    {
+        uint capacity = ComputeRequiredCapacity(dictionary.Count);
+
+        // Avoid allocating buckets if we actually don't need to (e.g. if we're simply measuring the total size).
+        uint[]? keys;
+        uint[]? values;
+
+        if (mapper is null)
+        {
+            keys = null;
+            values = null;
+        }
+        else
+        {
+            keys = new uint[capacity];
+            values = new uint[capacity];
+        }
+
+        var present = new BitArray((int) capacity, false);
+
+        // Fill in buckets.
+        foreach (var item in dictionary)
+        {
+            // Find empty bucket to place key-value pair in.
+            uint hash = hasher(item.Key);
+            uint index = hash % capacity;
+            while (present.Get((int) index))
+                index = (index + 1) % capacity;
+
+            // Mark bucket as used.
+            present.Set((int) index, true);
+
+            // Store key-value pair.
+            if (mapper is not null)
+            {
+                (uint key, uint value) = mapper(item.Key, item.Value);
+                keys![index] = key;
+                values![index] = value;
+            }
+        }
+
+        // Determine final word count in present bit vector.
+        uint wordCount = (capacity + sizeof(uint) - 1) / sizeof(uint);
+        uint[] words = new uint[wordCount];
+        present.CopyTo(words, 0);
+        while (wordCount > 0 && words[wordCount - 1] == 0)
+            wordCount--;
+
+        return new HashTableInfo(capacity, keys, values, present, wordCount);
+    }
+
+    private static uint ComputeRequiredCapacity(int totalItemCount)
     {
         // "Simulate" adding all items to the hash table, effectively calculating the capacity of the map.
         // TODO: This can probably be calculated with a single formula instead.
+
         uint capacity = 1;
-        for (int i = 0; i <= dictionary.Count; i++)
+        for (int i = 0; i <= totalItemCount; i++)
         {
             // Reference implementation allows only 67% of the capacity to be used.
             uint maxLoad = capacity * 2 / 3 + 1;
@@ -111,42 +188,24 @@ public static class PdbHashTable
                 capacity = 2 * maxLoad;
         }
 
-        // Define buckets.
-        uint[] keys = new uint[capacity];
-        uint[] values = new uint[capacity];
-        var present = new BitArray((int) capacity, false);
-
-        // Fill in buckets.
-        foreach (var item in dictionary)
-        {
-            uint hash = hasher(item.Key);
-            (uint key, uint value) = mapper(item.Key, item.Value);
-
-            uint index = hash % capacity;
-            while (present.Get((int) index))
-                index = (index + 1) % capacity;
-
-            keys[index] = key;
-            values[index] = value;
-            present.Set((int) index, true);
-        }
-
-        return new HashTableInfo(capacity, keys, values, present);
+        return capacity;
     }
 
     private readonly struct HashTableInfo
     {
         public readonly uint Capacity;
-        public readonly uint[] Keys;
-        public readonly uint[] Values;
+        public readonly uint[]? Keys;
+        public readonly uint[]? Values;
         public readonly BitArray Present;
+        public readonly uint PresentWordCount;
 
-        public HashTableInfo(uint capacity, uint[] keys, uint[] values, BitArray present)
+        public HashTableInfo(uint capacity, uint[]? keys, uint[]? values, BitArray present, uint presentWordCount)
         {
             Capacity = capacity;
             Keys = keys;
             Values = values;
             Present = present;
+            PresentWordCount = presentWordCount;
         }
     }
 

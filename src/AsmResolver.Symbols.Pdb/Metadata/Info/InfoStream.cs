@@ -16,6 +16,14 @@ public class InfoStream : SegmentBase
     /// </summary>
     public const int StreamIndex = 1;
 
+    private const int HeaderSize =
+            sizeof(InfoStreamVersion) // Version
+            + sizeof(uint) // Signature
+            + sizeof(uint) // Aage
+            + 16 //UniqueId
+            + sizeof(uint) // NameBufferSize
+        ;
+
     private IDictionary<Utf8String, int>? _streamIndices;
     private IList<PdbFeature>? _features;
 
@@ -115,11 +123,22 @@ public class InfoStream : SegmentBase
     /// <inheritdoc />
     public override uint GetPhysicalSize()
     {
-        return sizeof(uint) // Version
-               + sizeof(uint) // Signature
-               + sizeof(uint) // Aage
-               + 16 // UniqueId
-            ;
+        uint totalSize = HeaderSize;
+
+        // Name buffer
+        foreach (var entry in StreamIndices)
+            totalSize += (uint) entry.Key.ByteCount + 1u;
+
+        // Stream indices hash table.
+        totalSize += StreamIndices.GetPdbHashTableSize(ComputeStringHash);
+
+        // Last NI
+        totalSize += sizeof(uint);
+
+        // Feature codes.
+        totalSize += (uint) Features.Count * sizeof(PdbFeature);
+
+        return totalSize;
     }
 
     /// <inheritdoc />
@@ -148,12 +167,8 @@ public class InfoStream : SegmentBase
         writer.WriteBytes(nameBuffer.ToArray());
 
         // Write the hash table.
-        // Note: The hash of a single entry is **deliberately** truncated to a 16 bit number. This is because
-        // the reference implementation of the name table returns a number of type HASH, which is a typedef
-        // for "unsigned short". If we don't do this, this will result in wrong buckets being filled in the
-        // hash table, and thus the serialization would fail. See NMTNI::hash() in Microsoft/microsoft-pdb.
         StreamIndices.WriteAsPdbHashTable(writer,
-            str => (ushort) PdbHash.ComputeV1(str),
+            ComputeStringHash,
             (key, value) => (stringOffsets[key], (uint) value));
 
         // last NI, safe to put always zero.
@@ -162,5 +177,15 @@ public class InfoStream : SegmentBase
         // Write feature codes.
         foreach (var feature in Features)
             writer.WriteUInt32((uint) feature);
+    }
+
+    private static uint ComputeStringHash(Utf8String str)
+    {
+        // Note: The hash of a single entry is **deliberately** truncated to a 16 bit number. This is because
+        // the reference implementation of the name table returns a number of type HASH, which is a typedef
+        // for "unsigned short". If we don't do this, this will result in wrong buckets being filled in the
+        // hash table, and thus the serialization would fail. See NMTNI::hash() in Microsoft/microsoft-pdb.
+
+        return (ushort) PdbHash.ComputeV1(str);
     }
 }

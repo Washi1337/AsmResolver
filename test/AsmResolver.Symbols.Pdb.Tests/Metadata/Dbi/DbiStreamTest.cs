@@ -196,4 +196,18 @@ public class DbiStreamTest
             0x7, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xB, 0xFFFF, 0xFFFF, 0xFFFF, 0xD, 0xFFFF
         }, dbiStream.ExtraStreamIndices);
     }
+
+    [Fact]
+    public void SizeCalculation()
+    {
+        var file = MsfFile.FromBytes(Properties.Resources.SimpleDllPdb);
+        var infoStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
+
+        uint calculatedSize = infoStream.GetPhysicalSize();
+
+        using var stream = new MemoryStream();
+        infoStream.Write(new BinaryStreamWriter(stream));
+
+        Assert.Equal(stream.Length, calculatedSize);
+    }
 }
