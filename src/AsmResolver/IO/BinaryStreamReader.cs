@@ -328,18 +328,45 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="delimeter">The delimeter byte to stop at.</param>
         /// <returns>The read bytes, including the delimeter if it was found.</returns>
-        public byte[] ReadBytesUntil(byte delimeter)
+        public byte[] ReadBytesUntil(byte delimeter) => ReadBytesUntil(delimeter, true);
+
+        /// <summary>
+        /// Reads bytes from the input stream until the provided delimeter byte is reached.
+        /// </summary>
+        /// <param name="delimeter">The delimeter byte to stop at.</param>
+        /// <param name="includeDelimeterInReturn">
+        /// <c>true</c> if the final delimeter should be included in the return value, <c>false</c> otherwise.
+        /// </param>
+        /// <returns>The read bytes.</returns>
+        /// <remarks>
+        /// This function always consumes the delimeter from the input stream if it is present, regardless of the value
+        /// of <paramref name="includeDelimeterInReturn"/>.
+        /// </remarks>
+        public byte[] ReadBytesUntil(byte delimeter, bool includeDelimeterInReturn)
         {
+            bool shouldReadExtra = false;
+
             var lookahead = Fork();
             while (lookahead.RelativeOffset < lookahead.Length)
             {
                 byte b = lookahead.ReadByte();
                 if (b == delimeter)
+                {
+                    if (!includeDelimeterInReturn)
+                    {
+                        lookahead.RelativeOffset--;
+                        shouldReadExtra = true;
+                    }
                     break;
+                }
             }
 
             byte[] buffer = new byte[lookahead.RelativeOffset - RelativeOffset];
             ReadBytes(buffer, 0, buffer.Length);
+
+            if (shouldReadExtra)
+                ReadByte();
+
             return buffer;
         }
 
@@ -347,17 +374,7 @@ namespace AsmResolver.IO
         /// Reads a null-terminated ASCII string from the input stream.
         /// </summary>
         /// <returns>The read ASCII string, excluding the null terminator.</returns>
-        public string ReadAsciiString()
-        {
-            byte[] data = ReadBytesUntil(0);
-            int length = data.Length;
-
-            // Exclude trailing 0 byte.
-            if (data[data.Length - 1] == 0)
-                length--;
-
-            return Encoding.ASCII.GetString(data, 0, length);
-        }
+        public string ReadAsciiString() => Encoding.ASCII.GetString(ReadBytesUntil(0, false));
 
         /// <summary>
         /// Reads a zero-terminated Unicode string from the stream.
@@ -376,6 +393,18 @@ namespace AsmResolver.IO
             }
 
             return builder.ToString();
+        }
+
+        /// <summary>
+        /// Reads a null-terminated UTF-8 string from the input stream.
+        /// </summary>
+        /// <returns>The read UTF-8 string, excluding the null terminator.</returns>
+        public Utf8String ReadUtf8String()
+        {
+            byte[] data = ReadBytesUntil(0, false);
+            return data.Length != 0
+                ? new Utf8String(data)
+                : Utf8String.Empty;
         }
 
         /// <summary>
