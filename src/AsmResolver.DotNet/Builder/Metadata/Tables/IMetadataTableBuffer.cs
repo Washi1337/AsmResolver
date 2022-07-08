@@ -56,5 +56,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// <param name="row">The row to add.</param>
         /// <returns>The metadata token that this row was assigned to.</returns>
         MetadataToken Add(in TRow row);
+
+        MetadataToken Insert(uint rid, in TRow row);
     }
 }

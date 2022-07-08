@@ -50,6 +50,23 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// <inheritdoc />
         public MetadataToken Add(in TRow row) => Add(row, false);
 
+        public MetadataToken Insert(uint rid, in TRow row) => Insert(rid, row, false);
+
+        public MetadataToken Insert(uint rid, in TRow row, bool allowDuplicates)
+        {
+            if (!_entries.TryGetValue(row, out var token))
+            {
+                token = _underlyingBuffer.Insert(rid, in row);
+                _entries.Add(row, token);
+            }
+            else if (allowDuplicates)
+            {
+                token = _underlyingBuffer.Insert(rid, in row);
+            }
+
+            return token;
+        }
+
         /// <summary>
         /// Adds a row to the metadata table buffer.
         /// </summary>

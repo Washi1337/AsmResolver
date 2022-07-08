@@ -212,19 +212,19 @@ namespace AsmResolver.DotNet.Builder
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveAssemblyReferenceIndices) != 0)
             {
                 ImportTables<AssemblyReference>(module, TableIndex.AssemblyRef,
-                    r => buffer.AddAssemblyReference(r, true));
+                    r => buffer.AddAssemblyReference(r, true, true));
             }
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveModuleReferenceIndices) != 0)
             {
                 ImportTables<ModuleReference>(module, TableIndex.ModuleRef,
-                    r => buffer.AddModuleReference(r, true));
+                    r => buffer.AddModuleReference(r, true, true));
             }
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeReferenceIndices) != 0)
             {
                 ImportTables<TypeReference>(module, TableIndex.TypeRef,
-                    r => buffer.AddTypeReference(r, true));
+                    r => buffer.AddTypeReference(r, true, true));
             }
         }
 
