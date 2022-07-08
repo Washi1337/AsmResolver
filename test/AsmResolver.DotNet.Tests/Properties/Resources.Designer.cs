@@ -164,6 +164,13 @@ namespace AsmResolver.DotNet.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_UnusualNestedTypeRefOrder {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_UnusualNestedTypeRefOrder", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] Assembly1_Forwarder {
             get {
                 object obj = ResourceManager.GetObject("Assembly1_Forwarder", resourceCulture);

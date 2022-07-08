@@ -99,5 +99,19 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 references.Select(r => r.MetadataToken).ToHashSet(),
                 newObjectReferences.Select(r => r.MetadataToken).ToHashSet());
         }
+
+        [Fact]
+        public void PreserveNestedTypeRefOrdering()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/329
+
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_UnusualNestedTypeRefOrder);
+            var originalTypeRefs = GetMembers<TypeReference>(module, TableIndex.TypeRef);
+
+            var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveTypeReferenceIndices);
+            var newTypeRefs = GetMembers<TypeReference>(newModule, TableIndex.TypeRef);
+
+            Assert.Equal(originalTypeRefs, newTypeRefs.Take(originalTypeRefs.Count), Comparer);
+        }
     }
 }
