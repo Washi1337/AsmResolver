@@ -23,6 +23,9 @@ namespace AsmResolver.DotNet.Builder
         /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
         /// is supposed to be removed and the token of the original should be returned instead.
         /// </param>
+        /// <param name="preserveRid">
+        /// <c>true</c> if the metadata token of the type should be preserved, <c>false</c> otherwise.
+        /// </param>
         /// <returns>The newly assigned metadata token.</returns>
         public MetadataToken AddTypeReference(TypeReference? type, bool allowDuplicates, bool preserveRid)
         {
@@ -181,6 +184,9 @@ namespace AsmResolver.DotNet.Builder
         /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
         /// is supposed to be removed and the token of the original should be returned instead.
         /// </param>
+        /// <param name="preserveRid">
+        /// <c>true</c> if the metadata token of the assembly should be preserved, <c>false</c> otherwise.
+        /// </param>
         /// <returns>The newly assigned metadata token.</returns>
         public MetadataToken AddAssemblyReference(AssemblyReference? assembly, bool allowDuplicates, bool preserveRid)
         {
@@ -224,6 +230,9 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="allowDuplicates">
         /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
         /// is supposed to be removed and the token of the original should be returned instead.
+        /// </param>
+        /// <param name="preserveRid">
+        /// <c>true</c> if the metadata token of the module should be preserved, <c>false</c> otherwise.
         /// </param>
         /// <returns>The newly assigned metadata token.</returns>
         public MetadataToken AddModuleReference(ModuleReference? reference, bool allowDuplicates, bool preserveRid)

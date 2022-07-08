@@ -15,9 +15,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         where TRow : struct, IMetadataRow
     {
         private readonly RefList<TRow> _entries = new();
-        private readonly List<bool> _available = new();
+        private readonly BitList _available = new();
         private readonly MetadataTable<TRow> _table;
-        private uint _currentRid = 0;
+        private uint _currentRid;
 
         /// <summary>
         /// Creates a new unsorted metadata table buffer.

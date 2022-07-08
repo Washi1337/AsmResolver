@@ -57,6 +57,12 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// <returns>The metadata token that this row was assigned to.</returns>
         MetadataToken Add(in TRow row);
 
+        /// <summary>
+        /// Inserts a row into the metadata table at the provided row identifier.
+        /// </summary>
+        /// <param name="rid">The row identifier.</param>
+        /// <param name="row">The row to add.</param>
+        /// <returns>The metadata token that this row was assigned to.</returns>
         MetadataToken Insert(uint rid, in TRow row);
     }
 }
