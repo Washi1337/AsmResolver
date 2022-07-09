@@ -10,7 +10,10 @@ namespace AsmResolver.DotNet.Builder
         public uint GetUserStringIndex(string value) => Metadata.UserStringsStream.GetStringIndex(value);
 
         /// <inheritdoc />
-        public MetadataToken GetTypeReferenceToken(TypeReference? type) => AddTypeReference(type, false);
+        public MetadataToken GetTypeReferenceToken(TypeReference? type)
+        {
+            return AddTypeReference(type, false, false);
+        }
 
         /// <summary>
         /// Adds a type reference to the buffer.
@@ -20,19 +23,25 @@ namespace AsmResolver.DotNet.Builder
         /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
         /// is supposed to be removed and the token of the original should be returned instead.
         /// </param>
+        /// <param name="preserveRid">
+        /// <c>true</c> if the metadata token of the type should be preserved, <c>false</c> otherwise.
+        /// </param>
         /// <returns>The newly assigned metadata token.</returns>
-        public MetadataToken AddTypeReference(TypeReference? type, bool allowDuplicates)
+        public MetadataToken AddTypeReference(TypeReference? type, bool allowDuplicates, bool preserveRid)
         {
             if (!AssertIsImported(type))
                 return MetadataToken.Zero;
 
             var table = Metadata.TablesStream.GetDistinctTable<TypeReferenceRow>(TableIndex.TypeRef);
             var row = new TypeReferenceRow(
-                AddResolutionScope(type.Scope),
+                AddResolutionScope(type.Scope, allowDuplicates, preserveRid),
                 Metadata.StringsStream.GetStringIndex(type.Name),
                 Metadata.StringsStream.GetStringIndex(type.Namespace));
 
-            var token = table.Add(row, allowDuplicates);
+            var token = preserveRid
+                ? table.Insert(type.MetadataToken.Rid, row, allowDuplicates)
+                : table.Add(row, allowDuplicates);
+
             _tokenMapping.Register(type, token);
             AddCustomAttributes(token, type);
             return token;
@@ -164,7 +173,7 @@ namespace AsmResolver.DotNet.Builder
         /// <inheritdoc />
         public MetadataToken GetAssemblyReferenceToken(AssemblyReference? assembly)
         {
-            return AddAssemblyReference(assembly, false);
+            return AddAssemblyReference(assembly, false, false);
         }
 
         /// <summary>
@@ -175,8 +184,11 @@ namespace AsmResolver.DotNet.Builder
         /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
         /// is supposed to be removed and the token of the original should be returned instead.
         /// </param>
+        /// <param name="preserveRid">
+        /// <c>true</c> if the metadata token of the assembly should be preserved, <c>false</c> otherwise.
+        /// </param>
         /// <returns>The newly assigned metadata token.</returns>
-        public MetadataToken AddAssemblyReference(AssemblyReference? assembly, bool allowDuplicates)
+        public MetadataToken AddAssemblyReference(AssemblyReference? assembly, bool allowDuplicates, bool preserveRid)
         {
             if (assembly is null || !AssertIsImported(assembly))
                 return MetadataToken.Zero;
@@ -193,7 +205,10 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(assembly.Culture),
                 Metadata.BlobStream.GetBlobIndex(assembly.HashValue));
 
-            var token = table.Add(row, allowDuplicates);
+            var token = preserveRid
+                ? table.Insert(assembly.MetadataToken.Rid, row, allowDuplicates)
+                : table.Add(row, allowDuplicates);
+
             AddCustomAttributes(token, assembly);
             return token;
         }
@@ -205,7 +220,7 @@ namespace AsmResolver.DotNet.Builder
         /// <returns>The new metadata token assigned to the module reference.</returns>
         public MetadataToken GetModuleReferenceToken(ModuleReference? reference)
         {
-            return AddModuleReference(reference, false);
+            return AddModuleReference(reference, false, false);
         }
 
         /// <summary>
@@ -216,8 +231,11 @@ namespace AsmResolver.DotNet.Builder
         /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
         /// is supposed to be removed and the token of the original should be returned instead.
         /// </param>
+        /// <param name="preserveRid">
+        /// <c>true</c> if the metadata token of the module should be preserved, <c>false</c> otherwise.
+        /// </param>
         /// <returns>The newly assigned metadata token.</returns>
-        public MetadataToken AddModuleReference(ModuleReference? reference, bool allowDuplicates)
+        public MetadataToken AddModuleReference(ModuleReference? reference, bool allowDuplicates, bool preserveRid)
         {
             if (!AssertIsImported(reference))
                 return MetadataToken.Zero;
@@ -225,7 +243,10 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetDistinctTable<ModuleReferenceRow>(TableIndex.ModuleRef);
 
             var row = new ModuleReferenceRow(Metadata.StringsStream.GetStringIndex(reference.Name));
-            var token = table.Add(row, allowDuplicates);
+            var token = preserveRid
+                ? table.Insert(reference.MetadataToken.Rid, row, allowDuplicates)
+                : table.Add(row, allowDuplicates);
+
             AddCustomAttributes(token, reference);
             return token;
         }

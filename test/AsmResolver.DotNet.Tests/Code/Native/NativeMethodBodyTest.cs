@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
@@ -19,6 +20,8 @@ namespace AsmResolver.DotNet.Tests.Code.Native
 {
     public class NativeMethodBodyTest : IClassFixture<TemporaryDirectoryFixture>
     {
+        private const string NonWindowsPlatform = "Test produces a mixed mode assembly which is not supported on non-Windows platforms.";
+
         private TemporaryDirectoryFixture _fixture;
 
         public NativeMethodBodyTest(TemporaryDirectoryFixture fixture)
@@ -254,7 +257,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             Assert.Equal(body.Code, newBuffer);
         }
 
-        [Theory]
+        [SkippableTheory]
         [InlineData(
             true,
             new byte[] {0xB8, 0x00, 0x00, 0x00, 0x00}, // mov eax, message
@@ -267,6 +270,8 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             11u)]
         public void NativeBodyWithLocalSymbols(bool is32Bit, byte[] movInstruction, uint fixupOffset, AddressFixupType fixupType, uint symbolOffset)
         {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+
             // Create native body.
             var code = new List<byte>(movInstruction);
             code.AddRange(new byte[]

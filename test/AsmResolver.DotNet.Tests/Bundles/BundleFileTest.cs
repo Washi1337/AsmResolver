@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
         {
             var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6);
             var file = manifest.Files.First(f => f.Type == BundleFileType.RuntimeConfigJson);
-            string contents = Encoding.UTF8.GetString(file.GetData());
+            string contents = Encoding.UTF8.GetString(file.GetData()).Replace("\r", "");
 
             Assert.Equal(@"{
   ""runtimeOptions"": {
@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
       ""System.Reflection.Metadata.MetadataUpdater.IsSupported"": false
     }
   }
-}", contents);
+}".Replace("\r", ""), contents);
         }
 
         [Fact]

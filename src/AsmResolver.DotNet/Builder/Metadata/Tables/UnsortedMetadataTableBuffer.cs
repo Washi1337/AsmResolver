@@ -15,7 +15,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         where TRow : struct, IMetadataRow
     {
         private readonly RefList<TRow> _entries = new();
+        private readonly BitList _available = new();
         private readonly MetadataTable<TRow> _table;
+        private uint _currentRid;
 
         /// <summary>
         /// Creates a new unsorted metadata table buffer.
@@ -33,7 +35,11 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         public virtual TRow this[uint rid]
         {
             get => _entries[(int) (rid - 1)];
-            set => _entries[(int) (rid - 1)] = value;
+            set
+            {
+                _entries[(int) (rid - 1)] = value;
+                _available[(int) (rid - 1)] = false;
+            }
         }
 
         /// <inheritdoc />
@@ -49,8 +55,45 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// <inheritdoc />
         public virtual MetadataToken Add(in TRow row)
         {
-            _entries.Add(row);
-            return new MetadataToken(_table.TableIndex, (uint) _entries.Count);
+            // Move over unavailable slots.
+            while (_currentRid < _available.Count && !_available[(int) _currentRid])
+                _currentRid++;
+
+            // If we moved over all entries, we're adding to the end.
+            if (_currentRid == _entries.Count)
+            {
+                _currentRid++;
+            }
+
+            return Insert(_currentRid++, row);
+        }
+
+        /// <inheritdoc />
+        public MetadataToken Insert(uint rid, in TRow row)
+        {
+            EnsureRowsAllocated(rid);
+
+            var token = new MetadataToken(_table.TableIndex, rid);
+
+            if (!_available[(int) (rid - 1)])
+            {
+                if (EqualityComparer<TRow>.Default.Equals(row, _entries[(int) (rid - 1)]))
+                    return token;
+
+                throw new InvalidOperationException($"Token 0x{token.ToString()} is already in use.");
+            }
+
+            this[rid] = row;
+            return token;
+        }
+
+        private void EnsureRowsAllocated(uint rid)
+        {
+            while (_entries.Count < rid)
+            {
+                _entries.Add(default);
+                _available.Add(true);
+            }
         }
 
         /// <inheritdoc />
