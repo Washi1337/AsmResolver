@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet
         private readonly ConcurrentDictionary<ITypeDescriptor, TypeDefinition> _typeCache;
         private readonly SignatureComparer _comparer = new()
         {
-            AcceptNewerAssemblyVersionNumbers = true
+            IgnoreAssemblyVersionNumbers = true
         };
 
         /// <summary>

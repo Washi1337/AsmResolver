@@ -234,6 +234,20 @@ namespace AsmResolver.DotNet.Tests.Properties {
             }
         }
 
+        public static byte[] DifferentNetVersion_MainApp {
+            get {
+                object obj = ResourceManager.GetObject("DifferentNetVersion_MainApp", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] DifferentNetVersion_Library {
+            get {
+                object obj = ResourceManager.GetObject("DifferentNetVersion_Library", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] CallManagedExport_X86 {
             get {
                 object obj = ResourceManager.GetObject("CallManagedExport_X86", resourceCulture);
