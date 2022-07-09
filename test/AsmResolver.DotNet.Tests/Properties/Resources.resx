@@ -54,6 +54,21 @@
     <data name="HelloWorld_Forwarder" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld_Forwarder.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="HelloWorld_WithAttribute" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.WithAttribute.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="HelloWorld_SingleFile_V1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.SingleFile.v1.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="HelloWorld_SingleFile_V2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.SingleFile.v2.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="HelloWorld_SingleFile_V6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.SingleFile.v6.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="HelloWorld_SingleFile_V6_WithResources" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.SingleFile.v6.WithResources.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
     <data name="Assembly1_Forwarder" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\Assembly1_Forwarder.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
@@ -86,5 +101,17 @@
     </data>
     <data name="DifferentNetVersion_Library" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\DifferentNetVersion.Library.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="CallManagedExport_X86" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\CallManagedExport.x86.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="CallManagedExport_X64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\CallManagedExport.x64.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="MyLibrary_X86" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\MyLibrary.x86.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="MyLibrary_X64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\MyLibrary.x64.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
 </root>

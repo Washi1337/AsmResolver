@@ -10,7 +10,7 @@ namespace AsmResolver.PE.File
     /// </summary>
     public class SerializedPEFile : PEFile
     {
-        private readonly IList<SectionHeader> _sectionHeaders;
+        private readonly List<SectionHeader> _sectionHeaders;
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace AsmResolver.PE.File
             // Data between section headers and sections.
             int extraSectionDataLength = (int) (DosHeader.Offset + OptionalHeader.SizeOfHeaders - _reader.Offset);
             if (extraSectionDataLength != 0)
-                ExtraSectionData = DataSegment.FromReader(ref _reader, extraSectionDataLength);
+                ExtraSectionData = _reader.ReadSegment((uint) extraSectionDataLength);
         }
 
         /// <inheritdoc />
@@ -60,7 +60,7 @@ namespace AsmResolver.PE.File
 
                 (ulong offset, uint size) = MappingMode switch
                 {
-                    PEMappingMode.Unmapped => (header.PointerToRawData, header.SizeOfRawData),
+                    PEMappingMode.Unmapped => (_reader.StartOffset + header.PointerToRawData, header.SizeOfRawData),
                     PEMappingMode.Mapped => (_reader.StartOffset + header.VirtualAddress, header.VirtualSize),
                     _ => throw new ArgumentOutOfRangeException()
                 };
@@ -77,5 +77,19 @@ namespace AsmResolver.PE.File
             return result;
         }
 
+        /// <inheritdoc />
+        protected override ISegment? GetEofData()
+        {
+            if (MappingMode != PEMappingMode.Unmapped)
+                return null;
+
+            var lastSection = _sectionHeaders[_sectionHeaders.Count - 1];
+            ulong offset = lastSection.PointerToRawData + lastSection.SizeOfRawData;
+
+            var reader = _reader.ForkAbsolute(offset);
+            return reader.Length > 0
+                ? reader.ReadSegment(reader.Length)
+                : null;
+        }
     }
 }

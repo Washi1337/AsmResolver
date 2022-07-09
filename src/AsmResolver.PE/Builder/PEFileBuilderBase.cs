@@ -17,12 +17,12 @@ namespace AsmResolver.PE.Builder
         {
             var peFile = new PEFile();
             var context = CreateContext(image);
-            
+
             foreach (var section in CreateSections(image, context))
                 peFile.Sections.Add(section);
-            
+
             ComputeHeaderFields(peFile, image, context);
-            
+
             return peFile;
         }
 
@@ -34,7 +34,7 @@ namespace AsmResolver.PE.Builder
         protected abstract TContext CreateContext(IPEImage image);
 
         /// <summary>
-        /// Creates the sections of the PE image. 
+        /// Creates the sections of the PE image.
         /// </summary>
         /// <param name="image">The image to create sections for.</param>
         /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
@@ -42,7 +42,7 @@ namespace AsmResolver.PE.Builder
         protected abstract IEnumerable<PESection> CreateSections(IPEImage image, TContext context);
 
         /// <summary>
-        /// Creates the data directory headers stored in the optional header of the PE file. 
+        /// Creates the data directory headers stored in the optional header of the PE file.
         /// </summary>
         /// <param name="peFile">The (incomplete) PE file that contains the sections.</param>
         /// <param name="image">The image to create the data directories for.</param>
@@ -67,7 +67,7 @@ namespace AsmResolver.PE.Builder
         /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
         /// <returns>The file alignment. This should be a power of 2 between 512 and 64,000.</returns>
         protected abstract uint GetFileAlignment(PEFile peFile, IPEImage image, TContext context);
-        
+
         /// <summary>
         /// Gets the section alignment for the new PE file.
         /// </summary>
@@ -79,7 +79,7 @@ namespace AsmResolver.PE.Builder
         /// the architecture.
         /// </returns>
         protected abstract uint GetSectionAlignment(PEFile peFile, IPEImage image, TContext context);
-        
+
         /// <summary>
         /// Gets the image base for the new PE file.
         /// </summary>
@@ -88,7 +88,7 @@ namespace AsmResolver.PE.Builder
         /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
         /// <returns>The image base.</returns>
         protected abstract uint GetImageBase(PEFile peFile, IPEImage image, TContext context);
-        
+
         /// <summary>
         /// Updates the fields in the file header and optional header of the PE file.
         /// </summary>
@@ -115,10 +115,10 @@ namespace AsmResolver.PE.Builder
             header.ImageBase = GetImageBase(peFile, image, context);
             header.SectionAlignment = GetSectionAlignment(peFile, image, context);
             header.FileAlignment = GetFileAlignment(peFile, image, context);
-            
+
             if (header.SectionAlignment < header.FileAlignment)
                 throw new ArgumentException("File alignment cannot be larger than the section alignment.");
-            
+
             peFile.UpdateHeaders();
 
             header.Magic = image.PEKind;
@@ -129,9 +129,12 @@ namespace AsmResolver.PE.Builder
             header.SizeOfInitializedData = 0;
             header.SizeOfUninitializedData = 0;
             header.SizeOfImage = 0;
-            foreach (var section in peFile.Sections)
+
+            for (int i = 0; i < peFile.Sections.Count; i++)
             {
+                var section = peFile.Sections[i];
                 uint physicalSize = section.GetPhysicalSize();
+
                 if (section.IsContentCode)
                     header.SizeOfCode += physicalSize;
                 if (section.IsContentInitializedData)
@@ -142,7 +145,7 @@ namespace AsmResolver.PE.Builder
             }
 
             header.AddressOfEntrypoint = GetEntrypointAddress(peFile, image, context);
-            
+
             header.BaseOfCode = peFile.Sections.FirstOrDefault(s => s.IsContentCode)?.Rva ?? 0;
             header.BaseOfData = peFile.Sections.FirstOrDefault(s => s.IsContentInitializedData)?.Rva ?? 0;
 
@@ -159,12 +162,12 @@ namespace AsmResolver.PE.Builder
                                     + peFile.OptionalHeader.GetPhysicalSize()
                                     + (uint) peFile.Sections.Count * SectionHeader.SectionHeaderSize)
                 .Align(header.FileAlignment);
-            
+
             header.CheckSum = 0; // TODO: actually calculate a checksum.
 
             header.SubSystem = image.SubSystem;
             header.DllCharacteristics = image.DllCharacteristics;
-            
+
             // TODO: make more configurable.
             header.SizeOfStackReserve = 0x00100000;
             header.SizeOfStackCommit = 0x00001000;
@@ -173,10 +176,11 @@ namespace AsmResolver.PE.Builder
             header.LoaderFlags = 0;
 
             var dataDirectories = CreateDataDirectories(peFile, image, context).ToList();
+            header.DataDirectories.Clear();
             for (int i = 0; i < OptionalHeader.DefaultNumberOfRvasAndSizes; i++)
             {
-                header.DataDirectories.Add(i < dataDirectories.Count 
-                    ? dataDirectories[i] 
+                header.DataDirectories.Add(i < dataDirectories.Count
+                    ? dataDirectories[i]
                     : new DataDirectory(0, 0));
             }
 
@@ -201,6 +205,6 @@ namespace AsmResolver.PE.Builder
             header.SizeOfOptionalHeader = (ushort) peFile.OptionalHeader.GetPhysicalSize();
             header.Characteristics = image.Characteristics;
         }
-        
+
     }
 }

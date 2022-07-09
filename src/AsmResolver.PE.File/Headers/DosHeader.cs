@@ -85,6 +85,7 @@ namespace AsmResolver.PE.File.Headers
         public DosHeader()
             : this(DefaultDosHeader)
         {
+            NextHeaderOffset = 0x80;
         }
 
         /// <summary>

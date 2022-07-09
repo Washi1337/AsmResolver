@@ -9,11 +9,20 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
     /// </summary>
     public class SerializedUserStringsStream : UserStringsStream
     {
-        private readonly Dictionary<uint, string> _cachedStrings = new();
+        private readonly Dictionary<uint, string?> _cachedStrings = new();
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
-        /// Creates a new user-strings stream based on a byte array.
+        /// Creates a new user-strings stream with the provided byte array as the raw contents of the stream.
+        /// </summary>
+        /// <param name="rawData">The raw contents of the stream.</param>
+        public SerializedUserStringsStream(byte[] rawData)
+            : this(DefaultName, ByteArrayDataSource.CreateReader(rawData))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new user-strings stream with the provided byte array as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
@@ -23,7 +32,7 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         }
 
         /// <summary>
-        /// Creates a new user-strings stream based on a segment in a file.
+        /// Creates a new user-strings stream with the provided file segment reader as the raw contents of the stream.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="reader">The raw contents of the stream.</param>
@@ -50,7 +59,9 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         /// <inheritdoc />
         public override string? GetStringByIndex(uint index)
         {
-            if (!_cachedStrings.TryGetValue(index, out string value) && index < _reader.Length)
+            index &= 0x00FFFFFF;
+
+            if (!_cachedStrings.TryGetValue(index, out string? value) && index < _reader.Length)
             {
                 var stringsReader = _reader.ForkRelative(index);
 
@@ -61,7 +72,7 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
                         return string.Empty;
 
                     // Read unicode bytes.
-                    var data = new byte[length];
+                    byte[] data = new byte[length];
                     int actualLength = stringsReader.ReadBytes(data, 0, (int) length);
 
                     // Exclude the terminator byte.
@@ -72,6 +83,43 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
             }
 
             return value;
+        }
+
+        /// <inheritdoc />
+        public override bool TryFindStringIndex(string value, out uint index)
+        {
+            if (value == string.Empty)
+            {
+                index = 0;
+                return true;
+            }
+
+            uint byteCount = (uint) (value.Length * sizeof(ushort)) + sizeof(byte);
+            uint totalLength = byteCount.GetCompressedSize() + byteCount;
+
+            var reader = _reader.Fork();
+            while (reader.CanRead(totalLength))
+            {
+                index = reader.RelativeOffset;
+
+                if (reader.TryReadCompressedUInt32(out uint length) && length == byteCount && reader.CanRead(length))
+                {
+                    int i = 0;
+                    for (; i < value.Length; i++)
+                    {
+                        if (value[i] != reader.ReadUInt16())
+                            break;
+                    }
+
+                    if (i == value.Length && reader.CanRead(sizeof(byte)) && reader.ReadByte() is 0x00 or 0x01)
+                        return true;
+                }
+
+                reader.RelativeOffset = index + 1;
+            }
+
+            index = 0;
+            return false;
         }
     }
 }

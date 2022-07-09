@@ -20,6 +20,7 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<GenericParameterSignature>,
         IEqualityComparer<ArrayTypeSignature>,
         IEqualityComparer<SentinelTypeSignature>,
+        IEqualityComparer<FunctionPointerTypeSignature>,
         IEqualityComparer<IList<TypeSignature>>,
         IEqualityComparer<IEnumerable<TypeSignature>>
     {
@@ -59,6 +60,7 @@ namespace AsmResolver.DotNet.Signatures
                 case ElementType.Boxed:
                     return Equals(x as BoxedTypeSignature, y as BoxedTypeSignature);
                 case ElementType.FnPtr:
+                    return Equals(x as FunctionPointerTypeSignature, y as FunctionPointerTypeSignature);
                 case ElementType.Internal:
                 case ElementType.Modifier:
                     throw new NotSupportedException();
@@ -307,6 +309,22 @@ namespace AsmResolver.DotNet.Signatures
 
                 return hashCode;
             }
+        }
+
+        /// <inheritdoc />
+        public bool Equals(FunctionPointerTypeSignature? x, FunctionPointerTypeSignature? y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (x is null || y is null)
+                return false;
+            return Equals(x.Signature, y.Signature);
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(FunctionPointerTypeSignature obj)
+        {
+            return obj.Signature.GetHashCode();
         }
 
         /// <inheritdoc />

@@ -8,6 +8,8 @@ namespace AsmResolver.Collections
     /// <typeparam name="TKey">The first object type.</typeparam>
     /// <typeparam name="TValue">The second object type.</typeparam>
     public sealed class OneToOneRelation<TKey, TValue>
+        where TKey : notnull
+        where TValue : notnull
     {
         private readonly Dictionary<TKey, TValue> _keyToValue = new();
         private readonly Dictionary<TValue, TKey> _valueToKey = new();
@@ -36,7 +38,7 @@ namespace AsmResolver.Collections
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns>The value.</returns>
-        public TValue GetValue(TKey key)
+        public TValue? GetValue(TKey key)
         {
             _keyToValue.TryGetValue(key, out var value);
             return value;
@@ -47,7 +49,7 @@ namespace AsmResolver.Collections
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The key.</returns>
-        public TKey GetKey(TValue value)
+        public TKey? GetKey(TValue value)
         {
             _valueToKey.TryGetValue(value, out var key);
             return key;

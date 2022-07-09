@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Builder.Resources;
+using AsmResolver.DotNet.Builder.VTableFixups;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.VTableFixups;
+using AsmResolver.PE.Platforms;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -40,6 +43,7 @@ namespace AsmResolver.DotNet.Builder
             Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
             Resources = new DotNetResourcesDirectoryBuffer();
+            VTableFixups = new VTableFixupsBuffer(Platform.Get(module.MachineType), symbolsProvider);
         }
 
         /// <summary>
@@ -100,6 +104,14 @@ namespace AsmResolver.DotNet.Builder
             set;
         }
 
+        /// <summary>
+        /// Gets the buffer used to store VTable fixups and register unmanaged symbols.
+        /// </summary>
+        public VTableFixupsBuffer VTableFixups
+        {
+            get;
+        }
+
         private bool AssertIsImported([NotNullWhen(true)] IModuleProvider? member)
         {
             if (member is null)
@@ -133,7 +145,8 @@ namespace AsmResolver.DotNet.Builder
                 DotNetResources = Resources.Size > 0 ? Resources.CreateDirectory() : null,
                 Entrypoint = GetEntrypoint(),
                 Flags = Module.Attributes,
-                StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null
+                StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null,
+                VTableFixups = VTableFixups.Directory.Count > 0 ? VTableFixups.Directory : null
             };
 
             return new DotNetDirectoryBuildResult(directory, _tokenMapping);

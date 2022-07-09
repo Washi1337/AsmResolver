@@ -172,10 +172,14 @@ namespace AsmResolver.DotNet
             public static readonly RuntimeNameComparer Instance = new();
 
             /// <inheritdoc />
-            public int Compare(string x, string y)
+            public int Compare(string? x, string? y)
             {
                 if (x == y)
                     return 0;
+                if (x is null)
+                    return -1;
+                if (y is null)
+                    return 1;
                 if (x == KnownRuntimeNames.NetCoreApp)
                     return 1;
                 if (y == KnownRuntimeNames.NetCoreApp)

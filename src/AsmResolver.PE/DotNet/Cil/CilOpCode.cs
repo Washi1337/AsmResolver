@@ -1,7 +1,7 @@
 namespace AsmResolver.PE.DotNet.Cil
 {
     /// <summary>
-    /// Describes the operation that a single CIL instruction performs.  
+    /// Describes the operation that a single CIL instruction performs.
     /// </summary>
     public readonly struct CilOpCode
     {
@@ -10,7 +10,7 @@ namespace AsmResolver.PE.DotNet.Cil
 
         internal const int TwoBytesBitLength = 1;
         internal const int TwoBytesOffset = ValueOffset + ValueBitLength;
-        
+
         internal const int StackBehaviourBitLength = 5;
         internal const int StackBehaviourPushOffset = TwoBytesOffset + TwoBytesBitLength;
         internal const int StackBehaviourPopOffset = StackBehaviourPushOffset + StackBehaviourBitLength;
@@ -55,13 +55,13 @@ namespace AsmResolver.PE.DotNet.Cil
         internal CilOpCode(uint value)
         {
             _value = value;
-            
+
             if (IsLarge)
                 CilOpCodes.MultiByteOpCodes[Byte2] = this;
             else
                 CilOpCodes.SingleByteOpCodes[Byte1] = this;
         }
-        
+
         /// <summary>
         /// Gets the mnemonic of the operation code.
         /// </summary>
@@ -135,7 +135,7 @@ namespace AsmResolver.PE.DotNet.Cil
         public bool Equals(CilOpCode other) => Code == other.Code;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => obj is CilOpCode other && Equals(other);
+        public override bool Equals(object? obj) => obj is CilOpCode other && Equals(other);
 
         /// <inheritdoc />
         public override int GetHashCode() => (int) Code;

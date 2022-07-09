@@ -48,12 +48,26 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         public ref TRow GetRowRef(uint rid) => ref _underlyingBuffer.GetRowRef(rid);
 
         /// <inheritdoc />
-        public MetadataToken Add(in TRow row)
+        public MetadataToken Add(in TRow row) => Add(row, false);
+
+        /// <summary>
+        /// Adds a row to the metadata table buffer.
+        /// </summary>
+        /// <param name="row">The row to add.</param>
+        /// <param name="allowDuplicates">
+        /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
+        /// is supposed to be removed and the token of the original should be returned instead.</param>
+        /// <returns>The metadata token that this row was assigned to.</returns>
+        public MetadataToken Add(in TRow row, bool allowDuplicates)
         {
             if (!_entries.TryGetValue(row, out var token))
             {
                 token = _underlyingBuffer.Add(in row);
                 _entries.Add(row, token);
+            }
+            else if (allowDuplicates)
+            {
+                token = _underlyingBuffer.Add(in row);
             }
 
             return token;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code;
@@ -27,12 +28,13 @@ namespace AsmResolver.DotNet
         IHasSecurityDeclaration,
         IManagedEntrypoint
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<TypeDefinition?> _declaringType;
         private readonly LazyVariable<MethodSignature?> _signature;
         private readonly LazyVariable<MethodBody?> _methodBody;
         private readonly LazyVariable<ImplementationMap?> _implementationMap;
         private readonly LazyVariable<MethodSemantics?> _semantics;
+        private readonly LazyVariable<UnmanagedExportInfo?> _exportInfo;
         private IList<ParameterDefinition>? _parameterDefinitions;
         private ParameterCollection? _parameters;
         private IList<CustomAttribute>? _customAttributes;
@@ -46,12 +48,13 @@ namespace AsmResolver.DotNet
         protected MethodDefinition(MetadataToken token)
             : base(token)
         {
-            _name  =new LazyVariable<string?>(GetName);
+            _name  =new LazyVariable<Utf8String?>(GetName);
             _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
             _signature = new LazyVariable<MethodSignature?>(GetSignature);
             _methodBody = new LazyVariable<MethodBody?>(GetBody);
             _implementationMap = new LazyVariable<ImplementationMap?>(GetImplementationMap);
             _semantics = new LazyVariable<MethodSemantics?>(GetSemantics);
+            _exportInfo = new LazyVariable<UnmanagedExportInfo?>(GetExportInfo);
         }
 
         /// <summary>
@@ -98,7 +101,13 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetMethodFullName(Name, DeclaringType, Signature);
+        public string FullName => FullNameGenerator.GetMethodFullName(
+            Name,
+            DeclaringType,
+            Signature,
+            GenericParameters.Count > 0
+                ? GenericParameters.Select(x => x.Name?.Value ?? NullName)
+                : Enumerable.Empty<string>());
 
         /// <summary>
         /// Gets or sets the attributes associated to the method.
@@ -677,7 +686,34 @@ namespace AsmResolver.DotNet
         /// </summary>
         public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && Name?.Value is ".cctor" or ".ctor";
 
+        /// <summary>
+        /// Gets or sets the unmanaged export info assigned to this method (if available). This can be used to indicate
+        /// that a method needs to be exported in the final PE file as an unmanaged symbol.
+        /// </summary>
+        public UnmanagedExportInfo? ExportInfo
+        {
+            get => _exportInfo.Value;
+            set => _exportInfo.Value = value;
+        }
+
         MethodDefinition IMethodDescriptor.Resolve() => this;
+
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module)
+        {
+            return Module == module
+                   && (Signature?.IsImportedInModule(module) ?? false);
+        }
+
+        /// <summary>
+        /// Imports the method using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported method.</returns>
+        public IMethodDefOrRef ImportWith(ReferenceImporter importer) => importer.ImportMethod(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
@@ -703,7 +739,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
-        protected virtual string? GetName() => null;
+        protected virtual Utf8String? GetName() => null;
 
         /// <summary>
         /// Obtains the declaring type of the method definition.
@@ -789,6 +825,15 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="Semantics"/> property.
         /// </remarks>
         protected virtual MethodSemantics? GetSemantics() => null;
+
+        /// <summary>
+        /// Obtains the unmanaged export information associated to the method (if available).
+        /// </summary>
+        /// <returns>The export information or <c>null</c> if the method was not exported as a native symbol.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="ExportInfo"/> property.
+        /// </remarks>
+        protected virtual UnmanagedExportInfo? GetExportInfo() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;

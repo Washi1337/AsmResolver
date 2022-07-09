@@ -129,6 +129,41 @@ namespace AsmResolver.DotNet.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_WithAttribute {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_WithAttribute", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_SingleFile_V1 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V1", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_SingleFile_V2 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V2", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_SingleFile_V6 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V6", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_SingleFile_V6_WithResources {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V6_WithResources", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] Assembly1_Forwarder {
             get {
                 object obj = ResourceManager.GetObject("Assembly1_Forwarder", resourceCulture);
@@ -205,5 +240,31 @@ namespace AsmResolver.DotNet.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        public static byte[] CallManagedExport_X86 {
+            get {
+                object obj = ResourceManager.GetObject("CallManagedExport_X86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        public static byte[] CallManagedExport_X64 {
+            get {
+                object obj = ResourceManager.GetObject("CallManagedExport_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] MyLibrary_X86 {
+            get {
+                object obj = ResourceManager.GetObject("MyLibrary_X86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] MyLibrary_X64 {
+            get {
+                object obj = ResourceManager.GetObject("MyLibrary_X64", resourceCulture);
+
     }
 }

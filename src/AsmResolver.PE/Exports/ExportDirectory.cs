@@ -100,6 +100,6 @@ namespace AsmResolver.PE.Exports
         /// This method is called upon initialization of the <see cref="Entries"/> property.
         /// </remarks>
         protected virtual IList<ExportedSymbol> GetExports() =>
-            new OwnedCollection<IExportDirectory, ExportedSymbol>(this);
+            new ExportedSymbolCollection(this);
     }
 }

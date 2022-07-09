@@ -8,8 +8,9 @@ namespace AsmResolver.PE.Win32Resources.Builder
     /// </summary>
     /// <typeparam name="TEntry">The type of entries to store in the table.</typeparam>
     public abstract class ResourceTableBuffer<TEntry> : SegmentBase
+        where TEntry : notnull
     {
-        private readonly IDictionary<TEntry, uint> _entryOffsets = new Dictionary<TEntry, uint>();
+        private readonly Dictionary<TEntry, uint> _entryOffsets = new();
         private readonly ISegment _parentBuffer;
         private uint _length;
 
@@ -29,7 +30,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// This property should only be used after the table has been relocated to the right location in the PE file.
         /// </remarks>
         public uint RelativeOffset => Rva - _parentBuffer.Rva;
-        
+
         /// <summary>
         /// Gets an ordered collection of entries that are put into the table.
         /// </summary>
@@ -58,7 +59,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// <param name="entry">The item to measure.</param>
         /// <returns>The size in bytes.</returns>
         public abstract uint GetEntrySize(TEntry entry);
-        
+
         /// <summary>
         /// Determines the offset of an entry stored in the table, relative to the start of the resource directory.
         /// </summary>
@@ -72,6 +73,6 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// <inheritdoc />
         public override uint GetPhysicalSize() => _length;
 
-        
+
     }
 }

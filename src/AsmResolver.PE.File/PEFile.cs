@@ -21,6 +21,7 @@ namespace AsmResolver.PE.File
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
 
         private readonly LazyVariable<ISegment?> _extraSectionData;
+        private readonly LazyVariable<ISegment?> _eofData;
         private IList<PESection>? _sections;
 
         /// <summary>
@@ -43,6 +44,7 @@ namespace AsmResolver.PE.File
             FileHeader = fileHeader ?? throw new ArgumentNullException(nameof(fileHeader));
             OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
             _extraSectionData = new LazyVariable<ISegment?>(GetExtraSectionData);
+            _eofData = new LazyVariable<ISegment?>(GetEofData);
             MappingMode = PEMappingMode.Unmapped;
         }
 
@@ -92,13 +94,18 @@ namespace AsmResolver.PE.File
             protected set;
         }
 
-        /// <summary>
-        /// Gets or sets the padding data in between the last section header and the first section.
-        /// </summary>
+        /// <inheritdoc />
         public ISegment? ExtraSectionData
         {
             get => _extraSectionData.Value;
             set => _extraSectionData.Value = value;
+        }
+
+        /// <inheritdoc />
+        public ISegment? EofData
+        {
+            get => _eofData.Value;
+            set => _eofData.Value = value;
         }
 
         /// <summary>
@@ -137,6 +144,16 @@ namespace AsmResolver.PE.File
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static unsafe PEFile FromModuleBaseAddress(IntPtr hInstance)
+            => FromModuleBaseAddress(hInstance, PEMappingMode.Mapped);
+
+        /// <summary>
+        /// Reads a PE file starting at the provided module base address (HINSTANCE).
+        /// </summary>
+        /// <param name="hInstance">The HINSTANCE or base address of the module.</param>
+        /// <param name="mode">Indicates how the input PE file is mapped.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static unsafe PEFile FromModuleBaseAddress(IntPtr hInstance, PEMappingMode mode)
         {
             // Perform some minimal parsing to get the size of the image from the optional header.
             uint nextHeaderOffset = *(uint*) ((byte*) hInstance + DosHeader.NextHeaderFieldOffset);
@@ -145,7 +162,7 @@ namespace AsmResolver.PE.File
                 + sizeof(uint)
                 + FileHeader.FileHeaderSize
                 + OptionalHeader.OptionalHeaderSizeOfImageFieldOffset);
-            return FromDataSource(new UnmanagedDataSource(hInstance, sizeOfImage), PEMappingMode.Mapped);
+            return FromDataSource(new UnmanagedDataSource(hInstance, sizeOfImage), mode);
         }
 
         /// <summary>
@@ -350,7 +367,7 @@ namespace AsmResolver.PE.File
         /// </remarks>
         public void UpdateHeaders()
         {
-            var oldSections = Sections.Select(_ => _.CreateHeader()).ToList();
+            var oldSections = Sections.Select(x => x.CreateHeader()).ToList();
 
             FileHeader.NumberOfSections = (ushort) Sections.Count;
 
@@ -373,6 +390,8 @@ namespace AsmResolver.PE.File
             var lastSection = Sections[Sections.Count - 1];
             OptionalHeader.SizeOfImage = lastSection.Rva
                                          + lastSection.GetVirtualSize().Align(OptionalHeader.SectionAlignment);
+
+            EofData?.UpdateOffsets(lastSection.Offset + lastSection.GetPhysicalSize(), OptionalHeader.SizeOfImage);
         }
 
         /// <summary>
@@ -464,28 +483,30 @@ namespace AsmResolver.PE.File
 
             // NT headers
             writer.Offset = DosHeader.NextHeaderOffset;
-
             writer.WriteUInt32(ValidPESignature);
             FileHeader.Write(writer);
             OptionalHeader.Write(writer);
 
             // Section headers.
             writer.Offset = OptionalHeader.Offset + FileHeader.SizeOfOptionalHeader;
-            foreach (var section in Sections)
-                section.CreateHeader().Write(writer);
+            for (int i = 0; i < Sections.Count; i++)
+                Sections[i].CreateHeader().Write(writer);
 
             // Data between section headers and sections.
             ExtraSectionData?.Write(writer);
 
             // Sections.
-
             writer.Offset = OptionalHeader.SizeOfHeaders;
-            foreach (var section in Sections)
+            for (int i = 0; i < Sections.Count; i++)
             {
+                var section = Sections[i];
                 writer.Offset = section.Offset;
                 section.Contents?.Write(writer);
                 writer.Align(OptionalHeader.FileAlignment);
             }
+
+            // EOF Data.
+            EofData?.Write(writer);
         }
 
         /// <summary>
@@ -505,5 +526,14 @@ namespace AsmResolver.PE.File
         /// This method is called upon the initialization of the <see cref="ExtraSectionData"/> property.
         /// </remarks>
         protected virtual ISegment? GetExtraSectionData() => null;
+
+        /// <summary>
+        /// Obtains any data appended to the end of the file (EoF).
+        /// </summary>
+        /// <returns>The extra data.</returns>
+        /// <remarks>
+        /// This method is called upon the initialization of the <see cref="EofData"/> property.
+        /// </remarks>
+        protected virtual ISegment? GetEofData() => null;
     }
 }

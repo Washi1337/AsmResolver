@@ -109,6 +109,21 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => GenericType;
 
         /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module)
+        {
+            if (!GenericType.IsImportedInModule(module))
+                return false;
+
+            for (int i = 0; i < TypeArguments.Count; i++)
+            {
+                if (!TypeArguments[i].IsImportedInModule(module))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;

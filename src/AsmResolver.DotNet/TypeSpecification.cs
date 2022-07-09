@@ -96,6 +96,19 @@ namespace AsmResolver.DotNet
             Signature ?? throw new ArgumentException("Signature embedded into the type specification is null.");
 
         /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module) => Signature?.IsImportedInModule(module) ?? false;
+
+        /// <summary>
+        /// Imports the type specification using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported type.</returns>
+        public ITypeDefOrRef ImportWith(ReferenceImporter importer) => (TypeSpecification) importer.ImportType(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
         public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();

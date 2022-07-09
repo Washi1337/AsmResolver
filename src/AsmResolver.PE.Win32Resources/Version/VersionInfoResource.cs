@@ -22,7 +22,8 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <returns>The version info resource, or <c>null</c> if none was found.</returns>
         public static VersionInfoResource? FromDirectory(IResourceDirectory rootDirectory)
         {
-            var versionDirectory = (IResourceDirectory) rootDirectory.Entries[ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.Version)];
+            if (!rootDirectory.TryGetDirectory(ResourceType.Version, out var versionDirectory))
+                return null;
 
             var categoryDirectory = versionDirectory
                 .Entries
@@ -97,7 +98,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         }
 
         private FixedVersionInfo _fixedVersionInfo = new FixedVersionInfo();
-        private readonly IDictionary<string, VersionTableEntry> _entries = new Dictionary<string, VersionTableEntry>();
+        private readonly Dictionary<string, VersionTableEntry> _entries = new Dictionary<string, VersionTableEntry>();
 
         /// <inheritdoc />
         public override string Key => VsVersionInfoKey;
@@ -188,14 +189,6 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <inheritdoc />
         public void WriteToDirectory(IResourceDirectory rootDirectory)
         {
-            // Find and remove old version directory.
-            int index = ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.Version);
-
-            if (index == -1)
-                index = rootDirectory.Entries.Count;
-            else
-                rootDirectory.Entries.RemoveAt(index);
-
             // Construct new directory.
             var newVersionDirectory = new ResourceDirectory(ResourceType.Version)
             {
@@ -209,7 +202,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             };
 
             // Insert.
-            rootDirectory.Entries.Insert(index, newVersionDirectory);
+            rootDirectory.AddOrReplaceEntry(newVersionDirectory);
         }
     }
 }

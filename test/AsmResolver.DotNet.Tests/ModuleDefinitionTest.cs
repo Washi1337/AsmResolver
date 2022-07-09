@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Cloning;
 using AsmResolver.DotNet.Serialized;
@@ -11,20 +13,43 @@ using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.Win32Resources;
 using Xunit;
 using FileAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.FileAttributes;
+using TypeAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.TypeAttributes;
 
 namespace AsmResolver.DotNet.Tests
 {
     public class ModuleDefinitionTest
     {
+        private static readonly SignatureComparer Comparer = new();
+        private const string NonWindowsPlatform = "Test loads a module from a base address, which is only supported on Windows.";
+
         private static ModuleDefinition Rebuild(ModuleDefinition module)
         {
             using var stream = new MemoryStream();
             module.Write(stream);
             return ModuleDefinition.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+        }
+
+        [SkippableFact]
+        public void LoadFromModule()
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+
+            var reflectionModule = typeof(ModuleDefinition).Assembly.ManifestModule;
+            var module = ModuleDefinition.FromModule(reflectionModule);
+            Assert.Equal(reflectionModule.Name, module.Name);
+        }
+
+        [SkippableFact]
+        public void LoadFromDynamicModule()
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+
+            var reflectionModule = Assembly.Load(Properties.Resources.ActualLibrary).ManifestModule;
+            var module = ModuleDefinition.FromModule(reflectionModule);
+            Assert.Equal("ActualLibrary.dll", module.Name);
         }
 
         [Fact]
@@ -319,9 +344,17 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void DetectTargetStandard()
         {
-            var module = ModuleDefinition.FromFile(typeof(ISegment).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TestCases.Types.Class).Assembly.Location);
             Assert.Contains(DotNetRuntimeInfo.NetStandard, module.OriginalTargetRuntime.Name);
             Assert.Equal(2, module.OriginalTargetRuntime.Version.Major);
+        }
+
+        [Fact]
+        public void NewModuleShouldContainSingleReferenceToCorLib()
+        {
+            var module = new ModuleDefinition("SomeModule", KnownCorLibs.NetStandard_v2_0_0_0);
+            var reference = Assert.Single(module.AssemblyReferences);
+            Assert.Equal(KnownCorLibs.NetStandard_v2_0_0_0, reference, Comparer);
         }
     }
 }

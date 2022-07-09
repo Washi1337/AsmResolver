@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
@@ -18,6 +18,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="module">Target Module</param>
         /// <param name="dynamicMethodObj">Dynamic Method / Delegate / DynamicResolver</param>
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls ResolveDynamicResolver and FromDynamicMethod")]
         public DynamicMethodDefinition(ModuleDefinition module,object dynamicMethodObj) :
             base(new MetadataToken(TableIndex.Method, 0))
         {

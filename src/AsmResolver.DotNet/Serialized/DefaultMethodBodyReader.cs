@@ -2,7 +2,6 @@ using System;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Serialized
@@ -16,27 +15,26 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         public virtual MethodBody? ReadMethodBody(ModuleReaderContext context, MethodDefinition owner, in MethodDefinitionRow row)
         {
+            var bodyReference = row.Body;
+            if (bodyReference == SegmentReference.Null)
+                return null;
+
+            MethodBody? result = null;
+
             try
             {
-                if (row.Body.CanRead)
+                if (bodyReference.CanRead && owner.IsIL)
                 {
-                    if (owner.IsIL)
-                    {
-                        var reader = row.Body.CreateReader();
-                        var rawBody = CilRawMethodBody.FromReader(context, ref reader);
-                        return rawBody is not null
-                            ? CilMethodBody.FromRawMethodBody(context, owner, rawBody)
-                            : null;
-                    }
-                    else
-                    {
-                        context.NotSupported($"Body of method {owner.MetadataToken} is native and unbounded which is not supported.");
-                        // TODO: handle native method bodies.
-                    }
+                    var reader = bodyReference.CreateReader();
+                    var rawBody = CilRawMethodBody.FromReader(context, ref reader);
+                    if (rawBody is not null)
+                        result = CilMethodBody.FromRawMethodBody(context, owner, rawBody);
                 }
-                else if (row.Body.IsBounded && row.Body.GetSegment() is CilRawMethodBody rawMethodBody)
+
+                if (result is null && bodyReference.IsBounded)
                 {
-                    return CilMethodBody.FromRawMethodBody(context, owner, rawMethodBody);
+                    if (bodyReference.GetSegment() is CilRawMethodBody rawMethodBody)
+                        result = CilMethodBody.FromRawMethodBody(context, owner, rawMethodBody);
                 }
             }
             catch (Exception ex)
@@ -44,7 +42,13 @@ namespace AsmResolver.DotNet.Serialized
                 context.RegisterException(new BadImageFormatException($"Failed to parse the method body of {owner.MetadataToken}.", ex));
             }
 
-            return null;
+            if (result is not null)
+            {
+                result.Address = bodyReference;
+                return result;
+            }
+
+            return new UnresolvedMethodBody(owner, bodyReference);
         }
     }
 }

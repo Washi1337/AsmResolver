@@ -1,12 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
-using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -164,8 +161,10 @@ namespace AsmResolver.DotNet.Tests
             var module = new ModuleDefinition("SomeModule.dll");
 
             var stringType = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "String");
-            var emptyField = new MemberReference(stringType, "Empty",
-                FieldSignature.CreateStatic(module.CorLibTypeFactory.String));
+            var emptyField = new MemberReference(
+                stringType,
+                "Empty",
+                new FieldSignature(module.CorLibTypeFactory.String));
 
             var definition = _fwResolver.ResolveField(emptyField);
 
@@ -246,6 +245,26 @@ namespace AsmResolver.DotNet.Tests
             var resolved = reference.Resolve();
             Assert.NotNull(resolved);
             Assert.Equal(definition, resolved);
+        }
+        
+        public void ResolveMethodWithoutHideBySig()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/241
+
+            var classLibrary = ModuleDefinition.FromFile(typeof(ClassLibraryVB.Class1).Assembly.Location);
+            var definitions = classLibrary
+                .TopLevelTypes.First(t => t.Name == nameof(ClassLibraryVB.Class1))
+                .Methods.Where(m => m.Name == nameof(ClassLibraryVB.Class1.Test))
+                .OrderBy(x => x.Parameters.Count)
+                .ToArray();
+
+            var helloWorld = ModuleDefinition.FromFile(typeof(HelloWorldVB.Program).Assembly.Location);
+            var resolved = helloWorld.ManagedEntrypointMethod!.CilMethodBody!.Instructions
+                .Where(x => x.OpCode == CilOpCodes.Call)
+                .Select(x => ((IMethodDescriptor) x.Operand!).Resolve())
+                .ToArray();
+
+            Assert.Equal(definitions, resolved, new SignatureComparer());
         }
     }
 }

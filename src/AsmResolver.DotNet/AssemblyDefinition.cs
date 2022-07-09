@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents an assembly of self-describing modules of an executable file hosted by a common language runtime (CLR).
     /// </summary>
-    public class AssemblyDefinition : AssemblyDescriptor, IHasSecurityDeclaration
+    public class AssemblyDefinition : AssemblyDescriptor, IModuleProvider, IHasSecurityDeclaration
     {
         private IList<ModuleDefinition>? _modules;
         private IList<SecurityDeclaration>? _securityDeclarations;
@@ -133,6 +133,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public ModuleDefinition? ManifestModule => Modules.Count > 0 ? Modules[0] : null;
 
+        ModuleDefinition? IModuleProvider.Module => ManifestModule;
+
         /// <summary>
         /// Gets a collection of modules that this .NET assembly defines.
         /// </summary>
@@ -221,6 +223,13 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module) => ManifestModule == module;
+
+        /// <inheritdoc />
+        public override AssemblyReference ImportWith(ReferenceImporter importer) =>
+            (AssemblyReference) importer.ImportScope(new AssemblyReference(this));
+
+        /// <inheritdoc />
         public override AssemblyDefinition Resolve() => this;
 
         /// <summary>
@@ -274,15 +283,18 @@ namespace AsmResolver.DotNet
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void Write(string filePath, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            string? directory = Path.GetDirectoryName(filePath);
+            string? directory = Path.GetDirectoryName(Path.GetFullPath(filePath));
             if (directory is null || !Directory.Exists(directory))
                 throw new DirectoryNotFoundException();
 
-            foreach (var module in Modules)
+            for (int i = 0; i < Modules.Count; i++)
             {
-                string modulePath = module == ManifestModule
-                    ? filePath
-                    : Path.Combine(directory, module.Name);
+                var module = Modules[i];
+                string modulePath;
+                if (module == ManifestModule)
+                    modulePath = filePath;
+                else
+                    modulePath = Path.Combine(directory, module.Name ?? $"module{i}.bin");
 
                 module.Write(modulePath, imageBuilder, fileBuilder);
             }

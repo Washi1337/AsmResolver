@@ -5,7 +5,7 @@ using Xunit;
 
 namespace AsmResolver.DotNet.Tests
 {
-    public class ConstantTest
+    public partial class ConstantTest
     {
         private Constant GetFieldConstant(string name)
         {

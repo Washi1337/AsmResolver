@@ -39,7 +39,9 @@ Table of Contents:
    peimage/win32resources
    peimage/exceptions
    peimage/debug
+   peimage/tls
    peimage/dotnet
+   peimage/pe-building
 
 
 .. toctree::
@@ -53,9 +55,12 @@ Table of Contents:
    dotnet/member-tree
    dotnet/type-signatures
    dotnet/importing
+   dotnet/methods
    dotnet/managed-method-bodies
    dotnet/unmanaged-method-bodies
+   dotnet/managed-resources
    dotnet/cloning
    dotnet/token-allocation
    dotnet/type-memory-layout
+   dotnet/bundles
    dotnet/advanced-pe-image-building.rst

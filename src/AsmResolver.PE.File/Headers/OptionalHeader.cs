@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.File.Headers
@@ -105,6 +106,7 @@ namespace AsmResolver.PE.File.Headers
                 ? DefaultNumberOfRvasAndSizes
                 : (int) header.NumberOfRvaAndSizes;
 
+            header.DataDirectories.Clear();
             for (int i = 0; i < dataDirectories; i++)
                 header.DataDirectories.Add(DataDirectory.FromReader(ref reader));
 
@@ -118,7 +120,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = OptionalHeaderMagic.Pe32;
 
         /// <summary>
         /// Gets or sets the major linker version used to link the portable executable (PE) file.
@@ -127,7 +129,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0x30;
 
         /// <summary>
         /// Gets or sets the minor linker version used to link the portable executable (PE) file.
@@ -136,7 +138,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0x18;
 
         /// <summary>
         /// Gets or sets the total amount of bytes the code sections consist of.
@@ -199,7 +201,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0x00400000;
 
         /// <summary>
         /// Gets or sets the alignment of the sections when loaded into memory. Must be greater or equal to
@@ -209,7 +211,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0x2000;
 
         /// <summary>
         /// Gets or sets the alignment of the raw data of sections in the image file. Must be a power of 2 between 512 and 64,000.
@@ -218,7 +220,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0x200;
 
         /// <summary>
         /// Gets or sets the minimum major version of the operating system required to run the portable executable (PE) file.
@@ -227,7 +229,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 4;
 
         /// <summary>
         /// Gets or sets the minimum minor version of the operating system required to run the portable executable (PE) file.
@@ -236,7 +238,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0;
 
         /// <summary>
         /// Gets or sets the major image version.
@@ -263,7 +265,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 4;
 
         /// <summary>
         /// Gets or sets the minor version of the subsystem.
@@ -272,7 +274,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0;
 
         /// <summary>
         /// Reserved, should be zero.
@@ -317,7 +319,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = SubSystem.WindowsCui;
 
         /// <summary>
         /// Gets or sets the dynamic linked library characteristics of the portable executable (PE) file.
@@ -326,7 +328,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = DllCharacteristics.DynamicBase | DllCharacteristics.TerminalServerAware | DllCharacteristics.NxCompat;
 
         /// <summary>
         /// Gets or sets the size of the stack to reserve.
@@ -335,7 +337,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0x001000000;
 
         /// <summary>
         /// Gets or sets the size of the stack to commit.
@@ -344,7 +346,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0x00001000;
 
         /// <summary>
         /// Gets or sets the size of the heap to reserve.
@@ -353,7 +355,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0x001000000;
 
         /// <summary>
         /// Gets or sets the size of the heap to commit.
@@ -362,7 +364,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = 0x00001000;
 
         /// <summary>
         /// Obsolete.
@@ -380,7 +382,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        }
+        } = DefaultNumberOfRvasAndSizes;
 
         /// <summary>
         /// Gets the data directory headers defined in the optional header.
@@ -388,7 +390,7 @@ namespace AsmResolver.PE.File.Headers
         public IList<DataDirectory> DataDirectories
         {
             get;
-        } = new List<DataDirectory>();
+        } = new DataDirectory[DefaultNumberOfRvasAndSizes].ToList();
 
         /// <summary>
         /// Gets a data directory by its index.

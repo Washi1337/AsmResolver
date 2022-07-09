@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,7 +12,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// <summary>
         /// Used to keep track of icon groups.
         /// </summary>
-        private readonly IDictionary<uint, IconGroupDirectory> _entries = new Dictionary<uint, IconGroupDirectory>();
+        private readonly Dictionary<uint, IconGroupDirectory> _entries = new Dictionary<uint, IconGroupDirectory>();
 
         /// <summary>
         /// Obtains the icon group resources from the provided root win32 resources directory.
@@ -22,11 +22,11 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// <exception cref="ArgumentException">Occurs when the resource data is not readable.</exception>
         public static IconResource? FromDirectory(IResourceDirectory rootDirectory)
         {
-            var groupIconDirectory = (IResourceDirectory) rootDirectory.Entries[
-                ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.GroupIcon)];
-
-            var iconDirectory = (IResourceDirectory) rootDirectory.Entries[
-                ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.Icon)];
+            if (!rootDirectory.TryGetDirectory(ResourceType.GroupIcon, out var groupIconDirectory)
+                || !rootDirectory.TryGetDirectory(ResourceType.Icon, out var iconDirectory))
+            {
+                return null;
+            }
 
             var result = new IconResource();
 
@@ -83,25 +83,6 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// <inheritdoc />
         public void WriteToDirectory(IResourceDirectory rootDirectory)
         {
-            // Find and remove old group icon directory.
-            int groupIconIndex = ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.GroupIcon);
-
-            if (groupIconIndex == -1)
-                groupIconIndex = rootDirectory.Entries.Count;
-            else
-                rootDirectory.Entries.RemoveAt(groupIconIndex);
-
-            // Find and remove old icon directory.
-            int iconIndex = ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.Icon);
-
-            if (iconIndex == -1)
-                iconIndex = rootDirectory.Entries.Count;
-            else
-                rootDirectory.Entries.RemoveAt(iconIndex);
-
-            if (groupIconIndex == iconIndex)
-                iconIndex += 1;
-
             // Construct new directory.
             var newGroupIconDirectory = new ResourceDirectory(ResourceType.GroupIcon);
             foreach (var entry in _entries)
@@ -122,8 +103,8 @@ namespace AsmResolver.PE.Win32Resources.Icon
             }
 
             // Insert.
-            rootDirectory.Entries.Insert(groupIconIndex, newGroupIconDirectory);
-            rootDirectory.Entries.Insert(iconIndex, newIconDirectory);
+            rootDirectory.AddOrReplaceEntry(newGroupIconDirectory);
+            rootDirectory.AddOrReplaceEntry(newIconDirectory);
         }
     }
 }

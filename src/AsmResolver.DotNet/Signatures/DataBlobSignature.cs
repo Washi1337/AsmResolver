@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Text;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -65,5 +66,188 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public override void Write(BlobSerializationContext context) => context.Writer.WriteBytes(Data);
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(bool value)
+        {
+            byte[] bytes = new byte[1];
+            bytes[0] = (byte)(value ? 1 : 0);
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(char value)
+        {
+            byte[] bytes = new byte[2];
+            BinaryPrimitives.WriteUInt16LittleEndian(bytes, value);
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(byte value)
+        {
+            byte[] bytes = new byte[1];
+            bytes[0] = value;
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(sbyte value)
+        {
+            byte[] bytes = new byte[1];
+            bytes[0] = unchecked((byte)value);
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(ushort value)
+        {
+            byte[] bytes = new byte[2];
+            BinaryPrimitives.WriteUInt16LittleEndian(bytes, value);
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(short value)
+        {
+            byte[] bytes = new byte[2];
+            BinaryPrimitives.WriteInt16LittleEndian(bytes, value);
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(uint value)
+        {
+            byte[] bytes = new byte[4];
+            BinaryPrimitives.WriteUInt32LittleEndian(bytes, value);
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(int value)
+        {
+            byte[] bytes = new byte[4];
+            BinaryPrimitives.WriteInt32LittleEndian(bytes, value);
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(ulong value)
+        {
+            byte[] bytes = new byte[8];
+            BinaryPrimitives.WriteUInt64LittleEndian(bytes, value);
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(long value)
+        {
+            byte[] bytes = new byte[8];
+            BinaryPrimitives.WriteInt64LittleEndian(bytes, value);
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(float value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            if (!BitConverter.IsLittleEndian)
+                Array.Reverse(bytes);
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(double value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            if (!BitConverter.IsLittleEndian)
+                Array.Reverse(bytes);
+            return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be converted into data</param>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromValue(string value)
+        {
+            byte[] bytes = Encoding.Unicode.GetBytes(value);
+            return new DataBlobSignature(bytes);
+        }
     }
 }

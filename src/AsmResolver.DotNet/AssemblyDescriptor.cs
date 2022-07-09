@@ -2,18 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AssemblyHashAlgorithm = AsmResolver.PE.DotNet.Metadata.Tables.Rows.AssemblyHashAlgorithm;
 
 namespace AsmResolver.DotNet
 {
     /// <summary>
     /// Provides a base implementation for describing a self-describing .NET assembly hosted by a common language runtime (CLR).
     /// </summary>
-    public abstract class AssemblyDescriptor : MetadataMember, IHasCustomAttribute, IFullNameProvider
+    public abstract class AssemblyDescriptor : MetadataMember, IHasCustomAttribute, IFullNameProvider, IImportable
     {
         private const int PublicKeyTokenLength = 8;
 
@@ -29,7 +31,7 @@ namespace AsmResolver.DotNet
             : base(token)
         {
             _name = new LazyVariable<Utf8String?>(GetName);
-            _culture = new LazyVariable<Utf8String?>(() => GetCulture());
+            _culture = new LazyVariable<Utf8String?>(GetCulture);
             Version = new Version(0, 0, 0, 0);
         }
 
@@ -211,6 +213,19 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public override string ToString() => FullName;
+
+        /// <inheritdoc />
+        public abstract bool IsImportedInModule(ModuleDefinition module);
+
+        /// <summary>
+        /// Imports the assembly descriptor using the provided reference importer.
+        /// </summary>
+        /// <param name="importer">The importer object to use.</param>
+        /// <returns>The imported assembly reference.</returns>
+        public abstract AssemblyReference ImportWith(ReferenceImporter importer);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <summary>
         /// Computes the token of a public key using the provided hashing algorithm.
