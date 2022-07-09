@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet
         private readonly IDictionary<ITypeDescriptor, TypeDefinition> _typeCache;
         private readonly SignatureComparer _comparer = new()
         {
-            AcceptNewerAssemblyVersionNumbers = true
+            IgnoreAssemblyVersionNumbers = true
         };
 
         /// <summary>
