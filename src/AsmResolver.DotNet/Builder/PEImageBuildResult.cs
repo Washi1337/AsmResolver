@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Builder
         /// Gets a value indicating whether the image was constructed successfully or not.
         /// </summary>
         [MemberNotNullWhen(false, nameof(ConstructedImage))]
-        public bool HasFailed => ConstructedImage is null;
+        public bool HasFailed => DiagnosticBag.IsFatal;
 
         /// <summary>
         /// Gets the bag containing the diagnostics that were collected during the construction of the image.
