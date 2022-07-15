@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AsmResolver.Symbols.Pdb.Metadata.Dbi;
 using AsmResolver.Symbols.Pdb.Metadata.Info;
@@ -20,6 +21,11 @@ public class SerializedPdbImage : PdbImage
     public SerializedPdbImage(MsfFile file)
     {
         _file = file;
+
+        if (InfoStream.StreamIndex >= file.Streams.Count)
+            throw new BadImageFormatException("MSF file does not contain a PDB Info stream.");
+        if (InfoStream.StreamIndex >= file.Streams.Count)
+            throw new BadImageFormatException("MSF file does not contain a PDB Info stream.");
 
         InfoStream = InfoStream.FromReader(file.Streams[InfoStream.StreamIndex].CreateReader());
         DbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
