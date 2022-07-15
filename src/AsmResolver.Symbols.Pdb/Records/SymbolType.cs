@@ -1,6 +1,6 @@
 namespace AsmResolver.Symbols.Pdb.Records;
 
-// Reference: cvinfo.h
+// Reference: microsoft-pdb/include/cvinfo.h
 
 /// <summary>
 /// Provides members defining all symbol record types that can be stored in a PDB symbol stream.
