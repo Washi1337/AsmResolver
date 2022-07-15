@@ -30,6 +30,7 @@ public abstract class SymbolRecord
         return type switch
         {
             SymbolType.Pub32 => PublicSymbol.FromReader(ref dataReader),
+            SymbolType.Udt => UserDefinedTypeSymbol.FromReader(ref dataReader),
             _ => new UnknownSymbol(type, dataReader.ReadToEnd())
         };
     }

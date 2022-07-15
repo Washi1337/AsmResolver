@@ -1,4 +1,3 @@
-using System.Text;
 using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.Pdb.Records;
@@ -15,7 +14,7 @@ public class PublicSymbol : SymbolRecord
     /// <param name="offset">The offset within the segment the symbol starts at.</param>
     /// <param name="name">The name of the symbol.</param>
     /// <param name="attributes">The attributes associated to the symbol.</param>
-    public PublicSymbol(ushort segment, uint offset, string name, PublicSymbolAttributes attributes)
+    public PublicSymbol(ushort segment, uint offset, Utf8String name, PublicSymbolAttributes attributes)
     {
         Segment = segment;
         Offset = offset;
@@ -96,7 +95,7 @@ public class PublicSymbol : SymbolRecord
     /// <summary>
     /// Gets or sets the name of the symbol.
     /// </summary>
-    public string Name
+    public Utf8String Name
     {
         get;
         set;
@@ -107,7 +106,7 @@ public class PublicSymbol : SymbolRecord
         var attributes = (PublicSymbolAttributes) reader.ReadUInt32();
         uint offset = reader.ReadUInt32();
         ushort segment = reader.ReadUInt16();
-        string name = Encoding.ASCII.GetString(reader.ReadToEnd());
+        var name = new Utf8String(reader.ReadToEnd());
 
         return new PublicSymbol(segment, offset, name, attributes);
     }
