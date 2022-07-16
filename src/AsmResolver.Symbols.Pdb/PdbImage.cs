@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.IO;
 using AsmResolver.Symbols.Pdb.Msf;
 using AsmResolver.Symbols.Pdb.Records;
+using AsmResolver.Symbols.Pdb.Types;
 
 namespace AsmResolver.Symbols.Pdb;
 
@@ -60,6 +63,31 @@ public class PdbImage
     /// <param name="file">The MSF file.</param>
     /// <returns>The read PDB image.</returns>
     public static PdbImage FromFile(MsfFile file) => new SerializedPdbImage(file);
+
+    /// <summary>
+    /// Attempts to obtain a type record from the TPI or IPI stream based on its type index.
+    /// </summary>
+    /// <param name="typeIndex">The type index.</param>
+    /// <param name="type">The resolved type.</param>
+    /// <returns><c>true</c> if the type was found, <c>false</c> otherwise.</returns>
+    public virtual bool TryGetTypeRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewType? type)
+    {
+        type = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Obtains a type record from the TPI or IPI stream based on its type index.
+    /// </summary>
+    /// <param name="typeIndex">The type index.</param>
+    /// <returns>The resolved type.</returns>
+    /// <exception cref="ArgumentException">Occurs when the type index is invalid.</exception>
+    public CodeViewType GetTypeRecord(uint typeIndex)
+    {
+        if (!TryGetTypeRecord(typeIndex, out var type))
+            throw new ArgumentException("Invalid type index.");
+        return type;
+    }
 
     /// <summary>
     /// Obtains a collection of symbols stored in the symbol record stream of the PDB image.
