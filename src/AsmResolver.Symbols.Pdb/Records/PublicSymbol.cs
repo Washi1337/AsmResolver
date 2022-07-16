@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a public symbol stored in a PDB symbol stream.
 /// </summary>
-public class PublicSymbol : SymbolRecord
+public class PublicSymbol : CodeViewSymbol
 {
     /// <summary>
     /// Creates a new public symbol.
@@ -23,7 +23,7 @@ public class PublicSymbol : SymbolRecord
     }
 
     /// <inheritdoc />
-    public override SymbolType SymbolType => SymbolType.Pub32;
+    public override CodeViewSymbolType CodeViewSymbolType => CodeViewSymbolType.Pub32;
 
     /// <summary>
     /// Gets or sets the file segment index this symbol is located in.
@@ -112,5 +112,5 @@ public class PublicSymbol : SymbolRecord
     }
 
     /// <inheritdoc />
-    public override string ToString() => $"{SymbolType}: [{Segment:X4}:{Offset:X8}] {Name}";
+    public override string ToString() => $"{CodeViewSymbolType}: [{Segment:X4}:{Offset:X8}] {Name}";
 }

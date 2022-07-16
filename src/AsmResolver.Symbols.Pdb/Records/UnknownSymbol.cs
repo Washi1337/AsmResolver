@@ -3,21 +3,21 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a symbol record for which the format is unknown or unsupported.
 /// </summary>
-public class UnknownSymbol : SymbolRecord
+public class UnknownSymbol : CodeViewSymbol
 {
     /// <summary>
     /// Creates a new unknown symbol record.
     /// </summary>
-    /// <param name="symbolType">The type of symbol.</param>
+    /// <param name="codeViewSymbolType">The type of symbol.</param>
     /// <param name="data">The raw data stored in the record.</param>
-    public UnknownSymbol(SymbolType symbolType, byte[] data)
+    public UnknownSymbol(CodeViewSymbolType codeViewSymbolType, byte[] data)
     {
-        SymbolType = symbolType;
+        CodeViewSymbolType = codeViewSymbolType;
         Data = data;
     }
 
     /// <inheritdoc />
-    public override SymbolType SymbolType
+    public override CodeViewSymbolType CodeViewSymbolType
     {
         get;
     }
@@ -31,5 +31,5 @@ public class UnknownSymbol : SymbolRecord
     }
 
     /// <inheritdoc />
-    public override string ToString() => $"{SymbolType.ToString()} ({Data.Length.ToString()} bytes)";
+    public override string ToString() => $"{CodeViewSymbolType.ToString()} ({Data.Length.ToString()} bytes)";
 }

@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a user-defined type symbol in a PDB symbol stream.
 /// </summary>
-public class UserDefinedTypeSymbol : SymbolRecord
+public class UserDefinedTypeSymbol : CodeViewSymbol
 {
     /// <summary>
     /// Defines a new user-defined type.
@@ -19,7 +19,7 @@ public class UserDefinedTypeSymbol : SymbolRecord
     }
 
     /// <inheritdoc />
-    public override SymbolType SymbolType => SymbolType.Udt;
+    public override CodeViewSymbolType CodeViewSymbolType => CodeViewSymbolType.Udt;
 
     /// <summary>
     /// Gets or sets the name of the type.
@@ -48,5 +48,5 @@ public class UserDefinedTypeSymbol : SymbolRecord
     }
 
     /// <inheritdoc />
-    public override string ToString() => $"{SymbolType}: [{TypeIndex}] {Name}";
+    public override string ToString() => $"{CodeViewSymbolType}: [{TypeIndex}] {Name}";
 }

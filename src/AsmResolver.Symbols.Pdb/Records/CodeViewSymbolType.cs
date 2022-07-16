@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Provides members defining all symbol record types that can be stored in a PDB symbol stream.
 /// </summary>
-public enum SymbolType : ushort
+public enum CodeViewSymbolType : ushort
 {
 #pragma warning disable CS1591
     /// <summary>

@@ -42,9 +42,9 @@ public class SerializedPdbImage : PdbImage
     }
 
     /// <inheritdoc />
-    protected override IList<SymbolRecord> GetSymbols()
+    protected override IList<CodeViewSymbol> GetSymbols()
     {
-        var result = new List<SymbolRecord>();
+        var result = new List<CodeViewSymbol>();
 
         int index = DbiStream.SymbolRecordStreamIndex;
         if (index >= _file.Streams.Count)
@@ -53,7 +53,7 @@ public class SerializedPdbImage : PdbImage
         var reader = _file.Streams[DbiStream.SymbolRecordStreamIndex].CreateReader();
         while (reader.CanRead(sizeof(ushort) * 2))
         {
-            result.Add(SymbolRecord.FromReader(ref reader));
+            result.Add(CodeViewSymbol.FromReader(ref reader));
         }
 
         return result;

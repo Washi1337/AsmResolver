@@ -11,12 +11,12 @@ namespace AsmResolver.Symbols.Pdb;
 /// </summary>
 public class PdbImage
 {
-    private IList<SymbolRecord>? _symbols;
+    private IList<CodeViewSymbol>? _symbols;
 
     /// <summary>
     /// Gets a collection of all symbols stored in the PDB image.
     /// </summary>
-    public IList<SymbolRecord> Symbols
+    public IList<CodeViewSymbol> Symbols
     {
         get
         {
@@ -68,5 +68,5 @@ public class PdbImage
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Symbols"/> property.
     /// </remarks>
-    protected virtual IList<SymbolRecord> GetSymbols() => new List<SymbolRecord>();
+    protected virtual IList<CodeViewSymbol> GetSymbols() => new List<CodeViewSymbol>();
 }
