@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -61,8 +62,12 @@ public class SerializedPdbImage : PdbImage
         }
     }
 
+    /// <inheritdoc />
     public override bool TryGetTypeRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewType? type)
     {
+        if (typeIndex < TpiStream.TypeIndexBegin)
+            return base.TryGetTypeRecord(typeIndex, out type);
+
         EnsureTypeArrayInitialized();
 
         if (typeIndex >= TpiStream.TypeIndexBegin && typeIndex < TpiStream.TypeIndexEnd)

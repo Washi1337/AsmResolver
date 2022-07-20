@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -15,6 +16,7 @@ namespace AsmResolver.Symbols.Pdb;
 public class PdbImage
 {
     private IList<CodeViewSymbol>? _symbols;
+    private ConcurrentDictionary<uint, SimpleType> _simpleTypes = new();
 
     /// <summary>
     /// Gets a collection of all symbols stored in the PDB image.
@@ -72,6 +74,13 @@ public class PdbImage
     /// <returns><c>true</c> if the type was found, <c>false</c> otherwise.</returns>
     public virtual bool TryGetTypeRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewType? type)
     {
+        typeIndex &= 0x7fffffff;
+        if (typeIndex < 0x1000)
+        {
+            type = _simpleTypes.GetOrAdd(typeIndex, i => new SimpleType(i));
+            return true;
+        }
+
         type = null;
         return false;
     }
