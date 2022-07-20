@@ -11,6 +11,18 @@ public class UnknownCodeViewType : CodeViewType
     /// <param name="typeKind">The type of symbol.</param>
     /// <param name="data">The raw data stored in the record.</param>
     public UnknownCodeViewType(CodeViewTypeKind typeKind, byte[] data)
+        : this(0, typeKind, data)
+    {
+    }
+
+    /// <summary>
+    /// Creates a new unknown type record.
+    /// </summary>
+    /// <param name="typeIndex">The type index to assign to the type</param>
+    /// <param name="typeKind">The type of symbol.</param>
+    /// <param name="data">The raw data stored in the record.</param>
+    internal UnknownCodeViewType(uint typeIndex, CodeViewTypeKind typeKind, byte[] data)
+        : base(typeIndex)
     {
         TypeKind = typeKind;
         Data = data;

@@ -1,3 +1,5 @@
+using System.Linq;
+using AsmResolver.Symbols.Pdb.Records;
 using AsmResolver.Symbols.Pdb.Types;
 using Xunit;
 

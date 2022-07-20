@@ -83,8 +83,7 @@ public class SerializedPdbImage : PdbImage
             type = _types[typeIndex - TpiStream.TypeIndexBegin];
             if (type is null && TpiStream.TryGetTypeRecordReader(typeIndex, out var reader))
             {
-                type = CodeViewType.FromReader(ReaderContext, reader);
-                type.TypeIndex = typeIndex;
+                type = CodeViewType.FromReader(ReaderContext, typeIndex, ref reader);
                 Interlocked.CompareExchange(ref _types[typeIndex - TpiStream.TypeIndexBegin], type, null);
             }
 

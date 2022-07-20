@@ -63,7 +63,7 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     /// <summary>
     /// Obtains the type that is referenced by this symbol.
     /// </summary>
-    /// <returns>The name.</returns>
+    /// <returns>The type.</returns>
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Type"/> property.
     /// </remarks>

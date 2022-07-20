@@ -10,8 +10,8 @@ public class SimpleType : CodeViewType
     /// </summary>
     /// <param name="typeIndex">The type index.</param>
     public SimpleType(uint typeIndex)
+        : base(typeIndex)
     {
-        TypeIndex = typeIndex;
     }
 
     /// <summary>
@@ -19,7 +19,7 @@ public class SimpleType : CodeViewType
     /// </summary>
     /// <param name="kind">The type kind.</param>
     public SimpleType(SimpleTypeKind kind)
-        : this((uint) kind)
+        : base((uint) kind)
     {
     }
 
@@ -29,7 +29,7 @@ public class SimpleType : CodeViewType
     /// <param name="kind">The type kind.</param>
     /// <param name="mode">The mode indicating the pointer specifiers added to the type.</param>
     public SimpleType(SimpleTypeKind kind, SimpleTypeMode mode)
-        : this((uint) kind | ((uint) mode << 8))
+        : base((uint) kind | ((uint) mode << 8))
     {
     }
 

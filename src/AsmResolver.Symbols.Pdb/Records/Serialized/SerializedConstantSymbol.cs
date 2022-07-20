@@ -15,6 +15,7 @@ public class SerializedConstantSymbol : ConstantSymbol
     /// <summary>
     /// Reads a constant symbol from the provided input stream.
     /// </summary>
+    /// <param name="context">The reading context in which the symbol is situated in.</param>
     /// <param name="reader">The input stream to read from.</param>
     public SerializedConstantSymbol(PdbReaderContext context, BinaryStreamReader reader)
     {
