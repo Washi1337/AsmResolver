@@ -22,5 +22,5 @@ public class SerializedPublicSymbol : PublicSymbol
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => new(_nameReader.Fork().ReadToEnd());
+    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
 }

@@ -25,7 +25,7 @@ public class SerializedUserDefinedTypeSymbol : UserDefinedTypeSymbol
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() =>  new(_nameReader.Fork().ReadToEnd());
+    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
 
     /// <inheritdoc />
     protected override CodeViewType? GetSymbolType()
