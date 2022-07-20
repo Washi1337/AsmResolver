@@ -33,6 +33,7 @@ public abstract class CodeViewSymbol
         {
             CodeViewSymbolType.Pub32 => new SerializedPublicSymbol(dataReader),
             CodeViewSymbolType.Udt => new SerializedUserDefinedTypeSymbol(context, dataReader),
+            CodeViewSymbolType.Constant => new SerializedConstantSymbol(context, dataReader),
             _ => new UnknownSymbol(type, dataReader.ReadToEnd())
         };
     }
