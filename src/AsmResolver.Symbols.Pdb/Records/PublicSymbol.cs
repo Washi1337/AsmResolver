@@ -1,5 +1,3 @@
-using AsmResolver.IO;
-
 namespace AsmResolver.Symbols.Pdb.Records;
 
 /// <summary>
@@ -7,6 +5,16 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class PublicSymbol : CodeViewSymbol
 {
+    private readonly LazyVariable<Utf8String> _name;
+
+    /// <summary>
+    /// Initializes a new empty public symbol.
+    /// </summary>
+    protected PublicSymbol()
+    {
+        _name = new LazyVariable<Utf8String>(GetName);
+    }
+
     /// <summary>
     /// Creates a new public symbol.
     /// </summary>
@@ -18,7 +26,7 @@ public class PublicSymbol : CodeViewSymbol
     {
         Segment = segment;
         Offset = offset;
-        Name = name;
+        _name = new LazyVariable<Utf8String>(name);
         Attributes = attributes;
     }
 
@@ -97,19 +105,18 @@ public class PublicSymbol : CodeViewSymbol
     /// </summary>
     public Utf8String Name
     {
-        get;
-        set;
+        get => _name.Value;
+        set => _name.Value = value;
     }
 
-    internal new static PublicSymbol FromReader(ref BinaryStreamReader reader)
-    {
-        var attributes = (PublicSymbolAttributes) reader.ReadUInt32();
-        uint offset = reader.ReadUInt32();
-        ushort segment = reader.ReadUInt16();
-        var name = new Utf8String(reader.ReadToEnd());
-
-        return new PublicSymbol(segment, offset, name, attributes);
-    }
+    /// <summary>
+    /// Obtains the name of the public symbol.
+    /// </summary>
+    /// <returns>The name.</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="Name"/> property.
+    /// </remarks>
+    protected virtual Utf8String GetName() => Utf8String.Empty;
 
     /// <inheritdoc />
     public override string ToString() => $"{CodeViewSymbolType}: [{Segment:X4}:{Offset:X8}] {Name}";

@@ -24,7 +24,7 @@ public abstract class CodeViewType
         internal set;
     }
 
-    internal static CodeViewType FromReader(PdbImage owner, BinaryStreamReader reader)
+    internal static CodeViewType FromReader(PdbReaderContext context, BinaryStreamReader reader)
     {
         ushort length = reader.ReadUInt16();
         var kind = (CodeViewTypeKind) reader.ReadUInt16();

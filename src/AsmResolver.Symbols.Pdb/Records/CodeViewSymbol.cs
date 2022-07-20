@@ -1,4 +1,5 @@
 using AsmResolver.IO;
+using AsmResolver.Symbols.Pdb.Records.Serialized;
 
 namespace AsmResolver.Symbols.Pdb.Records;
 
@@ -18,9 +19,10 @@ public abstract class CodeViewSymbol
     /// <summary>
     /// Reads a single symbol record from the input stream.
     /// </summary>
+    /// <param name="context">The reading context in which the symbol is situated in.</param>
     /// <param name="reader">The input stream.</param>
     /// <returns>The read symbol.</returns>
-    public static CodeViewSymbol FromReader(ref BinaryStreamReader reader)
+    public static CodeViewSymbol FromReader(PdbReaderContext context, ref BinaryStreamReader reader)
     {
         ushort length = reader.ReadUInt16();
         var type = (CodeViewSymbolType) reader.ReadUInt16();
@@ -29,8 +31,8 @@ public abstract class CodeViewSymbol
 
         return type switch
         {
-            CodeViewSymbolType.Pub32 => PublicSymbol.FromReader(ref dataReader),
-            CodeViewSymbolType.Udt => UserDefinedTypeSymbol.FromReader(ref dataReader),
+            CodeViewSymbolType.Pub32 => new SerializedPublicSymbol(dataReader),
+            CodeViewSymbolType.Udt => new SerializedUserDefinedTypeSymbol(context, dataReader),
             _ => new UnknownSymbol(type, dataReader.ReadToEnd())
         };
     }

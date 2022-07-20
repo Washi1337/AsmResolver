@@ -64,7 +64,21 @@ public class PdbImage
     /// </summary>
     /// <param name="file">The MSF file.</param>
     /// <returns>The read PDB image.</returns>
-    public static PdbImage FromFile(MsfFile file) => new SerializedPdbImage(file);
+    public static PdbImage FromFile(MsfFile file)
+    {
+        return FromFile(file, new PdbReaderParameters(ThrowErrorListener.Instance));
+    }
+
+    /// <summary>
+    /// Loads a PDB image from the provided MSF file.
+    /// </summary>
+    /// <param name="file">The MSF file.</param>
+    /// <param name="readerParameters">The parameters to use while reading the PDB image.</param>
+    /// <returns>The read PDB image.</returns>
+    public static PdbImage FromFile(MsfFile file, PdbReaderParameters readerParameters)
+    {
+        return new SerializedPdbImage(file, readerParameters);
+    }
 
     /// <summary>
     /// Attempts to obtain a type record from the TPI or IPI stream based on its type index.

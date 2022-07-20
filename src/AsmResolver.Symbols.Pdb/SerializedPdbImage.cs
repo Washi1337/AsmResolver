@@ -25,7 +25,8 @@ public class SerializedPdbImage : PdbImage
     /// Interprets a PDB image from the provided MSF file.
     /// </summary>
     /// <param name="file">The MSF file to read from.</param>
-    public SerializedPdbImage(MsfFile file)
+    /// <param name="readerParameters">The parameters to use while reading the PDB image.</param>
+    public SerializedPdbImage(MsfFile file, PdbReaderParameters readerParameters)
     {
         _file = file;
 
@@ -35,7 +36,14 @@ public class SerializedPdbImage : PdbImage
         InfoStream = InfoStream.FromReader(file.Streams[InfoStream.StreamIndex].CreateReader());
         DbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
         TpiStream = TpiStream.FromReader(file.Streams[TpiStream.StreamIndex].CreateReader());
-     }
+
+        ReaderContext = new PdbReaderContext(this, readerParameters);
+    }
+
+    internal PdbReaderContext ReaderContext
+    {
+        get;
+    }
 
     internal InfoStream InfoStream
     {
@@ -75,7 +83,7 @@ public class SerializedPdbImage : PdbImage
             type = _types[typeIndex - TpiStream.TypeIndexBegin];
             if (type is null && TpiStream.TryGetTypeRecordReader(typeIndex, out var reader))
             {
-                type = CodeViewType.FromReader(this, reader);
+                type = CodeViewType.FromReader(ReaderContext, reader);
                 type.TypeIndex = typeIndex;
                 Interlocked.CompareExchange(ref _types[typeIndex - TpiStream.TypeIndexBegin], type, null);
             }
@@ -99,7 +107,7 @@ public class SerializedPdbImage : PdbImage
 
         var reader = _file.Streams[DbiStream.SymbolRecordStreamIndex].CreateReader();
         while (reader.CanRead(sizeof(ushort) * 2))
-            result.Add(CodeViewSymbol.FromReader(ref reader));
+            result.Add(CodeViewSymbol.FromReader(ReaderContext, ref reader));
 
         return result;
     }
