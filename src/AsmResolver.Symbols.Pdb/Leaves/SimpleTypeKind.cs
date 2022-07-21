@@ -1,4 +1,4 @@
-namespace AsmResolver.Symbols.Pdb.Types;
+namespace AsmResolver.Symbols.Pdb.Leaves;
 
 /// <summary>
 /// Provides members defining all basic type kinds that can be used as a type index.

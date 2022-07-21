@@ -1,9 +1,9 @@
-namespace AsmResolver.Symbols.Pdb.Types;
+namespace AsmResolver.Symbols.Pdb.Leaves;
 
 /// <summary>
 /// Provides members defining all possible type record kinds that can be stored in a TPI or IPI stream.
 /// </summary>
-public enum CodeViewTypeKind : ushort
+public enum CodeViewLeafKind : ushort
 {
 #pragma warning disable CS1591
     /// <summary>

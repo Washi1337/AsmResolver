@@ -1,7 +1,7 @@
-using AsmResolver.Symbols.Pdb.Types;
+using AsmResolver.Symbols.Pdb.Leaves;
 using Xunit;
 
-namespace AsmResolver.Symbols.Pdb.Tests.Types;
+namespace AsmResolver.Symbols.Pdb.Tests.Leaves;
 
 public class SimpleTypeTest
 {

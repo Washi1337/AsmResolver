@@ -1,5 +1,5 @@
 using AsmResolver.IO;
-using AsmResolver.Symbols.Pdb.Types;
+using AsmResolver.Symbols.Pdb.Leaves;
 
 namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 
@@ -30,7 +30,7 @@ public class SerializedUserDefinedTypeSymbol : UserDefinedTypeSymbol
     /// <inheritdoc />
     protected override CodeViewType? GetSymbolType()
     {
-        return _context.ParentImage.TryGetTypeRecord(_typeIndex, out var type)
+        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out var leaf) && leaf is CodeViewType type
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewType>(
                 $"User-defined type contains an invalid type index {_typeIndex:X8}.");

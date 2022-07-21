@@ -1,4 +1,4 @@
-namespace AsmResolver.Symbols.Pdb.Types;
+namespace AsmResolver.Symbols.Pdb.Leaves;
 
 /// <summary>
 /// Represents a simple type referenced by a simple type index.
@@ -34,7 +34,7 @@ public class SimpleType : CodeViewType
     }
 
     /// <inheritdoc />
-    public override CodeViewTypeKind TypeKind => CodeViewTypeKind.SimpleType;
+    public override CodeViewLeafKind LeafKind => CodeViewLeafKind.SimpleType;
 
     /// <summary>
     /// Gets the kind of the simple type.

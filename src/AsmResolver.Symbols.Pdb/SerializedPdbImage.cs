@@ -3,12 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using AsmResolver.Symbols.Pdb.Leaves;
 using AsmResolver.Symbols.Pdb.Metadata.Dbi;
 using AsmResolver.Symbols.Pdb.Metadata.Info;
 using AsmResolver.Symbols.Pdb.Metadata.Tpi;
 using AsmResolver.Symbols.Pdb.Msf;
 using AsmResolver.Symbols.Pdb.Records;
-using AsmResolver.Symbols.Pdb.Types;
 
 namespace AsmResolver.Symbols.Pdb;
 
@@ -19,7 +19,7 @@ public class SerializedPdbImage : PdbImage
 {
     private const int MinimalRequiredStreamCount = 5;
     private readonly MsfFile _file;
-    private CodeViewType?[]? _types;
+    private CodeViewLeaf?[]? _types;
 
     /// <summary>
     /// Interprets a PDB image from the provided MSF file.
@@ -66,15 +66,15 @@ public class SerializedPdbImage : PdbImage
         if (_types is null)
         {
             Interlocked.CompareExchange(ref _types,
-                new CodeViewType?[TpiStream.TypeIndexEnd - TpiStream.TypeIndexBegin], null);
+                new CodeViewLeaf?[TpiStream.TypeIndexEnd - TpiStream.TypeIndexBegin], null);
         }
     }
 
     /// <inheritdoc />
-    public override bool TryGetTypeRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewType? type)
+    public override bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewLeaf? type)
     {
         if (typeIndex < TpiStream.TypeIndexBegin)
-            return base.TryGetTypeRecord(typeIndex, out type);
+            return base.TryGetLeafRecord(typeIndex, out type);
 
         EnsureTypeArrayInitialized();
 
@@ -83,7 +83,7 @@ public class SerializedPdbImage : PdbImage
             type = _types[typeIndex - TpiStream.TypeIndexBegin];
             if (type is null && TpiStream.TryGetTypeRecordReader(typeIndex, out var reader))
             {
-                type = CodeViewType.FromReader(ReaderContext, typeIndex, ref reader);
+                type = CodeViewLeaf.FromReader(ReaderContext, typeIndex, ref reader);
                 Interlocked.CompareExchange(ref _types[typeIndex - TpiStream.TypeIndexBegin], type, null);
             }
 

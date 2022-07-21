@@ -1,6 +1,6 @@
 using System;
 
-namespace AsmResolver.Symbols.Pdb.Types;
+namespace AsmResolver.Symbols.Pdb.Leaves;
 
 /// <summary>
 /// Provides members defining all possible attributes that can be assigned to a structure, class or enum type symbol.

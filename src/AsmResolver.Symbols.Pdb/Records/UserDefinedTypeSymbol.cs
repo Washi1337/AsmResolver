@@ -1,4 +1,4 @@
-using AsmResolver.Symbols.Pdb.Types;
+using AsmResolver.Symbols.Pdb.Leaves;
 
 namespace AsmResolver.Symbols.Pdb.Records;
 

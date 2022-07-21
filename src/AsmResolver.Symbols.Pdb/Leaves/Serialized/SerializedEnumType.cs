@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using AsmResolver.IO;
 
-namespace AsmResolver.Symbols.Pdb.Types.Serialized;
+namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 
 public class SerializedEnumType : EnumType
 {
@@ -31,11 +30,11 @@ public class SerializedEnumType : EnumType
     protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
 
     /// <inheritdoc />
-    protected override CodeViewType? GetEnumUnderlyingType()
+    protected override CodeViewLeaf? GetEnumUnderlyingType()
     {
-        return _context.ParentImage.TryGetTypeRecord(_underlyingType, out var type)
+        return _context.ParentImage.TryGetLeafRecord(_underlyingType, out var type)
             ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewType>(
+            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewLeaf>(
                 $"Enum type {TypeIndex:X8} contains an invalid underlying enum type index {_underlyingType:X8}.");
     }
 }

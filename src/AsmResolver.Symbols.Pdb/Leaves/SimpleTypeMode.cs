@@ -1,4 +1,4 @@
-namespace AsmResolver.Symbols.Pdb.Types;
+namespace AsmResolver.Symbols.Pdb.Leaves;
 
 /// <summary>
 /// Provides members defining all possible modes that a simple type in a PDB image can be set to.

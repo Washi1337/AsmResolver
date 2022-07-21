@@ -1,30 +1,30 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace AsmResolver.Symbols.Pdb.Types;
+namespace AsmResolver.Symbols.Pdb.Leaves;
 
 public class EnumType : CodeViewType
 {
     private readonly LazyVariable<Utf8String> _name;
-    private readonly LazyVariable<CodeViewType> _type;
-    private IList<CodeViewType>? _fields;
+    private readonly LazyVariable<CodeViewLeaf> _type;
+    private IList<CodeViewLeaf>? _fields;
 
     protected EnumType(uint typeIndex)
         : base(typeIndex)
     {
         _name = new LazyVariable<Utf8String>(GetName);
-        _type = new LazyVariable<CodeViewType>(GetEnumUnderlyingType);
+        _type = new LazyVariable<CodeViewLeaf>(GetEnumUnderlyingType);
     }
 
-    public EnumType(Utf8String name, CodeViewType underlyingType)
+    public EnumType(Utf8String name, CodeViewLeaf underlyingType)
         : base(0)
     {
         _name = new LazyVariable<Utf8String>(name);
-        _type = new LazyVariable<CodeViewType>(underlyingType);
+        _type = new LazyVariable<CodeViewLeaf>(underlyingType);
     }
 
     /// <inheritdoc />
-    public override CodeViewTypeKind TypeKind => CodeViewTypeKind.Enum;
+    public override CodeViewLeafKind LeafKind => CodeViewLeafKind.Enum;
 
     public StructureAttributes StructureAttributes
     {
@@ -32,13 +32,13 @@ public class EnumType : CodeViewType
         set;
     }
 
-    public CodeViewType EnumUnderlyingType
+    public CodeViewLeaf EnumUnderlyingType
     {
         get => _type.Value;
         set => _type.Value = value;
     }
 
-    public IList<CodeViewType> Fields
+    public IList<CodeViewLeaf> Fields
     {
         get
         {
@@ -70,7 +70,7 @@ public class EnumType : CodeViewType
     /// <remarks>
     /// This method is called upon initialization of the <see cref="EnumUnderlyingType"/> property.
     /// </remarks>
-    protected virtual CodeViewType? GetEnumUnderlyingType() => null;
+    protected virtual CodeViewLeaf? GetEnumUnderlyingType() => null;
 
     /// <summary>
     /// Obtains the fields defined in the enum type.
@@ -79,7 +79,7 @@ public class EnumType : CodeViewType
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Fields"/> property.
     /// </remarks>
-    protected virtual IList<CodeViewType> GetFields() => new List<CodeViewType>();
+    protected virtual IList<CodeViewLeaf> GetFields() => new List<CodeViewLeaf>();
 
     /// <inheritdoc />
     public override string ToString() => Name;

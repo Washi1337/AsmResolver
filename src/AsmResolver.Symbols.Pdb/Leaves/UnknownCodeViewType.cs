@@ -1,17 +1,17 @@
-namespace AsmResolver.Symbols.Pdb.Types;
+namespace AsmResolver.Symbols.Pdb.Leaves;
 
 /// <summary>
 /// Represents an unknown or unsupported CodeView type record.
 /// </summary>
-public class UnknownCodeViewType : CodeViewType
+public class UnknownCodeViewType : CodeViewLeaf
 {
     /// <summary>
     /// Creates a new unknown type record.
     /// </summary>
-    /// <param name="typeKind">The type of symbol.</param>
+    /// <param name="leafKind">The type of symbol.</param>
     /// <param name="data">The raw data stored in the record.</param>
-    public UnknownCodeViewType(CodeViewTypeKind typeKind, byte[] data)
-        : this(0, typeKind, data)
+    public UnknownCodeViewType(CodeViewLeafKind leafKind, byte[] data)
+        : this(0, leafKind, data)
     {
     }
 
@@ -19,17 +19,17 @@ public class UnknownCodeViewType : CodeViewType
     /// Creates a new unknown type record.
     /// </summary>
     /// <param name="typeIndex">The type index to assign to the type</param>
-    /// <param name="typeKind">The type of symbol.</param>
+    /// <param name="leafKind">The type of symbol.</param>
     /// <param name="data">The raw data stored in the record.</param>
-    internal UnknownCodeViewType(uint typeIndex, CodeViewTypeKind typeKind, byte[] data)
+    internal UnknownCodeViewType(uint typeIndex, CodeViewLeafKind leafKind, byte[] data)
         : base(typeIndex)
     {
-        TypeKind = typeKind;
+        LeafKind = leafKind;
         Data = data;
     }
 
     /// <inheritdoc />
-    public override CodeViewTypeKind TypeKind
+    public override CodeViewLeafKind LeafKind
     {
         get;
     }
@@ -43,5 +43,5 @@ public class UnknownCodeViewType : CodeViewType
     }
 
     /// <inheritdoc />
-    public override string ToString() => $"{TypeKind.ToString()} ({Data.Length.ToString()} bytes)";
+    public override string ToString() => $"{LeafKind.ToString()} ({Data.Length.ToString()} bytes)";
 }

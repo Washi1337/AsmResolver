@@ -1,6 +1,4 @@
-using System.Linq;
-using AsmResolver.Symbols.Pdb.Records;
-using AsmResolver.Symbols.Pdb.Types;
+using AsmResolver.Symbols.Pdb.Leaves;
 using Xunit;
 
 namespace AsmResolver.Symbols.Pdb.Tests;
@@ -19,7 +17,7 @@ public class PdbImageTest : IClassFixture<MockPdbFixture>
     [InlineData(0x04_03, SimpleTypeKind.Void, SimpleTypeMode.NearPointer32)]
     public void SimpleTypeLookup(uint typeIndex, SimpleTypeKind kind, SimpleTypeMode mode)
     {
-        var type = Assert.IsAssignableFrom<SimpleType>(_fixture.SimplePdb.GetTypeRecord(typeIndex));
+        var type = Assert.IsAssignableFrom<SimpleType>(_fixture.SimplePdb.GetLeafRecord(typeIndex));
         Assert.Equal(kind, type.Kind);
         Assert.Equal(mode, type.Mode);
     }
@@ -29,8 +27,8 @@ public class PdbImageTest : IClassFixture<MockPdbFixture>
     {
         var image = _fixture.SimplePdb;
 
-        var type = image.GetTypeRecord(0x00_75);
-        var type2 = image.GetTypeRecord(0x00_75);
+        var type = image.GetLeafRecord(0x00_75);
+        var type2 = image.GetLeafRecord(0x00_75);
 
         Assert.Same(type, type2);
     }

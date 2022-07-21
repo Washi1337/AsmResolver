@@ -1,6 +1,6 @@
 using System.Linq;
+using AsmResolver.Symbols.Pdb.Leaves;
 using AsmResolver.Symbols.Pdb.Records;
-using AsmResolver.Symbols.Pdb.Types;
 using Xunit;
 
 namespace AsmResolver.Symbols.Pdb.Tests.Records;
