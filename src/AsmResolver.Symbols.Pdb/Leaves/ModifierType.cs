@@ -51,6 +51,36 @@ public class ModifierType : CodeViewType
     }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the type is marked as const.
+    /// </summary>
+    public bool IsConst
+    {
+        get => (Attributes & ModifierAttributes.Const) != 0;
+        set => Attributes = (Attributes & ~ModifierAttributes.Const)
+                            | (value ? ModifierAttributes.Const : 0);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the type is marked as volatile.
+    /// </summary>
+    public bool IsVolatile
+    {
+        get => (Attributes & ModifierAttributes.Volatile) != 0;
+        set => Attributes = (Attributes & ~ModifierAttributes.Volatile)
+                            | (value ? ModifierAttributes.Volatile : 0);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the type is marked as unaligned.
+    /// </summary>
+    public bool IsUnaligned
+    {
+        get => (Attributes & ModifierAttributes.Unaligned) != 0;
+        set => Attributes = (Attributes & ~ModifierAttributes.Unaligned)
+                            | (value ? ModifierAttributes.Unaligned : 0);
+    }
+
+    /// <summary>
     /// Obtains the base type of the modifier type.
     /// </summary>
     /// <returns>The base type.</returns>
