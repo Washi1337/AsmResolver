@@ -56,7 +56,7 @@ public abstract class CodeViewLeaf
             CodeViewLeafKind.FieldList => new SerializedFieldList(context, typeIndex, dataReader),
             CodeViewLeafKind.Modifier => new SerializedModifierType(context, typeIndex, dataReader),
             CodeViewLeafKind.Pointer => new SerializedPointerType(context, typeIndex, dataReader),
-            _ => new UnknownCodeViewType(kind, dataReader.ReadToEnd())
+            _ => new UnknownCodeViewLeaf(kind, dataReader.ReadToEnd())
         };
     }
 }
