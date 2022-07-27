@@ -89,7 +89,7 @@ public class PdbImage
     public virtual bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewLeaf? type)
     {
         typeIndex &= 0x7fffffff;
-        if (typeIndex < 0x1000)
+        if (typeIndex is > 0 and < 0x1000)
         {
             type = _simpleTypes.GetOrAdd(typeIndex, i => new SimpleType(i));
             return true;

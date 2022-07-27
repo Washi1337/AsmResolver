@@ -34,7 +34,7 @@ public class SerializedEnumType : EnumType
     protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
 
     /// <inheritdoc />
-    protected override CodeViewType? GetEnumUnderlyingType()
+    protected override CodeViewType? GetBaseType()
     {
         return _context.ParentImage.TryGetLeafRecord(_underlyingType, out var leaf) && leaf is CodeViewType type
             ? type
@@ -43,8 +43,11 @@ public class SerializedEnumType : EnumType
     }
 
     /// <inheritdoc />
-    protected override FieldList GetFields()
+    protected override FieldList? GetFields()
     {
+        if (_fieldIndex == 0)
+            return null;
+
         if (!_context.ParentImage.TryGetLeafRecord(_fieldIndex, out var leaf) || leaf is not SerializedFieldList list)
         {
             _context.Parameters.ErrorListener.BadImage(

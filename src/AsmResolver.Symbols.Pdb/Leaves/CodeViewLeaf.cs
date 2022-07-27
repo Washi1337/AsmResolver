@@ -51,12 +51,32 @@ public abstract class CodeViewLeaf
         var kind = (CodeViewLeafKind) dataReader.ReadUInt16();
         return kind switch
         {
+            CodeViewLeafKind.Class => new SerializedClassType(CodeViewLeafKind.Class, context, typeIndex, dataReader),
             CodeViewLeafKind.Enum => new SerializedEnumType(context, typeIndex, dataReader),
             CodeViewLeafKind.Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
             CodeViewLeafKind.FieldList => new SerializedFieldList(context, typeIndex, dataReader),
+            CodeViewLeafKind.Interface => new SerializedClassType(CodeViewLeafKind.Interface, context, typeIndex, dataReader),
             CodeViewLeafKind.Modifier => new SerializedModifierType(context, typeIndex, dataReader),
             CodeViewLeafKind.Pointer => new SerializedPointerType(context, typeIndex, dataReader),
+            CodeViewLeafKind.Structure => new SerializedClassType(CodeViewLeafKind.Structure, context, typeIndex, dataReader),
             _ => new UnknownCodeViewLeaf(kind, dataReader.ReadToEnd())
+        };
+    }
+
+    internal static object ReadNumeric(ref BinaryStreamReader reader)
+    {
+        var kind = (CodeViewLeafKind) reader.ReadUInt16();
+        return kind switch
+        {
+            < CodeViewLeafKind.Numeric => (object) (uint) kind,
+            CodeViewLeafKind.Char => (char) reader.ReadByte(),
+            CodeViewLeafKind.Short => reader.ReadInt16(),
+            CodeViewLeafKind.UShort => reader.ReadUInt16(),
+            CodeViewLeafKind.Long => reader.ReadInt32(),
+            CodeViewLeafKind.ULong => reader.ReadUInt32(),
+            CodeViewLeafKind.QuadWord => reader.ReadInt64(),
+            CodeViewLeafKind.UQuadWord => reader.ReadUInt64(),
+            _ => 0
         };
     }
 }

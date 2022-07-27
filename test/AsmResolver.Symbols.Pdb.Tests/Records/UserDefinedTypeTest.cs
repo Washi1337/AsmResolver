@@ -33,6 +33,6 @@ public class UserDefinedTypeTest : IClassFixture<MockPdbFixture>
     public void Type2()
     {
         var udt = _fixture.SimplePdb.Symbols.OfType<UserDefinedTypeSymbol>().ElementAt(1);
-        Assert.Equal(CodeViewLeafKind.UdtSrcLine, udt.Type.LeafKind);
+        Assert.Equal(CodeViewLeafKind.Pointer, udt.Type.LeafKind);
     }
 }
