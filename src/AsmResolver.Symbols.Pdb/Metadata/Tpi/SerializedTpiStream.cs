@@ -6,11 +6,18 @@ using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.Pdb.Metadata.Tpi;
 
+/// <summary>
+/// Provides a lazily initialized implementation of <see cref="TpiStream"/> that is read from a PDB image.
+/// </summary>
 public class SerializedTpiStream : TpiStream
 {
     private readonly BinaryStreamReader _recordsReader;
     private List<(uint Offset, uint Length)>? _recordOffsets;
 
+    /// <summary>
+    /// Reads a TPI stream from the provided input stream.
+    /// </summary>
+    /// <param name="reader">The input stream to read from.</param>
     public SerializedTpiStream(BinaryStreamReader reader)
     {
         Version = (TpiStreamVersion) reader.ReadUInt32();

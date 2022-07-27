@@ -4,10 +4,14 @@ using AsmResolver.Symbols.Pdb.Leaves.Serialized;
 namespace AsmResolver.Symbols.Pdb.Leaves;
 
 /// <summary>
-/// Represents a single type record in a TPI or IPI stream.
+/// Represents a single leaf record in a TPI or IPI stream.
 /// </summary>
 public abstract class CodeViewLeaf
 {
+    /// <summary>
+    /// Initializes an empty CodeView leaf.
+    /// </summary>
+    /// <param name="typeIndex">The type index to assign to the leaf.</param>
     protected CodeViewLeaf(uint typeIndex)
     {
         TypeIndex = typeIndex;
@@ -47,9 +51,9 @@ public abstract class CodeViewLeaf
         var kind = (CodeViewLeafKind) dataReader.ReadUInt16();
         return kind switch
         {
-            CodeViewLeafKind.FieldList => new SerializedFieldList(context, typeIndex, ref dataReader),
-            CodeViewLeafKind.Enum => new SerializedEnumType(context, typeIndex, ref dataReader),
-            CodeViewLeafKind.Enumerate => new SerializedEnumerateLeaf(context, typeIndex, ref dataReader),
+            CodeViewLeafKind.FieldList => new SerializedFieldList(context, typeIndex, dataReader),
+            CodeViewLeafKind.Enum => new SerializedEnumType(context, typeIndex, dataReader),
+            CodeViewLeafKind.Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
             _ => new UnknownCodeViewType(kind, dataReader.ReadToEnd())
         };
     }

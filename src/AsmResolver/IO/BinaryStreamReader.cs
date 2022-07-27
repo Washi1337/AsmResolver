@@ -356,6 +356,14 @@ namespace AsmResolver.IO
             return buffer;
         }
 
+        /// <summary>
+        /// Advances the reader until the provided delimeter byte is reached.
+        /// </summary>
+        /// <param name="delimeter">The delimeter byte to stop at.</param>
+        /// <param name="consumeDelimeter">
+        /// <c>true</c> if the final delimeter should be consumed if available, <c>false</c> otherwise.
+        /// </param>
+        /// <returns><c>true</c> if the delimeter byte was found and consumed, <c>false</c> otherwise.</returns>
         public bool AdvanceUntil(byte delimeter, bool consumeDelimeter)
         {
             while (RelativeOffset < Length)

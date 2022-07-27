@@ -2,11 +2,20 @@ using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 
-public class SerializedEnumerateLeaf : EnumerateLeaf
+/// <summary>
+/// Provides a lazily initialized implementation of <see cref="EnumerateField"/> that is read from a PDB image.
+/// </summary>
+public class SerializedEnumerateField : EnumerateField
 {
     private readonly BinaryStreamReader _nameReader;
 
-    public SerializedEnumerateLeaf(PdbReaderContext context, uint typeIndex, ref BinaryStreamReader reader)
+    /// <summary>
+    /// Reads a enumerate field list from the provided input stream.
+    /// </summary>
+    /// <param name="context">The reading context in which the enumerate field is situated in.</param>
+    /// <param name="typeIndex">The type index to assign to the enum type.</param>
+    /// <param name="reader">The input stream to read from.</param>
+    public SerializedEnumerateField(PdbReaderContext context, uint typeIndex, ref BinaryStreamReader reader)
         : base(typeIndex)
     {
         Attributes = (CodeViewFieldAttributes) reader.ReadUInt16();

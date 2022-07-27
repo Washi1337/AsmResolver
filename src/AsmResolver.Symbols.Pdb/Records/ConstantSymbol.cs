@@ -2,6 +2,9 @@ using AsmResolver.Symbols.Pdb.Leaves;
 
 namespace AsmResolver.Symbols.Pdb.Records;
 
+/// <summary>
+/// Represents a single constant symbol.
+/// </summary>
 public class ConstantSymbol : CodeViewSymbol
 {
     private readonly LazyVariable<Utf8String> _name;
@@ -21,6 +24,7 @@ public class ConstantSymbol : CodeViewSymbol
     /// </summary>
     /// <param name="name">The name of the type.</param>
     /// <param name="type">The type.</param>
+    /// <param name="value">The value to assign to the constant.</param>
     public ConstantSymbol(Utf8String name, CodeViewType type, ushort value)
     {
         _name = new LazyVariable<Utf8String>(name);

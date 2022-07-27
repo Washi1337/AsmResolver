@@ -1,8 +1,10 @@
-using System.Collections.Generic;
 using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 
+/// <summary>
+/// Provides a lazily initialized implementation of <see cref="EnumType"/> that is read from a PDB image.
+/// </summary>
 public class SerializedEnumType : EnumType
 {
     private readonly PdbReaderContext _context;
@@ -15,8 +17,9 @@ public class SerializedEnumType : EnumType
     /// Reads a constant symbol from the provided input stream.
     /// </summary>
     /// <param name="context">The reading context in which the symbol is situated in.</param>
+    /// <param name="typeIndex">The type index to assign to the enum type.</param>
     /// <param name="reader">The input stream to read from.</param>
-    public SerializedEnumType(PdbReaderContext context, uint typeIndex, ref BinaryStreamReader reader)
+    public SerializedEnumType(PdbReaderContext context, uint typeIndex, BinaryStreamReader reader)
         : base(typeIndex)
     {
         _context = context;
@@ -40,15 +43,15 @@ public class SerializedEnumType : EnumType
     }
 
     /// <inheritdoc />
-    protected override IList<CodeViewField> GetFields()
+    protected override FieldList GetFields()
     {
         if (!_context.ParentImage.TryGetLeafRecord(_fieldIndex, out var leaf) || leaf is not SerializedFieldList list)
         {
             _context.Parameters.ErrorListener.BadImage(
                 $"Enum type {TypeIndex:X8} contains an invalid field list index {_fieldIndex:X8}.");
-            return new List<CodeViewField>();
+            return new FieldList();
         }
 
-        return list.Fields;
+        return list;
     }
 }
