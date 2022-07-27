@@ -51,9 +51,10 @@ public abstract class CodeViewLeaf
         var kind = (CodeViewLeafKind) dataReader.ReadUInt16();
         return kind switch
         {
-            CodeViewLeafKind.FieldList => new SerializedFieldList(context, typeIndex, dataReader),
             CodeViewLeafKind.Enum => new SerializedEnumType(context, typeIndex, dataReader),
             CodeViewLeafKind.Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
+            CodeViewLeafKind.FieldList => new SerializedFieldList(context, typeIndex, dataReader),
+            CodeViewLeafKind.Modifier => new SerializedModifierType(context, typeIndex, dataReader),
             CodeViewLeafKind.Pointer => new SerializedPointerType(context, typeIndex, dataReader),
             _ => new UnknownCodeViewType(kind, dataReader.ReadToEnd())
         };
