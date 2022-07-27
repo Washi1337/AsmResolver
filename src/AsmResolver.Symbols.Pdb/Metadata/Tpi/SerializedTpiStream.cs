@@ -75,7 +75,7 @@ public class SerializedTpiStream : TpiStream
         }
 
         (uint offset, uint length) = _recordOffsets[(int) typeIndex];
-        reader = _recordsReader.ForkRelative(offset, length);
+        reader = _recordsReader.ForkRelative(offset, length + sizeof(ushort));
         return true;
     }
 
