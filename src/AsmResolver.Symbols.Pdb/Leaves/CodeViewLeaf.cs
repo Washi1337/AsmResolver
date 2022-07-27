@@ -36,11 +36,20 @@ public abstract class CodeViewLeaf
         var dataReader = reader.Fork();
         reader.Offset += length;
 
-        var kind = (CodeViewLeafKind) dataReader.ReadUInt16();
+        return FromReaderNoHeader(context, typeIndex, ref dataReader);
+    }
 
+    internal static CodeViewLeaf FromReaderNoHeader(
+        PdbReaderContext context,
+        uint typeIndex,
+        ref BinaryStreamReader dataReader)
+    {
+        var kind = (CodeViewLeafKind) dataReader.ReadUInt16();
         return kind switch
         {
-            CodeViewLeafKind.Enum => new SerializedEnumType(context, typeIndex, dataReader),
+            CodeViewLeafKind.FieldList => new SerializedFieldList(context, typeIndex, ref dataReader),
+            CodeViewLeafKind.Enum => new SerializedEnumType(context, typeIndex, ref dataReader),
+            CodeViewLeafKind.Enumerate => new SerializedEnumerateLeaf(context, typeIndex, ref dataReader),
             _ => new UnknownCodeViewType(kind, dataReader.ReadToEnd())
         };
     }

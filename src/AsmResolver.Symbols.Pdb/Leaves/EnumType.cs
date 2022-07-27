@@ -7,7 +7,7 @@ public class EnumType : CodeViewType
 {
     private readonly LazyVariable<Utf8String> _name;
     private readonly LazyVariable<CodeViewLeaf> _type;
-    private IList<CodeViewLeaf>? _fields;
+    private IList<CodeViewField>? _fields;
 
     protected EnumType(uint typeIndex)
         : base(typeIndex)
@@ -38,7 +38,7 @@ public class EnumType : CodeViewType
         set => _type.Value = value;
     }
 
-    public IList<CodeViewLeaf> Fields
+    public IList<CodeViewField> Fields
     {
         get
         {
@@ -79,7 +79,7 @@ public class EnumType : CodeViewType
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Fields"/> property.
     /// </remarks>
-    protected virtual IList<CodeViewLeaf> GetFields() => new List<CodeViewLeaf>();
+    protected virtual IList<CodeViewField> GetFields() => new List<CodeViewField>();
 
     /// <inheritdoc />
     public override string ToString() => Name;

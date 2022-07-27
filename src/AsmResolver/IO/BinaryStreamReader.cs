@@ -344,30 +344,36 @@ namespace AsmResolver.IO
         /// </remarks>
         public byte[] ReadBytesUntil(byte delimeter, bool includeDelimeterInReturn)
         {
-            bool shouldReadExtra = false;
-
             var lookahead = Fork();
-            while (lookahead.RelativeOffset < lookahead.Length)
-            {
-                byte b = lookahead.ReadByte();
-                if (b == delimeter)
-                {
-                    if (!includeDelimeterInReturn)
-                    {
-                        lookahead.RelativeOffset--;
-                        shouldReadExtra = true;
-                    }
-                    break;
-                }
-            }
+            bool hasConsumedDelimeter = lookahead.AdvanceUntil(delimeter, includeDelimeterInReturn);
 
             byte[] buffer = new byte[lookahead.RelativeOffset - RelativeOffset];
             ReadBytes(buffer, 0, buffer.Length);
 
-            if (shouldReadExtra)
+            if (hasConsumedDelimeter)
                 ReadByte();
 
             return buffer;
+        }
+
+        public bool AdvanceUntil(byte delimeter, bool consumeDelimeter)
+        {
+            while (RelativeOffset < Length)
+            {
+                byte b = ReadByte();
+                if (b == delimeter)
+                {
+                    if (!consumeDelimeter)
+                    {
+                        RelativeOffset--;
+                        return true;
+                    }
+
+                    return false;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
@@ -15,7 +16,7 @@ public class SerializedEnumType : EnumType
     /// </summary>
     /// <param name="context">The reading context in which the symbol is situated in.</param>
     /// <param name="reader">The input stream to read from.</param>
-    public SerializedEnumType(PdbReaderContext context, uint typeIndex, BinaryStreamReader reader)
+    public SerializedEnumType(PdbReaderContext context, uint typeIndex, ref BinaryStreamReader reader)
         : base(typeIndex)
     {
         _context = context;
@@ -36,5 +37,18 @@ public class SerializedEnumType : EnumType
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewLeaf>(
                 $"Enum type {TypeIndex:X8} contains an invalid underlying enum type index {_underlyingType:X8}.");
+    }
+
+    /// <inheritdoc />
+    protected override IList<CodeViewField> GetFields()
+    {
+        if (!_context.ParentImage.TryGetLeafRecord(_fieldIndex, out var leaf) || leaf is not SerializedFieldList list)
+        {
+            _context.Parameters.ErrorListener.BadImage(
+                $"Enum type {TypeIndex:X8} contains an invalid field list index {_fieldIndex:X8}.");
+            return new List<CodeViewField>();
+        }
+
+        return list.Fields;
     }
 }
