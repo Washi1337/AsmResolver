@@ -54,6 +54,7 @@ public abstract class CodeViewLeaf
             CodeViewLeafKind.FieldList => new SerializedFieldList(context, typeIndex, dataReader),
             CodeViewLeafKind.Enum => new SerializedEnumType(context, typeIndex, dataReader),
             CodeViewLeafKind.Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
+            CodeViewLeafKind.Pointer => new SerializedPointerType(context, typeIndex, dataReader),
             _ => new UnknownCodeViewType(kind, dataReader.ReadToEnd())
         };
     }

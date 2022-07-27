@@ -34,11 +34,11 @@ public class SerializedEnumType : EnumType
     protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
 
     /// <inheritdoc />
-    protected override CodeViewLeaf? GetEnumUnderlyingType()
+    protected override CodeViewType? GetEnumUnderlyingType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_underlyingType, out var type)
+        return _context.ParentImage.TryGetLeafRecord(_underlyingType, out var leaf) && leaf is CodeViewType type
             ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewLeaf>(
+            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewType>(
                 $"Enum type {TypeIndex:X8} contains an invalid underlying enum type index {_underlyingType:X8}.");
     }
 

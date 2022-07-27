@@ -6,7 +6,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 public class EnumType : CodeViewType
 {
     private readonly LazyVariable<Utf8String> _name;
-    private readonly LazyVariable<CodeViewLeaf> _type;
+    private readonly LazyVariable<CodeViewType> _type;
     private readonly LazyVariable<FieldList> _fields;
 
     /// <summary>
@@ -17,7 +17,7 @@ public class EnumType : CodeViewType
         : base(typeIndex)
     {
         _name = new LazyVariable<Utf8String>(GetName);
-        _type = new LazyVariable<CodeViewLeaf>(GetEnumUnderlyingType);
+        _type = new LazyVariable<CodeViewType>(GetEnumUnderlyingType);
         _fields = new LazyVariable<FieldList>(GetFields);
     }
 
@@ -27,11 +27,11 @@ public class EnumType : CodeViewType
     /// <param name="name">The name of the enum.</param>
     /// <param name="underlyingType">The underlying type of all members in the enum.</param>
     /// <param name="attributes">The structural attributes assigned to the enum.</param>
-    public EnumType(Utf8String name, CodeViewLeaf underlyingType, StructureAttributes attributes)
+    public EnumType(Utf8String name, CodeViewType underlyingType, StructureAttributes attributes)
         : base(0)
     {
         _name = new LazyVariable<Utf8String>(name);
-        _type = new LazyVariable<CodeViewLeaf>(underlyingType);
+        _type = new LazyVariable<CodeViewType>(underlyingType);
         _fields = new LazyVariable<FieldList>(new FieldList());
         StructureAttributes = attributes;
     }
@@ -51,7 +51,7 @@ public class EnumType : CodeViewType
     /// <summary>
     /// Gets or sets the underlying type of all members in the enum.
     /// </summary>
-    public CodeViewLeaf EnumUnderlyingType
+    public CodeViewType EnumUnderlyingType
     {
         get => _type.Value;
         set => _type.Value = value;
@@ -87,7 +87,7 @@ public class EnumType : CodeViewType
     /// <remarks>
     /// This method is called upon initialization of the <see cref="EnumUnderlyingType"/> property.
     /// </remarks>
-    protected virtual CodeViewLeaf? GetEnumUnderlyingType() => null;
+    protected virtual CodeViewType? GetEnumUnderlyingType() => null;
 
     /// <summary>
     /// Obtains the fields defined in the enum type.
