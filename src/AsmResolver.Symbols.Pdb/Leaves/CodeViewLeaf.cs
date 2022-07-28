@@ -63,6 +63,7 @@ public abstract class CodeViewLeaf
             CodeViewLeafKind.MethodList => new SerializedMethodList(context, typeIndex, dataReader),
             MFunction => new SerializedMemberFunction(context, typeIndex, dataReader),
             Modifier => new SerializedModifierType(context, typeIndex, dataReader),
+            OneMethod => new SerializedNonOverloadedMethod(context, typeIndex, ref dataReader),
             Pointer => new SerializedPointerType(context, typeIndex, dataReader),
             Structure => new SerializedClassType(Structure, context, typeIndex, dataReader),
             VTShape => new SerializedVTableShape(context, typeIndex, dataReader),

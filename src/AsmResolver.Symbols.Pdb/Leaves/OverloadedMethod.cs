@@ -8,7 +8,7 @@ public class OverloadedMethod : CodeViewField
     private readonly LazyVariable<MethodList?> _methods;
 
     /// <summary>
-    /// Creates a new empty overloaded method.
+    /// Initializes an empty overloaded method.
     /// </summary>
     /// <param name="typeIndex">The type index to assign to the method.</param>
     protected OverloadedMethod(uint typeIndex)
