@@ -8,6 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 public class ClassType : CodeViewComplexType
 {
     private readonly LazyVariable<Utf8String> _uniqueName;
+    private readonly LazyVariable<VTableShape?> _vtableShape;
 
     /// <summary>
     /// Initializes an empty class type.
@@ -25,6 +26,7 @@ public class ClassType : CodeViewComplexType
 
         LeafKind = kind;
         _uniqueName = new LazyVariable<Utf8String>(GetUniqueName);
+        _vtableShape = new LazyVariable<VTableShape?>(GetVTableShape);
     }
 
     /// <summary>
@@ -49,6 +51,7 @@ public class ClassType : CodeViewComplexType
         LeafKind = kind;
         Name = name;
         _uniqueName = new LazyVariable<Utf8String>(uniqueName);
+        _vtableShape = new LazyVariable<VTableShape?>(default(VTableShape));
         Size = size;
         StructureAttributes = attributes;
         BaseType = baseType;
@@ -79,6 +82,15 @@ public class ClassType : CodeViewComplexType
     }
 
     /// <summary>
+    /// Gets or sets the shape of the virtual function table of this type, if available.
+    /// </summary>
+    public VTableShape? VTableShape
+    {
+        get => _vtableShape.Value;
+        set => _vtableShape.Value = value;
+    }
+
+    /// <summary>
     /// Obtains the uniquely identifiable name of the type.
     /// </summary>
     /// <returns>The name.</returns>
@@ -86,4 +98,13 @@ public class ClassType : CodeViewComplexType
     /// This method is called upon initialization of the <see cref="UniqueName"/> property.
     /// </remarks>
     protected virtual Utf8String GetUniqueName() => Utf8String.Empty;
+
+    /// <summary>
+    /// Obtains the shape of the virtual function table name of the type.
+    /// </summary>
+    /// <returns>The shape.</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="VTableShape"/> property.
+    /// </remarks>
+    protected virtual VTableShape? GetVTableShape() => null;
 }

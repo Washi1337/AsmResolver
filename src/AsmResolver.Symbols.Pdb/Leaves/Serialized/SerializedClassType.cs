@@ -11,7 +11,7 @@ public class SerializedClassType : ClassType
     private readonly ushort _memberCount;
     private readonly uint _baseTypeIndex;
     private readonly uint _fieldIndex;
-    private readonly uint _vshapeIndex;
+    private readonly uint _vTableShapeIndex;
     private readonly BinaryStreamReader _nameReader;
     private readonly BinaryStreamReader _uniqueNameReader;
 
@@ -30,7 +30,7 @@ public class SerializedClassType : ClassType
         StructureAttributes = (StructureAttributes) reader.ReadUInt16();
         _fieldIndex = reader.ReadUInt32();
         _baseTypeIndex = reader.ReadUInt32();
-        _vshapeIndex = reader.ReadUInt32();
+        _vTableShapeIndex = reader.ReadUInt32();
 
         Size = (uint) ReadNumeric(ref reader);
 
@@ -65,11 +65,22 @@ public class SerializedClassType : ClassType
 
         if (!_context.ParentImage.TryGetLeafRecord(_fieldIndex, out var leaf) || leaf is not SerializedFieldList list)
         {
-            _context.Parameters.ErrorListener.BadImage(
-                $"Class type {TypeIndex:X8} contains an invalid field list index {_fieldIndex:X8}.");
+            _context.Parameters.ErrorListener.BadImage($"Class type {TypeIndex:X8} contains an invalid field list index {_fieldIndex:X8}.");
             return new FieldList();
         }
 
         return list;
+    }
+
+    /// <inheritdoc />
+    protected override VTableShape? GetVTableShape()
+    {
+        if (_vTableShapeIndex == 0)
+            return null;
+
+        return _context.ParentImage.TryGetLeafRecord(_vTableShapeIndex, out var leaf) && leaf is VTableShape shape
+            ? shape
+            : _context.Parameters.ErrorListener.BadImageAndReturn<VTableShape>(
+                $"Class type {TypeIndex:X8} contains an invalid VTable shape index {_fieldIndex:X8}.");
     }
 }

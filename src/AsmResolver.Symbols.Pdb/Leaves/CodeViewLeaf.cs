@@ -1,5 +1,6 @@
 using AsmResolver.IO;
 using AsmResolver.Symbols.Pdb.Leaves.Serialized;
+using static AsmResolver.Symbols.Pdb.Leaves.CodeViewLeafKind;
 
 namespace AsmResolver.Symbols.Pdb.Leaves;
 
@@ -51,32 +52,29 @@ public abstract class CodeViewLeaf
         var kind = (CodeViewLeafKind) dataReader.ReadUInt16();
         return kind switch
         {
-            CodeViewLeafKind.Class => new SerializedClassType(CodeViewLeafKind.Class, context, typeIndex, dataReader),
-            CodeViewLeafKind.Enum => new SerializedEnumType(context, typeIndex, dataReader),
-            CodeViewLeafKind.Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
+            Class => new SerializedClassType(Class, context, typeIndex, dataReader),
+            Enum => new SerializedEnumType(context, typeIndex, dataReader),
+            Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
             CodeViewLeafKind.FieldList => new SerializedFieldList(context, typeIndex, dataReader),
-            CodeViewLeafKind.Interface => new SerializedClassType(CodeViewLeafKind.Interface, context, typeIndex, dataReader),
-            CodeViewLeafKind.Modifier => new SerializedModifierType(context, typeIndex, dataReader),
-            CodeViewLeafKind.Pointer => new SerializedPointerType(context, typeIndex, dataReader),
-            CodeViewLeafKind.Structure => new SerializedClassType(CodeViewLeafKind.Structure, context, typeIndex, dataReader),
+            Interface => new SerializedClassType(Interface, context, typeIndex, dataReader),
+            Modifier => new SerializedModifierType(context, typeIndex, dataReader),
+            Pointer => new SerializedPointerType(context, typeIndex, dataReader),
+            Structure => new SerializedClassType(Structure, context, typeIndex, dataReader),
+            VTShape => new SerializedVTableShape(context, typeIndex, dataReader),
             _ => new UnknownCodeViewLeaf(kind, dataReader.ReadToEnd())
         };
     }
 
-    internal static object ReadNumeric(ref BinaryStreamReader reader)
+    internal static object ReadNumeric(ref BinaryStreamReader reader) => (CodeViewLeafKind) reader.ReadUInt16() switch
     {
-        var kind = (CodeViewLeafKind) reader.ReadUInt16();
-        return kind switch
-        {
-            < CodeViewLeafKind.Numeric => (object) (uint) kind,
-            CodeViewLeafKind.Char => (char) reader.ReadByte(),
-            CodeViewLeafKind.Short => reader.ReadInt16(),
-            CodeViewLeafKind.UShort => reader.ReadUInt16(),
-            CodeViewLeafKind.Long => reader.ReadInt32(),
-            CodeViewLeafKind.ULong => reader.ReadUInt32(),
-            CodeViewLeafKind.QuadWord => reader.ReadInt64(),
-            CodeViewLeafKind.UQuadWord => reader.ReadUInt64(),
-            _ => 0
-        };
-    }
+        < Numeric => (object) (uint) (CodeViewLeafKind) reader.ReadUInt16(),
+        Char => (char) reader.ReadByte(),
+        Short => reader.ReadInt16(),
+        UShort => reader.ReadUInt16(),
+        Long => reader.ReadInt32(),
+        ULong => reader.ReadUInt32(),
+        QuadWord => reader.ReadInt64(),
+        UQuadWord => reader.ReadUInt64(),
+        _ => 0
+    };
 }
