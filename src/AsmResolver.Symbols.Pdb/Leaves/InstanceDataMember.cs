@@ -26,7 +26,7 @@ public class InstanceDataMember : CodeViewField
     public InstanceDataMember(CodeViewType dataType, Utf8String name, ulong offset)
         : base(0)
     {
-        DataType = dataType;
+        _dataType = new LazyVariable<CodeViewType>(dataType);
         Name = name;
         Offset = offset;
     }

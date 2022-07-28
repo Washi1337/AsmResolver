@@ -22,7 +22,6 @@ internal class SerializedFieldList : FieldList
     {
         _context = context;
         _reader = reader;
-        reader.RelativeOffset = reader.Length;
     }
 
     /// <inheritdoc />

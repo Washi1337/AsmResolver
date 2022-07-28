@@ -90,7 +90,7 @@ public enum CodeViewLeafKind : ushort
     // leaf indices starting records but referenced only from type records
 
     Skip = 0x1200,
-    Arglist = 0x1201,
+    ArgList = 0x1201,
     DefArgSt = 0x1202,
     FieldList = 0x1203,
     Derived = 0x1204,

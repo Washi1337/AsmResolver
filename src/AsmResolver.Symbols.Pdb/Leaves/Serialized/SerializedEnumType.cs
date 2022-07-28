@@ -48,13 +48,9 @@ public class SerializedEnumType : EnumType
         if (_fieldIndex == 0)
             return null;
 
-        if (!_context.ParentImage.TryGetLeafRecord(_fieldIndex, out var leaf) || leaf is not SerializedFieldList list)
-        {
-            _context.Parameters.ErrorListener.BadImage(
+        return _context.ParentImage.TryGetLeafRecord(_fieldIndex, out var leaf) && leaf is FieldList list
+            ? list
+            : _context.Parameters.ErrorListener.BadImageAndReturn<FieldList>(
                 $"Enum type {TypeIndex:X8} contains an invalid field list index {_fieldIndex:X8}.");
-            return new FieldList();
-        }
-
-        return list;
     }
 }

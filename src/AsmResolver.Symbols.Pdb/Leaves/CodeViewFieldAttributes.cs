@@ -34,6 +34,36 @@ public enum CodeViewFieldAttributes : ushort
     AccessMask = 0b00000000_00000011,
 
     /// <summary>
+    /// Indicates the method is a virtual method.
+    /// </summary>
+    Virtual = 0b00000000_00000100,
+
+    /// <summary>
+    /// Indicates the method is a static method.
+    /// </summary>
+    Static = 0b00000000_00001000,
+
+    /// <summary>
+    /// Indicates the method can be accessed only from within the current module.
+    /// </summary>
+    Friend = 0b00000000_00001100,
+
+    /// <summary>
+    /// Indicates the method is a new introducing virtual method.
+    /// </summary>
+    IntroducingVirtual = 0b00000000_00010000,
+
+    /// <summary>
+    /// Indicates the method is a pure virtual method.
+    /// </summary>
+    PureVirtual = 0b00000000_00010100,
+
+    /// <summary>
+    /// Indicates the method is a new introducing pure virtual method.
+    /// </summary>
+    PureIntroducingVirtual = 0b00000000_00011000,
+
+    /// <summary>
     /// Provides the bit-mask that can be used to extract the method properties of the field.
     /// </summary>
     MethodPropertiesMask = 0b00000000_00011100,
