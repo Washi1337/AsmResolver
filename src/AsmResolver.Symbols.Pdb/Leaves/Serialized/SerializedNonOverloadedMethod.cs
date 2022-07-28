@@ -26,6 +26,7 @@ public class SerializedNonOverloadedMethod : NonOverloadedMethod
         if (IsIntroducingVirtual)
             VFTableOffset = reader.ReadUInt32();
         _nameReader = reader.Fork();
+        reader.AdvanceUntil(0, true);
     }
 
     /// <inheritdoc />

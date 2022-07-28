@@ -35,14 +35,18 @@ internal class SerializedFieldList : FieldList
         while (reader.CanRead(sizeof(ushort)))
         {
             // Skip padding bytes.
-            while (true)
+            while (reader.CanRead(sizeof(byte)))
             {
-                if ((CodeViewLeafKind) reader.ReadByte() < CodeViewLeafKind.Pad0)
+                var b = (CodeViewLeafKind) reader.ReadByte();
+                if (b < CodeViewLeafKind.Pad0)
                 {
                     reader.Offset--;
                     break;
                 }
             }
+
+            if (!reader.CanRead(sizeof(byte)))
+                break;
 
             // Read field.
             var leaf = FromReaderNoHeader(_context, 0, ref reader);

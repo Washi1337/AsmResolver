@@ -53,4 +53,19 @@ public class FieldListTest : IClassFixture<MockPdbFixture>
         Assert.Equal((Public, "cch", 40ul), enumerates[10]);
         Assert.Equal((Public, "hbmpItem", 44ul), enumerates[11]);
     }
+
+    [Fact]
+    public void ReadMixed()
+    {
+        var list = (FieldList) _fixture.SimplePdb.GetLeafRecord(0x239d);
+
+        Assert.Equal("std::exception", Assert.IsAssignableFrom<ClassType>(
+            Assert.IsAssignableFrom<BaseClass>(list.Entries[0]).Type).Name);
+        Assert.Equal("bad_cast", Assert.IsAssignableFrom<OverloadedMethod>(list.Entries[1]).Name);
+        Assert.Equal("__construct_from_string_literal", Assert.IsAssignableFrom<NonOverloadedMethod>(list.Entries[2]).Name);
+        Assert.Equal("~bad_cast", Assert.IsAssignableFrom<NonOverloadedMethod>(list.Entries[3]).Name);
+        Assert.Equal("operator=", Assert.IsAssignableFrom<OverloadedMethod>(list.Entries[4]).Name);
+        Assert.Equal("__local_vftable_ctor_closure", Assert.IsAssignableFrom<NonOverloadedMethod>(list.Entries[5]).Name);
+        Assert.Equal("__vecDelDtor", Assert.IsAssignableFrom<NonOverloadedMethod>(list.Entries[6]).Name);
+    }
 }

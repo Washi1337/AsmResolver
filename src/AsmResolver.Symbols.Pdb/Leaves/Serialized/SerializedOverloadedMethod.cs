@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 public class SerializedOverloadedMethod : OverloadedMethod
 {
     private readonly PdbReaderContext _context;
-    private readonly uint _functionCount;
+    private readonly ushort _functionCount;
     private readonly uint _methodListIndex;
     private readonly BinaryStreamReader _nameReader;
 
@@ -22,9 +22,10 @@ public class SerializedOverloadedMethod : OverloadedMethod
         : base(typeIndex)
     {
         _context = context;
-        _functionCount = reader.ReadUInt32();
+        _functionCount = reader.ReadUInt16();
         _methodListIndex = reader.ReadUInt32();
         _nameReader = reader.Fork();
+        reader.AdvanceUntil(0, true);
     }
 
     /// <inheritdoc />

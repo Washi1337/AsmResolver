@@ -39,8 +39,8 @@ public abstract class CodeViewField : CodeViewLeaf
     /// Gets a value indicating whether the field is a newly introduced virtual function.
     /// </summary>
     public bool IsIntroducingVirtual =>
-        (Attributes & CodeViewFieldAttributes.IntroducingVirtual) != 0
-        || (Attributes & CodeViewFieldAttributes.PureIntroducingVirtual) != 0;
+        (Attributes & CodeViewFieldAttributes.IntroducingVirtual) == CodeViewFieldAttributes.IntroducingVirtual
+        || (Attributes & CodeViewFieldAttributes.PureIntroducingVirtual) == CodeViewFieldAttributes.PureIntroducingVirtual;
 
     /// <summary>
     /// Obtains the name of the field.

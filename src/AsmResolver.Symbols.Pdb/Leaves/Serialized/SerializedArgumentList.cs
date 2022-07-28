@@ -15,7 +15,7 @@ public class SerializedArgumentList : ArgumentList
     /// Reads a argument list from the provided input stream.
     /// </summary>
     /// <param name="context">The reading context in which the list is situated in.</param>
-    /// <param name="typeIndex">The type index to assign to the enum type.</param>
+    /// <param name="typeIndex">The type index to assign to the list.</param>
     /// <param name="reader">The input stream to read from.</param>
     public SerializedArgumentList(PdbReaderContext context, uint typeIndex, BinaryStreamReader reader)
         : base(typeIndex)

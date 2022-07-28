@@ -53,6 +53,7 @@ public abstract class CodeViewLeaf
         return kind switch
         {
             ArgList => new SerializedArgumentList(context, typeIndex, dataReader),
+            BClass => new SerializedBaseClass(context, typeIndex, ref dataReader),
             Class => new SerializedClassType(Class, context, typeIndex, dataReader),
             Enum => new SerializedEnumType(context, typeIndex, dataReader),
             Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
