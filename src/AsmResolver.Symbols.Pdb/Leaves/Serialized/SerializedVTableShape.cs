@@ -41,7 +41,7 @@ public class SerializedVTableShape : VTableShape
             }
             else
             {
-                result.Add((VTableShapeEntry) ((currentByte >> 8) & 0xF));
+                result.Add((VTableShapeEntry) ((currentByte >> 4) & 0xF));
             }
         }
 
