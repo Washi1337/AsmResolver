@@ -57,6 +57,7 @@ public abstract class CodeViewLeaf
             Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
             CodeViewLeafKind.FieldList => new SerializedFieldList(context, typeIndex, dataReader),
             Interface => new SerializedClassType(Interface, context, typeIndex, dataReader),
+            Member => new SerializedInstanceDataMember(context, typeIndex, ref dataReader),
             Modifier => new SerializedModifierType(context, typeIndex, dataReader),
             Pointer => new SerializedPointerType(context, typeIndex, dataReader),
             Structure => new SerializedClassType(Structure, context, typeIndex, dataReader),
