@@ -65,16 +65,20 @@ public abstract class CodeViewLeaf
         };
     }
 
-    internal static object ReadNumeric(ref BinaryStreamReader reader) => (CodeViewLeafKind) reader.ReadUInt16() switch
+    internal static object ReadNumeric(ref BinaryStreamReader reader)
     {
-        < Numeric => (object) (uint) (CodeViewLeafKind) reader.ReadUInt16(),
-        Char => (char) reader.ReadByte(),
-        Short => reader.ReadInt16(),
-        UShort => reader.ReadUInt16(),
-        Long => reader.ReadInt32(),
-        ULong => reader.ReadUInt32(),
-        QuadWord => reader.ReadInt64(),
-        UQuadWord => reader.ReadUInt64(),
-        _ => 0
-    };
+        var kind = (CodeViewLeafKind) reader.ReadUInt16();
+        return kind switch
+        {
+            < Numeric => (object) (uint) kind,
+            Char => (char) reader.ReadByte(),
+            Short => reader.ReadInt16(),
+            UShort => reader.ReadUInt16(),
+            Long => reader.ReadInt32(),
+            ULong => reader.ReadUInt32(),
+            QuadWord => reader.ReadInt64(),
+            UQuadWord => reader.ReadUInt64(),
+            _ => 0
+        };
+    }
 }
