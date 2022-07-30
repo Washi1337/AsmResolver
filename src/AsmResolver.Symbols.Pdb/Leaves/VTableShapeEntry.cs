@@ -1,7 +1,7 @@
 namespace AsmResolver.Symbols.Pdb.Leaves;
 
 /// <summary>
-/// Provides members defining all possible types that a single entry in a <see cref="VTableShape"/> can be.
+/// Provides members defining all possible types that a single entry in a <see cref="VTableShapeLeaf"/> can be.
 /// </summary>
 public enum VTableShapeEntry : byte
 {

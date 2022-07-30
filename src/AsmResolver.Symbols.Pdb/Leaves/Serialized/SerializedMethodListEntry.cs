@@ -25,11 +25,11 @@ public class SerializedMethodListEntry : MethodListEntry
     }
 
     /// <inheritdoc />
-    protected override MemberFunction? GetFunction()
+    protected override MemberFunctionLeaf? GetFunction()
     {
-        return _context.ParentImage.TryGetLeafRecord(_functionIndex, out var leaf) && leaf is MemberFunction type
+        return _context.ParentImage.TryGetLeafRecord(_functionIndex, out var leaf) && leaf is MemberFunctionLeaf type
             ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<MemberFunction>(
+            : _context.Parameters.ErrorListener.BadImageAndReturn<MemberFunctionLeaf>(
                 $"Method list entry contains an invalid return type index {_functionIndex:X8}.");
     }
 }

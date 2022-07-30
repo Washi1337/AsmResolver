@@ -29,11 +29,11 @@ public class SerializedConstantSymbol : ConstantSymbol
     protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
 
     /// <inheritdoc />
-    protected override CodeViewType? GetConstantType()
+    protected override CodeViewTypeRecord? GetConstantType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out var leaf) && leaf is CodeViewType type
+        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out var leaf) && leaf is CodeViewTypeRecord type
             ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewType>(
+            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"Constant contains an invalid type index {_typeIndex:X8}.");
     }
 }

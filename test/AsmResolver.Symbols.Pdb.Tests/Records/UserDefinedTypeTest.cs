@@ -25,7 +25,7 @@ public class UserDefinedTypeTest : IClassFixture<MockPdbFixture>
     public void Type()
     {
         var udt = _fixture.SimplePdb.Symbols.OfType<UserDefinedTypeSymbol>().First();
-        var type = Assert.IsAssignableFrom<SimpleType>(udt.Type);
+        var type = Assert.IsAssignableFrom<SimpleTypeRecord>(udt.Type);
         Assert.Equal(SimpleTypeKind.UInt32, type.Kind);
     }
 

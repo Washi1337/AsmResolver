@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 public class ConstantSymbol : CodeViewSymbol
 {
     private readonly LazyVariable<Utf8String> _name;
-    private readonly LazyVariable<CodeViewType> _type;
+    private readonly LazyVariable<CodeViewTypeRecord> _type;
 
     /// <summary>
     /// Initializes a named constant
@@ -16,7 +16,7 @@ public class ConstantSymbol : CodeViewSymbol
     protected ConstantSymbol()
     {
         _name = new LazyVariable<Utf8String>(GetName);
-        _type = new LazyVariable<CodeViewType>(GetConstantType);
+        _type = new LazyVariable<CodeViewTypeRecord>(GetConstantType);
     }
 
     /// <summary>
@@ -25,10 +25,10 @@ public class ConstantSymbol : CodeViewSymbol
     /// <param name="name">The name of the type.</param>
     /// <param name="type">The type.</param>
     /// <param name="value">The value to assign to the constant.</param>
-    public ConstantSymbol(Utf8String name, CodeViewType type, ushort value)
+    public ConstantSymbol(Utf8String name, CodeViewTypeRecord type, ushort value)
     {
         _name = new LazyVariable<Utf8String>(name);
-        _type = new LazyVariable<CodeViewType>(type);
+        _type = new LazyVariable<CodeViewTypeRecord>(type);
         Value = value;
     }
 
@@ -38,7 +38,7 @@ public class ConstantSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the value type of the constant.
     /// </summary>
-    public CodeViewType Type
+    public CodeViewTypeRecord Type
     {
         get => _type.Value;
         set => _type.Value = value;
@@ -78,7 +78,7 @@ public class ConstantSymbol : CodeViewSymbol
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Type"/> property.
     /// </remarks>
-    protected virtual CodeViewType? GetConstantType() => null;
+    protected virtual CodeViewTypeRecord? GetConstantType() => null;
 
     /// <inheritdoc />
     public override string ToString() => $"{CodeViewSymbolType}: {Type} {Name} = {Value}";

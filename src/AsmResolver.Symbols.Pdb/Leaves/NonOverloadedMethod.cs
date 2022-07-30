@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class NonOverloadedMethod : CodeViewField
 {
-    private readonly LazyVariable<MemberFunction?> _function;
+    private readonly LazyVariable<MemberFunctionLeaf?> _function;
 
     /// <summary>
     /// Initializes an empty non-overloaded method.
@@ -14,7 +14,7 @@ public class NonOverloadedMethod : CodeViewField
     protected NonOverloadedMethod(uint typeIndex)
         : base(typeIndex)
     {
-        _function = new LazyVariable<MemberFunction?>(GetFunction);
+        _function = new LazyVariable<MemberFunctionLeaf?>(GetFunction);
     }
 
     /// <summary>
@@ -23,10 +23,10 @@ public class NonOverloadedMethod : CodeViewField
     /// <param name="function">The function that is referenced by the method.</param>
     /// <param name="attributes">The attributes associated to the method.</param>
     /// <param name="name">The name of the method.</param>
-    public NonOverloadedMethod(MemberFunction function, CodeViewFieldAttributes attributes, Utf8String name)
+    public NonOverloadedMethod(MemberFunctionLeaf function, CodeViewFieldAttributes attributes, Utf8String name)
         : base(0)
     {
-        _function = new LazyVariable<MemberFunction?>(function);
+        _function = new LazyVariable<MemberFunctionLeaf?>(function);
         Attributes = attributes;
         Name = name;
     }
@@ -38,10 +38,10 @@ public class NonOverloadedMethod : CodeViewField
     /// <param name="attributes">The attributes associated to the method.</param>
     /// <param name="name">The name of the method.</param>
     /// <param name="vfTableOffset">The offset to the slot the virtual function table that this method occupies.</param>
-    public NonOverloadedMethod(MemberFunction function, CodeViewFieldAttributes attributes, Utf8String name, uint vfTableOffset)
+    public NonOverloadedMethod(MemberFunctionLeaf function, CodeViewFieldAttributes attributes, Utf8String name, uint vfTableOffset)
         : base(0)
     {
-        _function = new LazyVariable<MemberFunction?>(function);
+        _function = new LazyVariable<MemberFunctionLeaf?>(function);
         Attributes = attributes;
         Name = name;
         VFTableOffset = vfTableOffset;
@@ -53,7 +53,7 @@ public class NonOverloadedMethod : CodeViewField
     /// <summary>
     /// Gets or sets the function that is referenced by this method.
     /// </summary>
-    public MemberFunction? Function
+    public MemberFunctionLeaf? Function
     {
         get => _function.Value;
         set => _function.Value = value;
@@ -76,5 +76,5 @@ public class NonOverloadedMethod : CodeViewField
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Function"/> property.
     /// </remarks>
-    protected virtual MemberFunction? GetFunction() => null;
+    protected virtual MemberFunctionLeaf? GetFunction() => null;
 }

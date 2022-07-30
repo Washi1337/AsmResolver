@@ -17,7 +17,7 @@ public class PdbImageTest : IClassFixture<MockPdbFixture>
     [InlineData(0x04_03, SimpleTypeKind.Void, SimpleTypeMode.NearPointer32)]
     public void SimpleTypeLookup(uint typeIndex, SimpleTypeKind kind, SimpleTypeMode mode)
     {
-        var type = Assert.IsAssignableFrom<SimpleType>(_fixture.SimplePdb.GetLeafRecord(typeIndex));
+        var type = Assert.IsAssignableFrom<SimpleTypeRecord>(_fixture.SimplePdb.GetLeafRecord(typeIndex));
         Assert.Equal(kind, type.Kind);
         Assert.Equal(mode, type.Mode);
     }

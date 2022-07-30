@@ -5,14 +5,14 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class MethodListEntry
 {
-    private readonly LazyVariable<MemberFunction?> _function;
+    private readonly LazyVariable<MemberFunctionLeaf?> _function;
 
     /// <summary>
     /// Initializes an empty method list entry.
     /// </summary>
     protected MethodListEntry()
     {
-        _function = new LazyVariable<MemberFunction?>(GetFunction);
+        _function = new LazyVariable<MemberFunctionLeaf?>(GetFunction);
     }
 
     /// <summary>
@@ -20,10 +20,10 @@ public class MethodListEntry
     /// </summary>
     /// <param name="attributes">The attributes associated to this method.</param>
     /// <param name="function">The referenced function.</param>
-    public MethodListEntry(CodeViewFieldAttributes attributes, MemberFunction function)
+    public MethodListEntry(CodeViewFieldAttributes attributes, MemberFunctionLeaf function)
     {
         Attributes = attributes;
-        _function = new LazyVariable<MemberFunction?>(function);
+        _function = new LazyVariable<MemberFunctionLeaf?>(function);
         VFTableOffset = 0;
     }
 
@@ -33,10 +33,10 @@ public class MethodListEntry
     /// <param name="attributes">The attributes associated to this method.</param>
     /// <param name="function">The referenced function.</param>
     /// <param name="vfTableOffset">The offset to the slot the virtual function table that this method occupies.</param>
-    public MethodListEntry(CodeViewFieldAttributes attributes, MemberFunction function, uint vfTableOffset)
+    public MethodListEntry(CodeViewFieldAttributes attributes, MemberFunctionLeaf function, uint vfTableOffset)
     {
         Attributes = attributes;
-        _function = new LazyVariable<MemberFunction?>(function);
+        _function = new LazyVariable<MemberFunctionLeaf?>(function);
         VFTableOffset = vfTableOffset;
     }
 
@@ -52,7 +52,7 @@ public class MethodListEntry
     /// <summary>
     /// Gets or sets the function that is referenced by this method.
     /// </summary>
-    public MemberFunction? Function
+    public MemberFunctionLeaf? Function
     {
         get => _function.Value;
         set => _function.Value = value;
@@ -82,7 +82,7 @@ public class MethodListEntry
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Function"/> property.
     /// </remarks>
-    protected virtual MemberFunction? GetFunction() => null;
+    protected virtual MemberFunctionLeaf? GetFunction() => null;
 
     /// <inheritdoc />
     public override string ToString()

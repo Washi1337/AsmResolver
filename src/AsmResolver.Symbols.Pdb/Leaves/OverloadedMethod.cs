@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class OverloadedMethod : CodeViewField
 {
-    private readonly LazyVariable<MethodList?> _methods;
+    private readonly LazyVariable<MethodListLeaf?> _methods;
 
     /// <summary>
     /// Initializes an empty overloaded method.
@@ -14,7 +14,7 @@ public class OverloadedMethod : CodeViewField
     protected OverloadedMethod(uint typeIndex)
         : base(typeIndex)
     {
-        _methods = new LazyVariable<MethodList?>(GetMethods);
+        _methods = new LazyVariable<MethodListLeaf?>(GetMethods);
     }
 
     /// <summary>
@@ -31,7 +31,7 @@ public class OverloadedMethod : CodeViewField
     /// <summary>
     /// Gets or sets a list of methods that were overloaded.
     /// </summary>
-    public MethodList? Methods
+    public MethodListLeaf? Methods
     {
         get => _methods.Value;
         set => _methods.Value = value;
@@ -44,5 +44,5 @@ public class OverloadedMethod : CodeViewField
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Methods"/> property.
     /// </remarks>
-    protected virtual MethodList? GetMethods() => null;
+    protected virtual MethodListLeaf? GetMethods() => null;
 }

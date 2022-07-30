@@ -16,7 +16,7 @@ namespace AsmResolver.Symbols.Pdb;
 public class PdbImage
 {
     private IList<CodeViewSymbol>? _symbols;
-    private ConcurrentDictionary<uint, SimpleType> _simpleTypes = new();
+    private ConcurrentDictionary<uint, SimpleTypeRecord> _simpleTypes = new();
 
     /// <summary>
     /// Gets a collection of all symbols stored in the PDB image.
@@ -91,7 +91,7 @@ public class PdbImage
         typeIndex &= 0x7fffffff;
         if (typeIndex is > 0 and < 0x1000)
         {
-            type = _simpleTypes.GetOrAdd(typeIndex, i => new SimpleType(i));
+            type = _simpleTypes.GetOrAdd(typeIndex, i => new SimpleTypeRecord(i));
             return true;
         }
 

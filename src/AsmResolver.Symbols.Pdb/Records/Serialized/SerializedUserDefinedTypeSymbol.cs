@@ -28,11 +28,11 @@ public class SerializedUserDefinedTypeSymbol : UserDefinedTypeSymbol
     protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
 
     /// <inheritdoc />
-    protected override CodeViewType? GetSymbolType()
+    protected override CodeViewTypeRecord? GetSymbolType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out var leaf) && leaf is CodeViewType type
+        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out var leaf) && leaf is CodeViewTypeRecord type
             ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewType>(
+            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"User-defined type contains an invalid type index {_typeIndex:X8}.");
     }
 }

@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 public class UserDefinedTypeSymbol : CodeViewSymbol
 {
     private readonly LazyVariable<Utf8String> _name;
-    private readonly LazyVariable<CodeViewType> _type;
+    private readonly LazyVariable<CodeViewTypeRecord> _type;
 
     /// <summary>
     /// Initializes a new empty user-defined type symbol.
@@ -16,7 +16,7 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     protected UserDefinedTypeSymbol()
     {
         _name = new LazyVariable<Utf8String>(GetName);
-        _type = new LazyVariable<CodeViewType>(GetSymbolType);
+        _type = new LazyVariable<CodeViewTypeRecord>(GetSymbolType);
     }
 
     /// <summary>
@@ -24,10 +24,10 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     /// </summary>
     /// <param name="name">The name of the type.</param>
     /// <param name="type">The type.</param>
-    public UserDefinedTypeSymbol(Utf8String name, CodeViewType type)
+    public UserDefinedTypeSymbol(Utf8String name, CodeViewTypeRecord type)
     {
         _name = new LazyVariable<Utf8String>(name);
-        _type = new LazyVariable<CodeViewType>(type);
+        _type = new LazyVariable<CodeViewTypeRecord>(type);
     }
 
     /// <inheritdoc />
@@ -45,7 +45,7 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the index associated to the type.
     /// </summary>
-    public CodeViewType Type
+    public CodeViewTypeRecord Type
     {
         get => _type.Value;
         set => _type.Value = value;
@@ -67,7 +67,7 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Type"/> property.
     /// </remarks>
-    protected virtual CodeViewType? GetSymbolType() => null;
+    protected virtual CodeViewTypeRecord? GetSymbolType() => null;
 
     /// <inheritdoc />
     public override string ToString() => $"{CodeViewSymbolType}: {Type} {Name}";
