@@ -29,7 +29,7 @@ public abstract class CodeViewCompositeType : CodeViewType
     }
 
     /// <summary>
-    /// Gets or sets the name of the enum type.
+    /// Gets or sets the name of the type.
     /// </summary>
     public Utf8String Name
     {

@@ -52,6 +52,7 @@ public abstract class CodeViewLeaf
         var kind = (CodeViewLeafKind) dataReader.ReadUInt16();
         return kind switch
         {
+            Array => new SerializedArrayType(context, typeIndex, dataReader),
             ArgList => new SerializedArgumentList(context, typeIndex, dataReader),
             BClass => new SerializedBaseClass(context, typeIndex, ref dataReader),
             Class => new SerializedClassType(Class, context, typeIndex, dataReader),
