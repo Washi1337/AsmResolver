@@ -55,7 +55,7 @@ public class FieldListTest : IClassFixture<MockPdbFixture>
     }
 
     [Fact]
-    public void ReadMixed()
+    public void ReadMethodsAndBaseClass()
     {
         var list = (FieldList) _fixture.SimplePdb.GetLeafRecord(0x239d);
 
@@ -67,5 +67,16 @@ public class FieldListTest : IClassFixture<MockPdbFixture>
         Assert.Equal("operator=", Assert.IsAssignableFrom<OverloadedMethod>(list.Entries[4]).Name);
         Assert.Equal("__local_vftable_ctor_closure", Assert.IsAssignableFrom<NonOverloadedMethod>(list.Entries[5]).Name);
         Assert.Equal("__vecDelDtor", Assert.IsAssignableFrom<NonOverloadedMethod>(list.Entries[6]).Name);
+    }
+
+    [Fact]
+    public void ReadNestedTypes()
+    {
+        var list = (FieldList) _fixture.SimplePdb.GetLeafRecord(0x1854);
+
+        Assert.Equal("_LDT_ENTRY::<unnamed-type-HighWord>::<unnamed-type-Bytes>",
+            Assert.IsAssignableFrom<ClassType>(Assert.IsAssignableFrom<NestedType>(list.Entries[0]).Type).Name);
+        Assert.Equal("_LDT_ENTRY::<unnamed-type-HighWord>::<unnamed-type-Bits>",
+            Assert.IsAssignableFrom<ClassType>(Assert.IsAssignableFrom<NestedType>(list.Entries[2]).Type).Name);
     }
 }
