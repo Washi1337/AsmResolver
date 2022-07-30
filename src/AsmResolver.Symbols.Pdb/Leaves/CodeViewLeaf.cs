@@ -68,6 +68,7 @@ public abstract class CodeViewLeaf
             NestType or NestTypeEx => new SerializedNestedType(context, typeIndex, ref dataReader),
             OneMethod => new SerializedNonOverloadedMethod(context, typeIndex, ref dataReader),
             Pointer => new SerializedPointerType(context, typeIndex, dataReader),
+            Procedure => new SerializedProcedureType(context, typeIndex, dataReader),
             Structure => new SerializedClassType(Structure, context, typeIndex, dataReader),
             Union => new SerializedUnionType(context, typeIndex, dataReader),
             VTShape => new SerializedVTableShape(context, typeIndex, dataReader),
