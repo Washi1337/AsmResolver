@@ -63,13 +63,10 @@ public class SerializedClassType : ClassType
         if (_fieldIndex == 0)
             return null;
 
-        if (!_context.ParentImage.TryGetLeafRecord(_fieldIndex, out var leaf) || leaf is not SerializedFieldList list)
-        {
-            _context.Parameters.ErrorListener.BadImage($"Class type {TypeIndex:X8} contains an invalid field list index {_fieldIndex:X8}.");
-            return new FieldList();
-        }
-
-        return list;
+        return _context.ParentImage.TryGetLeafRecord(_fieldIndex, out var leaf) && leaf is SerializedFieldList list
+            ? list
+            : _context.Parameters.ErrorListener.BadImageAndReturn<FieldList>(
+                $"Class type {TypeIndex:X8} contains an invalid field list index {_fieldIndex:X8}.");
     }
 
     /// <inheritdoc />

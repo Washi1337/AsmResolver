@@ -68,6 +68,7 @@ public abstract class CodeViewLeaf
             OneMethod => new SerializedNonOverloadedMethod(context, typeIndex, ref dataReader),
             Pointer => new SerializedPointerType(context, typeIndex, dataReader),
             Structure => new SerializedClassType(Structure, context, typeIndex, dataReader),
+            Union => new SerializedUnionType(context, typeIndex, dataReader),
             VTShape => new SerializedVTableShape(context, typeIndex, dataReader),
             _ => new UnknownCodeViewLeaf(kind, dataReader.ReadToEnd())
         };

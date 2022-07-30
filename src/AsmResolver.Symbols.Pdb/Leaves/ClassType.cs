@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a class, structure or interface type in a PDB.
 /// </summary>
-public class ClassType : CodeViewComplexType
+public class ClassType : CodeViewDerivedType
 {
     private readonly LazyVariable<Utf8String> _uniqueName;
     private readonly LazyVariable<VTableShape?> _vtableShape;

@@ -3,7 +3,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents an enum type.
 /// </summary>
-public class EnumType : CodeViewComplexType
+public class EnumType : CodeViewDerivedType
 {
     /// <summary>
     /// Initializes a new empty enum type.
