@@ -46,6 +46,7 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="targetModule">The target module to copy the members into.</param>
         /// <param name="importerFactory">The factory for creating the reference importer</param>
+        /// <param name="clonerListener">The listener used in the cloner.</param>
         public MemberCloner(ModuleDefinition targetModule,
             Func<MemberCloneContext, CloneContextAwareReferenceImporter>? importerFactory,
             IMemberClonerListener clonerListener)
