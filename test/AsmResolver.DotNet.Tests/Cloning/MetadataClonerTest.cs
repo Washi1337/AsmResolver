@@ -329,5 +329,33 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 originalTypeDef.Interfaces.Select(t => t.Interface.FullName),
                 clonedType.Interfaces.Select(t => t.Interface.FullName));
         }
+
+        [Fact]
+        public void CloneCallbackResult()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
+
+            var targetModule = PrepareTempModule();
+
+            var reverseMethodsNames = (IMetadataMember original, IMetadataMember cloned) => {
+
+                if (cloned is MethodDefinition clonedDescriptor && original is MethodDefinition originalDescriptor)
+                    clonedDescriptor.Name = new string(originalDescriptor.Name.Reverse().ToArray());
+                
+            };
+
+            var result = new MemberCloner(targetModule, reverseMethodsNames)
+                .Include(type)
+                .Clone();
+
+            var clonedType = result.GetClonedMember(type);
+
+            Assert.Equal(
+                type.Methods.Select(m => m.Name.Reverse().ToArray()),
+                clonedType.Methods.Select(m => m.Name.ToArray()));
+
+        }
+
     }
 }

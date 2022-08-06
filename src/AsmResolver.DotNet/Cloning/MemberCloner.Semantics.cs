@@ -17,6 +17,10 @@ namespace AsmResolver.DotNet.Cloning
                 {
                     declaringType.Properties.Add(clonedProperty);
                 }
+                var clonedMember = clonedProperty;
+                _clonerListener.OnClonedMember(property, clonedMember);
+                if (_clonerListener is MemberClonerListener listener)
+                    listener.OnClonedProperty(property, clonedMember);
             }
         }
 
@@ -51,6 +55,10 @@ namespace AsmResolver.DotNet.Cloning
                 {
                     declaringType.Events.Add(clonedEvent);
                 }
+                var clonedMember = clonedEvent;
+                _clonerListener.OnClonedMember(@event, clonedMember);
+                if (_clonerListener is MemberClonerListener listener)
+                    listener.OnClonedEvent(@event, clonedMember);
             }
         }
 
