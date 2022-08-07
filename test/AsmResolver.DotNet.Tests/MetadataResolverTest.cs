@@ -161,8 +161,10 @@ namespace AsmResolver.DotNet.Tests
             var module = new ModuleDefinition("SomeModule.dll");
 
             var stringType = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "String");
-            var emptyField = new MemberReference(stringType, "Empty",
-                FieldSignature.CreateStatic(module.CorLibTypeFactory.String));
+            var emptyField = new MemberReference(
+                stringType,
+                "Empty",
+                new FieldSignature(module.CorLibTypeFactory.String));
 
             var definition = _fwResolver.ResolveField(emptyField);
 
@@ -220,6 +222,29 @@ namespace AsmResolver.DotNet.Tests
 
             // Attempt to resolve. The test here is that it should not result in an infinite loop / stack overflow.
             Assert.Null(reference.Resolve());
+        }
+
+        [Fact]
+        public void ResolveToOlderNetVersion()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/321
+
+            var mainApp = ModuleDefinition.FromBytes(Properties.Resources.DifferentNetVersion_MainApp);
+            var library = ModuleDefinition.FromBytes(Properties.Resources.DifferentNetVersion_Library);
+
+            mainApp.MetadataResolver.AssemblyResolver.AddToCache(library.Assembly!, library.Assembly!);
+
+            var definition = library
+                .TopLevelTypes.First(t => t.Name == "MyClass")
+                .Methods.First(m => m.Name == "ThrowMe");
+
+            var reference = (IMethodDescriptor) mainApp.ManagedEntrypointMethod!.CilMethodBody!.Instructions.First(
+                    i => i.OpCode == CilOpCodes.Callvirt && ((IMethodDescriptor) i.Operand)?.Name == "ThrowMe")
+                .Operand!;
+
+            var resolved = reference.Resolve();
+            Assert.NotNull(resolved);
+            Assert.Equal(definition, resolved);
         }
 
         [Fact]

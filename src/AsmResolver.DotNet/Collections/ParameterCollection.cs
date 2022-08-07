@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class ParameterCollection : IReadOnlyList<Parameter>
     {
-        private readonly IList<Parameter> _parameters = new List<Parameter>();
+        private readonly List<Parameter> _parameters = new List<Parameter>();
         private readonly MethodDefinition _owner;
         private bool _hasThis;
 

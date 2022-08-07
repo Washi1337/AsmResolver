@@ -1,4 +1,6 @@
-﻿namespace AsmResolver.Workspaces
+using System.Collections.Generic;
+
+namespace AsmResolver.Workspaces
 {
     /// <summary>
     /// Provides a base mechanism for indexing assemblies and their components.
@@ -6,9 +8,9 @@
     public abstract class Workspace
     {
         /// <summary>
-        /// Gets a collection of object analyzers that are used in this workspace.
+        /// Gets a ordered list of profiles for workspace analyzing.
         /// </summary>
-        public AnalyzerRepository Analyzers
+        public List<WorksapceProfile> Profiles
         {
             get;
         } = new();
@@ -27,16 +29,32 @@
         /// <param name="context">The analysis context.</param>
         protected void Analyze(AnalysisContext context)
         {
-            while (context.Agenda.Count > 0)
+            var traversedObjects = new HashSet<object>(context.Agenda);
+            foreach (var profile in Profiles)
             {
-                var nextSubject = context.Agenda.Dequeue();
-                var analyzers = Analyzers.GetAnalyzers(nextSubject.GetType());
-                foreach (var analyzer in analyzers)
+                context.Agenda.Clear();
+                foreach (object agenda in traversedObjects)
+                    context.Agenda.Enqueue(agenda);
+                context.TraversedObjects.Clear();
+
+                while (context.Agenda.Count > 0)
                 {
-                    if (analyzer.CanAnalyze(context, nextSubject))
-                        analyzer.Analyze(context, nextSubject);
+                    object nextSubject = context.Agenda.Dequeue();
+                    var analyzers = profile.Analyzers.GetAnalyzers(nextSubject.GetType());
+                    foreach (var analyzer in analyzers)
+                    {
+                        if (analyzer.CanAnalyze(context, nextSubject))
+                            analyzer.Analyze(context, nextSubject);
+                    }
                 }
+
+                foreach (object traversedObject in context.TraversedObjects)
+                    traversedObjects.Add(traversedObject);
             }
+
+            context.TraversedObjects.Clear();
+            foreach (object traversedObject in traversedObjects)
+                context.TraversedObjects.Add(traversedObject);
         }
     }
 }

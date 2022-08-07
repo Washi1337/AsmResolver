@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
@@ -113,6 +115,71 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var signature2 = PropertySignature.CreateStatic(type.ToTypeSignature());
 
             Assert.Equal(signature1, signature2, _comparer);
+        }
+
+        [Fact]
+        public void NestedTypesWithSameNameButDifferentDeclaringTypeShouldNotMatch()
+        {
+            var nestedTypes = ModuleDefinition.FromFile(typeof(SignatureComparerTest).Assembly.Location)
+                .GetAllTypes().First(t => t.Name == nameof(SignatureComparerTest))
+                .NestedTypes.First(t => t.Name == nameof(NestedTypes));
+
+            var firstType = nestedTypes.NestedTypes
+                .First(t => t.Name == nameof(NestedTypes.FirstType)).NestedTypes
+                .First(t => t.Name == nameof(NestedTypes.FirstType.TypeWithCommonName));
+            var secondType = nestedTypes.NestedTypes
+                .First(t => t.Name == nameof(NestedTypes.SecondType)).NestedTypes
+                .First(t => t.Name == nameof(NestedTypes.SecondType.TypeWithCommonName));
+
+            Assert.NotEqual(firstType, secondType, _comparer);
+        }
+
+        [Fact]
+        public void MatchForwardedNestedTypes()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ForwarderRefTest);
+            var forwarder = ModuleDefinition.FromBytes(Properties.Resources.ForwarderLibrary).Assembly!;
+            var library = ModuleDefinition.FromBytes(Properties.Resources.ActualLibrary).Assembly!;
+
+            module.MetadataResolver.AssemblyResolver.AddToCache(forwarder, forwarder);
+            module.MetadataResolver.AssemblyResolver.AddToCache(library, library);
+            forwarder.ManifestModule!.MetadataResolver.AssemblyResolver.AddToCache(library, library);
+
+            var referencedTypes = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions
+                .Where(i => i.OpCode.Code == CilCode.Call)
+                .Select(i => ((IMethodDefOrRef) i.Operand!).DeclaringType)
+                .Where(t => t.Name == "MyNestedClass")
+                .ToArray();
+
+            var type1 = referencedTypes[0]!;
+            var type2 = referencedTypes[1]!;
+
+            var resolvedType1 = type1.Resolve();
+            var resolvedType2 = type2.Resolve();
+
+            Assert.Equal(type1, resolvedType1, _comparer);
+            Assert.Equal(type2, resolvedType2, _comparer);
+
+            Assert.NotEqual(type1, type2, _comparer);
+            Assert.NotEqual(type1, resolvedType2, _comparer); // Fails
+            Assert.NotEqual(type2, resolvedType1, _comparer); // Fails
+        }
+
+        private class NestedTypes
+        {
+            public class FirstType
+            {
+                public class TypeWithCommonName
+                {
+                }
+
+            }
+            public class SecondType
+            {
+                public class TypeWithCommonName
+                {
+                }
+            }
         }
     }
 }

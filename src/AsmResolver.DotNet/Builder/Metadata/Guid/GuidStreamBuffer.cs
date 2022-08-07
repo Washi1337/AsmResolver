@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
     public class GuidStreamBuffer : IMetadataStreamBuffer
     {
         private readonly MemoryStream _rawStream = new();
-        private readonly IBinaryStreamWriter _writer;
+        private readonly BinaryStreamWriter _writer;
         private readonly Dictionary<System.Guid, uint> _guids = new();
 
         /// <summary>

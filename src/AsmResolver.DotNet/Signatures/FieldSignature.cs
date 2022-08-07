@@ -1,6 +1,6 @@
+using System;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -14,6 +14,9 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="fieldType">The value type of the field.</param>
         /// <returns>The signature.</returns>
+        [Obsolete("The HasThis bit in field signatures is ignored by the CLR. Use the constructor instead,"
+                  + " or when this call is used in an argument of a FieldDefinition constructor, use the overload"
+                  + " taking TypeSignature instead.")]
         public static FieldSignature CreateStatic(TypeSignature fieldType)
             => new(CallingConventionAttributes.Field, fieldType);
 
@@ -22,6 +25,9 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="fieldType">The value type of the field.</param>
         /// <returns>The signature.</returns>
+        [Obsolete("The HasThis bit in field signatures is ignored by the CLR. Use the constructor instead,"
+                  + " or when this call is used in an argument of a FieldDefinition constructor, use the overload"
+                  + " taking TypeSignature instead.")]
         public static FieldSignature CreateInstance(TypeSignature fieldType)
             => new(CallingConventionAttributes.Field | CallingConventionAttributes.HasThis, fieldType);
 
@@ -61,7 +67,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
-        /// Gets the type of the object that the field stores.
+        /// Gets the type of the value that the field contains.
         /// </summary>
         public TypeSignature FieldType
         {
@@ -88,5 +94,18 @@ namespace AsmResolver.DotNet.Signatures
             context.Writer.WriteByte((byte) Attributes);
             FieldType.Write(context);
         }
+
+        /// <summary>
+        /// Imports the field signature using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to us.</param>
+        /// <returns>The imported field signature.</returns>
+        public FieldSignature ImportWith(ReferenceImporter importer) => importer.ImportFieldSignature(this);
+
+        /// <inheritdoc />
+        protected override CallingConventionSignature ImportWithInternal(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
+        public override string ToString() => FieldType.FullName;
     }
 }

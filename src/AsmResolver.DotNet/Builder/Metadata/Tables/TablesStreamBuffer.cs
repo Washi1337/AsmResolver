@@ -124,6 +124,18 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// Gets a table buffer by its table index.
         /// </summary>
         /// <param name="table">The index of the table to get.</param>
+        /// <typeparam name="TRow">The type of rows the table stores.</typeparam>
+        /// <returns>The metadata table.</returns>
+        public DistinctMetadataTableBuffer<TRow> GetDistinctTable<TRow>(TableIndex table)
+            where TRow : struct, IMetadataRow
+        {
+            return (DistinctMetadataTableBuffer<TRow>) _tableBuffers[(int) table];
+        }
+
+        /// <summary>
+        /// Gets a table buffer by its table index.
+        /// </summary>
+        /// <param name="table">The index of the table to get.</param>
         /// <typeparam name="TKey">The type of members that are assigned new metadata rows.</typeparam>
         /// <typeparam name="TRow">The type of rows the table stores.</typeparam>
         /// <returns>The metadata table.</returns>
@@ -171,6 +183,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         private ISortedMetadataTableBuffer<TKey, TRow> Sorted<TKey, TRow>(TableIndex table, int primaryColumn)
+            where TKey : notnull
             where TRow : struct, IMetadataRow
         {
             return new SortedMetadataTableBuffer<TKey, TRow>(
@@ -179,6 +192,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         private ISortedMetadataTableBuffer<TKey, TRow> Sorted<TKey, TRow>(TableIndex table, int primaryColumn, int secondaryColumn)
+            where TKey : notnull
             where TRow : struct, IMetadataRow
         {
             return new SortedMetadataTableBuffer<TKey, TRow>(

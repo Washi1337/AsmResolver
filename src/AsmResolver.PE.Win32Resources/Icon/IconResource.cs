@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,7 +12,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// <summary>
         /// Used to keep track of icon groups.
         /// </summary>
-        private readonly IDictionary<uint, IconGroupDirectory> _entries = new Dictionary<uint, IconGroupDirectory>();
+        private readonly Dictionary<uint, IconGroupDirectory> _entries = new Dictionary<uint, IconGroupDirectory>();
 
         /// <summary>
         /// Obtains the icon group resources from the provided root win32 resources directory.

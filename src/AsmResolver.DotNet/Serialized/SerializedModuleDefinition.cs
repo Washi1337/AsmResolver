@@ -77,15 +77,15 @@ namespace AsmResolver.DotNet.Serialized
                 readerParameters.PEReaderParameters.FileService));
 
             // Prepare lazy RID lists.
-            _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,
+            _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.Field, TableIndex.TypeDef,
                 (rid, _) => rid, tablesStream.GetFieldRange);
-            _methodLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,
+            _methodLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.Method, TableIndex.TypeDef,
                 (rid, _) => rid, tablesStream.GetMethodRange);
-            _paramLists = new LazyRidListRelation<MethodDefinitionRow>(metadata, TableIndex.Method,
+            _paramLists = new LazyRidListRelation<MethodDefinitionRow>(metadata, TableIndex.Param, TableIndex.Method,
                 (rid, _) => rid, tablesStream.GetParameterRange);
-            _propertyLists = new LazyRidListRelation<PropertyMapRow>(metadata, TableIndex.PropertyMap,
+            _propertyLists = new LazyRidListRelation<PropertyMapRow>(metadata, TableIndex.Property, TableIndex.PropertyMap,
                 (_, map) => map.Parent, tablesStream.GetPropertyRange);
-            _eventLists = new LazyRidListRelation<EventMapRow>(metadata, TableIndex.EventMap,
+            _eventLists = new LazyRidListRelation<EventMapRow>(metadata, TableIndex.Event, TableIndex.EventMap,
                 (_, map) => map.Parent, tablesStream.GetEventRange);
         }
 
@@ -204,11 +204,17 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureTypeDefinitionTreeInitialized();
 
-            var types = new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
-
             var typeDefTable = ReaderContext.Metadata
                 .GetStream<TablesStream>()
                 .GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+
+            int nestedTypeCount = ReaderContext.Metadata
+                .GetStream<TablesStream>()
+                .GetTable(TableIndex.NestedClass)
+                .Count;
+
+            var types = new OwnedCollection<ModuleDefinition, TypeDefinition>(this,
+                typeDefTable.Count - nestedTypeCount);
 
             for (int i = 0; i < typeDefTable.Count; i++)
             {
@@ -226,11 +232,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<AssemblyReference> GetAssemblyReferences()
         {
-            var result = new OwnedCollection<ModuleDefinition, AssemblyReference>(this);
-
             var table = ReaderContext.Metadata
                 .GetStream<TablesStream>()
                 .GetTable<AssemblyReferenceRow>(TableIndex.AssemblyRef);
+
+            var result = new OwnedCollection<ModuleDefinition, AssemblyReference>(this, table.Count);
 
             // Don't use the member factory here, this method may be called before the member factory is initialized.
             for (int i = 0; i < table.Count; i++)
@@ -245,11 +251,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<ModuleReference> GetModuleReferences()
         {
-            var result = new OwnedCollection<ModuleDefinition, ModuleReference>(this);
-
             var table = ReaderContext.Metadata
                 .GetStream<TablesStream>()
                 .GetTable(TableIndex.ModuleRef);
+
+            var result = new OwnedCollection<ModuleDefinition, ModuleReference>(this, table.Count);
 
             for (int i = 0; i < table.Count; i++)
             {
@@ -264,11 +270,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<FileReference> GetFileReferences()
         {
-            var result = new OwnedCollection<ModuleDefinition, FileReference>(this);
-
             var table = ReaderContext.Metadata
                 .GetStream<TablesStream>()
                 .GetTable(TableIndex.File);
+
+            var result = new OwnedCollection<ModuleDefinition, FileReference>(this, table.Count);
 
             for (int i = 0; i < table.Count; i++)
             {
@@ -283,11 +289,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<ManifestResource> GetResources()
         {
-            var result = new OwnedCollection<ModuleDefinition, ManifestResource>(this);
-
             var table = ReaderContext.Metadata
                 .GetStream<TablesStream>()
                 .GetTable(TableIndex.ManifestResource);
+
+            var result = new OwnedCollection<ModuleDefinition, ManifestResource>(this, table.Count);
 
             for (int i = 0; i < table.Count; i++)
             {
@@ -302,11 +308,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<ExportedType> GetExportedTypes()
         {
-            var result = new OwnedCollection<ModuleDefinition, ExportedType>(this);
-
             var table = ReaderContext.Metadata
                 .GetStream<TablesStream>()
                 .GetTable(TableIndex.ExportedType);
+
+            var result = new OwnedCollection<ModuleDefinition, ExportedType>(this, table.Count);
 
             for (int i = 0; i < table.Count; i++)
             {
@@ -350,12 +356,11 @@ namespace AsmResolver.DotNet.Serialized
 
             if (assemblyTable.Count > 0)
             {
-                var assembly = new SerializedAssemblyDefinition(
+                return new SerializedAssemblyDefinition(
                     ReaderContext,
                     new MetadataToken(TableIndex.Assembly, 1),
                     assemblyTable[0],
                     this);
-                return assembly;
             }
 
             return null;

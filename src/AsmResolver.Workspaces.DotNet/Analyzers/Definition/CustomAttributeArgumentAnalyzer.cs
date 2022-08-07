@@ -13,6 +13,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {
+                context.ScheduleForAnalysis(subject.ArgumentType);
                 for (int i = 0; i < subject.Elements.Count; i++)
                 {
                     var element = subject.Elements[i];

@@ -76,6 +76,10 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitCustomModifierType(this, state);
 
         /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module) =>
+            ModifierType.IsImportedInModule(module) && base.IsImportedInModule(module);
+
+        /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {
             context.Writer.WriteByte((byte) ElementType);

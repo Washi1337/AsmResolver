@@ -102,13 +102,13 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="newToken">The new token.</param>
         /// <returns>The type, or <c>null</c> if no type is assigned to the provided token.</returns>
-        public TypeDefinition GetTypeByToken(MetadataToken newToken) => _typeDefTokens.GetKey(newToken);
+        public TypeDefinition? GetTypeByToken(MetadataToken newToken) => _typeDefTokens.GetKey(newToken);
 
         /// <summary>
         /// Gets the method assigned to the provided metadata token.
         /// </summary>
         /// <param name="newToken">The new token.</param>
         /// <returns>The type, or <c>null</c> if no method is assigned to the provided token.</returns>
-        public MethodDefinition GetMethodByToken(MetadataToken newToken) => _methodTokens.GetKey(newToken);
+        public MethodDefinition? GetMethodByToken(MetadataToken newToken) => _methodTokens.GetKey(newToken);
     }
 }

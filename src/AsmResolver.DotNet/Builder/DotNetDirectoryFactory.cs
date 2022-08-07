@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet.Builder
 
             // When specified, import existing AssemblyRef, ModuleRef, TypeRef and MemberRef prior to adding any other
             // member reference or definition, to ensure that they are assigned their original RIDs.
-            ImportBasicTablesIntoTableBuffersIfSpecified(module, buffer);
+            ImportBasicTablesIfSpecified(module, buffer);
 
             // Define all types defined in the module.
             buffer.DefineTypes(discoveryResult.Types);
@@ -102,7 +102,7 @@ namespace AsmResolver.DotNet.Builder
 
             // Import remaining preservable tables (Type specs, method specs, signatures etc).
             // We do this before finalizing any member to ensure that they are assigned their original RIDs.
-            ImportRemainingTablesIntoTableBuffersIfSpecified(module, buffer);
+            ImportRemainingTablesIfSpecified(module, buffer);
 
             // Finalize member definitions.
             buffer.FinalizeTypes();
@@ -197,7 +197,7 @@ namespace AsmResolver.DotNet.Builder
             return metadataBuffer;
         }
 
-        private void ImportBasicTablesIntoTableBuffersIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
+        private void ImportBasicTablesIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
             if (module.DotNetDirectory is null)
                 return;
@@ -210,37 +210,58 @@ namespace AsmResolver.DotNet.Builder
             // and type reference tokens are still preserved, we need to prioritize these.
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveAssemblyReferenceIndices) != 0)
-                ImportTableIntoTableBuffers<AssemblyReference>(module, TableIndex.AssemblyRef, buffer.GetAssemblyReferenceToken);
+            {
+                ImportTables<AssemblyReference>(module, TableIndex.AssemblyRef,
+                    r => buffer.AddAssemblyReference(r, true, true));
+            }
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveModuleReferenceIndices) != 0)
-                ImportTableIntoTableBuffers<ModuleReference>(module, TableIndex.ModuleRef, buffer.GetModuleReferenceToken);
+            {
+                ImportTables<ModuleReference>(module, TableIndex.ModuleRef,
+                    r => buffer.AddModuleReference(r, true, true));
+            }
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeReferenceIndices) != 0)
-                ImportTableIntoTableBuffers<TypeReference>(module, TableIndex.TypeRef, buffer.GetTypeReferenceToken);
+            {
+                ImportTables<TypeReference>(module, TableIndex.TypeRef,
+                    r => buffer.AddTypeReference(r, true, true));
+            }
         }
 
         private void ImportTypeSpecsAndMemberRefsIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeSpecificationIndices) != 0)
-                ImportTableIntoTableBuffers<TypeSpecification>(module, TableIndex.TypeSpec, buffer.GetTypeSpecificationToken);
+            {
+                ImportTables<TypeSpecification>(module, TableIndex.TypeSpec,
+                    s => buffer.AddTypeSpecification(s, true));
+            }
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveMemberReferenceIndices) != 0)
-                ImportTableIntoTableBuffers<MemberReference>(module, TableIndex.MemberRef, buffer.GetMemberReferenceToken);
+            {
+                ImportTables<MemberReference>(module, TableIndex.MemberRef,
+                    r => buffer.AddMemberReference(r, true));
+            }
         }
 
-        private void ImportRemainingTablesIntoTableBuffersIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
+        private void ImportRemainingTablesIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
             if (module.DotNetDirectory is null)
                 return;
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStandAloneSignatureIndices) != 0)
-                ImportTableIntoTableBuffers<StandAloneSignature>(module, TableIndex.StandAloneSig, buffer.GetStandAloneSignatureToken);
+            {
+                ImportTables<StandAloneSignature>(module, TableIndex.StandAloneSig,
+                    s => buffer.AddStandAloneSignature(s, true));
+            }
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveMethodSpecificationIndices) != 0)
-                ImportTableIntoTableBuffers<MethodSpecification>(module, TableIndex.MethodSpec, buffer.GetMethodSpecificationToken);
+            {
+                ImportTables<MethodSpecification>(module, TableIndex.MethodSpec,
+                    s => buffer.AddMethodSpecification(s, true));
+            }
         }
 
-        private static void ImportTableIntoTableBuffers<TMember>(ModuleDefinition module, TableIndex tableIndex,
+        private static void ImportTables<TMember>(ModuleDefinition module, TableIndex tableIndex,
             Func<TMember, MetadataToken> importAction)
         {
             int count = module.DotNetDirectory!.Metadata

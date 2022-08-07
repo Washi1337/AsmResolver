@@ -681,6 +681,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module) => Module == module;
+
+        /// <summary>
+        /// Imports the type definition using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported type.</returns>
+        public ITypeDefOrRef ImportWith(ReferenceImporter importer) => importer.ImportType(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
         {
             // TODO: Check types of the same family.

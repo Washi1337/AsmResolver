@@ -3,10 +3,11 @@
     <PropertyGroup>
         <Title>AsmResolver.PE.Win32Resources</Title>
         <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
-        <TargetFramework>netstandard2.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
         <Nullable>enable</Nullable>
+        <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+        <IsTrimmable>true</IsTrimmable>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

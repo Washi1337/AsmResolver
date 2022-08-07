@@ -28,11 +28,6 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return string.Format("{0}{1}",
-                HasThis ? "instance " : string.Empty,
-                MemberReturnType?.FullName ?? TypeSignature.NullTypeToString);
-        }
+        public override bool IsImportedInModule(ModuleDefinition module) => MemberReturnType.IsImportedInModule(module);
     }
 }

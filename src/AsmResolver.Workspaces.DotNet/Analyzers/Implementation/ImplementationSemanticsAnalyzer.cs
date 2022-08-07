@@ -1,13 +1,13 @@
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
+namespace AsmResolver.Workspaces.DotNet.Analyzers.Implementation
 {
     /// <summary>
     /// Analyzes a <see cref="IHasSemantics"/> for implicit base definitions, such as abstract events or properties in
     /// base classes or members in implemented interfaces.
     /// </summary>
-    public class SemanticsImplementationAnalyzer : ObjectAnalyzer<IHasSemantics>
+    public class ImplementationSemanticsAnalyzer : ObjectAnalyzer<IHasSemantics>
     {
         /// <inheritdoc />
         protected override void Analyze(AnalysisContext context, IHasSemantics subject)

@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -22,7 +23,7 @@ namespace AsmResolver.DotNet
         {
             _parentModule = parentModule;
             _assemblyName = assemblyName;
-            Version = assemblyName.Version;
+            Version = assemblyName.Version ?? new Version();
         }
 
         /// <inheritdoc />
@@ -30,6 +31,13 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         protected override Utf8String? GetCulture() => _assemblyName.CultureName;
+
+        /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module) => false;
+
+        /// <inheritdoc />
+        public override AssemblyReference ImportWith(ReferenceImporter importer) =>
+            (AssemblyReference) importer.ImportScope(new AssemblyReference(this));
 
         /// <inheritdoc />
         public override bool IsCorLib => Name is not null && KnownCorLibs.KnownCorLibNames.Contains(Name);

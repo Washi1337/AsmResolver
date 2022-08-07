@@ -10,6 +10,8 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </summary>
     public class GenericInstanceTypeSignature : TypeSignature, IGenericArgumentsProvider
     {
+        private readonly List<TypeSignature> _typeArguments;
+
         internal new static GenericInstanceTypeSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
             var genericType = TypeSignature.FromReader(context, ref reader);
@@ -21,8 +23,9 @@ namespace AsmResolver.DotNet.Signatures.Types
                 return signature;
             }
 
+            signature._typeArguments.Capacity = (int) count;
             for (int i = 0; i < count; i++)
-                signature.TypeArguments.Add(TypeSignature.FromReader(context, ref reader));
+                signature._typeArguments.Add(TypeSignature.FromReader(context, ref reader));
 
             return signature;
         }
@@ -53,7 +56,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             IEnumerable<TypeSignature> typeArguments)
         {
             GenericType = genericType;
-            TypeArguments = new List<TypeSignature>(typeArguments);
+            _typeArguments = new List<TypeSignature>(typeArguments);
             IsValueType = isValueType;
         }
 
@@ -72,10 +75,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <summary>
         /// Gets a collection of type arguments used to instantiate the generic type.
         /// </summary>
-        public IList<TypeSignature> TypeArguments
-        {
-            get;
-        }
+        public IList<TypeSignature> TypeArguments => _typeArguments;
 
         /// <inheritdoc />
         public override string? Name
@@ -107,6 +107,21 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => GenericType;
+
+        /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module)
+        {
+            if (!GenericType.IsImportedInModule(module))
+                return false;
+
+            for (int i = 0; i < TypeArguments.Count; i++)
+            {
+                if (!TypeArguments[i].IsImportedInModule(module))
+                    return false;
+            }
+
+            return true;
+        }
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

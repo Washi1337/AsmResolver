@@ -27,7 +27,7 @@ namespace AsmResolver.PE.DotNet.Cil
         public bool Equals(ICilLabel? other) => other is not null && Offset == other.Offset;
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => Equals(obj as ICilLabel);
+        public override bool Equals(object? obj) => Equals(obj as ICilLabel);
 
         /// <inheritdoc />
         public override int GetHashCode() => Offset;

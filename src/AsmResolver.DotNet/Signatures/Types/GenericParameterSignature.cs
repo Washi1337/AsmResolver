@@ -9,8 +9,6 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </summary>
     public class GenericParameterSignature : TypeSignature
     {
-        private readonly IResolutionScope? _scope;
-
         /// <summary>
         /// Creates a new reference to a generic parameter.
         /// </summary>
@@ -30,7 +28,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="index">The index of the referenced parameter.</param>
         public GenericParameterSignature(ModuleDefinition module, GenericParameterType parameterType, int index)
         {
-            _scope = module;
+            Scope = module;
             ParameterType = parameterType;
             Index = index;
         }
@@ -74,13 +72,19 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override string? Namespace => null;
 
         /// <inheritdoc />
-        public override IResolutionScope? Scope => _scope;
+        public override IResolutionScope? Scope
+        {
+            get;
+        }
 
         /// <inheritdoc />
         public override bool IsValueType => false;
 
         /// <inheritdoc />
         public override TypeDefinition? Resolve() => null;
+
+        /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module) => Module == module;
 
         /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => null;

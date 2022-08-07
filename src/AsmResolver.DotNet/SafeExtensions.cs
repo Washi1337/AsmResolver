@@ -1,4 +1,3 @@
-using System;
 using AsmResolver.DotNet.Builder;
 
 namespace AsmResolver.DotNet
@@ -12,14 +11,14 @@ namespace AsmResolver.DotNet
 
             try
             {
-                string value = self.ToString();
+                string value = self.ToString()!;
                 if (value.Length > 200)
                     value = $"{value.Remove(197)}... (truncated)";
                 if (self.MetadataToken.Rid != 0)
                     value = $"{value} (0x{self.MetadataToken.ToString()})";
                 return value;
             }
-            catch (Exception)
+            catch
             {
                 return $"0x{self.MetadataToken.ToString()}";
             }
@@ -32,9 +31,9 @@ namespace AsmResolver.DotNet
 
             try
             {
-                return self.ToString();
+                return self.ToString()!;
             }
-            catch (Exception)
+            catch
             {
                 return self.GetType().ToString();
             }

@@ -1,6 +1,7 @@
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using System.Linq;
+using AsmResolver.Workspaces.DotNet.Analyzers.Implementation;
 
 namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
 {

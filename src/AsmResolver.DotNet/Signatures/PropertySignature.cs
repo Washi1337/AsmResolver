@@ -126,10 +126,17 @@ namespace AsmResolver.DotNet.Signatures
                 ? $"[{string.Join(", ", ParameterTypes)}]"
                 : string.Empty;
 
-            return string.Format("{0}{1} *{2}",
-                prefix,
-                ReturnType.FullName,
-                parameterTypesString);
+            return $"{prefix}{ReturnType.FullName} *{parameterTypesString}";
         }
+
+        /// <summary>
+        /// Imports the property signature using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to us.</param>
+        /// <returns>The imported signature.</returns>
+        public PropertySignature ImportWith(ReferenceImporter importer) => importer.ImportPropertySignature(this);
+
+        /// <inheritdoc />
+        protected override CallingConventionSignature ImportWithInternal(ReferenceImporter importer) => ImportWith(importer);
     }
 }

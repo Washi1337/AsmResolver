@@ -101,7 +101,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <inheritdoc />
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is ParameterDefinitionRow other && Equals(other);
         }

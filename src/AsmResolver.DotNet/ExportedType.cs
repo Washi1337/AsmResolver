@@ -28,8 +28,8 @@ namespace AsmResolver.DotNet
         protected ExportedType(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(() => GetName());
-            _namespace = new LazyVariable<Utf8String?>(() => GetNamespace());
+            _name = new LazyVariable<Utf8String?>(GetName);
+            _namespace = new LazyVariable<Utf8String?>(GetNamespace);
             _implementation = new LazyVariable<IImplementation?>(GetImplementation);
         }
 
@@ -144,6 +144,23 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
+
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module)
+        {
+            return Module == module
+                   && (Implementation?.IsImportedInModule(module) ?? false);
+        }
+
+        /// <summary>
+        /// Imports the exported type using the provided importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported type.</returns>
+        public ExportedType ImportWith(ReferenceImporter importer) => importer.ImportType(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 

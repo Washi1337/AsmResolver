@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet.Tests
             var field = (FieldDefinition) module.LookupMember(
                 typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
 
-            field.Signature = FieldSignature.CreateInstance(module.CorLibTypeFactory.Byte);
+            field.Signature = new FieldSignature(module.CorLibTypeFactory.Byte);
 
             var newField = RebuildAndLookup(field);
 

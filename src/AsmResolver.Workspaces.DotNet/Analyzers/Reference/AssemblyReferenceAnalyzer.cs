@@ -1,4 +1,5 @@
 using AsmResolver.DotNet;
+using AsmResolver.Workspaces.DotNet.Analyzers.Implementation;
 
 namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
 {

@@ -17,6 +17,11 @@ namespace AsmResolver.DotNet.Cloning
             _context = context;
         }
 
+        /// <summary>
+        /// The working space for this member cloning procedure.
+        /// </summary>
+        protected MemberCloneContext Context => _context;
+
         /// <inheritdoc />
         protected override ITypeDefOrRef ImportType(TypeDefinition type)
         {
@@ -39,6 +44,16 @@ namespace AsmResolver.DotNet.Cloning
             return _context.ClonedMembers.TryGetValue(method, out var clonedMethod)
                 ? (IMethodDefOrRef) clonedMethod
                 : base.ImportMethod(method);
+        }
+
+        /// <inheritdoc />
+        protected override ITypeDefOrRef ImportType(TypeReference type)
+        {
+            return type.Namespace == "System"
+                && type.Name == nameof(System.Object)
+                && (type.Scope?.GetAssembly()?.IsCorLib ?? false)
+                ? _context.Module.CorLibTypeFactory.Object.Type
+                : base.ImportType(type);
         }
     }
 }

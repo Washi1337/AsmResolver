@@ -343,7 +343,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             var placeHolderField = new FieldDefinition(
                 $"PlaceHolderField_{token.Rid.ToString()}",
                 FieldPlaceHolderAttributes,
-                FieldSignature.CreateStatic(_module.CorLibTypeFactory.Object));
+                _module.CorLibTypeFactory.Object);
 
             // Add the field to the type.
             placeHolderType.Fields.Add(placeHolderField);
