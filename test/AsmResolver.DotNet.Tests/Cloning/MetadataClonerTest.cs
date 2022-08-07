@@ -10,6 +10,7 @@ using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.Types;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.Tests.Listeners;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -354,6 +355,25 @@ namespace AsmResolver.DotNet.Tests.Cloning
             Assert.Equal(
                 type.Methods.Select(m => m.Name.Reverse().ToArray()),
                 clonedType.Methods.Select(m => m.Name.ToArray()));
+
+        }
+
+        [Fact]
+        public void CloneCustomListenerResult() {
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
+
+            var targetModule = PrepareTempModule();
+
+            var result = new MemberCloner(targetModule, new CustomMemberClonerListener())
+                .Include(type)
+                .Clone();
+
+            var clonedType = result.GetClonedMember(type);
+
+            Assert.Equal(
+                type.Methods.Select(m => $"Method_{m.Name}"),
+                clonedType.Methods.Select(m => m.Name.ToString()));
 
         }
 
