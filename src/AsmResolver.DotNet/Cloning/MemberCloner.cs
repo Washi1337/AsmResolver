@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet.Cloning
     /// </remarks>
     public partial class MemberCloner
     {
+        private readonly Func<MemberCloneContext, CloneContextAwareReferenceImporter>? _importerFactory;
         private readonly ModuleDefinition _targetModule;
 
         private readonly HashSet<TypeDefinition> _typesToClone = new();
@@ -29,9 +30,18 @@ namespace AsmResolver.DotNet.Cloning
         /// Creates a new instance of the <see cref="MemberCloner"/> class.
         /// </summary>
         /// <param name="targetModule">The target module to copy the members into.</param>
-        public MemberCloner(ModuleDefinition targetModule)
+        public MemberCloner(ModuleDefinition targetModule) : this(targetModule, null) { }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="MemberCloner"/> class.
+        /// </summary>
+        /// <param name="targetModule">The target module to copy the members into.</param>
+        /// <param name="importerFactory">The factory for creating the reference importer</param>
+        public MemberCloner(ModuleDefinition targetModule,
+            Func<MemberCloneContext, CloneContextAwareReferenceImporter>? importerFactory)
         {
             _targetModule = targetModule ?? throw new ArgumentNullException(nameof(targetModule));
+            _importerFactory = importerFactory;
         }
 
         /// <summary>
@@ -220,7 +230,7 @@ namespace AsmResolver.DotNet.Cloning
         /// <returns>An object representing the result of the cloning process.</returns>
         public MemberCloneResult Clone()
         {
-            var context = new MemberCloneContext(_targetModule);
+            var context = new MemberCloneContext(_targetModule, _importerFactory);
 
             CreateMemberStubs(context);
             DeepCopyMembers(context);

@@ -12,6 +12,8 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public class CustomAttributeSignature : ExtendableBlobSignature
     {
+        private readonly List<CustomAttributeArgument> _fixedArguments;
+        private readonly List<CustomAttributeNamedArgument> _namedArguments;
         private const ushort CustomAttributeSignaturePrologue = 0x0001;
 
         /// <summary>
@@ -35,18 +37,20 @@ namespace AsmResolver.DotNet.Signatures
 
             // Read fixed arguments.
             var parameterTypes = ctor.Signature?.ParameterTypes ?? Array.Empty<TypeSignature>();
+            result._fixedArguments.Capacity = parameterTypes.Count;
             for (int i = 0; i < parameterTypes.Count; i++)
             {
                 var argument = CustomAttributeArgument.FromReader(context, parameterTypes[i], ref reader);
-                result.FixedArguments.Add(argument);
+                result._fixedArguments.Add(argument);
             }
 
             // Read named arguments.
             ushort namedArgumentCount = reader.ReadUInt16();
+            result._namedArguments.Capacity = namedArgumentCount;
             for (int i = 0; i < namedArgumentCount; i++)
             {
                 var argument = CustomAttributeNamedArgument.FromReader(context, ref reader);
-                result.NamedArguments.Add(argument);
+                result._namedArguments.Add(argument);
             }
 
             return result;
@@ -73,25 +77,19 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         public CustomAttributeSignature(IEnumerable<CustomAttributeArgument> fixedArguments, IEnumerable<CustomAttributeNamedArgument> namedArguments)
         {
-            FixedArguments = new List<CustomAttributeArgument>(fixedArguments);
-            NamedArguments = new List<CustomAttributeNamedArgument>(namedArguments);
+            _fixedArguments = new List<CustomAttributeArgument>(fixedArguments);
+            _namedArguments = new List<CustomAttributeNamedArgument>(namedArguments);
         }
 
         /// <summary>
         /// Gets a collection of fixed arguments that are passed onto the constructor of the attribute.
         /// </summary>
-        public IList<CustomAttributeArgument> FixedArguments
-        {
-            get;
-        }
+        public IList<CustomAttributeArgument> FixedArguments => _fixedArguments;
 
         /// <summary>
         /// Gets a collection of values that are assigned to fields and/or members of the attribute class.
         /// </summary>
-        public IList<CustomAttributeNamedArgument> NamedArguments
-        {
-            get;
-        }
+        public IList<CustomAttributeNamedArgument> NamedArguments => _namedArguments;
 
         /// <inheritdoc />
         public override string ToString()

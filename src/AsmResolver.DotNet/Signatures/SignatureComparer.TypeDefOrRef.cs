@@ -51,10 +51,16 @@ namespace AsmResolver.DotNet.Signatures
             if (Equals(x.Scope, y.Scope))
                 return true;
 
-            // If scope does not match, it can still be a reference to an exported type.
-            return x.Resolve() is { } definition1
-                   && y.Resolve() is { } definition2
-                   && Equals(definition1.Module!.Assembly, definition2.Module!.Assembly);
+            // It can still be an exported type, we need to resolve the type then and check if the definitions match.
+            if (!Equals(x.Module, y.Module))
+            {
+                return x.Resolve() is { } definition1
+                       && y.Resolve() is { } definition2
+                       && Equals(definition1.Module!.Assembly, definition2.Module!.Assembly)
+                       && Equals(definition1.DeclaringType, definition2.DeclaringType);
+            }
+
+            return false;
         }
 
         /// <inheritdoc />

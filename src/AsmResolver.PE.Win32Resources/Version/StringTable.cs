@@ -122,7 +122,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             return new KeyValuePair<string, string>(header.Key, value);
         }
 
-        private readonly IDictionary<string, string> _entries = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _entries = new Dictionary<string, string>();
 
         /// <summary>
         /// Creates a new string table.

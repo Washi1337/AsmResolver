@@ -10,28 +10,27 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public abstract class MethodSignatureBase : MemberSignature
     {
+        private readonly List<TypeSignature> _parameterTypes;
+
         /// <summary>
         /// Initializes the base of a method signature.
         /// </summary>
-        /// <param name="attributes"></param>
-        /// <param name="memberReturnType"></param>
-        /// <param name="parameterTypes"></param>
+        /// <param name="attributes">The attributes associated to the signature.</param>
+        /// <param name="memberReturnType">The return type of the member.</param>
+        /// <param name="parameterTypes">The types of all (non-sentinel) parameters.</param>
         protected MethodSignatureBase(
             CallingConventionAttributes attributes,
             TypeSignature memberReturnType,
             IEnumerable<TypeSignature> parameterTypes)
             : base(attributes, memberReturnType)
         {
-            ParameterTypes = new List<TypeSignature>(parameterTypes);
+            _parameterTypes = new List<TypeSignature>(parameterTypes);
         }
 
         /// <summary>
         /// Gets an ordered list of types indicating the types of the parameters that this member defines.
         /// </summary>
-        public IList<TypeSignature> ParameterTypes
-        {
-            get;
-        }
+        public IList<TypeSignature> ParameterTypes => _parameterTypes;
 
         /// <summary>
         /// Gets or sets the type of the value that this member returns.
@@ -78,6 +77,29 @@ namespace AsmResolver.DotNet.Signatures
             get;
         } = new List<TypeSignature>();
 
+        /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module)
+        {
+            if (!ReturnType.IsImportedInModule(module))
+                return false;
+
+            for (int i = 0; i < ParameterTypes.Count; i++)
+            {
+                var x = ParameterTypes[i];
+                if (!x.IsImportedInModule(module))
+                    return false;
+            }
+
+            for (int i = 0; i < SentinelParameterTypes.Count; i++)
+            {
+                var x = SentinelParameterTypes[i];
+                if (!x.IsImportedInModule(module))
+                    return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Initializes the <see cref="ParameterTypes"/> and <see cref="ReturnType"/> properties by reading
         /// the parameter count, return type and parameter fields of the signature from the provided input stream.
@@ -97,6 +119,7 @@ namespace AsmResolver.DotNet.Signatures
             ReturnType = TypeSignature.FromReader(context, ref reader);
 
             // Parameter types.
+            _parameterTypes.Capacity = (int) parameterCount;
             bool sentinel = false;
             for (int i = 0; i < parameterCount; i++)
             {

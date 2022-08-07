@@ -1,0 +1,8 @@
+name: Other
+description: Something else?
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please describe your issue.

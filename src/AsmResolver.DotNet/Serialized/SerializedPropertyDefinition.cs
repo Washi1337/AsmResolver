@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
@@ -70,11 +71,13 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<MethodSemantics> GetSemantics()
         {
-            var result = new MethodSemanticsCollection(this);
+            var module = _context.ParentModule;
+            var rids = module.GetMethodSemantics(MetadataToken);
+
+            var result = new MethodSemanticsCollection(this, rids.Count);
             result.ValidateMembership = false;
 
-            var module = _context.ParentModule;
-            foreach (uint rid in module.GetMethodSemantics(MetadataToken))
+            foreach (uint rid in rids)
             {
                 var semanticsToken = new MetadataToken(TableIndex.MethodSemantics, rid);
                 result.Add((MethodSemantics) module.LookupMember(semanticsToken));

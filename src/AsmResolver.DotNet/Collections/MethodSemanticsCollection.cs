@@ -20,6 +20,16 @@ namespace AsmResolver.DotNet.Collections
         {
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="MethodSemanticsCollection"/> class.
+        /// </summary>
+        /// <param name="owner">The owner of the collection.</param>
+        /// <param name="capacity">The initial number of elements the collection can store.</param>
+        public MethodSemanticsCollection(IHasSemantics owner, int capacity)
+            : base(owner, capacity)
+        {
+        }
+
         internal bool ValidateMembership
         {
             get;

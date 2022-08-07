@@ -5,7 +5,7 @@
 }
 
 .class public auto ansi MyModel
-    extends [mscorlib] System.Object 
+    extends [mscorlib] System.Object
     implements [ForwarderLibrary] IMyModel
 {
     .method public hidebysig specialname rtspecialname void .ctor()
@@ -15,7 +15,7 @@
         ret
     }
 
-    .method public virtual hidebysig void MyMethod() 
+    .method public virtual hidebysig void MyMethod()
     {
         ldstr "Hello, world!"
         call void [mscorlib] System.Console::WriteLine(string)
@@ -29,5 +29,8 @@
 
     newobj void MyModel::.ctor()
     call void [ForwarderLibrary] MyClass::StaticMethod(class [ForwarderLibrary] IMyModel argument)
+
+    call void [ForwarderLibrary] MyClass/MyNestedClass::NestedStaticMethod()
+    call void [ForwarderLibrary] MyClass2/MyNestedClass::NestedStaticMethod()
     ret
 }

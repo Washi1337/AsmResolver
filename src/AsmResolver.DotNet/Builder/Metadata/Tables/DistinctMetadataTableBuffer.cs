@@ -45,15 +45,66 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         /// <inheritdoc />
+        public void EnsureCapacity(int capacity)
+        {
+            _underlyingBuffer.EnsureCapacity(capacity);
+
+#if NETSTANDARD2_1_OR_GREATER
+            _entries.EnsureCapacity(capacity);
+#endif
+        }
+
+        /// <inheritdoc />
         public ref TRow GetRowRef(uint rid) => ref _underlyingBuffer.GetRowRef(rid);
 
         /// <inheritdoc />
-        public MetadataToken Add(in TRow row)
+        public MetadataToken Add(in TRow row) => Add(row, false);
+
+        /// <inheritdoc />
+        public MetadataToken Insert(uint rid, in TRow row) => Insert(rid, row, false);
+
+        /// <summary>
+        /// Inserts a row into the metadata table at the provided row identifier.
+        /// </summary>
+        /// <param name="rid">The row identifier.</param>
+        /// <param name="row">The row to add.</param>
+        /// <param name="allowDuplicates">
+        /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
+        /// is supposed to be removed and the token of the original should be returned instead.</param>
+        /// <returns>The metadata token that this row was assigned to.</returns>
+        public MetadataToken Insert(uint rid, in TRow row, bool allowDuplicates)
+        {
+            if (!_entries.TryGetValue(row, out var token))
+            {
+                token = _underlyingBuffer.Insert(rid, in row);
+                _entries.Add(row, token);
+            }
+            else if (allowDuplicates)
+            {
+                token = _underlyingBuffer.Insert(rid, in row);
+            }
+
+            return token;
+        }
+
+        /// <summary>
+        /// Adds a row to the metadata table buffer.
+        /// </summary>
+        /// <param name="row">The row to add.</param>
+        /// <param name="allowDuplicates">
+        /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
+        /// is supposed to be removed and the token of the original should be returned instead.</param>
+        /// <returns>The metadata token that this row was assigned to.</returns>
+        public MetadataToken Add(in TRow row, bool allowDuplicates)
         {
             if (!_entries.TryGetValue(row, out var token))
             {
                 token = _underlyingBuffer.Add(in row);
                 _entries.Add(row, token);
+            }
+            else if (allowDuplicates)
+            {
+                token = _underlyingBuffer.Add(in row);
             }
 
             return token;

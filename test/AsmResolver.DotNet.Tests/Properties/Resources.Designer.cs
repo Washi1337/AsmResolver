@@ -129,6 +129,48 @@ namespace AsmResolver.DotNet.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_WithAttribute {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_WithAttribute", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_SingleFile_V1 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V1", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_SingleFile_V2 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V2", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_SingleFile_V6 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V6", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_SingleFile_V6_WithResources {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V6_WithResources", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_UnusualNestedTypeRefOrder {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_UnusualNestedTypeRefOrder", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] Assembly1_Forwarder {
             get {
                 object obj = ResourceManager.GetObject("Assembly1_Forwarder", resourceCulture);
@@ -188,6 +230,20 @@ namespace AsmResolver.DotNet.Tests.Properties {
         public static byte[] FieldRvaTest {
             get {
                 object obj = ResourceManager.GetObject("FieldRvaTest", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] DifferentNetVersion_MainApp {
+            get {
+                object obj = ResourceManager.GetObject("DifferentNetVersion_MainApp", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] DifferentNetVersion_Library {
+            get {
+                object obj = ResourceManager.GetObject("DifferentNetVersion_Library", resourceCulture);
                 return ((byte[])(obj));
             }
         }

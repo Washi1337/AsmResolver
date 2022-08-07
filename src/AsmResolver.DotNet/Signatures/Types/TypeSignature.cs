@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                     (BindingFlags) (-1),
                     null,
                     new[] {typeof(IntPtr)},
-                    null);
+                    null)!;
         }
 
         /// <inheritdoc />
@@ -163,8 +163,11 @@ namespace AsmResolver.DotNet.Signatures.Types
                     };
 
                     // Let the runtime translate the address to a type and import it.
-                    var clrType = (Type) GetTypeFromHandleUnsafeMethod.Invoke(null, new object[] {address});
-                    var asmResType = new ReferenceImporter(context.ReaderContext.ParentModule).ImportType(clrType);
+                    var clrType = (Type?) GetTypeFromHandleUnsafeMethod.Invoke(null, new object[] { address });
+                    var asmResType = clrType is not null
+                        ? new ReferenceImporter(context.ReaderContext.ParentModule).ImportType(clrType)
+                        : InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.IllegalTypeSpec);
+
                     return new TypeDefOrRefSignature(asmResType);
 
                 default:
@@ -372,6 +375,19 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// </remarks>
         public TypeSignature InstantiateGenericTypes(GenericContext context)
             => AcceptVisitor(GenericTypeActivator.Instance, context);
+
+        /// <inheritdoc />
+        public abstract bool IsImportedInModule(ModuleDefinition module);
+
+        /// <summary>
+        /// Imports the type signature using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to us.</param>
+        /// <returns>The imported type.</returns>
+        public TypeSignature ImportWith(ReferenceImporter importer) => importer.ImportTypeSignature(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <summary>
         /// Visit the current type signature using the provided visitor.

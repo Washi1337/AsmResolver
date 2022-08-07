@@ -13,8 +13,9 @@ namespace AsmResolver.DotNet
     public class DotNetCorePathProvider
     {
         private static readonly string[] DefaultDotNetUnixPaths = {
-            "/usr/share/dotnet/shared",
-            "/opt/dotnet/shared/"
+            "/usr/share/dotnet/",
+            "/usr/local/share/dotnet/",
+            "/opt/dotnet/"
         };
 
         private static readonly Regex NetCoreRuntimePattern = new(@"\.NET( Core)? \d+\.\d+\.\d+");
@@ -23,7 +24,7 @@ namespace AsmResolver.DotNet
         static DotNetCorePathProvider()
         {
             DefaultInstallationPath = FindDotNetPath();
-            Default = new();
+            Default = new DotNetCorePathProvider();
         }
 
         /// <summary>
@@ -153,8 +154,12 @@ namespace AsmResolver.DotNet
         private void DetectInstalledRuntimes(string installationDirectory)
         {
             installationDirectory = Path.Combine(installationDirectory, "shared");
+            if (!Directory.Exists(installationDirectory))
+                return;
+
             foreach (string directory in Directory.EnumerateDirectories(installationDirectory))
                 _installedRuntimes.Add(new DotNetInstallationInfo(directory));
+
             _installedRuntimes.Sort();
         }
 

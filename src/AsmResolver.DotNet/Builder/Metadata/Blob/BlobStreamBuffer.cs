@@ -14,8 +14,10 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
     public class BlobStreamBuffer : IMetadataStreamBuffer
     {
         private readonly MemoryStream _rawStream = new();
-        private readonly IBinaryStreamWriter _writer;
+        private readonly BinaryStreamWriter _writer;
         private readonly Dictionary<byte[], uint> _blobs = new(ByteArrayEqualityComparer.Instance);
+
+        private readonly MemoryStreamWriterPool _blobWriterPool = new();
 
         /// <summary>
         /// Creates a new blob stream buffer with the default blob stream name.
@@ -116,11 +118,11 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
                 return 0u;
 
             // Serialize blob.
-            using var stream = new MemoryStream();
-            var writer = new BinaryStreamWriter(stream);
-            signature.Write(new BlobSerializationContext(writer, provider, errorListener));
 
-            return GetBlobIndex(stream.ToArray());
+            using var rentedWriter = _blobWriterPool.Rent();
+            signature.Write(new BlobSerializationContext(rentedWriter.Writer, provider, errorListener));
+
+            return GetBlobIndex(rentedWriter.GetData());
         }
 
         /// <summary>

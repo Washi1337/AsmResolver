@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet
             Name,
             DeclaringType,
             Method?.Signature,
-            Signature?.TypeArguments ?? Enumerable.Empty<TypeSignature>());
+            Signature?.TypeArguments.Select(x => x.FullName) ?? Enumerable.Empty<string>());
 
         /// <inheritdoc />
         public ModuleDefinition? Module => Method?.Module;
@@ -98,6 +98,23 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public MethodDefinition? Resolve() => Method?.Resolve();
+
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module)
+        {
+            return (Method?.IsImportedInModule(module) ?? false)
+                   && (Signature?.IsImportedInModule(module) ?? false);
+        }
+
+        /// <summary>
+        /// Imports the method specification using the provided reference importer.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported method specification.</returns>
+        public MethodSpecification ImportWith(ReferenceImporter importer) => importer.ImportMethod(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 

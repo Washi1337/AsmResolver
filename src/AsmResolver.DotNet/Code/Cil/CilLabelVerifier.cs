@@ -130,7 +130,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             _diagnostics ??= new List<Exception>();
             _cachedName ??= _body.Owner.SafeToString();
-            _diagnostics.Add(new InvalidCilInstructionException($"[{_cachedName}]: {message}"));
+            _diagnostics.Add(new InvalidCilInstructionException($"[In {_cachedName}]: {message}"));
         }
 
     }

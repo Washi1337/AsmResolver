@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
         protected static List<TMember> GetMembers<TMember>(ModuleDefinition module, TableIndex tableIndex)
         {
-            int count = module.DotNetDirectory.Metadata
+            int count = module.DotNetDirectory!.Metadata!
                 .GetStream<TablesStream>()
                 .GetTable(tableIndex)
                 .Count;
@@ -38,10 +38,11 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             };
 
             var result = builder.CreateImage(module);
-            if (result.DiagnosticBag.HasErrors)
+            if (result.HasFailed)
                 throw new AggregateException(result.DiagnosticBag.Exceptions);
 
             var newImage = result.ConstructedImage;
+
             return ModuleDefinition.FromImage(newImage);
         }
 

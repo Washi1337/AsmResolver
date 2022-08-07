@@ -26,16 +26,16 @@ namespace AsmResolver.DotNet.Builder
             table.Add(attribute, row);
         }
 
-        private uint AddResolutionScope(IResolutionScope? scope)
+        private uint AddResolutionScope(IResolutionScope? scope, bool allowDuplicates, bool preserveRid)
         {
             if (!AssertIsImported(scope))
                 return 0;
 
             var token = scope.MetadataToken.Table switch
             {
-                TableIndex.AssemblyRef => GetAssemblyReferenceToken(scope as AssemblyReference),
-                TableIndex.TypeRef => GetTypeReferenceToken(scope as TypeReference),
-                TableIndex.ModuleRef => GetModuleReferenceToken(scope as ModuleReference),
+                TableIndex.AssemblyRef => AddAssemblyReference(scope as AssemblyReference, allowDuplicates, preserveRid),
+                TableIndex.TypeRef => AddTypeReference(scope as TypeReference, allowDuplicates, preserveRid),
+                TableIndex.ModuleRef => AddModuleReference(scope as ModuleReference, allowDuplicates, preserveRid),
                 TableIndex.Module => 0,
                 _ => throw new ArgumentOutOfRangeException(nameof(scope))
             };

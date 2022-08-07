@@ -29,8 +29,15 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         }
 
         /// <inheritdoc />
-        public int Compare(byte[] x, byte[] y)
+        public int Compare(byte[]? x, byte[]? y)
         {
+            if (ReferenceEquals(x, y))
+                return 0;
+            if (x is null)
+                return -1;
+            if (y is null)
+                return 1;
+
             for (int i = x.Length - 1, j = y.Length - 1; i >= 0 && j >= 0; i--, j--)
             {
                 int charComparison = x[i].CompareTo(y[j]);

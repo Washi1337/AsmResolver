@@ -166,7 +166,7 @@ namespace AsmResolver.DotNet.Serialized
                     continue;
 
                 object? element = attribute.Signature.FixedArguments[0].Element;
-                if (element is string or Utf8String && DotNetRuntimeInfo.TryParse(element.ToString(), out info))
+                if (element is string or Utf8String && DotNetRuntimeInfo.TryParse(element.ToString()!, out info))
                     return true;
             }
 

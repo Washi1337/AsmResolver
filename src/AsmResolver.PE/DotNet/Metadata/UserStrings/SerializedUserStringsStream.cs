@@ -9,7 +9,7 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
     /// </summary>
     public class SerializedUserStringsStream : UserStringsStream
     {
-        private readonly Dictionary<uint, string> _cachedStrings = new();
+        private readonly Dictionary<uint, string?> _cachedStrings = new();
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         {
             index &= 0x00FFFFFF;
 
-            if (!_cachedStrings.TryGetValue(index, out string value) && index < _reader.Length)
+            if (!_cachedStrings.TryGetValue(index, out string? value) && index < _reader.Length)
             {
                 var stringsReader = _reader.ForkRelative(index);
 

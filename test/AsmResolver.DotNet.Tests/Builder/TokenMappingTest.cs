@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             var field = new FieldDefinition(
                 "MyField",
                 FieldAttributes.Public | FieldAttributes.Static,
-                FieldSignature.CreateStatic(module.CorLibTypeFactory.Object));
+                module.CorLibTypeFactory.Object);
             module.GetOrCreateModuleType().Fields.Add(field);
 
             // Rebuild.
@@ -107,7 +107,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             module.GetOrCreateModuleType().Fields.Add(new FieldDefinition(
                 "MyField",
                 FieldAttributes.Public | FieldAttributes.Static,
-                FieldSignature.CreateStatic(reference.ToTypeSignature())));
+                reference.ToTypeSignature()));
 
             // Rebuild.
             var builder = new ManagedPEImageBuilder();

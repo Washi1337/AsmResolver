@@ -127,4 +127,10 @@
     <data name="HelloWorld_Pumped" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.pumped.deflate;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="HelloWorld_ManyMethods" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.ManyMethods.deflate;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="HelloWorld_SingleFile_V6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.SingleFile.v6.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
 </root>

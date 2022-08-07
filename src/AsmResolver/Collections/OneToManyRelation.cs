@@ -8,9 +8,30 @@ namespace AsmResolver.Collections
     /// <typeparam name="TKey">The type of objects to map.</typeparam>
     /// <typeparam name="TValue">The type of objects to map to.</typeparam>
     public sealed class OneToManyRelation<TKey, TValue>
+        where TKey : notnull
+        where TValue : notnull
     {
-        private readonly Dictionary<TKey, ICollection<TValue>> _memberLists = new();
-        private readonly Dictionary<TValue, TKey> _memberOwners = new();
+        private readonly Dictionary<TKey, ICollection<TValue>> _memberLists;
+        private readonly Dictionary<TValue, TKey> _memberOwners;
+
+        /// <summary>
+        /// Creates a new, empty one-to-many relation mapping.
+        /// </summary>
+        public OneToManyRelation()
+        {
+            _memberLists = new Dictionary<TKey, ICollection<TValue>>();
+            _memberOwners = new Dictionary<TValue, TKey>();
+        }
+
+        /// <summary>
+        /// Creates a new, empty one-to-many relation mapping.
+        /// </summary>
+        /// <param name="capacity">The initial number of elements the relation can store.</param>
+        public OneToManyRelation(int capacity)
+        {
+            _memberLists = new Dictionary<TKey, ICollection<TValue>>(capacity);
+            _memberOwners = new Dictionary<TValue, TKey>(capacity);
+        }
 
         /// <summary>
         /// Registers a relation between two objects.

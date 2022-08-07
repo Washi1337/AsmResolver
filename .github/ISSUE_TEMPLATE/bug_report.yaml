@@ -1,0 +1,61 @@
+name: Bug Report
+description: File a bug or crash report
+labels: ["bug"]
+body:
+  - type: input
+    id: asmresolver_version
+    attributes:
+      label: AsmResolver Version
+      placeholder: 4.11.0
+    validations:
+      required: true
+  - type: input
+    id: dotnet_version
+    attributes:
+      label: .NET Version
+      placeholder: .NET 6.0
+  - type: dropdown
+    attributes:
+      label: Operating System
+      options:
+        - Windows
+        - Linux
+        - MacOS
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: how_to_reproduce
+    attributes:
+      label: How To Reproduce
+      description: The steps on how to reproduce the bug. Preferably with sample code and/or sample input files.
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: Describe the result that you expect to get after performing the steps.
+    validations:
+      required: true
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: Actual Behavior
+      description: Describe the actual behavior that you observed after performing the steps.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other information that may help us fix the issue goes here.
+    validations:
+      required: false

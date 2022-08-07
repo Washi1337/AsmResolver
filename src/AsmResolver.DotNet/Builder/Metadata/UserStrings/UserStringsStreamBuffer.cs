@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
     public class UserStringsStreamBuffer : IMetadataStreamBuffer
     {
         private readonly MemoryStream _rawStream = new();
-        private readonly IBinaryStreamWriter _writer;
+        private readonly BinaryStreamWriter _writer;
         private readonly Dictionary<string, uint> _strings = new();
 
         /// <summary>

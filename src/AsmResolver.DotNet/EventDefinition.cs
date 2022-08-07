@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -136,19 +137,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the method definition representing the add accessor of this event definition.
+        /// Gets the method definition representing the first add accessor of this event definition.
         /// </summary>
         public MethodDefinition? AddMethod =>
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.AddOn)?.Method;
 
         /// <summary>
-        /// Gets the method definition representing the remove accessor of this event definition.
+        /// Gets the method definition representing the first remove accessor of this event definition.
         /// </summary>
         public MethodDefinition? RemoveMethod =>
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.RemoveOn)?.Method;
 
         /// <summary>
-        /// Gets the method definition representing the fire accessor of this event definition.
+        /// Gets the method definition representing the first fire accessor of this event definition.
         /// </summary>
         public MethodDefinition? FireMethod =>
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Fire)?.Method;
@@ -164,11 +165,38 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <summary>
+        /// Clear <see cref="Semantics"/> and apply these methods to the event definition.
+        /// </summary>
+        /// <param name="addMethod">The method definition representing the add accessor of this event definition.</param>
+        /// <param name="removeMethod">The method definition representing the remove accessor of this event definition.</param>
+        /// <param name="fireMethod">The method definition representing the fire accessor of this event definition.</param>
+        public void SetSemanticMethods(MethodDefinition? addMethod, MethodDefinition? removeMethod, MethodDefinition? fireMethod)
+        {
+            Semantics.Clear();
+            if (addMethod is not null)
+                Semantics.Add(new MethodSemantics(addMethod, MethodSemanticsAttributes.AddOn));
+            if (removeMethod is not null)
+                Semantics.Add(new MethodSemantics(removeMethod, MethodSemanticsAttributes.RemoveOn));
+            if (fireMethod is not null)
+                Semantics.Add(new MethodSemantics(fireMethod, MethodSemanticsAttributes.Fire));
+        }
+
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type) =>
             Semantics.Any(s => s.Method?.IsAccessibleFromType(type) ?? false);
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
+
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module)
+        {
+            return Module == module
+                   && (EventType?.IsImportedInModule(module) ?? false);
+        }
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => throw new NotSupportedException();
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
@@ -181,7 +209,7 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         /// <summary>
-        /// Obtains the name of the property definition.
+        /// Obtains the name of the event definition.
         /// </summary>
         /// <returns>The name.</returns>
         /// <remarks>
@@ -190,7 +218,7 @@ namespace AsmResolver.DotNet
         protected virtual Utf8String? GetName() => null;
 
         /// <summary>
-        /// Obtains the event type of the property definition.
+        /// Obtains the event type of the event definition.
         /// </summary>
         /// <returns>The event type.</returns>
         /// <remarks>
@@ -199,7 +227,7 @@ namespace AsmResolver.DotNet
         protected virtual ITypeDefOrRef? GetEventType() => null;
 
         /// <summary>
-        /// Obtains the declaring type of the property definition.
+        /// Obtains the declaring type of the event definition.
         /// </summary>
         /// <returns>The declaring type.</returns>
         /// <remarks>
@@ -208,7 +236,7 @@ namespace AsmResolver.DotNet
         protected virtual TypeDefinition? GetDeclaringType() => null;
 
         /// <summary>
-        /// Obtains the methods associated to this property definition.
+        /// Obtains the methods associated to this event definition.
         /// </summary>
         /// <returns>The method semantic objects.</returns>
         /// <remarks>

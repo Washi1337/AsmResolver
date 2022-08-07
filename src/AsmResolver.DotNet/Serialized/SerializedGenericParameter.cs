@@ -58,10 +58,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<GenericParameterConstraint> GetConstraints()
         {
-            var result = new OwnedCollection<GenericParameter, GenericParameterConstraint>(this);
-
             var module = _context.ParentModule;
-            foreach (uint rid in module.GetGenericParameterConstraints(MetadataToken))
+            var rids = module.GetGenericParameterConstraints(MetadataToken);
+            var result = new OwnedCollection<GenericParameter, GenericParameterConstraint>(this, rids.Count);
+
+            foreach (uint rid in rids)
             {
                 var constraintToken = new MetadataToken(TableIndex.GenericParamConstraint, rid);
                 result.Add((GenericParameterConstraint) module.LookupMember(constraintToken));

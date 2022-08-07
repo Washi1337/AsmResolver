@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string? GetName()
+        protected override Utf8String? GetName()
         {
             return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
                 ? stringsStream.GetStringByIndex(_row.Name)
@@ -81,9 +81,10 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<ParameterDefinition> GetParameterDefinitions()
         {
-            var result = new OwnedCollection<MethodDefinition, ParameterDefinition>(this);
+            var parameterRange = _context.ParentModule.GetParameterRange(MetadataToken.Rid);
+            var result = new OwnedCollection<MethodDefinition, ParameterDefinition>(this, parameterRange.Count);
 
-            foreach (var token in _context.ParentModule.GetParameterRange(MetadataToken.Rid))
+            foreach (var token in parameterRange)
             {
                 if (_context.ParentModule.TryLookupMember(token, out var member) && member is ParameterDefinition parameter)
                     result.Add(parameter);
@@ -108,9 +109,10 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<GenericParameter> GetGenericParameters()
         {
-            var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
+            var rids = _context.ParentModule.GetGenericParameters(MetadataToken);
+            var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this, rids.Count);
 
-            foreach (uint rid in _context.ParentModule.GetGenericParameters(MetadataToken))
+            foreach (uint rid in rids)
             {
                 if (_context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.GenericParam, rid), out var member)
                     && member is GenericParameter genericParameter)

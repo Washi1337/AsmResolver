@@ -98,7 +98,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         }
 
         private FixedVersionInfo _fixedVersionInfo = new FixedVersionInfo();
-        private readonly IDictionary<string, VersionTableEntry> _entries = new Dictionary<string, VersionTableEntry>();
+        private readonly Dictionary<string, VersionTableEntry> _entries = new Dictionary<string, VersionTableEntry>();
 
         /// <inheritdoc />
         public override string Key => VsVersionInfoKey;

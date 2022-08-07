@@ -45,6 +45,12 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         /// <summary>
+        /// Ensures the capacity of the table buffer is at least the provided amount of elements.
+        /// </summary>
+        /// <param name="capacity">The number of elements to store.</param>
+        void EnsureCapacity(int capacity);
+
+        /// <summary>
         /// Gets or sets a reference to a row in the metadata table.
         /// </summary>
         /// <param name="rid">The identifier of the metadata row.</param>
@@ -56,5 +62,13 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// <param name="row">The row to add.</param>
         /// <returns>The metadata token that this row was assigned to.</returns>
         MetadataToken Add(in TRow row);
+
+        /// <summary>
+        /// Inserts a row into the metadata table at the provided row identifier.
+        /// </summary>
+        /// <param name="rid">The row identifier.</param>
+        /// <param name="row">The row to add.</param>
+        /// <returns>The metadata token that this row was assigned to.</returns>
+        MetadataToken Insert(uint rid, in TRow row);
     }
 }

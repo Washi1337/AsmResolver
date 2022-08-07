@@ -118,12 +118,12 @@ namespace AsmResolver.DotNet.Signatures
             return ElementToString(obj);
         }
 
-        private string ElementToString(object? element) => element switch
+        private static string ElementToString(object? element) => element switch
         {
             null => "null",
             IList<object?> list => $"{{{string.Join(", ", list.Select(ElementToString))}}}",
             string x => x.CreateEscapedString(),
-            _ => element.ToString()
+            _ => element.ToString() ?? string.Empty
         };
 
         /// <summary>

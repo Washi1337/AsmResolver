@@ -24,6 +24,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
+        public override ModuleDefinition? Module => BaseType.Module;
+
+        /// <inheritdoc />
         public override string? Namespace => BaseType.Namespace;
 
         /// <inheritdoc />
@@ -36,6 +39,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() =>
             BaseType.GetUnderlyingTypeDefOrRef();
+
+        /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module) => BaseType.IsImportedInModule(module);
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

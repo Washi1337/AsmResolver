@@ -90,14 +90,14 @@ By default, depending on the value of ``OpCode.OperandType``, ``Operand`` contai
 +----------------------------------------+----------------------------------------------+
 
 .. warning::
-    
+
     Providing an incorrect operand type will result in the CIL assembler to fail assembling the method body upon writing the module to the disk.
 
 Creating a new instruction can be done using one of the constructors, together with the ``CilOpCodes`` static class:
 
-.. code-block:: csharp 
+.. code-block:: csharp
 
-    body.Instructions.AddRange(new[] 
+    body.Instructions.AddRange(new[]
     {
         new CilInstruction(CilOpCodes.Ldstr, "Hello, World!"),
         new CilInstruction(CilOpCodes.Ret),
@@ -105,7 +105,7 @@ Creating a new instruction can be done using one of the constructors, together w
 
 However, the preferred way of adding instructions to add or insert new instructions is to use one of the ``Add`` or ``Insert`` overloads that directly take an opcode and operand. This is because it avoids an allocation of an array, and the overloads perform immediate validation on the created instruction.
 
-.. code-block:: csharp 
+.. code-block:: csharp
 
     var instructions = body.Instructions;
     instructions.Add(CilOpCodes.Ldstr, "Hello, World!");
@@ -115,16 +115,16 @@ However, the preferred way of adding instructions to add or insert new instructi
 Pushing 32-bit integer constants onto the stack
 -----------------------------------------------
 
-In CIL, pushing integer constants onto the stack is done using one of the ``ldc.i4`` instruction variants. 
+In CIL, pushing integer constants onto the stack is done using one of the ``ldc.i4`` instruction variants.
 
 The recommended way to create such an instruction is not to use the constructor, but instead use the ``CilInstruction.CreateLdcI4(int)`` method instead. This automatically selects the smallest possible opcode possible and sets the operand accordingly:
 
-.. code-block:: csharp 
+.. code-block:: csharp
 
     CilInstruction push1 = CilInstruction.CreateLdcI4(1);            // Returns "ldc.i4.1" macro
     CilInstruction pushShort = CilInstruction.CreateLdcI4(123);      // Returns "ldc.i4.s 123" macro
     CilInstruction pushLarge = CilInstruction.CreateLdcI4(12345678); // Returns "ldc.i4 12345678"
-    
+
 If we want to get the pushed value, we can use the ``CilInstruction.GetLdcI4Constant()`` method. This method works on any of the ``ldc.i4`` variants, including all the macro opcodes that do not explicitly define an operand such as ``ldc.i4.1``.
 
 
@@ -133,7 +133,7 @@ Branching Instructions
 
 Branch instructions are instructions that (might) transfer control to another part of the method body. To reference the instruction to jump to (the branch target),  ``ICilLabel`` is used. The easiest way to create such a label is to use the ``CreateLabel()`` function on the instruction to reference:
 
-.. code-block:: csharp 
+.. code-block:: csharp
 
     CilInstruction targetInstruction = ...
     ICilLabel label = targetInstruction.CreateLabel();
@@ -142,7 +142,7 @@ Branch instructions are instructions that (might) transfer control to another pa
 
 Alternatively, when using the ``Add`` or ``Insert`` overloads, it is possible to use the return value of these overloads.
 
-.. code-block:: csharp 
+.. code-block:: csharp
 
     var instructions = body.Instructions;
     var label = new CilInstructionLabel();
@@ -150,8 +150,8 @@ Alternatively, when using the ``Add`` or ``Insert`` overloads, it is possible to
     instructions.Add(CilOpCodes.Br, label);
     /* ... */
     label.Instruction = instruction.Add(CilOpCodes.Ret);
-    
- 
+
+
 The ``switch`` operation uses a ``IList<ICilLabel>`` instead.
 
 .. note::
@@ -159,10 +159,10 @@ The ``switch`` operation uses a ``IList<ICilLabel>`` instead.
     When a branching instruction contains a ``null`` label or a label that references an instruction that is not present in the method body, AsmResolver will by default report an exception upon serializing the code stream. This can be disabled by setting ``VerifyLabelsOnBuild`` to ``false``.
 
 
-Finding instructions by offset 
+Finding instructions by offset
 ------------------------------
 
-Instructions stored in a method body are indexed not by offset, but by order of occurrence. If it is required to find an instruction by offset, it is possible to use the ``Instructions.GetByOffset(int)`` method, which performs a binary search (O(log(n))) and is faster than a linear search (O(n)) such as a for loop or using a construction like ``.First(i => i.Offset == offset)`` provided by ``System.Linq``. 
+Instructions stored in a method body are indexed not by offset, but by order of occurrence. If it is required to find an instruction by offset, it is possible to use the ``Instructions.GetByOffset(int)`` method, which performs a binary search (O(log(n))) and is faster than a linear search (O(n)) such as a for loop or using a construction like ``.First(i => i.Offset == offset)`` provided by ``System.Linq``.
 
 For ``GetByOffset`` to work, it is required that all offsets in the instruction collection are up to date. Recalculating all offsets within an instruction collection can be done through ``Instructions.CalculateOffsets()``.
 
@@ -180,12 +180,12 @@ For ``GetByOffset`` to work, it is required that all offsets in the instruction 
     instruction1 = body.Instructions[index];
 
 
-Referencing members 
+Referencing members
 -------------------
 
 As specified by the table above, operations such as a ``call`` require a member as operand.
 
-It is important that the member referenced in the operand of such an instruction is imported in the module. This can be done using the ``ReferenceImporter`` class. 
+It is important that the member referenced in the operand of such an instruction is imported in the module. This can be done using the ``ReferenceImporter`` class.
 
 Below an example on how to use the ``ReferenceImporter`` to emit a call to ``Console::WriteLine(string)`` using reflection:
 
@@ -238,7 +238,44 @@ Instructions can be formatted using e.g. an instance of the ``CilInstructionForm
         Console.WriteLine(formatter.FormatInstruction(instruction));
 
 
-Exception handlers 
+Patching CIL instructions
+-------------------------
+
+Instructions can be added or removed using the ``Add``, ``Insert``, ``Remove`` and ``RemoveAt`` methods:
+
+.. code-block:: csharp
+
+    body.Instructions.Add(CilOpCodes.Ldstr, "Hello, world!");
+    body.Instructions.Insert(i, CilOpCodes.Ldc_I4, 1234);
+    body.Instructions.RemoveAt(i);
+
+... or by using the indexer to replace existing instructions:
+
+.. code-block:: csharp
+
+    body.Instructions[i] = new CilInstruction(CilOpCodes.Ret);
+
+Removing or replacing instructions may not always be favourable. The original ``CilInstruction`` object might be used as a reference for a branch target or exception handler boundary. Removing or replacing these ``CilInstruction`` objects would therefore break these kinds of references, rendering the body invalid. Rather than updating all references manually, it may therefore be wiser to reuse the ``CilInstruction`` object and simply modify the ``OpCode`` and ``Operand`` properties instead:
+
+.. code-block:: csharp
+
+    body.Instructions[i].OpCode = CilOpCodes.Ldc_I4;
+    body.Instructions[i].Operand = 1234;
+
+AsmResolver provides a helper function ``ReplaceWith`` that shortens the code into a single line:
+
+.. code-block:: csharp
+
+    body.Instructions[i].ReplaceWith(CilOpCodes.Ldc_I4, 1234);
+
+Since it is very common to replace instructions with a `nop`, AsmResolver also defines a special ``ReplaceWithNop`` helper function:
+
+.. code-block:: csharp
+
+    body.Instructions[i].ReplaceWithNop();
+
+
+Exception handlers
 ------------------
 
 Exception handlers are regions in the method body that are protected from exceptions. In AsmResolver, they are represented by the ``CilExceptionHandler`` class, and define the following properties:

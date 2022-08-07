@@ -76,6 +76,19 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <inheritdoc />
+        public bool IsImportedInModule(ModuleDefinition module) => Module == module;
+
+        /// <summary>
+        /// Imports the module reference using the provided reference importer object.
+        /// </summary>
+        /// <param name="importer">The reference importer to use.</param>
+        /// <returns>The imported module.</returns>
+        public ModuleReference ImportWith(ReferenceImporter importer) => importer.ImportModule(this);
+
+        /// <inheritdoc />
+        IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
         /// <summary>
         /// Obtains the name of the module.
         /// </summary>
