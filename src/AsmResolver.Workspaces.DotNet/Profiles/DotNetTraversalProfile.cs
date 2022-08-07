@@ -49,7 +49,7 @@ namespace AsmResolver.Workspaces.DotNet.Profiles
             Analyzers.Register(typeof(StandAloneSignature), new StandaloneSignatureAnalyzer());
             Analyzers.Register(typeof(InterfaceImplementation), new InterfaceImplementationAnalyzer());
             Analyzers.Register(typeof(MethodSpecification), new MethodSpecificationAnalyzer());
-
+            Analyzers.Register(typeof(GenericInstanceMethodSignature), new GenericInstanceMethodSignatureAnalyzer());
         }
     }
 }
