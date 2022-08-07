@@ -12,8 +12,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         protected override void Analyze(AnalysisContext context, IHasGenericParameters subject)
         {
             bool hasGenericParameterAnalyzer = context.HasAnalyzers(typeof(GenericParameter));
-            bool hasGenericParameterConstraintAnalyzer = context.HasAnalyzers(typeof(GenericParameter));
-            
+            bool hasGenericParameterConstraintAnalyzer = context.HasAnalyzers(typeof(GenericParameterConstraint));
+
             for (int i = 0; i < subject.GenericParameters.Count; i++)
             {
                 var genericParameter = subject.GenericParameters[i];
