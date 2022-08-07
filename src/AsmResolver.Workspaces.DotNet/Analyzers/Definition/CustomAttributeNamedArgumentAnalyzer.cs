@@ -11,6 +11,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         /// <inheritdoc />
         protected override void Analyze(AnalysisContext context, CustomAttributeNamedArgument subject)
         {
+            if (context.HasAnalyzers(typeof(TypeSignature)))
+            {
+                context.ScheduleForAnalysis(subject.ArgumentType);
+            }
+
             if (context.HasAnalyzers(typeof(CustomAttributeArgument)))
             {
                 context.ScheduleForAnalysis(subject.Argument);
