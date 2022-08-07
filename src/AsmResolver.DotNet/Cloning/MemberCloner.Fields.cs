@@ -43,8 +43,7 @@ namespace AsmResolver.DotNet.Cloning
                 DeepCopyField(context, field);
                 var clonedMember = (FieldDefinition)context.ClonedMembers[field];
                 _clonerListener.OnClonedMember(field, clonedMember);
-                if (_clonerListener is MemberClonerListener listener)
-                    listener.OnClonedField(field, clonedMember);
+                _clonerListener.OnClonedField(field, clonedMember);
             }
         }
 

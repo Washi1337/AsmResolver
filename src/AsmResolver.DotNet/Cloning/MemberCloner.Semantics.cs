@@ -19,8 +19,7 @@ namespace AsmResolver.DotNet.Cloning
                 }
                 var clonedMember = clonedProperty;
                 _clonerListener.OnClonedMember(property, clonedMember);
-                if (_clonerListener is MemberClonerListener listener)
-                    listener.OnClonedProperty(property, clonedMember);
+                _clonerListener.OnClonedProperty(property, clonedMember);
             }
         }
 
@@ -57,8 +56,7 @@ namespace AsmResolver.DotNet.Cloning
                 }
                 var clonedMember = clonedEvent;
                 _clonerListener.OnClonedMember(@event, clonedMember);
-                if (_clonerListener is MemberClonerListener listener)
-                    listener.OnClonedEvent(@event, clonedMember);
+                _clonerListener.OnClonedEvent(@event, clonedMember);
             }
         }
 

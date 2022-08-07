@@ -359,7 +359,9 @@ namespace AsmResolver.DotNet.Tests.Cloning
         }
 
         [Fact]
-        public void CloneCustomListenerResult() {
+        public void CloneCustomListenerResult()
+        {
+
             var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
             var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
 

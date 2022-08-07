@@ -2,8 +2,10 @@ using System;
 
 namespace AsmResolver.DotNet.Cloning
 {
-    /// <inheritdoc/>
-    public class CallbackCloneListener : IMemberClonerListener
+    /// <summary>
+    /// This implementation that calls the <see cref="MemberClonerListener.OnClonedMember"/> to a callback action.
+    /// </summary>
+    public class CallbackCloneListener : MemberClonerListener
     {
 
         private readonly Action<IMetadataMember, IMetadataMember> _callback;
@@ -16,7 +18,7 @@ namespace AsmResolver.DotNet.Cloning
             _callback = callback;
 
         /// <inheritdoc/>
-        public void OnClonedMember(IMetadataMember original, IMetadataMember cloned) =>
+        public override void OnClonedMember(IMetadataMember original, IMetadataMember cloned) =>
             _callback(original, cloned);
     }
 }

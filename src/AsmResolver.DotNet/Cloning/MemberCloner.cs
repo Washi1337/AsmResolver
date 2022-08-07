@@ -31,8 +31,14 @@ namespace AsmResolver.DotNet.Cloning
         /// Creates a new instance of the <see cref="MemberCloner"/> class.
         /// </summary>
         /// <param name="targetModule">The target module to copy the members into.</param>
+        public MemberCloner(ModuleDefinition targetModule) : this(targetModule, (original, cloned) => { }) { }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="MemberCloner"/> class.
+        /// </summary>
+        /// <param name="targetModule">The target module to copy the members into.</param>
         /// <param name="callback">The callback used in the cloner listener.</param>
-        public MemberCloner(ModuleDefinition targetModule, Action<IMetadataMember, IMetadataMember>? callback = null) : this(targetModule, null, new CallbackCloneListener(callback ?? new Action<IMetadataMember, IMetadataMember>((orginal, cloned) => { }))) { }
+        public MemberCloner(ModuleDefinition targetModule, Action<IMetadataMember, IMetadataMember> callback) : this(targetModule, new CallbackCloneListener(callback)) { }
 
         /// <summary>
         /// Creates a new instance of the <see cref="MemberCloner"/> class.
@@ -288,8 +294,7 @@ namespace AsmResolver.DotNet.Cloning
                 DeepCopyType(context, type);
                 var clonedMember = (TypeDefinition)context.ClonedMembers[type];
                 _clonerListener.OnClonedMember(type, clonedMember);
-                if (_clonerListener is MemberClonerListener listener)
-                    listener.OnClonedType(type, clonedMember);
+                _clonerListener.OnClonedType(type, clonedMember);
             }
         }
 
