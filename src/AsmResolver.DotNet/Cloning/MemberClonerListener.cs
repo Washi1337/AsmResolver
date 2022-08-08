@@ -1,7 +1,8 @@
 namespace AsmResolver.DotNet.Cloning
 {
     /// <inheritdoc/>
-    public abstract class MemberClonerListener : IMemberClonerListener {
+    public abstract class MemberClonerListener : IMemberClonerListener
+    {
         /// <inheritdoc/>
         public virtual void OnClonedMember(IMetadataMember original, IMetadataMember cloned) { }
         /// <inheritdoc/>
