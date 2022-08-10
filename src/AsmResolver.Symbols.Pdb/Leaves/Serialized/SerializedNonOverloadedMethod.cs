@@ -31,4 +31,13 @@ public class SerializedNonOverloadedMethod : NonOverloadedMethod
 
     /// <inheritdoc />
     protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+
+    /// <inheritdoc />
+    protected override MemberFunctionLeaf? GetFunction()
+    {
+        return _context.ParentImage.TryGetLeafRecord(_functionIndex, out var leaf) && leaf is MemberFunctionLeaf type
+            ? type
+            : _context.Parameters.ErrorListener.BadImageAndReturn<MemberFunctionLeaf>(
+                $"Method {TypeIndex:X8} contains an invalid function type index {_functionIndex:X8}.");
+    }
 }
