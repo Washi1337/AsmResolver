@@ -3,7 +3,7 @@ using Xunit;
 
 namespace AsmResolver.Symbols.Pdb.Tests.Leaves;
 
-public class ArrayTypeRecordTest: IClassFixture<MockPdbFixture>
+public class ArrayTypeRecordTest : IClassFixture<MockPdbFixture>
 {
     private readonly MockPdbFixture _fixture;
 

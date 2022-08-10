@@ -56,6 +56,7 @@ public abstract class CodeViewLeaf
             ArgList => new SerializedArgumentListLeaf(context, typeIndex, dataReader),
             BClass => new SerializedBaseClassField(context, typeIndex, ref dataReader),
             Class => new SerializedClassTypeRecord(Class, context, typeIndex, dataReader),
+            BitField => new SerializedBitFieldTypeRecord(context, typeIndex, dataReader),
             Enum => new SerializedEnumTypeRecord(context, typeIndex, dataReader),
             Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
             FieldList => new SerializedFieldListLeaf(context, typeIndex, dataReader),
