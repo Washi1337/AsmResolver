@@ -69,6 +69,7 @@ public abstract class CodeViewLeaf
             OneMethod => new SerializedNonOverloadedMethod(context, typeIndex, ref dataReader),
             Pointer => new SerializedPointerTypeRecord(context, typeIndex, dataReader),
             Procedure => new SerializedProcedureTypeRecord(context, typeIndex, dataReader),
+            StMember => new SerializedStaticDataField(context, typeIndex, ref dataReader),
             Structure => new SerializedClassTypeRecord(Structure, context, typeIndex, dataReader),
             Union => new SerializedUnionTypeRecord(context, typeIndex, dataReader),
             VTShape => new SerializedVTableShapeLeaf(context, typeIndex, dataReader),

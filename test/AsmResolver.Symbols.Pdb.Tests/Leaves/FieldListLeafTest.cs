@@ -107,4 +107,16 @@ public class FieldListLeafTest : IClassFixture<MockPdbFixture>
         Assert.Equal(0ul, baseClass.PointerOffset);
         Assert.Equal(1ul, baseClass.TableOffset);
     }
+
+    [Fact]
+    public void ReadStaticFields()
+    {
+        var list = (FieldListLeaf) _fixture.MyTestApplication.GetLeafRecord(0x1423);
+
+        Assert.Equal("is_bounded", Assert.IsAssignableFrom<StaticDataField>(list.Entries[1]).Name);
+        Assert.Equal("is_exact", Assert.IsAssignableFrom<StaticDataField>(list.Entries[2]).Name);
+        Assert.Equal("is_integer", Assert.IsAssignableFrom<StaticDataField>(list.Entries[3]).Name);
+        Assert.Equal("is_specialized", Assert.IsAssignableFrom<StaticDataField>(list.Entries[4]).Name);
+        Assert.Equal("radix", Assert.IsAssignableFrom<StaticDataField>(list.Entries[5]).Name);
+    }
 }
