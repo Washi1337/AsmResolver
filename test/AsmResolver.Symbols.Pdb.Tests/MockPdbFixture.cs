@@ -6,4 +6,9 @@ public class MockPdbFixture
     {
         get;
     } = PdbImage.FromBytes(Properties.Resources.SimpleDllPdb);
+
+    public PdbImage MyTestApplication
+    {
+        get;
+    } = PdbImage.FromBytes(Properties.Resources.MyTestApplication);
 }

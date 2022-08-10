@@ -9,21 +9,21 @@
 
 namespace AsmResolver.Symbols.Pdb.Tests.Properties {
     using System;
-
-
+    
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
-
+        
         private static System.Resources.ResourceManager resourceMan;
-
+        
         private static System.Globalization.CultureInfo resourceCulture;
-
+        
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
-
+        
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static System.Resources.ResourceManager ResourceManager {
             get {
@@ -34,7 +34,7 @@ namespace AsmResolver.Symbols.Pdb.Tests.Properties {
                 return resourceMan;
             }
         }
-
+        
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static System.Globalization.CultureInfo Culture {
             get {
@@ -44,10 +44,17 @@ namespace AsmResolver.Symbols.Pdb.Tests.Properties {
                 resourceCulture = value;
             }
         }
-
+        
         internal static byte[] SimpleDllPdb {
             get {
                 object obj = ResourceManager.GetObject("SimpleDllPdb", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        internal static byte[] MyTestApplication {
+            get {
+                object obj = ResourceManager.GetObject("MyTestApplication", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -79,4 +79,32 @@ public class FieldListLeafTest : IClassFixture<MockPdbFixture>
         Assert.Equal("_LDT_ENTRY::<unnamed-type-HighWord>::<unnamed-type-Bits>",
             Assert.IsAssignableFrom<ClassTypeRecord>(Assert.IsAssignableFrom<NestedTypeField>(list.Entries[2]).Type).Name);
     }
+
+    [Fact]
+    public void ReadVirtualBaseClass()
+    {
+        var list = (FieldListLeaf) _fixture.MyTestApplication.GetLeafRecord(0x1347);
+        var baseClass = Assert.IsAssignableFrom<VirtualBaseClassField>(list.Entries[0]);
+
+        Assert.Equal("std::basic_ios<char,std::char_traits<char> >",
+            Assert.IsAssignableFrom<ClassTypeRecord>(baseClass.Type).Name);
+        Assert.True(Assert.IsAssignableFrom<PointerTypeRecord>(baseClass.PointerType).IsNear64);
+        Assert.False(baseClass.IsIndirect);
+        Assert.Equal(0ul, baseClass.PointerOffset);
+        Assert.Equal(1ul, baseClass.TableOffset);
+    }
+
+    [Fact]
+    public void ReadIndirectVirtualBaseClass()
+    {
+        var list = (FieldListLeaf) _fixture.MyTestApplication.GetLeafRecord(0x1e97);
+        var baseClass = Assert.IsAssignableFrom<VirtualBaseClassField>(list.Entries[2]);
+
+        Assert.Equal("std::basic_ios<char,std::char_traits<char> >",
+            Assert.IsAssignableFrom<ClassTypeRecord>(baseClass.Type).Name);
+        Assert.True(Assert.IsAssignableFrom<PointerTypeRecord>(baseClass.PointerType).IsNear64);
+        Assert.True(baseClass.IsIndirect);
+        Assert.Equal(0ul, baseClass.PointerOffset);
+        Assert.Equal(1ul, baseClass.TableOffset);
+    }
 }

@@ -58,11 +58,11 @@ public abstract class CodeViewLeaf
             Class => new SerializedClassTypeRecord(Class, context, typeIndex, dataReader),
             Enum => new SerializedEnumTypeRecord(context, typeIndex, dataReader),
             Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
-            CodeViewLeafKind.FieldList => new SerializedFieldListLeaf(context, typeIndex, dataReader),
+            FieldList => new SerializedFieldListLeaf(context, typeIndex, dataReader),
             Interface => new SerializedClassTypeRecord(Interface, context, typeIndex, dataReader),
             Member => new SerializedInstanceDataField(context, typeIndex, ref dataReader),
             Method => new SerializedOverloadedMethod(context, typeIndex, ref dataReader),
-            CodeViewLeafKind.MethodList => new SerializedMethodListLeaf(context, typeIndex, dataReader),
+            MethodList => new SerializedMethodListLeaf(context, typeIndex, dataReader),
             MFunction => new SerializedMemberFunctionLeaf(context, typeIndex, dataReader),
             Modifier => new SerializedModifierTypeRecord(context, typeIndex, dataReader),
             NestType or NestTypeEx => new SerializedNestedTypeField(context, typeIndex, ref dataReader),
@@ -72,6 +72,7 @@ public abstract class CodeViewLeaf
             Structure => new SerializedClassTypeRecord(Structure, context, typeIndex, dataReader),
             Union => new SerializedUnionTypeRecord(context, typeIndex, dataReader),
             VTShape => new SerializedVTableShapeLeaf(context, typeIndex, dataReader),
+            VBClass or IVBClass => new SerializedVirtualBaseClassField(context, typeIndex, ref dataReader, kind == IVBClass),
             _ => new UnknownCodeViewLeaf(kind, dataReader.ReadToEnd())
         };
     }
