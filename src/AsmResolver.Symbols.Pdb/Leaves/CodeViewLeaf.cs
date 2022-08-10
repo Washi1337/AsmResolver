@@ -89,6 +89,8 @@ public abstract class CodeViewLeaf
             ULong => reader.ReadUInt32(),
             QuadWord => reader.ReadInt64(),
             UQuadWord => reader.ReadUInt64(),
+            Real32 => reader.ReadSingle(),
+            Real64 => reader.ReadDouble(),
             _ => 0
         };
     }
