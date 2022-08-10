@@ -3,7 +3,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a data member in a class or structure type.
 /// </summary>
-public abstract class CodeViewDataField : CodeViewField
+public abstract class CodeViewDataField : CodeViewNamedField
 {
     private readonly LazyVariable<CodeViewTypeRecord> _dataType;
 

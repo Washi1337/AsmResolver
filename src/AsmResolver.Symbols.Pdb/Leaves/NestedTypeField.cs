@@ -3,7 +3,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a field in a type that references a nested type definition.
 /// </summary>
-public class NestedTypeField : CodeViewField
+public class NestedTypeField : CodeViewNamedField
 {
     private readonly LazyVariable<CodeViewTypeRecord?> _type;
 

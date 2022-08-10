@@ -3,7 +3,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a method that is overloaded by one or more functions.
 /// </summary>
-public class OverloadedMethod : CodeViewField
+public class OverloadedMethod : CodeViewNamedField
 {
     private readonly LazyVariable<MethodListLeaf?> _methods;
 

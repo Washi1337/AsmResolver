@@ -3,7 +3,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a single enumerate field leaf in a field list.
 /// </summary>
-public class EnumerateField : CodeViewField
+public class EnumerateField : CodeViewNamedField
 {
     private readonly LazyVariable<object> _value;
 

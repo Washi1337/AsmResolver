@@ -24,7 +24,7 @@ public class SerializedNonOverloadedMethod : NonOverloadedMethod
         Attributes = (CodeViewFieldAttributes) reader.ReadUInt16();
         _functionIndex = reader.ReadUInt32();
         if (IsIntroducingVirtual)
-            VFTableOffset = reader.ReadUInt32();
+            VTableOffset = reader.ReadUInt32();
         _nameReader = reader.Fork();
         reader.AdvanceUntil(0, true);
     }

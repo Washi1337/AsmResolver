@@ -55,12 +55,11 @@ public abstract class CodeViewLeaf
             Array => new SerializedArrayTypeRecord(context, typeIndex, dataReader),
             ArgList => new SerializedArgumentListLeaf(context, typeIndex, dataReader),
             BClass => new SerializedBaseClassField(context, typeIndex, ref dataReader),
-            Class => new SerializedClassTypeRecord(Class, context, typeIndex, dataReader),
+            Class or Interface or Structure => new SerializedClassTypeRecord(kind, context, typeIndex, dataReader),
             BitField => new SerializedBitFieldTypeRecord(context, typeIndex, dataReader),
             Enum => new SerializedEnumTypeRecord(context, typeIndex, dataReader),
             Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
             FieldList => new SerializedFieldListLeaf(context, typeIndex, dataReader),
-            Interface => new SerializedClassTypeRecord(Interface, context, typeIndex, dataReader),
             Member => new SerializedInstanceDataField(context, typeIndex, ref dataReader),
             Method => new SerializedOverloadedMethod(context, typeIndex, ref dataReader),
             MethodList => new SerializedMethodListLeaf(context, typeIndex, dataReader),
@@ -71,10 +70,10 @@ public abstract class CodeViewLeaf
             Pointer => new SerializedPointerTypeRecord(context, typeIndex, dataReader),
             Procedure => new SerializedProcedureTypeRecord(context, typeIndex, dataReader),
             StMember => new SerializedStaticDataField(context, typeIndex, ref dataReader),
-            Structure => new SerializedClassTypeRecord(Structure, context, typeIndex, dataReader),
             Union => new SerializedUnionTypeRecord(context, typeIndex, dataReader),
+            VFuncTab => new SerializedVTableField(context, typeIndex, ref dataReader),
             VTShape => new SerializedVTableShapeLeaf(context, typeIndex, dataReader),
-            VBClass or IVBClass => new SerializedVirtualBaseClassField(context, typeIndex, ref dataReader, kind == IVBClass),
+            VBClass or IVBClass => new SerializedVBaseClassField(context, typeIndex, ref dataReader, kind == IVBClass),
             _ => new UnknownCodeViewLeaf(kind, dataReader.ReadToEnd())
         };
     }

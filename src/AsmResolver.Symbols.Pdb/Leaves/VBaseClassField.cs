@@ -3,7 +3,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a direct or indirect reference to a virtual base class object in a structure.
 /// </summary>
-public class VirtualBaseClassField : CodeViewField
+public class VBaseClassField : CodeViewField
 {
     private readonly LazyVariable<CodeViewTypeRecord?> _baseType;
     private readonly LazyVariable<CodeViewTypeRecord?> _basePointerType;
@@ -12,7 +12,7 @@ public class VirtualBaseClassField : CodeViewField
     /// Initializes a new empty virtual base class field.
     /// </summary>
     /// <param name="typeIndex">The type index to assign to the field.</param>
-    protected VirtualBaseClassField(uint typeIndex)
+    protected VBaseClassField(uint typeIndex)
         : base(typeIndex)
     {
         _baseType = new LazyVariable<CodeViewTypeRecord?>(GetBaseType);
@@ -27,7 +27,7 @@ public class VirtualBaseClassField : CodeViewField
     /// <param name="pointerOffset">The offset of the virtual base pointer</param>
     /// <param name="tableOffset">The offset from the base table.</param>
     /// <param name="isIndirect"><c>true</c> if the field is an indirect virtual base class, <c>false</c> otherwise.</param>
-    public VirtualBaseClassField(
+    public VBaseClassField(
         CodeViewTypeRecord baseType,
         CodeViewTypeRecord pointerType,
         ulong pointerOffset,

@@ -4,9 +4,9 @@ using AsmResolver.IO;
 namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 
 /// <summary>
-/// Provides a lazily initialized implementation of <see cref="VirtualBaseClassField"/> that is read from a PDB image.
+/// Provides a lazily initialized implementation of <see cref="VBaseClassField"/> that is read from a PDB image.
 /// </summary>
-public class SerializedVirtualBaseClassField : VirtualBaseClassField
+public class SerializedVBaseClassField : VBaseClassField
 {
     private readonly PdbReaderContext _context;
     private readonly uint _baseTypeIndex;
@@ -19,7 +19,7 @@ public class SerializedVirtualBaseClassField : VirtualBaseClassField
     /// <param name="typeIndex">The type index to assign to the type.</param>
     /// <param name="reader">The input stream to read from.</param>
     /// <param name="isIndirect"><c>true</c> if the field is an indirect virtual base class, <c>false</c> otherwise.</param>
-    public SerializedVirtualBaseClassField(
+    public SerializedVBaseClassField(
         PdbReaderContext context,
         uint typeIndex,
         ref BinaryStreamReader reader,

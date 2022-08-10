@@ -3,7 +3,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a single method in a type.
 /// </summary>
-public class NonOverloadedMethod : CodeViewField
+public class NonOverloadedMethod : CodeViewNamedField
 {
     private readonly LazyVariable<MemberFunctionLeaf?> _function;
 
@@ -37,14 +37,14 @@ public class NonOverloadedMethod : CodeViewField
     /// <param name="function">The function that is referenced by the method.</param>
     /// <param name="attributes">The attributes associated to the method.</param>
     /// <param name="name">The name of the method.</param>
-    /// <param name="vfTableOffset">The offset to the slot the virtual function table that this method occupies.</param>
-    public NonOverloadedMethod(MemberFunctionLeaf function, CodeViewFieldAttributes attributes, Utf8String name, uint vfTableOffset)
+    /// <param name="vTableOffset">The offset to the slot the virtual function table that this method occupies.</param>
+    public NonOverloadedMethod(MemberFunctionLeaf function, CodeViewFieldAttributes attributes, Utf8String name, uint vTableOffset)
         : base(0)
     {
         _function = new LazyVariable<MemberFunctionLeaf?>(function);
         Attributes = attributes;
         Name = name;
-        VFTableOffset = vfTableOffset;
+        VTableOffset = vTableOffset;
     }
 
     /// <inheritdoc />
@@ -63,7 +63,7 @@ public class NonOverloadedMethod : CodeViewField
     /// When this method is an introducing virtual method, gets or sets the offset to the slot the virtual function
     /// table that this method occupies.
     /// </summary>
-    public uint VFTableOffset
+    public uint VTableOffset
     {
         get;
         set;

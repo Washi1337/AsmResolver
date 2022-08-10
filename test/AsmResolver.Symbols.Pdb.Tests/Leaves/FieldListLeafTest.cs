@@ -84,7 +84,7 @@ public class FieldListLeafTest : IClassFixture<MockPdbFixture>
     public void ReadVirtualBaseClass()
     {
         var list = (FieldListLeaf) _fixture.MyTestApplication.GetLeafRecord(0x1347);
-        var baseClass = Assert.IsAssignableFrom<VirtualBaseClassField>(list.Entries[0]);
+        var baseClass = Assert.IsAssignableFrom<VBaseClassField>(list.Entries[0]);
 
         Assert.Equal("std::basic_ios<char,std::char_traits<char> >",
             Assert.IsAssignableFrom<ClassTypeRecord>(baseClass.Type).Name);
@@ -98,7 +98,7 @@ public class FieldListLeafTest : IClassFixture<MockPdbFixture>
     public void ReadIndirectVirtualBaseClass()
     {
         var list = (FieldListLeaf) _fixture.MyTestApplication.GetLeafRecord(0x1e97);
-        var baseClass = Assert.IsAssignableFrom<VirtualBaseClassField>(list.Entries[2]);
+        var baseClass = Assert.IsAssignableFrom<VBaseClassField>(list.Entries[2]);
 
         Assert.Equal("std::basic_ios<char,std::char_traits<char> >",
             Assert.IsAssignableFrom<ClassTypeRecord>(baseClass.Type).Name);
@@ -118,5 +118,13 @@ public class FieldListLeafTest : IClassFixture<MockPdbFixture>
         Assert.Equal("is_integer", Assert.IsAssignableFrom<StaticDataField>(list.Entries[3]).Name);
         Assert.Equal("is_specialized", Assert.IsAssignableFrom<StaticDataField>(list.Entries[4]).Name);
         Assert.Equal("radix", Assert.IsAssignableFrom<StaticDataField>(list.Entries[5]).Name);
+    }
+
+    [Fact]
+    public void ReadVTableField()
+    {
+        var list = (FieldListLeaf) _fixture.MyTestApplication.GetLeafRecord(0x1215);
+        Assert.IsAssignableFrom<PointerTypeRecord>(Assert.IsAssignableFrom<VTableField>(list.Entries[0]).PointerType);
+        Assert.IsAssignableFrom<OverloadedMethod>(list.Entries[1]);
     }
 }
