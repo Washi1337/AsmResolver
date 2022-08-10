@@ -11,6 +11,8 @@ namespace AsmResolver.DotNet.Signatures.Types
     public class GenericInstanceTypeSignature : TypeSignature, IGenericArgumentsProvider
     {
         private readonly List<TypeSignature> _typeArguments;
+        private ITypeDefOrRef _genericType;
+        private bool _isValueType;
 
         internal new static GenericInstanceTypeSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
@@ -57,7 +59,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             GenericType = genericType;
             _typeArguments = new List<TypeSignature>(typeArguments);
-            IsValueType = isValueType;
+            _isValueType = isValueType;
         }
 
         /// <inheritdoc />
@@ -68,8 +70,12 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// </summary>
         public ITypeDefOrRef GenericType
         {
-            get;
-            set;
+            get => _genericType;
+            set
+            {
+                _genericType = value;
+                _isValueType = _genericType.IsValueType;
+            }
         }
 
         /// <summary>
@@ -97,10 +103,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ModuleDefinition? Module => GenericType.Module;
 
         /// <inheritdoc />
-        public override bool IsValueType
-        {
-            get;
-        }
+        public override bool IsValueType => _isValueType;
 
         /// <inheritdoc />
         public override TypeDefinition? Resolve() => GenericType.Resolve();
