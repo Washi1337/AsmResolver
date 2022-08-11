@@ -6,127 +6,127 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 public enum CodeViewCallingConvention : byte
 {
     /// <summary>
-    /// near right to left push, caller pops stack
+    /// Indicates a near call using the cdecl calling convention.
     /// </summary>
     NearC = 0x00,
 
     /// <summary>
-    /// far right to left push, caller pops stack
+    /// Indicates a far call using the cdecl calling convention.
     /// </summary>
     FarC = 0x01,
 
     /// <summary>
-    /// near left to right push, callee pops stack
+    /// Indicates a near call using the Pascal calling convention.
     /// </summary>
     NearPascal = 0x02,
 
     /// <summary>
-    /// far left to right push, callee pops stack
+    /// Indicates a far call using the Pascal calling convention.
     /// </summary>
     FarPascal = 0x03,
 
     /// <summary>
-    /// near left to right push with regs, callee pops stack
+    /// Indicates a near call using the fastcall calling convention.
     /// </summary>
     NearFast = 0x04,
 
     /// <summary>
-    /// far left to right push with regs, callee pops stack
+    /// Indicates a far call using the fastcall calling convention.
     /// </summary>
     FarFast = 0x05,
 
     /// <summary>
-    /// skipped (unused) call index
+    /// Skipped (unused) call index
     /// </summary>
     Skipped = 0x06,
 
     /// <summary>
-    /// near standard call
+    /// Indicates a near call using the stdcall calling convention.
     /// </summary>
     NearStd = 0x07,
 
     /// <summary>
-    /// far standard call
+    /// Indicates a far call using the stdcall calling convention.
     /// </summary>
     FarStd = 0x08,
 
     /// <summary>
-    /// near sys call
+    /// Indicates a near call using the syscall calling convention.
     /// </summary>
     NearSys = 0x09,
 
     /// <summary>
-    /// far sys call
+    /// Indicates a far call using the syscall calling convention.
     /// </summary>
     FarSys = 0x0a,
 
     /// <summary>
-    /// this call (this passed in register)
+    /// Indicates a call using the thiscall calling convention.
     /// </summary>
     ThisCall = 0x0b,
 
     /// <summary>
-    /// Mips call
+    /// Indicates a call using the MIPS calling convention.
     /// </summary>
     MipsCall = 0x0c,
 
     /// <summary>
-    /// Generic call sequence
+    /// Indicates a generic calling sequence.
     /// </summary>
     Generic = 0x0d,
 
     /// <summary>
-    /// Alpha call
+    /// Indicates a call using the Alpha calling convention.
     /// </summary>
     AlphaCall = 0x0e,
 
     /// <summary>
-    /// PPC call
+    /// Indicates a call using the PowerPC calling convention.
     /// </summary>
     PpcCall = 0x0f,
 
     /// <summary>
-    /// Hitachi SuperH call
+    /// Indicates a call using the Hitachi SuperH calling convention.
     /// </summary>
     ShCall = 0x10,
 
     /// <summary>
-    /// ARM call
+    /// Indicates a call using the ARM calling convention.
     /// </summary>
     ArmCall = 0x11,
 
     /// <summary>
-    /// AM33 call
+    /// Indicates a call using the AM33  calling convention.
     /// </summary>
     Am33Call = 0x12,
 
     /// <summary>
-    /// TriCore Call
+    /// Indicates a call using the TriCore  calling convention.
     /// </summary>
     TriCall = 0x13,
 
     /// <summary>
-    /// Hitachi SuperH-5 call
+    /// Indicates a call using the Hitachi SuperH-5  calling convention.
     /// </summary>
     Sh5Call = 0x14,
 
     /// <summary>
-    /// M32R Call
+    /// Indicates a call using the M32R  calling convention.
     /// </summary>
     M32RCall = 0x15,
 
     /// <summary>
-    /// clr call
+    /// Indicates a call using the clr  calling convention.
     /// </summary>
     ClrCall = 0x16,
 
     /// <summary>
-    /// Marker for routines always inlined and thus lacking a convention
+    /// Marker for routines always inlined and thus lacking a convention.
     /// </summary>
     Inline = 0x17,
 
     /// <summary>
-    /// near left to right push with regs, callee pops stack
+    /// Indicates a near call using the vectorcall calling convention.
     /// </summary>
     NearVector = 0x18,
 }
