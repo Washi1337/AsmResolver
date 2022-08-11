@@ -84,18 +84,18 @@ public class PdbImage
     /// Attempts to obtain a type record from the TPI or IPI stream based on its type index.
     /// </summary>
     /// <param name="typeIndex">The type index.</param>
-    /// <param name="type">The resolved type.</param>
+    /// <param name="leaf">The resolved type.</param>
     /// <returns><c>true</c> if the type was found, <c>false</c> otherwise.</returns>
-    public virtual bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewLeaf? type)
+    public virtual bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewLeaf? leaf)
     {
         typeIndex &= 0x7fffffff;
         if (typeIndex is > 0 and < 0x1000)
         {
-            type = _simpleTypes.GetOrAdd(typeIndex, i => new SimpleTypeRecord(i));
+            leaf = _simpleTypes.GetOrAdd(typeIndex, i => new SimpleTypeRecord(i));
             return true;
         }
 
-        type = null;
+        leaf = null;
         return false;
     }
 

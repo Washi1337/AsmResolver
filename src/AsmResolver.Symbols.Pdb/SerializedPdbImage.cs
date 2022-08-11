@@ -61,7 +61,7 @@ public class SerializedPdbImage : PdbImage
     }
 
     [MemberNotNull(nameof(_leaves))]
-    private void EnsureTypeArrayInitialized()
+    private void EnsureLeavesInitialized()
     {
         if (_leaves is null)
         {
@@ -71,27 +71,27 @@ public class SerializedPdbImage : PdbImage
     }
 
     /// <inheritdoc />
-    public override bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewLeaf? type)
+    public override bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewLeaf? leaf)
     {
         if (typeIndex < TpiStream.TypeIndexBegin)
-            return base.TryGetLeafRecord(typeIndex, out type);
+            return base.TryGetLeafRecord(typeIndex, out leaf);
 
-        EnsureTypeArrayInitialized();
+        EnsureLeavesInitialized();
 
         if (typeIndex >= TpiStream.TypeIndexBegin && typeIndex < TpiStream.TypeIndexEnd)
         {
-            type = _leaves[typeIndex - TpiStream.TypeIndexBegin];
-            if (type is null && TpiStream.TryGetLeafRecordReader(typeIndex, out var reader))
+            leaf = _leaves[typeIndex - TpiStream.TypeIndexBegin];
+            if (leaf is null && TpiStream.TryGetLeafRecordReader(typeIndex, out var reader))
             {
-                type = CodeViewLeaf.FromReader(ReaderContext, typeIndex, ref reader);
-                Interlocked.CompareExchange(ref _leaves[typeIndex - TpiStream.TypeIndexBegin], type, null);
+                leaf = CodeViewLeaf.FromReader(ReaderContext, typeIndex, ref reader);
+                Interlocked.CompareExchange(ref _leaves[typeIndex - TpiStream.TypeIndexBegin], leaf, null);
             }
 
-            type = _leaves[typeIndex - TpiStream.TypeIndexBegin];
-            return type is not null;
+            leaf = _leaves[typeIndex - TpiStream.TypeIndexBegin];
+            return leaf is not null;
         }
 
-        type = null;
+        leaf = null;
         return false;
     }
 
