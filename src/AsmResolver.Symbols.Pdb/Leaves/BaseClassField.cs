@@ -17,6 +17,16 @@ public class BaseClassField : CodeViewField
         _type = new LazyVariable<CodeViewTypeRecord?>(GetBaseType);
     }
 
+    /// <summary>
+    /// Creates a new base class field.
+    /// </summary>
+    /// <param name="type">The base type to reference.</param>
+    public BaseClassField(CodeViewTypeRecord type)
+        : base(0)
+    {
+        _type = new LazyVariable<CodeViewTypeRecord?>(type);
+    }
+
     /// <inheritdoc />
     public override CodeViewLeafKind LeafKind => CodeViewLeafKind.BClass;
 
