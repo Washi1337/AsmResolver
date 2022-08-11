@@ -25,6 +25,24 @@ public class MemberFunctionLeaf : CodeViewLeaf
         _argumentList = new LazyVariable<ArgumentListLeaf?>(GetArguments);
     }
 
+    /// <summary>
+    /// Creates a new member function.
+    /// </summary>
+    /// <param name="returnType">The return type of the function.</param>
+    /// <param name="declaringType">The declaring type of the function.</param>
+    /// <param name="arguments">The argument types of the function.</param>
+    public MemberFunctionLeaf(CodeViewTypeRecord returnType, CodeViewTypeRecord declaringType, ArgumentListLeaf arguments)
+        : base(0)
+    {
+        _returnType = new LazyVariable<CodeViewTypeRecord?>(returnType);
+        _declaringType = new LazyVariable<CodeViewTypeRecord?>(declaringType);
+        _thisType = new LazyVariable<CodeViewTypeRecord?>(default(CodeViewTypeRecord));
+        _argumentList = new LazyVariable<ArgumentListLeaf?>(arguments);
+        CallingConvention = CodeViewCallingConvention.NearC;
+        Attributes = 0;
+        ThisAdjuster = 0;
+    }
+
     /// <inheritdoc />
     public override CodeViewLeafKind LeafKind => CodeViewLeafKind.MFunction;
 
