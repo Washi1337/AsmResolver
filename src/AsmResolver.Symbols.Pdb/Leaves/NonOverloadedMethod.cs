@@ -20,10 +20,10 @@ public class NonOverloadedMethod : CodeViewNamedField
     /// <summary>
     /// Creates a new overloaded method.
     /// </summary>
-    /// <param name="function">The function that is referenced by the method.</param>
-    /// <param name="attributes">The attributes associated to the method.</param>
     /// <param name="name">The name of the method.</param>
-    public NonOverloadedMethod(MemberFunctionLeaf function, CodeViewFieldAttributes attributes, Utf8String name)
+    /// <param name="attributes">The attributes associated to the method.</param>
+    /// <param name="function">The function that is referenced by the method.</param>
+    public NonOverloadedMethod(Utf8String name, CodeViewFieldAttributes attributes, MemberFunctionLeaf function)
         : base(0)
     {
         _function = new LazyVariable<MemberFunctionLeaf?>(function);
@@ -34,11 +34,11 @@ public class NonOverloadedMethod : CodeViewNamedField
     /// <summary>
     /// Creates a new overloaded method.
     /// </summary>
-    /// <param name="function">The function that is referenced by the method.</param>
-    /// <param name="attributes">The attributes associated to the method.</param>
     /// <param name="name">The name of the method.</param>
+    /// <param name="attributes">The attributes associated to the method.</param>
     /// <param name="vTableOffset">The offset to the slot the virtual function table that this method occupies.</param>
-    public NonOverloadedMethod(MemberFunctionLeaf function, CodeViewFieldAttributes attributes, Utf8String name, uint vTableOffset)
+    /// <param name="function">The function that is referenced by the method.</param>
+    public NonOverloadedMethod(Utf8String name, CodeViewFieldAttributes attributes, uint vTableOffset, MemberFunctionLeaf function)
         : base(0)
     {
         _function = new LazyVariable<MemberFunctionLeaf?>(function);

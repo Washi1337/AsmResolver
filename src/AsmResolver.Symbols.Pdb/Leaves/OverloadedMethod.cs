@@ -21,8 +21,27 @@ public class OverloadedMethod : CodeViewNamedField
     /// Creates a new empty overloaded method.
     /// </summary>
     public OverloadedMethod()
-        : this(0)
+        : base(0)
     {
+        _methods = new LazyVariable<MethodListLeaf?>(new MethodListLeaf());
+    }
+
+    /// <summary>
+    /// Creates a new overloaded method.
+    /// </summary>
+    public OverloadedMethod(MethodListLeaf methods)
+        : base(0)
+    {
+        _methods = new LazyVariable<MethodListLeaf?>(methods);
+    }
+
+    /// <summary>
+    /// Creates a new overloaded method.
+    /// </summary>
+    public OverloadedMethod(params MethodListEntry[] methods)
+        : base(0)
+    {
+        _methods = new LazyVariable<MethodListLeaf?>(new MethodListLeaf(methods));
     }
 
     /// <inheritdoc />

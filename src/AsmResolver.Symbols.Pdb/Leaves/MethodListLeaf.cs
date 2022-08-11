@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace AsmResolver.Symbols.Pdb.Leaves;
@@ -25,6 +26,16 @@ public class MethodListLeaf : CodeViewLeaf
     public MethodListLeaf()
         : base(0)
     {
+    }
+
+    /// <summary>
+    /// Creates a new method list.
+    /// </summary>
+    /// <param name="entries">The methods to include.</param>
+    public MethodListLeaf(params MethodListEntry[] entries)
+        : base(0)
+    {
+        _entries = entries.ToList();
     }
 
     /// <inheritdoc />
