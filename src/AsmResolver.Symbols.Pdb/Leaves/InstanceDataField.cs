@@ -17,10 +17,10 @@ public class InstanceDataField : CodeViewDataField
     /// <summary>
     /// Creates a new instance data member.
     /// </summary>
-    /// <param name="dataType">The data type of the member.</param>
     /// <param name="name">The name of the member.</param>
     /// <param name="offset">The byte offset within the class or structure that the member is stored at.</param>
-    public InstanceDataField(CodeViewTypeRecord dataType, Utf8String name, ulong offset)
+    /// <param name="dataType">The data type of the member.</param>
+    public InstanceDataField(Utf8String name, ulong offset, CodeViewTypeRecord dataType)
         : base(dataType, name)
     {
         Offset = offset;

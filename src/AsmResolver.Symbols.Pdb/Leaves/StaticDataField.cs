@@ -17,9 +17,9 @@ public class StaticDataField : CodeViewDataField
     /// <summary>
     /// Creates a new static data member.
     /// </summary>
-    /// <param name="dataType">The data type of the member.</param>
     /// <param name="name">The name.</param>
-    public StaticDataField(CodeViewTypeRecord dataType, Utf8String name)
+    /// <param name="dataType">The data type of the member.</param>
+    public StaticDataField(Utf8String name, CodeViewTypeRecord dataType)
         : base(dataType, name)
     {
     }
