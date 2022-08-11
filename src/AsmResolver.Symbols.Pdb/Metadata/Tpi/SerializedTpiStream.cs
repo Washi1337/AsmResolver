@@ -70,7 +70,7 @@ public class SerializedTpiStream : TpiStream
     }
 
     /// <inheritdoc />
-    public override bool TryGetTypeRecordReader(uint typeIndex, out BinaryStreamReader reader)
+    public override bool TryGetLeafRecordReader(uint typeIndex, out BinaryStreamReader reader)
     {
         EnsureRecordOffsetMappingInitialized();
 

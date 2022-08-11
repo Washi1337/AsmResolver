@@ -19,7 +19,7 @@ public class SerializedPdbImage : PdbImage
 {
     private const int MinimalRequiredStreamCount = 5;
     private readonly MsfFile _file;
-    private CodeViewLeaf?[]? _types;
+    private CodeViewLeaf?[]? _leaves;
 
     /// <summary>
     /// Interprets a PDB image from the provided MSF file.
@@ -60,12 +60,12 @@ public class SerializedPdbImage : PdbImage
         get;
     }
 
-    [MemberNotNull(nameof(_types))]
+    [MemberNotNull(nameof(_leaves))]
     private void EnsureTypeArrayInitialized()
     {
-        if (_types is null)
+        if (_leaves is null)
         {
-            Interlocked.CompareExchange(ref _types,
+            Interlocked.CompareExchange(ref _leaves,
                 new CodeViewLeaf?[TpiStream.TypeIndexEnd - TpiStream.TypeIndexBegin], null);
         }
     }
@@ -80,14 +80,14 @@ public class SerializedPdbImage : PdbImage
 
         if (typeIndex >= TpiStream.TypeIndexBegin && typeIndex < TpiStream.TypeIndexEnd)
         {
-            type = _types[typeIndex - TpiStream.TypeIndexBegin];
-            if (type is null && TpiStream.TryGetTypeRecordReader(typeIndex, out var reader))
+            type = _leaves[typeIndex - TpiStream.TypeIndexBegin];
+            if (type is null && TpiStream.TryGetLeafRecordReader(typeIndex, out var reader))
             {
                 type = CodeViewLeaf.FromReader(ReaderContext, typeIndex, ref reader);
-                Interlocked.CompareExchange(ref _types[typeIndex - TpiStream.TypeIndexBegin], type, null);
+                Interlocked.CompareExchange(ref _leaves[typeIndex - TpiStream.TypeIndexBegin], type, null);
             }
 
-            type = _types[typeIndex - TpiStream.TypeIndexBegin];
+            type = _leaves[typeIndex - TpiStream.TypeIndexBegin];
             return type is not null;
         }
 

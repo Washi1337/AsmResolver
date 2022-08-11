@@ -172,7 +172,7 @@ public abstract class TpiStream : SegmentBase
     public static TpiStream FromReader(BinaryStreamReader reader) => new SerializedTpiStream(reader);
 
     /// <summary>
-    /// Attempts to get a reader object that starts at the beginning of a type record for the provided type index.
+    /// Attempts to get a reader object that starts at the beginning of a leaf record for the provided type index.
     /// </summary>
     /// <param name="typeIndex">The type index to get the reader for.</param>
     /// <param name="reader">The obtained reader object.</param>
@@ -180,17 +180,17 @@ public abstract class TpiStream : SegmentBase
     /// <c>true</c> if the provided type index was valid and a reader object was constructed successfully,
     /// <c>false</c> otherwise.
     /// </returns>
-    public abstract bool TryGetTypeRecordReader(uint typeIndex, out BinaryStreamReader reader);
+    public abstract bool TryGetLeafRecordReader(uint typeIndex, out BinaryStreamReader reader);
 
     /// <summary>
-    /// Gets a reader object that starts at the beginning of a type record for the provided type index.
+    /// Gets a reader object that starts at the beginning of a leaf record for the provided type index.
     /// </summary>
     /// <param name="typeIndex">The type index to get the reader for.</param>
     /// <returns>The obtained reader object.</returns>
     /// <exception cref="ArgumentException">Occurs when the provided type index was invalid.</exception>
-    public BinaryStreamReader GetTypeRecordReader(uint typeIndex)
+    public BinaryStreamReader GetLeafRecordReader(uint typeIndex)
     {
-        if (!TryGetTypeRecordReader(typeIndex, out var reader))
+        if (!TryGetLeafRecordReader(typeIndex, out var reader))
             throw new ArgumentException("Invalid type index.");
 
         return reader;
