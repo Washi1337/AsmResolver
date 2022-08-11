@@ -21,7 +21,7 @@ public class SerializedMethodListEntry : MethodListEntry
         Attributes = (CodeViewFieldAttributes) reader.ReadUInt16();
         reader.ReadUInt16(); // padding
         _functionIndex = reader.ReadUInt32();
-        VFTableOffset = IsIntroducingVirtual ? reader.ReadUInt32() : 0;
+        VTableOffset = IsIntroducingVirtual ? reader.ReadUInt32() : 0;
     }
 
     /// <inheritdoc />

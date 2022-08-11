@@ -24,7 +24,7 @@ public class MethodListEntry
     {
         Attributes = attributes;
         _function = new LazyVariable<MemberFunctionLeaf?>(function);
-        VFTableOffset = 0;
+        VTableOffset = 0;
     }
 
     /// <summary>
@@ -32,12 +32,12 @@ public class MethodListEntry
     /// </summary>
     /// <param name="attributes">The attributes associated to this method.</param>
     /// <param name="function">The referenced function.</param>
-    /// <param name="vfTableOffset">The offset to the slot the virtual function table that this method occupies.</param>
-    public MethodListEntry(CodeViewFieldAttributes attributes, MemberFunctionLeaf function, uint vfTableOffset)
+    /// <param name="vTableOffset">The offset to the slot the virtual function table that this method occupies.</param>
+    public MethodListEntry(CodeViewFieldAttributes attributes, MemberFunctionLeaf function, uint vTableOffset)
     {
         Attributes = attributes;
         _function = new LazyVariable<MemberFunctionLeaf?>(function);
-        VFTableOffset = vfTableOffset;
+        VTableOffset = vTableOffset;
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public class MethodListEntry
     /// When this method is an introducing virtual method, gets or sets the offset to the slot the virtual function
     /// table that this method occupies.
     /// </summary>
-    public uint VFTableOffset
+    public uint VTableOffset
     {
         get;
         set;
@@ -88,7 +88,7 @@ public class MethodListEntry
     public override string ToString()
     {
         return IsIntroducingVirtual
-            ? $"{nameof(Attributes)}: {Attributes}, {nameof(Function)}: {Function}, {nameof(VFTableOffset)}: {VFTableOffset}"
+            ? $"{nameof(Attributes)}: {Attributes}, {nameof(Function)}: {Function}, {nameof(VTableOffset)}: {VTableOffset}"
             : $"{nameof(Attributes)}: {Attributes}, {nameof(Function)}: {Function}";
     }
 }
