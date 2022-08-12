@@ -344,30 +344,44 @@ namespace AsmResolver.IO
         /// </remarks>
         public byte[] ReadBytesUntil(byte delimeter, bool includeDelimeterInReturn)
         {
-            bool shouldReadExtra = false;
-
             var lookahead = Fork();
-            while (lookahead.RelativeOffset < lookahead.Length)
-            {
-                byte b = lookahead.ReadByte();
-                if (b == delimeter)
-                {
-                    if (!includeDelimeterInReturn)
-                    {
-                        lookahead.RelativeOffset--;
-                        shouldReadExtra = true;
-                    }
-                    break;
-                }
-            }
+            bool hasConsumedDelimeter = lookahead.AdvanceUntil(delimeter, includeDelimeterInReturn);
 
             byte[] buffer = new byte[lookahead.RelativeOffset - RelativeOffset];
             ReadBytes(buffer, 0, buffer.Length);
 
-            if (shouldReadExtra)
+            if (hasConsumedDelimeter)
                 ReadByte();
 
             return buffer;
+        }
+
+        /// <summary>
+        /// Advances the reader until the provided delimeter byte is reached.
+        /// </summary>
+        /// <param name="delimeter">The delimeter byte to stop at.</param>
+        /// <param name="consumeDelimeter">
+        /// <c>true</c> if the final delimeter should be consumed if available, <c>false</c> otherwise.
+        /// </param>
+        /// <returns><c>true</c> if the delimeter byte was found and consumed, <c>false</c> otherwise.</returns>
+        public bool AdvanceUntil(byte delimeter, bool consumeDelimeter)
+        {
+            while (RelativeOffset < Length)
+            {
+                byte b = ReadByte();
+                if (b == delimeter)
+                {
+                    if (!consumeDelimeter)
+                    {
+                        RelativeOffset--;
+                        return true;
+                    }
+
+                    return false;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
