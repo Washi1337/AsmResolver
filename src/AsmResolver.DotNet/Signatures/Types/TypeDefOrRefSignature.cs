@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="isValueType">Indicates whether the referenced type is a value type or not.</param>
         public TypeDefOrRefSignature(ITypeDefOrRef type, bool isValueType)
         {
-            Type = type;
+            _type = type;
             _isValueType = isValueType;
         }
 

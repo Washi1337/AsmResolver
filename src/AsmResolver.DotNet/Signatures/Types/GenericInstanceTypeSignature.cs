@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         private GenericInstanceTypeSignature(ITypeDefOrRef genericType, bool isValueType,
             IEnumerable<TypeSignature> typeArguments)
         {
-            GenericType = genericType;
+            _genericType = genericType;
             _typeArguments = new List<TypeSignature>(typeArguments);
             _isValueType = isValueType;
         }
