@@ -54,6 +54,21 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a value indicating whether the application targets the .NET or .NET Core runtime or not.
+        /// </summary>
+        public bool IsNetCoreApp => Name == NetCoreApp;
+
+        /// <summary>
+        /// Gets a value indicating whether the application targets the .NET Framework runtime or not.
+        /// </summary>
+        public bool IsNetFramework => Name == NetFramework;
+
+        /// <summary>
+        /// Gets a value indicating whether the application targets the .NET standard specification or not.
+        /// </summary>
+        public bool IsNetStandard => Name == NetStandard;
+
+        /// <summary>
         /// Attempts to parse the framework name as provided in <see cref="TargetFrameworkAttribute"/>.
         /// </summary>
         /// <param name="frameworkName">The full runtime name.</param>

@@ -327,6 +327,7 @@ namespace AsmResolver.DotNet.Tests
         public void DetectTargetNetFramework40()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            Assert.True(module.OriginalTargetRuntime.IsNetFramework);
             Assert.Contains(DotNetRuntimeInfo.NetFramework, module.OriginalTargetRuntime.Name);
             Assert.Equal(4, module.OriginalTargetRuntime.Version.Major);
             Assert.Equal(0, module.OriginalTargetRuntime.Version.Minor);
@@ -336,6 +337,7 @@ namespace AsmResolver.DotNet.Tests
         public void DetectTargetNetCore()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            Assert.True(module.OriginalTargetRuntime.IsNetCoreApp);
             Assert.Contains(DotNetRuntimeInfo.NetCoreApp, module.OriginalTargetRuntime.Name);
             Assert.Equal(2, module.OriginalTargetRuntime.Version.Major);
             Assert.Equal(2, module.OriginalTargetRuntime.Version.Minor);
@@ -345,6 +347,7 @@ namespace AsmResolver.DotNet.Tests
         public void DetectTargetStandard()
         {
             var module = ModuleDefinition.FromFile(typeof(TestCases.Types.Class).Assembly.Location);
+            Assert.True(module.OriginalTargetRuntime.IsNetStandard);
             Assert.Contains(DotNetRuntimeInfo.NetStandard, module.OriginalTargetRuntime.Name);
             Assert.Equal(2, module.OriginalTargetRuntime.Version.Major);
         }
