@@ -121,6 +121,9 @@ namespace AsmResolver.DotNet.Builder.Discovery
 
         private void CollectExistingMembers()
         {
+            if (_module.DotNetDirectory?.Metadata is null)
+                return;
+
             if ((_flags & MemberDiscoveryFlags.PreserveTypeOrder) != 0)
                 CollectMembersFromTable<TypeDefinition>(TableIndex.TypeDef);
             if ((_flags & MemberDiscoveryFlags.PreserveFieldOrder) != 0)
@@ -139,8 +142,8 @@ namespace AsmResolver.DotNet.Builder.Discovery
             where TMember: IMetadataMember, IModuleProvider
         {
             // Get original number of elements in the table.
-            int count = _module.DotNetDirectory!.Metadata
-                !.GetStream<TablesStream>()
+            int count = _module.DotNetDirectory!.Metadata!
+                .GetStream<TablesStream>()
                 .GetTable(tableIndex)
                 .Count;
 
