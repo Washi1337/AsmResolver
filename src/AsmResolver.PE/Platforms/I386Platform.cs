@@ -25,11 +25,11 @@ namespace AsmResolver.PE.Platforms
         public override bool IsClrBootstrapperRequired => true;
 
         /// <inheritdoc />
-        public override RelocatableSegment CreateThunkStub(ulong imageBase, ISymbol entrypoint)
+        public override RelocatableSegment CreateThunkStub(ISymbol entrypoint)
         {
-            var segment = new CodeSegment(imageBase, new byte[]
+            var segment = new CodeSegment(new byte[]
             {
-                0xFF, 0x25, 0x00, 0x00, 0x00, 0x00  // jmp [&symbol]
+                0xFF, 0x25, 0x00, 0x00, 0x00, 0x00 // jmp [&symbol]
             });
             segment.AddressFixups.Add(new AddressFixup(2, AddressFixupType.Absolute32BitAddress, entrypoint));
 

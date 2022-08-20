@@ -25,9 +25,9 @@ namespace AsmResolver.PE.Platforms
         public override bool IsClrBootstrapperRequired => false;
 
         /// <inheritdoc />
-        public override RelocatableSegment CreateThunkStub(ulong imageBase, ISymbol entrypoint)
+        public override RelocatableSegment CreateThunkStub(ISymbol entrypoint)
         {
-            var segment = new CodeSegment(imageBase, new byte[]
+            var segment = new CodeSegment(new byte[]
             {
                 0x48, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // rex.w rex.b mov rax, [&symbol]
                 0xFF, 0xE0                                                  // jmp [rax]

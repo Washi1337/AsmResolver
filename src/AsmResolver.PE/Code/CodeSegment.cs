@@ -57,6 +57,13 @@ namespace AsmResolver.PE.Code
         } = new List<AddressFixup>();
 
         /// <inheritdoc />
+        public override void UpdateOffsets(in RelocationParameters parameters)
+        {
+            ImageBase = parameters.ImageBase;
+            base.UpdateOffsets(in parameters);
+        }
+
+        /// <inheritdoc />
         public override uint GetPhysicalSize() => (uint) Code.Length;
 
         /// <inheritdoc />
