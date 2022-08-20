@@ -58,15 +58,15 @@ namespace AsmResolver.PE.DotNet.Cil
 
             uint codeSize = (uint) flag >> 2;
             var methodBody = new CilRawTinyMethodBody(reader.ReadSegment(codeSize));
-            methodBody.UpdateOffsets(fileOffset, rva);
+            methodBody.UpdateOffsets(new RelocationParameters(fileOffset, rva));
             return methodBody;
         }
 
         /// <inheritdoc />
-        public override void UpdateOffsets(ulong newOffset, uint newRva)
+        public override void UpdateOffsets(in RelocationParameters parameters)
         {
-            base.UpdateOffsets(newOffset, newRva);
-            Code.UpdateOffsets(newOffset + 1, newRva + 1);
+            base.UpdateOffsets(parameters);
+            Code.UpdateOffsets(parameters.Advance(1));
         }
 
         /// <inheritdoc />

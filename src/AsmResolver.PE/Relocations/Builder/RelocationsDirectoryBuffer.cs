@@ -58,9 +58,9 @@ namespace AsmResolver.PE.Relocations.Builder
         }
 
         /// <inheritdoc />
-        public override void UpdateOffsets(ulong newOffset, uint newRva)
+        public override void UpdateOffsets(in RelocationParameters parameters)
         {
-            base.UpdateOffsets(newOffset, newRva);
+            base.UpdateOffsets(parameters);
             _blocks = null;
         }
 

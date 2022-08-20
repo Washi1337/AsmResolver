@@ -12,6 +12,8 @@ namespace AsmResolver.PE.File
     {
         private readonly List<SectionHeader> _sectionHeaders;
         private readonly BinaryStreamReader _reader;
+        private readonly ulong _originalImageBase;
+        private readonly bool _is32Bit;
 
         /// <summary>
         /// Reads a PE file from an input stream.
@@ -36,6 +38,8 @@ namespace AsmResolver.PE.File
             // Read NT headers.
             FileHeader = FileHeader.FromReader(ref _reader);
             OptionalHeader = OptionalHeader.FromReader(ref _reader);
+            _originalImageBase = OptionalHeader.ImageBase;
+            _is32Bit = OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
 
             // Read section headers.
             _reader.Offset = OptionalHeader.Offset + FileHeader.SizeOfOptionalHeader;
@@ -70,7 +74,12 @@ namespace AsmResolver.PE.File
                     physicalContents = new DataSourceSegment(_reader.DataSource, offset, header.VirtualAddress, size);
 
                 var virtualSegment = new VirtualSegment(physicalContents, header.VirtualSize);
-                virtualSegment.UpdateOffsets(offset, header.VirtualAddress);
+                virtualSegment.UpdateOffsets(new RelocationParameters(
+                    _originalImageBase,
+                    offset,
+                    header.VirtualAddress,
+                    _is32Bit));
+
                 result.Add(new PESection(header, virtualSegment));
             }
 

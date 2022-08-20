@@ -10,10 +10,24 @@ namespace AsmResolver
     public interface ISegment : IOffsetProvider, IWritable
     {
         /// <summary>
+        /// Determines whether this structure can be relocated to another offset or virtual address.
+        /// </summary>
+        bool CanUpdateOffsets
+        {
+            get;
+        }
+
+        /// <summary>
         /// Computes the number of bytes the segment will contain when it is mapped into memory.
         /// </summary>
         /// <returns>The number of bytes.</returns>
         uint GetVirtualSize();
+
+        /// <summary>
+        /// Assigns a new file and virtual offset to the segment and all its sub-components.
+        /// </summary>
+        /// <param name="parameters">The parameters containing the new offset information for the segment.</param>
+        void UpdateOffsets(in RelocationParameters parameters);
 
     }
 
