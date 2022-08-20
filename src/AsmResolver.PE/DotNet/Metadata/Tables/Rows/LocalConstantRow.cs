@@ -54,10 +54,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Reads a single Portable PDB Method Debug Information row from an input stream.
+        /// Reads a single Portable PDB local constant row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="layout">The layout of the assembly definition table.</param>
+        /// <param name="layout">The layout of the local constant table.</param>
         /// <returns>The row.</returns>
         public static LocalConstantRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {

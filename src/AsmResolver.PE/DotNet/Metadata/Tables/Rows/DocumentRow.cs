@@ -81,7 +81,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// Reads a single Portable PDB Document row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="layout">The layout of the assembly definition table.</param>
+        /// <param name="layout">The layout of the document table.</param>
         /// <returns>The row.</returns>
         public static DocumentRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {

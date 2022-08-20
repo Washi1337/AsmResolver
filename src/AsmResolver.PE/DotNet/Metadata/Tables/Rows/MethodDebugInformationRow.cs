@@ -63,7 +63,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// Reads a single Portable PDB Method Debug Information row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="layout">The layout of the assembly definition table.</param>
+        /// <param name="layout">The layout of the method debug information table.</param>
         /// <returns>The row.</returns>
         public static MethodDebugInformationRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
@@ -104,6 +104,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             }
         }
 
+        /// <inheritdoc />
         public override string ToString() => $"({Document:X8}, {SequencePoints:X8})";
 
         /// <inheritdoc />

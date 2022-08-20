@@ -102,10 +102,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Reads a single Portable PDB Method Debug Information row from an input stream.
+        /// Reads a single Portable PDB local scope row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="layout">The layout of the assembly definition table.</param>
+        /// <param name="layout">The layout of the local socpe table.</param>
         /// <returns>The row.</returns>
         public static LocalScopeRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
