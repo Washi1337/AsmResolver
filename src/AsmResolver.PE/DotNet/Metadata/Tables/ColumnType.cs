@@ -53,7 +53,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         GenericParam = 42,
         MethodSpec = 43,
         GenericParamConstraint = 44,
-        
+
+        Document = 0x30,
+        MethodDebugInformation = 0x31,
+        LocalScope = 0x32,
+        LocalVariable = 0x33,
+        LocalConstant = 0x34,
+        ImportScope = 0x35,
+        StateMachineMethod = 0x36,
+        CustomDebugInformation = 0x37,
+
         TypeDefOrRef,
         HasConstant,
         HasCustomAttribute,
@@ -67,11 +76,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         CustomAttributeType,
         ResolutionScope,
         TypeOrMethodDef,
-        
-        String, 
+        HasCustomDebugInformation,
+
+        String,
         Blob,
         Guid,
-        
+
         Byte = 0x8000001,
         UInt16 = 0x8000002,
         UInt32 = 0x8000004,

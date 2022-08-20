@@ -387,10 +387,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Tables"/> property.
         /// </remarks>
-        protected virtual IList<IMetadataTable> GetTables()
+        protected virtual IList<IMetadataTable?> GetTables()
         {
             var layouts = TableLayouts;
-            return new IMetadataTable[]
+            return new IMetadataTable?[]
             {
                 new MetadataTable<ModuleDefinitionRow>(TableIndex.Module, layouts[0]),
                 new MetadataTable<TypeReferenceRow>(TableIndex.TypeRef, layouts[1]),
@@ -437,6 +437,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new MetadataTable<GenericParameterRow>(TableIndex.GenericParam, layouts[42]),
                 new MetadataTable<MethodSpecificationRow>(TableIndex.MethodSpec, layouts[43]),
                 new MetadataTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint, layouts[44]),
+                null,
+                null,
+                null,
+                new MetadataTable<DocumentRow>(TableIndex.Document, layouts[48]),
+                new MetadataTable<MethodDebugInformationRow>(TableIndex.MethodDebugInformation, layouts[49]),
+                new MetadataTable<LocalScopeRow>(TableIndex.LocalScope, layouts[50]),
+                new MetadataTable<LocalVariableRow>(TableIndex.LocalVariable, layouts[51]),
+                new MetadataTable<LocalConstantRow>(TableIndex.LocalConstant, layouts[52]),
+                new MetadataTable<ImportScopeRow>(TableIndex.ImportScope, layouts[53]),
+                new MetadataTable<StateMachineMethodRow>(TableIndex.StateMachineMethod, layouts[54]),
+                new MetadataTable<CustomDebugInformationRow>(TableIndex.CustomDebugInformation, layouts[55]),
             };
         }
 
@@ -475,7 +486,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 [CodedIndex.ResolutionScope] = new(this,
                     TableIndex.Module, TableIndex.ModuleRef, TableIndex.AssemblyRef, TableIndex.TypeRef),
                 [CodedIndex.TypeOrMethodDef] = new(this,
-                    TableIndex.TypeDef, TableIndex.Method)
+                    TableIndex.TypeDef, TableIndex.Method),
+                [CodedIndex.HasCustomDebugInformation] = new(this,
+                    TableIndex.Method, TableIndex.Field, TableIndex.TypeRef, TableIndex.TypeDef, TableIndex.Param,
+                    TableIndex.InterfaceImpl, TableIndex.MemberRef, TableIndex.Module, TableIndex.DeclSecurity,
+                    TableIndex.Property, TableIndex.Event, TableIndex.StandAloneSig, TableIndex.ModuleRef,
+                    TableIndex.TypeSpec, TableIndex.Assembly, TableIndex.AssemblyRef, TableIndex.File,
+                    TableIndex.ExportedType, TableIndex.ManifestResource, TableIndex.GenericParam,
+                    TableIndex.GenericParamConstraint, TableIndex.MethodSpec, TableIndex.Document,
+                    TableIndex.LocalScope, TableIndex.LocalVariable, TableIndex.LocalConstant, TableIndex.ImportScope)
             };
         }
 
@@ -526,7 +545,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             if (_layouts.IsInitialized)
             {
-                if (columnType <= ColumnType.GenericParamConstraint)
+                if (columnType <= ColumnType.Document)
                     return (uint) Tables[(int) columnType].IndexSize;
                 if (columnType <= ColumnType.TypeOrMethodDef)
                     return (uint) GetIndexEncoder((CodedIndex) columnType).IndexSize;
@@ -744,6 +763,41 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new TableLayout(
                     new ColumnLayout("Owner", ColumnType.GenericParam, GetColumnSize(ColumnType.GenericParam)),
                     new ColumnLayout("Constraint", ColumnType.TypeDefOrRef, GetColumnSize(ColumnType.TypeDefOrRef))),
+                default,
+                default,
+                default,
+                new TableLayout(
+                    new ColumnLayout("Name", ColumnType.Blob, BlobIndexSize),
+                    new ColumnLayout("HashAlgorithm", ColumnType.Guid, GuidIndexSize),
+                    new ColumnLayout("Hash", ColumnType.Blob, BlobIndexSize),
+                    new ColumnLayout("Language", ColumnType.Guid, GuidIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Document", ColumnType.Document, GetColumnSize(ColumnType.Document)),
+                    new ColumnLayout("SequencePoints", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Method", ColumnType.Method, GetColumnSize(ColumnType.Method)),
+                    new ColumnLayout("ImportScope", ColumnType.ImportScope, GetColumnSize(ColumnType.ImportScope)),
+                    new ColumnLayout("VariableList", ColumnType.LocalVariable, GetColumnSize(ColumnType.LocalVariable)),
+                    new ColumnLayout("ConstantList", ColumnType.LocalConstant, GetColumnSize(ColumnType.LocalConstant)),
+                    new ColumnLayout("StartOffset", ColumnType.UInt32),
+                    new ColumnLayout("Length", ColumnType.UInt32)),
+                new TableLayout(
+                    new ColumnLayout("Attributes", ColumnType.UInt16),
+                    new ColumnLayout("Index", ColumnType.UInt16),
+                    new ColumnLayout("VariableList", ColumnType.String, StringIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Parent", ColumnType.ImportScope, GetColumnSize(ColumnType.ImportScope)),
+                    new ColumnLayout("Imports", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("MoveNextMethod", ColumnType.Method, GetColumnSize(ColumnType.Method)),
+                    new ColumnLayout("KickoffMethod", ColumnType.Method, GetColumnSize(ColumnType.Method))),
+                new TableLayout(
+                    new ColumnLayout("Parent", ColumnType.HasCustomDebugInformation, GetColumnSize(ColumnType.HasCustomDebugInformation)),
+                    new ColumnLayout("Kind", ColumnType.Guid, GuidIndexSize),
+                    new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)),
             };
 
             return result;

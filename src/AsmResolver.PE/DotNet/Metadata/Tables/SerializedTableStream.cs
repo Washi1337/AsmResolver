@@ -75,7 +75,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             const TableIndex maxTableIndex = TableIndex.GenericParamConstraint;
 
-            var result = new uint[(int) maxTableIndex + 1 ];
+            uint[] result = new uint[(int) maxTableIndex + 1];
             for (TableIndex i = 0; i <= maxTableIndex; i++)
                 result[(int) i] = HasTable(_validMask, i) ? reader.ReadUInt32() : 0;
 
@@ -149,6 +149,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
                 // TypeOrMethodDef
                 GetCodedIndexSize(TableIndex.TypeDef, TableIndex.Method),
+
+                // HasCustomDebugInformation
+                GetCodedIndexSize(TableIndex.Method, TableIndex.Field, TableIndex.TypeRef, TableIndex.TypeDef,
+                    TableIndex.Param, TableIndex.InterfaceImpl, TableIndex.MemberRef, TableIndex.Module,
+                    TableIndex.DeclSecurity, TableIndex.Property, TableIndex.Event, TableIndex.StandAloneSig
+                    , TableIndex.ModuleRef, TableIndex.TypeSpec, TableIndex.Assembly, TableIndex.AssemblyRef,
+                    TableIndex.File, TableIndex.ExportedType, TableIndex.ManifestResource, TableIndex.GenericParam,
+                    TableIndex.GenericParamConstraint, TableIndex.MethodSpec, TableIndex.Document,
+                    TableIndex.LocalScope, TableIndex.LocalVariable, TableIndex.LocalConstant, TableIndex.ImportScope)
             });
 
             return result.ToArray();
@@ -165,10 +174,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        protected override IList<IMetadataTable> GetTables()
+        protected override IList<IMetadataTable?> GetTables()
         {
             uint offset = _headerSize;
-            var tables = new IMetadataTable[]
+            var tables = new IMetadataTable?[]
             {
                 CreateNextTable(TableIndex.Module, ref offset, ModuleDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.TypeRef, ref offset, TypeReferenceRow.FromReader),
@@ -215,6 +224,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.GenericParam, ref offset, GenericParameterRow.FromReader),
                 CreateNextTable(TableIndex.MethodSpec, ref offset, MethodSpecificationRow.FromReader),
                 CreateNextTable(TableIndex.GenericParamConstraint, ref offset, GenericParameterConstraintRow.FromReader),
+                null,
+                null,
+                null,
+                CreateNextTable(TableIndex.Document, ref offset, DocumentRow.FromReader),
+                CreateNextTable(TableIndex.MethodDebugInformation, ref offset, MethodDebugInformationRow.FromReader),
+                CreateNextTable(TableIndex.LocalScope, ref offset, LocalScopeRow.FromReader),
+                CreateNextTable(TableIndex.LocalVariable, ref offset, LocalVariableRow.FromReader),
+                CreateNextTable(TableIndex.LocalConstant, ref offset, LocalConstantRow.FromReader),
+                CreateNextTable(TableIndex.ImportScope, ref offset, ImportScopeRow.FromReader),
+                CreateNextTable(TableIndex.StateMachineMethod, ref offset, StateMachineMethodRow.FromReader),
+                CreateNextTable(TableIndex.CustomDebugInformation, ref offset, CustomDebugInformationRow.FromReader),
             };
             _tablesInitialized = true;
             return tables;
