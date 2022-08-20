@@ -22,21 +22,6 @@ namespace AsmResolver.DotNet.Code.Native
         private uint _maxExportedOrdinal = 0;
         private readonly List<ExportedSymbol> _floatingExportedSymbols = new();
 
-        /// <summary>
-        /// Creates a new instance of the <see cref="NativeSymbolsProvider"/> class.
-        /// </summary>
-        /// <param name="imageBase">The image base of the final PE image.</param>
-        public NativeSymbolsProvider(ulong imageBase)
-        {
-            ImageBase = imageBase;
-        }
-
-        /// <inheritdoc />
-        public ulong ImageBase
-        {
-            get;
-        }
-
         /// <inheritdoc />
         public ISymbol ImportSymbol(ISymbol symbol)
         {
