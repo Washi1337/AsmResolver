@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     public struct ImportScopeRow : IMetadataRow
     {
         /// <summary>
-        ///Creates a new row for the Portable PDB import scope metadata table.
+        /// Creates a new row for the Portable PDB import scope metadata table.
         /// </summary>
         /// <param name="parent">
         /// An index into the import parent scope defining the parent scope, or 0 if it is the root scope.
