@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Builder.VTableFixups
             vtableFixup.Tokens.Add(token);
             var vtableSymbol = new Symbol(vtableFixup.Tokens.GetReferenceToIndex(vtableFixup.Tokens.Count - 1));
 
-            var thunkStub = _targetPlatform.CreateThunkStub(0x00400000, vtableSymbol);
+            var thunkStub = _targetPlatform.CreateThunkStub(vtableSymbol);
 
             // Register exported symbol.
             var stubReference = thunkStub.Segment.ToReference();

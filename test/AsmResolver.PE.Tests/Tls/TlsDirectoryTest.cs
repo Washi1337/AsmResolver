@@ -162,8 +162,6 @@ namespace AsmResolver.PE.Tests.Tls
 
             var directory = new TlsDirectory
             {
-                ImageBase = file.OptionalHeader.ImageBase,
-                Is32Bit = file.OptionalHeader.Magic == OptionalHeaderMagic.Pe32,
                 TemplateData = templateData,
                 Index = indexSegment.ToReference(),
                 Characteristics = TlsCharacteristics.Align4Bytes,

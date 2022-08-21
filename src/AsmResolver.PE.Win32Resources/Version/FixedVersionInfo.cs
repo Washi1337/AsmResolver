@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public static FixedVersionInfo FromReader(ref BinaryStreamReader reader)
         {
             var result = new FixedVersionInfo();
-            result.UpdateOffsets(reader.Offset, reader.Rva);
+            result.UpdateOffsets(new RelocationParameters(reader.Offset, reader.Rva));
 
             uint signature = reader.ReadUInt32();
             if (signature != Signature)

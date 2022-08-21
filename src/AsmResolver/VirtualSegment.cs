@@ -44,15 +44,7 @@ namespace AsmResolver
         public ulong Offset => PhysicalContents?.Offset ?? 0;
 
         /// <inheritdoc />
-        public uint Rva
-        {
-            get => _rva;
-            set
-            {
-                _rva = value;
-                PhysicalContents?.UpdateOffsets(Offset, value);
-            }
-        }
+        public uint Rva => _rva;
 
         /// <inheritdoc />
         public bool CanUpdateOffsets => PhysicalContents?.CanUpdateOffsets ?? false;
@@ -64,10 +56,10 @@ namespace AsmResolver
         public bool IsReadable => PhysicalContents is IReadableSegment;
 
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newOffset, uint newRva)
+        public void UpdateOffsets(in RelocationParameters parameters)
         {
-            _rva = newRva;
-            PhysicalContents?.UpdateOffsets(newOffset, newRva);
+            _rva = parameters.Rva;
+            PhysicalContents?.UpdateOffsets(parameters);
         }
 
         /// <inheritdoc />

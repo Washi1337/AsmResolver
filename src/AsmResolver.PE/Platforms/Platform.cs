@@ -69,10 +69,9 @@ namespace AsmResolver.PE.Platforms
         /// <summary>
         /// Creates a new thunk stub that transfers control to the provided symbol.
         /// </summary>
-        /// <param name="imageBase">The image base of the image.</param>
         /// <param name="entrypoint">The symbol to jump to.</param>
         /// <returns>The created stub.</returns>
-        public abstract RelocatableSegment CreateThunkStub(ulong imageBase, ISymbol entrypoint);
+        public abstract RelocatableSegment CreateThunkStub(ISymbol entrypoint);
 
         /// <summary>
         /// Attempts to extract the original RVA from the code at the provided thunk address reader.

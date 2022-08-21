@@ -83,10 +83,10 @@ namespace AsmResolver.PE.Exports.Builder
         }
 
         /// <inheritdoc />
-        public override void UpdateOffsets(ulong newOffset, uint newRva)
+        public override void UpdateOffsets(in RelocationParameters parameters)
         {
-            base.UpdateOffsets(newOffset, newRva);
-            _contentsBuilder.UpdateOffsets(newOffset + ExportDirectoryHeaderSize, newRva + ExportDirectoryHeaderSize);
+            base.UpdateOffsets(parameters);
+            _contentsBuilder.UpdateOffsets(parameters.WithAdvance(ExportDirectoryHeaderSize));
         }
 
         /// <inheritdoc />
