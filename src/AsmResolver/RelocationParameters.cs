@@ -3,7 +3,7 @@ namespace AsmResolver
     /// <summary>
     /// Provides parameters for relocating a segment to a new offset-rva pair.
     /// </summary>
-    public readonly struct RelocationParameters
+    public struct RelocationParameters
     {
         /// <summary>
         /// Creates new relocation parameters.
@@ -44,6 +44,7 @@ namespace AsmResolver
         public ulong Offset
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -52,6 +53,7 @@ namespace AsmResolver
         public uint Rva
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -72,7 +74,6 @@ namespace AsmResolver
         /// </summary>
         /// <param name="offset">The new offset.</param>
         /// <param name="rva">The new relative virtual address.</param>
-        /// <returns>The new relocation parameters.</returns>
         public RelocationParameters WithOffsetRva(ulong offset, uint rva)
         {
             return new RelocationParameters(ImageBase, offset, rva, Is32Bit);
@@ -82,10 +83,10 @@ namespace AsmResolver
         /// Aligns the current offset and virtual address to the nearest multiple of the provided alignment.
         /// </summary>
         /// <param name="alignment">The alignment.</param>
-        /// <returns>The new relocation parameters.</returns>
-        public RelocationParameters Align(uint alignment)
+        public void Align(uint alignment)
         {
-            return WithOffsetRva(Offset.Align(alignment), Rva.Align(alignment));
+            Offset = Offset.Align(alignment);
+            Rva = Rva.Align(alignment);
         }
 
         /// <summary>
@@ -93,9 +94,20 @@ namespace AsmResolver
         /// </summary>
         /// <param name="count">The number of bytes to advance with.</param>
         /// <returns>The new relocation parameters.</returns>
-        public RelocationParameters Advance(uint count)
+        public readonly RelocationParameters WithAdvance(uint count)
         {
-            return WithOffsetRva(Offset + count, Rva + count);
+            return new RelocationParameters(ImageBase, Offset + count, Rva + count, Is32Bit);
+        }
+
+        /// <summary>
+        /// Advances the current offset and virtual address by the provided byte count.
+        /// </summary>
+        /// <param name="count">The number of bytes to advance with.</param>
+        /// <returns>The new relocation parameters.</returns>
+        public void Advance(uint count)
+        {
+            Offset += count;
+            Rva += count;
         }
 
         /// <summary>
@@ -103,10 +115,10 @@ namespace AsmResolver
         /// </summary>
         /// <param name="physicalCount">The number of bytes to advance the physical offset with.</param>
         /// <param name="virtualCount">The number of bytes to advance the virtual address with.</param>
-        /// <returns>The new relocation parameters.</returns>
-        public RelocationParameters Advance(uint physicalCount, uint virtualCount)
+        public void Advance(uint physicalCount, uint virtualCount)
         {
-            return WithOffsetRva(Offset + physicalCount, Rva + virtualCount);
+            Offset += physicalCount;
+            Rva += virtualCount;
         }
 
         /// <inheritdoc />

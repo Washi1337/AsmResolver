@@ -46,7 +46,7 @@ namespace AsmResolver.PE.Imports.Builder
         {
             base.UpdateOffsets(parameters);
 
-            var current = parameters.Advance(_entriesLength);
+            var current = parameters.WithAdvance(_entriesLength);
 
             foreach (var module in Modules)
             {
@@ -54,7 +54,7 @@ namespace AsmResolver.PE.Imports.Builder
                 uint size = thunkTable.GetPhysicalSize();
                 thunkTable.UpdateOffsets(current);
 
-                current = current.Advance(size);
+                current.Advance(size);
             }
 
             HintNameTable.UpdateOffsets(current);

@@ -29,7 +29,7 @@ namespace AsmResolver.PE.Imports.Builder
                 var thunkTable = GetModuleThunkTable(module);
                 uint size = thunkTable.GetPhysicalSize();
                 thunkTable.UpdateOffsets(current);
-                current = current.Advance(size);
+                current.Advance(size);
             }
         }
 

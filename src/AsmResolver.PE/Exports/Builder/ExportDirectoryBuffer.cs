@@ -86,7 +86,7 @@ namespace AsmResolver.PE.Exports.Builder
         public override void UpdateOffsets(in RelocationParameters parameters)
         {
             base.UpdateOffsets(parameters);
-            _contentsBuilder.UpdateOffsets(parameters.Advance(ExportDirectoryHeaderSize));
+            _contentsBuilder.UpdateOffsets(parameters.WithAdvance(ExportDirectoryHeaderSize));
         }
 
         /// <inheritdoc />

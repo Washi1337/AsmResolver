@@ -415,7 +415,7 @@ namespace AsmResolver.PE.File
                 var section = Sections[i];
 
                 section.UpdateOffsets(relocation);
-                relocation = relocation.Advance(
+                relocation.Advance(
                     section.GetPhysicalSize().Align(OptionalHeader.FileAlignment),
                     section.GetVirtualSize().Align(OptionalHeader.SectionAlignment));
             }

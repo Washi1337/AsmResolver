@@ -176,17 +176,19 @@ namespace AsmResolver.PE.DotNet.Cil
         {
             base.UpdateOffsets(parameters);
 
-            var current = parameters.Advance(12);
+            var current = parameters.WithAdvance(12);
+
             Code.UpdateOffsets(current);
             if (HasSections)
             {
                 uint codeSize = Code.GetPhysicalSize();
-                current = current.Advance(codeSize).Align(4);
+                current.Advance(codeSize);
+                current.Align(4);
 
                 for (int i = 0; i < ExtraSections.Count; i++)
                 {
                     ExtraSections[i].UpdateOffsets(current);
-                    current = current.Advance(ExtraSections[i].GetPhysicalSize());
+                    current.Advance(ExtraSections[i].GetPhysicalSize());
                 }
             }
         }

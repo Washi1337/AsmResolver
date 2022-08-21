@@ -63,17 +63,17 @@ namespace AsmResolver
             var current = parameters;
             foreach (var item in _items)
             {
-                current = current.Align(item.Alignment);
+                current.Align(item.Alignment);
                 item.Segment.UpdateOffsets(current);
 
                 uint physicalSize = item.Segment.GetPhysicalSize();
                 uint virtualSize = item.Segment.GetVirtualSize();
 
-                current = current.Advance(physicalSize, virtualSize);
+                current.Advance(physicalSize, virtualSize);
             }
 
             _physicalSize = (uint) (current.Offset - parameters.Offset);
-            _virtualSize = (uint) (current.Rva - parameters.Rva);
+            _virtualSize = current.Rva - parameters.Rva;
         }
 
         /// <inheritdoc />

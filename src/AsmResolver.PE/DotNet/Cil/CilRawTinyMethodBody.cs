@@ -66,7 +66,7 @@ namespace AsmResolver.PE.DotNet.Cil
         public override void UpdateOffsets(in RelocationParameters parameters)
         {
             base.UpdateOffsets(parameters);
-            Code.UpdateOffsets(parameters.Advance(1));
+            Code.UpdateOffsets(parameters.WithAdvance(1));
         }
 
         /// <inheritdoc />
