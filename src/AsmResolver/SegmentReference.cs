@@ -33,9 +33,6 @@ namespace AsmResolver
         public uint Rva => Segment?.Rva ?? 0;
 
         /// <inheritdoc />
-        public bool CanUpdateOffsets => Segment?.CanUpdateOffsets ?? false;
-
-        /// <inheritdoc />
         public bool IsBounded => true;
 
         /// <inheritdoc />
