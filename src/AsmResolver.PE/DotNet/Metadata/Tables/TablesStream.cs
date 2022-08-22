@@ -11,6 +11,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// </summary>
     public class TablesStream : SegmentBase, IMetadataStream
     {
+        private const TableIndex MaxTypeSystemTableIndex = TableIndex.GenericParamConstraint;
+
         /// <summary>
         /// The default name of a table stream using the compressed format.
         /// </summary>
@@ -32,7 +34,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public const string UncompressedStreamName = "#Schema";
 
         private readonly Dictionary<CodedIndex, IndexEncoder> _indexEncoders;
-        private readonly LazyVariable<IList<IMetadataTable>> _tables;
+        private readonly LazyVariable<IList<IMetadataTable?>> _tables;
         private readonly LazyVariable<IList<TableLayout>> _layouts;
 
         /// <summary>
@@ -41,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public TablesStream()
         {
             _layouts = new LazyVariable<IList<TableLayout>>(GetTableLayouts);
-            _tables = new LazyVariable<IList<IMetadataTable>>(GetTables);
+            _tables = new LazyVariable<IList<IMetadataTable?>>(GetTables);
             _indexEncoders = CreateIndexEncoders();
         }
 
@@ -199,7 +201,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// This collection always contains all tables, in the same order as <see cref="TableIndex"/> defines, regardless
         /// of whether a table actually has elements or not.
         /// </remarks>
-        protected IList<IMetadataTable> Tables => _tables.Value;
+        protected IList<IMetadataTable?> Tables => _tables.Value;
 
         /// <summary>
         /// Gets the layout of all tables in the stream.
@@ -220,7 +222,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             var layouts = GetTableLayouts();
             for (int i = 0; i < Tables.Count; i++)
-                Tables[i].UpdateTableLayout(layouts[i]);
+                Tables[i]?.UpdateTableLayout(layouts[i]);
         }
 
         /// <inheritdoc />
@@ -274,7 +276,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             ulong result = 0;
             for (int i = 0; i < Tables.Count; i++)
             {
-                if (Tables[i].Count > 0)
+                if (Tables[i]?.Count > 0)
                     result |= 1UL << i;
             }
 
@@ -301,7 +303,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         protected virtual int GetTablesCount(ulong validBitmask)
         {
             int count = 0;
-            for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)
+            for (TableIndex i = 0; i <= TableIndex.GenericParamConstraint; i++)
             {
                 if (HasTable(validBitmask, i))
                     count++;
@@ -337,7 +339,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="validBitmask">The valid bitmask, indicating all present tables in the stream.</param>
         protected virtual void WriteRowCounts(IBinaryStreamWriter writer, ulong validBitmask)
         {
-            for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)
+            for (TableIndex i = 0; i <= MaxTypeSystemTableIndex; i++)
             {
                 if (HasTable(validBitmask, i))
                     writer.WriteInt32(GetTable(i).Count);
@@ -503,7 +505,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         /// <param name="index">The table index.</param>
         /// <returns>The table.</returns>
-        public virtual IMetadataTable GetTable(TableIndex index) => Tables[(int) index];
+        public virtual IMetadataTable GetTable(TableIndex index) =>
+            Tables[(int) index] ?? throw new ArgumentOutOfRangeException(nameof(index));
 
         /// <summary>
         /// Gets a table by its row type.
@@ -525,7 +528,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public virtual MetadataTable<TRow> GetTable<TRow>(TableIndex index)
             where TRow : struct, IMetadataRow
         {
-            return (MetadataTable<TRow>) Tables[(int) index];
+            return (MetadataTable<TRow>) (Tables[(int) index] ?? throw new ArgumentOutOfRangeException(nameof(index)));
         }
 
         private IndexSize GetStreamIndexSize(int bitIndex) => (IndexSize) (((((int) Flags >> bitIndex) & 1) + 1) * 2);
@@ -545,9 +548,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             if (_layouts.IsInitialized)
             {
-                if (columnType <= ColumnType.Document)
-                    return (uint) Tables[(int) columnType].IndexSize;
-                if (columnType <= ColumnType.TypeOrMethodDef)
+                if (columnType <= ColumnType.CustomDebugInformation)
+                {
+                    return (uint) (Tables[(int) columnType]?.IndexSize
+                                   ?? throw new ArgumentOutOfRangeException(nameof(columnType)));
+                }
+
+                if (columnType <= ColumnType.HasCustomDebugInformation)
                     return (uint) GetIndexEncoder((CodedIndex) columnType).IndexSize;
             }
 

@@ -73,11 +73,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         private uint[] ReadRowCounts(ref BinaryStreamReader reader)
         {
-            const TableIndex maxTableIndex = TableIndex.GenericParamConstraint;
+            uint[] result = new uint[(int) TableIndex.Max];
 
-            uint[] result = new uint[(int) maxTableIndex + 1];
-            for (TableIndex i = 0; i <= maxTableIndex; i++)
-                result[(int) i] = HasTable(_validMask, i) ? reader.ReadUInt32() : 0;
+            for (TableIndex i = 0; i <= TableIndex.GenericParamConstraint; i++)
+            {
+                result[(int) i] = HasTable(_validMask, i)
+                    ? reader.ReadUInt32()
+                    : 0;
+            }
 
             return result;
         }

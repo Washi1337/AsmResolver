@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <summary>
         /// Indicates the index is an index to a member in either the TypeRef, TypeDef or TypeSpec table.
         /// </summary>
-        TypeDefOrRef = 45,
+        TypeDefOrRef = ColumnType.TypeDefOrRef,
 
         /// <summary>
         /// Indicates the index is an index to a member in either the Field, Parameter or Property table.
@@ -74,6 +74,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         TypeOrMethodDef,
 
+        /// <summary>
+        /// Indicates the index is an index to a member in one of the following tables:
+        /// MethodDef, Field, TypeRef, TypeDef, Parameter, InterfaceImpl, MemberRef, Module, DeclSecurity, Property,
+        /// Event, StandAloneSig, ModuleRef, TypeSpec, Assembly, AssemblyRef, File, ExportedType, ManifestResource,
+        /// GenericParam, GenericParamConstraint, MethodSpec, Document, LocalScope, LocalVariable, LocalConstant,
+        /// or ImportScope
+        /// </summary>
         HasCustomDebugInformation
     }
 

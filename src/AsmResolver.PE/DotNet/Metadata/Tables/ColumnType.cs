@@ -8,6 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// </summary>
     public enum ColumnType
     {
+        // Normal type system indices (in sync with TableIndex).
         Module = 0,
         TypeRef = 1,
         TypeDef = 2,
@@ -54,6 +55,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         MethodSpec = 43,
         GenericParamConstraint = 44,
 
+        // PortablePDB indices (in sync with TableIndex).
         Document = 0x30,
         MethodDebugInformation = 0x31,
         LocalScope = 0x32,
@@ -63,6 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         StateMachineMethod = 0x36,
         CustomDebugInformation = 0x37,
 
+        // Coded indices (in sync with CodedIndex).
         TypeDefOrRef,
         HasConstant,
         HasCustomAttribute,
@@ -78,10 +81,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         TypeOrMethodDef,
         HasCustomDebugInformation,
 
+        // Heap indices.
         String,
         Blob,
         Guid,
 
+        // Primitives.
         Byte = 0x8000001,
         UInt16 = 0x8000002,
         UInt32 = 0x8000004,

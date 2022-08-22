@@ -67,4 +67,5 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         String = 0x70
     }
+
 }
