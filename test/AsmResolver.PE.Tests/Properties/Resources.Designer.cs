@@ -94,6 +94,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorldPortablePdb {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorldPortablePdb", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] SimpleDll {
             get {
                 object obj = ResourceManager.GetObject("SimpleDll", resourceCulture);

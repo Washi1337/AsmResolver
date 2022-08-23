@@ -7,6 +7,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Pdb
     /// </summary>
     public class SerializedPdbStream : PdbStream
     {
+        private readonly BinaryStreamReader _reader;
+
         /// <summary>
         /// Creates a new PDB stream with the provided byte array as the raw contents of the stream.
         /// </summary>
@@ -33,6 +35,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Pdb
         /// <param name="reader">The raw contents of the stream.</param>
         public SerializedPdbStream(string name, in BinaryStreamReader reader)
         {
+            _reader = reader;
+
             Name = name;
             Offset = reader.Offset;
             Rva = reader.Rva;
@@ -43,7 +47,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Pdb
             EntryPoint = headerReader.ReadUInt32();
 
             ulong mask = headerReader.ReadUInt64();
-
+            for (int i = 0; i < 64; i++)
+            {
+                if (((mask >> i) & 1) != 0)
+                    TypeSystemTableRows[i] = headerReader.ReadUInt32();
+            }
         }
+
+        /// <inheritdoc />
+        public override bool CanRead => true;
+
+        /// <inheritdoc />
+        public override BinaryStreamReader CreateReader() => _reader.Fork();
     }
 }

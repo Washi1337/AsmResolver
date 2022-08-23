@@ -50,7 +50,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Pdb
         public uint[] TypeSystemTableRows
         {
             get;
-            set;
+        } = new uint[(int) TableIndex.Max];
+
+        /// <summary>
+        /// Synchronizes the row counts stored in <see cref="TypeSystemTableRows"/> with the tables in the provided
+        /// tables stream.
+        /// </summary>
+        /// <param name="stream">The tables stream to pull the data from.</param>
+        public void UpdateRowCounts(TablesStream stream)
+        {
+            for (TableIndex i = 0; i < TableIndex.Max; i++)
+            {
+                if (i.IsValidTableIndex())
+                    TypeSystemTableRows[(int) i] = (uint) stream.GetTable(i).Count;
+            }
         }
 
         /// <summary>
