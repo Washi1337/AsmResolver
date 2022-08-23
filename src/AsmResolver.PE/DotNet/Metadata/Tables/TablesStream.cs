@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// </summary>
     public class TablesStream : SegmentBase, IMetadataStream
     {
-        private const TableIndex MaxTypeSystemTableIndex = TableIndex.GenericParamConstraint;
+        protected const TableIndex MaxTypeSystemTableIndex = TableIndex.GenericParamConstraint;
 
         /// <summary>
         /// The default name of a table stream using the compressed format.

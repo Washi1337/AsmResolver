@@ -1,7 +1,7 @@
-using System;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
+using AsmResolver.PE.DotNet.Metadata.Pdb;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.UserStrings;
@@ -16,7 +16,9 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class DefaultMetadataStreamReader : IMetadataStreamReader
     {
         /// <inheritdoc />
-        public IMetadataStream ReadStream(PEReaderContext context, MetadataStreamHeader header,
+        public IMetadataStream ReadStream(
+            PEReaderContext context,
+            MetadataStreamHeader header,
             ref BinaryStreamReader reader)
         {
             switch (header.Name)
@@ -36,6 +38,9 @@ namespace AsmResolver.PE.DotNet.Metadata
 
                 case GuidStream.DefaultName:
                     return new SerializedGuidStream(header.Name, reader);
+
+                case PdbStream.DefaultName:
+                    return new SerializedPdbStream(header.Name, reader);
 
                 default:
                     return new CustomMetadataStream(header.Name, DataSegment.FromReader(ref reader));
