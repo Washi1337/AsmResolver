@@ -60,7 +60,7 @@ namespace AsmResolver.PE.DotNet
                 return null;
             }
 
-            return new SerializedMetadata(MetadataReaderContext.FromReaderContext(_context), ref directoryReader);
+            return DotNet.Metadata.Metadata.FromReader(directoryReader, MetadataReaderContext.FromReaderContext(_context));
         }
 
         /// <inheritdoc />
