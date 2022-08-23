@@ -55,24 +55,6 @@ namespace AsmResolver.PE.Tls
         }
 
         /// <summary>
-        /// Gets or sets the image base address that the TLS directory assumes.
-        /// </summary>
-        public ulong ImageBase
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the TLS directory assumes a 32-bit or 64-bit format.
-        /// </summary>
-        public bool Is32Bit
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Obtains a collection of base address relocations that need to be applied to the TLS data directory
         /// after the image was loaded into memory.
         /// </summary>

@@ -262,7 +262,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 if (entrypointSymbol is null)
                     throw new InvalidOperationException("Entrypoint symbol was required but not imported.");
 
-                context.Bootstrapper = context.Platform.CreateThunkStub(image.ImageBase, entrypointSymbol);
+                context.Bootstrapper = context.Platform.CreateThunkStub(entrypointSymbol);
             }
         }
 

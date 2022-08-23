@@ -70,7 +70,7 @@ namespace AsmResolver.DotNet.Builder
                 };
 
                 // Construct new .NET directory.
-                var symbolProvider = new NativeSymbolsProvider(image.ImageBase);
+                var symbolProvider = new NativeSymbolsProvider();
                 var result = DotNetDirectoryFactory.CreateDotNetDirectory(
                     module,
                     symbolProvider,

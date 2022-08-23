@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Code.Native
             var provider = context.SymbolsProvider;
 
             // Create new raw code segment containing the native code.
-            var segment = new CodeSegment(provider.ImageBase, nativeMethodBody.Code);
+            var segment = new CodeSegment(nativeMethodBody.Code);
 
             // Process fixups.
             for (int i = 0; i < nativeMethodBody.AddressFixups.Count; i++)

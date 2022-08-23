@@ -445,7 +445,7 @@ namespace AsmResolver.DotNet.Bundles
                 if (file.Type == BundleFileType.Assembly)
                     writer.Align(alignment);
 
-                file.Contents.UpdateOffsets(writer.Offset, (uint) writer.Offset);
+                file.Contents.UpdateOffsets(new RelocationParameters(writer.Offset, (uint) writer.Offset));
                 file.Contents.Write(writer);
             }
         }

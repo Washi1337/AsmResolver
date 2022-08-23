@@ -25,10 +25,10 @@ namespace AsmResolver
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
-        public virtual void UpdateOffsets(ulong newOffset, uint newRva)
+        public virtual void UpdateOffsets(in RelocationParameters parameters)
         {
-            Offset = newOffset;
-            Rva = newRva;
+            Offset = parameters.Offset;
+            Rva = parameters.Rva;
         }
 
         /// <inheritdoc />

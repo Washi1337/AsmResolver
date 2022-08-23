@@ -42,13 +42,6 @@ namespace AsmResolver
         public uint Rva => (uint) (Base.Rva + Additive);
 
         /// <inheritdoc />
-        public bool CanUpdateOffsets => Base.CanUpdateOffsets;
-
-        /// <inheritdoc />
-        public void UpdateOffsets(ulong newOffset, uint newRva) =>
-            Base.UpdateOffsets( newOffset - (ulong) Additive, (uint) (newRva - Additive));
-
-        /// <inheritdoc />
         public bool CanRead => Base is ISegmentReference reference && reference.CanRead;
 
         /// <inheritdoc />

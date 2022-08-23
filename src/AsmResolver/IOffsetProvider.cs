@@ -20,20 +20,6 @@ namespace AsmResolver
         {
             get;
         }
-
-        /// <summary>
-        /// Determines whether this structure can be relocated to another offset or virtual address.
-        /// </summary>
-        bool CanUpdateOffsets
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Assigns a new file and virtual offset to the segment and all its sub-components.
-        /// </summary>
-        /// <param name="newOffset">The new file offset.</param>
-        /// <param name="newRva">The new virtual offset.</param>
-        void UpdateOffsets(ulong newOffset, uint newRva);
     }
+
 }

@@ -17,10 +17,6 @@ namespace AsmResolver.PE.Tests
             get;
         }
 
-        bool IOffsetProvider.CanUpdateOffsets => false;
-
-        void IOffsetProvider.UpdateOffsets(ulong newOffset, uint newRva) => throw new InvalidOperationException();
-
         public bool CanRead => false;
 
         bool ISegmentReference.IsBounded => false;

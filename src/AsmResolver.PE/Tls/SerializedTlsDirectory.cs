@@ -22,18 +22,16 @@ namespace AsmResolver.PE.Tls
         {
             _context = context;
 
-            ulong imageBase = context.File.OptionalHeader.ImageBase;
-            bool is32Bit = context.File.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
+            var relocation = context.GetRelocation(reader.Offset, reader.Rva);
 
-            _templateStart = reader.ReadNativeInt(is32Bit);
-            _templateEnd = reader.ReadNativeInt(is32Bit);
-            Index = context.File.GetReferenceToRva((uint)(reader.ReadNativeInt(is32Bit) - imageBase));
-            _addressOfCallbacks = reader.ReadNativeInt(is32Bit);
+            _templateStart = reader.ReadNativeInt(relocation.Is32Bit);
+            _templateEnd = reader.ReadNativeInt(relocation.Is32Bit);
+            Index = context.File.GetReferenceToRva((uint)(reader.ReadNativeInt(relocation.Is32Bit) - relocation.ImageBase));
+            _addressOfCallbacks = reader.ReadNativeInt(relocation.Is32Bit);
             SizeOfZeroFill = reader.ReadUInt32();
             Characteristics = (TlsCharacteristics) reader.ReadUInt32();
 
-            ImageBase = imageBase;
-            Is32Bit = is32Bit;
+            UpdateOffsets(relocation);
         }
 
         /// <inheritdoc />

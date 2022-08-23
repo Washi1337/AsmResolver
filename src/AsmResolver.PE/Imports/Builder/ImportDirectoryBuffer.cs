@@ -42,23 +42,22 @@ namespace AsmResolver.PE.Imports.Builder
         }
 
         /// <inheritdoc />
-        public override void UpdateOffsets(ulong newOffset, uint newRva)
+        public override void UpdateOffsets(in RelocationParameters parameters)
         {
-            base.UpdateOffsets(newOffset, newRva);
+            base.UpdateOffsets(parameters);
 
-            newOffset += _entriesLength;
-            newRva += _entriesLength;
+            var current = parameters.WithAdvance(_entriesLength);
 
             foreach (var module in Modules)
             {
                 var thunkTable = GetModuleThunkTable(module);
                 uint size = thunkTable.GetPhysicalSize();
-                thunkTable.UpdateOffsets(newOffset, newRva);
-                newOffset += size;
-                newRva += size;
+                thunkTable.UpdateOffsets(current);
+
+                current.Advance(size);
             }
 
-            HintNameTable.UpdateOffsets(newOffset, newRva);
+            HintNameTable.UpdateOffsets(current);
         }
 
         /// <inheritdoc />

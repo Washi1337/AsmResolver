@@ -55,31 +55,25 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newOffset, uint newRva)
+        public void UpdateOffsets(in RelocationParameters parameters)
         {
-            Offset = newOffset;
-            Rva = newRva;
-            _physicalSize = 0;
-            _virtualSize = 0;
+            Offset = parameters.Offset;
+            Rva = parameters.Rva;
 
+            var current = parameters;
             foreach (var item in _items)
             {
-                uint physicalPadding = (uint) (newOffset.Align(item.Alignment) - newOffset);
-                uint virtualPadding = newRva.Align(item.Alignment) - newRva;
-
-                newOffset += physicalPadding;
-                newRva += virtualPadding;
-
-                item.Segment.UpdateOffsets(newOffset, newRva);
+                current.Align(item.Alignment);
+                item.Segment.UpdateOffsets(current);
 
                 uint physicalSize = item.Segment.GetPhysicalSize();
                 uint virtualSize = item.Segment.GetVirtualSize();
 
-                newOffset += physicalSize;
-                newRva += virtualSize;
-                _physicalSize += physicalPadding + physicalSize;
-                _virtualSize += virtualPadding + virtualSize;
+                current.Advance(physicalSize, virtualSize);
             }
+
+            _physicalSize = (uint) (current.Offset - parameters.Offset);
+            _virtualSize = current.Rva - parameters.Rva;
         }
 
         /// <inheritdoc />

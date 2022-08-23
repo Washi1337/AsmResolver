@@ -6,7 +6,7 @@ Executables that use multiple threads might require static (non-stack) memory th
 All code relevant to the TLS data directory of a PE resides in the following namespace:
 
 .. code-block:: csharp
-    
+
     using AsmResolver.PE.Tls;
 
 
@@ -21,7 +21,7 @@ The PE file format defines a segment of memory within the TLS data directory tha
 
 
 .. code-block:: csharp
-    
+
     var indexSegment = new DataSegment(new byte[8]);
 
     var directory = new TlsDirectory
@@ -48,18 +48,14 @@ Next to static initialization data, it is also possible to specify a list of fun
 Creating new TLS directories
 ----------------------------
 
-Since the TLS data directory stores its data using virtual addresses (VA) rather than relative virtual addresses (RVA), AsmResolver requires the image base as well as the pointer size. This is done through the ``ImageBase`` and ``Is32Bit`` properties. By default, the following values are assumed:
+Adding a new TLS directory to an image can be done using the parameterless constructor of the ``TlsDirectory`` class:
 
 .. code-block:: csharp
 
-    var directory = new TlsDirectory();
-    directory.ImageBase = 0x00400000;
-    directory.Is32Bit = true;
+    var tlsDirectory = new TlsDirectory();
+    image.TlsDirectory = tlsDirectory;
 
-
-Typically, you should make sure they are in sync with the values found in the file and optional header of the final PE file. Upon reading from an existing PE file, these two properties are initialized to the values stored in these two headers.
-
-When building a relocatable PE file, you might also need to add base address relocations to the VAs inside the TLS directory. To quickly get all the base relocations required, use the ``GetRequiredBaseRelocations`` method:
+A TLS directory references all its sub segments using virtual addresses (VA) rather than relative addresses (RVA). This means that constructing a relocatable PE image with a TLS directory requires base relocation entries to be registered that let the Windows PE loader rebase all virtual addresses used in the directory when necessary. To quickly register all the required base relocations, you can call the ``GetRequiredBaseRelocations`` method and add all returned entries to the base relocation directory of the PE image:
 
 .. code-block:: csharp
 
@@ -67,5 +63,5 @@ When building a relocatable PE file, you might also need to add base address rel
 
     IPEImage image = ...;
 
-    foreach (var relocation in image.TlsDirectory.GetRequiredBaseRelocations())
+    foreach (var relocation in tlsDirectory.GetRequiredBaseRelocations())
         image.Relocations.Add(relocation);

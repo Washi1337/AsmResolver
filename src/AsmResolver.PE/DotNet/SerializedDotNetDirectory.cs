@@ -125,7 +125,7 @@ namespace AsmResolver.PE.DotNet
             }
 
             var vtables = new VTableFixupsDirectory();
-            vtables.UpdateOffsets(directoryReader.Offset, directoryReader.Rva);
+            vtables.UpdateOffsets(_context.GetRelocation(directoryReader.Offset, directoryReader.Rva));
 
             for (int i = 0; i < directoryReader.Length / 8; i++)
             {

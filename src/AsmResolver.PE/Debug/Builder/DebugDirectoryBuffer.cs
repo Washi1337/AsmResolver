@@ -41,7 +41,7 @@ namespace AsmResolver.PE.Debug.Builder
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newOffset, uint newRva) => _headers.UpdateOffsets(newOffset, newRva);
+        public void UpdateOffsets(in RelocationParameters parameters) => _headers.UpdateOffsets(parameters);
 
         /// <inheritdoc />
         public uint GetPhysicalSize() => _headers.GetPhysicalSize();
