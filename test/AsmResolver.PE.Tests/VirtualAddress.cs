@@ -3,7 +3,7 @@ using AsmResolver.IO;
 
 namespace AsmResolver.PE.Tests
 {
-    public readonly struct VirtualAddress : ISegmentReference
+    public sealed class VirtualAddress : ISegmentReference
     {
         public VirtualAddress(uint rva)
         {

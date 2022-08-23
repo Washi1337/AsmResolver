@@ -27,7 +27,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the table.</param>
         public delegate TRow ReadRowExtendedDelegate(
-            PEReaderContext context,
+            MetadataReaderContext context,
             ref BinaryStreamReader reader,
             TableLayout layout);
 
@@ -61,7 +61,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="originalLayout">The layout of the table.</param>
         /// <param name="readRow">The method to use for reading each row in the table.</param>
         public SerializedMetadataTable(
-            PEReaderContext context,
+            MetadataReaderContext context,
             in BinaryStreamReader reader,
             TableIndex tableIndex,
             TableLayout originalLayout,

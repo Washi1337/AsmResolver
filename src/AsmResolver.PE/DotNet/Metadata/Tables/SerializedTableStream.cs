@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// </summary>
     public class SerializedTableStream : TablesStream
     {
-        private readonly PEReaderContext _context;
+        private readonly MetadataReaderContext _context;
         private readonly BinaryStreamReader _reader;
         private readonly ulong _validMask;
         private readonly ulong _sortedMask;
@@ -26,7 +26,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="context">The reader context.</param>
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
-        public SerializedTableStream(PEReaderContext context, string name, byte[] rawData)
+        public SerializedTableStream(MetadataReaderContext context, string name, byte[] rawData)
             : this(context, name, ByteArrayDataSource.CreateReader(rawData))
         {
         }
@@ -37,7 +37,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="context">The reader context.</param>
         /// <param name="name">The name of the stream.</param>
         /// <param name="reader">The raw contents of the stream.</param>
-        public SerializedTableStream(PEReaderContext context, string name, in BinaryStreamReader reader)
+        public SerializedTableStream(MetadataReaderContext context, string name, in BinaryStreamReader reader)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             _context = context ?? throw new ArgumentNullException(nameof(context));

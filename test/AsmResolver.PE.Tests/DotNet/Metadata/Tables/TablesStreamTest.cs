@@ -1,5 +1,6 @@
 using System.IO;
 using AsmResolver.IO;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 using Xunit;
@@ -37,7 +38,8 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
             using var tempStream = new MemoryStream();
             tablesStream.Write(new BinaryStreamWriter(tempStream));
 
-            var newTablesStream = new SerializedTableStream(new PEReaderContext(new PEFile()), tablesStream.Name, tempStream.ToArray());
+            var context = new MetadataReaderContext(VirtualAddressFactory.Instance);
+            var newTablesStream = new SerializedTableStream(context, tablesStream.Name, tempStream.ToArray());
 
             Assert.Equal(tablesStream.Reserved, newTablesStream.Reserved);
             Assert.Equal(tablesStream.MajorVersion, newTablesStream.MajorVersion);

@@ -9,7 +9,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class MetadataStreamList : LazyList<IMetadataStream>
     {
-        private readonly PEReaderContext _context;
+        private readonly MetadataReaderContext _context;
         private readonly int _numberOfStreams;
         private BinaryStreamReader _directoryReader;
         private BinaryStreamReader _entriesReader;
@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="entriesReader">The input stream containing the metadata stream entries.</param>
         /// <param name="numberOfStreams">The number of streams.</param>
         public MetadataStreamList(
-            PEReaderContext context,
+            MetadataReaderContext context,
             in BinaryStreamReader directoryReader,
             in BinaryStreamReader entriesReader,
             int numberOfStreams)
@@ -48,7 +48,7 @@ namespace AsmResolver.PE.DotNet.Metadata
                 var header = headers[i];
 
                 var streamReader = _directoryReader.ForkAbsolute(_directoryReader.Offset + header.Offset, headers[i].Size);
-                var stream = _context.Parameters.MetadataStreamReader.ReadStream(_context, header, ref streamReader);
+                var stream = _context.MetadataStreamReader.ReadStream(_context, header, ref streamReader);
 
                 Items.Add(stream);
             }

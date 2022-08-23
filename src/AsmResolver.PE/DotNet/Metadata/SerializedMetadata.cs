@@ -10,7 +10,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class SerializedMetadata : Metadata
     {
-        private readonly PEReaderContext _context;
+        private readonly MetadataReaderContext _context;
         private readonly BinaryStreamReader _streamEntriesReader;
         private readonly BinaryStreamReader _streamContentsReader;
         private readonly int _numberOfStreams;
@@ -23,7 +23,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
         /// <exception cref="NotSupportedException">Occurs when an unsupported metadata directory format was encountered.</exception>
         /// <exception cref="BadImageFormatException">Occurs when the metadata directory header is invalid.</exception>
-        public SerializedMetadata(PEReaderContext context, ref BinaryStreamReader directoryReader)
+        public SerializedMetadata(MetadataReaderContext context, ref BinaryStreamReader directoryReader)
         {
             if (!directoryReader.IsValid)
                 throw new ArgumentNullException(nameof(directoryReader));
