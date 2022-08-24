@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -47,22 +48,36 @@ namespace AsmResolver.PE.DotNet.Metadata.Pdb
         /// <summary>
         /// Gets an array of row counts of every portable PDB table in the tables stream.
         /// </summary>
-        public uint[] TypeSystemTableRows
+        public uint[] TypeSystemRowCounts
         {
             get;
         } = new uint[(int) TableIndex.Max];
 
         /// <summary>
-        /// Synchronizes the row counts stored in <see cref="TypeSystemTableRows"/> with the tables in the provided
+        /// Synchronizes the row counts stored in <see cref="TypeSystemRowCounts"/> with the tables in the provided
         /// tables stream.
         /// </summary>
         /// <param name="stream">The tables stream to pull the data from.</param>
         public void UpdateRowCounts(TablesStream stream)
         {
-            for (TableIndex i = 0; i < TableIndex.Max; i++)
+            for (TableIndex i = 0; i < TableIndex.MaxTypeSystemTableIndex; i++)
             {
                 if (i.IsValidTableIndex())
-                    TypeSystemTableRows[(int) i] = (uint) stream.GetTable(i).Count;
+                    TypeSystemRowCounts[(int) i] = (uint) stream.GetTable(i).Count;
+            }
+        }
+
+        /// <summary>
+        /// Synchronizes the row counts stored in <see cref="TypeSystemRowCounts"/> with the tables in the provided
+        /// tables stream row counts.
+        /// </summary>
+        /// <param name="rowCounts">The tables stream row counts to pull in.</param>
+        public void UpdateRowCounts(uint[] rowCounts)
+        {
+            for (TableIndex i = 0; i < TableIndex.MaxTypeSystemTableIndex && (int) i < rowCounts.Length; i++)
+            {
+                if (i.IsValidTableIndex())
+                    TypeSystemRowCounts[(int) i] = rowCounts[(int) i];
             }
         }
 
@@ -74,9 +89,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Pdb
         {
             ulong result = 0;
 
-            for (int i = 0; i < TypeSystemTableRows.Length; i++)
+            for (int i = 0; i < TypeSystemRowCounts.Length; i++)
             {
-                if (TypeSystemTableRows[i] != 0)
+                if (TypeSystemRowCounts[i] != 0)
                     result |= 1UL << i;
             }
 
@@ -92,7 +107,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Pdb
             return 20 // ID
                    + sizeof(uint) // EntryPoint
                    + sizeof(ulong) // ReferencedTypeSystemTables
-                   + 4 * (uint) TypeSystemTableRows.Length; // TypeSystemTableRows.
+                   + 4 * (uint) TypeSystemRowCounts.Count(c => c != 0); // TypeSystemTableRows.
         }
 
         /// <inheritdoc />
@@ -101,8 +116,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Pdb
             writer.WriteBytes(Id);
             writer.WriteUInt32(EntryPoint.ToUInt32());
             writer.WriteUInt64(ComputeReferencedTypeSystemTables());
-            foreach (uint row in TypeSystemTableRows)
-                writer.WriteUInt32(row);
+
+            foreach (uint count in TypeSystemRowCounts)
+            {
+                if (count != 0)
+                    writer.WriteUInt32(count);
+            }
         }
 
     }

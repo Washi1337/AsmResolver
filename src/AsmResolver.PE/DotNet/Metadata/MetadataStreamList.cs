@@ -10,24 +10,28 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class MetadataStreamList : LazyList<IMetadataStream>
     {
         private readonly MetadataReaderContext _context;
+        private readonly IMetadata _owner;
         private readonly int _numberOfStreams;
-        private BinaryStreamReader _directoryReader;
+        private readonly BinaryStreamReader _directoryReader;
         private BinaryStreamReader _entriesReader;
 
         /// <summary>
         /// Prepares a new lazy-initialized metadata stream list.
         /// </summary>
+        /// <param name="owner">The owner of the metadata stream list.</param>
         /// <param name="context">The reader context.</param>
         /// <param name="directoryReader">The input stream containing the metadata directory.</param>
         /// <param name="entriesReader">The input stream containing the metadata stream entries.</param>
         /// <param name="numberOfStreams">The number of streams.</param>
         public MetadataStreamList(
+            IMetadata owner,
             MetadataReaderContext context,
             in BinaryStreamReader directoryReader,
             in BinaryStreamReader entriesReader,
             int numberOfStreams)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _owner = owner;
             _directoryReader = directoryReader;
             _entriesReader = entriesReader;
             _numberOfStreams = numberOfStreams;
@@ -54,5 +58,14 @@ namespace AsmResolver.PE.DotNet.Metadata
             }
         }
 
+        /// <inheritdoc />
+        protected override void PostInitialize()
+        {
+            for (int i = 0; i < _numberOfStreams; i++)
+            {
+                if (Items[i] is ILazyMetadataStream lazyStream)
+                    lazyStream.Initialize(_owner);
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -11,8 +12,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// </summary>
     public class TablesStream : SegmentBase, IMetadataStream
     {
-        protected const TableIndex MaxTypeSystemTableIndex = TableIndex.GenericParamConstraint;
-
         /// <summary>
         /// The default name of a table stream using the compressed format.
         /// </summary>
@@ -195,6 +194,29 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
+        /// Gets a value indicating whether the tables stream is assigned with row counts that originate from an
+        /// external .NET metadata file.
+        /// </summary>
+        /// <remarks>
+        /// This value is typically set to <c>false</c>, except for Portable PDB metadata table streams.
+        /// </remarks>
+        [MemberNotNullWhen(true, nameof(ExternalRowCounts))]
+        public bool HasExternalRowCounts => ExternalRowCounts is not null;
+
+        /// <summary>
+        /// Gets or sets an array of row counts originating from an external .NET metadata file that this table stream
+        /// should consider when encoding indices.
+        /// </summary>
+        /// <remarks>
+        /// This value is typically <c>null</c>, except for Portable PDB metadata table streams.
+        /// </remarks>
+        public uint[]? ExternalRowCounts
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets a collection of all tables in the tables stream.
         /// </summary>
         /// <remarks>
@@ -210,6 +232,36 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         /// <inheritdoc />
         public virtual BinaryStreamReader CreateReader() => throw new NotSupportedException();
+
+        /// <summary>
+        /// Obtains the implied table row count for the provided table index.
+        /// </summary>
+        /// <param name="table">The table index.</param>
+        /// <returns>The row count.</returns>
+        /// <remarks>
+        /// This method takes any external row counts from <see cref="ExternalRowCounts"/> into account.
+        /// </remarks>
+        public uint GetTableRowCount(TableIndex table)
+        {
+            return HasExternalRowCounts && (int) table < ExternalRowCounts.Length
+                ? ExternalRowCounts[(int) table]
+                : (uint) GetTable(table).Count;
+        }
+
+        /// <summary>
+        /// Obtains the implied table index size for the provided table index.
+        /// </summary>
+        /// <param name="table">The table index.</param>
+        /// <returns>The index size.</returns>
+        /// <remarks>
+        /// This method takes any external row counts from <see cref="ExternalRowCounts"/> into account.
+        /// </remarks>
+        public IndexSize GetTableIndexSize(TableIndex table)
+        {
+            return GetTableRowCount(table) > 0xFFFF
+                ? IndexSize.Long
+                : IndexSize.Short;
+        }
 
         /// <summary>
         /// Updates the layouts of each metadata table, according to the <see cref="Flags"/> property.
@@ -303,7 +355,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         protected virtual int GetTablesCount(ulong validBitmask)
         {
             int count = 0;
-            for (TableIndex i = 0; i <= TableIndex.GenericParamConstraint; i++)
+            for (TableIndex i = 0; i < TableIndex.Max; i++)
             {
                 if (HasTable(validBitmask, i))
                     count++;
@@ -339,7 +391,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="validBitmask">The valid bitmask, indicating all present tables in the stream.</param>
         protected virtual void WriteRowCounts(IBinaryStreamWriter writer, ulong validBitmask)
         {
-            for (TableIndex i = 0; i <= MaxTypeSystemTableIndex; i++)
+            for (TableIndex i = 0; i <= TableIndex.Max; i++)
             {
                 if (HasTable(validBitmask, i))
                     writer.WriteInt32(GetTable(i).Count);
@@ -548,33 +600,25 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             if (_layouts.IsInitialized)
             {
-                if (columnType <= ColumnType.CustomDebugInformation)
+                switch (columnType)
                 {
-                    return (uint) (Tables[(int) columnType]?.IndexSize
-                                   ?? throw new ArgumentOutOfRangeException(nameof(columnType)));
+                    case <= ColumnType.CustomDebugInformation:
+                        return (uint) GetTableIndexSize((TableIndex) columnType);
+                    case <= ColumnType.HasCustomDebugInformation:
+                        return (uint) GetIndexEncoder((CodedIndex) columnType).IndexSize;
                 }
-
-                if (columnType <= ColumnType.HasCustomDebugInformation)
-                    return (uint) GetIndexEncoder((CodedIndex) columnType).IndexSize;
             }
 
-            switch (columnType)
+            return columnType switch
             {
-                case ColumnType.Blob:
-                    return (uint) BlobIndexSize;
-                case ColumnType.String:
-                    return (uint) StringIndexSize;
-                case ColumnType.Guid:
-                    return (uint) GuidIndexSize;
-                case ColumnType.Byte:
-                    return sizeof(byte);
-                case ColumnType.UInt16:
-                    return sizeof(ushort);
-                case ColumnType.UInt32:
-                    return sizeof(uint);
-                default:
-                    return sizeof(uint);
-            }
+                ColumnType.Blob => (uint) BlobIndexSize,
+                ColumnType.String => (uint) StringIndexSize,
+                ColumnType.Guid => (uint) GuidIndexSize,
+                ColumnType.Byte => sizeof(byte),
+                ColumnType.UInt16 => sizeof(ushort),
+                ColumnType.UInt32 => sizeof(uint),
+                _ => sizeof(uint)
+            };
         }
 
         /// <summary>

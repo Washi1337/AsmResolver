@@ -50,7 +50,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Pdb
             for (int i = 0; i < 64; i++)
             {
                 if (((mask >> i) & 1) != 0)
-                    TypeSystemTableRows[i] = headerReader.ReadUInt32();
+                    TypeSystemRowCounts[i] = headerReader.ReadUInt32();
             }
         }
 

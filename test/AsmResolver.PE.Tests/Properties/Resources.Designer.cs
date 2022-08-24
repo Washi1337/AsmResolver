@@ -129,6 +129,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
 
+        public static byte[] TheAnswerPortablePdb {
+            get {
+                object obj = ResourceManager.GetObject("TheAnswerPortablePdb", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] SEHSamples {
             get {
                 object obj = ResourceManager.GetObject("SEHSamples", resourceCulture);
@@ -160,6 +167,13 @@ namespace AsmResolver.PE.Tests.Properties {
         public static byte[] TlsTest_x64 {
             get {
                 object obj = ResourceManager.GetObject("TlsTest_x64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] LargeIndicesPdb {
+            get {
+                object obj = ResourceManager.GetObject("LargeIndicesPdb", resourceCulture);
                 return ((byte[])(obj));
             }
         }

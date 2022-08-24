@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
+using AsmResolver.PE.DotNet.Metadata.Pdb;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
@@ -9,16 +10,26 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Provides an implementation of a tables stream that obtains tables from a readable segment in a file.
     /// </summary>
-    public class SerializedTableStream : TablesStream
+    public class SerializedTableStream : TablesStream, ILazyMetadataStream
     {
         private readonly MetadataReaderContext _context;
         private readonly BinaryStreamReader _reader;
         private readonly ulong _validMask;
         private readonly ulong _sortedMask;
         private readonly uint[] _rowCounts;
-        private readonly IndexSize[] _indexSizes;
         private readonly uint _headerSize;
         private bool _tablesInitialized;
+
+        /// <summary>
+        /// Same as <see cref="_rowCounts"/> but may contain row counts from an external tables stream.
+        /// This is required for metadata directories containing Portable PDB debug data.
+        /// </summary>
+        private uint[]? _combinedRowCounts;
+
+        /// <summary>
+        /// Contains the initial sizes of every column type.
+        /// </summary>
+        private IndexSize[]? _indexSizes;
 
         /// <summary>
         /// Creates a new tables stream with the provided byte array as the raw contents of the stream.
@@ -54,15 +65,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             Log2LargestRid = headerReader.ReadByte();
             _validMask = headerReader.ReadUInt64();
             _sortedMask = headerReader.ReadUInt64();
-
             _rowCounts = ReadRowCounts(ref headerReader);
 
             if (HasExtraData)
                 ExtraData = headerReader.ReadUInt32();
 
             _headerSize = headerReader.RelativeOffset;
-
-            _indexSizes = InitializeIndexSizes();
         }
 
         /// <inheritdoc />
@@ -75,7 +83,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             uint[] result = new uint[(int) TableIndex.Max];
 
-            for (TableIndex i = 0; i <= TableIndex.GenericParamConstraint; i++)
+            for (TableIndex i = 0; i < TableIndex.Max; i++)
             {
                 result[(int) i] = HasTable(_validMask, i)
                     ? reader.ReadUInt32()
@@ -86,9 +94,42 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
+        public void Initialize(IMetadata parentMetadata)
+        {
+            if (parentMetadata.TryGetStream(out PdbStream? pdbStream))
+            {
+                // Metadata that contains a PDB stream should use the row counts provided in the pdb stream
+                // for computing the size of a column.
+                _combinedRowCounts = new uint[_rowCounts.Length];
+                ExternalRowCounts = new uint[(int) TableIndex.Document];
+
+                for (int i = 0; i < (int) TableIndex.Document; i++)
+                {
+                    _combinedRowCounts[i] = pdbStream.TypeSystemRowCounts[i];
+                    ExternalRowCounts[i] = pdbStream.TypeSystemRowCounts[i];
+                }
+
+                for (int i = (int) TableIndex.Document; i < (int) TableIndex.Max; i++)
+                    _combinedRowCounts[i] = _rowCounts[i];
+
+            }
+            else
+            {
+                // Otherwise, just use the original row counts array.
+                _combinedRowCounts = _rowCounts;
+            }
+
+            _indexSizes = InitializeIndexSizes();
+        }
+
+        /// <inheritdoc />
         protected override uint GetColumnSize(ColumnType columnType)
         {
-            if (_tablesInitialized || (int) columnType >= _indexSizes.Length)
+            if (_tablesInitialized)
+                return base.GetColumnSize(columnType);
+            if (_indexSizes is null)
+                throw new InvalidOperationException("Serialized tables stream is not fully initialized yet.");
+            if ((int) columnType >= _indexSizes.Length)
                 return base.GetColumnSize(columnType);
             return (uint) _indexSizes[(int) columnType];
         }
@@ -156,8 +197,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 // HasCustomDebugInformation
                 GetCodedIndexSize(TableIndex.Method, TableIndex.Field, TableIndex.TypeRef, TableIndex.TypeDef,
                     TableIndex.Param, TableIndex.InterfaceImpl, TableIndex.MemberRef, TableIndex.Module,
-                    TableIndex.DeclSecurity, TableIndex.Property, TableIndex.Event, TableIndex.StandAloneSig
-                    , TableIndex.ModuleRef, TableIndex.TypeSpec, TableIndex.Assembly, TableIndex.AssemblyRef,
+                    TableIndex.DeclSecurity, TableIndex.Property, TableIndex.Event, TableIndex.StandAloneSig,
+                    TableIndex.ModuleRef, TableIndex.TypeSpec, TableIndex.Assembly, TableIndex.AssemblyRef,
                     TableIndex.File, TableIndex.ExportedType, TableIndex.ManifestResource, TableIndex.GenericParam,
                     TableIndex.GenericParamConstraint, TableIndex.MethodSpec, TableIndex.Document,
                     TableIndex.LocalScope, TableIndex.LocalVariable, TableIndex.LocalConstant, TableIndex.ImportScope)
@@ -168,10 +209,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         private IndexSize GetCodedIndexSize(params TableIndex[] tables)
         {
+            if (_combinedRowCounts is null)
+                throw new InvalidOperationException("Serialized tables stream is not fully initialized yet.");
+
             int tableIndexBitCount = (int) Math.Ceiling(Math.Log(tables.Length, 2));
             int maxSmallTableMemberCount = ushort.MaxValue >> tableIndexBitCount;
 
-            return tables.Select(t => _rowCounts[(int) t]).All(c => c < maxSmallTableMemberCount)
+            return tables.Select(t => _combinedRowCounts[(int) t]).All(c => c < maxSmallTableMemberCount)
                 ? IndexSize.Short
                 : IndexSize.Long;
         }
