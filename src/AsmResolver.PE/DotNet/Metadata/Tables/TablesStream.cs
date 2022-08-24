@@ -324,8 +324,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         protected virtual ulong ComputeValidBitmask()
         {
             // TODO: make more configurable (maybe add IMetadataTable.IsPresent property?).
-
             ulong result = 0;
+
             for (int i = 0; i < Tables.Count; i++)
             {
                 if (Tables[i]?.Count > 0)
@@ -342,9 +342,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <returns>The valid bitmask.</returns>
         protected virtual ulong ComputeSortedBitmask()
         {
-            // TODO: make more configurable (maybe add IMetadataTable.IsSorted property?).
+            ulong result = 0;
 
-            return 0x000016003301FA00;
+            for (int i = 0; i < Tables.Count; i++)
+            {
+                if (Tables[i]?.IsSorted ?? false)
+                    result |= 1UL << i;
+            }
+
+            return result;
         }
 
         /// <summary>

@@ -120,6 +120,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
                 var oldTable = tablesStream.GetTable(tableIndex);
                 var newTable = newTablesStream.GetTable(tableIndex);
 
+                Assert.Equal(oldTable.IsSorted, newTable.IsSorted);
                 Assert.Equal(oldTable.Count, newTable.Count);
                 Assert.All(Enumerable.Range(0, oldTable.Count), j => Assert.Equal(oldTable[j], newTable[j]));
             });

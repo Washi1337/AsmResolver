@@ -306,6 +306,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextRawTableReader(index, ref offset),
                 index,
                 TableLayouts[(int) index],
+                IsSorted(_sortedMask, index),
                 readRow);
         }
 
@@ -320,6 +321,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextRawTableReader(index, ref offset),
                 index,
                 TableLayouts[(int) index],
+                IsSorted(_sortedMask, index),
                 readRow);
         }
 
