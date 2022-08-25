@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using AsmResolver.DotNet.Signatures.Types;
@@ -6,7 +6,7 @@ using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.PE.DotNet.Cil;
 using Xunit;
 
-namespace AsmResolver.DotNet.Tests
+namespace AsmResolver.DotNet.Dynamic.Tests
 {
     public class DynamicMethodDefinitionTest
     {

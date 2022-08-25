@@ -131,43 +131,6 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <summary>
-        ///     Creates a CIL method body from a dynamic method.
-        /// </summary>
-        /// <param name="method">The method that owns the method body.</param>
-        /// <param name="dynamicMethodObj">The Dynamic Method/Delegate/DynamicResolver.</param>
-        /// <returns>The method body.</returns>
-        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls ResolveDynamicResolver")]
-        public static CilMethodBody FromDynamicMethod(MethodDefinition method, object dynamicMethodObj)
-        {
-            if (!(method.Module is SerializedModuleDefinition module))
-                throw new ArgumentException("Method body should reference a serialized module.");
-
-            var result = new CilMethodBody(method);
-            dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
-
-            //Get Runtime Fields
-            byte[] code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code")!;
-            object scope = FieldReader.ReadField<object>(dynamicMethodObj, "m_scope")!;
-            var tokenList = FieldReader.ReadField<List<object?>>(scope, "m_tokens")!;
-            byte[] localSig = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_localSignature")!;
-            byte[] ehHeader = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_exceptionHeader")!;
-            var ehInfos = FieldReader.ReadField<IList<object>>(dynamicMethodObj, "m_exceptions")!;
-
-            //Local Variables
-            DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
-
-            // Read raw instructions.
-            var reader = ByteArrayDataSource.CreateReader(code);
-            var disassembler = new CilDisassembler(reader, new DynamicCilOperandResolver(module, result, tokenList));
-            result.Instructions.AddRange(disassembler.ReadInstructions());
-
-            //Exception Handlers
-            DynamicMethodHelper.ReadReflectionExceptionHandlers(result, ehInfos, ehHeader, new ReferenceImporter(module));
-
-            return result;
-        }
-
-        /// <summary>
         /// Creates a CIL method body from a raw CIL method body.
         /// </summary>
         /// <param name="context">The reader context.</param>
