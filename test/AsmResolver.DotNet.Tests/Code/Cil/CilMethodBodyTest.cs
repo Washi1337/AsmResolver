@@ -124,33 +124,6 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             Assert.Single(body.ExceptionHandlers);
         }
 
-        [Fact]
-        public void ReadDynamicMethod()
-        {
-            var module = ModuleDefinition.FromFile(typeof(TDynamicMethod).Assembly.Location);
-
-            var type = module.TopLevelTypes.First(t => t.Name == nameof(TDynamicMethod));
-
-            var method = type.Methods.FirstOrDefault(m => m.Name == nameof(TDynamicMethod.GenerateDynamicMethod));
-
-            DynamicMethod generateDynamicMethod = TDynamicMethod.GenerateDynamicMethod();
-
-            //Dynamic method => CilMethodBody
-            var body = CilMethodBody.FromDynamicMethod(method, generateDynamicMethod);
-
-            Assert.NotNull(body);
-
-            Assert.NotEmpty(body.Instructions);
-
-            Assert.Equal(body.Instructions.Select(q=>q.OpCode),new CilOpCode[]
-            {
-                CilOpCodes.Ldarg_0,
-                CilOpCodes.Call,
-                CilOpCodes.Ldarg_1,
-                CilOpCodes.Ret
-            });
-        }
-
         private static CilMethodBody CreateDummyBody(bool isVoid)
         {
             var module = new ModuleDefinition("DummyModule");

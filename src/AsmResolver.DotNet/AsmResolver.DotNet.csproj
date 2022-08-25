@@ -8,6 +8,7 @@
         <NoWarn>1701;1702;NU5105</NoWarn>
         <Nullable>enable</Nullable>
         <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+        <IsTrimmable>true</IsTrimmable>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
