@@ -134,6 +134,10 @@ namespace AsmResolver.IO
                 throw new EndOfStreamException();
         }
 
+        public int PeekByte() => CanRead(1)
+            ? DataSource[Offset]
+            : -1;
+
         /// <summary>
         /// Reads a single byte from the input stream, and advances the current offset by one.
         /// </summary>

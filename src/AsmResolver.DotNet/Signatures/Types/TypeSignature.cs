@@ -14,18 +14,6 @@ namespace AsmResolver.DotNet.Signatures.Types
     {
         internal const string NullTypeToString = "<<???>>";
 
-        private static readonly MethodInfo GetTypeFromHandleUnsafeMethod;
-
-        static TypeSignature()
-        {
-            GetTypeFromHandleUnsafeMethod = typeof(Type)
-                .GetMethod("GetTypeFromHandleUnsafe",
-                    (BindingFlags) (-1),
-                    null,
-                    new[] {typeof(IntPtr)},
-                    null)!;
-        }
-
         /// <inheritdoc />
         public abstract string? Name
         {
@@ -156,19 +144,9 @@ namespace AsmResolver.DotNet.Signatures.Types
                     return new BoxedTypeSignature(FromReader(context, ref reader));
 
                 case ElementType.Internal:
-                    var address = IntPtr.Size switch
-                    {
-                        4 => new IntPtr(reader.ReadInt32()),
-                        _ => new IntPtr(reader.ReadInt64())
-                    };
-
-                    // Let the runtime translate the address to a type and import it.
-                    var clrType = (Type?) GetTypeFromHandleUnsafeMethod.Invoke(null, new object[] { address });
-                    var asmResType = clrType is not null
-                        ? new ReferenceImporter(context.ReaderContext.ParentModule).ImportType(clrType)
-                        : InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.IllegalTypeSpec);
-
-                    return new TypeDefOrRefSignature(asmResType);
+                    throw new NotSupportedException(
+                        "Encountered an COR_ELEMENT_TYPE_INTERNAL type signature which is not supported by this "
+                        + " type signature reader. Use the AsmResolver.DotNet.Dynamic extension package instead.");
 
                 default:
                     throw new ArgumentOutOfRangeException($"Invalid or unsupported element type {elementType}.");

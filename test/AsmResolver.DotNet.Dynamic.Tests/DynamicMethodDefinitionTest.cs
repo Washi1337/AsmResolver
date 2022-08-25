@@ -14,56 +14,63 @@ namespace AsmResolver.DotNet.Dynamic.Tests
         public void ReadDynamicMethod()
         {
             var module = ModuleDefinition.FromFile(typeof(TDynamicMethod).Assembly.Location);
+            var generatedDynamicMethod = TDynamicMethod.GenerateDynamicMethod();
+            var dynamicMethodDef = new DynamicMethodDefinition(module, generatedDynamicMethod);
 
-            DynamicMethod generateDynamicMethod = TDynamicMethod.GenerateDynamicMethod();
-
-            var dynamicMethodDefinition = new DynamicMethodDefinition(module, generateDynamicMethod);
-
-            Assert.NotNull(dynamicMethodDefinition);
-
-            Assert.NotEmpty(dynamicMethodDefinition.CilMethodBody.Instructions);
-            
-            Assert.Equal(dynamicMethodDefinition.CilMethodBody.Instructions.Select(q=>q.OpCode),new []
+            Assert.NotNull(dynamicMethodDef);
+            Assert.NotEmpty(dynamicMethodDef.CilMethodBody!.Instructions);
+            Assert.Equal(new[]
             {
-                CilOpCodes.Ldarg_0, 
-                CilOpCodes.Call,
-                CilOpCodes.Ldarg_1,
-                CilOpCodes.Ret
-            });
-            Assert.Equal(dynamicMethodDefinition.Parameters.Select(q=>q.ParameterType),new TypeSignature[]
+                CilCode.Ldarg_0,
+                CilCode.Stloc_0,
+                CilCode.Ldloc_0,
+                CilCode.Call,
+                CilCode.Ldarg_1,
+                CilCode.Ret
+            }, dynamicMethodDef.CilMethodBody.Instructions.Select(q => q.OpCode.Code));
+            Assert.Equal(new TypeSignature[]
             {
                 module.CorLibTypeFactory.String,
                 module.CorLibTypeFactory.Int32
-            });
+            }, dynamicMethodDef.Parameters.Select(q => q.ParameterType));
+            Assert.Equal(new TypeSignature[]
+            {
+                module.CorLibTypeFactory.String,
+            }, dynamicMethodDef.CilMethodBody.LocalVariables.Select(v => v.VariableType));
         }
-        
+
         [Fact]
         public void RtDynamicMethod()
         {
             var module = ModuleDefinition.FromFile(typeof(TDynamicMethod).Assembly.Location);
 
-            DynamicMethod generateDynamicMethod = TDynamicMethod.GenerateDynamicMethod();
+            var generatedDynamicMethod = TDynamicMethod.GenerateDynamicMethod();
+            object rtDynamicMethod = generatedDynamicMethod
+                .GetType()
+                .GetField("m_dynMethod", (BindingFlags) (-1))?
+                .GetValue(generatedDynamicMethod);
+            var dynamicMethod = new DynamicMethodDefinition(module, rtDynamicMethod!);
 
-            var rtDynamicMethod = generateDynamicMethod.GetType().GetField("m_dynMethod", (BindingFlags) (-1))?.GetValue(generateDynamicMethod); 
-            
-            var dynamicMethodDefinition = new DynamicMethodDefinition(module, rtDynamicMethod);
-
-            Assert.NotNull(dynamicMethodDefinition);
-
-            Assert.NotEmpty(dynamicMethodDefinition.CilMethodBody.Instructions);
-            
-            Assert.Equal(dynamicMethodDefinition.CilMethodBody.Instructions.Select(q=>q.OpCode),new []
+            Assert.NotNull(dynamicMethod);
+            Assert.NotEmpty(dynamicMethod.CilMethodBody!.Instructions);
+            Assert.Equal(new[]
             {
-                CilOpCodes.Ldarg_0, 
-                CilOpCodes.Call,
-                CilOpCodes.Ldarg_1,
-                CilOpCodes.Ret
-            });
-            Assert.Equal(dynamicMethodDefinition.Parameters.Select(q=>q.ParameterType),new TypeSignature[]
+                CilCode.Ldarg_0,
+                CilCode.Stloc_0,
+                CilCode.Ldloc_0,
+                CilCode.Call,
+                CilCode.Ldarg_1,
+                CilCode.Ret
+            }, dynamicMethod.CilMethodBody.Instructions.Select(q => q.OpCode.Code));
+            Assert.Equal(new TypeSignature[]
             {
                 module.CorLibTypeFactory.String,
                 module.CorLibTypeFactory.Int32
-            });
+            }, dynamicMethod.Parameters.Select(q => q.ParameterType));
+            Assert.Equal(new TypeSignature[]
+            {
+                module.CorLibTypeFactory.String,
+            }, dynamicMethod.CilMethodBody.LocalVariables.Select(v => v.VariableType));
         }
     }
 }
