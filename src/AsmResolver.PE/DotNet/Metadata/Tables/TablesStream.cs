@@ -344,11 +344,36 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             ulong result = 0;
 
+            bool containsTypeSystemData = false;
+            bool containsPdbData = false;
+
+            // Determine which tables are marked as sorted.
             for (int i = 0; i < Tables.Count; i++)
             {
-                if (Tables[i]?.IsSorted ?? false)
+                if (Tables[i] is not { } table)
+                    continue;
+
+                if (table.IsSorted)
                     result |= 1UL << i;
+
+                if (table.Count > 0)
+                {
+                    if (i <= (int) TableIndex.MaxTypeSystemTableIndex)
+                        containsTypeSystemData = true;
+                    else
+                        containsPdbData = true;
+                }
             }
+
+            const ulong typeSystemMask = (1UL << (int) TableIndex.MaxTypeSystemTableIndex + 1) - 1;
+            const ulong pdbMask = ((1UL << (int) TableIndex.Max) - 1) & ~typeSystemMask;
+
+            // Backwards compatibility: Ensure that only the bits are set in the sorted mask if the metadata
+            // actually contains the type system and/or pdb tables.
+            if (!containsTypeSystemData)
+                result &= ~typeSystemMask;
+            if (!containsPdbData)
+                result &= ~pdbMask;
 
             return result;
         }
