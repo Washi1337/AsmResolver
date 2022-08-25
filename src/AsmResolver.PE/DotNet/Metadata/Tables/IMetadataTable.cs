@@ -38,6 +38,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the table is considered sorted.
+        /// </summary>
+        bool IsSorted
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets the contents of a row by its row identifier.
         /// </summary>
         /// <param name="rid">The row identifier.</param>

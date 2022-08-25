@@ -27,7 +27,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             _tableIndexBitCount = (int)Math.Ceiling(Math.Log(tables.Length, 2));
             _tableIndexBitMask = (int)(Math.Pow(2, _tableIndexBitCount) - 1);
             _maxSmallTableMemberCount = ushort.MaxValue >> _tableIndexBitCount;
-            
+
         }
 
         /// <summary>
@@ -37,11 +37,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             get
             {
-                int maxCount = _tables
-                    .Select(table => _tableStream.GetTable(table).Count)
-                    .Max();
+                uint maxCount = 0;
+                foreach (var table in _tables)
+                    maxCount = Math.Max(maxCount, _tableStream.GetTableRowCount(table));
 
-                return maxCount > _maxSmallTableMemberCount ? IndexSize.Long : IndexSize.Short;
+                return maxCount > _maxSmallTableMemberCount
+                    ? IndexSize.Long
+                    : IndexSize.Short;
             }
         }
 
@@ -71,9 +73,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             long tableIndex = codedIndex & _tableIndexBitMask;
             uint rowIndex = codedIndex >> _tableIndexBitCount;
-            
-            return new MetadataToken(tableIndex >= _tables.Length 
-                    ? TableIndex.Module 
+
+            return new MetadataToken(tableIndex >= _tables.Length
+                    ? TableIndex.Module
                     : _tables[tableIndex],
                 rowIndex);
         }

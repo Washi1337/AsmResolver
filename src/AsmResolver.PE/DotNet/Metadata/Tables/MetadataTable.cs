@@ -25,9 +25,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="tableIndex">The index of the table.</param>
         /// <param name="layout">The layout of the table.</param>
         public MetadataTable(TableIndex tableIndex, TableLayout layout)
+            : this(tableIndex, layout, false)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new metadata table using the provided layout.
+        /// </summary>
+        /// <param name="tableIndex">The index of the table.</param>
+        /// <param name="layout">The layout of the table.</param>
+        /// <param name="isSorted">Indicates the table is sorted or not.</param>
+        public MetadataTable(TableIndex tableIndex, TableLayout layout, bool isSorted)
         {
             TableIndex = tableIndex;
             Layout = layout;
+            IsSorted = isSorted;
         }
 
         /// <summary>
@@ -53,6 +65,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             get => Rows[index];
             set => Rows[index] = value;
+        }
+
+        /// <inheritdoc />
+        public bool IsSorted
+        {
+            get;
+            set;
         }
 
         /// <inheritdoc />

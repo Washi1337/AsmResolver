@@ -17,10 +17,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the field RVA table.</param>
         /// <returns>The row.</returns>
-        public static FieldRvaRow FromReader(PEReaderContext context, ref BinaryStreamReader reader, TableLayout layout)
+        public static FieldRvaRow FromReader(MetadataReaderContext context, ref BinaryStreamReader reader, TableLayout layout)
         {
             return new FieldRvaRow(
-                 context.File.GetReferenceToRva(reader.ReadUInt32()),
+                 context.ReferenceFactory.GetReferenceToRva(reader.ReadUInt32()),
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
 

@@ -94,6 +94,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorldPortablePdb {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorldPortablePdb", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] SimpleDll {
             get {
                 object obj = ResourceManager.GetObject("SimpleDll", resourceCulture);
@@ -118,6 +125,13 @@ namespace AsmResolver.PE.Tests.Properties {
         public static byte[] TheAnswer_NetCore {
             get {
                 object obj = ResourceManager.GetObject("TheAnswer_NetCore", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] TheAnswerPortablePdb {
+            get {
+                object obj = ResourceManager.GetObject("TheAnswerPortablePdb", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -153,6 +167,13 @@ namespace AsmResolver.PE.Tests.Properties {
         public static byte[] TlsTest_x64 {
             get {
                 object obj = ResourceManager.GetObject("TlsTest_x64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] LargeIndicesPdb {
+            get {
+                object obj = ResourceManager.GetObject("LargeIndicesPdb", resourceCulture);
                 return ((byte[])(obj));
             }
         }

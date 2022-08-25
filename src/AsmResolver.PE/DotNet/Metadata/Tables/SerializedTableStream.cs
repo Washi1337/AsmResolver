@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
+using AsmResolver.PE.DotNet.Metadata.Pdb;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
@@ -9,16 +10,26 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Provides an implementation of a tables stream that obtains tables from a readable segment in a file.
     /// </summary>
-    public class SerializedTableStream : TablesStream
+    public class SerializedTableStream : TablesStream, ILazyMetadataStream
     {
-        private readonly PEReaderContext _context;
+        private readonly MetadataReaderContext _context;
         private readonly BinaryStreamReader _reader;
         private readonly ulong _validMask;
         private readonly ulong _sortedMask;
         private readonly uint[] _rowCounts;
-        private readonly IndexSize[] _indexSizes;
         private readonly uint _headerSize;
         private bool _tablesInitialized;
+
+        /// <summary>
+        /// Same as <see cref="_rowCounts"/> but may contain row counts from an external tables stream.
+        /// This is required for metadata directories containing Portable PDB debug data.
+        /// </summary>
+        private uint[]? _combinedRowCounts;
+
+        /// <summary>
+        /// Contains the initial sizes of every column type.
+        /// </summary>
+        private IndexSize[]? _indexSizes;
 
         /// <summary>
         /// Creates a new tables stream with the provided byte array as the raw contents of the stream.
@@ -26,7 +37,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="context">The reader context.</param>
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
-        public SerializedTableStream(PEReaderContext context, string name, byte[] rawData)
+        public SerializedTableStream(MetadataReaderContext context, string name, byte[] rawData)
             : this(context, name, ByteArrayDataSource.CreateReader(rawData))
         {
         }
@@ -37,7 +48,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="context">The reader context.</param>
         /// <param name="name">The name of the stream.</param>
         /// <param name="reader">The raw contents of the stream.</param>
-        public SerializedTableStream(PEReaderContext context, string name, in BinaryStreamReader reader)
+        public SerializedTableStream(MetadataReaderContext context, string name, in BinaryStreamReader reader)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -54,15 +65,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             Log2LargestRid = headerReader.ReadByte();
             _validMask = headerReader.ReadUInt64();
             _sortedMask = headerReader.ReadUInt64();
-
             _rowCounts = ReadRowCounts(ref headerReader);
 
             if (HasExtraData)
                 ExtraData = headerReader.ReadUInt32();
 
             _headerSize = headerReader.RelativeOffset;
-
-            _indexSizes = InitializeIndexSizes();
         }
 
         /// <inheritdoc />
@@ -73,19 +81,55 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         private uint[] ReadRowCounts(ref BinaryStreamReader reader)
         {
-            const TableIndex maxTableIndex = TableIndex.GenericParamConstraint;
+            uint[] result = new uint[(int) TableIndex.Max];
 
-            var result = new uint[(int) maxTableIndex + 1 ];
-            for (TableIndex i = 0; i <= maxTableIndex; i++)
-                result[(int) i] = HasTable(_validMask, i) ? reader.ReadUInt32() : 0;
+            for (TableIndex i = 0; i < TableIndex.Max; i++)
+            {
+                result[(int) i] = HasTable(_validMask, i)
+                    ? reader.ReadUInt32()
+                    : 0;
+            }
 
             return result;
         }
 
         /// <inheritdoc />
+        public void Initialize(IMetadata parentMetadata)
+        {
+            if (parentMetadata.TryGetStream(out PdbStream? pdbStream))
+            {
+                // Metadata that contains a PDB stream should use the row counts provided in the pdb stream
+                // for computing the size of a column.
+                _combinedRowCounts = new uint[_rowCounts.Length];
+                ExternalRowCounts = new uint[(int) TableIndex.Document];
+
+                for (int i = 0; i < (int) TableIndex.Document; i++)
+                {
+                    _combinedRowCounts[i] = pdbStream.TypeSystemRowCounts[i];
+                    ExternalRowCounts[i] = pdbStream.TypeSystemRowCounts[i];
+                }
+
+                for (int i = (int) TableIndex.Document; i < (int) TableIndex.Max; i++)
+                    _combinedRowCounts[i] = _rowCounts[i];
+
+            }
+            else
+            {
+                // Otherwise, just use the original row counts array.
+                _combinedRowCounts = _rowCounts;
+            }
+
+            _indexSizes = InitializeIndexSizes();
+        }
+
+        /// <inheritdoc />
         protected override uint GetColumnSize(ColumnType columnType)
         {
-            if (_tablesInitialized || (int) columnType >= _indexSizes.Length)
+            if (_tablesInitialized)
+                return base.GetColumnSize(columnType);
+            if (_indexSizes is null)
+                throw new InvalidOperationException("Serialized tables stream is not fully initialized yet.");
+            if ((int) columnType >= _indexSizes.Length)
                 return base.GetColumnSize(columnType);
             return (uint) _indexSizes[(int) columnType];
         }
@@ -149,6 +193,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
                 // TypeOrMethodDef
                 GetCodedIndexSize(TableIndex.TypeDef, TableIndex.Method),
+
+                // HasCustomDebugInformation
+                GetCodedIndexSize(TableIndex.Method, TableIndex.Field, TableIndex.TypeRef, TableIndex.TypeDef,
+                    TableIndex.Param, TableIndex.InterfaceImpl, TableIndex.MemberRef, TableIndex.Module,
+                    TableIndex.DeclSecurity, TableIndex.Property, TableIndex.Event, TableIndex.StandAloneSig,
+                    TableIndex.ModuleRef, TableIndex.TypeSpec, TableIndex.Assembly, TableIndex.AssemblyRef,
+                    TableIndex.File, TableIndex.ExportedType, TableIndex.ManifestResource, TableIndex.GenericParam,
+                    TableIndex.GenericParamConstraint, TableIndex.MethodSpec, TableIndex.Document,
+                    TableIndex.LocalScope, TableIndex.LocalVariable, TableIndex.LocalConstant, TableIndex.ImportScope)
             });
 
             return result.ToArray();
@@ -156,19 +209,22 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         private IndexSize GetCodedIndexSize(params TableIndex[] tables)
         {
+            if (_combinedRowCounts is null)
+                throw new InvalidOperationException("Serialized tables stream is not fully initialized yet.");
+
             int tableIndexBitCount = (int) Math.Ceiling(Math.Log(tables.Length, 2));
             int maxSmallTableMemberCount = ushort.MaxValue >> tableIndexBitCount;
 
-            return tables.Select(t => _rowCounts[(int) t]).All(c => c < maxSmallTableMemberCount)
+            return tables.Select(t => _combinedRowCounts[(int) t]).All(c => c < maxSmallTableMemberCount)
                 ? IndexSize.Short
                 : IndexSize.Long;
         }
 
         /// <inheritdoc />
-        protected override IList<IMetadataTable> GetTables()
+        protected override IList<IMetadataTable?> GetTables()
         {
             uint offset = _headerSize;
-            var tables = new IMetadataTable[]
+            var tables = new IMetadataTable?[]
             {
                 CreateNextTable(TableIndex.Module, ref offset, ModuleDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.TypeRef, ref offset, TypeReferenceRow.FromReader),
@@ -215,6 +271,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.GenericParam, ref offset, GenericParameterRow.FromReader),
                 CreateNextTable(TableIndex.MethodSpec, ref offset, MethodSpecificationRow.FromReader),
                 CreateNextTable(TableIndex.GenericParamConstraint, ref offset, GenericParameterConstraintRow.FromReader),
+                null,
+                null,
+                null,
+                CreateNextTable(TableIndex.Document, ref offset, DocumentRow.FromReader),
+                CreateNextTable(TableIndex.MethodDebugInformation, ref offset, MethodDebugInformationRow.FromReader),
+                CreateNextTable(TableIndex.LocalScope, ref offset, LocalScopeRow.FromReader),
+                CreateNextTable(TableIndex.LocalVariable, ref offset, LocalVariableRow.FromReader),
+                CreateNextTable(TableIndex.LocalConstant, ref offset, LocalConstantRow.FromReader),
+                CreateNextTable(TableIndex.ImportScope, ref offset, ImportScopeRow.FromReader),
+                CreateNextTable(TableIndex.StateMachineMethod, ref offset, StateMachineMethodRow.FromReader),
+                CreateNextTable(TableIndex.CustomDebugInformation, ref offset, CustomDebugInformationRow.FromReader),
             };
             _tablesInitialized = true;
             return tables;
@@ -239,6 +306,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextRawTableReader(index, ref offset),
                 index,
                 TableLayouts[(int) index],
+                IsSorted(_sortedMask, index),
                 readRow);
         }
 
@@ -253,6 +321,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextRawTableReader(index, ref offset),
                 index,
                 TableLayouts[(int) index],
+                IsSorted(_sortedMask, index),
                 readRow);
         }
 

@@ -27,7 +27,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the table.</param>
         public delegate TRow ReadRowExtendedDelegate(
-            PEReaderContext context,
+            MetadataReaderContext context,
             ref BinaryStreamReader reader,
             TableLayout layout);
 
@@ -42,9 +42,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="reader">The input stream.</param>
         /// <param name="tableIndex">The index of the table.</param>
         /// <param name="originalLayout">The layout of the table.</param>
+        /// <param name="isSorted">Indicates the table is sorted or not.</param>
         /// <param name="readRow">The method to use for reading each row in the table.</param>
-        public SerializedMetadataTable(in BinaryStreamReader reader, TableIndex tableIndex, TableLayout originalLayout, ReadRowDelegate readRow)
-            : base(tableIndex, originalLayout)
+        public SerializedMetadataTable(
+            in BinaryStreamReader reader,
+            TableIndex tableIndex,
+            TableLayout originalLayout,
+            bool isSorted,
+            ReadRowDelegate readRow)
+            : base(tableIndex, originalLayout, isSorted)
         {
             _reader = reader;
             _originalLayout = originalLayout;
@@ -59,14 +65,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="reader">The input stream.</param>
         /// <param name="tableIndex">The index of the table.</param>
         /// <param name="originalLayout">The layout of the table.</param>
+        /// <param name="isSorted">Indicates the table is sorted or not.</param>
         /// <param name="readRow">The method to use for reading each row in the table.</param>
         public SerializedMetadataTable(
-            PEReaderContext context,
+            MetadataReaderContext context,
             in BinaryStreamReader reader,
             TableIndex tableIndex,
             TableLayout originalLayout,
+            bool isSorted,
             ReadRowExtendedDelegate readRow)
-            : this(reader, tableIndex, originalLayout,
+            : this(reader, tableIndex, originalLayout, isSorted,
                 (ref BinaryStreamReader r, TableLayout l) => readRow(context, ref r, l))
         {
         }

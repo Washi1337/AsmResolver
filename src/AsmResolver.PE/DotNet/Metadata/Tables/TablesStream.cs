@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -9,7 +10,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents the metadata stream containing tables defining each member in a .NET assembly.
     /// </summary>
-    public class TablesStream : SegmentBase, IMetadataStream
+    public partial class TablesStream : SegmentBase, IMetadataStream
     {
         /// <summary>
         /// The default name of a table stream using the compressed format.
@@ -32,7 +33,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public const string UncompressedStreamName = "#Schema";
 
         private readonly Dictionary<CodedIndex, IndexEncoder> _indexEncoders;
-        private readonly LazyVariable<IList<IMetadataTable>> _tables;
+        private readonly LazyVariable<IList<IMetadataTable?>> _tables;
         private readonly LazyVariable<IList<TableLayout>> _layouts;
 
         /// <summary>
@@ -41,7 +42,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public TablesStream()
         {
             _layouts = new LazyVariable<IList<TableLayout>>(GetTableLayouts);
-            _tables = new LazyVariable<IList<IMetadataTable>>(GetTables);
+            _tables = new LazyVariable<IList<IMetadataTable?>>(GetTables);
             _indexEncoders = CreateIndexEncoders();
         }
 
@@ -193,13 +194,36 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
+        /// Gets a value indicating whether the tables stream is assigned with row counts that originate from an
+        /// external .NET metadata file.
+        /// </summary>
+        /// <remarks>
+        /// This value is typically set to <c>false</c>, except for Portable PDB metadata table streams.
+        /// </remarks>
+        [MemberNotNullWhen(true, nameof(ExternalRowCounts))]
+        public bool HasExternalRowCounts => ExternalRowCounts is not null;
+
+        /// <summary>
+        /// Gets or sets an array of row counts originating from an external .NET metadata file that this table stream
+        /// should consider when encoding indices.
+        /// </summary>
+        /// <remarks>
+        /// This value is typically <c>null</c>, except for Portable PDB metadata table streams.
+        /// </remarks>
+        public uint[]? ExternalRowCounts
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets a collection of all tables in the tables stream.
         /// </summary>
         /// <remarks>
         /// This collection always contains all tables, in the same order as <see cref="TableIndex"/> defines, regardless
         /// of whether a table actually has elements or not.
         /// </remarks>
-        protected IList<IMetadataTable> Tables => _tables.Value;
+        protected IList<IMetadataTable?> Tables => _tables.Value;
 
         /// <summary>
         /// Gets the layout of all tables in the stream.
@@ -208,6 +232,36 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         /// <inheritdoc />
         public virtual BinaryStreamReader CreateReader() => throw new NotSupportedException();
+
+        /// <summary>
+        /// Obtains the implied table row count for the provided table index.
+        /// </summary>
+        /// <param name="table">The table index.</param>
+        /// <returns>The row count.</returns>
+        /// <remarks>
+        /// This method takes any external row counts from <see cref="ExternalRowCounts"/> into account.
+        /// </remarks>
+        public uint GetTableRowCount(TableIndex table)
+        {
+            return HasExternalRowCounts && (int) table < ExternalRowCounts.Length
+                ? ExternalRowCounts[(int) table]
+                : (uint) GetTable(table).Count;
+        }
+
+        /// <summary>
+        /// Obtains the implied table index size for the provided table index.
+        /// </summary>
+        /// <param name="table">The table index.</param>
+        /// <returns>The index size.</returns>
+        /// <remarks>
+        /// This method takes any external row counts from <see cref="ExternalRowCounts"/> into account.
+        /// </remarks>
+        public IndexSize GetTableIndexSize(TableIndex table)
+        {
+            return GetTableRowCount(table) > 0xFFFF
+                ? IndexSize.Long
+                : IndexSize.Short;
+        }
 
         /// <summary>
         /// Updates the layouts of each metadata table, according to the <see cref="Flags"/> property.
@@ -220,7 +274,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             var layouts = GetTableLayouts();
             for (int i = 0; i < Tables.Count; i++)
-                Tables[i].UpdateTableLayout(layouts[i]);
+                Tables[i]?.UpdateTableLayout(layouts[i]);
         }
 
         /// <inheritdoc />
@@ -270,11 +324,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         protected virtual ulong ComputeValidBitmask()
         {
             // TODO: make more configurable (maybe add IMetadataTable.IsPresent property?).
-
             ulong result = 0;
+
             for (int i = 0; i < Tables.Count; i++)
             {
-                if (Tables[i].Count > 0)
+                if (Tables[i]?.Count > 0)
                     result |= 1UL << i;
             }
 
@@ -288,9 +342,40 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <returns>The valid bitmask.</returns>
         protected virtual ulong ComputeSortedBitmask()
         {
-            // TODO: make more configurable (maybe add IMetadataTable.IsSorted property?).
+            ulong result = 0;
 
-            return 0x000016003301FA00;
+            bool containsTypeSystemData = false;
+            bool containsPdbData = false;
+
+            // Determine which tables are marked as sorted.
+            for (int i = 0; i < Tables.Count; i++)
+            {
+                if (Tables[i] is not { } table)
+                    continue;
+
+                if (table.IsSorted)
+                    result |= 1UL << i;
+
+                if (table.Count > 0)
+                {
+                    if (i <= (int) TableIndex.MaxTypeSystemTableIndex)
+                        containsTypeSystemData = true;
+                    else
+                        containsPdbData = true;
+                }
+            }
+
+            const ulong typeSystemMask = (1UL << (int) TableIndex.MaxTypeSystemTableIndex + 1) - 1;
+            const ulong pdbMask = ((1UL << (int) TableIndex.Max) - 1) & ~typeSystemMask;
+
+            // Backwards compatibility: Ensure that only the bits are set in the sorted mask if the metadata
+            // actually contains the type system and/or pdb tables.
+            if (!containsTypeSystemData)
+                result &= ~typeSystemMask;
+            if (!containsPdbData)
+                result &= ~pdbMask;
+
+            return result;
         }
 
         /// <summary>
@@ -301,7 +386,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         protected virtual int GetTablesCount(ulong validBitmask)
         {
             int count = 0;
-            for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)
+            for (TableIndex i = 0; i < TableIndex.Max; i++)
             {
                 if (HasTable(validBitmask, i))
                     count++;
@@ -337,7 +422,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="validBitmask">The valid bitmask, indicating all present tables in the stream.</param>
         protected virtual void WriteRowCounts(IBinaryStreamWriter writer, ulong validBitmask)
         {
-            for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)
+            for (TableIndex i = 0; i <= TableIndex.Max; i++)
             {
                 if (HasTable(validBitmask, i))
                     writer.WriteInt32(GetTable(i).Count);
@@ -381,110 +466,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
-        /// Obtains the collection of tables in the tables stream.
-        /// </summary>
-        /// <returns>The tables, including empty tables if there are any.</returns>
-        /// <remarks>
-        /// This method is called upon initialization of the <see cref="Tables"/> property.
-        /// </remarks>
-        protected virtual IList<IMetadataTable> GetTables()
-        {
-            var layouts = TableLayouts;
-            return new IMetadataTable[]
-            {
-                new MetadataTable<ModuleDefinitionRow>(TableIndex.Module, layouts[0]),
-                new MetadataTable<TypeReferenceRow>(TableIndex.TypeRef, layouts[1]),
-                new MetadataTable<TypeDefinitionRow>(TableIndex.TypeDef, layouts[2]),
-                new MetadataTable<FieldPointerRow>(TableIndex.FieldPtr, layouts[3]),
-                new MetadataTable<FieldDefinitionRow>(TableIndex.Field, layouts[4]),
-                new MetadataTable<MethodPointerRow>(TableIndex.Method, layouts[5]),
-                new MetadataTable<MethodDefinitionRow>(TableIndex.Method, layouts[6]),
-                new MetadataTable<ParameterPointerRow>(TableIndex.ParamPtr, layouts[7]),
-                new MetadataTable<ParameterDefinitionRow>(TableIndex.Param, layouts[8]),
-                new MetadataTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl, layouts[9]),
-                new MetadataTable<MemberReferenceRow>(TableIndex.MemberRef, layouts[10]),
-                new MetadataTable<ConstantRow>(TableIndex.Constant, layouts[11]),
-                new MetadataTable<CustomAttributeRow>(TableIndex.CustomAttribute, layouts[12]),
-                new MetadataTable<FieldMarshalRow>(TableIndex.FieldMarshal, layouts[13]),
-                new MetadataTable<SecurityDeclarationRow>(TableIndex.DeclSecurity, layouts[14]),
-                new MetadataTable<ClassLayoutRow>(TableIndex.ClassLayout, layouts[15]),
-                new MetadataTable<FieldLayoutRow>(TableIndex.FieldLayout, layouts[16]),
-                new MetadataTable<StandAloneSignatureRow>(TableIndex.StandAloneSig, layouts[17]),
-                new MetadataTable<EventMapRow>(TableIndex.EventMap, layouts[18]),
-                new MetadataTable<EventPointerRow>(TableIndex.EventPtr, layouts[19]),
-                new MetadataTable<EventDefinitionRow>(TableIndex.Event, layouts[20]),
-                new MetadataTable<PropertyMapRow>(TableIndex.PropertyMap, layouts[21]),
-                new MetadataTable<PropertyPointerRow>(TableIndex.PropertyPtr, layouts[22]),
-                new MetadataTable<PropertyDefinitionRow>(TableIndex.Property, layouts[23]),
-                new MetadataTable<MethodSemanticsRow>(TableIndex.MethodSemantics, layouts[24]),
-                new MetadataTable<MethodImplementationRow>(TableIndex.MethodImpl, layouts[25]),
-                new MetadataTable<ModuleReferenceRow>(TableIndex.ModuleRef, layouts[26]),
-                new MetadataTable<TypeSpecificationRow>(TableIndex.TypeSpec, layouts[27]),
-                new MetadataTable<ImplementationMapRow>(TableIndex.ImplMap, layouts[28]),
-                new MetadataTable<FieldRvaRow>(TableIndex.FieldRva, layouts[29]),
-                new MetadataTable<EncLogRow>(TableIndex.EncLog, layouts[30]),
-                new MetadataTable<EncMapRow>(TableIndex.EncMap, layouts[31]),
-                new MetadataTable<AssemblyDefinitionRow>(TableIndex.Assembly, layouts[32]),
-                new MetadataTable<AssemblyProcessorRow>(TableIndex.AssemblyProcessor, layouts[33]),
-                new MetadataTable<AssemblyOSRow>(TableIndex.AssemblyOS, layouts[34]),
-                new MetadataTable<AssemblyReferenceRow>(TableIndex.AssemblyRef, layouts[35]),
-                new MetadataTable<AssemblyRefProcessorRow>(TableIndex.AssemblyRefProcessor, layouts[36]),
-                new MetadataTable<AssemblyRefOSRow>(TableIndex.AssemblyRefProcessor, layouts[37]),
-                new MetadataTable<FileReferenceRow>(TableIndex.File, layouts[38]),
-                new MetadataTable<ExportedTypeRow>(TableIndex.ExportedType, layouts[39]),
-                new MetadataTable<ManifestResourceRow>(TableIndex.ManifestResource, layouts[40]),
-                new MetadataTable<NestedClassRow>(TableIndex.NestedClass, layouts[41]),
-                new MetadataTable<GenericParameterRow>(TableIndex.GenericParam, layouts[42]),
-                new MetadataTable<MethodSpecificationRow>(TableIndex.MethodSpec, layouts[43]),
-                new MetadataTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint, layouts[44]),
-            };
-        }
-
-        private Dictionary<CodedIndex, IndexEncoder> CreateIndexEncoders()
-        {
-            return new()
-            {
-                [CodedIndex.TypeDefOrRef] = new IndexEncoder(this,
-                    TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.TypeSpec),
-                [CodedIndex.HasConstant] = new(this,
-                    TableIndex.Field, TableIndex.Param, TableIndex.Property),
-                [CodedIndex.HasCustomAttribute] = new(this,
-                    TableIndex.Method, TableIndex.Field, TableIndex.TypeRef, TableIndex.TypeDef,
-                    TableIndex.Param, TableIndex.InterfaceImpl, TableIndex.MemberRef, TableIndex.Module,
-                    TableIndex.DeclSecurity, TableIndex.Property, TableIndex.Event, TableIndex.StandAloneSig,
-                    TableIndex.ModuleRef, TableIndex.TypeSpec, TableIndex.Assembly, TableIndex.AssemblyRef,
-                    TableIndex.File, TableIndex.ExportedType, TableIndex.ManifestResource, TableIndex.GenericParam,
-                    TableIndex.GenericParamConstraint, TableIndex.MethodSpec),
-                [CodedIndex.HasFieldMarshal] = new(this,
-                    TableIndex.Field, TableIndex.Param),
-                [CodedIndex.HasDeclSecurity] = new(this,
-                    TableIndex.TypeDef, TableIndex.Method, TableIndex.Assembly),
-                [CodedIndex.MemberRefParent] = new(this,
-                    TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.ModuleRef,
-                    TableIndex.Method, TableIndex.TypeSpec),
-                [CodedIndex.HasSemantics] = new(this,
-                    TableIndex.Event, TableIndex.Property),
-                [CodedIndex.MethodDefOrRef] = new(this,
-                    TableIndex.Method, TableIndex.MemberRef),
-                [CodedIndex.MemberForwarded] = new(this,
-                    TableIndex.Field, TableIndex.Method),
-                [CodedIndex.Implementation] = new(this,
-                    TableIndex.File, TableIndex.AssemblyRef, TableIndex.ExportedType),
-                [CodedIndex.CustomAttributeType] = new(this,
-                    0, 0, TableIndex.Method, TableIndex.MemberRef, 0),
-                [CodedIndex.ResolutionScope] = new(this,
-                    TableIndex.Module, TableIndex.ModuleRef, TableIndex.AssemblyRef, TableIndex.TypeRef),
-                [CodedIndex.TypeOrMethodDef] = new(this,
-                    TableIndex.TypeDef, TableIndex.Method)
-            };
-        }
-
-        /// <summary>
         /// Gets a table by its table index.
         /// </summary>
         /// <param name="index">The table index.</param>
         /// <returns>The table.</returns>
-        public virtual IMetadataTable GetTable(TableIndex index) => Tables[(int) index];
+        public virtual IMetadataTable GetTable(TableIndex index) =>
+            Tables[(int) index] ?? throw new ArgumentOutOfRangeException(nameof(index));
 
         /// <summary>
         /// Gets a table by its row type.
@@ -506,7 +493,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public virtual MetadataTable<TRow> GetTable<TRow>(TableIndex index)
             where TRow : struct, IMetadataRow
         {
-            return (MetadataTable<TRow>) Tables[(int) index];
+            return (MetadataTable<TRow>) (Tables[(int) index] ?? throw new ArgumentOutOfRangeException(nameof(index)));
         }
 
         private IndexSize GetStreamIndexSize(int bitIndex) => (IndexSize) (((((int) Flags >> bitIndex) & 1) + 1) * 2);
@@ -526,29 +513,25 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             if (_layouts.IsInitialized)
             {
-                if (columnType <= ColumnType.GenericParamConstraint)
-                    return (uint) Tables[(int) columnType].IndexSize;
-                if (columnType <= ColumnType.TypeOrMethodDef)
-                    return (uint) GetIndexEncoder((CodedIndex) columnType).IndexSize;
+                switch (columnType)
+                {
+                    case <= ColumnType.CustomDebugInformation:
+                        return (uint) GetTableIndexSize((TableIndex) columnType);
+                    case <= ColumnType.HasCustomDebugInformation:
+                        return (uint) GetIndexEncoder((CodedIndex) columnType).IndexSize;
+                }
             }
 
-            switch (columnType)
+            return columnType switch
             {
-                case ColumnType.Blob:
-                    return (uint) BlobIndexSize;
-                case ColumnType.String:
-                    return (uint) StringIndexSize;
-                case ColumnType.Guid:
-                    return (uint) GuidIndexSize;
-                case ColumnType.Byte:
-                    return sizeof(byte);
-                case ColumnType.UInt16:
-                    return sizeof(ushort);
-                case ColumnType.UInt32:
-                    return sizeof(uint);
-                default:
-                    return sizeof(uint);
-            }
+                ColumnType.Blob => (uint) BlobIndexSize,
+                ColumnType.String => (uint) StringIndexSize,
+                ColumnType.Guid => (uint) GuidIndexSize,
+                ColumnType.Byte => sizeof(byte),
+                ColumnType.UInt16 => sizeof(ushort),
+                ColumnType.UInt32 => sizeof(uint),
+                _ => sizeof(uint)
+            };
         }
 
         /// <summary>
@@ -557,197 +540,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="index">The type of coded index to encode/decode.</param>
         /// <returns>The encoder.</returns>
         public IndexEncoder GetIndexEncoder(CodedIndex index) => _indexEncoders[index];
-
-        /// <summary>
-        /// Gets an ordered collection of the current table layouts.
-        /// </summary>
-        /// <returns>The table layouts.</returns>
-        protected TableLayout[] GetTableLayouts()
-        {
-            var result = new[]
-            {
-                new TableLayout(
-                    new ColumnLayout("Generation", ColumnType.UInt16),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Mvid", ColumnType.Guid, GuidIndexSize),
-                    new ColumnLayout("EncId", ColumnType.Guid, GuidIndexSize),
-                    new ColumnLayout("EncBaseId", ColumnType.Guid, GuidIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("ResolutionScope", ColumnType.ResolutionScope,
-                        GetColumnSize(ColumnType.ResolutionScope)),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Namespace", ColumnType.Guid, StringIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Flags", ColumnType.UInt32),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Namespace", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Extends", ColumnType.TypeDefOrRef,
-                        GetColumnSize(ColumnType.TypeDefOrRef)),
-                    new ColumnLayout("FieldList", ColumnType.Field, GetColumnSize(ColumnType.Field)),
-                    new ColumnLayout("MethodList", ColumnType.Method, GetColumnSize(ColumnType.Method))),
-                new TableLayout(
-                    new ColumnLayout("Field", ColumnType.Field, GetColumnSize(ColumnType.Field))),
-                new TableLayout(
-                    new ColumnLayout("Flags", ColumnType.UInt16),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Method", ColumnType.Method, GetColumnSize(ColumnType.Method))),
-                new TableLayout(
-                    new ColumnLayout("RVA", ColumnType.UInt32),
-                    new ColumnLayout("ImplFlags", ColumnType.UInt16),
-                    new ColumnLayout("Flags", ColumnType.UInt16),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize),
-                    new ColumnLayout("ParamList", ColumnType.Param, GetColumnSize(ColumnType.Param))),
-                new TableLayout(
-                    new ColumnLayout("Parameter", ColumnType.Param, GetColumnSize(ColumnType.Param))),
-                new TableLayout(
-                    new ColumnLayout("Flags", ColumnType.UInt16),
-                    new ColumnLayout("Sequence", ColumnType.UInt16),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Class", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef)),
-                    new ColumnLayout("Interface", ColumnType.TypeDefOrRef, GetColumnSize(ColumnType.TypeDefOrRef))),
-                new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.MemberRefParent, GetColumnSize(ColumnType.MemberRefParent)),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Type", ColumnType.Byte),
-                    new ColumnLayout("Padding", ColumnType.Byte),
-                    new ColumnLayout("Parent", ColumnType.HasConstant, GetColumnSize(ColumnType.HasConstant)),
-                    new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.HasCustomAttribute, GetColumnSize(ColumnType.HasCustomAttribute)),
-                    new ColumnLayout("Type", ColumnType.CustomAttributeType, GetColumnSize(ColumnType.CustomAttributeType)),
-                    new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.HasFieldMarshal, GetColumnSize(ColumnType.HasFieldMarshal)),
-                    new ColumnLayout("NativeType", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Action", ColumnType.UInt16),
-                    new ColumnLayout("Parent", ColumnType.HasDeclSecurity, GetColumnSize(ColumnType.HasDeclSecurity)),
-                    new ColumnLayout("PermissionSet", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("PackingSize", ColumnType.UInt16),
-                    new ColumnLayout("ClassSize", ColumnType.UInt32),
-                    new ColumnLayout("Parent", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef))),
-                new TableLayout(
-                    new ColumnLayout("Offset", ColumnType.UInt32),
-                    new ColumnLayout("Field", ColumnType.TypeDef, GetColumnSize(ColumnType.Field))),
-                new TableLayout(
-                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef)),
-                    new ColumnLayout("EventList", ColumnType.Event, GetColumnSize(ColumnType.Event))),
-                new TableLayout(
-                    new ColumnLayout("Event", ColumnType.Event, GetColumnSize(ColumnType.Event))),
-                new TableLayout(
-                    new ColumnLayout("Flags", ColumnType.UInt16),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("EventType", ColumnType.TypeDefOrRef, GetColumnSize(ColumnType.TypeDefOrRef))),
-                new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef)),
-                    new ColumnLayout("PropertyList", ColumnType.Event, GetColumnSize(ColumnType.Property))),
-                new TableLayout(
-                    new ColumnLayout("Property", ColumnType.Property, GetColumnSize(ColumnType.Property))),
-                new TableLayout(
-                    new ColumnLayout("Flags", ColumnType.UInt16),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("PropertyType", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Semantic", ColumnType.UInt16),
-                    new ColumnLayout("Method", ColumnType.Method, GetColumnSize(ColumnType.Method)),
-                    new ColumnLayout("Association", ColumnType.HasSemantics, GetColumnSize(ColumnType.HasSemantics))),
-                new TableLayout(
-                    new ColumnLayout("Class", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef)),
-                    new ColumnLayout("MethodBody", ColumnType.MethodDefOrRef, GetColumnSize(ColumnType.MethodDefOrRef)),
-                    new ColumnLayout("MethodDeclaration", ColumnType.MethodDefOrRef, GetColumnSize(ColumnType.MethodDefOrRef))),
-                new TableLayout(
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("MappingFlags", ColumnType.UInt16),
-                    new ColumnLayout("MemberForwarded", ColumnType.MemberForwarded, GetColumnSize(ColumnType.MemberForwarded)),
-                    new ColumnLayout("ImportName", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("ImportScope", ColumnType.ModuleRef, GetColumnSize(ColumnType.ModuleRef))),
-                new TableLayout(
-                    new ColumnLayout("RVA", ColumnType.UInt32),
-                    new ColumnLayout("Field", ColumnType.Field, GetColumnSize(ColumnType.Field))),
-                new TableLayout(
-                    new ColumnLayout("Token", ColumnType.UInt32),
-                    new ColumnLayout("FuncCode", ColumnType.UInt32)),
-                new TableLayout(
-                    new ColumnLayout("Token", ColumnType.UInt32)),
-                new TableLayout(
-                    new ColumnLayout("HashAlgId", ColumnType.UInt32),
-                    new ColumnLayout("MajorVersion", ColumnType.UInt16),
-                    new ColumnLayout("MinorVersion", ColumnType.UInt16),
-                    new ColumnLayout("BuildNumber", ColumnType.UInt16),
-                    new ColumnLayout("RevisionNumber", ColumnType.UInt16),
-                    new ColumnLayout("Flags", ColumnType.UInt32),
-                    new ColumnLayout("PublicKey", ColumnType.Blob, BlobIndexSize),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Culture", ColumnType.String, StringIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Processor", ColumnType.UInt32)),
-                new TableLayout(
-                    new ColumnLayout("PlatformId", ColumnType.UInt32),
-                    new ColumnLayout("MajorVersion", ColumnType.UInt32),
-                    new ColumnLayout("MinorVersion", ColumnType.UInt32)),
-                new TableLayout(
-                    new ColumnLayout("MajorVersion", ColumnType.UInt16),
-                    new ColumnLayout("MinorVersion", ColumnType.UInt16),
-                    new ColumnLayout("BuildNumber", ColumnType.UInt16),
-                    new ColumnLayout("RevisionNumber", ColumnType.UInt16),
-                    new ColumnLayout("Flags", ColumnType.UInt32),
-                    new ColumnLayout("PublicKeyOrToken", ColumnType.Blob, BlobIndexSize),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Culture", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("HashValue", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Processor", ColumnType.UInt32),
-                    new ColumnLayout("AssemblyRef", ColumnType.AssemblyRef, GetColumnSize(ColumnType.AssemblyRef))),
-                new TableLayout(
-                    new ColumnLayout("PlatformId", ColumnType.UInt32),
-                    new ColumnLayout("MajorVersion", ColumnType.UInt32),
-                    new ColumnLayout("MinorVersion", ColumnType.UInt32),
-                    new ColumnLayout("AssemblyRef", ColumnType.AssemblyRef, GetColumnSize(ColumnType.AssemblyRef))),
-                new TableLayout(
-                    new ColumnLayout("Flags", ColumnType.UInt32),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("HashValue", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Flags", ColumnType.UInt32),
-                    new ColumnLayout("TypeDefId", ColumnType.UInt32),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Namespace", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Implementation", ColumnType.Implementation, GetColumnSize(ColumnType.Implementation))),
-                new TableLayout(
-                    new ColumnLayout("Offset", ColumnType.UInt32),
-                    new ColumnLayout("Flags", ColumnType.UInt32),
-                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Implementation", ColumnType.Implementation, GetColumnSize(ColumnType.Implementation))),
-                new TableLayout(
-                    new ColumnLayout("NestedClass", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef)),
-                    new ColumnLayout("EnclosingClass", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef))),
-                new TableLayout(
-                    new ColumnLayout("Number", ColumnType.UInt16),
-                    new ColumnLayout("Flags", ColumnType.UInt16),
-                    new ColumnLayout("Owner", ColumnType.TypeOrMethodDef, GetColumnSize(ColumnType.TypeOrMethodDef)),
-                    new ColumnLayout("EnclosingClass", ColumnType.String, StringIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Method", ColumnType.Method, GetColumnSize(ColumnType.MethodDefOrRef)),
-                    new ColumnLayout("Instantiation", ColumnType.Blob, BlobIndexSize)),
-                new TableLayout(
-                    new ColumnLayout("Owner", ColumnType.GenericParam, GetColumnSize(ColumnType.GenericParam)),
-                    new ColumnLayout("Constraint", ColumnType.TypeDefOrRef, GetColumnSize(ColumnType.TypeDefOrRef))),
-            };
-
-            return result;
-        }
 
         /// <summary>
         /// Gets the range of metadata tokens referencing fields that a type defines.

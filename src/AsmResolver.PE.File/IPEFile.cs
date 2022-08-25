@@ -9,7 +9,7 @@ namespace AsmResolver.PE.File
     /// <summary>
     /// Provides a writable implementation of the <see cref="IPEFile"/> interface.
     /// </summary>
-    public interface IPEFile : ISegmentReferenceResolver, IOffsetConverter
+    public interface IPEFile : ISegmentReferenceFactory, IOffsetConverter
     {
         /// <summary>
         /// When this PE file was read from the disk, gets the file path to the PE file.

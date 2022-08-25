@@ -38,6 +38,9 @@ namespace AsmResolver.DotNet
             var tableStream = netDirectory.Metadata!.GetStream<TablesStream>();
             for (TableIndex index = 0; index < TableIndex.Max; index++)
             {
+                if (!index.IsValidTableIndex())
+                    continue;
+
                 var table = tableStream.GetTable(index);
                 _buckets[(int) index] = new TokenBucket(new MetadataToken(index, (uint) table.Count + 1));
             }

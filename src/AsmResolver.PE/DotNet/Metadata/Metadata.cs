@@ -60,6 +60,48 @@ namespace AsmResolver.PE.DotNet.Metadata
             }
         }
 
+        /// <summary>
+        /// Reads a .NET metadata directory from a file.
+        /// </summary>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The read metadata.</returns>
+        public static Metadata FromFile(string path) => FromBytes(System.IO.File.ReadAllBytes(path));
+
+        /// <summary>
+        /// Interprets the provided binary data as a .NET metadata directory.
+        /// </summary>
+        /// <param name="data">The raw data.</param>
+        /// <returns>The read metadata.</returns>
+        public static Metadata FromBytes(byte[] data) => FromReader(ByteArrayDataSource.CreateReader(data));
+
+        /// <summary>
+        /// Reads a .NET metadata directory from a file.
+        /// </summary>
+        /// <param name="file">The file to read.</param>
+        /// <returns>The read metadata.</returns>
+        public static Metadata FromFile(IInputFile file) => FromReader(file.CreateReader());
+
+        /// <summary>
+        /// Interprets the provided binary stream as a .NET metadata directory.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The read metadata.</returns>
+        public static Metadata FromReader(BinaryStreamReader reader)
+        {
+            return FromReader(reader, new MetadataReaderContext(VirtualAddressFactory.Instance));
+        }
+
+        /// <summary>
+        /// Interprets the provided binary stream as a .NET metadata directory.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="context">The context in which the reader is situated in.</param>
+        /// <returns>The read metadata.</returns>
+        public static Metadata FromReader(BinaryStreamReader reader, MetadataReaderContext context)
+        {
+            return new SerializedMetadata(context, ref reader);
+        }
+
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {

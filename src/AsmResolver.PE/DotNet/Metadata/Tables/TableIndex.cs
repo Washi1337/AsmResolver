@@ -53,8 +53,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         GenericParam = 42,
         MethodSpec = 43,
         GenericParamConstraint = 44,
-        Max = GenericParamConstraint + 1,
+
+        MaxTypeSystemTableIndex = GenericParamConstraint,
+
+        Document = 0x30,
+        MethodDebugInformation = 0x31,
+        LocalScope = 0x32,
+        LocalVariable = 0x33,
+        LocalConstant = 0x34,
+        ImportScope = 0x35,
+        StateMachineMethod = 0x36,
+        CustomDebugInformation = 0x37,
+
+        Max = CustomDebugInformation + 1,
 
         String = 0x70
     }
+
 }

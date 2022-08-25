@@ -87,6 +87,19 @@ namespace AsmResolver.Collections
         /// </summary>
         protected abstract void Initialize();
 
+        /// <summary>
+        /// Performs any final adjustments to the collection after all initial items were added to the underlying list.
+        /// </summary>
+        /// <remarks>
+        /// Upon calling this method, the <see cref="IsInitialized"/> has already been set to <c>true</c>, but the
+        /// initialization lock has not been released yet. This means that any element in the list is guaranteed
+        /// to be still in its initial state. It is therefore safe to access elements, as well as adding or removing
+        /// items from <see cref="Items"/>.
+        /// </remarks>
+        protected virtual void PostInitialize()
+        {
+        }
+
         private void EnsureIsInitialized()
         {
             if (!IsInitialized)
@@ -97,6 +110,7 @@ namespace AsmResolver.Collections
                     {
                         Initialize();
                         IsInitialized = true;
+                        PostInitialize();
                     }
                 }
             }
