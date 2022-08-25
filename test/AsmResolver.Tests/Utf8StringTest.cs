@@ -81,7 +81,7 @@ namespace AsmResolver.Tests
         {
             Utf8String? s1 = a;
             Utf8String? s2 = b;
-            Assert.Equal((a ?? Array.Empty<byte>()).Concat(b ?? Array.Empty<byte>()), (s1 + s2)?.GetBytes());
+            Assert.Equal((a ?? Array.Empty<byte>()).Concat(b ?? Array.Empty<byte>()), (s1 + s2).GetBytes());
         }
 
         [Theory]

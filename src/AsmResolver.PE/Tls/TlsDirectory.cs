@@ -63,6 +63,7 @@ namespace AsmResolver.PE.Tls
             set;
         }
 
+        /// <inheritdoc />
         public override void UpdateOffsets(in RelocationParameters parameters)
         {
             _imageBase = parameters.ImageBase;

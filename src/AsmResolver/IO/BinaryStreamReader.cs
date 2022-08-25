@@ -134,6 +134,10 @@ namespace AsmResolver.IO
                 throw new EndOfStreamException();
         }
 
+        /// <summary>
+        /// Peeks a single byte from the input stream.
+        /// </summary>
+        /// <returns>The read byte, or <c>-1</c> if no byte could be read.</returns>
         public int PeekByte() => CanRead(1)
             ? DataSource[Offset]
             : -1;

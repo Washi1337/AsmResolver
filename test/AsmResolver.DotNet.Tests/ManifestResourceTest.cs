@@ -64,8 +64,10 @@ namespace AsmResolver.DotNet.Tests
             module.Write(stream);
 
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
-            Assert.Equal(contents
-                , newModule.Resources.First(r => r.Name == resourceName).GetReader()?.ReadToEnd());
+            var resource = newModule.Resources.First(r => r.Name == resourceName);
+
+            Assert.True(resource.TryGetReader(out var reader));
+            Assert.Equal(contents, reader.ReadToEnd());
         }
     }
 }

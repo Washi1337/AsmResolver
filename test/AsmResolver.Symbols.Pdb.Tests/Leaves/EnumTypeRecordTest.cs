@@ -17,7 +17,7 @@ public class EnumTypeRecordTest : IClassFixture<MockPdbFixture>
     public void FieldList()
     {
         var leaf = _fixture.SimplePdb.GetLeafRecord(0x1009);
-        var fields = Assert.IsAssignableFrom<EnumTypeRecord>(leaf).Fields.Entries.Cast<EnumerateField>().ToArray();
+        var fields = Assert.IsAssignableFrom<EnumTypeRecord>(leaf).Fields!.Entries.Cast<EnumerateField>().ToArray();
         var names = new[]
         {
             "DISPLAYCONFIG_SCANLINE_ORDERING_UNSPECIFIED",

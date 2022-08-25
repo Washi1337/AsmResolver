@@ -237,7 +237,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
         private static string FindAppHostTemplate(string sdkVersion)
         {
             string sdkPath = Path.Combine(DotNetCorePathProvider.DefaultInstallationPath!, "sdk");
-            string? sdkVersionPath = null;
+            string sdkVersionPath = null;
             foreach (string dir in Directory.GetDirectories(sdkPath))
             {
                 if (Path.GetFileName(dir).StartsWith(sdkVersion))
