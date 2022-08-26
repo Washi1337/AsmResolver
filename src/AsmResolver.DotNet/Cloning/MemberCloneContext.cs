@@ -35,9 +35,9 @@ namespace AsmResolver.DotNet.Cloning
         }
 
         /// <summary>
-        /// Gets the object responsible for importing references into the target mdoule. 
+        /// Gets the object responsible for importing references into the target module.
         /// </summary>
-        public ReferenceImporter Importer
+        public CloneContextAwareReferenceImporter Importer
         {
             get;
         }

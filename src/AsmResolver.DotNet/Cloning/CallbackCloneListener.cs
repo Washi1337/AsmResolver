@@ -7,7 +7,6 @@ namespace AsmResolver.DotNet.Cloning
     /// </summary>
     public class CallbackCloneListener : MemberClonerListener
     {
-
         private readonly Action<IMetadataMember, IMetadataMember> _callback;
 
         /// <summary>
@@ -17,8 +16,18 @@ namespace AsmResolver.DotNet.Cloning
         public CallbackCloneListener(Action<IMetadataMember, IMetadataMember> callback) =>
             _callback = callback;
 
+        /// <summary>
+        /// Gets a singleton instance of the <see cref="CallbackCloneListener"/> class that performs no operation
+        /// on any of the cloning procedure notifications.
+        /// </summary>
+        public static CallbackCloneListener EmptyInstance
+        {
+            get;
+        } = new((_, _) => { });
+
         /// <inheritdoc/>
         public override void OnClonedMember(IMetadataMember original, IMetadataMember cloned) =>
             _callback(original, cloned);
+
     }
 }

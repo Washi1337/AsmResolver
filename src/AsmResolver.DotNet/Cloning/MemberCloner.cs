@@ -31,21 +31,41 @@ namespace AsmResolver.DotNet.Cloning
         /// Creates a new instance of the <see cref="MemberCloner"/> class.
         /// </summary>
         /// <param name="targetModule">The target module to copy the members into.</param>
-        public MemberCloner(ModuleDefinition targetModule) : this(targetModule, (original, cloned) => { }) { }
+        public MemberCloner(ModuleDefinition targetModule)
+            : this(targetModule, (original, cloned) => { })
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="MemberCloner"/> class.
+        /// </summary>
+        /// <param name="targetModule">The target module to copy the members into.</param>
+        /// <param name="importerFactory">The factory for creating the reference importer</param>
+        public MemberCloner(ModuleDefinition targetModule,
+            Func<MemberCloneContext, CloneContextAwareReferenceImporter>? importerFactory)
+            : this(targetModule, importerFactory, null)
+        {
+        }
 
         /// <summary>
         /// Creates a new instance of the <see cref="MemberCloner"/> class.
         /// </summary>
         /// <param name="targetModule">The target module to copy the members into.</param>
         /// <param name="callback">The callback used in the cloner listener.</param>
-        public MemberCloner(ModuleDefinition targetModule, Action<IMetadataMember, IMetadataMember> callback) : this(targetModule, new CallbackCloneListener(callback)) { }
+        public MemberCloner(ModuleDefinition targetModule, Action<IMetadataMember, IMetadataMember> callback)
+            : this(targetModule, new CallbackCloneListener(callback))
+        {
+        }
 
         /// <summary>
         /// Creates a new instance of the <see cref="MemberCloner"/> class.
         /// </summary>
         /// <param name="targetModule">The target module to copy the members into.</param>
         /// <param name="listener">The callback listener used in the cloner.</param>
-        public MemberCloner(ModuleDefinition targetModule, IMemberClonerListener listener) : this(targetModule, null, listener) { }
+        public MemberCloner(ModuleDefinition targetModule, IMemberClonerListener listener)
+            : this(targetModule, null, listener)
+        {
+        }
 
         /// <summary>
         /// Creates a new instance of the <see cref="MemberCloner"/> class.
@@ -55,11 +75,11 @@ namespace AsmResolver.DotNet.Cloning
         /// <param name="clonerListener">The listener used in the cloner.</param>
         public MemberCloner(ModuleDefinition targetModule,
             Func<MemberCloneContext, CloneContextAwareReferenceImporter>? importerFactory,
-            IMemberClonerListener clonerListener)
+            IMemberClonerListener? clonerListener)
         {
             _targetModule = targetModule ?? throw new ArgumentNullException(nameof(targetModule));
             _importerFactory = importerFactory;
-            _clonerListener = clonerListener;
+            _clonerListener = clonerListener ?? CallbackCloneListener.EmptyInstance;
         }
 
         /// <summary>
