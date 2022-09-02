@@ -400,5 +400,43 @@ namespace AsmResolver.DotNet.Tests
                 1, 2, 3, 4
             }, boxedArgument.Value);
         }
+
+        [Fact]
+        public void CreateNewWithFixedArgumentsViaConstructor()
+        {
+            var module = new ModuleDefinition("Module.exe");
+
+            var attribute = new CustomAttribute(module.CorLibTypeFactory.CorLibScope
+                    .CreateTypeReference("System", "ObsoleteAttribute")
+                    .CreateMemberReference(".ctor", MethodSignature.CreateInstance(
+                        module.CorLibTypeFactory.Void,
+                        module.CorLibTypeFactory.String)),
+                new CustomAttributeSignature(new CustomAttributeArgument(
+                    module.CorLibTypeFactory.String,
+                    "My Message")));
+
+            Assert.NotNull(attribute.Signature);
+            var argument = Assert.Single(attribute.Signature.FixedArguments);
+            Assert.Equal("My Message", argument.Element);
+        }
+
+        [Fact]
+        public void CreateNewWithFixedArgumentsViaProperty()
+        {
+            var module = new ModuleDefinition("Module.exe");
+
+            var attribute = new CustomAttribute(module.CorLibTypeFactory.CorLibScope
+                .CreateTypeReference("System", "ObsoleteAttribute")
+                .CreateMemberReference(".ctor", MethodSignature.CreateInstance(
+                    module.CorLibTypeFactory.Void,
+                    module.CorLibTypeFactory.String)));
+            attribute.Signature!.FixedArguments.Add(new CustomAttributeArgument(
+                module.CorLibTypeFactory.String,
+                "My Message"));
+
+            Assert.NotNull(attribute.Signature);
+            var argument = Assert.Single(attribute.Signature.FixedArguments);
+            Assert.Equal("My Message", argument.Element);
+        }
     }
 }

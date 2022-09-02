@@ -31,6 +31,14 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Creates a new custom attribute signature with the provided fixed arguments.
         /// </summary>
+        public CustomAttributeSignature(params CustomAttributeArgument[] fixedArguments)
+            : this(fixedArguments, Enumerable.Empty<CustomAttributeNamedArgument>())
+        {
+        }
+
+        /// <summary>
+        /// Creates a new custom attribute signature with the provided fixed arguments.
+        /// </summary>
         public CustomAttributeSignature(IEnumerable<CustomAttributeArgument> fixedArguments)
             : this(fixedArguments, Enumerable.Empty<CustomAttributeNamedArgument>())
         {

@@ -29,6 +29,17 @@ namespace AsmResolver.DotNet
         /// Creates a new custom attribute.
         /// </summary>
         /// <param name="constructor">The constructor of the attribute to call.</param>
+        public CustomAttribute(ICustomAttributeType? constructor)
+            : this(new MetadataToken(TableIndex.CustomAttribute, 0))
+        {
+            Constructor = constructor;
+            Signature = new CustomAttributeSignature();
+        }
+
+        /// <summary>
+        /// Creates a new custom attribute.
+        /// </summary>
+        /// <param name="constructor">The constructor of the attribute to call.</param>
         /// <param name="signature">The signature containing the arguments to the constructor.</param>
         public CustomAttribute(ICustomAttributeType? constructor, CustomAttributeSignature? signature)
             : this(new MetadataToken(TableIndex.CustomAttribute, 0))
