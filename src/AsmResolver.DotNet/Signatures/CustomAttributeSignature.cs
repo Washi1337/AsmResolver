@@ -112,16 +112,15 @@ namespace AsmResolver.DotNet.Signatures
             if (IsInitialized)
                 return;
 
+            var fixedArguments = new List<CustomAttributeArgument>();
+            var namedArguments = new List<CustomAttributeNamedArgument>();
+
+            Initialize(fixedArguments, namedArguments);
+
             lock (this)
             {
                 if (IsInitialized)
                     return;
-
-                var fixedArguments = new List<CustomAttributeArgument>();
-                var namedArguments = new List<CustomAttributeNamedArgument>();
-
-                Initialize(fixedArguments, namedArguments);
-
                 _fixedArguments = fixedArguments;
                 _namedArguments = namedArguments;
             }
