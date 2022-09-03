@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
 using AsmResolver.DotNet;
+using AsmResolver.IO;
 using BenchmarkDotNet.Attributes;
 using static AsmResolver.Benchmarks.Properties.Resources;
 
@@ -12,15 +14,22 @@ namespace AsmResolver.Benchmarks
         private static readonly byte[] HelloWorldApp = HelloWorld;
         private static readonly byte[] CrackMeApp = Test;
         private static readonly byte[] ManyMethods = Utilities.DecompressDeflate(HelloWorld_ManyMethods);
-        private static readonly byte[] CoreLib;
+        private static readonly IInputFile SystemPrivateCoreLib;
+        private static readonly IInputFile SystemRuntime;
+        private static readonly IInputFile SystemPrivateXml;
 
         private readonly MemoryStream _outputStream = new();
 
         static ModuleReadWriteBenchmark()
         {
-            var resolver = new DotNetCoreAssemblyResolver(new Version(3, 1, 0));
-            string path = resolver.Resolve(KnownCorLibs.SystemPrivateCoreLib_v4_0_0_0)!.ManifestModule!.FilePath;
-            CoreLib = File.ReadAllBytes(path);
+            string runtimePath = DotNetCorePathProvider.Default
+                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
+                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
+
+            var fs = new ByteArrayFileService();
+            SystemPrivateCoreLib = fs.OpenFile(Path.Combine(runtimePath, "System.Private.CoreLib.dll"));
+            SystemRuntime = fs.OpenFile(Path.Combine(runtimePath, "System.Runtime.dll"));
+            SystemPrivateXml = fs.OpenFile(Path.Combine(runtimePath, "System.Private.Xml.dll"));
         }
 
         [Benchmark]
@@ -63,9 +72,23 @@ namespace AsmResolver.Benchmarks
         }
 
         [Benchmark]
-        public void CoreLib_ReadWrite()
+        public void SystemPrivateCoreLib_ReadWrite()
         {
-            var module = ModuleDefinition.FromBytes(CoreLib);
+            var module = ModuleDefinition.FromFile(SystemPrivateCoreLib);
+            module.Write(_outputStream);
+        }
+
+        [Benchmark]
+        public void SystemRuntimeLib_ReadWrite()
+        {
+            var module = ModuleDefinition.FromFile(SystemRuntime);
+            module.Write(_outputStream);
+        }
+
+        [Benchmark]
+        public void SystemPrivateXml_ReadWrite()
+        {
+            var module = ModuleDefinition.FromFile(SystemPrivateXml);
             module.Write(_outputStream);
         }
     }

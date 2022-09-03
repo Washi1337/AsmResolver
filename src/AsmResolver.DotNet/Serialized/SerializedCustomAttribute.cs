@@ -65,10 +65,7 @@ namespace AsmResolver.DotNet.Serialized
                     $"Invalid signature blob index in custom attribute {MetadataToken}.");
             }
 
-            return CustomAttributeSignature.FromReader(
-                new BlobReadContext(_context),
-                Constructor,
-                ref reader);
+            return CustomAttributeSignature.FromReader(new BlobReadContext(_context), Constructor, reader);
         }
     }
 }

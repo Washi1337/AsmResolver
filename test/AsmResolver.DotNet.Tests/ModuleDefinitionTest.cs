@@ -359,5 +359,41 @@ namespace AsmResolver.DotNet.Tests
             var reference = Assert.Single(module.AssemblyReferences);
             Assert.Equal(KnownCorLibs.NetStandard_v2_0_0_0, reference, Comparer);
         }
+
+        [Fact]
+        public void RewriteSystemPrivateCoreLib()
+        {
+            string runtimePath = DotNetCorePathProvider.Default
+                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
+                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
+            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Private.CoreLib.dll"));
+
+            using var stream = new MemoryStream();
+            module.Write(stream);
+        }
+
+        [Fact]
+        public void RewriteSystemRuntime()
+        {
+            string runtimePath = DotNetCorePathProvider.Default
+                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
+                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
+            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Runtime.dll"));
+
+            using var stream = new MemoryStream();
+            module.Write(stream);
+        }
+
+        [Fact]
+        public void RewriteSystemPrivateXml()
+        {
+            string runtimePath = DotNetCorePathProvider.Default
+                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
+                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
+            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Private.Xml.dll"));
+
+            using var stream = new MemoryStream();
+            module.Write(stream);
+        }
     }
 }
