@@ -60,6 +60,28 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ReadMvidFromNormalMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleGuidStream);
+            Assert.Equal(
+                new Guid(new byte[]
+                {
+                    0x94, 0xe3, 0x75, 0xe2, 0x82, 0x8b, 0xac, 0x4c, 0xa3, 0x8c, 0xb3, 0x72, 0x4b, 0x81, 0xea, 0x05
+                }), module.Mvid);
+        }
+
+        [Fact]
+        public void ReadMvidFromEnCMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleGuidStream_EnC);
+            Assert.Equal(
+                new Guid(new byte[]
+                {
+                    0x8F, 0x6C, 0x77, 0x06, 0xEE, 0x44, 0x65, 0x41, 0xB0, 0xF7, 0x2D, 0xBD, 0x12, 0x7F, 0xE2, 0x1B
+                }), module.Mvid);
+        }
+
+        [Fact]
         public void NameIsPersistentAfterRebuild()
         {
             const string newName = "HelloMars.exe";

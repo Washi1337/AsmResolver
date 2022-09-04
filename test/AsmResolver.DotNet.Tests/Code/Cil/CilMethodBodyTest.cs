@@ -597,5 +597,25 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             Assert.True(handler.IsFat);
         }
+
+        [Fact]
+        public void ReadUserStringFromNormalMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleUserStringsStream);
+            var instruction = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions
+                .First(i => i.OpCode.Code == CilCode.Ldstr);
+
+            Assert.Equal("Hello Mars!!", instruction.Operand);
+        }
+
+        [Fact]
+        public void ReadUserStringFromEnCMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleUserStringsStream_EnC);
+            var instruction = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions
+                .First(i => i.OpCode.Code == CilCode.Ldstr);
+
+            Assert.Equal("Hello World!", instruction.Operand);
+        }
     }
 }
