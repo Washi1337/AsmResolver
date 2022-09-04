@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override DataBlobSignature? GetValue()
         {
-            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+            if (_context.BlobStream is not { } blobStream
                 || !blobStream.TryGetBlobReaderByIndex(_row.Value, out var reader))
             {
                 // Don't report error. null constants are allowed (e.g. null strings).

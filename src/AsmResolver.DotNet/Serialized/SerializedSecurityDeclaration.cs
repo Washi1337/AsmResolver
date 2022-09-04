@@ -49,7 +49,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override PermissionSetSignature? GetPermissionSet()
         {
-            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+            if (_context.BlobStream is not { } blobStream
                 || !blobStream.TryGetBlobReaderByIndex(_row.PermissionSet, out var reader))
             {
                 return _context.BadImageAndReturn<PermissionSetSignature>(

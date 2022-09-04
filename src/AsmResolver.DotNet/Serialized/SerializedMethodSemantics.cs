@@ -42,8 +42,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IHasSemantics? GetAssociation()
         {
-            var token = _context.Metadata
-                .GetStream<TablesStream>()
+            var token = _context.TablesStream
                 .GetIndexEncoder(CodedIndex.HasSemantics)
                 .DecodeIndex(_row.Association);
 
