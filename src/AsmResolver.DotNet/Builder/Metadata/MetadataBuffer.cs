@@ -88,6 +88,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             var result = new PE.DotNet.Metadata.Metadata
             {
                 VersionString = _versionString,
+                IsEnCMetadata = TablesStream.IsEnCMetadata
             };
 
             // Create and add streams.

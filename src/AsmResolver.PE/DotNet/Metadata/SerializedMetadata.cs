@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using AsmResolver.IO;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -11,9 +12,8 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class SerializedMetadata : Metadata
     {
         private readonly MetadataReaderContext _context;
-        private readonly BinaryStreamReader _streamEntriesReader;
         private readonly BinaryStreamReader _streamContentsReader;
-        private readonly int _numberOfStreams;
+        private readonly MetadataStreamHeader[] _streamHeaders;
 
         /// <summary>
         /// Reads a metadata directory from an input stream.
@@ -34,14 +34,15 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             _streamContentsReader = directoryReader.Fork();
 
+            // Verify signature.
             var signature = (MetadataSignature) directoryReader.ReadUInt32();
             switch (signature)
             {
                 case MetadataSignature.Bsjb:
                     // BSJB header is the default header.
                     break;
-                case MetadataSignature.Moc:
-                    _context.NotSupported("Old +MOC metadata header format is not supported.");
+                case MetadataSignature.ComPlus:
+                    _context.NotSupported("Old COM+ metadata header format is not supported.");
                     return;
 
                 default:
@@ -49,10 +50,12 @@ namespace AsmResolver.PE.DotNet.Metadata
                     return;
             }
 
+            // Header fields.
             MajorVersion = directoryReader.ReadUInt16();
             MinorVersion = directoryReader.ReadUInt16();
             Reserved = directoryReader.ReadUInt32();
 
+            // Version string.
             uint versionLength = directoryReader.ReadUInt32();
             if (!directoryReader.CanRead(versionLength))
             {
@@ -60,25 +63,34 @@ namespace AsmResolver.PE.DotNet.Metadata
                 return;
             }
 
-            var versionBytes = new byte[versionLength];
+            byte[] versionBytes = new byte[versionLength];
             directoryReader.ReadBytes(versionBytes, 0, versionBytes.Length);
             VersionString = Encoding.ASCII.GetString(versionBytes);
 
+            // Remainder of all header fields.
             Flags = directoryReader.ReadUInt16();
-            _numberOfStreams = directoryReader.ReadInt16();
-            _streamEntriesReader = directoryReader.Fork();
+            int numberOfStreams = directoryReader.ReadInt16();
+
+            // Eagerly read stream headers to determine if we are EnC metadata.
+            _streamHeaders = new MetadataStreamHeader[numberOfStreams];
+            for (int i = 0; i < numberOfStreams; i++)
+            {
+                _streamHeaders[i] = MetadataStreamHeader.FromReader(ref directoryReader);
+                if (_streamHeaders[i].Name == TablesStream.EncStreamName)
+                    IsEnCMetadata = true;
+            }
         }
 
         /// <inheritdoc />
         protected override IList<IMetadataStream> GetStreams()
         {
-            if (_numberOfStreams == 0)
+            if (_streamHeaders.Length == 0)
                 return base.GetStreams();
 
             return new MetadataStreamList(this,
                 _context,
-                _streamContentsReader,
-                _streamEntriesReader, _numberOfStreams);
+                _streamHeaders,
+                _streamContentsReader);
         }
 
     }

@@ -54,17 +54,8 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <inheritdoc />
         public bool IsEnCMetadata
         {
-            get
-            {
-                var streams = Streams;
-                for (int i = 0; i < streams.Count; i++)
-                {
-                    if (streams[i].Name == TablesStream.EncStreamName)
-                        return true;
-                }
-
-                return false;
-            }
+            get;
+            set;
         }
 
         /// <inheritdoc />
