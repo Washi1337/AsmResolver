@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using AsmResolver.IO;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -47,6 +49,22 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             get;
             set;
+        }
+
+        /// <inheritdoc />
+        public bool IsEnCMetadata
+        {
+            get
+            {
+                var streams = Streams;
+                for (int i = 0; i < streams.Count; i++)
+                {
+                    if (streams[i].Name == TablesStream.EncStreamName)
+                        return true;
+                }
+
+                return false;
+            }
         }
 
         /// <inheritdoc />
@@ -216,33 +234,57 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <inheritdoc />
         public bool TryGetStream(string name, [NotNullWhen(true)] out IMetadataStream? stream)
         {
-            var streams = Streams;
+            bool heapRequested = name is not (TablesStream.CompressedStreamName
+                or TablesStream.EncStreamName
+                or TablesStream.UncompressedStreamName);
 
-            for (int i = 0; i < streams.Count; i++)
-            {
-                if (streams[i].Name == name)
-                {
-                    stream = streams[i];
-                    return true;
-                }
-            }
-
-            stream = null;
-            return false;
+            return TryFindStream((c, s) => c.Name == s as string, name, heapRequested, out stream);
         }
 
         /// <inheritdoc />
         public bool TryGetStream<TStream>([NotNullWhen(true)] out TStream? stream)
             where TStream : class, IMetadataStream
         {
-            var streams = Streams;
+            bool heapRequested = !typeof(TablesStream).IsAssignableFrom(typeof(TStream));
 
-            for (int i = 0; i < streams.Count; i++)
+            if (TryFindStream((c, _) => c is TStream, null, heapRequested, out var candidate))
             {
-                if (streams[i] is TStream s)
+                stream = (TStream) candidate;
+                return true;
+            }
+
+            stream = null;
+            return false;
+        }
+
+        private bool TryFindStream(
+            Func<IMetadataStream, object?, bool> condition,
+            object? state,
+            bool heapRequested,
+            [NotNullWhen(true)] out IMetadataStream? stream)
+        {
+            var streams = Streams;
+            bool reverseOrder = heapRequested && !IsEnCMetadata;
+            if (reverseOrder)
+            {
+                for (int i = streams.Count - 1; i >= 0; i--)
                 {
-                    stream = s;
-                    return true;
+                    if (condition(streams[i], state))
+                    {
+                        stream = streams[i];
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < streams.Count; i++)
+                {
+                    if (condition(streams[i], state))
+                    {
+                        stream = streams[i];
+                        return true;
+                    }
                 }
             }
 
