@@ -126,6 +126,68 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             });
         }
 
+        private void AssertCorrectStreamIsSelected<TStream>(byte[] assembly, bool isEnC)
+            where TStream : class, IMetadataStream
+        {
+            var peImage = PEImage.FromBytes(assembly);
+            var metadata = peImage.DotNetDirectory!.Metadata!;
+
+            var allStreams = metadata.Streams
+                .OfType<TStream>()
+                .ToArray();
+
+            var dominantStream = metadata.GetStream<TStream>();
+            int expectedIndex = isEnC ? 0 : allStreams.Length - 1;
+            Assert.Equal(allStreams[expectedIndex], dominantStream);
+        }
+
+        [Fact]
+        public void SelectLastBlobStreamInNormalMetadata()
+        {
+            AssertCorrectStreamIsSelected<BlobStream>(Properties.Resources.HelloWorld_DoubleBlobStream, false);
+        }
+
+        [Fact]
+        public void SelectLastGuidStreamInNormalMetadata()
+        {
+            AssertCorrectStreamIsSelected<GuidStream>(Properties.Resources.HelloWorld_DoubleGuidStream, false);
+        }
+
+        [Fact]
+        public void SelectLastStringsStreamInNormalMetadata()
+        {
+            AssertCorrectStreamIsSelected<StringsStream>(Properties.Resources.HelloWorld_DoubleStringsStream, false);
+        }
+
+        [Fact]
+        public void SelectLastUserStringsStreamInNormalMetadata()
+        {
+            AssertCorrectStreamIsSelected<UserStringsStream>(Properties.Resources.HelloWorld_DoubleUserStringsStream, false);
+        }
+
+        [Fact]
+        public void SelectFirstBlobStreamInEnCMetadata()
+        {
+            AssertCorrectStreamIsSelected<BlobStream>(Properties.Resources.HelloWorld_DoubleBlobStream_EnC, true);
+        }
+
+        [Fact]
+        public void SelectFirstGuidStreamInEnCMetadata()
+        {
+            AssertCorrectStreamIsSelected<GuidStream>(Properties.Resources.HelloWorld_DoubleGuidStream_EnC, true);
+        }
+
+        [Fact]
+        public void SelectFirstStringsStreamInEnCMetadata()
+        {
+            AssertCorrectStreamIsSelected<StringsStream>(Properties.Resources.HelloWorld_DoubleStringsStream_EnC, true);
+        }
+
+        [Fact]
+        public void SelectFirstUserStringsStreamInEnCMetadata()
+        {
+            AssertCorrectStreamIsSelected<UserStringsStream>(Properties.Resources.HelloWorld_DoubleUserStringsStream_EnC, true);
+        }
 
     }
 }

@@ -42,8 +42,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override ICustomAttributeType? GetConstructor()
         {
-            var token = _context.Metadata
-                .GetStream<TablesStream>()
+            var token = _context.TablesStream
                 .GetIndexEncoder(CodedIndex.CustomAttributeType)
                 .DecodeIndex(_row.Type);
 
@@ -58,7 +57,7 @@ namespace AsmResolver.DotNet.Serialized
             if (Constructor is null)
                 return null;
 
-            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+            if (_context.BlobStream is not { } blobStream
                 || !blobStream.TryGetBlobReaderByIndex(_row.Value, out var reader))
             {
                 return _context.BadImageAndReturn<CustomAttributeSignature>(

@@ -94,6 +94,62 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_DoubleBlobStream {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_DoubleBlobStream", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_DoubleBlobStream_EnC {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_DoubleBlobStream_EnC", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_DoubleGuidStream {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_DoubleGuidStream", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_DoubleGuidStream_EnC {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_DoubleGuidStream_EnC", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_DoubleStringsStream {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_DoubleStringsStream", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_DoubleStringsStream_EnC {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_DoubleStringsStream_EnC", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_DoubleUserStringsStream {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_DoubleUserStringsStream", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_DoubleUserStringsStream_EnC {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_DoubleUserStringsStream_EnC", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] HelloWorldPortablePdb {
             get {
                 object obj = ResourceManager.GetObject("HelloWorldPortablePdb", resourceCulture);

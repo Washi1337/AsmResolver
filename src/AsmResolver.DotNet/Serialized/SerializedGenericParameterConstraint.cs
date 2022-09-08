@@ -43,8 +43,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override ITypeDefOrRef? GetConstraint()
         {
-            var token = _context.Metadata
-                .GetStream<TablesStream>()
+            var token = _context.TablesStream
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef)
                 .DecodeIndex(_row.Constraint);
 

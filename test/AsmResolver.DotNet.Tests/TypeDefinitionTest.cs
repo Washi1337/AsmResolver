@@ -54,6 +54,20 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ReadNameFromNormalMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleStringsStream);
+            Assert.Equal("Class_2", module.TopLevelTypes[1].Name);
+        }
+
+        [Fact]
+        public void ReadNameFromEnCMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleStringsStream_EnC);
+            Assert.Equal("Class_1", module.TopLevelTypes[1].Name);
+        }
+
+        [Fact]
         public void NameIsPersistentAfterRebuild()
         {
             const string newName = "SomeType";

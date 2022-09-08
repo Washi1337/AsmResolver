@@ -61,6 +61,14 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <summary>
+        /// Gets a value indicating whether the metadata directory is loaded as Edit-and-Continue metadata.
+        /// </summary>
+        public bool IsEncMetadata
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets a collection of metadata streams that are defined in the metadata header.
         /// </summary>
         IList<IMetadataStream> Streams

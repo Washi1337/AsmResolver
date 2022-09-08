@@ -36,20 +36,10 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override Utf8String? GetNamespace()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Namespace)
-                : null;
-        }
+        protected override Utf8String? GetNamespace() => _context.StringsStream?.GetStringByIndex(_row.Namespace);
 
         /// <inheritdoc />
-        protected override Utf8String? GetName()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Name)
-                : null;
-        }
+        protected override Utf8String? GetName() => _context.StringsStream?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
         protected override ITypeDefOrRef? GetBaseType()
@@ -57,8 +47,7 @@ namespace AsmResolver.DotNet.Serialized
             if (_row.Extends == 0)
                 return null;
 
-            var token = _context.Metadata
-                .GetStream<TablesStream>()
+            var token = _context.TablesStream
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef)
                 .DecodeIndex(_row.Extends);
 
@@ -163,7 +152,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<MethodImplementation> GetMethodImplementations()
         {
-            var tablesStream = _context.Metadata.GetStream<TablesStream>();
+            var tablesStream = _context.TablesStream;
             var table = tablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.MethodDefOrRef);
 

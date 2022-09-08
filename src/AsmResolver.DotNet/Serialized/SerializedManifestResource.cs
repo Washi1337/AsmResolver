@@ -34,12 +34,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override Utf8String? GetName()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Name)
-                : null;
-        }
+        protected override Utf8String? GetName() => _context.StringsStream?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
         protected override IImplementation? GetImplementation()
@@ -47,9 +42,7 @@ namespace AsmResolver.DotNet.Serialized
             if (_row.Implementation == 0)
                 return null;
 
-            var encoder = _context.Metadata
-                .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.Implementation);
+            var encoder = _context.TablesStream.GetIndexEncoder(CodedIndex.Implementation);
 
             var token = encoder.DecodeIndex(_row.Implementation);
             return _context.ParentModule.TryLookupMember(token, out var member)

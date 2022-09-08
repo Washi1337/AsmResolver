@@ -32,20 +32,10 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override Utf8String? GetNamespace()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Namespace)
-                : null;
-        }
+        protected override Utf8String? GetNamespace() => _context.StringsStream?.GetStringByIndex(_row.Namespace);
 
         /// <inheritdoc />
-        protected override Utf8String? GetName()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Name)
-                : null;
-        }
+        protected override Utf8String? GetName() => _context.StringsStream?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
         protected override IResolutionScope? GetScope()
@@ -53,7 +43,7 @@ namespace AsmResolver.DotNet.Serialized
             if (_row.ResolutionScope == 0)
                 return _context.ParentModule;
 
-            var tablesStream = _context.Metadata.GetStream<TablesStream>();
+            var tablesStream = _context.TablesStream;
             var decoder = tablesStream.GetIndexEncoder(CodedIndex.ResolutionScope);
             var token = decoder.DecodeIndex(_row.ResolutionScope);
 
