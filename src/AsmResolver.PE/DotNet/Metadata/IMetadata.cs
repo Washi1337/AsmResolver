@@ -63,7 +63,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <summary>
         /// Gets a value indicating whether the metadata directory is loaded as Edit-and-Continue metadata.
         /// </summary>
-        public bool IsEnCMetadata
+        public bool IsEncMetadata
         {
             get;
         }

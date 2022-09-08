@@ -52,7 +52,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public bool IsEnCMetadata
+        public bool IsEncMetadata
         {
             get;
             set;
@@ -255,7 +255,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             [NotNullWhen(true)] out IMetadataStream? stream)
         {
             var streams = Streams;
-            bool reverseOrder = heapRequested && !IsEnCMetadata;
+            bool reverseOrder = heapRequested && !IsEncMetadata;
             if (reverseOrder)
             {
                 for (int i = streams.Count - 1; i >= 0; i--)

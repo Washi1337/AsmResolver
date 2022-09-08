@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public string Name => IsEnCMetadata ? TablesStream.EncStreamName : TablesStream.CompressedStreamName;
+        public string Name => IsEncMetadata ? TablesStream.EncStreamName : TablesStream.CompressedStreamName;
 
         /// <inheritdoc />
         public bool IsEmpty
@@ -94,7 +94,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// <summary>
         /// Gets a value indicating whether the buffer contains edit-and-continue metadata tables.
         /// </summary>
-        public bool IsEnCMetadata
+        public bool IsEncMetadata
         {
             get
             {

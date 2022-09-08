@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet.Serialized
             // On the other hand, EnC metadata (i.e., metadata with a #- stream) looks up the first occurrence
             // of the stream of the provided name. The exception for this is the tables stream itself, for which both
             // the CLR and CoreCLR seem to always result in a file corruption error when there are multiple table streams.
-            bool isEnCMetadata = Metadata.IsEnCMetadata;
+            bool isEncMetadata = Metadata.IsEncMetadata;
 
             for (int i = 0; i < Metadata.Streams.Count; i++)
             {
@@ -47,16 +47,16 @@ namespace AsmResolver.DotNet.Serialized
                     case TablesStream tablesStream when TablesStream is null:
                         TablesStream = tablesStream;
                         break;
-                    case BlobStream blobStream when BlobStream is null || !isEnCMetadata:
+                    case BlobStream blobStream when BlobStream is null || !isEncMetadata:
                         BlobStream = blobStream;
                         break;
-                    case GuidStream guidStream when GuidStream is null || !isEnCMetadata:
+                    case GuidStream guidStream when GuidStream is null || !isEncMetadata:
                         GuidStream = guidStream;
                         break;
-                    case StringsStream stringsStream when StringsStream is null || !isEnCMetadata:
+                    case StringsStream stringsStream when StringsStream is null || !isEncMetadata:
                         StringsStream = stringsStream;
                         break;
-                    case UserStringsStream userStringsStream when UserStringsStream is null || !isEnCMetadata:
+                    case UserStringsStream userStringsStream when UserStringsStream is null || !isEncMetadata:
                         UserStringsStream = userStringsStream;
                         break;
                 }

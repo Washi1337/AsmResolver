@@ -77,7 +77,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             {
                 _streamHeaders[i] = MetadataStreamHeader.FromReader(ref directoryReader);
                 if (_streamHeaders[i].Name == TablesStream.EncStreamName)
-                    IsEnCMetadata = true;
+                    IsEncMetadata = true;
             }
         }
 
