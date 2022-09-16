@@ -7,6 +7,6 @@ After you obtained an instance of the ``PEFile`` class, it is possible to read a
 
     Console.WriteLine("e_flanew: {0:X8}", peFile.DosHeader.NextHeaderOffset);
     Console.WriteLine("Machine: {0:X8}", peFile.FileHeader.Machine);
-    Console.WriteLine("Entrypoint: {0:X8}", peFile.OptionalHeader.AddressOfEntrypoint);
+    Console.WriteLine("EntryPoint: {0:X8}", peFile.OptionalHeader.AddressOfEntryPoint);
 
 Every change made to these headers will be reflected in the output executable, however very little verification on these values is done. 
