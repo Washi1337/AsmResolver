@@ -209,7 +209,7 @@ namespace AsmResolver.PE
         {
             get;
             set;
-        } = OptionalHeaderMagic.Pe32;
+        } = OptionalHeaderMagic.PE32;
 
         /// <inheritdoc />
         public SubSystem SubSystem

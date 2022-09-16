@@ -58,11 +58,11 @@ namespace AsmResolver.PE.File.Headers
 
             switch (header.Magic)
             {
-                case OptionalHeaderMagic.Pe32:
+                case OptionalHeaderMagic.PE32:
                     header.BaseOfData = reader.ReadUInt32();
                     header.ImageBase = reader.ReadUInt32();
                     break;
-                case OptionalHeaderMagic.Pe32Plus:
+                case OptionalHeaderMagic.PE32Plus:
                     header.ImageBase = reader.ReadUInt64();
                     break;
                 default:
@@ -84,7 +84,7 @@ namespace AsmResolver.PE.File.Headers
             header.SubSystem = (SubSystem)reader.ReadUInt16();
             header.DllCharacteristics = (DllCharacteristics)reader.ReadUInt16();
 
-            if (header.Magic == OptionalHeaderMagic.Pe32)
+            if (header.Magic == OptionalHeaderMagic.PE32)
             {
                 header.SizeOfStackReserve = reader.ReadUInt32();
                 header.SizeOfStackCommit = reader.ReadUInt32();
@@ -120,7 +120,7 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
-        } = OptionalHeaderMagic.Pe32;
+        } = OptionalHeaderMagic.PE32;
 
         /// <summary>
         /// Gets or sets the major linker version used to link the portable executable (PE) file.
@@ -403,7 +403,7 @@ namespace AsmResolver.PE.File.Headers
         public override uint GetPhysicalSize()
         {
             // TODO: make configurable?
-            return Magic == OptionalHeaderMagic.Pe32 ? 0xE0u : 0xF0u;
+            return Magic == OptionalHeaderMagic.PE32 ? 0xE0u : 0xF0u;
         }
 
         /// <inheritdoc />
@@ -422,11 +422,11 @@ namespace AsmResolver.PE.File.Headers
 
             switch (Magic)
             {
-                case OptionalHeaderMagic.Pe32:
+                case OptionalHeaderMagic.PE32:
                     writer.WriteUInt32(BaseOfData);
                     writer.WriteUInt32((uint)ImageBase);
                     break;
-                case OptionalHeaderMagic.Pe32Plus:
+                case OptionalHeaderMagic.PE32Plus:
                     writer.WriteUInt64(ImageBase);
                     break;
                 default:
@@ -448,7 +448,7 @@ namespace AsmResolver.PE.File.Headers
             writer.WriteUInt16((ushort)SubSystem);
             writer.WriteUInt16((ushort)DllCharacteristics);
 
-            if (Magic == OptionalHeaderMagic.Pe32)
+            if (Magic == OptionalHeaderMagic.PE32)
             {
                 writer.WriteUInt32((uint)SizeOfStackReserve);
                 writer.WriteUInt32((uint)SizeOfStackCommit);

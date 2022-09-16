@@ -34,13 +34,13 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             if (is32bit)
             {
                 image.MachineType = MachineType.I386;
-                image.PEKind = OptionalHeaderMagic.Pe32;
+                image.PEKind = OptionalHeaderMagic.PE32;
                 image.DotNetDirectory.Flags |= DotNetDirectoryFlags.Bit32Required;
             }
             else
             {
                 image.MachineType = MachineType.Amd64;
-                image.PEKind = OptionalHeaderMagic.Pe32Plus;
+                image.PEKind = OptionalHeaderMagic.PE32Plus;
             }
 
             // Access metadata.

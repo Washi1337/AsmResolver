@@ -143,7 +143,7 @@ namespace AsmResolver.PE.Tests.Tls
                 },
                 OptionalHeader =
                 {
-                    Magic = is32Bit ? OptionalHeaderMagic.Pe32 : OptionalHeaderMagic.Pe32Plus
+                    Magic = is32Bit ? OptionalHeaderMagic.PE32 : OptionalHeaderMagic.PE32Plus
                 },
                 Sections =
                 {

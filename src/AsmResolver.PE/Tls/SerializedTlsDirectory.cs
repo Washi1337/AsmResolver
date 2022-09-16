@@ -68,7 +68,7 @@ namespace AsmResolver.PE.Tls
             var file = _context.File;
             var optionalHeader = file.OptionalHeader;
             ulong imageBase = optionalHeader.ImageBase;
-            bool is32Bit = optionalHeader.Magic == OptionalHeaderMagic.Pe32;
+            bool is32Bit = optionalHeader.Magic == OptionalHeaderMagic.PE32;
 
             if (!file.TryCreateReaderAtRva((uint) (_addressOfCallbacks - imageBase), out var reader))
             {

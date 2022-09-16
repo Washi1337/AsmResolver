@@ -36,13 +36,13 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             module.Attributes &= ~DotNetDirectoryFlags.ILOnly;
             if (is32Bit)
             {
-                module.PEKind = OptionalHeaderMagic.Pe32;
+                module.PEKind = OptionalHeaderMagic.PE32;
                 module.MachineType = MachineType.I386;
                 module.Attributes |= DotNetDirectoryFlags.Bit32Required;
             }
             else
             {
-                module.PEKind = OptionalHeaderMagic.Pe32Plus;
+                module.PEKind = OptionalHeaderMagic.PE32Plus;
                 module.MachineType = MachineType.Amd64;
             }
 

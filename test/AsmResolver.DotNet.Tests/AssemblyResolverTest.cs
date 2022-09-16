@@ -175,7 +175,7 @@ namespace AsmResolver.DotNet.Tests
             module.IsBit32Preferred = true;
             module.IsBit32Required = true;
             module.MachineType = MachineType.I386;
-            module.PEKind = OptionalHeaderMagic.Pe32;
+            module.PEKind = OptionalHeaderMagic.PE32;
 
             var resolved = module.CorLibTypeFactory.CorLibScope.GetAssembly()!.Resolve();
             Assert.NotNull(resolved);
@@ -196,7 +196,7 @@ namespace AsmResolver.DotNet.Tests
             module.IsBit32Preferred = false;
             module.IsBit32Required = false;
             module.MachineType = MachineType.Amd64;
-            module.PEKind = OptionalHeaderMagic.Pe32Plus;
+            module.PEKind = OptionalHeaderMagic.PE32Plus;
 
             var resolved = module.CorLibTypeFactory.CorLibScope.GetAssembly()!.Resolve();
             Assert.NotNull(resolved);

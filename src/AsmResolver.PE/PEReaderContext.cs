@@ -56,7 +56,7 @@ namespace AsmResolver.PE
         public RelocationParameters GetRelocation(ulong offset, uint rva)
         {
             return new RelocationParameters(File.OptionalHeader.ImageBase, offset, rva,
-                File.OptionalHeader.Magic == OptionalHeaderMagic.Pe32);
+                File.OptionalHeader.Magic == OptionalHeaderMagic.PE32);
         }
 
         /// <inheritdoc />

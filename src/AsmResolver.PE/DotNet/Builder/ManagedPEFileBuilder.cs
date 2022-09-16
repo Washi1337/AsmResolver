@@ -66,7 +66,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 if (image.DotNetDirectory is null)
                     throw new ArgumentException("Image does not contain a .NET directory.");
 
-                ImportDirectory = new ImportDirectoryBuffer(image.PEKind == OptionalHeaderMagic.Pe32);
+                ImportDirectory = new ImportDirectoryBuffer(image.PEKind == OptionalHeaderMagic.PE32);
                 ExportDirectory = new ExportDirectoryBuffer();
                 DotNetSegment = new DotNetSegmentBuffer(image.DotNetDirectory);
                 ResourceDirectory = new ResourceDirectoryBuffer();

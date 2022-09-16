@@ -39,7 +39,7 @@ namespace AsmResolver.PE.File
             FileHeader = FileHeader.FromReader(ref _reader);
             OptionalHeader = OptionalHeader.FromReader(ref _reader);
             _originalImageBase = OptionalHeader.ImageBase;
-            _is32Bit = OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
+            _is32Bit = OptionalHeader.Magic == OptionalHeaderMagic.PE32;
 
             // Read section headers.
             _reader.Offset = OptionalHeader.Offset + FileHeader.SizeOfOptionalHeader;

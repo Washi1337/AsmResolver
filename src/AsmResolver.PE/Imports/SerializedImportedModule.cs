@@ -68,7 +68,7 @@ namespace AsmResolver.PE.Imports
             if (IsEmpty)
                 return result;
 
-            bool is32Bit = _context.File.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
+            bool is32Bit = _context.File.OptionalHeader.Magic == OptionalHeaderMagic.PE32;
             (ulong ordinalMask, int pointerSize) = is32Bit
                 ? (0x8000_0000ul, sizeof(uint))
                 : (0x8000_0000_0000_0000ul, sizeof(ulong));

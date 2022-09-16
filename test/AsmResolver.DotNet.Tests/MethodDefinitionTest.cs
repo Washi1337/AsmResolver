@@ -216,13 +216,13 @@ namespace AsmResolver.DotNet.Tests
             {
                 module.Attributes |= DotNetDirectoryFlags.Bit32Required;
                 module.FileCharacteristics |= Characteristics.Dll | Characteristics.Machine32Bit;
-                module.PEKind = OptionalHeaderMagic.Pe32;
+                module.PEKind = OptionalHeaderMagic.PE32;
                 module.MachineType = MachineType.I386;
             }
             else
             {
                 module.FileCharacteristics |= Characteristics.Dll;
-                module.PEKind = OptionalHeaderMagic.Pe32Plus;
+                module.PEKind = OptionalHeaderMagic.PE32Plus;
                 module.MachineType = MachineType.Amd64;
             }
 

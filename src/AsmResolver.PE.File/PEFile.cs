@@ -372,7 +372,7 @@ namespace AsmResolver.PE.File
             FileHeader.NumberOfSections = (ushort) Sections.Count;
 
             var relocation = new RelocationParameters(OptionalHeader.ImageBase, 0, 0,
-                OptionalHeader.Magic == OptionalHeaderMagic.Pe32);
+                OptionalHeader.Magic == OptionalHeaderMagic.PE32);
 
             FileHeader.UpdateOffsets(relocation.WithOffsetRva(
                 DosHeader.NextHeaderOffset + 4,
@@ -408,7 +408,7 @@ namespace AsmResolver.PE.File
                 OptionalHeader.ImageBase,
                 OptionalHeader.SizeOfHeaders.Align(OptionalHeader.FileAlignment),
                 OptionalHeader.SizeOfHeaders.Align(OptionalHeader.SectionAlignment),
-                OptionalHeader.Magic == OptionalHeaderMagic.Pe32);
+                OptionalHeader.Magic == OptionalHeaderMagic.PE32);
 
             for (int i = 0; i < Sections.Count; i++)
             {

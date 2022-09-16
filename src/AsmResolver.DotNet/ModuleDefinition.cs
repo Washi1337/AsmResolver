@@ -574,7 +574,7 @@ namespace AsmResolver.DotNet
         {
             get;
             set;
-        } = OptionalHeaderMagic.Pe32;
+        } = OptionalHeaderMagic.PE32;
 
         /// <summary>
         /// Gets or sets the subsystem to use when running the underlying portable executable (PE) file.

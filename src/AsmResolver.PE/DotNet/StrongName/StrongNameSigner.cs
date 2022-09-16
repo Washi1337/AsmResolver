@@ -101,7 +101,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             hashBuilder.ZeroRange(new OffsetRange(peChecksumOffset, peChecksumOffset + sizeof(uint)));
 
             // Zero certificate directory entry.
-            uint optionalHeaderSize = file.OptionalHeader.Magic == OptionalHeaderMagic.Pe32
+            uint optionalHeaderSize = file.OptionalHeader.Magic == OptionalHeaderMagic.PE32
                 ? OptionalHeader.OptionalHeader32SizeExcludingDataDirectories
                 : OptionalHeader.OptionalHeader64SizeExcludingDataDirectories;
             ulong certificateEntryOffset = file.OptionalHeader.Offset
