@@ -52,8 +52,8 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="targetModule">The target module to copy the members into.</param>
         /// <param name="callback">The callback used in the cloner listener.</param>
-        public MemberCloner(ModuleDefinition targetModule, Action<IMetadataMember, IMetadataMember> callback)
-            : this(targetModule, new CallbackCloneListener(callback))
+        public MemberCloner(ModuleDefinition targetModule, Action<IMemberDefinition, IMemberDefinition> callback)
+            : this(targetModule, new CallbackClonerListener(callback))
         {
         }
 
@@ -79,7 +79,7 @@ namespace AsmResolver.DotNet.Cloning
         {
             _targetModule = targetModule ?? throw new ArgumentNullException(nameof(targetModule));
             _importerFactory = importerFactory;
-            _clonerListener = clonerListener ?? CallbackCloneListener.EmptyInstance;
+            _clonerListener = clonerListener ?? CallbackClonerListener.EmptyInstance;
         }
 
         /// <summary>
