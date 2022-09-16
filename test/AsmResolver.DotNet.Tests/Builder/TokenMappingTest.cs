@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             module.GetOrCreateModuleType().Methods.Add(method);
 
             // Get existing main method.
-            var main = module.ManagedEntrypointMethod;
+            var main = module.ManagedEntryPointMethod;
 
             // Rebuild.
             var builder = new ManagedPEImageBuilder();
@@ -134,7 +134,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             var reference = importer.ImportMethod(typeof(MemoryStream).GetConstructor(Type.EmptyTypes));
 
             // Ensure method reference is added to the module by referencing it in main.
-            var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
+            var instructions = module.ManagedEntryPointMethod.CilMethodBody.Instructions;
             instructions.Insert(0, CilOpCodes.Newobj, reference);
             instructions.Insert(1, CilOpCodes.Pop);
 
@@ -162,7 +162,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             var specification = importer.ImportType(typeof(List<object>));
 
             // Ensure method reference is added to the module by referencing it in main.
-            var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
+            var instructions = module.ManagedEntryPointMethod.CilMethodBody.Instructions;
             instructions.Insert(0, CilOpCodes.Ldtoken, specification);
             instructions.Insert(1, CilOpCodes.Pop);
 
@@ -190,7 +190,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             var reference = importer.ImportMethod(typeof(Array).GetMethod("Empty").MakeGenericMethod(typeof(object)));
 
             // Ensure method reference is added to the module by referencing it in main.
-            var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
+            var instructions = module.ManagedEntryPointMethod.CilMethodBody.Instructions;
             instructions.Insert(0, CilOpCodes.Call, reference);
             instructions.Insert(1, CilOpCodes.Pop);
 
@@ -219,7 +219,7 @@ namespace AsmResolver.DotNet.Tests.Builder
                 importer.ImportMethodSignature(MethodSignature.CreateStatic(module.CorLibTypeFactory.Void)));
 
             // Ensure reference is added to the module by referencing it in main.
-            var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
+            var instructions = module.ManagedEntryPointMethod.CilMethodBody.Instructions;
             instructions.Insert(0, CilOpCodes.Ldnull);
             instructions.Insert(0, CilOpCodes.Calli, signature);
 

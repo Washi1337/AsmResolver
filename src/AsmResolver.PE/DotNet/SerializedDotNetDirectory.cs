@@ -39,7 +39,7 @@ namespace AsmResolver.PE.DotNet
             MinorRuntimeVersion = reader.ReadUInt16();
             _metadataDirectory = DataDirectory.FromReader(ref reader);
             Flags = (DotNetDirectoryFlags) reader.ReadUInt32();
-            Entrypoint = reader.ReadUInt32();
+            EntryPoint = reader.ReadUInt32();
             _resourcesDirectory = DataDirectory.FromReader(ref reader);
             _strongNameDirectory = DataDirectory.FromReader(ref reader);
             _codeManagerDirectory = DataDirectory.FromReader(ref reader);

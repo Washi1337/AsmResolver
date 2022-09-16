@@ -143,7 +143,7 @@ namespace AsmResolver.DotNet.Builder
             {
                 Metadata = Metadata.CreateMetadata(),
                 DotNetResources = Resources.Size > 0 ? Resources.CreateDirectory() : null,
-                Entrypoint = GetEntrypoint(),
+                EntryPoint = GetEntryPoint(),
                 Flags = Module.Attributes,
                 StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null,
                 VTableFixups = VTableFixups.Directory.Count > 0 ? VTableFixups.Directory : null
@@ -152,29 +152,29 @@ namespace AsmResolver.DotNet.Builder
             return new DotNetDirectoryBuildResult(directory, _tokenMapping);
         }
 
-        private uint GetEntrypoint()
+        private uint GetEntryPoint()
         {
-            if (Module.ManagedEntrypoint is null)
+            if (Module.ManagedEntryPoint is null)
                 return 0;
 
-            var entrypointToken = MetadataToken.Zero;
+            var entryPointToken = MetadataToken.Zero;
 
-            switch (Module.ManagedEntrypoint.MetadataToken.Table)
+            switch (Module.ManagedEntryPoint.MetadataToken.Table)
             {
                 case TableIndex.Method:
-                    entrypointToken = GetMethodDefinitionToken(Module.ManagedEntrypointMethod!);
+                    entryPointToken = GetMethodDefinitionToken(Module.ManagedEntryPointMethod!);
                     break;
 
                 case TableIndex.File:
-                    entrypointToken = AddFileReference((FileReference) Module.ManagedEntrypoint);
+                    entryPointToken = AddFileReference((FileReference) Module.ManagedEntryPoint);
                     break;
 
                 default:
-                    ErrorListener.MetadataBuilder($"Invalid managed entrypoint {Module.ManagedEntrypoint.SafeToString()}.");
+                    ErrorListener.MetadataBuilder($"Invalid managed entry point {Module.ManagedEntryPoint.SafeToString()}.");
                     break;
             }
 
-            return entrypointToken.ToUInt32();
+            return entryPointToken.ToUInt32();
         }
 
         private void AddMethodSemantics(MetadataToken ownerToken, IHasSemantics provider)

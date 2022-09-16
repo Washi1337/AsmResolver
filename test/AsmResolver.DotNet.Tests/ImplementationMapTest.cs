@@ -28,17 +28,17 @@ namespace AsmResolver.DotNet.Tests
         {
             using var stream = new MemoryStream();
             implementationMap.MemberForwarded.Module.Write(stream);
-            
+
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
             var t = newModule.TopLevelTypes.First(t => t.Name == nameof(PlatformInvoke));
             return t.Methods.First(m => m.Name == implementationMap.MemberForwarded.Name).ImplementationMap;
         }
-        
+
         [Fact]
         public void ReadName()
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
-            Assert.Equal("SomeEntrypoint", map.Name);
+            Assert.Equal("SomeEntryPoint", map.Name);
         }
 
         [Fact]
@@ -49,27 +49,27 @@ namespace AsmResolver.DotNet.Tests
             var newMap = RebuildAndLookup(map);
             Assert.Equal(map.Name, newMap.Name);
         }
-        
+
         [Fact]
         public void ReadScope()
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
             Assert.Equal("SomeDll.dll", map.Scope.Name);
         }
-        
+
         [Fact]
         public void PersistentScope()
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
-            
+
             var newModule = new ModuleReference("SomeOtherDll.dll");
             map.MemberForwarded.Module.ModuleReferences.Add(newModule);
             map.Scope = newModule;
-            
+
             var newMap = RebuildAndLookup(map);
             Assert.Equal(newModule.Name, newMap.Scope.Name);
         }
-        
+
         [Fact]
         public void ReadMemberForwarded()
         {
@@ -100,11 +100,11 @@ namespace AsmResolver.DotNet.Tests
         public void PersistentMemberForwarded()
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
-            
+
             var declaringType = (TypeDefinition) map.MemberForwarded.DeclaringType;
             var otherMethod = declaringType.Methods.First(m =>
                 m.Name == nameof(PlatformInvoke.NonImplementationMapMethod));
-            
+
             map.MemberForwarded.ImplementationMap = null;
             otherMethod.ImplementationMap = map;
 

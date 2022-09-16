@@ -401,7 +401,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void ExceptionHandlerWithHandlerEndOutsideOfMethodShouldResultInEndLabel()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HandlerEndAtEndOfMethodBody);
-            var body = module.ManagedEntrypointMethod.CilMethodBody;
+            var body = module.ManagedEntryPointMethod.CilMethodBody;
             Assert.Same(body.Instructions.EndLabel, body.ExceptionHandlers[0].HandlerEnd);
             body.VerifyLabels();
         }
@@ -602,7 +602,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void ReadUserStringFromNormalMetadata()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleUserStringsStream);
-            var instruction = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions
+            var instruction = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions
                 .First(i => i.OpCode.Code == CilCode.Ldstr);
 
             Assert.Equal("Hello Mars!!", instruction.Operand);
@@ -612,7 +612,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void ReadUserStringFromEnCMetadata()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleUserStringsStream_EnC);
-            var instruction = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions
+            var instruction = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions
                 .First(i => i.OpCode.Code == CilCode.Ldstr);
 
             Assert.Equal("Hello World!", instruction.Operand);

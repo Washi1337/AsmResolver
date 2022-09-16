@@ -310,7 +310,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
                     module.CorLibTypeFactory.String)
             );
 
-            var instructions = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions;
+            var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
             instructions.Clear();
             instructions.Add(CilOpCodes.Call, body.Owner);
             instructions.Add(CilOpCodes.Newobj, stringConstructor);

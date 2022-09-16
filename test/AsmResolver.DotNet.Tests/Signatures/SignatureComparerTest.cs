@@ -145,7 +145,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             module.MetadataResolver.AssemblyResolver.AddToCache(library, library);
             forwarder.ManifestModule!.MetadataResolver.AssemblyResolver.AddToCache(library, library);
 
-            var referencedTypes = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions
+            var referencedTypes = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions
                 .Where(i => i.OpCode.Code == CilCode.Call)
                 .Select(i => ((IMethodDefOrRef) i.Operand!).DeclaringType)
                 .Where(t => t.Name == "MyNestedClass")

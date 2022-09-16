@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
             var originalTypeRefs = GetMembers<TypeReference>(module, TableIndex.TypeRef);
 
-            var instructions = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions;
+            var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
             instructions.Clear();
             instructions.Add(CilOpCodes.Ret);
 
@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var importer = new ReferenceImporter(module);
             var readKey = importer.ImportMethod(typeof(Console).GetMethod("ReadKey", Type.EmptyTypes)!);
 
-            var instructions = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions;
+            var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
             instructions.RemoveAt(instructions.Count - 1);
             instructions.Add(CilOpCodes.Call, readKey);
             instructions.Add(CilOpCodes.Pop);

@@ -69,9 +69,9 @@ namespace AsmResolver.PE.Platforms
         /// <summary>
         /// Creates a new thunk stub that transfers control to the provided symbol.
         /// </summary>
-        /// <param name="entrypoint">The symbol to jump to.</param>
+        /// <param name="entryPoint">The symbol to jump to.</param>
         /// <returns>The created stub.</returns>
-        public abstract RelocatableSegment CreateThunkStub(ISymbol entrypoint);
+        public abstract RelocatableSegment CreateThunkStub(ISymbol entryPoint);
 
         /// <summary>
         /// Attempts to extract the original RVA from the code at the provided thunk address reader.

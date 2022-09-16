@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             };
             
             module.GetOrCreateModuleType().Methods.Add(main);
-            module.ManagedEntrypoint = main;
+            module.ManagedEntryPoint = main;
             
             var builder = new ManagedPEImageBuilder(new DotNetDirectoryFactory
             {
@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             var newImage = builder.CreateImage(module).ConstructedImage;
             var newModule = ModuleDefinition.FromImage(newImage);
 
-            Assert.Equal(expectedMaxStack, newModule.ManagedEntrypointMethod.CilMethodBody.MaxStack);
+            Assert.Equal(expectedMaxStack, newModule.ManagedEntryPointMethod.CilMethodBody.MaxStack);
         }
     }
 }

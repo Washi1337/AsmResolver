@@ -52,7 +52,7 @@ namespace AsmResolver.PE.File.Headers
                 SizeOfCode = reader.ReadUInt32(),
                 SizeOfInitializedData = reader.ReadUInt32(),
                 SizeOfUninitializedData = reader.ReadUInt32(),
-                AddressOfEntrypoint = reader.ReadUInt32(),
+                AddressOfEntryPoint = reader.ReadUInt32(),
                 BaseOfCode = reader.ReadUInt32()
             };
 
@@ -168,9 +168,9 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Gets or sets the relative virtual address to the entrypoint of the portable executable (PE) file.
+        /// Gets or sets the relative virtual address to the entry point of the portable executable (PE) file.
         /// </summary>
-        public uint AddressOfEntrypoint
+        public uint AddressOfEntryPoint
         {
             get;
             set;
@@ -417,7 +417,7 @@ namespace AsmResolver.PE.File.Headers
             writer.WriteUInt32(SizeOfCode);
             writer.WriteUInt32(SizeOfInitializedData);
             writer.WriteUInt32(SizeOfUninitializedData);
-            writer.WriteUInt32(AddressOfEntrypoint);
+            writer.WriteUInt32(AddressOfEntryPoint);
             writer.WriteUInt32(BaseOfCode);
 
             switch (Magic)

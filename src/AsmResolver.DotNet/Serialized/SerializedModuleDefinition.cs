@@ -288,16 +288,16 @@ namespace AsmResolver.DotNet.Serialized
         protected override string GetRuntimeVersion() => ReaderContext.Metadata!.VersionString;
 
         /// <inheritdoc />
-        protected override IManagedEntrypoint? GetManagedEntrypoint()
+        protected override IManagedEntryPoint? GetManagedEntryPoint()
         {
-            if ((DotNetDirectory.Flags & DotNetDirectoryFlags.NativeEntrypoint) != 0)
+            if ((DotNetDirectory.Flags & DotNetDirectoryFlags.NativeEntryPoint) != 0)
             {
-                // TODO: native entrypoints.
+                // TODO: native entry points.
                 return null;
             }
 
-            if (DotNetDirectory.Entrypoint != 0)
-                return LookupMember(DotNetDirectory.Entrypoint) as IManagedEntrypoint;
+            if (DotNetDirectory.EntryPoint != 0)
+                return LookupMember(DotNetDirectory.EntryPoint) as IManagedEntryPoint;
 
             return null;
         }

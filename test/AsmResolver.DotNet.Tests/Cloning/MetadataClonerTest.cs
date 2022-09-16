@@ -123,7 +123,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
             foreach (var type in result.ClonedTopLevelTypes)
                 targetModule.TopLevelTypes.Add(type);
 
-            targetModule.ManagedEntrypointMethod = (MethodDefinition) result.ClonedMembers.First(m => m.Name == "Main");
+            targetModule.ManagedEntryPointMethod = (MethodDefinition) result.ClonedMembers.First(m => m.Name == "Main");
             _fixture
                 .GetRunner<FrameworkPERunner>()
                 .RebuildAndRun(targetModule, "HelloWorld.exe", "Hello World!" + Environment.NewLine);
