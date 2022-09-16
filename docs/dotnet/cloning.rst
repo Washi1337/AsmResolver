@@ -13,14 +13,14 @@ To help developers in injecting existing code into a module, ``AsmResolver.DotNe
 The MemberCloner class
 ----------------------
 
-The ``MemberCloner`` is the root object responsible for cloning members in a .NET module, and importing them into another. 
+The ``MemberCloner`` is the root object responsible for cloning members in a .NET module, and importing them into another.
 
 In the snippet below, we define a new ``MemberCloner`` that is able to clone and import members into the module ``destinationModule:``.
 
 .. code-block:: csharp
 
     ModuleDefinition destinationModule = ...
-    MemberCloner cloner = new MemberCloner(destinationModule);
+    var cloner = new MemberCloner(destinationModule);
 
 In the remaining sections of this article, we assume that the ``MemberCloner`` is initialized using the code above.
 
@@ -36,7 +36,7 @@ For the sake of the example, we assume that the following two classes are to be 
 
     public class Rectangle
     {
-        public Rectangle(Vector2 location, Vector2 size) 
+        public Rectangle(Vector2 location, Vector2 size)
         {
             Location = location;
             Size = size;
@@ -50,7 +50,7 @@ For the sake of the example, we assume that the following two classes are to be 
 
     public class Vector2
     {
-        public Vector2(int x, int y) 
+        public Vector2(int x, int y)
         {
             X = x;
             Y = y;
@@ -97,28 +97,122 @@ The ``recursive`` parameter indicates whether all members and nested types need 
 Cloning individual methods, fields, properties and/or events is also supported. This can be done by including the corresponding ``MethodDefinition``, ``FieldDefinition``, ``PropertyDefinition`` and/or ``EventDefinition`` instead.
 
 
-Cloning the included members 
+Cloning the included members
 ----------------------------
 
-When all members are included, it is possible to call ``MemberCloner.Clone`` to clone them all in one go. 
+When all members are included, it is possible to call ``MemberCloner.Clone`` to clone them all in one go.
 
 .. code-block:: csharp
 
     var result = cloner.Clone();
 
-The ``MemberCloner`` will automatically resolve any cross references between types, fields and methods that are included in the cloning process. 
+The ``MemberCloner`` will automatically resolve any cross references between types, fields and methods that are included in the cloning process.
 
 For instance, going with the example in the previous section, if both the ``Rectangle`` as well as the ``Vector2`` classes are included, any reference in ``Rectangle`` to ``Vector2`` will be replaced with a reference to the cloned ``Vector2``.  If not all members are included, the ``MemberCloner`` will assume that these are references to external libraries, and will use the ``ReferenceImporter`` to construct references to these members instead.
 
-.. warning::
 
-    The ``MemberCloner`` heavily depends on the ``ReferenceImporter`` class for copying references into the destination module. This class has some limitations, in particular on importing / cloning from modules targeting different framework versions. See :ref:`dotnet-importer-common-caveats` for more information.
+Custom reference importers
+--------------------------
+
+The ``MemberCloner`` heavily depends on the ``CloneContextAwareReferenceImporter`` class for copying references into the destination module. This class is derived from ``ReferenceImporter``, which has some limitations. In particular, limitations arise when cloning from modules targeting different framework versions, or when trying to reference members that may already exist in the target module (e.g., when dealing with ``NullableAttribute`` annotated metadata).
+
+To account for situations like these, the cloner allows for specifying custom reference importer instances. By deriving from the ``CloneContextAwareReferenceImporter`` class, and overriding methods such as ``ImportMethod``, we can reroute specific member references to the appropriate metadata if needed. Below is an example of a basic implementation of an importer that attempts to map method references from the ``System.Runtime.CompilerServices`` namespace to definitions that are already present in the target module.
+
+.. code-block:: csharp
+
+    public class MyImporter : CloneContextAwareReferenceImporter
+    {
+        private static readonly SignatureComparer Comparer = new();
+
+        public MyImporter(MemberCloneContext context)
+            : base(context)
+        {
+        }
+
+        public override IMethodDefOrRef ImportMethod(IMethodDefOrRef method)
+        {
+            // Check if the method is from a type defined in the System.Runtime.CompilerServices namespace.
+            if (method.DeclaringType is { Namespace.Value: "System.Runtime.CompilerServices" } type)
+            {
+                // We might already have a type and method defined in the target module (e.g., NullableAttribute::.ctor(int32)).
+                // Try find it in the target module.
+
+                var existingMethod = this.Context.Module
+                    .TopLevelTypes.FirstOrDefault(t => t.IsTypeOf(type.Namespace, type.Name))?
+                    .Methods.FirstOrDefault(m => method.Name == m.Name && Comparer.Equals(m.Signature, method.Signature));
+
+                // If we found a matching definition, then return it instead of importing the reference.
+                if (existingMethod is not null)
+                    return existingMethod;
+            }
+
+            return base.ImportMethod(method);
+        }
+    }
 
 
-Injecting the cloned members 
+We can then pass a custom importer factory to our member cloner constructor as follows:
+
+.. code-block:: csharp
+
+    var cloner = new MemberCloner(destinationModule, context => new MyImporter(context));
+
+All references to methods defined in the ``NSystem.Runtime.CompilerServices`` namespace will then be mapped to the appropriate method definitions if they exist in the target module.
+
+See :ref:`dotnet-importer-common-caveats` for more information on reference importing and its caveats.
+
+
+Post processing of cloned members
+---------------------------------
+
+In some cases, cloned members may need to be post-processed before they are injected into the target module. The ``MemberCloner`` class can be initialized with an instance of a ``IMemberClonerListener``, that gets notified by the cloner object every time a definition was cloned.
+
+Below an example that appends the string ``_Cloned`` to the  name for every cloned type.
+
+.. code-block:: csharp
+
+    public class MyListener : MemberClonerListener
+    {
+        public override void OnClonedType(TypeDefinition original, TypeDefinition cloned)
+        {
+            cloned.Name = $"{original.Name}_Cloned";
+            base.OnClonedType(original, cloned);
+        }
+    }
+
+We can then initialize our cloner with an instance of our listener class:
+
+.. code-block:: csharp
+
+    var cloner = new MemberCloner(destinationModule, new MyListener());
+
+
+Alternatively, we can also override the more generic ``OnClonedMember`` instead, which gets fired for every member definition that was cloned.
+
+.. code-block:: csharp
+
+    public class MyListener : MemberClonerListener
+    {
+        public override void OnClonedMember(IMemberDefinition original, IMemberDefinition cloned)
+        {
+            /* ... Do post processing here ... */
+            base.OnClonedMember(original, cloned);
+        }
+    }
+
+As a shortcut, this can also be done by passing in a delegate or lambda instead to the ``MemberCloner`` constructor.
+
+.. code-block:: csharp
+
+    var cloner = new MemberCloner(destinationModule, (original, cloned) => {
+        /* ... Do post processing here ... */
+    });
+
+
+Injecting the cloned members
 ----------------------------
 
-After cloning, we obtain a ``MemberCloneResult``, which contains a register of all members cloned by the member cloner.
+The ``Clone`` method returns a  ``MemberCloneResult``, which contains a register of all members cloned by the member cloner.
 
 - ``OriginalMembers``: The collection containing all original members.
 - ``ClonedMembers``: The collection containing all cloned members.
@@ -136,9 +230,21 @@ Alternatively, we can get all cloned top-level types.
 
     var clonedTypes = result.ClonedTopLevelTypes;
 
-It is important to note that the ``MemberCloner`` class itself does not inject any of the cloned members. To inject the cloned types, we can for instance add them to the ``ModuleDefinition.TopLevelTypes`` collection:
+It is important to note that the ``MemberCloner`` class itself does not inject any of the cloned members by itself. To inject the cloned types, we can for instance add them to the ``ModuleDefinition.TopLevelTypes`` collection:
 
 .. code-block:: csharp
 
     foreach (var clonedType in clonedTypes)
         destinationModule.TopLevelTypes.Add(clonedType);
+
+
+However, since injecting the cloned top level types is a very common use-case for the cloner, AsmResolver defines the ``InjectTypeClonerListener`` class that implements a cloner listener that injects all top level types automatically into the destination module. In such a case, the code can be reduced to the following:
+
+.. code-block:: csharp
+
+    new MemberCloner(destinationModule, new InjectTypeClonerListener(destinationModule))
+        .Include(rectangleType)
+        .Include(vectorType)
+        .Clone();
+
+    // `destinationModule` now contains copies of `rectangleType` and `vectorType`.
