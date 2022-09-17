@@ -4,7 +4,7 @@ namespace AsmResolver.DotNet.Cloning
     public abstract class MemberClonerListener : IMemberClonerListener
     {
         /// <inheritdoc/>
-        public virtual void OnClonedMember(IMetadataMember original, IMetadataMember cloned) { }
+        public virtual void OnClonedMember(IMemberDefinition original, IMemberDefinition cloned) { }
         /// <inheritdoc/>
         public virtual void OnClonedEvent(EventDefinition original, EventDefinition cloned) { }
         /// <inheritdoc/>

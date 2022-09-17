@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="original">The original member.</param>
         /// <param name="cloned">The cloned member.</param>
-        public void OnClonedMember(IMetadataMember original, IMetadataMember cloned);
+        public void OnClonedMember(IMemberDefinition original, IMemberDefinition cloned);
         /// <summary>
         /// This function is called for every type that got cloned.
         /// </summary>
