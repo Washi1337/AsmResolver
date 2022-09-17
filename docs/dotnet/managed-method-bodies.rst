@@ -1,3 +1,4 @@
+.. _dotnet-cil-method-bodies:
 CIL Method Bodies
 =================
 

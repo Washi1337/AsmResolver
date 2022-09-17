@@ -172,6 +172,8 @@ namespace AsmResolver.DotNet
             var handle = (IntPtr) GetHINSTANCEMethod?.Invoke(null, new object[] { module })!;
             if (handle == IntPtr.Zero)
                 throw new NotSupportedException("The current platform does not support getting the base address of an instance of System.Reflection.Module.");
+            if (handle == (IntPtr) (-1))
+                throw new NotSupportedException("Provided module does not have a module base address.");
 
             // Dynamically loaded modules are in their unmapped form, as opposed to modules loaded normally by the
             // Windows PE loader. They also have a fully qualified name "<Unknown>" or similar.
