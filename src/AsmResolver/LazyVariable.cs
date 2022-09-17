@@ -7,11 +7,14 @@ namespace AsmResolver
     /// Represents a variable that can be lazily initialized and/or assigned a new value.
     /// </summary>
     /// <typeparam name="T">The type of the values that the variable stores.</typeparam>
+    /// <remarks>
+    /// For performance reasons, this class locks on itself for thread synchronization. Therefore, consumers
+    /// should not lock instances of this class as a lock object to avoid dead-locks.
+    /// </remarks>
     public class LazyVariable<T>
     {
         private T? _value;
         private readonly Func<T?>? _getValue;
-        private readonly object _lockObject = new();
 
         /// <summary>
         /// Creates a new lazy variable and initialize it with a constant.
@@ -55,7 +58,7 @@ namespace AsmResolver
             }
             set
             {
-                lock (_lockObject)
+                lock (this)
                 {
                     _value = value;
                     IsInitialized = true;
@@ -65,7 +68,7 @@ namespace AsmResolver
 
         private void InitializeValue()
         {
-            lock (_lockObject)
+            lock (this)
             {
                 if (!IsInitialized)
                 {
