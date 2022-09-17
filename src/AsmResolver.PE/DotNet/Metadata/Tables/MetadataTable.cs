@@ -180,6 +180,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <returns>The row.</returns>
         public TRow GetByRid(uint rid) => this[(int) (rid - 1)];
 
+        /// <inheritdoc />
+        public bool TryGetCell(uint rid, int column, out uint value)
+        {
+            if (column >= 0 && column < Layout.Columns.Count && TryGetByRid(rid, out var row))
+            {
+                value = row[column];
+                return true;
+            }
+
+            value = 0;
+            return false;
+        }
+
         IMetadataRow IMetadataTable.GetByRid(uint rid) => GetByRid(rid);
 
         /// <summary>

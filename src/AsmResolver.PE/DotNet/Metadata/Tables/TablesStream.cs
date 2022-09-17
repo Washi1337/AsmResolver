@@ -610,10 +610,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             // Check if redirect table is present.
             var redirectTable = GetTable(redirectTableIndex);
             if (redirectTable.Count > 0)
-                return new RedirectedMetadataRange(redirectTable, memberTableIndex, startRid, endRid);
+                return new MetadataRange(redirectTable, memberTableIndex, startRid, endRid);
 
             // If not, its a simple range.
-            return new ContinuousMetadataRange(memberTableIndex, startRid, endRid);
+            return new MetadataRange(memberTableIndex, startRid, endRid);
         }
     }
 }

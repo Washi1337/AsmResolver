@@ -54,11 +54,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         IMetadataRow GetByRid(uint rid);
 
         /// <summary>
+        /// Attempts to get the contents of a cell in the table by its row identifier and column index.
+        /// </summary>
+        /// <param name="rid">The row identifier.</param>
+        /// <param name="column">The column index.</param>
+        /// <param name="value">When successful, the contents of the cell, converted to an unsigned integer.</param>
+        /// <returns><c>true</c> if the cell existed and was obtained successfully, <c>false</c> otherwise.</returns>
+        bool TryGetCell(uint rid, int column, out uint value);
+
+        /// <summary>
         /// Attempts to get the contents of a row by its row identifier.
         /// </summary>
         /// <param name="rid">The row identifier.</param>
         /// <param name="row">When successful, the read row.</param>
-        /// <returns><c>true</c> if the RID existed an the row was obtained successfully, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c> if the RID existed and the row was obtained successfully, <c>false</c> otherwise.</returns>
         bool TryGetByRid(uint rid, out IMetadataRow row);
 
         /// <summary>

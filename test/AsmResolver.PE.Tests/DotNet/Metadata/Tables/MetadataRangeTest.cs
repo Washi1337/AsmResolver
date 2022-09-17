@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void ContinuousRangeEmpty()
         {
-            var range = new ContinuousMetadataRange(TableIndex.Method, 3, 3);
+            var range = new MetadataRange(TableIndex.Method, 3, 3);
             Assert.Equal(0, range.Count);
             Assert.Empty(range);
         }
@@ -18,7 +18,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void ContinuousRangeSingleItem()
         {
-            var range = new ContinuousMetadataRange(TableIndex.Method, 3, 4);
+            var range = new MetadataRange(TableIndex.Method, 3, 4);
             Assert.Equal(1, range.Count);
             Assert.Single(range);
             Assert.Equal(new MetadataToken(TableIndex.Method, 3), range.First());
@@ -27,7 +27,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void ContinuousRangeMultipleItems()
         {
-            var range = new ContinuousMetadataRange(TableIndex.Method, 3, 10);
+            var range = new MetadataRange(TableIndex.Method, 3, 10);
             Assert.Equal(7, range.Count);
             Assert.Equal(new[]
             {
@@ -46,12 +46,12 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         {
             var stream = new TablesStream();
             var redirectTable = stream.GetTable<MethodPointerRow>();
-            
-            var range = new RedirectedMetadataRange(redirectTable, TableIndex.Method, 3, 3);
+
+            var range = new MetadataRange(redirectTable, TableIndex.Method, 3, 3);
             Assert.Equal(0, range.Count);
             Assert.Empty(range);
         }
-        
+
         [Fact]
         public void RedirectedRangeSingleItem()
         {
@@ -62,13 +62,13 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
             redirectTable.Add(new MethodPointerRow(5));
             redirectTable.Add(new MethodPointerRow(4));
             redirectTable.Add(new MethodPointerRow(3));
-            
-            var range = new RedirectedMetadataRange(redirectTable, TableIndex.Method, 3, 4);
+
+            var range = new MetadataRange(redirectTable, TableIndex.Method, 3, 4);
             Assert.Equal(1, range.Count);
             Assert.Single(range);
             Assert.Equal(new MetadataToken(TableIndex.Method, 5), range.First());
         }
-        
+
         [Fact]
         public void RedirectedRangeMultipleItems()
         {
@@ -82,8 +82,8 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
             redirectTable.Add(new MethodPointerRow(9));
             redirectTable.Add(new MethodPointerRow(8));
             redirectTable.Add(new MethodPointerRow(10));
-            
-            var range = new RedirectedMetadataRange(redirectTable, TableIndex.Method, 3, 8);
+
+            var range = new MetadataRange(redirectTable, TableIndex.Method, 3, 8);
             Assert.Equal(5, range.Count);
             Assert.Equal(new[]
             {
