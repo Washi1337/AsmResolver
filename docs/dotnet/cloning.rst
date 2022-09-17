@@ -25,10 +25,10 @@ In the snippet below, we define a new ``MemberCloner`` that is able to clone and
 In the remaining sections of this article, we assume that the ``MemberCloner`` is initialized using the code above.
 
 
-Include members to clone
-------------------------
+Include members
+---------------
 
-The general idea of the ``MemberCloner`` is to first provide all the members to be cloned, and then clone everything all in one go. The reason why it is done like this, is to allow the ``MemberCloner`` to fix up any cross references to members within the to-be-cloned metadata and CIL code.
+The general idea of the ``MemberCloner`` is to first provide all the members to be cloned, and then clone everything all in one go. This is to allow the ``MemberCloner`` to fix up any cross references to members within the to-be-cloned metadata and CIL code.
 
 For the sake of the example, we assume that the following two classes are to be injected in ``destinationModule``:
 
@@ -60,13 +60,14 @@ For the sake of the example, we assume that the following two classes are to be 
         public int Y { get; set; }
     }
 
-The first thing we then should do, is find the type definitions that correspond to these classes:
+The first step in cloning involves loading the source module, and finding the type definitions that correspond to these classes:
 
 .. code-block:: csharp
 
     var sourceModule = ModuleDefinition.FromFile(...);
     var rectangleType = sourceModule.TopLevelTypes.First(t => t.Name == "Rectangle");
     var vectorType = sourceModule.TopLevelTypes.First(t => t.Name == "Vector2");
+
 
 Alternatively, if the source assembly is loaded by the CLR, we also can look up the members by metadata token.
 
@@ -84,15 +85,23 @@ We can then use ``MemberCloner.Include`` to include the types in the cloning pro
     cloner.Include(rectangleType, recursive: true);
     cloner.Include(vectorType, recursive: true);
 
-The ``recursive`` parameter indicates whether all members and nested types need to be included as well.
+
+The ``recursive`` parameter indicates whether all members and nested types need to be included as well. This value is ``true`` by default and can also be omitted.
+
+.. code-block:: csharp
+
+    cloner.Include(rectangleType);
+    cloner.Include(vectorType);
+
 
 ``Include`` returns the same ``MemberCloner`` instance. It is therefore also possible to create a long method chain of members to include in the cloning process.
 
 .. code-block:: csharp
 
     cloner
-        .Include(rectangleType, recursive: true)
-        .Include(vectorType, recursive: true);
+        .Include(rectangleType)
+        .Include(vectorType);
+
 
 Cloning individual methods, fields, properties and/or events is also supported. This can be done by including the corresponding ``MethodDefinition``, ``FieldDefinition``, ``PropertyDefinition`` and/or ``EventDefinition`` instead.
 
@@ -106,6 +115,7 @@ When all members are included, it is possible to call ``MemberCloner.Clone`` to 
 
     var result = cloner.Clone();
 
+
 The ``MemberCloner`` will automatically resolve any cross references between types, fields and methods that are included in the cloning process.
 
 For instance, going with the example in the previous section, if both the ``Rectangle`` as well as the ``Vector2`` classes are included, any reference in ``Rectangle`` to ``Vector2`` will be replaced with a reference to the cloned ``Vector2``.  If not all members are included, the ``MemberCloner`` will assume that these are references to external libraries, and will use the ``ReferenceImporter`` to construct references to these members instead.
@@ -116,7 +126,7 @@ Custom reference importers
 
 The ``MemberCloner`` heavily depends on the ``CloneContextAwareReferenceImporter`` class for copying references into the destination module. This class is derived from ``ReferenceImporter``, which has some limitations. In particular, limitations arise when cloning from modules targeting different framework versions, or when trying to reference members that may already exist in the target module (e.g., when dealing with ``NullableAttribute`` annotated metadata).
 
-To account for situations like these, the cloner allows for specifying custom reference importer instances. By deriving from the ``CloneContextAwareReferenceImporter`` class, and overriding methods such as ``ImportMethod``, we can reroute specific member references to the appropriate metadata if needed. Below is an example of a basic implementation of an importer that attempts to map method references from the ``System.Runtime.CompilerServices`` namespace to definitions that are already present in the target module.
+To account for these situations, the cloner allows for specifying custom reference importer instances. By deriving from the ``CloneContextAwareReferenceImporter`` class and overriding methods such as ``ImportMethod``, we can reroute specific member references to the appropriate metadata if needed. Below is an example of a basic implementation of an importer that attempts to map method references from the ``System.Runtime.CompilerServices`` namespace to definitions that are already present in the target module:
 
 .. code-block:: csharp
 
@@ -157,7 +167,8 @@ We can then pass a custom importer factory to our member cloner constructor as f
 
     var cloner = new MemberCloner(destinationModule, context => new MyImporter(context));
 
-All references to methods defined in the ``NSystem.Runtime.CompilerServices`` namespace will then be mapped to the appropriate method definitions if they exist in the target module.
+
+All references to methods defined in the ``System.Runtime.CompilerServices`` namespace will then be mapped to the appropriate method definitions if they exist in the target module.
 
 See :ref:`dotnet-importer-common-caveats` for more information on reference importing and its caveats.
 
@@ -180,6 +191,7 @@ Below an example that appends the string ``_Cloned`` to the  name for every clon
         }
     }
 
+
 We can then initialize our cloner with an instance of our listener class:
 
 .. code-block:: csharp
@@ -199,6 +211,7 @@ Alternatively, we can also override the more generic ``OnClonedMember`` instead,
             base.OnClonedMember(original, cloned);
         }
     }
+
 
 As a shortcut, this can also be done by passing in a delegate or lambda instead to the ``MemberCloner`` constructor.
 
