@@ -216,8 +216,19 @@ namespace AsmResolver.PE.File
         /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
         public bool TryGetSectionContainingOffset(ulong fileOffset, [NotNullWhen(true)] out PESection? section)
         {
-            section = Sections.FirstOrDefault(s => s.ContainsFileOffset(fileOffset));
-            return section != null;
+            var sections = Sections;
+
+            for (int i = 0; i < sections.Count; i++)
+            {
+                if (sections[i].ContainsFileOffset(fileOffset))
+                {
+                    section = sections[i];
+                    return true;
+                }
+            }
+
+            section = null;
+            return false;
         }
 
         /// <inheritdoc />
@@ -231,8 +242,19 @@ namespace AsmResolver.PE.File
         /// <inheritdoc />
         public bool TryGetSectionContainingRva(uint rva,  [NotNullWhen(true)] out PESection? section)
         {
-            section = Sections.FirstOrDefault(s => s.ContainsRva(rva));
-            return section != null;
+            var sections = Sections;
+
+            for (int i = 0; i < sections.Count; i++)
+            {
+                if (sections[i].ContainsRva(rva))
+                {
+                    section = sections[i];
+                    return true;
+                }
+            }
+
+            section = null;
+            return false;
         }
 
         /// <inheritdoc />
