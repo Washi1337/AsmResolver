@@ -3,7 +3,7 @@ Dynamic Methods
 
 Dynamic methods are methods that are constructed and assembled at run time. They allow for dynamically generating managed code, without having to go through the process of compiling or generating new assemblies. This is used a lot in obfuscators that implement for example reference proxies or virtual machines.
 
-AsmResolver has support for reading dynamic methods, and transforming them into ``MethodDefinition`` objects that can be processed further later. All relevant classes are present in the following namespace:
+AsmResolver has support for reading dynamic methods, and transforming them into ``MethodDefinition`` objects that can be processed further. All relevant classes are present in the following namespace:
 
 .. code-block:: csharp
 
@@ -17,7 +17,7 @@ AsmResolver has support for reading dynamic methods, and transforming them into 
 Reading dynamic methods
 -----------------------
 
-The following example demonstrates how to transform an instance of ``DynamicMethod`` into a ``DynamicMethodDefinition``, to read all instructions present in
+The following example demonstrates how to transform an instance of ``DynamicMethod`` into a ``DynamicMethodDefinition``:
 
 .. code-block:: csharp
 
@@ -58,3 +58,6 @@ An instance of ``DynamicMethodDefinition`` is virtually the same as any other ``
 
     // Save
     contextModule.Write("Program.patched.dll");
+
+
+See :ref:`dotnet-obtaining-methods-and-fields` and :ref:`dotnet-cil-method-bodies` for more information on how to use ``MethodDefinition`` objects.
