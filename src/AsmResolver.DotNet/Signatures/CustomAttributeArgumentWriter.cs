@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Signatures
 
         public CustomAttributeArgumentWriter(BlobSerializationContext context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _context = context;
         }
 
         public void WriteArgument(CustomAttributeArgument argument)

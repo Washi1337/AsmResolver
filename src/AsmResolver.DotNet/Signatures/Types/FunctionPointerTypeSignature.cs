@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override bool IsImportedInModule(ModuleDefinition module) => Signature.IsImportedInModule(module);
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context)
+        protected override void WriteContents(in BlobSerializationContext context)
         {
             context.Writer.WriteByte((byte) ElementType);
             Signature.Write(context);

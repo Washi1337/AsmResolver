@@ -144,7 +144,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context)
+        protected override void WriteContents(in BlobSerializationContext context)
         {
             context.Writer.WriteUInt16(CustomAttributeSignaturePrologue);
 
