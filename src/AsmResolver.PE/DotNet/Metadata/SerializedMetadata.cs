@@ -33,6 +33,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             Rva = directoryReader.Rva;
 
             _streamContentsReader = directoryReader.Fork();
+            _streamHeaders = Array.Empty<MetadataStreamHeader>();
 
             // Verify signature.
             var signature = (MetadataSignature) directoryReader.ReadUInt32();
