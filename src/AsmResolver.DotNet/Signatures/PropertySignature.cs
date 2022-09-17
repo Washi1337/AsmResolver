@@ -112,7 +112,7 @@ namespace AsmResolver.DotNet.Signatures
             => GenericTypeActivator.Instance.InstantiatePropertySignature(this, context);
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context)
+        protected override void WriteContents(in BlobSerializationContext context)
         {
             context.Writer.WriteByte((byte) Attributes);
             WriteParametersAndReturnType(context);

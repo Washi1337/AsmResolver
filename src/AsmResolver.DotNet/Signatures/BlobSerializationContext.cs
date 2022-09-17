@@ -6,7 +6,7 @@ namespace AsmResolver.DotNet.Signatures
     /// <summary>
     /// Describes a context in which a blob signature is to be serialized in.
     /// </summary>
-    public class BlobSerializationContext
+    public readonly struct BlobSerializationContext
     {
         /// <summary>
         /// Creates a new instance of the <see cref="BlobSerializationContext"/> class.

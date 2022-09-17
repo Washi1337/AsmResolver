@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Serializes the blob to an output stream.
         /// </summary>
-        public abstract void Write(BlobSerializationContext context);
+        public abstract void Write(in BlobSerializationContext context);
 
         /// <summary>
         /// Wraps the blob signature into a new stand-alone signature that can be referenced by a metadata token.
