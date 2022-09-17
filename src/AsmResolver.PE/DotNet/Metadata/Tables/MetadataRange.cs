@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -7,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a range of metadata tokens, indicated by a starting and ending row identifier within a metadata table.
     /// </summary>
-    public readonly struct MetadataRange : IEnumerable<MetadataToken>
+    public readonly struct MetadataRange : IEnumerable<MetadataToken>, IEquatable<MetadataRange>
     {
         /// <summary>
         /// Represents the empty metadata range.
@@ -68,6 +69,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
+        /// Gets the number of metadata rows this range spans.
+        /// </summary>
+        public int Count => (int) (EndRid - StartRid);
+
+        /// <summary>
         /// Gets a value indicating whether the range is empty or not.
         /// </summary>
         public bool IsEmpty => EndRid == StartRid;
@@ -87,11 +93,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public bool IsRedirected => RedirectionTable is not null;
 
         /// <summary>
-        /// Gets the number of metadata rows this range spans.
-        /// </summary>
-        public int Count => (int) (EndRid - StartRid);
-
-        /// <summary>
         /// Obtains an enumerator that enumerates all metadata tokens within the range.
         /// </summary>
         /// <returns></returns>
@@ -108,6 +109,40 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             var start = new MetadataToken(Table, StartRid);
             var end = new MetadataToken(Table, EndRid);
             return $"[0x{start.ToString()}..0x{end.ToString()})";
+        }
+
+        /// <inheritdoc />
+        public bool Equals(MetadataRange other)
+        {
+            if (IsEmpty && other.IsEmpty)
+                return true;
+
+            return Table == other.Table
+                   && StartRid == other.StartRid
+                   && EndRid == other.EndRid
+                   && Equals(RedirectionTable, other.RedirectionTable);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            return obj is MetadataRange other && Equals(other);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            if (IsEmpty)
+                return 0;
+
+            unchecked
+            {
+                int hashCode = (int) Table;
+                hashCode = (hashCode * 397) ^ (int) StartRid;
+                hashCode = (hashCode * 397) ^ (int) EndRid;
+                hashCode = (hashCode * 397) ^ (RedirectionTable is not null ? RedirectionTable.GetHashCode() : 0);
+                return hashCode;
+            }
         }
 
         /// <summary>
