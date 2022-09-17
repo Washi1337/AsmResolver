@@ -201,7 +201,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitArrayType(this, state);
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context)
+        protected override void WriteContents(in BlobSerializationContext context)
         {
             if (!Validate())
                 throw new InvalidOperationException();

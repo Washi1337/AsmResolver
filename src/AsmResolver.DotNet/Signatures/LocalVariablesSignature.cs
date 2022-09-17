@@ -93,7 +93,7 @@ namespace AsmResolver.DotNet.Signatures
             ImportWith(importer);
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context)
+        protected override void WriteContents(in BlobSerializationContext context)
         {
             var writer = context.Writer;
 

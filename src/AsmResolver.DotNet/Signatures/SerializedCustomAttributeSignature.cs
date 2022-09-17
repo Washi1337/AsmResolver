@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context)
+        protected override void WriteContents(in BlobSerializationContext context)
         {
             // If the arguments are not initialized yet, it means nobody accessed the fixed or named arguments of the
             // signature. In such a case, we can safely assume nothing has changed to the signature.
