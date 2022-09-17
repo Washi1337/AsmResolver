@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet.Serialized
             return typeDefTree;
         }
 
-        internal ICollection<uint> GetNestedTypeRids(uint enclosingTypeRid)
+        internal OneToManyRelation<uint, uint>.ValueSet GetNestedTypeRids(uint enclosingTypeRid)
         {
             EnsureTypeDefinitionTreeInitialized();
             return _typeDefTree.GetValues(enclosingTypeRid);
@@ -123,7 +123,7 @@ namespace AsmResolver.DotNet.Serialized
             Interlocked.CompareExchange(ref _semanticMethods, semanticMethods, null);
         }
 
-        internal ICollection<uint> GetMethodSemantics(MetadataToken owner)
+        internal OneToManyRelation<MetadataToken, uint>.ValueSet GetMethodSemantics(MetadataToken owner)
         {
             EnsureMethodSemanticsInitialized();
             return _semantics.GetValues(owner);
@@ -213,7 +213,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => GetCustomAttributeCollection(this);
 
-        internal ICollection<uint> GetCustomAttributes(MetadataToken ownerToken)
+        internal OneToManyRelation<MetadataToken, uint>.ValueSet GetCustomAttributes(MetadataToken ownerToken)
         {
             EnsureCustomAttributesInitialized();
             return _customAttributes.GetValues(ownerToken);
@@ -315,7 +315,7 @@ namespace AsmResolver.DotNet.Serialized
             return _genericParameters.GetKey(parameterRid);
         }
 
-        internal ICollection<uint> GetGenericParameters(MetadataToken ownerToken)
+        internal OneToManyRelation<MetadataToken, uint>.ValueSet GetGenericParameters(MetadataToken ownerToken)
         {
             EnsureGenericParametersInitialized();
             return _genericParameters.GetValues(ownerToken);
@@ -350,7 +350,7 @@ namespace AsmResolver.DotNet.Serialized
             return _genericParameterConstraints.GetKey(constraintRid);
         }
 
-        internal ICollection<uint> GetGenericParameterConstraints(MetadataToken ownerToken)
+        internal OneToManyRelation<MetadataToken, uint>.ValueSet GetGenericParameterConstraints(MetadataToken ownerToken)
         {
             EnsureGenericParameterConstrainsInitialized();
             return _genericParameterConstraints.GetValues(ownerToken);
@@ -385,7 +385,7 @@ namespace AsmResolver.DotNet.Serialized
             return _interfaces.GetKey(implementationRid);
         }
 
-        internal ICollection<uint> GetInterfaceImplementationRids(MetadataToken ownerToken)
+        internal OneToManyRelation<MetadataToken, uint>.ValueSet GetInterfaceImplementationRids(MetadataToken ownerToken)
         {
             EnsureInterfacesInitialized();
             return _interfaces.GetValues(ownerToken);
@@ -414,7 +414,7 @@ namespace AsmResolver.DotNet.Serialized
             return methodImplementations;
         }
 
-        internal ICollection<uint> GetMethodImplementationRids(MetadataToken ownerToken)
+        internal OneToManyRelation<MetadataToken, uint>.ValueSet GetMethodImplementationRids(MetadataToken ownerToken)
         {
             EnsureMethodImplementationsInitialized();
             return _methodImplementations.GetValues(ownerToken);
