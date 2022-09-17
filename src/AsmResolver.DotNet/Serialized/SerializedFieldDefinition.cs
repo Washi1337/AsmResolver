@@ -86,7 +86,7 @@ namespace AsmResolver.DotNet.Serialized
 
             uint rid = module.GetFieldRvaRid(MetadataToken);
             bool result = _context.TablesStream
-                .GetTable<FieldRvaRow>()
+                .GetTable<FieldRvaRow>(TableIndex.FieldRva)
                 .TryGetByRid(rid, out var fieldRvaRow);
 
             return result

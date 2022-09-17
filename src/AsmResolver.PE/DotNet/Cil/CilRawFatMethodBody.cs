@@ -203,7 +203,9 @@ namespace AsmResolver.PE.DotNet.Cil
             {
                 ulong sectionsOffset = endOffset.Align(4);
                 length += (uint) (sectionsOffset - endOffset);
-                length += (uint) ExtraSections.Sum(x => x.GetPhysicalSize());
+
+                for (int i = 0; i < ExtraSections.Count; i++)
+                    length += ExtraSections[i].GetPhysicalSize();
             }
 
             return length;

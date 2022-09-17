@@ -188,8 +188,9 @@ namespace AsmResolver.DotNet.Builder.Discovery
                     var method = type.Methods[i];
                     InsertOrAppendIfNew(method, true);
 
-                    foreach (var parameter in method.ParameterDefinitions)
-                        InsertOrAppendIfNew(parameter, true);
+                    // Try find new parameters.
+                    for (int j = 0; j < method.ParameterDefinitions.Count; j++)
+                        InsertOrAppendIfNew(method.ParameterDefinitions[j], true);
                 }
 
                 // Try find new properties.

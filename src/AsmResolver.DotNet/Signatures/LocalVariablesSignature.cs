@@ -100,8 +100,8 @@ namespace AsmResolver.DotNet.Signatures
             writer.WriteByte((byte) Attributes);
             writer.WriteCompressedUInt32((uint) VariableTypes.Count);
 
-            foreach (var type in VariableTypes)
-                type.Write(context);
+            for (int i = 0; i < VariableTypes.Count; i++)
+                VariableTypes[i].Write(context);
         }
 
         /// <inheritdoc />
