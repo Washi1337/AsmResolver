@@ -31,9 +31,6 @@ public class SerializedConstantSymbol : ConstantSymbol
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetConstantType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out var leaf) && leaf is CodeViewTypeRecord type
-            ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
-                $"Constant contains an invalid type index {_typeIndex:X8}.");
+        return GetLeafRecord<CodeViewTypeRecord>(_context, _typeIndex);
     }
 }

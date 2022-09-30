@@ -1,4 +1,5 @@
 using AsmResolver.IO;
+using AsmResolver.Symbols.Pdb.Leaves;
 using AsmResolver.Symbols.Pdb.Records.Serialized;
 
 namespace AsmResolver.Symbols.Pdb.Records;
@@ -36,5 +37,20 @@ public abstract class CodeViewSymbol
             CodeViewSymbolType.Constant => new SerializedConstantSymbol(context, dataReader),
             _ => new UnknownSymbol(type, dataReader.ReadToEnd())
         };
+    }
+
+    private protected T? GetLeafRecord<T>(PdbReaderContext context, uint typeIndex) where T : CodeViewLeaf
+    {
+        return context.ParentImage.TryGetLeafRecord(typeIndex, out var leaf)
+            ? leaf switch
+            {
+                T t => t,
+                UnknownCodeViewLeaf unknownLeaf => context.Parameters.ErrorListener.BadImageAndReturn<T>(
+                    $"{GetType().Name} contains an unknown leaf ({unknownLeaf.LeafKind}) at index {typeIndex:X8}."),
+                _ => context.Parameters.ErrorListener.BadImageAndReturn<T>(
+                    $"{GetType().Name} contains an incorrect leaf type ({leaf.GetType().Name}) at index {typeIndex:X8}.")
+            }
+            : context.Parameters.ErrorListener.BadImageAndReturn<T>(
+                $"{GetType().Name} contains an invalid type index {typeIndex:X8}.");
     }
 }
