@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         /// <remarks>
         /// <para>
-        /// When this property is set to <c>true</c>, the maximum stack depth of all method bodies will be recaculated.
+        /// When this property is set to <c>true</c>, the maximum stack depth of all method bodies will be recalculated.
         /// </para>
         /// <para>
         /// When this property is set to <c>false</c>, the maximum stack depth of all method bodies will be preserved.
@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             get;
             set;
-        }
+        } = null;
 
         /// <summary>
         /// Gets or sets the value of an override switch indicating whether labels should always be verified for
@@ -64,7 +64,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <inheritdoc />
         public ISegmentReference SerializeMethodBody(MethodBodySerializationContext context, MethodDefinition method)
         {
-            if (method.CilMethodBody == null)
+            if (method.CilMethodBody is null)
                 return SegmentReference.Null;
 
             var body = method.CilMethodBody;

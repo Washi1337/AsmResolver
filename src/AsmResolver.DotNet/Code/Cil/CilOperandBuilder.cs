@@ -31,8 +31,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 CilLocalVariable localVariable => localVariable.Index,
                 byte raw => raw,
                 ushort raw => raw,
-                _ => _errorListener.RegisterExceptionAndReturnDefault<int>(
-                    new NotSupportedException($"Invalid or unsupported variable operand ({operand.SafeToString()})."))
+                _ => _errorListener.NotSupportedAndReturn<int>($"Invalid or unsupported variable operand ({operand.SafeToString()}).")
             };
         }
 
@@ -44,8 +43,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 Parameter parameter => parameter.MethodSignatureIndex,
                 byte raw => raw,
                 ushort raw => raw,
-                _ => _errorListener.RegisterExceptionAndReturnDefault<int>(
-                    new NotSupportedException($"Invalid or unsupported argument operand ({operand.SafeToString()})."))
+                _ => _errorListener.NotSupportedAndReturn<int>($"Invalid or unsupported argument operand ({operand.SafeToString()}).")
             };
         }
 
@@ -55,9 +53,9 @@ namespace AsmResolver.DotNet.Code.Cil
             return operand switch
             {
                 string value => 0x70000000 | _provider.GetUserStringIndex(value),
+                MetadataToken token => token.ToUInt32(),
                 uint raw => raw,
-                _ => _errorListener.RegisterExceptionAndReturnDefault<uint>(
-                    new NotSupportedException($"Invalid or unsupported string operand ({operand.SafeToString()})."))
+                _ => _errorListener.NotSupportedAndReturn<uint>($"Invalid or unsupported string operand ({operand.SafeToString()}).")
             };
         }
 
@@ -69,8 +67,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 IMetadataMember member => GetMemberToken(member),
                 MetadataToken token => token,
                 uint raw => raw,
-                _ => _errorListener.RegisterExceptionAndReturnDefault<uint>(
-                    new NotSupportedException($"Invalid or unsupported member operand ({operand.SafeToString()})."))
+                _ => _errorListener.NotSupportedAndReturn<uint>($"Invalid or unsupported member operand ({operand.SafeToString()}).")
             };
         }
 

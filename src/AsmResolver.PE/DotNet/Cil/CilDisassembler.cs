@@ -162,7 +162,7 @@ namespace AsmResolver.PE.DotNet.Cil
                     return _reader.ReadInt32();
 
                 case CilOperandType.InlineBrTarget:
-                    return new CilOffsetLabel(_reader.ReadInt32() + (int) (_reader.Offset - _reader.StartOffset));
+                    return new CilOffsetLabel(_reader.ReadInt32() + (int) _reader.RelativeOffset);
 
                 case CilOperandType.ShortInlineR:
                     return _reader.ReadSingle();

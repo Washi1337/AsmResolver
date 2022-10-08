@@ -147,15 +147,13 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             var result = new CilMethodBody(method);
 
-            operandResolver ??= new PhysicalCilOperandResolver(context.ParentModule, result);
-
             // Interpret body header.
             var fatBody = rawBody as CilRawFatMethodBody;
             if (fatBody is not null)
             {
                 result.MaxStack = fatBody.MaxStack;
                 result.InitializeLocals = fatBody.InitLocals;
-                ReadLocalVariables(context.ParentModule, result, fatBody);
+                ReadLocalVariables(context, result, fatBody);
             }
             else
             {
@@ -164,55 +162,88 @@ namespace AsmResolver.DotNet.Code.Cil
             }
 
             // Parse instructions.
-            ReadInstructions(result, operandResolver, rawBody);
+            operandResolver ??= new PhysicalCilOperandResolver(context.ParentModule, result);
+            ReadInstructions(context, result, operandResolver, rawBody);
 
             // Read exception handlers.
             if (fatBody is not null)
-                ReadExceptionHandlers(fatBody, result);
+                ReadExceptionHandlers(context, fatBody, result);
 
             return result;
         }
 
         private static void ReadLocalVariables(
-            ModuleDefinition module,
+            ModuleReaderContext context,
             CilMethodBody result,
             CilRawFatMethodBody fatBody)
         {
-            if (fatBody.LocalVarSigToken != MetadataToken.Zero
-                && module.TryLookupMember(fatBody.LocalVarSigToken, out var member)
-                && member is StandAloneSignature {Signature: LocalVariablesSignature localVariablesSignature})
+            // Method bodies can have 0 tokens if there are no locals defined.
+            if (fatBody.LocalVarSigToken == MetadataToken.Zero)
+                return;
+
+            // If there is a non-zero token however, it needs to point to a stand-alone signature with a
+            // local variable signature stored in it.
+            if (!context.ParentModule.TryLookupMember(fatBody.LocalVarSigToken, out var member)
+                || member is not StandAloneSignature { Signature: LocalVariablesSignature localVariablesSignature })
             {
-                var variableTypes = localVariablesSignature.VariableTypes;
-                for (int i = 0; i < variableTypes.Count; i++)
-                    result.LocalVariables.Add(new CilLocalVariable(variableTypes[i]));
+                context.BadImage($"Method body of {result.Owner.SafeToString()} contains an invalid local variable signature token.");
+                return;
             }
+
+            // Copy over the local variable types from the signature into the method body.
+            var variableTypes = localVariablesSignature.VariableTypes;
+            for (int i = 0; i < variableTypes.Count; i++)
+                result.LocalVariables.Add(new CilLocalVariable(variableTypes[i]));
         }
 
         private static void ReadInstructions(
+            ModuleReaderContext context,
             CilMethodBody result,
             ICilOperandResolver operandResolver,
             CilRawMethodBody rawBody)
         {
-            var reader = rawBody.Code.CreateReader();
-            var disassembler = new CilDisassembler(reader, operandResolver);
-            result.Instructions.AddRange(disassembler.ReadInstructions());
+            try
+            {
+                var reader = rawBody.Code.CreateReader();
+                var disassembler = new CilDisassembler(reader, operandResolver);
+                result.Instructions.AddRange(disassembler.ReadInstructions());
+            }
+            catch (Exception ex)
+            {
+                context.RegisterException(new BadImageFormatException(
+                    $"Method body of {result.Owner.SafeToString()} contains an invalid CIL code stream.", ex));
+            }
         }
 
-        private static void ReadExceptionHandlers(CilRawFatMethodBody fatBody, CilMethodBody result)
+        private static void ReadExceptionHandlers(
+            ModuleReaderContext context,
+            CilRawFatMethodBody fatBody,
+            CilMethodBody result)
         {
-            for (int i = 0; i < fatBody.ExtraSections.Count; i++)
+            try
             {
-                var section = fatBody.ExtraSections[i];
-                if (section.IsEHTable)
+                for (int i = 0; i < fatBody.ExtraSections.Count; i++)
                 {
-                    var reader = ByteArrayDataSource.CreateReader(section.Data);
-                    uint size = section.IsFat
-                        ? CilExceptionHandler.FatExceptionHandlerSize
-                        : CilExceptionHandler.TinyExceptionHandlerSize;
+                    var section = fatBody.ExtraSections[i];
+                    if (section.IsEHTable)
+                    {
+                        var reader = ByteArrayDataSource.CreateReader(section.Data);
+                        uint size = section.IsFat
+                            ? CilExceptionHandler.FatExceptionHandlerSize
+                            : CilExceptionHandler.TinyExceptionHandlerSize;
 
-                    while (reader.CanRead(size))
-                        result.ExceptionHandlers.Add(CilExceptionHandler.FromReader(result, ref reader, section.IsFat));
+                        while (reader.CanRead(size))
+                        {
+                            var handler = CilExceptionHandler.FromReader(result, ref reader, section.IsFat);
+                            result.ExceptionHandlers.Add(handler);
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                context.RegisterException(new BadImageFormatException(
+                    $"Method body of {result.Owner.SafeToString()} contains invalid extra sections.", ex));
             }
         }
 

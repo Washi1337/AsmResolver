@@ -132,14 +132,31 @@ namespace AsmResolver.DotNet.Code.Cil
                 {
                     case CilFlowControl.Branch:
                         // Schedule branch target.
-                        ScheduleLabel(instruction.Offset, (ICilLabel) instruction.Operand!, nextStackSize);
+                        switch (instruction.Operand)
+                        {
+                            case sbyte delta:
+                                ScheduleDelta(currentState.InstructionIndex, delta, nextStackSize);
+                                break;
+
+                            case int delta:
+                                ScheduleDelta(currentState.InstructionIndex, delta, nextStackSize);
+                                break;
+
+                            case ICilLabel label:
+                                ScheduleLabel(currentState.InstructionIndex, label, nextStackSize);
+                                break;
+
+                            default:
+                                throw new NotSupportedException(
+                                    $"Invalid or unsupported operand type at offset IL_{instruction.Offset:X4}.");
+                        }
                         break;
 
                     case CilFlowControl.ConditionalBranch when instruction.OpCode.Code == CilCode.Switch:
                         // Schedule all switch targets for processing.
                         var targets = (IList<ICilLabel>) instruction.Operand!;
                         for (int i = 0; i < targets.Count; i++)
-                            ScheduleLabel(instruction.Offset, targets[i], nextStackSize);
+                            ScheduleLabel(currentState.InstructionIndex, targets[i], nextStackSize);
 
                         // Schedule default case (= fallthrough instruction).
                         ScheduleNext(currentState.InstructionIndex, nextStackSize);
@@ -147,7 +164,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
                     case CilFlowControl.ConditionalBranch:
                         // Schedule branch target.
-                        ScheduleLabel(instruction.Offset, (ICilLabel) instruction.Operand!, nextStackSize);
+                        ScheduleLabel(currentState.InstructionIndex, (ICilLabel) instruction.Operand!, nextStackSize);
 
                         // Schedule fallthrough instruction.
                         ScheduleNext(currentState.InstructionIndex, nextStackSize);
@@ -185,6 +202,14 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             int nextIndex = _body.Instructions.GetIndexByOffset(label.Offset);
             ScheduleIndex(currentIndex, nextIndex, label.Offset, nextStackSize);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ScheduleDelta(int currentIndex, int offsetDelta, int nextStackSize)
+        {
+            int nextOffset = _body.Instructions[currentIndex].Offset + offsetDelta;
+            int nextIndex = _body.Instructions.GetIndexByOffset(nextOffset);
+            ScheduleIndex(currentIndex, nextIndex, nextOffset, nextStackSize);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -617,5 +617,86 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             Assert.Equal("Hello World!", instruction.Operand);
         }
+
+        private CilMethodBody CreateAndReadPatchedBody(IErrorListener listener, Action<CilRawFatMethodBody> patch)
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+
+            // Add new dummy method to type.
+            var method = new MethodDefinition("Dummy", MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
+            module.GetOrCreateModuleType().Methods.Add(method);
+
+            // Give it a method body.
+            var body = new CilMethodBody(method);
+            method.MethodBody = body;
+
+            // Add some random local variables.
+            for (int i = 0; i < 10; i++)
+                body.LocalVariables.Add(new CilLocalVariable(module.CorLibTypeFactory.Object));
+
+            // Add some random instructions.
+            for (int i = 0; i < 100; i++)
+                body.Instructions.Add(CilOpCodes.Nop);
+            body.Instructions.Add(CilOpCodes.Ret);
+
+            // Construct PE image.
+            var result = new ManagedPEImageBuilder().CreateImage(module);
+
+            // Look up raw method body.
+            var token = result.TokenMapping[method];
+            var metadata = result.ConstructedImage!.DotNetDirectory!.Metadata!;
+            var rawBody = (CilRawFatMethodBody) metadata
+                .GetStream<TablesStream>()
+                .GetTable<MethodDefinitionRow>()
+                .GetByRid(token.Rid)
+                .Body.GetSegment();
+
+            Assert.NotNull(rawBody);
+
+            // Patch it.
+            patch(rawBody);
+
+            // Read back module definition and look up interpreted method body.
+            module = ModuleDefinition.FromImage(result.ConstructedImage, new ModuleReaderParameters(listener));
+            return ((MethodDefinition) module.LookupMember(token)).CilMethodBody;
+        }
+
+        [Fact]
+        public void ReadLocalsFromBodyWithInvalidCodeStream()
+        {
+            var body = CreateAndReadPatchedBody(EmptyErrorListener.Instance, raw =>
+            {
+                raw.Code = new DataSegment(new byte[]
+                {
+                    0xFE // 2-byte prefix opcode
+                });
+            });
+
+            Assert.NotEmpty(body.LocalVariables);
+        }
+
+        [Fact]
+        public void ReadCodeStreamFromBodyWithInvalidLocalVariablesSignature()
+        {
+            var body = CreateAndReadPatchedBody(EmptyErrorListener.Instance, raw =>
+            {
+                raw.LocalVarSigToken = new MetadataToken(TableIndex.StandAloneSig, 0x123456);
+            });
+
+            Assert.NotEmpty(body.Instructions);
+        }
+
+        [Fact]
+        public void ReadInvalidBody()
+        {
+            var body = CreateAndReadPatchedBody(EmptyErrorListener.Instance, raw =>
+            {
+                raw.Code = new DataSegment(new byte[] { 0xFE });
+                raw.LocalVarSigToken = new MetadataToken(TableIndex.StandAloneSig, 0x123456);
+            });
+
+            Assert.NotNull(body);
+        }
     }
 }
