@@ -69,14 +69,30 @@ namespace AsmResolver.DotNet.Dynamic
         /// <returns>The method body.</returns>
         private static CilMethodBody CreateDynamicMethodBody(MethodDefinition method, object dynamicMethodObj)
         {
-            if (!(method.Module is SerializedModuleDefinition module))
+            if (method.Module is not SerializedModuleDefinition module)
                 throw new ArgumentException("Method body should reference a serialized module.");
 
             var result = new CilMethodBody(method);
             dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
 
-            //Get Runtime Fields
-            byte[] code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code")!;
+            // Attempt to get the code field.
+            byte[]? code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code");
+
+            // If it is still null, it might still be set using DynamicILInfo::SetCode.
+            // Find the code stored in the DynamicILInfo if available.
+            if (code is null
+                && FieldReader.TryReadField<MethodBase>(dynamicMethodObj, "m_method", out var methodBase)
+                && methodBase is not null
+                && FieldReader.TryReadField(methodBase, "m_DynamicILInfo", out object? dynamicILInfo)
+                && dynamicILInfo is not null)
+            {
+                code = FieldReader.ReadField<byte[]>(dynamicILInfo, "m_code");
+            }
+
+            if (code is null)
+                throw new InvalidOperationException("Dynamic method does not have a CIL code stream.");
+
+            // Get remaining fields.
             object scope = FieldReader.ReadField<object>(dynamicMethodObj, "m_scope")!;
             var tokenList = FieldReader.ReadField<List<object?>>(scope, "m_tokens")!;
             byte[] localSig = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_localSignature")!;

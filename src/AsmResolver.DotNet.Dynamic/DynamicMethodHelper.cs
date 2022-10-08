@@ -108,7 +108,7 @@ namespace AsmResolver.DotNet.Dynamic
             for (int i = 0; i < FieldReader.ReadField<int>(ehInfo, "m_currentCatch"); i++)
             {
                 // Get ExceptionHandlerInfo Field Values
-                var endFinally = FieldReader.ReadField<int>(ehInfo, "m_endFinally");
+                int endFinally = FieldReader.ReadField<int>(ehInfo, "m_endFinally");
                 var instructions = methodBody.Instructions;
 
                 var endFinallyLabel = endFinally >= 0
@@ -155,17 +155,21 @@ namespace AsmResolver.DotNet.Dynamic
 
             if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod")
             {
-                var resolver = FieldReader.ReadField<object>(dynamicMethodObj, "m_resolver");
+                object? resolver = FieldReader.ReadField<object>(dynamicMethodObj, "m_resolver");
                 if (resolver != null)
                     dynamicMethodObj = resolver;
             }
             //Create Resolver if it does not exist.
             if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod")
             {
-                var dynamicResolver = typeof(OpCode).Module.GetTypes()
+                var dynamicResolver = typeof(OpCode).Module
+                    .GetTypes()
                     .First(t => t.Name == "DynamicResolver");
 
-                var ilGenerator = dynamicMethodObj.GetType().GetRuntimeMethods().First(q => q.Name == "GetILGenerator")
+                object? ilGenerator = dynamicMethodObj
+                    .GetType()
+                    .GetRuntimeMethods()
+                    .First(q => q.Name == "GetILGenerator")
                     .Invoke(dynamicMethodObj, null);
 
                 //Create instance of dynamicResolver

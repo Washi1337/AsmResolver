@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -71,6 +72,22 @@ namespace AsmResolver.DotNet.Dynamic.Tests
             {
                 module.CorLibTypeFactory.String,
             }, dynamicMethod.CilMethodBody.LocalVariables.Select(v => v.VariableType));
+        }
+
+        [Fact]
+        public void ReadDynamicMethodInitializedByDynamicILInfo()
+        {
+            var method = new DynamicMethod("Test", typeof(void), Type.EmptyTypes);
+            var info = method.GetDynamicILInfo();
+            info.SetLocalSignature(new byte[] { 0x7, 0x0 });
+            info.SetCode(new byte[] {0x2a}, 1);
+
+            var contextModule = ModuleDefinition.FromFile(typeof(DynamicMethodDefinitionTest).Assembly.Location);
+            var definition = new DynamicMethodDefinition(contextModule, method);
+
+            Assert.NotNull(definition.CilMethodBody);
+            var instruction = Assert.Single(definition.CilMethodBody.Instructions);
+            Assert.Equal(CilOpCodes.Ret, instruction.OpCode);
         }
     }
 }
