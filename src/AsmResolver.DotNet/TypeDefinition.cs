@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code.Cil;
@@ -497,6 +498,13 @@ namespace AsmResolver.DotNet
         public bool IsReadOnly =>
             IsValueType
             && this.HasCustomAttribute("System.Runtime.CompilerServices", nameof(ReadOnlyAttribute));
+
+        /// <summary>
+        /// Determines whether the type is marked with the IsByRefLike attribute, indicating a ref struct definition.
+        /// </summary>
+        public bool IsByRefLike =>
+            IsValueType
+            && this.HasCustomAttribute("System.Runtime.CompilerServices", "IsByRefLikeAttribute");
 
         /// <summary>
         /// Gets a collection of fields defined in the type.
