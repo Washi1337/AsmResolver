@@ -46,11 +46,11 @@ public abstract class CodeViewSymbol
             {
                 T t => t,
                 UnknownCodeViewLeaf unknownLeaf => context.Parameters.ErrorListener.BadImageAndReturn<T>(
-                    $"{GetType().Name} contains an unknown leaf ({unknownLeaf.LeafKind}) at index {typeIndex:X8}."),
+                    $"{CodeViewSymbolType} references a leaf at {typeIndex:X8} that is of an unknown type {unknownLeaf.LeafKind}."),
                 _ => context.Parameters.ErrorListener.BadImageAndReturn<T>(
-                    $"{GetType().Name} contains an incorrect leaf type ({leaf.GetType().Name}) at index {typeIndex:X8}.")
+                    $"{CodeViewSymbolType} references a leaf at {typeIndex:X8} that is of an unexpected type ({leaf.LeafKind}).")
             }
             : context.Parameters.ErrorListener.BadImageAndReturn<T>(
-                $"{GetType().Name} contains an invalid type index {typeIndex:X8}.");
+                $"{CodeViewSymbolType} contains an invalid type index {typeIndex:X8}.");
     }
 }
