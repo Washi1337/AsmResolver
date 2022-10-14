@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 
 namespace AsmResolver.Collections
 {
@@ -12,6 +13,7 @@ namespace AsmResolver.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public abstract class LazyList<TItem> : IList<TItem>
     {
+        private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.NoRecursion);
         private readonly List<TItem> _items;
 
         /// <summary>
@@ -41,8 +43,11 @@ namespace AsmResolver.Collections
             }
             set
             {
-                EnsureIsInitialized();
-                OnSetItem(index, value);
+                lock (_items)
+                {
+                    EnsureIsInitialized();
+                    OnSetItem(index, value);
+                }
             }
         }
 
@@ -104,7 +109,7 @@ namespace AsmResolver.Collections
         {
             if (!IsInitialized)
             {
-                lock (this)
+                lock (_items)
                 {
                     if (!IsInitialized)
                     {
@@ -128,8 +133,11 @@ namespace AsmResolver.Collections
         /// <inheritdoc />
         public void Clear()
         {
-            OnClearItems();
-            IsInitialized = true;
+            lock (_items)
+            {
+                OnClearItems();
+                IsInitialized = true;
+            }
         }
 
         /// <inheritdoc />
@@ -149,11 +157,15 @@ namespace AsmResolver.Collections
         /// <inheritdoc />
         public bool Remove(TItem item)
         {
-            EnsureIsInitialized();
-            int index = Items.IndexOf(item);
-            if (index == -1)
-                return false;
-            OnRemoveItem(index);
+            lock (_items)
+            {
+                EnsureIsInitialized();
+                int index = Items.IndexOf(item);
+                if (index == -1)
+                    return false;
+                OnRemoveItem(index);
+            }
+
             return true;
         }
 
@@ -167,8 +179,11 @@ namespace AsmResolver.Collections
         /// <inheritdoc />
         public void Insert(int index, TItem item)
         {
-            EnsureIsInitialized();
-            OnInsertItem(index, item);
+            lock (_items)
+            {
+                EnsureIsInitialized();
+                OnInsertItem(index, item);
+            }
         }
 
         /// <summary>
@@ -178,15 +193,21 @@ namespace AsmResolver.Collections
         /// <param name="items">The items to insert.</param>
         private void InsertRange(int index, IEnumerable<TItem> items)
         {
-            EnsureIsInitialized();
-            OnInsertRange(index, items);
+            lock (_items)
+            {
+                EnsureIsInitialized();
+                OnInsertRange(index, items);
+            }
         }
 
         /// <inheritdoc />
         public void RemoveAt(int index)
         {
-            EnsureIsInitialized();
-            OnRemoveItem(index);
+            lock (_items)
+            {
+                EnsureIsInitialized();
+                OnRemoveItem(index);
+            }
         }
 
         /// <summary>
