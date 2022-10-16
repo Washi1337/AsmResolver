@@ -8,35 +8,28 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<IResolutionScope>,
         IEqualityComparer<AssemblyDescriptor>
     {
-        /// <summary>
-        /// Gets or sets a value indicating whether version numbers should be excluded in the comparison of two
-        /// assembly descriptors.
-        /// </summary>
-        public bool IgnoreAssemblyVersionNumbers
+        private bool IgnoreAssemblyVersionNumbers
         {
-            get;
-            set;
+            get
+            {
+                return (Flags & SignatureComparisonFlags.VersionAgnostic) == SignatureComparisonFlags.VersionAgnostic;
+            }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the containing assembly of the second member to compare is
-        /// allowed to be a newer version than the containing assembly of the first member.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// If this property is set to <c>true</c>, then any member reference that is contained in a certain
-        /// assembly (e.g. with version 1.0.0.0), will be considered equal to a member reference with the
-        /// same name or signature contained in an assembly with a newer version (e.g. 1.1.0.0). When this
-        /// property is set to <c>false</c>, the exact version number must match instead.
-        /// </para>
-        /// <para>
-        /// This property is ignored if <see cref="IgnoreAssemblyVersionNumbers"/> is <c>true</c>.
-        /// </para>
-        /// </remarks>
-        public bool AcceptNewerAssemblyVersionNumbers
+        private bool AcceptNewerAssemblyVersionNumbers
         {
-            get;
-            set;
+            get
+            {
+                return (Flags & SignatureComparisonFlags.AcceptNewerVersions) == SignatureComparisonFlags.AcceptNewerVersions;
+            }
+        }
+
+        private bool AcceptOlderAssemblyVersionNumbers
+        {
+            get
+            {
+                return (Flags & SignatureComparisonFlags.AcceptOlderVersions) == SignatureComparisonFlags.AcceptOlderVersions;
+            }
         }
 
         /// <inheritdoc />
@@ -80,6 +73,8 @@ namespace AsmResolver.DotNet.Signatures
                 versionMatch = true;
             else if (AcceptNewerAssemblyVersionNumbers)
                 versionMatch = x.Version <= y.Version;
+            else if (AcceptOlderAssemblyVersionNumbers)
+                versionMatch = x.Version >= y.Version;
             else
                 versionMatch = x.Version == y.Version;
 
