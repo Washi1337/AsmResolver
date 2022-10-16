@@ -36,22 +36,22 @@ namespace AsmResolver.DotNet.Dynamic
             Module = module;
             Name = methodBase.Name;
             Attributes = (MethodAttributes)methodBase.Attributes;
-            Signature = new ReferenceImporter(module).ImportMethodSignature(ResolveSig(methodBase, module));
+            Signature = module.DefaultImporter.ImportMethodSignature(ResolveSig(methodBase, module));
             CilMethodBody = CreateDynamicMethodBody(this, dynamicMethodObj);
         }
 
         private MethodSignature ResolveSig(MethodBase methodBase, ModuleDefinition module)
         {
-            var imp = new ReferenceImporter(module);
+            var importer = module.DefaultImporter;
             var returnType = methodBase is MethodInfo info
-                ? imp.ImportTypeSignature(info.ReturnType)
+                ? importer.ImportTypeSignature(info.ReturnType)
                 : module.CorLibTypeFactory.Void;
 
             var parameters = methodBase.GetParameters();
 
             var parameterTypes = new TypeSignature[parameters.Length];
             for (int i = 0; i < parameterTypes.Length; i++)
-                parameterTypes[i] = imp.ImportTypeSignature(parameters[i].ParameterType);
+                parameterTypes[i] = importer.ImportTypeSignature(parameters[i].ParameterType);
 
             return new MethodSignature(
                 methodBase.IsStatic ? 0 : CallingConventionAttributes.HasThis,
@@ -108,7 +108,7 @@ namespace AsmResolver.DotNet.Dynamic
             result.Instructions.AddRange(disassembler.ReadInstructions());
 
             //Exception Handlers
-            DynamicMethodHelper.ReadReflectionExceptionHandlers(result, ehInfos, ehHeader, new ReferenceImporter(module));
+            DynamicMethodHelper.ReadReflectionExceptionHandlers(result, ehInfos, ehHeader, module.DefaultImporter);
 
             return result;
         }

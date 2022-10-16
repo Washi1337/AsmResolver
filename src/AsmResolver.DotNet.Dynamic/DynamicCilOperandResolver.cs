@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Dynamic
         {
             _tokens = tokens ?? throw new ArgumentNullException(nameof(tokens));
             _readerContext = contextModule.ReaderContext;
-            _importer = new ReferenceImporter(contextModule);
+            _importer = contextModule.DefaultImporter;
         }
 
         /// <inheritdoc />
