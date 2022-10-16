@@ -1,11 +1,15 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.PE.DotNet.Cil;
 using Xunit;
+using MethodAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.MethodAttributes;
 
 namespace AsmResolver.DotNet.Dynamic.Tests
 {
@@ -88,6 +92,33 @@ namespace AsmResolver.DotNet.Dynamic.Tests
             Assert.NotNull(definition.CilMethodBody);
             var instruction = Assert.Single(definition.CilMethodBody.Instructions);
             Assert.Equal(CilOpCodes.Ret, instruction.OpCode);
+        }
+
+        [Fact]
+        public void ImportNestedType()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/363
+
+            var method = new DynamicMethod("Test", typeof(void), Type.EmptyTypes);
+            var cil = method.GetILGenerator();
+            cil.Emit(OpCodes.Call, typeof(NestedClass).GetMethod(nameof(NestedClass.TestMethod))!);
+            cil.Emit(OpCodes.Ret);
+
+            var contextModule = ModuleDefinition.FromFile(typeof(DynamicMethodDefinitionTest).Assembly.Location);
+            var definition = new DynamicMethodDefinition(contextModule, method);
+
+            Assert.NotNull(definition.CilMethodBody);
+            var reference = Assert.IsAssignableFrom<IMethodDescriptor>(definition.CilMethodBody.Instructions[0].Operand);
+            var declaringType = reference.DeclaringType;
+            Assert.NotNull(declaringType);
+            Assert.Equal(nameof(NestedClass), declaringType.Name);
+            Assert.NotNull(declaringType.DeclaringType);
+            Assert.Equal(nameof(DynamicMethodDefinitionTest), declaringType.DeclaringType.Name);
+        }
+
+        internal static class NestedClass
+        {
+            public static void TestMethod() => Console.WriteLine("TestMethod");
         }
     }
 }
