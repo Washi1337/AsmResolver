@@ -70,8 +70,14 @@ namespace AsmResolver.DotNet
             Version = descriptor.Version;
             Attributes = descriptor.Attributes;
             HasPublicKey = false;
+
             PublicKeyOrToken = descriptor.GetPublicKeyToken();
+            if (PublicKeyOrToken?.Length == 0)
+                PublicKeyOrToken = null;
+
             Culture = descriptor.Culture;
+            if (Utf8String.IsNullOrEmpty(Culture))
+                Culture = null;
         }
 
         /// <inheritdoc />

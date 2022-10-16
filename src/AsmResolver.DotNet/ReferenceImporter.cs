@@ -315,10 +315,18 @@ namespace AsmResolver.DotNet
             if (corlibType != null)
                 return corlibType;
 
-            var reference = new TypeReference(TargetModule,
-                ImportAssembly(new ReflectionAssemblyDescriptor(TargetModule, type.Assembly.GetName())),
-                type.Namespace,
-                type.Name);
+            TypeReference reference;
+
+            if (type.IsNested)
+            {
+                var scope = (IResolutionScope) ImportType(type.DeclaringType!);
+                reference = new TypeReference(TargetModule, scope, null, type.Name);
+            }
+            else
+            {
+                var scope = ImportAssembly(new ReflectionAssemblyDescriptor(TargetModule, type.Assembly.GetName()));
+                reference = new TypeReference(TargetModule, scope, type.Namespace, type.Name);
+            }
 
             return new TypeDefOrRefSignature(reference, type.IsValueType);
         }
