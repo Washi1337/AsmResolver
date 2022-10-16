@@ -13,10 +13,7 @@ namespace AsmResolver.DotNet
     public class DefaultMetadataResolver : IMetadataResolver
     {
         private readonly ConcurrentDictionary<ITypeDescriptor, TypeDefinition> _typeCache;
-        private readonly SignatureComparer _comparer = new()
-        {
-            IgnoreAssemblyVersionNumbers = true
-        };
+        private readonly SignatureComparer _comparer = new(SignatureComparisonFlags.VersionAgnostic);
 
         /// <summary>
         /// Creates a new metadata resolver.
