@@ -16,6 +16,24 @@ namespace AsmResolver.IO
         /// <summary>
         /// Creates a new binary stream reader on the provided data source.
         /// </summary>
+        /// <param name="data">The data to read from.</param>
+        public BinaryStreamReader(byte[] data)
+            : this(new ByteArrayDataSource(data))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new binary stream reader on the provided data source.
+        /// </summary>
+        /// <param name="dataSource">The object to get the data from.</param>
+        public BinaryStreamReader(IDataSource dataSource)
+            : this(dataSource, 0, 0, (uint) dataSource.Length)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new binary stream reader on the provided data source.
+        /// </summary>
         /// <param name="dataSource">The object to get the data from.</param>
         /// <param name="offset">The raw offset to start at.</param>
         /// <param name="rva">The relative virtual address associated to the offset.</param>

@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Tests
         {
             using var stream = new MemoryStream();
             module.Write(stream);
-            return ModuleDefinition.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+            return ModuleDefinition.FromReader(new BinaryStreamReader(stream.ToArray()));
         }
 
         [SkippableFact]
@@ -285,7 +285,7 @@ namespace AsmResolver.DotNet.Tests
             // Write and rebuild.
             using var stream = new MemoryStream();
             module.Write(stream);
-            var newModule = ModuleDefinition.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+            var newModule = ModuleDefinition.FromReader(new BinaryStreamReader(stream.ToArray()));
 
             // Assert contents.
             var newDirectory = (IResourceDirectory)newModule.NativeResourceDirectory.Entries

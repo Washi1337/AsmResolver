@@ -95,7 +95,7 @@ namespace AsmResolver.DotNet.Dynamic
                     break;
 
                 case TableIndex.StandAloneSig:
-                    var reader = ByteArrayDataSource.CreateReader((byte[])_tokens[(int)token.Rid]!);
+                    var reader = new BinaryStreamReader((byte[])_tokens[(int)token.Rid]!);
                     return CallingConventionSignature.FromReader(new BlobReadContext(_readerContext), ref reader);
             }
 

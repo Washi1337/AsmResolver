@@ -30,13 +30,12 @@ namespace AsmResolver.DotNet.Dynamic
 
         public static void ReadLocalVariables(CilMethodBody methodBody, MethodDefinition method, byte[] localSig)
         {
-            if (!(method.Module is SerializedModuleDefinition module))
+            if (method.Module is not SerializedModuleDefinition module)
                 throw new ArgumentException("Method body should reference a serialized module.");
 
-            var reader = ByteArrayDataSource.CreateReader(localSig);
-            if (ReadLocalVariableSignature(
-                    new BlobReadContext(module.ReaderContext),
-                    ref reader) is not LocalVariablesSignature localsSignature)
+            var reader = new BinaryStreamReader(localSig);
+            if (ReadLocalVariableSignature(new BlobReadContext(module.ReaderContext), ref reader)
+                is not { } localsSignature)
             {
                 throw new ArgumentException("Invalid local variables signature.");
             }

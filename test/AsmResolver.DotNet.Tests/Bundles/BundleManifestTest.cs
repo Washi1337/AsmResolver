@@ -103,7 +103,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             using var stream = new MemoryStream();
             ulong address = manifest.WriteManifest(new BinaryStreamWriter(stream), false);
 
-            var reader = ByteArrayDataSource.CreateReader(stream.ToArray());
+            var reader = new BinaryStreamReader(stream.ToArray());
             reader.Offset = address;
             var newManifest = BundleManifest.FromReader(reader);
             AssertBundlesAreEqual(manifest, newManifest);

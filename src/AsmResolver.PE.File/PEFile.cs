@@ -135,7 +135,7 @@ namespace AsmResolver.PE.File
         /// <param name="raw">The raw bytes representing the contents of the PE file to read.</param>
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromBytes(byte[] raw) => FromReader(ByteArrayDataSource.CreateReader(raw));
+        public static PEFile FromBytes(byte[] raw) => FromReader(new BinaryStreamReader(raw));
 
         /// <summary>
         /// Reads a mapped PE file starting at the provided module base address (HINSTANCE).

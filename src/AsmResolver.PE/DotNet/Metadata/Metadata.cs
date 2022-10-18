@@ -81,7 +81,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="data">The raw data.</param>
         /// <returns>The read metadata.</returns>
-        public static Metadata FromBytes(byte[] data) => FromReader(ByteArrayDataSource.CreateReader(data));
+        public static Metadata FromBytes(byte[] data) => FromReader(new BinaryStreamReader(data));
 
         /// <summary>
         /// Reads a .NET metadata directory from a file.

@@ -11,7 +11,7 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void EmptyArray()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[0]);
+            var reader = new BinaryStreamReader(new byte[0]);
             Assert.Equal(0u, reader.Length);
 
             Assert.Throws<EndOfStreamException>(() => reader.ReadByte());
@@ -21,7 +21,7 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void ReadByte()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[]
+            var reader = new BinaryStreamReader(new byte[]
             {
                 0x80,
                 0x80
@@ -37,7 +37,7 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void ReadInt16()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[]
+            var reader = new BinaryStreamReader(new byte[]
             {
                 0x01, 0x80,
                 0x02, 0x80
@@ -52,7 +52,7 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void ReadInt32()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[]
+            var reader = new BinaryStreamReader(new byte[]
             {
                 0x04, 0x03, 0x02, 0x81,
                 0x08, 0x07, 0x06, 0x85
@@ -68,7 +68,7 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void ReadInt64()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[]
+            var reader = new BinaryStreamReader(new byte[]
             {
                 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x80,
                 0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x88,
@@ -90,14 +90,14 @@ namespace AsmResolver.Tests.IO
             var writer = new BinaryWriter(stream, Encoding.UTF8);
             writer.Write(value);
 
-            var reader = ByteArrayDataSource.CreateReader(stream.ToArray());
+            var reader = new BinaryStreamReader(stream.ToArray());
             Assert.Equal(value, reader.ReadBinaryFormatterString());
         }
 
         [Fact]
         public void NewForkSubRange()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[]
+            var reader = new BinaryStreamReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
@@ -112,7 +112,7 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void NewForkInvalidStart()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[]
+            var reader = new BinaryStreamReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
@@ -123,7 +123,7 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void NewForkTooLong()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[]
+            var reader = new BinaryStreamReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
@@ -134,7 +134,7 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void ForkReadsSameData()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[]
+            var reader = new BinaryStreamReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
@@ -146,7 +146,7 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void ForkMovesIndependentOfOriginal()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[]
+            var reader = new BinaryStreamReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
@@ -161,7 +161,7 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void ForkStartAtMiddle()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[]
+            var reader = new BinaryStreamReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
@@ -173,7 +173,7 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void ForkOfFork()
         {
-            var reader = ByteArrayDataSource.CreateReader(new byte[]
+            var reader = new BinaryStreamReader(new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });

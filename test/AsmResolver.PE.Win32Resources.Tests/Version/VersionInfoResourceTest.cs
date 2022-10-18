@@ -45,7 +45,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             versionInfo.Write(new BinaryStreamWriter(tempStream));
 
             // Reload.
-            var infoReader = ByteArrayDataSource.CreateReader(tempStream.ToArray());
+            var infoReader = new BinaryStreamReader(tempStream.ToArray());
             var newVersionInfo = VersionInfoResource.FromReader(ref infoReader);
             var newFixedVersionInfo = newVersionInfo.FixedVersionInfo;
 
@@ -117,7 +117,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             versionInfo.Write(new BinaryStreamWriter(tempStream));
 
             // Reload.
-            var infoReader = ByteArrayDataSource.CreateReader(tempStream.ToArray());
+            var infoReader = new BinaryStreamReader(tempStream.ToArray());
             var newVersionInfo = VersionInfoResource.FromReader(ref infoReader);
 
             // Verify.
@@ -152,7 +152,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             versionInfo.Write(new BinaryStreamWriter(tempStream));
 
             // Reload.
-            var infoReader = ByteArrayDataSource.CreateReader(tempStream.ToArray());
+            var infoReader = new BinaryStreamReader(tempStream.ToArray());
             var newVersionInfo = VersionInfoResource.FromReader(ref infoReader);
 
             // Verify.

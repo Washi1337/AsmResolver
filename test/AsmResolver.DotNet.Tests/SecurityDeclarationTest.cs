@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Tests
             {
                 var stream = new MemoryStream();
                 module.Write(stream);
-                module = ModuleDefinition.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+                module = ModuleDefinition.FromReader(new BinaryStreamReader(stream.ToArray()));
             }
 
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SecurityAttributes));

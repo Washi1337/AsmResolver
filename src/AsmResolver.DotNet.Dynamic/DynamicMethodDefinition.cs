@@ -103,7 +103,7 @@ namespace AsmResolver.DotNet.Dynamic
             DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
 
             // Read raw instructions.
-            var reader = ByteArrayDataSource.CreateReader(code);
+            var reader = new BinaryStreamReader(code);
             var disassembler = new CilDisassembler(reader, new DynamicCilOperandResolver(module, result, tokenList));
             result.Instructions.AddRange(disassembler.ReadInstructions());
 

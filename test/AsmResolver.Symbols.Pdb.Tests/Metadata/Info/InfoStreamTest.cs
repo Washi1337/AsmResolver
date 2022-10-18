@@ -19,7 +19,7 @@ public class InfoStreamTest
         {
             using var stream = new MemoryStream();
             infoStream.Write(new BinaryStreamWriter(stream));
-            infoStream = InfoStream.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+            infoStream = InfoStream.FromReader(new BinaryStreamReader(stream.ToArray()));
         }
 
         return infoStream;

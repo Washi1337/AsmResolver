@@ -227,7 +227,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     var section = fatBody.ExtraSections[i];
                     if (section.IsEHTable)
                     {
-                        var reader = ByteArrayDataSource.CreateReader(section.Data);
+                        var reader = new BinaryStreamReader(section.Data);
                         uint size = section.IsFat
                             ? CilExceptionHandler.FatExceptionHandlerSize
                             : CilExceptionHandler.TinyExceptionHandlerSize;

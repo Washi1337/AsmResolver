@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet.Tests.Resources
             using var stream = new MemoryStream();
             set.Write(new BinaryStreamWriter(stream));
 
-            var actualSet = ResourceSet.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+            var actualSet = ResourceSet.FromReader(new BinaryStreamReader(stream.ToArray()));
             var actualEntry = actualSet.First(e => e.Name == key);
             Assert.Equal(entry.Type, actualEntry.Type);
             Assert.Equal(entry.Data, actualEntry.Data);
@@ -110,7 +110,7 @@ namespace AsmResolver.DotNet.Tests.Resources
             using var stream = new MemoryStream();
             set.Write(new BinaryStreamWriter(stream));
 
-            var actualSet = ResourceSet.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+            var actualSet = ResourceSet.FromReader(new BinaryStreamReader(stream.ToArray()));
             var actualEntry = actualSet.First(e => e.Name == "Point");
             Assert.Equal(entry.Type.FullName, actualEntry.Type.FullName);
             Assert.Equal(entry.Data, actualEntry.Data);
@@ -134,7 +134,7 @@ namespace AsmResolver.DotNet.Tests.Resources
 
             var resourceReader = new ResourceReader(stream);
 
-            var actualSet = ResourceSet.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+            var actualSet = ResourceSet.FromReader(new BinaryStreamReader(stream.ToArray()));
             Assert.Equal(set.Count, actualSet.Count);
             for (int i = 0; i < set.Count; i++)
             {

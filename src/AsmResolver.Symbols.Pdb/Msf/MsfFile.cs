@@ -88,7 +88,7 @@ public class MsfFile
     /// </summary>
     /// <param name="data">The data to interpret.</param>
     /// <returns>The read MSF file.</returns>
-    public static MsfFile FromBytes(byte[] data) => FromReader(ByteArrayDataSource.CreateReader(data));
+    public static MsfFile FromBytes(byte[] data) => FromReader(new BinaryStreamReader(data));
 
     /// <summary>
     /// Reads an MSF file from the provided input stream reader.

@@ -14,7 +14,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Pdb
         /// </summary>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedPdbStream(byte[] rawData)
-            : this(DefaultName, ByteArrayDataSource.CreateReader(rawData))
+            : this(DefaultName, new BinaryStreamReader(rawData))
         {
         }
 
@@ -24,7 +24,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Pdb
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedPdbStream(string name, byte[] rawData)
-            : this(name, ByteArrayDataSource.CreateReader(rawData))
+            : this(name, new BinaryStreamReader(rawData))
         {
         }
 

@@ -20,7 +20,7 @@ public class DbiStreamTest
         {
             using var stream = new MemoryStream();
             dbiStream.Write(new BinaryStreamWriter(stream));
-            dbiStream = DbiStream.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+            dbiStream = DbiStream.FromReader(new BinaryStreamReader(stream.ToArray()));
         }
 
         return dbiStream;
