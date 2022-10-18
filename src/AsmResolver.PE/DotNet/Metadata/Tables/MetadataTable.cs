@@ -25,9 +25,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="tableIndex">The index of the table.</param>
         /// <param name="layout">The layout of the table.</param>
         public MetadataTable(TableIndex tableIndex, TableLayout layout)
+            : this(tableIndex, layout, false)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new metadata table using the provided layout.
+        /// </summary>
+        /// <param name="tableIndex">The index of the table.</param>
+        /// <param name="layout">The layout of the table.</param>
+        /// <param name="isSorted">Indicates the table is sorted or not.</param>
+        public MetadataTable(TableIndex tableIndex, TableLayout layout, bool isSorted)
         {
             TableIndex = tableIndex;
             Layout = layout;
+            IsSorted = isSorted;
         }
 
         /// <summary>
@@ -53,6 +65,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             get => Rows[index];
             set => Rows[index] = value;
+        }
+
+        /// <inheritdoc />
+        public bool IsSorted
+        {
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -87,6 +106,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         /// <inheritdoc cref="ICollection{T}.Count" />
         public virtual int Count => Rows.Count;
+
+        /// <summary>
+        /// Gets or sets the total number of rows that the underlying array can store.
+        /// </summary>
+        public int Capacity
+        {
+            get => Rows.Capacity;
+            set => Rows.Capacity = value;
+        }
 
         /// <inheritdoc />
         public bool IsReadOnly => false; // TODO: it might be necessary later to make this configurable.
@@ -151,6 +179,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="rid">The row identifier.</param>
         /// <returns>The row.</returns>
         public TRow GetByRid(uint rid) => this[(int) (rid - 1)];
+
+        /// <inheritdoc />
+        public bool TryGetCell(uint rid, int column, out uint value)
+        {
+            if (column >= 0 && column < Layout.Columns.Count && TryGetByRid(rid, out var row))
+            {
+                value = row[column];
+                return true;
+            }
+
+            value = 0;
+            return false;
+        }
 
         IMetadataRow IMetadataTable.GetByRid(uint rid) => GetByRid(rid);
 

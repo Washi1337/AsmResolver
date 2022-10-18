@@ -9,14 +9,6 @@ namespace AsmResolver.DotNet.Code.Native
     public interface INativeSymbolsProvider
     {
         /// <summary>
-        /// Gets or sets the image base the final PE image is using.
-        /// </summary>
-        ulong ImageBase
-        {
-            get;
-        }
-
-        /// <summary>
         /// Adds a single symbol to the prototype.
         /// </summary>
         /// <param name="symbol">The symbol to import.</param>

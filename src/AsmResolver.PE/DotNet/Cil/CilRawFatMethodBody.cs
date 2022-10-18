@@ -153,7 +153,7 @@ namespace AsmResolver.PE.DotNet.Cil
 
             // Create body.
             var body = new CilRawFatMethodBody(flags, maxStack, localVarSigToken, code);
-            body.UpdateOffsets(fileOffset, rva);
+            body.UpdateOffsets(new RelocationParameters(fileOffset, rva));
 
             // Read any extra sections.
             if (body.HasSections)
@@ -172,18 +172,24 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <inheritdoc />
-        public override void UpdateOffsets(ulong newOffset, uint newRva)
+        public override void UpdateOffsets(in RelocationParameters parameters)
         {
-            base.UpdateOffsets(newOffset, newRva);
-            Code.UpdateOffsets(newOffset + 12, newRva + 12);
+            base.UpdateOffsets(parameters);
+
+            var current = parameters.WithAdvance(12);
+
+            Code.UpdateOffsets(current);
             if (HasSections)
             {
                 uint codeSize = Code.GetPhysicalSize();
-                newOffset = (Code.Offset + codeSize).Align(4);
-                newRva = (Code.Rva + codeSize).Align(4);
+                current.Advance(codeSize);
+                current.Align(4);
 
                 for (int i = 0; i < ExtraSections.Count; i++)
-                    ExtraSections[i].UpdateOffsets(newOffset, newRva);
+                {
+                    ExtraSections[i].UpdateOffsets(current);
+                    current.Advance(ExtraSections[i].GetPhysicalSize());
+                }
             }
         }
 
@@ -197,7 +203,9 @@ namespace AsmResolver.PE.DotNet.Cil
             {
                 ulong sectionsOffset = endOffset.Align(4);
                 length += (uint) (sectionsOffset - endOffset);
-                length += (uint) ExtraSections.Sum(x => x.GetPhysicalSize());
+
+                for (int i = 0; i < ExtraSections.Count; i++)
+                    length += ExtraSections[i].GetPhysicalSize();
             }
 
             return length;

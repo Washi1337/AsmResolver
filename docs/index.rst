@@ -58,6 +58,7 @@ Table of Contents:
    dotnet/methods
    dotnet/managed-method-bodies
    dotnet/unmanaged-method-bodies
+   dotnet/dynamic-methods
    dotnet/managed-resources
    dotnet/cloning
    dotnet/token-allocation

@@ -103,7 +103,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             using var stream = new MemoryStream();
             ulong address = manifest.WriteManifest(new BinaryStreamWriter(stream), false);
 
-            var reader = ByteArrayDataSource.CreateReader(stream.ToArray());
+            var reader = new BinaryStreamReader(stream.ToArray());
             reader.Offset = address;
             var newManifest = BundleManifest.FromReader(reader);
             AssertBundlesAreEqual(manifest, newManifest);
@@ -237,7 +237,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
         private static string FindAppHostTemplate(string sdkVersion)
         {
             string sdkPath = Path.Combine(DotNetCorePathProvider.DefaultInstallationPath!, "sdk");
-            string? sdkVersionPath = null;
+            string sdkVersionPath = null;
             foreach (string dir in Directory.GetDirectories(sdkPath))
             {
                 if (Path.GetFileName(dir).StartsWith(sdkVersion))

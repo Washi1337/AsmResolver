@@ -143,7 +143,7 @@ namespace AsmResolver.PE.Tests.Tls
                 },
                 OptionalHeader =
                 {
-                    Magic = is32Bit ? OptionalHeaderMagic.Pe32 : OptionalHeaderMagic.Pe32Plus
+                    Magic = is32Bit ? OptionalHeaderMagic.PE32 : OptionalHeaderMagic.PE32Plus
                 },
                 Sections =
                 {
@@ -162,8 +162,6 @@ namespace AsmResolver.PE.Tests.Tls
 
             var directory = new TlsDirectory
             {
-                ImageBase = file.OptionalHeader.ImageBase,
-                Is32Bit = file.OptionalHeader.Magic == OptionalHeaderMagic.Pe32,
                 TemplateData = templateData,
                 Index = indexSegment.ToReference(),
                 Characteristics = TlsCharacteristics.Align4Bytes,

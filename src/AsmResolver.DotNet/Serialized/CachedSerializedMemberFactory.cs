@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Serialized
         internal CachedSerializedMemberFactory(ModuleReaderContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _tablesStream = _context.Image.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
+            _tablesStream = _context.TablesStream;
         }
 
         internal bool TryLookupMember(MetadataToken token, [NotNullWhen(true)] out IMetadataMember? member)

@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Tests
 {
     public class TypeSpecificationTest
     {
-        
+
         [Fact]
         public void ReadGenericTypeInstantiation()
         {
@@ -33,17 +33,17 @@ namespace AsmResolver.DotNet.Tests
 
         [Fact]
         public void PersistentGenericTypeInstantiation()
-        {  
+        {
             var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);
-            
+
             using var tempStream = new MemoryStream();
             module.Write(tempStream);
-            
+
             module = ModuleDefinition.FromBytes(tempStream.ToArray());
             var fieldType = module
-                .TopLevelTypes.First(t => t.Name == nameof(GenericsTestClass))
-                .Fields.First(f => f.Name == nameof(GenericsTestClass.GenericField))
-                .Signature.FieldType;
+                .TopLevelTypes.First(t => t.Name == nameof(GenericsTestClass))!
+                .Fields.First(f => f.Name == nameof(GenericsTestClass.GenericField))!
+                .Signature!.FieldType;
 
             Assert.IsAssignableFrom<GenericInstanceTypeSignature>(fieldType);
             var genericType = (GenericInstanceTypeSignature) fieldType;
@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Tests
                 "System.String", "System.Int32", "System.Object"
             }, genericType.TypeArguments.Select(a => a.FullName));
         }
-        
+
         [Fact]
         public void IllegalTypeSpecInTypeDefOrRef()
         {
@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Tests
             var typeSpec =  (TypeSpecification) module.LookupMember(new MetadataToken(TableIndex.TypeSpec, 1));
             Assert.NotNull(typeSpec);
         }
-        
+
         [Fact]
         public void MaliciousTypeSpecLoop()
         {
@@ -70,6 +70,6 @@ namespace AsmResolver.DotNet.Tests
             var typeSpec =  (TypeSpecification) module.LookupMember(new MetadataToken(TableIndex.TypeSpec, 1));
             Assert.NotNull(typeSpec.Signature);
         }
-        
+
     }
 }

@@ -34,26 +34,15 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override Utf8String? GetName()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Name)
-                : null;
-        }
+        protected override Utf8String? GetName() => _context.StringsStream?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override Utf8String? GetNamespace()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Namespace)
-                : null;
-        }
+        protected override Utf8String? GetNamespace() => _context.StringsStream?.GetStringByIndex(_row.Namespace);
 
         /// <inheritdoc />
         protected override IImplementation? GetImplementation()
         {
-            var token = _context.Metadata
-                .GetStream<TablesStream>()
+            var token = _context.TablesStream
                 .GetIndexEncoder(CodedIndex.Implementation)
                 .DecodeIndex(_row.Implementation);
 

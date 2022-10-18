@@ -12,7 +12,7 @@ The .NET data directory can be accessed by the ``IPEImage.DotNetDirectory`` prop
 
     IPEImage peImage = ...
 
-    Console.WriteLine("Managed entrypoint: {0:X8}", peImage.DotNetDirectory.Entrypoint);
+    Console.WriteLine("Managed entry point: {0:X8}", peImage.DotNetDirectory.EntryPoint);
 
 
 Metadata directory

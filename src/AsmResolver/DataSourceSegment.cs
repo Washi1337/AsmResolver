@@ -25,11 +25,11 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public override void UpdateOffsets(ulong newOffset, uint newRva)
+        public override void UpdateOffsets(in RelocationParameters parameters)
         {
-            base.UpdateOffsets(newOffset, newRva);
+            base.UpdateOffsets(parameters);
 
-            long displacement = (long) newOffset - (long) _originalOffset;
+            long displacement = (long) parameters.Offset - (long) _originalOffset;
             _displacedDataSource = displacement != 0
                 ? new DisplacedDataSource(_dataSource, displacement)
                 : null;

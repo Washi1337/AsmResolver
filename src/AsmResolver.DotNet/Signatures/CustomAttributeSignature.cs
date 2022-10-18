@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
@@ -12,51 +13,26 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public class CustomAttributeSignature : ExtendableBlobSignature
     {
-        private const ushort CustomAttributeSignaturePrologue = 0x0001;
-
         /// <summary>
-        /// Reads a single custom attribute signature from the input stream.
+        /// The header value of every custom attribute signature.
         /// </summary>
-        /// <param name="context">The blob reader context.</param>
-        /// <param name="ctor">The constructor that was called.</param>
-        /// <param name="reader">The input stream.</param>
-        /// <returns>The signature.</returns>
-        /// <exception cref="FormatException">Occurs when the input stream does not point to a valid signature.</exception>
-        public static CustomAttributeSignature? FromReader(in BlobReadContext context, ICustomAttributeType ctor, ref BinaryStreamReader reader)
-        {
-            ushort prologue = reader.ReadUInt16();
-            if (prologue != CustomAttributeSignaturePrologue)
-            {
-                context.ReaderContext.BadImage("Input stream does not point to a valid custom attribute signature.");
-                return null;
-            }
+        protected const ushort CustomAttributeSignaturePrologue = 0x0001;
 
-            var result = new CustomAttributeSignature();
-
-            // Read fixed arguments.
-            var parameterTypes = ctor.Signature?.ParameterTypes ?? Array.Empty<TypeSignature>();
-            for (int i = 0; i < parameterTypes.Count; i++)
-            {
-                var argument = CustomAttributeArgument.FromReader(context, parameterTypes[i], ref reader);
-                result.FixedArguments.Add(argument);
-            }
-
-            // Read named arguments.
-            ushort namedArgumentCount = reader.ReadUInt16();
-            for (int i = 0; i < namedArgumentCount; i++)
-            {
-                var argument = CustomAttributeNamedArgument.FromReader(context, ref reader);
-                result.NamedArguments.Add(argument);
-            }
-
-            return result;
-        }
+        private List<CustomAttributeArgument>? _fixedArguments;
+        private List<CustomAttributeNamedArgument>? _namedArguments;
 
         /// <summary>
         /// Creates a new empty custom attribute signature.
         /// </summary>
         public CustomAttributeSignature()
-            : this(Enumerable.Empty<CustomAttributeArgument>(), Enumerable.Empty<CustomAttributeNamedArgument>())
+        {
+        }
+
+        /// <summary>
+        /// Creates a new custom attribute signature with the provided fixed arguments.
+        /// </summary>
+        public CustomAttributeSignature(params CustomAttributeArgument[] fixedArguments)
+            : this(fixedArguments, Enumerable.Empty<CustomAttributeNamedArgument>())
         {
         }
 
@@ -73,8 +49,8 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         public CustomAttributeSignature(IEnumerable<CustomAttributeArgument> fixedArguments, IEnumerable<CustomAttributeNamedArgument> namedArguments)
         {
-            FixedArguments = new List<CustomAttributeArgument>(fixedArguments);
-            NamedArguments = new List<CustomAttributeNamedArgument>(namedArguments);
+            _fixedArguments = new List<CustomAttributeArgument>(fixedArguments);
+            _namedArguments = new List<CustomAttributeNamedArgument>(namedArguments);
         }
 
         /// <summary>
@@ -82,7 +58,11 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         public IList<CustomAttributeArgument> FixedArguments
         {
-            get;
+            get
+            {
+                EnsureIsInitialized();
+                return _fixedArguments;
+            }
         }
 
         /// <summary>
@@ -90,7 +70,71 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         public IList<CustomAttributeNamedArgument> NamedArguments
         {
-            get;
+            get
+            {
+                EnsureIsInitialized();
+                return _namedArguments;
+            }
+        }
+
+        /// <summary>
+        /// Reads a single custom attribute signature from the input stream.
+        /// </summary>
+        /// <param name="context">The blob reader context.</param>
+        /// <param name="ctor">The constructor that was called.</param>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The signature.</returns>
+        /// <exception cref="FormatException">Occurs when the input stream does not point to a valid signature.</exception>
+        public static CustomAttributeSignature FromReader(
+            in BlobReadContext context,
+            ICustomAttributeType ctor,
+            in BinaryStreamReader reader)
+        {
+            var argumentTypes = ctor.Signature?.ParameterTypes ?? Array.Empty<TypeSignature>();
+            return new SerializedCustomAttributeSignature(context, argumentTypes, reader);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="FixedArguments"/> and <see cref="NamedArguments"/> collections
+        /// are initialized or not.
+        /// </summary>
+        [MemberNotNullWhen(true, nameof(_fixedArguments))]
+        [MemberNotNullWhen(true, nameof(_namedArguments))]
+        protected bool IsInitialized => _fixedArguments is not null && _namedArguments is not null;
+
+        /// <summary>
+        /// Ensures that the <see cref="FixedArguments"/> and <see cref="NamedArguments"/> are initialized.
+        /// </summary>
+        [MemberNotNull(nameof(_fixedArguments))]
+        [MemberNotNull(nameof(_namedArguments))]
+        protected void EnsureIsInitialized()
+        {
+            if (IsInitialized)
+                return;
+
+            var fixedArguments = new List<CustomAttributeArgument>();
+            var namedArguments = new List<CustomAttributeNamedArgument>();
+
+            Initialize(fixedArguments, namedArguments);
+
+            lock (this)
+            {
+                if (IsInitialized)
+                    return;
+                _fixedArguments = fixedArguments;
+                _namedArguments = namedArguments;
+            }
+        }
+
+        /// <summary>
+        /// Initializes the argument collections of the signature.
+        /// </summary>
+        /// <param name="fixedArguments">The collection that will receive the fixed arguments.</param>
+        /// <param name="namedArguments">The collection that will receive the named arguments.</param>
+        protected virtual void Initialize(
+            IList<CustomAttributeArgument> fixedArguments,
+            IList<CustomAttributeNamedArgument> namedArguments)
+        {
         }
 
         /// <inheritdoc />
@@ -100,7 +144,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context)
+        protected override void WriteContents(in BlobSerializationContext context)
         {
             context.Writer.WriteUInt16(CustomAttributeSignaturePrologue);
 
@@ -112,4 +156,5 @@ namespace AsmResolver.DotNet.Signatures
                 NamedArguments[i].Write(context);
         }
     }
+
 }

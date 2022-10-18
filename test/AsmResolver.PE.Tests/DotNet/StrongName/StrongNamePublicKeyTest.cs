@@ -18,7 +18,7 @@ namespace AsmResolver.PE.Tests.DotNet.StrongName
             using var tempStream = new MemoryStream();
             publicKey.Write(new BinaryStreamWriter(tempStream));
 
-            var reader = ByteArrayDataSource.CreateReader(tempStream.ToArray());
+            var reader = new BinaryStreamReader(tempStream.ToArray());
             var newPublicKey = StrongNamePublicKey.FromReader(ref reader);
 
             Assert.Equal(publicKey.Modulus, newPublicKey.Modulus);

@@ -230,6 +230,9 @@ namespace AsmResolver.DotNet.Builder
 
         private void ImportTypeSpecsAndMemberRefsIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
+            if (module.DotNetDirectory is null)
+                return;
+
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeSpecificationIndices) != 0)
             {
                 ImportTables<TypeSpecification>(module, TableIndex.TypeSpec,

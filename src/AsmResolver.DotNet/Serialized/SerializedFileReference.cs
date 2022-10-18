@@ -35,20 +35,10 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override Utf8String? GetName()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Name)
-                : null;
-        }
+        protected override Utf8String? GetName() => _context.StringsStream?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override byte[]? GetHashValue()
-        {
-            return _context.Metadata.TryGetStream<BlobStream>(out var blobStream)
-                ? blobStream.GetBlobByIndex(_row.HashValue)
-                : null;
-        }
+        protected override byte[]? GetHashValue() => _context.BlobStream?.GetBlobByIndex(_row.HashValue);
 
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() =>

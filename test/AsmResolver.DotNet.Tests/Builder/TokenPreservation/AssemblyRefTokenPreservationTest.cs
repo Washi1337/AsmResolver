@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
             var originalAssemblyRefs = GetMembers<AssemblyReference>(module, TableIndex.AssemblyRef);
 
-            var instructions = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions;
+            var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
             instructions.Clear();
             instructions.Add(CilOpCodes.Ret);
 
@@ -49,7 +49,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var importer = new ReferenceImporter(module);
             var exists = importer.ImportMethod(typeof(File).GetMethod("Exists", new[] {typeof(string)})!);
 
-            var instructions = module.ManagedEntrypointMethod!.CilMethodBody!.Instructions;
+            var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
             instructions.RemoveAt(instructions.Count - 1);
             instructions.Add(CilOpCodes.Ldstr, "file.txt");
             instructions.Add(CilOpCodes.Call, exists);

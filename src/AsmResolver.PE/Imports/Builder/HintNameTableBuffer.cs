@@ -15,23 +15,23 @@ namespace AsmResolver.PE.Imports.Builder
         private uint _length;
 
         /// <inheritdoc />
-        public override void UpdateOffsets(ulong newOffset, uint newRva)
+        public override void UpdateOffsets(in RelocationParameters parameters)
         {
-            base.UpdateOffsets(newOffset, newRva);
+            base.UpdateOffsets(parameters);
 
-            ulong currentOffset = newOffset;
+            ulong currentOffset = parameters.Offset;
             foreach (var module in _modules)
             {
                 foreach (var entry in module.Symbols)
                 {
                     if (entry.IsImportByName)
                     {
-                        _hintNameOffsets[entry] = (uint) (currentOffset - newOffset);
+                        _hintNameOffsets[entry] = (uint) (currentOffset - parameters.Offset);
                         currentOffset += (uint) (sizeof(ushort) + Encoding.ASCII.GetByteCount(entry.Name) + 1);
                         currentOffset = currentOffset.Align(2);
                     }
                 }
-                _moduleNameOffsets[module] = (uint) (currentOffset - newOffset);
+                _moduleNameOffsets[module] = (uint) (currentOffset - parameters.Offset);
                 if (module.Name is not null)
                     currentOffset += (uint) Encoding.ASCII.GetByteCount(module.Name);
 
@@ -39,7 +39,7 @@ namespace AsmResolver.PE.Imports.Builder
                 currentOffset++;
             }
 
-            _length = (uint) (currentOffset - newOffset);
+            _length = (uint) (currentOffset - parameters.Offset);
         }
 
         /// <summary>

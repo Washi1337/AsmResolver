@@ -34,13 +34,13 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             if (is32bit)
             {
                 image.MachineType = MachineType.I386;
-                image.PEKind = OptionalHeaderMagic.Pe32;
+                image.PEKind = OptionalHeaderMagic.PE32;
                 image.DotNetDirectory.Flags |= DotNetDirectoryFlags.Bit32Required;
             }
             else
             {
                 image.MachineType = MachineType.Amd64;
-                image.PEKind = OptionalHeaderMagic.Pe32Plus;
+                image.PEKind = OptionalHeaderMagic.PE32Plus;
             }
 
             // Access metadata.
@@ -89,7 +89,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
 
-            ReplaceBodyWithNativeCode(image, new CodeSegment(image.ImageBase, new byte[]
+            ReplaceBodyWithNativeCode(image, new CodeSegment(new byte[]
             {
                 0xb8, 0x39, 0x05, 0x00, 0x00,      // mov rax, 1337
                 0xc3                               // ret
@@ -120,7 +120,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             var function = new ImportedSymbol(0x4fc, "puts");
             module.Symbols.Add(function);
 
-            var body = new CodeSegment(image.ImageBase, new byte[]
+            var body = new CodeSegment(new byte[]
             {
                 /* 00: */ 0x48, 0x83, 0xEC, 0x28,                     // sub rsp, 0x28
                 /* 04: */ 0x48, 0x8D, 0x0D, 0x10, 0x00, 0x00, 0x00,   // lea rcx, qword [rel str]
@@ -170,7 +170,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             var function = new ImportedSymbol(0x4fc, "puts");
             module.Symbols.Add(function);
 
-            var body = new CodeSegment(image.ImageBase, new byte[]
+            var body = new CodeSegment(new byte[]
             {
                 /* 00: */  0x55,                                 // push ebp
                 /* 01: */  0x89, 0xE5,                           // mov ebp,esp

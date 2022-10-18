@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The deserialized literal.</returns>
         public object InterpretData(ElementType elementType)
         {
-            var reader = ByteArrayDataSource.CreateReader(Data);
+            var reader = new BinaryStreamReader(Data);
 
             return elementType switch
             {
@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override void Write(BlobSerializationContext context) => context.Writer.WriteBytes(Data);
+        public override void Write(in BlobSerializationContext context) => context.Writer.WriteBytes(Data);
 
         /// <summary>
         /// Create a <see cref="DataBlobSignature"/> from a value

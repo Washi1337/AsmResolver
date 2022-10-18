@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using AsmResolver.IO;
@@ -24,7 +25,7 @@ namespace AsmResolver.PE.Tests.Exports
             {
                 "NamedExport1",
                 "NamedExport2",
-            }, image.Exports?.Entries.Select(e => e.Name));
+            }, image.Exports?.Entries.Select(e => e.Name) ?? Array.Empty<string>());
         }
 
         [Fact]

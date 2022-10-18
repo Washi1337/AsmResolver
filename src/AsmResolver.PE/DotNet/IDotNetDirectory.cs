@@ -52,10 +52,10 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <summary>
-        /// Gets or sets the metadata token or entrypoint virtual address, depending on whether
-        /// <see cref="DotNetDirectoryFlags.NativeEntrypoint"/> is set in <see cref="Flags" />.
+        /// Gets or sets the metadata token or entry point virtual address, depending on whether
+        /// <see cref="DotNetDirectoryFlags.NativeEntryPoint"/> is set in <see cref="Flags" />.
         /// </summary>
-        uint Entrypoint
+        uint EntryPoint
         {
             get;
             set;

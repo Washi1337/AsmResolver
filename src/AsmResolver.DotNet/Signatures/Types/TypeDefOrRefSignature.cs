@@ -7,6 +7,9 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </summary>
     public class TypeDefOrRefSignature : TypeSignature
     {
+        private ITypeDefOrRef _type;
+        private bool _isValueType;
+
         /// <summary>
         /// Creates a new type signature referencing a type in a type metadata table.
         /// </summary>
@@ -23,9 +26,8 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="isValueType">Indicates whether the referenced type is a value type or not.</param>
         public TypeDefOrRefSignature(ITypeDefOrRef type, bool isValueType)
         {
-            Type = type;
-            IsValueType = isValueType;
-
+            _type = type;
+            _isValueType = isValueType;
         }
 
         /// <summary>
@@ -33,7 +35,12 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// </summary>
         public ITypeDefOrRef Type
         {
-            get;
+            get => _type;
+            set
+            {
+                _type = value;
+                _isValueType = value.IsValueType;
+            }
         }
 
         /// <inheritdoc />
@@ -52,10 +59,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ModuleDefinition? Module => Type.Module;
 
         /// <inheritdoc />
-        public override bool IsValueType
-        {
-            get;
-        }
+        public override bool IsValueType => _isValueType;
 
         /// <inheritdoc />
         public override TypeDefinition? Resolve() => Type.Resolve();
@@ -79,7 +83,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitTypeDefOrRef(this, state);
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context)
+        protected override void WriteContents(in BlobSerializationContext context)
         {
             var writer = context.Writer;
             writer.WriteByte((byte) ElementType);

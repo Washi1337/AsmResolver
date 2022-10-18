@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override CallingConventionSignature? GetSignature()
         {
-            if (!_context.Metadata.TryGetStream<BlobStream>(out var blobStream)
+            if (_context.BlobStream is not { } blobStream
                 || !blobStream.TryGetBlobReaderByIndex(_row.Signature, out var reader))
             {
                 return _context.BadImageAndReturn<CallingConventionSignature>(

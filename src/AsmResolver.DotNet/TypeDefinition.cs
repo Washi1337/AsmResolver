@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code.Cil;
@@ -499,6 +500,13 @@ namespace AsmResolver.DotNet
             && this.HasCustomAttribute("System.Runtime.CompilerServices", nameof(ReadOnlyAttribute));
 
         /// <summary>
+        /// Determines whether the type is marked with the IsByRefLike attribute, indicating a ref struct definition.
+        /// </summary>
+        public bool IsByRefLike =>
+            IsValueType
+            && this.HasCustomAttribute("System.Runtime.CompilerServices", "IsByRefLikeAttribute");
+
+        /// <summary>
         /// Gets a collection of fields defined in the type.
         /// </summary>
         public IList<FieldDefinition> Fields
@@ -674,10 +682,13 @@ namespace AsmResolver.DotNet
         ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef() => this;
 
         /// <inheritdoc />
-        public TypeSignature ToTypeSignature()
+        public TypeSignature ToTypeSignature() => ToTypeSignature(IsValueType);
+
+        /// <inheritdoc />
+        public TypeSignature ToTypeSignature(bool isValueType)
         {
             return Module?.CorLibTypeFactory.FromType(this) as TypeSignature
-                   ?? new TypeDefOrRefSignature(this, IsValueType);
+                   ?? new TypeDefOrRefSignature(this, isValueType);
         }
 
         /// <inheritdoc />

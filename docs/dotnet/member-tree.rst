@@ -27,7 +27,7 @@ Below, an example program that iterates through all types recursively and prints
 .. code-block:: csharp
 
     public const int IndentationWidth = 3;
-    
+
     private static void Main(string[] args)
     {
         var module = ModuleDefinition.FromFile(...);
@@ -41,14 +41,15 @@ Below, an example program that iterates through all types recursively and prints
         {
             // Print the name of the current type.
             Console.WriteLine("{0}- {1} : {2:X8}", indentation, type.Name, type.MetadataToken.ToInt32());
-            
+
             // Dump any nested types.
             DumpTypes(type.NestedTypes, indentationLevel + 1);
         }
     }
 
+.. _dotnet-obtaining-methods-and-fields:
 
-Obtaining methods and fields 
+Obtaining methods and fields
 ----------------------------
 
 The ``TypeDefinition`` class exposes collections of methods and fields that the type defines:
@@ -76,7 +77,7 @@ Methods and fields have a ``Signature`` property, that contain the return and pa
 .. code-block:: csharp
 
     FieldDefinition field = ...
-    Console.WriteLine("Return type: " + field.Signature.FieldType);
+    Console.WriteLine("Field type: " + field.Signature.FieldType);
 
 
 However, for reading parameters from a method definition, it is preferred to use the ``Parameters`` property instead of the ``ParameterTypes`` property stored in the signature. This is because the ``Parameters`` property automatically binds the types to the parameter definitions that are associated to these parameter types. This provides additional information, such as the name of the parameter:
@@ -98,7 +99,7 @@ Obtaining properties and events is similar to obtaining methods and fields; ``Ty
         Console.WriteLine("{0} : {1:X8}", @event.Name, @event.MetadataToken.ToInt32());
 
 .. code-block:: csharp
-        
+
     foreach (var property in type.Properties)
         Console.WriteLine("{0} : {1:X8}", property.Name, property.MetadataToken.ToInt32());
 
@@ -112,4 +113,3 @@ Properties and events have methods associated to them. These are accessible thro
         Console.WriteLine("{0} {1} : {2:X8}", semantic.Attributes, semantic.Method.Name,
             semantic.MetadataToken.ToInt32());
     }
-

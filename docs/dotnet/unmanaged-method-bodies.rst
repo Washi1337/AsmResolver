@@ -23,23 +23,23 @@ To make the CLR treat the output file as a mixed mode application, the ``ILOnly`
 .. code-block:: csharp
 
     ModuleDefinition module = ...
-    module.Attributes &= ~DotNetDirectoryFlags.ILOnly;
+    module.IsILOnly = false;
 
 Furthermore, make sure the right architecture is specified. For example, for an x86 64-bit binary, use the following:
 
 .. code-block:: csharp
 
-    module.PEKind = OptionalHeaderMagic.Pe32Plus;
+    module.PEKind = OptionalHeaderMagic.PE32Plus;
     module.MachineType = MachineType.Amd64;
-    module.Attributes &= ~DotNetDirectoryFlags.Bit32Required;
+    module.IsBit32Required = false;
 
 For 32-bit x86 binaries, use the following:
 
 .. code-block:: csharp
 
-    module.PEKind = OptionalHeaderMagic.Pe32;
+    module.PEKind = OptionalHeaderMagic.PE32;
     module.MachineType = MachineType.I386;
-    module.Attributes |= DotNetDirectoryFlags.Bit32Required;
+    module.IsBit32Required = true;
 
 
 Flags for native methods

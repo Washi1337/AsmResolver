@@ -5,6 +5,7 @@ using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Fields;
+using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
@@ -135,6 +136,20 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(declaringType, reference.DeclaringType, Comparer);
             Assert.Equal(_module, reference.Module);
             Assert.Equal(_module, reference.DeclaringType.Module);
+        }
+
+        [Fact]
+        public void ImportNestedTypeViaReflectionShouldImportParentType()
+        {
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var declaringType = module.TopLevelTypes.First(t => t.Name == nameof(TopLevelClass1));
+            var nested = declaringType.NestedTypes.First(t => t.Name == nameof(TopLevelClass1.Nested1));
+
+            var result = _importer.ImportType(typeof(TopLevelClass1.Nested1));
+
+            Assert.Equal(nested, result, Comparer);
+            Assert.Equal(_module, result.Module);
+            Assert.Equal(_module, result.DeclaringType?.Module);
         }
 
         [Fact]

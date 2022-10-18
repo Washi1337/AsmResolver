@@ -10,6 +10,7 @@ using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.Types;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.Tests.Listeners;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -32,7 +33,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
             assembly.Modules.Add(module);
             return module;
         }
-        
+
         private static TypeDefinition CloneType(Type type, out TypeDefinition originalTypeDef)
         {
             var sourceModule = ModuleDefinition.FromFile(type.Module.Assembly.Location);
@@ -54,7 +55,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             return clonedType;
         }
-        
+
         private static MethodDefinition CloneMethod(MethodBase methodBase, out MethodDefinition originalMethodDef)
         {
             var sourceModule = ModuleDefinition.FromFile(methodBase.Module.Assembly.Location);
@@ -74,7 +75,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             return clonedMethod;
         }
-        
+
         private static FieldDefinition CloneIntializerField(FieldInfo field, out FieldDefinition originalFieldDef)
         {
             var sourceModule = ModuleDefinition.FromFile(field.Module.Assembly.Location);
@@ -122,7 +123,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
             foreach (var type in result.ClonedTopLevelTypes)
                 targetModule.TopLevelTypes.Add(type);
 
-            targetModule.ManagedEntrypointMethod = (MethodDefinition) result.ClonedMembers.First(m => m.Name == "Main");
+            targetModule.ManagedEntryPointMethod = (MethodDefinition) result.ClonedMembers.First(m => m.Name == "Main");
             _fixture
                 .GetRunner<FrameworkPERunner>()
                 .RebuildAndRun(targetModule, "HelloWorld.exe", "Hello World!" + Environment.NewLine);
@@ -138,7 +139,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Select(i => i.Operand)
                 .OfType<CilInstructionLabel>()
                 .ToArray();
-            
+
             var newBranches = clonedMethod.CilMethodBody.Instructions
                 .Where(i => i.IsBranch())
                 .Select(i => i.Operand)
@@ -147,7 +148,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             // Assert offsets match.
             Assert.Equal(
-                originalBranches.Select(x => x.Offset), 
+                originalBranches.Select(x => x.Offset),
                 newBranches.Select(x => x.Offset));
 
             // Assert all referenced instructions are instructions in the cloned method body.
@@ -164,14 +165,14 @@ namespace AsmResolver.DotNet.Tests.Cloning
             var originalBranches = (IEnumerable<ICilLabel>) method.CilMethodBody.Instructions
                 .First(i => i.OpCode.Code == CilCode.Switch)
                 .Operand;
-            
+
             var newBranches = (IEnumerable<ICilLabel>) clonedMethod.CilMethodBody.Instructions
                 .First(i => i.OpCode.Code == CilCode.Switch)
                 .Operand;
 
             // Assert offsets match.
             Assert.Equal(
-                originalBranches.Select(x => x.Offset), 
+                originalBranches.Select(x => x.Offset),
                 newBranches.Select(x => x.Offset));
 
             // Assert all referenced instructions are instructions in the cloned method body.
@@ -185,7 +186,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         {
             var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
             var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
-            
+
             var targetModule = PrepareTempModule();
 
             var result = new MemberCloner(targetModule)
@@ -211,7 +212,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         {
             var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
             var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
-            
+
             var targetModule = PrepareTempModule();
 
             var result = new MemberCloner(targetModule)
@@ -221,7 +222,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             var clonedMethod = (MethodDefinition) result.ClonedMembers
                 .First(m => m.Name == nameof(Miscellaneous.NestedClassLocal));
- 
+
             var references = clonedMethod.CilMethodBody.Instructions
                 .Where(i => i.OpCode.Code == CilCode.Callvirt || i.OpCode.Code == CilCode.Newobj)
                 .Select(i => i.Operand)
@@ -236,7 +237,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         public void ReferencesToMethodSpecs()
         {
             // https://github.com/Washi1337/AsmResolver/issues/43
-            
+
             var clonedMethod = CloneMethod(
                 typeof(GenericsTestClass).GetMethod(nameof(GenericsTestClass.MethodInstantiationFromExternalType)),
                 out var method);
@@ -252,7 +253,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
             Assert.Equal(originalSpec, newSpec, _signatureComparer);
             Assert.NotSame(originalSpec.Module, newSpec.Module);
         }
-        
+
         [Fact]
         public void CloneImplMap()
         {
@@ -267,7 +268,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         public void CloneConstant()
         {
             var clonedMethod = CloneMethod(typeof(Miscellaneous).GetMethod(nameof(Miscellaneous.OptionalParameter)), out var method);
-            
+
             Assert.NotEmpty(clonedMethod.ParameterDefinitions);
             Assert.NotNull(clonedMethod.ParameterDefinitions[0].Constant);
             Assert.Equal(clonedMethod.ParameterDefinitions[0].Constant.Type, method.ParameterDefinitions[0].Constant.Type);
@@ -279,7 +280,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         {
             var clonedInitializerField =
                 CloneIntializerField(typeof(InitialValues).GetField(nameof(InitialValues.ByteArray)), out var field);
-            
+
             var originalData = ((IReadableSegment) field.FieldRva).ToArray();
             var newData = ((IReadableSegment) clonedInitializerField.FieldRva).ToArray();
 
@@ -329,5 +330,66 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 originalTypeDef.Interfaces.Select(t => t.Interface.FullName),
                 clonedType.Interfaces.Select(t => t.Interface.FullName));
         }
+
+        [Fact]
+        public void CloneCallbackResult()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
+
+            var targetModule = PrepareTempModule();
+
+            var reverseMethodsNames = (IMemberDefinition original, IMemberDefinition cloned) => {
+
+                if (cloned is MethodDefinition clonedDescriptor && original is MethodDefinition originalDescriptor)
+                    clonedDescriptor.Name = new string(originalDescriptor.Name.Reverse().ToArray());
+
+            };
+
+            var result = new MemberCloner(targetModule, reverseMethodsNames)
+                .Include(type)
+                .Clone();
+
+            var clonedType = result.GetClonedMember(type);
+
+            Assert.Equal(
+                type.Methods.Select(m => m.Name.Reverse().ToArray()),
+                clonedType.Methods.Select(m => m.Name.ToArray()));
+        }
+
+        [Fact]
+        public void CloneCustomListenerResult()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
+
+            var targetModule = PrepareTempModule();
+
+            var result = new MemberCloner(targetModule, new CustomMemberClonerListener())
+                .Include(type)
+                .Clone();
+
+            var clonedType = result.GetClonedMember(type);
+
+            Assert.Equal(
+                type.Methods.Select(m => $"Method_{m.Name}"),
+                clonedType.Methods.Select(m => m.Name.ToString()));
+        }
+
+        [Fact]
+        public void CloneAndInject()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var targetModule = PrepareTempModule();
+
+            var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
+
+            var result = new MemberCloner(targetModule, new InjectTypeClonerListener(targetModule))
+                .Include(type)
+                .Clone();
+
+            Assert.All(result.ClonedTopLevelTypes, t => Assert.Contains(t, targetModule.TopLevelTypes));
+        }
+
     }
 }

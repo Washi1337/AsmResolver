@@ -8,107 +8,113 @@ namespace AsmResolver.IO
     /// </summary>
     public class BinaryStreamWriter : IBinaryStreamWriter
     {
-        private readonly Stream _stream;
-
         /// <summary>
         /// Creates a new binary stream writer using the provided output stream.
         /// </summary>
         /// <param name="stream">The stream to write to.</param>
         public BinaryStreamWriter(Stream stream)
         {
-            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            BaseStream = stream ?? throw new ArgumentNullException(nameof(stream));
+        }
+
+        /// <summary>
+        /// Gets the stream this writer writes to.
+        /// </summary>
+        public Stream BaseStream
+        {
+            get;
         }
 
         /// <inheritdoc />
         public ulong Offset
         {
-            get => (uint) _stream.Position;
+            get => (uint) BaseStream.Position;
             set
             {
                 // Check if position actually changed before actually setting. If we don't do this, this can cause
                 // performance issues on some systems. See https://github.com/Washi1337/AsmResolver/issues/232
-                if (_stream.Position != (long) value)
-                    _stream.Position = (long) value;
+                if (BaseStream.Position != (long) value)
+                    BaseStream.Position = (long) value;
             }
         }
 
         /// <inheritdoc />
-        public uint Length => (uint) _stream.Length;
+        public uint Length => (uint) BaseStream.Length;
 
         /// <inheritdoc />
         public void WriteBytes(byte[] buffer, int startIndex, int count)
         {
-            _stream.Write(buffer, startIndex, count);
+            BaseStream.Write(buffer, startIndex, count);
         }
 
         /// <inheritdoc />
         public void WriteByte(byte value)
         {
-            _stream.WriteByte(value);
+            BaseStream.WriteByte(value);
         }
 
         /// <inheritdoc />
         public void WriteUInt16(ushort value)
         {
-            _stream.WriteByte((byte) (value & 0xFF));
-            _stream.WriteByte((byte) ((value >> 8) & 0xFF));
+            BaseStream.WriteByte((byte) (value & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 8) & 0xFF));
         }
 
         /// <inheritdoc />
         public void WriteUInt32(uint value)
         {
-            _stream.WriteByte((byte) (value & 0xFF));
-            _stream.WriteByte((byte) ((value >> 8) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 16) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 24) & 0xFF));
+            BaseStream.WriteByte((byte) (value & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 8) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 16) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 24) & 0xFF));
         }
 
         /// <inheritdoc />
         public void WriteUInt64(ulong value)
         {
-            _stream.WriteByte((byte) (value & 0xFF));
-            _stream.WriteByte((byte) ((value >> 8) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 16) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 24) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 32) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 40) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 48) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 56) & 0xFF));
+            BaseStream.WriteByte((byte) (value & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 8) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 16) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 24) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 32) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 40) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 48) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 56) & 0xFF));
         }
 
         /// <inheritdoc />
         public void WriteSByte(sbyte value)
         {
-            _stream.WriteByte(unchecked((byte) value));
+            BaseStream.WriteByte(unchecked((byte) value));
         }
 
         /// <inheritdoc />
         public void WriteInt16(short value)
         {
-            _stream.WriteByte((byte) (value & 0xFF));
-            _stream.WriteByte((byte) ((value >> 8) & 0xFF));
+            BaseStream.WriteByte((byte) (value & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 8) & 0xFF));
         }
 
         /// <inheritdoc />
         public void WriteInt32(int value)
         {
-            _stream.WriteByte((byte) (value & 0xFF));
-            _stream.WriteByte((byte) ((value >> 8) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 16) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 24) & 0xFF));
+            BaseStream.WriteByte((byte) (value & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 8) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 16) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 24) & 0xFF));
         }
 
         /// <inheritdoc />
         public void WriteInt64(long value)
         {
-            _stream.WriteByte((byte) (value & 0xFF));
-            _stream.WriteByte((byte) ((value >> 8) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 16) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 24) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 32) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 40) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 48) & 0xFF));
-            _stream.WriteByte((byte) ((value >> 56) & 0xFF));
+            BaseStream.WriteByte((byte) (value & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 8) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 16) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 24) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 32) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 40) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 48) & 0xFF));
+            BaseStream.WriteByte((byte) ((value >> 56) & 0xFF));
         }
 
         /// <inheritdoc />

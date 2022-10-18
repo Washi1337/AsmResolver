@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet
         IHasGenericParameters,
         IMemberForwarded,
         IHasSecurityDeclaration,
-        IManagedEntrypoint
+        IManagedEntryPoint
     {
         private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<TypeDefinition?> _declaringType;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
@@ -35,20 +36,10 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override Utf8String? GetNamespace()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Namespace)
-                : null;
-        }
+        protected override Utf8String? GetNamespace() => _context.StringsStream?.GetStringByIndex(_row.Namespace);
 
         /// <inheritdoc />
-        protected override Utf8String? GetName()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Name)
-                : null;
-        }
+        protected override Utf8String? GetName() => _context.StringsStream?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
         protected override ITypeDefOrRef? GetBaseType()
@@ -56,8 +47,7 @@ namespace AsmResolver.DotNet.Serialized
             if (_row.Extends == 0)
                 return null;
 
-            var token = _context.Metadata
-                .GetStream<TablesStream>()
+            var token = _context.TablesStream
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef)
                 .DecodeIndex(_row.Extends);
 
@@ -67,9 +57,9 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<TypeDefinition> GetNestedTypes()
         {
-            var result = new OwnedCollection<TypeDefinition, TypeDefinition>(this);
-
             var rids = _context.ParentModule.GetNestedTypeRids(MetadataToken.Rid);
+            var result = new OwnedCollection<TypeDefinition, TypeDefinition>(this, rids.Count);
+
             foreach (uint rid in rids)
             {
                 var nestedType = (TypeDefinition) _context.ParentModule.LookupMember(new MetadataToken(TableIndex.TypeDef, rid));
@@ -107,7 +97,7 @@ namespace AsmResolver.DotNet.Serialized
         private IList<TMember> CreateMemberCollection<TMember>(MetadataRange range)
             where TMember : class, IMetadataMember, IOwnedCollectionElement<TypeDefinition>
         {
-            var result = new OwnedCollection<TypeDefinition, TMember>(this);
+            var result = new OwnedCollection<TypeDefinition, TMember>(this, range.Count);
 
             foreach (var token in range)
                 result.Add((TMember) _context.ParentModule.LookupMember(token));
@@ -126,9 +116,10 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<GenericParameter> GetGenericParameters()
         {
-            var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
+            var rids = _context.ParentModule.GetGenericParameters(MetadataToken);
+            var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this, rids.Count);
 
-            foreach (uint rid in _context.ParentModule.GetGenericParameters(MetadataToken))
+            foreach (uint rid in rids)
             {
                 if (_context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.GenericParam, rid), out var member)
                     && member is GenericParameter genericParameter)
@@ -143,9 +134,9 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<InterfaceImplementation> GetInterfaces()
         {
-            var result = new OwnedCollection<TypeDefinition, InterfaceImplementation>(this);
-
             var rids = _context.ParentModule.GetInterfaceImplementationRids(MetadataToken);
+            var result = new OwnedCollection<TypeDefinition, InterfaceImplementation>(this, rids.Count);
+
             foreach (uint rid in rids)
             {
                 if (_context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.InterfaceImpl, rid), out var member)
@@ -161,13 +152,13 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<MethodImplementation> GetMethodImplementations()
         {
-            var result = new List<MethodImplementation>();
-
-            var tablesStream = _context.Metadata.GetStream<TablesStream>();
+            var tablesStream = _context.TablesStream;
             var table = tablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.MethodDefOrRef);
 
             var rids = _context.ParentModule.GetMethodImplementationRids(MetadataToken);
+            var result = new List<MethodImplementation>(rids.Count);
+
             foreach (uint rid in rids)
             {
                 var row = table.GetByRid(rid);

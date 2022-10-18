@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using AsmResolver.IO;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -50,6 +52,13 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
+        public bool IsEncMetadata
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
         public IList<IMetadataStream> Streams
         {
             get
@@ -58,6 +67,48 @@ namespace AsmResolver.PE.DotNet.Metadata
                     Interlocked.CompareExchange(ref _streams, GetStreams(), null);
                 return _streams;
             }
+        }
+
+        /// <summary>
+        /// Reads a .NET metadata directory from a file.
+        /// </summary>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The read metadata.</returns>
+        public static Metadata FromFile(string path) => FromBytes(System.IO.File.ReadAllBytes(path));
+
+        /// <summary>
+        /// Interprets the provided binary data as a .NET metadata directory.
+        /// </summary>
+        /// <param name="data">The raw data.</param>
+        /// <returns>The read metadata.</returns>
+        public static Metadata FromBytes(byte[] data) => FromReader(new BinaryStreamReader(data));
+
+        /// <summary>
+        /// Reads a .NET metadata directory from a file.
+        /// </summary>
+        /// <param name="file">The file to read.</param>
+        /// <returns>The read metadata.</returns>
+        public static Metadata FromFile(IInputFile file) => FromReader(file.CreateReader());
+
+        /// <summary>
+        /// Interprets the provided binary stream as a .NET metadata directory.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The read metadata.</returns>
+        public static Metadata FromReader(BinaryStreamReader reader)
+        {
+            return FromReader(reader, new MetadataReaderContext(VirtualAddressFactory.Instance));
+        }
+
+        /// <summary>
+        /// Interprets the provided binary stream as a .NET metadata directory.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="context">The context in which the reader is situated in.</param>
+        /// <returns>The read metadata.</returns>
+        public static Metadata FromReader(BinaryStreamReader reader, MetadataReaderContext context)
+        {
+            return new SerializedMetadata(context, ref reader);
         }
 
         /// <inheritdoc />
@@ -174,33 +225,57 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <inheritdoc />
         public bool TryGetStream(string name, [NotNullWhen(true)] out IMetadataStream? stream)
         {
-            var streams = Streams;
+            bool heapRequested = name is not (TablesStream.CompressedStreamName
+                or TablesStream.EncStreamName
+                or TablesStream.UncompressedStreamName);
 
-            for (int i = 0; i < streams.Count; i++)
-            {
-                if (streams[i].Name == name)
-                {
-                    stream = streams[i];
-                    return true;
-                }
-            }
-
-            stream = null;
-            return false;
+            return TryFindStream((c, s) => c.Name == s as string, name, heapRequested, out stream);
         }
 
         /// <inheritdoc />
         public bool TryGetStream<TStream>([NotNullWhen(true)] out TStream? stream)
             where TStream : class, IMetadataStream
         {
-            var streams = Streams;
+            bool heapRequested = !typeof(TablesStream).IsAssignableFrom(typeof(TStream));
 
-            for (int i = 0; i < streams.Count; i++)
+            if (TryFindStream((c, _) => c is TStream, null, heapRequested, out var candidate))
             {
-                if (streams[i] is TStream s)
+                stream = (TStream) candidate;
+                return true;
+            }
+
+            stream = null;
+            return false;
+        }
+
+        private bool TryFindStream(
+            Func<IMetadataStream, object?, bool> condition,
+            object? state,
+            bool heapRequested,
+            [NotNullWhen(true)] out IMetadataStream? stream)
+        {
+            var streams = Streams;
+            bool reverseOrder = heapRequested && !IsEncMetadata;
+            if (reverseOrder)
+            {
+                for (int i = streams.Count - 1; i >= 0; i--)
                 {
-                    stream = s;
-                    return true;
+                    if (condition(streams[i], state))
+                    {
+                        stream = streams[i];
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < streams.Count; i++)
+                {
+                    if (condition(streams[i], state))
+                    {
+                        stream = streams[i];
+                        return true;
+                    }
                 }
             }
 

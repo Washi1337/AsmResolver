@@ -47,28 +47,13 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override Utf8String? GetName()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Name)
-                : null;
-        }
+        protected override Utf8String? GetName() => _context.StringsStream?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override Utf8String? GetCulture()
-        {
-            return _context.Metadata.TryGetStream<StringsStream>(out var stringsStream)
-                ? stringsStream.GetStringByIndex(_row.Culture)
-                : null;
-        }
+        protected override Utf8String? GetCulture() => _context.StringsStream?.GetStringByIndex(_row.Culture);
 
         /// <inheritdoc />
-        protected override byte[]? GetPublicKey()
-        {
-            return _context.Metadata.TryGetStream<BlobStream>(out var blobStream)
-                ? blobStream.GetBlobByIndex(_row.PublicKey)
-                : null;
-        }
+        protected override byte[]? GetPublicKey() => _context.BlobStream?.GetBlobByIndex(_row.PublicKey);
 
         /// <inheritdoc />
         protected override IList<ModuleDefinition> GetModules()
@@ -82,13 +67,15 @@ namespace AsmResolver.DotNet.Serialized
             var moduleResolver = _context.Parameters.ModuleResolver;
             if (moduleResolver is not null)
             {
-                var metadata = _context.Image.DotNetDirectory!.Metadata!;
-                var tablesStream = metadata.GetStream<TablesStream>();
-                var stringsStream = metadata.GetStream<StringsStream>();
+                var tablesStream = _context.TablesStream;
+                var stringsStream = _context.StringsStream;
+                if (stringsStream is null)
+                    return result;
 
                 var filesTable = tablesStream.GetTable<FileReferenceRow>(TableIndex.File);
-                foreach (var fileRow in filesTable)
+                for (int i = 0; i < filesTable.Count; i++)
                 {
+                    var fileRow = filesTable[i];
                     if (fileRow.Attributes == FileAttributes.ContainsMetadata)
                     {
                         string? name = stringsStream.GetStringByIndex(fileRow.Name);
@@ -115,9 +102,8 @@ namespace AsmResolver.DotNet.Serialized
             // We need to override this to be able to detect the runtime without lazily resolving all kinds of members.
 
             // Get relevant streams.
-            var metadata = _manifestModule.DotNetDirectory.Metadata!;
-            var tablesStream = metadata.GetStream<TablesStream>();
-            if (!metadata.TryGetStream<StringsStream>(out var stringsStream))
+            var tablesStream = _context.TablesStream;
+            if (_context.StringsStream is not { } stringsStream)
             {
                 info = default;
                 return false;

@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet
     public class FileReference :
         MetadataMember,
         IImplementation,
-        IManagedEntrypoint,
+        IManagedEntryPoint,
         IOwnedCollectionElement<ModuleDefinition>
     {
         private readonly LazyVariable<Utf8String?> _name;

@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet.Cloning
     /// </remarks>
     public partial class MemberCloner
     {
+        private readonly IMemberClonerListener _clonerListener;
         private readonly Func<MemberCloneContext, CloneContextAwareReferenceImporter>? _importerFactory;
         private readonly ModuleDefinition _targetModule;
 
@@ -30,7 +31,10 @@ namespace AsmResolver.DotNet.Cloning
         /// Creates a new instance of the <see cref="MemberCloner"/> class.
         /// </summary>
         /// <param name="targetModule">The target module to copy the members into.</param>
-        public MemberCloner(ModuleDefinition targetModule) : this(targetModule, null) { }
+        public MemberCloner(ModuleDefinition targetModule)
+            : this(targetModule, (original, cloned) => { })
+        {
+        }
 
         /// <summary>
         /// Creates a new instance of the <see cref="MemberCloner"/> class.
@@ -39,9 +43,43 @@ namespace AsmResolver.DotNet.Cloning
         /// <param name="importerFactory">The factory for creating the reference importer</param>
         public MemberCloner(ModuleDefinition targetModule,
             Func<MemberCloneContext, CloneContextAwareReferenceImporter>? importerFactory)
+            : this(targetModule, importerFactory, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="MemberCloner"/> class.
+        /// </summary>
+        /// <param name="targetModule">The target module to copy the members into.</param>
+        /// <param name="callback">The callback used in the cloner listener.</param>
+        public MemberCloner(ModuleDefinition targetModule, Action<IMemberDefinition, IMemberDefinition> callback)
+            : this(targetModule, new CallbackClonerListener(callback))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="MemberCloner"/> class.
+        /// </summary>
+        /// <param name="targetModule">The target module to copy the members into.</param>
+        /// <param name="listener">The callback listener used in the cloner.</param>
+        public MemberCloner(ModuleDefinition targetModule, IMemberClonerListener listener)
+            : this(targetModule, null, listener)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="MemberCloner"/> class.
+        /// </summary>
+        /// <param name="targetModule">The target module to copy the members into.</param>
+        /// <param name="importerFactory">The factory for creating the reference importer</param>
+        /// <param name="clonerListener">The listener used in the cloner.</param>
+        public MemberCloner(ModuleDefinition targetModule,
+            Func<MemberCloneContext, CloneContextAwareReferenceImporter>? importerFactory,
+            IMemberClonerListener? clonerListener)
         {
             _targetModule = targetModule ?? throw new ArgumentNullException(nameof(targetModule));
             _importerFactory = importerFactory;
+            _clonerListener = clonerListener ?? CallbackClonerListener.EmptyInstance;
         }
 
         /// <summary>
@@ -272,7 +310,12 @@ namespace AsmResolver.DotNet.Cloning
         private void DeepCopyTypes(MemberCloneContext context)
         {
             foreach (var type in _typesToClone)
+            {
                 DeepCopyType(context, type);
+                var clonedMember = (TypeDefinition)context.ClonedMembers[type];
+                _clonerListener.OnClonedMember(type, clonedMember);
+                _clonerListener.OnClonedType(type, clonedMember);
+            }
         }
 
         private void DeepCopyType(MemberCloneContext context, TypeDefinition type)

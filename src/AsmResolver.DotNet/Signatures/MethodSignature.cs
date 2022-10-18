@@ -20,8 +20,10 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The method signature.</returns>
         public static MethodSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
-            var result = new MethodSignature((CallingConventionAttributes) reader.ReadByte(),
-                context.ReaderContext.ParentModule.CorLibTypeFactory.Void, Enumerable.Empty<TypeSignature>());
+            var result = new MethodSignature(
+                (CallingConventionAttributes) reader.ReadByte(),
+                context.ReaderContext.ParentModule.CorLibTypeFactory.Void,
+                Enumerable.Empty<TypeSignature>());
 
             // Generic parameter count.
             if (result.IsGeneric)
@@ -199,7 +201,7 @@ namespace AsmResolver.DotNet.Signatures
         public FunctionPointerTypeSignature MakeFunctionPointerType() => new(this);
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context)
+        protected override void WriteContents(in BlobSerializationContext context)
         {
             var writer = context.Writer;
 

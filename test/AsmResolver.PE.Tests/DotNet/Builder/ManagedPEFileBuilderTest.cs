@@ -62,7 +62,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             
             // Change machine type and pe kind to 64-bit
             image.MachineType = MachineType.Amd64;
-            image.PEKind = OptionalHeaderMagic.Pe32Plus;
+            image.PEKind = OptionalHeaderMagic.PE32Plus;
             
             // Rebuild
             var builder = new ManagedPEFileBuilder();
@@ -82,7 +82,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             
             // Change machine type and pe kind to 32-bit
             image.MachineType = MachineType.I386;
-            image.PEKind = OptionalHeaderMagic.Pe32;
+            image.PEKind = OptionalHeaderMagic.PE32;
             
             // Rebuild
             var builder = new ManagedPEFileBuilder();

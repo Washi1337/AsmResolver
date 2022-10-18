@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE
 {
@@ -29,7 +30,7 @@ namespace AsmResolver.PE
             File = file;
             Parameters = parameters;
         }
-        
+
         /// <summary>
         /// Gets the original PE file that is being parsed.
         /// </summary>
@@ -44,6 +45,18 @@ namespace AsmResolver.PE
         public PEReaderParameters Parameters
         {
             get;
+        }
+
+        /// <summary>
+        /// Creates relocation parameters based on the current PE file that is being read.
+        /// </summary>
+        /// <param name="offset">The offset of the segment.</param>
+        /// <param name="rva">The relative virtual address of the segment.</param>
+        /// <returns>The created relocation parameters.</returns>
+        public RelocationParameters GetRelocation(ulong offset, uint rva)
+        {
+            return new RelocationParameters(File.OptionalHeader.ImageBase, offset, rva,
+                File.OptionalHeader.Magic == OptionalHeaderMagic.PE32);
         }
 
         /// <inheritdoc />

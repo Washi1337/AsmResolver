@@ -66,7 +66,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 if (image.DotNetDirectory is null)
                     throw new ArgumentException("Image does not contain a .NET directory.");
 
-                ImportDirectory = new ImportDirectoryBuffer(image.PEKind == OptionalHeaderMagic.Pe32);
+                ImportDirectory = new ImportDirectoryBuffer(image.PEKind == OptionalHeaderMagic.PE32);
                 ExportDirectory = new ExportDirectoryBuffer();
                 DotNetSegment = new DotNetSegmentBuffer(image.DotNetDirectory);
                 ResourceDirectory = new ResourceDirectoryBuffer();
@@ -134,7 +134,7 @@ namespace AsmResolver.PE.DotNet.Builder
             }
 
             /// <summary>
-            /// Gets the code segment used as a native entrypoint of the resulting PE file.
+            /// Gets the code segment used as a native entry point of the resulting PE file.
             /// </summary>
             /// <remarks>
             /// This property might be <c>null</c> if no bootstrapper is to be emitted. For example, since the
@@ -246,23 +246,23 @@ namespace AsmResolver.PE.DotNet.Builder
 
         private static void CreateImportDirectory(IPEImage image, ManagedPEBuilderContext context)
         {
-            bool importEntrypointRequired = context.Platform.IsClrBootstrapperRequired
+            bool importEntryPointRequired = context.Platform.IsClrBootstrapperRequired
                                             || (image.DotNetDirectory!.Flags & DotNetDirectoryFlags.ILOnly) == 0;
-            string entrypointName = (image.Characteristics & Characteristics.Dll) != 0
+            string entryPointName = (image.Characteristics & Characteristics.Dll) != 0
                 ? "_CorDllMain"
                 : "_CorExeMain";
 
-            var modules = CollectImportedModules(image, importEntrypointRequired, entrypointName, out var entrypointSymbol);
+            var modules = CollectImportedModules(image, importEntryPointRequired, entryPointName, out var entryPointSymbol);
 
             foreach (var module in modules)
                 context.ImportDirectory.AddModule(module);
 
-            if (importEntrypointRequired)
+            if (importEntryPointRequired)
             {
-                if (entrypointSymbol is null)
-                    throw new InvalidOperationException("Entrypoint symbol was required but not imported.");
+                if (entryPointSymbol is null)
+                    throw new InvalidOperationException("Entry point symbol was required but not imported.");
 
-                context.Bootstrapper = context.Platform.CreateThunkStub(image.ImageBase, entrypointSymbol);
+                context.Bootstrapper = context.Platform.CreateThunkStub(entryPointSymbol);
             }
         }
 
@@ -270,23 +270,23 @@ namespace AsmResolver.PE.DotNet.Builder
             IPEImage image,
             bool entryRequired,
             string mscoreeEntryName,
-            out ImportedSymbol? entrypointSymbol)
+            out ImportedSymbol? entryPointSymbol)
         {
             var modules = new List<IImportedModule>();
 
             IImportedModule? mscoreeModule = null;
-            entrypointSymbol = null;
+            entryPointSymbol = null;
 
             foreach (var module in image.Imports)
             {
-                // Check if the CLR entrypoint is already imported.
+                // Check if the CLR entry point is already imported.
                 if (module.Name == "mscoree.dll")
                 {
                     mscoreeModule = module;
 
-                    // Find entrypoint in this imported module.
+                    // Find entry point in this imported module.
                     if (entryRequired)
-                        entrypointSymbol = mscoreeModule.Symbols.FirstOrDefault(s => s.Name == mscoreeEntryName);
+                        entryPointSymbol = mscoreeModule.Symbols.FirstOrDefault(s => s.Name == mscoreeEntryName);
 
                     // Only include mscoree.dll if necessary.
                     if (entryRequired || module.Symbols.Count > 1)
@@ -308,11 +308,11 @@ namespace AsmResolver.PE.DotNet.Builder
                     modules.Add(mscoreeModule);
                 }
 
-                // Add entrypoint sumbol if it wasn't imported yet.
-                if (entrypointSymbol is null)
+                // Add entry point sumbol if it wasn't imported yet.
+                if (entryPointSymbol is null)
                 {
-                    entrypointSymbol = new ImportedSymbol(0, mscoreeEntryName);
-                    mscoreeModule.Symbols.Add(entrypointSymbol);
+                    entryPointSymbol = new ImportedSymbol(0, mscoreeEntryName);
+                    mscoreeModule.Symbols.Add(entryPointSymbol);
                 }
             }
 
@@ -423,7 +423,7 @@ namespace AsmResolver.PE.DotNet.Builder
         }
 
         /// <inheritdoc />
-        protected override uint GetEntrypointAddress(PEFile peFile, IPEImage image, ManagedPEBuilderContext context)
+        protected override uint GetEntryPointAddress(PEFile peFile, IPEImage image, ManagedPEBuilderContext context)
             => context.Bootstrapper?.Segment.Rva ?? 0;
 
         /// <inheritdoc />

@@ -9,10 +9,10 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// Indicates the BSJB metadata directory format is used.
         /// </summary>
         Bsjb = 0x424A5342,
-        
+
         /// <summary>
-        /// Indicates the legacy +MOC metadata directory format is used.
+        /// Indicates the legacy COM+ metadata directory format is used.
         /// </summary>
-        Moc = 0x2B4D4F43
+        ComPlus = 0x2B4D4F43
     }
 }

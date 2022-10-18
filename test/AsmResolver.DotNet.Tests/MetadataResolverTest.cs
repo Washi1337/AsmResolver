@@ -192,7 +192,7 @@ namespace AsmResolver.DotNet.Tests
             resolver.AddToCache(assembly2, assembly2);
 
             // Resolve
-            var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
+            var instructions = module.ManagedEntryPointMethod.CilMethodBody.Instructions;
             Assert.NotNull(((IMethodDescriptor) instructions[0].Operand).Resolve());
         }
 
@@ -238,7 +238,7 @@ namespace AsmResolver.DotNet.Tests
                 .TopLevelTypes.First(t => t.Name == "MyClass")
                 .Methods.First(m => m.Name == "ThrowMe");
 
-            var reference = (IMethodDescriptor) mainApp.ManagedEntrypointMethod!.CilMethodBody!.Instructions.First(
+            var reference = (IMethodDescriptor) mainApp.ManagedEntryPointMethod!.CilMethodBody!.Instructions.First(
                     i => i.OpCode == CilOpCodes.Callvirt && ((IMethodDescriptor) i.Operand)?.Name == "ThrowMe")
                 .Operand!;
 
@@ -246,7 +246,8 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(resolved);
             Assert.Equal(definition, resolved);
         }
-        
+
+        [Fact]
         public void ResolveMethodWithoutHideBySig()
         {
             // https://github.com/Washi1337/AsmResolver/issues/241
@@ -259,7 +260,7 @@ namespace AsmResolver.DotNet.Tests
                 .ToArray();
 
             var helloWorld = ModuleDefinition.FromFile(typeof(HelloWorldVB.Program).Assembly.Location);
-            var resolved = helloWorld.ManagedEntrypointMethod!.CilMethodBody!.Instructions
+            var resolved = helloWorld.ManagedEntryPointMethod!.CilMethodBody!.Instructions
                 .Where(x => x.OpCode == CilOpCodes.Call)
                 .Select(x => ((IMethodDescriptor) x.Operand!).Resolve())
                 .ToArray();

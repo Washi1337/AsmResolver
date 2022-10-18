@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             ModifierType.IsImportedInModule(module) && base.IsImportedInModule(module);
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context)
+        protected override void WriteContents(in BlobSerializationContext context)
         {
             context.Writer.WriteByte((byte) ElementType);
             WriteTypeDefOrRef(context, ModifierType, "Modifier type");

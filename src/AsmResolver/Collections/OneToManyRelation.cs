@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace AsmResolver.Collections
@@ -11,8 +13,27 @@ namespace AsmResolver.Collections
         where TKey : notnull
         where TValue : notnull
     {
-        private readonly Dictionary<TKey, ICollection<TValue>> _memberLists = new();
-        private readonly Dictionary<TValue, TKey> _memberOwners = new();
+        private readonly Dictionary<TKey, ValueSet> _memberLists;
+        private readonly Dictionary<TValue, TKey> _memberOwners;
+
+        /// <summary>
+        /// Creates a new, empty one-to-many relation mapping.
+        /// </summary>
+        public OneToManyRelation()
+        {
+            _memberLists = new Dictionary<TKey, ValueSet>();
+            _memberOwners = new Dictionary<TValue, TKey>();
+        }
+
+        /// <summary>
+        /// Creates a new, empty one-to-many relation mapping.
+        /// </summary>
+        /// <param name="capacity">The initial number of elements the relation can store.</param>
+        public OneToManyRelation(int capacity)
+        {
+            _memberLists = new Dictionary<TKey, ValueSet>(capacity);
+            _memberOwners = new Dictionary<TValue, TKey>(capacity);
+        }
 
         /// <summary>
         /// Registers a relation between two objects.
@@ -25,7 +46,7 @@ namespace AsmResolver.Collections
         {
             if (!_memberOwners.ContainsKey(value))
             {
-                GetValues(key).Add(value);
+                GetValues(key).Items.Add(value);
                 _memberOwners.Add(value, key);
                 return true;
             }
@@ -38,11 +59,11 @@ namespace AsmResolver.Collections
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns>The values.</returns>
-        public ICollection<TValue> GetValues(TKey key)
+        public ValueSet GetValues(TKey key)
         {
             if (!_memberLists.TryGetValue(key, out var items))
             {
-                items = new List<TValue>();
+                items = new ValueSet();
                 _memberLists.Add(key, items);
             }
 
@@ -59,6 +80,77 @@ namespace AsmResolver.Collections
             return _memberOwners.TryGetValue(value, out var key)
                 ? key
                 : default;
+        }
+
+        /// <summary>
+        /// Represents a collection of values assigned to a single key in a one-to-many relation.
+        /// </summary>
+        public class ValueSet : ICollection<TValue>
+        {
+            internal List<TValue> Items
+            {
+                get;
+            } = new();
+
+            /// <inheritdoc />
+            public int Count => Items.Count;
+
+            /// <inheritdoc />
+            public bool IsReadOnly => true;
+
+            /// <inheritdoc />
+            public void Add(TValue item) => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public void Clear() => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public bool Contains(TValue item) => Items.Contains(item);
+
+            /// <inheritdoc />
+            public void CopyTo(TValue[] array, int arrayIndex) => Items.CopyTo(array, arrayIndex);
+
+            /// <inheritdoc />
+            public bool Remove(TValue item) => throw new NotSupportedException();
+
+            /// <summary>
+            /// Gets an enumerator that enumerates all values in the collection.
+            /// </summary>
+            public Enumerator GetEnumerator() => new(Items.GetEnumerator());
+
+            /// <inheritdoc />
+            IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => GetEnumerator();
+
+            /// <inheritdoc />
+            IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) Items).GetEnumerator();
+
+            /// <summary>
+            /// Represents an enumerator that enumerates all items in a value collection.
+            /// </summary>
+            public struct Enumerator : IEnumerator<TValue>
+            {
+                private List<TValue>.Enumerator _enumerator;
+
+                internal Enumerator(List<TValue>.Enumerator enumerator)
+                {
+                    _enumerator = enumerator;
+                }
+
+                /// <inheritdoc />
+                public TValue Current => _enumerator.Current!;
+
+                /// <inheritdoc />
+                object IEnumerator.Current => ((IEnumerator) _enumerator).Current!;
+
+                /// <inheritdoc />
+                public bool MoveNext() => _enumerator.MoveNext();
+
+                /// <inheritdoc />
+                public void Reset() => throw new NotSupportedException();
+
+                /// <inheritdoc />
+                public void Dispose() => _enumerator.Dispose();
+            }
         }
     }
 }

@@ -45,6 +45,16 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         /// <inheritdoc />
+        public void EnsureCapacity(int capacity)
+        {
+            _underlyingBuffer.EnsureCapacity(capacity);
+
+#if NETSTANDARD2_1_OR_GREATER
+            _entries.EnsureCapacity(capacity);
+#endif
+        }
+
+        /// <inheritdoc />
         public ref TRow GetRowRef(uint rid) => ref _underlyingBuffer.GetRowRef(rid);
 
         /// <inheritdoc />

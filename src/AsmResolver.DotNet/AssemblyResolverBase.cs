@@ -13,10 +13,7 @@ namespace AsmResolver.DotNet
     public abstract class AssemblyResolverBase : IAssemblyResolver
     {
         private static readonly string[] BinaryFileExtensions = {".dll", ".exe"};
-        private static readonly SignatureComparer Comparer = new()
-        {
-            AcceptNewerAssemblyVersionNumbers = true
-        };
+        private static readonly SignatureComparer Comparer = new(SignatureComparisonFlags.AcceptNewerVersions);
 
         private readonly Dictionary<AssemblyDescriptor, AssemblyDefinition> _cache = new(new SignatureComparer());
 

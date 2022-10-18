@@ -84,7 +84,7 @@ namespace AsmResolver.Tests.IO
 
             writer.Write7BitEncodedInt32(value);
 
-            var reader = ByteArrayDataSource.CreateReader(stream.ToArray());
+            var reader = new BinaryStreamReader(stream.ToArray());
             Assert.Equal(value, reader.Read7BitEncodedInt32());
         }
 

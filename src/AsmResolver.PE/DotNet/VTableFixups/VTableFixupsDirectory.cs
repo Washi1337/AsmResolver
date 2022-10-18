@@ -27,10 +27,10 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newOffset, uint newRva)
+        public void UpdateOffsets(in RelocationParameters parameters)
         {
-            Offset = newOffset;
-            Rva = newRva;
+            Offset = parameters.Offset;
+            Rva = parameters.Rva;
         }
 
         /// <inheritdoc />

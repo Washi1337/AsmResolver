@@ -10,7 +10,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <summary>
         /// Represents the zero metadata token, or the absence of a metadata token.
         /// </summary>
-        public static readonly MetadataToken Zero = new MetadataToken(0);
+        public static readonly MetadataToken Zero = new(0);
 
         /// <summary>
         /// Converts a 32-bit integer to a metadata token.

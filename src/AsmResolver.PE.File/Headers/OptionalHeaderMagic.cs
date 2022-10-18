@@ -8,11 +8,16 @@ namespace AsmResolver.PE.File.Headers
         /// <summary>
         /// Indicates the binary contains a 32-bit portable executable file.
         /// </summary>
-        Pe32 = 0x010B,
-        
+        PE32 = 0x010B,
+
         /// <summary>
         /// Indicates the binary contains a 64-bit portable executable file.
         /// </summary>
-        Pe32Plus = 0x020B,
+        PE32Plus = 0x020B,
+
+        /// <summary>
+        /// Indicates the binary contains a 64-bit portable executable file.
+        /// </summary>
+        PE64 = PE32Plus
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.IO;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Exceptions.X64
 {
@@ -151,7 +152,7 @@ namespace AsmResolver.PE.Exceptions.X64
         public static X64UnwindInfo FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             var result = new X64UnwindInfo();
-            result.UpdateOffsets(reader.Offset, reader.Rva);
+            result.UpdateOffsets(context.GetRelocation(reader.Offset, reader.Rva));
 
             result._firstByte = reader.ReadByte();
             result.SizeOfProlog = reader.ReadByte();

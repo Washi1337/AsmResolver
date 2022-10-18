@@ -33,16 +33,10 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        bool IOffsetProvider.CanUpdateOffsets => false;
-
-        /// <inheritdoc />
         public bool CanRead => _peFile.TryGetSectionContainingRva(Rva, out _);
 
         /// <inheritdoc />
         public bool IsBounded => false;
-
-        /// <inheritdoc />
-        void IOffsetProvider.UpdateOffsets(ulong newOffset, uint newRva) => throw new InvalidOperationException();
 
         /// <inheritdoc />
         public BinaryStreamReader CreateReader() => _peFile.CreateReaderAtRva(Rva);

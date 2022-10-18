@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported algorithm is specified.</exception>
         public new static StrongNamePrivateKey FromFile(string path)
         {
-            var reader = ByteArrayDataSource.CreateReader(System.IO.File.ReadAllBytes(path));
+            var reader = new BinaryStreamReader(System.IO.File.ReadAllBytes(path));
             return FromReader(ref reader);
         }
 

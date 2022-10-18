@@ -51,13 +51,13 @@ namespace AsmResolver.PE.Builder
         protected abstract IEnumerable<DataDirectory> CreateDataDirectories(PEFile peFile, IPEImage image, TContext context);
 
         /// <summary>
-        /// Gets the relative virtual address (RVA) to the entrypoint of the PE file.
+        /// Gets the relative virtual address (RVA) to the entry point of the PE file.
         /// </summary>
-        /// <param name="peFile">The (incomplete) PE file containing the entrypoint.</param>
+        /// <param name="peFile">The (incomplete) PE file containing the entry point.</param>
         /// <param name="image">The image that the PE file was based on.</param>
         /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
-        /// <returns>The relative virtual address to the entrypoin.</returns>
-        protected abstract uint GetEntrypointAddress(PEFile peFile, IPEImage image, TContext context);
+        /// <returns>The relative virtual address to the entry point.</returns>
+        protected abstract uint GetEntryPointAddress(PEFile peFile, IPEImage image, TContext context);
 
         /// <summary>
         /// Gets the file alignment for the new PE file.
@@ -144,7 +144,7 @@ namespace AsmResolver.PE.Builder
                 header.SizeOfImage += section.GetVirtualSize();
             }
 
-            header.AddressOfEntrypoint = GetEntrypointAddress(peFile, image, context);
+            header.AddressOfEntryPoint = GetEntryPointAddress(peFile, image, context);
 
             header.BaseOfCode = peFile.Sections.FirstOrDefault(s => s.IsContentCode)?.Rva ?? 0;
             header.BaseOfData = peFile.Sections.FirstOrDefault(s => s.IsContentInitializedData)?.Rva ?? 0;

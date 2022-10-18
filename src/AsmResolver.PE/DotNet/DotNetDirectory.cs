@@ -62,7 +62,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        public uint Entrypoint
+        public uint EntryPoint
         {
             get;
             set;
@@ -116,7 +116,7 @@ namespace AsmResolver.PE.DotNet
             + 2 * sizeof(ushort)                    // version
             + DataDirectory.DataDirectorySize       // metadata
             + sizeof(uint)                          // flags
-            + sizeof(uint)                          // entrypoint
+            + sizeof(uint)                          // entry point
             + 6 * DataDirectory.DataDirectorySize;  // data directories.
 
         /// <inheritdoc />
@@ -127,7 +127,7 @@ namespace AsmResolver.PE.DotNet
             writer.WriteUInt16(MinorRuntimeVersion);
             CreateDataDirectoryHeader(Metadata).Write(writer);
             writer.WriteUInt32((uint) Flags);
-            writer.WriteUInt32(Entrypoint);
+            writer.WriteUInt32(EntryPoint);
             CreateDataDirectoryHeader(DotNetResources).Write(writer);
             CreateDataDirectoryHeader(StrongName).Write(writer);
             CreateDataDirectoryHeader(CodeManagerTable).Write(writer);

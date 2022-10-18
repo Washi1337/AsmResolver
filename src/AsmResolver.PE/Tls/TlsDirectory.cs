@@ -12,6 +12,8 @@ namespace AsmResolver.PE.Tls
     {
         private readonly LazyVariable<IReadableSegment?> _templateData;
         private TlsCallbackCollection? _callbackFunctions;
+        private ulong _imageBase = 0x00400000;
+        private bool _is32Bit = true;
 
         /// <summary>
         /// Initializes a new empty TLS data directory.
@@ -62,18 +64,12 @@ namespace AsmResolver.PE.Tls
         }
 
         /// <inheritdoc />
-        public ulong ImageBase
+        public override void UpdateOffsets(in RelocationParameters parameters)
         {
-            get;
-            set;
-        } = 0x00400000;
-
-        /// <inheritdoc />
-        public bool Is32Bit
-        {
-            get;
-            set;
-        } = true;
+            _imageBase = parameters.ImageBase;
+            _is32Bit = parameters.Is32Bit;
+            base.UpdateOffsets(in parameters);
+        }
 
         /// <summary>
         /// Obtains the block of template data.
@@ -96,29 +92,30 @@ namespace AsmResolver.PE.Tls
         /// <inheritdoc />
         public IEnumerable<BaseRelocation> GetRequiredBaseRelocations()
         {
-            int pointerSize = Is32Bit ? sizeof(uint) : sizeof(ulong);
-            var type = Is32Bit ? RelocationType.HighLow : RelocationType.Dir64;
+            int pointerSize = _is32Bit ? sizeof(uint) : sizeof(ulong);
+            var type = _is32Bit ? RelocationType.HighLow : RelocationType.Dir64;
 
             var result = new List<BaseRelocation>(4 + CallbackFunctions.Count);
             for (int i = 0; i < 4; i++)
                 result.Add(new BaseRelocation(type, this.ToReference(i * pointerSize)));
             for (int i = 0; i < CallbackFunctions.Count; i++)
                 result.Add(new BaseRelocation(type, CallbackFunctions.ToReference(i * pointerSize)));
+
             return result;
         }
 
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
-            int pointerSize = Is32Bit ? sizeof(uint) : sizeof(ulong);
+            int pointerSize = _is32Bit ? sizeof(uint) : sizeof(ulong);
             return (uint) (pointerSize * 4 + 2 * sizeof(uint));
         }
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            ulong imageBase = ImageBase;
-            bool is32Bit = Is32Bit;
+            ulong imageBase = _imageBase;
+            bool is32Bit = _is32Bit;
 
             if (TemplateData is { } data)
             {

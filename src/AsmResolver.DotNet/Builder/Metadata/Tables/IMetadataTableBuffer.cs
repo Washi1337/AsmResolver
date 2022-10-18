@@ -45,6 +45,12 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         /// <summary>
+        /// Ensures the capacity of the table buffer is at least the provided amount of elements.
+        /// </summary>
+        /// <param name="capacity">The number of elements to store.</param>
+        void EnsureCapacity(int capacity);
+
+        /// <summary>
         /// Gets or sets a reference to a row in the metadata table.
         /// </summary>
         /// <param name="rid">The identifier of the metadata row.</param>

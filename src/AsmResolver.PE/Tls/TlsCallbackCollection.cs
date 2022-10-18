@@ -9,6 +9,8 @@ namespace AsmResolver.PE.Tls
     public class TlsCallbackCollection : Collection<ISegmentReference>, ISegment
     {
         private readonly ITlsDirectory _owner;
+        private ulong _imageBase = 0x00400000;
+        private bool _is32Bit = true;
 
         internal TlsCallbackCollection(ITlsDirectory owner)
         {
@@ -33,16 +35,18 @@ namespace AsmResolver.PE.Tls
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newOffset, uint newRva)
+        public void UpdateOffsets(in RelocationParameters parameters)
         {
-            Offset = newOffset;
-            Rva = newRva;
+            Offset = parameters.Offset;
+            Rva = parameters.Rva;
+            _imageBase = parameters.ImageBase;
+            _is32Bit = parameters.Is32Bit;
         }
 
         /// <inheritdoc />
         public uint GetPhysicalSize()
         {
-            uint pointerSize = (uint) (_owner.Is32Bit ? sizeof(uint) : sizeof(ulong));
+            uint pointerSize = (uint) (_is32Bit ? sizeof(uint) : sizeof(ulong));
             return (uint) (pointerSize * (Count + 1));
         }
 
@@ -52,8 +56,8 @@ namespace AsmResolver.PE.Tls
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
-            ulong imageBase = _owner.ImageBase;
-            bool is32Bit = _owner.Is32Bit;
+            ulong imageBase = _imageBase;
+            bool is32Bit = _is32Bit;
 
             for (int i = 0; i < Items.Count; i++)
                 writer.WriteNativeInt(imageBase + Items[i].Rva, is32Bit);

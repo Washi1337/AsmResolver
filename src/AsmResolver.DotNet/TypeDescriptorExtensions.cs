@@ -100,7 +100,24 @@ namespace AsmResolver.DotNet
         public static GenericInstanceTypeSignature MakeGenericInstanceType(
             this ITypeDescriptor type, params TypeSignature[] typeArguments)
         {
-            return new GenericInstanceTypeSignature(type.ToTypeDefOrRef(), type.IsValueType, typeArguments);
+            return type.MakeGenericInstanceType(type.IsValueType, typeArguments);
+        }
+
+        /// <summary>
+        /// Constructs a new pointer type signature with the provided type descriptor as element type.
+        /// as element type.
+        /// </summary>
+        /// <param name="type">The element type.</param>
+        /// <param name="isValueType"><c>true</c> if the type is a value type, <c>false</c> otherwise.</param>
+        /// <param name="typeArguments">The arguments to instantiate the type with.</param>
+        /// <returns>The constructed by-reference type signature.</returns>
+        /// <remarks>
+        /// This function can be used to avoid type resolution on type references.
+        /// </remarks>
+        public static GenericInstanceTypeSignature MakeGenericInstanceType(
+            this ITypeDescriptor type, bool isValueType, params TypeSignature[] typeArguments)
+        {
+            return new GenericInstanceTypeSignature(type.ToTypeDefOrRef(), isValueType, typeArguments);
         }
 
         /// <summary>

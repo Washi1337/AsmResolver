@@ -18,7 +18,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
         /// </summary>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedGuidStream(byte[] rawData)
-            : this(DefaultName, ByteArrayDataSource.CreateReader(rawData))
+            : this(DefaultName, new BinaryStreamReader(rawData))
         {
         }
 
@@ -28,7 +28,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedGuidStream(string name, byte[] rawData)
-            : this(name, ByteArrayDataSource.CreateReader(rawData))
+            : this(name, new BinaryStreamReader(rawData))
         {
         }
 

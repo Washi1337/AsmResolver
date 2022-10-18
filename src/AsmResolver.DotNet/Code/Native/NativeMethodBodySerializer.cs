@@ -12,13 +12,19 @@ namespace AsmResolver.DotNet.Code.Native
         /// <inheritdoc />
         public ISegmentReference SerializeMethodBody(MethodBodySerializationContext context, MethodDefinition method)
         {
+            // We treat any non-conventional bounded method body as a plain native method body that we
+            // don't need to process further.
+            if (method.MethodBody is {Address.IsBounded: true} plainBody)
+                return plainBody.Address;
+
+            // We only support special treatment of native method bodies.
             if (method.MethodBody is not NativeMethodBody nativeMethodBody)
                 return SegmentReference.Null;
 
             var provider = context.SymbolsProvider;
 
             // Create new raw code segment containing the native code.
-            var segment = new CodeSegment(provider.ImageBase, nativeMethodBody.Code);
+            var segment = new CodeSegment(nativeMethodBody.Code);
 
             // Process fixups.
             for (int i = 0; i < nativeMethodBody.AddressFixups.Count; i++)

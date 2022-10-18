@@ -4,14 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Cloning;
-using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Builder;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.Win32Resources;
 using Xunit;
@@ -29,7 +24,7 @@ namespace AsmResolver.DotNet.Tests
         {
             using var stream = new MemoryStream();
             module.Write(stream);
-            return ModuleDefinition.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+            return ModuleDefinition.FromReader(new BinaryStreamReader(stream.ToArray()));
         }
 
         [SkippableFact]
@@ -57,6 +52,28 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             Assert.Equal("HelloWorld.exe", module.Name);
+        }
+
+        [Fact]
+        public void ReadMvidFromNormalMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleGuidStream);
+            Assert.Equal(
+                new Guid(new byte[]
+                {
+                    0x94, 0xe3, 0x75, 0xe2, 0x82, 0x8b, 0xac, 0x4c, 0xa3, 0x8c, 0xb3, 0x72, 0x4b, 0x81, 0xea, 0x05
+                }), module.Mvid);
+        }
+
+        [Fact]
+        public void ReadMvidFromEnCMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleGuidStream_EnC);
+            Assert.Equal(
+                new Guid(new byte[]
+                {
+                    0x8F, 0x6C, 0x77, 0x06, 0xEE, 0x44, 0x65, 0x41, 0xB0, 0xF7, 0x2D, 0xBD, 0x12, 0x7F, 0xE2, 0x1B
+                }), module.Mvid);
         }
 
         [Fact]
@@ -268,7 +285,7 @@ namespace AsmResolver.DotNet.Tests
             // Write and rebuild.
             using var stream = new MemoryStream();
             module.Write(stream);
-            var newModule = ModuleDefinition.FromReader(ByteArrayDataSource.CreateReader(stream.ToArray()));
+            var newModule = ModuleDefinition.FromReader(new BinaryStreamReader(stream.ToArray()));
 
             // Assert contents.
             var newDirectory = (IResourceDirectory)newModule.NativeResourceDirectory.Entries
@@ -327,6 +344,7 @@ namespace AsmResolver.DotNet.Tests
         public void DetectTargetNetFramework40()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            Assert.True(module.OriginalTargetRuntime.IsNetFramework);
             Assert.Contains(DotNetRuntimeInfo.NetFramework, module.OriginalTargetRuntime.Name);
             Assert.Equal(4, module.OriginalTargetRuntime.Version.Major);
             Assert.Equal(0, module.OriginalTargetRuntime.Version.Minor);
@@ -336,6 +354,7 @@ namespace AsmResolver.DotNet.Tests
         public void DetectTargetNetCore()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            Assert.True(module.OriginalTargetRuntime.IsNetCoreApp);
             Assert.Contains(DotNetRuntimeInfo.NetCoreApp, module.OriginalTargetRuntime.Name);
             Assert.Equal(2, module.OriginalTargetRuntime.Version.Major);
             Assert.Equal(2, module.OriginalTargetRuntime.Version.Minor);
@@ -345,6 +364,7 @@ namespace AsmResolver.DotNet.Tests
         public void DetectTargetStandard()
         {
             var module = ModuleDefinition.FromFile(typeof(TestCases.Types.Class).Assembly.Location);
+            Assert.True(module.OriginalTargetRuntime.IsNetStandard);
             Assert.Contains(DotNetRuntimeInfo.NetStandard, module.OriginalTargetRuntime.Name);
             Assert.Equal(2, module.OriginalTargetRuntime.Version.Major);
         }
@@ -355,6 +375,42 @@ namespace AsmResolver.DotNet.Tests
             var module = new ModuleDefinition("SomeModule", KnownCorLibs.NetStandard_v2_0_0_0);
             var reference = Assert.Single(module.AssemblyReferences);
             Assert.Equal(KnownCorLibs.NetStandard_v2_0_0_0, reference, Comparer);
+        }
+
+        [Fact]
+        public void RewriteSystemPrivateCoreLib()
+        {
+            string runtimePath = DotNetCorePathProvider.Default
+                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
+                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
+            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Private.CoreLib.dll"));
+
+            using var stream = new MemoryStream();
+            module.Write(stream);
+        }
+
+        [Fact]
+        public void RewriteSystemRuntime()
+        {
+            string runtimePath = DotNetCorePathProvider.Default
+                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
+                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
+            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Runtime.dll"));
+
+            using var stream = new MemoryStream();
+            module.Write(stream);
+        }
+
+        [Fact]
+        public void RewriteSystemPrivateXml()
+        {
+            string runtimePath = DotNetCorePathProvider.Default
+                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
+                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
+            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Private.Xml.dll"));
+
+            using var stream = new MemoryStream();
+            module.Write(stream);
         }
     }
 }

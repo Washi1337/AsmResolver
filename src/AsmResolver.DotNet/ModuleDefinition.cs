@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet
         private IList<AssemblyReference>? _assemblyReferences;
         private IList<CustomAttribute>? _customAttributes;
 
-        private readonly LazyVariable<IManagedEntrypoint?> _managedEntrypoint;
+        private readonly LazyVariable<IManagedEntryPoint?> _managedEntryPoint;
         private IList<ModuleReference>? _moduleReferences;
         private IList<FileReference>? _fileReferences;
         private IList<ManifestResource>? _resources;
@@ -172,6 +172,8 @@ namespace AsmResolver.DotNet
             var handle = (IntPtr) GetHINSTANCEMethod?.Invoke(null, new object[] { module })!;
             if (handle == IntPtr.Zero)
                 throw new NotSupportedException("The current platform does not support getting the base address of an instance of System.Reflection.Module.");
+            if (handle == (IntPtr) (-1))
+                throw new NotSupportedException("Provided module does not have a module base address.");
 
             // Dynamically loaded modules are in their unmapped form, as opposed to modules loaded normally by the
             // Windows PE loader. They also have a fully qualified name "<Unknown>" or similar.
@@ -269,7 +271,7 @@ namespace AsmResolver.DotNet
             _mvid = new LazyVariable<Guid>(GetMvid);
             _encId = new LazyVariable<Guid>(GetEncId);
             _encBaseId = new LazyVariable<Guid>(GetEncBaseId);
-            _managedEntrypoint = new LazyVariable<IManagedEntrypoint?>(GetManagedEntrypoint);
+            _managedEntryPoint = new LazyVariable<IManagedEntryPoint?>(GetManagedEntryPoint);
             _runtimeVersion = new LazyVariable<string>(GetRuntimeVersion);
             _nativeResources = new LazyVariable<IResourceDirectory?>(GetNativeResources);
             Attributes = DotNetDirectoryFlags.ILOnly;
@@ -494,13 +496,13 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the .NET module has a native entrypoint or not.
+        /// Gets or sets a value indicating whether the .NET module has a native entry point or not.
         /// </summary>
-        public bool HasNativeEntrypoint
+        public bool HasNativeEntryPoint
         {
-            get => (Attributes & DotNetDirectoryFlags.NativeEntrypoint) != 0;
-            set => Attributes = (Attributes & ~DotNetDirectoryFlags.NativeEntrypoint)
-                                | (value ? DotNetDirectoryFlags.NativeEntrypoint : 0);
+            get => (Attributes & DotNetDirectoryFlags.NativeEntryPoint) != 0;
+            set => Attributes = (Attributes & ~DotNetDirectoryFlags.NativeEntryPoint)
+                                | (value ? DotNetDirectoryFlags.NativeEntryPoint : 0);
         }
 
         /// <summary>
@@ -574,7 +576,7 @@ namespace AsmResolver.DotNet
         {
             get;
             set;
-        } = OptionalHeaderMagic.Pe32;
+        } = OptionalHeaderMagic.PE32;
 
         /// <summary>
         /// Gets or sets the subsystem to use when running the underlying portable executable (PE) file.
@@ -744,22 +746,22 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets the managed method that is invoked when the .NET module is initialized.
+        /// Gets or sets the managed method that is invoked after the .NET module is loaded and initialized.
         /// </summary>
-        public MethodDefinition? ManagedEntrypointMethod
+        public MethodDefinition? ManagedEntryPointMethod
         {
-            get => ManagedEntrypoint as MethodDefinition;
-            set => ManagedEntrypoint = value;
+            get => ManagedEntryPoint as MethodDefinition;
+            set => ManagedEntryPoint = value;
         }
 
         /// <summary>
-        /// Gets or sets the managed entrypoint that is invoked when the .NET module is initialized. This is either a
-        /// method, or a reference to a secondary module containing the entrypoint method.
+        /// Gets or sets the managed entry point that is invoked when the .NET module is initialized. This is either a
+        /// method, or a reference to a secondary module containing the entry point method.
         /// </summary>
-        public IManagedEntrypoint? ManagedEntrypoint
+        public IManagedEntryPoint? ManagedEntryPoint
         {
-            get => _managedEntrypoint.Value;
-            set => _managedEntrypoint.Value = value;
+            get => _managedEntryPoint.Value;
+            set => _managedEntryPoint.Value = value;
         }
 
         /// <summary>
@@ -1036,13 +1038,13 @@ namespace AsmResolver.DotNet
         protected virtual string GetRuntimeVersion() => KnownRuntimeVersions.Clr40;
 
         /// <summary>
-        /// Obtains the managed entrypoint of this module.
+        /// Obtains the managed entry point of this module.
         /// </summary>
-        /// <returns>The entrypoint.</returns>
+        /// <returns>The entry point.</returns>
         /// <remarks>
-        /// This method is called upon initialization of the <see cref="ManagedEntrypoint"/> property.
+        /// This method is called upon initialization of the <see cref="ManagedEntryPoint"/> property.
         /// </remarks>
-        protected virtual IManagedEntrypoint? GetManagedEntrypoint() => null;
+        protected virtual IManagedEntryPoint? GetManagedEntryPoint() => null;
 
         /// <summary>
         /// Obtains the native win32 resources directory of the underlying PE image (if available).

@@ -132,6 +132,9 @@ namespace AsmResolver.DotNet.Builder
             var typeDefTable = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
             var nestedClassTable = Metadata.TablesStream.GetSortedTable<TypeDefinition, NestedClassRow>(TableIndex.NestedClass);
 
+            if (types is ICollection<TypeDefinition> collection)
+                typeDefTable.EnsureCapacity(typeDefTable.Count + collection.Count);
+
             foreach (var type in types)
             {
                 // At this point, we might not have added all type defs/refs/specs yet, so we cannot determine
@@ -177,6 +180,8 @@ namespace AsmResolver.DotNet.Builder
         public void DefineFields(IEnumerable<FieldDefinition> fields)
         {
             var table = Metadata.TablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
+            if (fields is ICollection<FieldDefinition> collection)
+                table.EnsureCapacity(table.Count + collection.Count);
 
             foreach (var field in fields)
             {
@@ -197,6 +202,8 @@ namespace AsmResolver.DotNet.Builder
         public void DefineMethods(IEnumerable<MethodDefinition> methods)
         {
             var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
+            if (methods is ICollection<MethodDefinition> collection)
+                table.EnsureCapacity(table.Count + collection.Count);
 
             foreach (var method in methods)
             {
@@ -227,6 +234,8 @@ namespace AsmResolver.DotNet.Builder
         public void DefineParameters(IEnumerable<ParameterDefinition> parameters)
         {
             var table = Metadata.TablesStream.GetTable<ParameterDefinitionRow>(TableIndex.Param);
+            if (parameters is ICollection<ParameterDefinition> collection)
+                table.EnsureCapacity(table.Count + collection.Count);
 
             foreach (var parameter in parameters)
             {
@@ -247,6 +256,8 @@ namespace AsmResolver.DotNet.Builder
         public void DefineProperties(IEnumerable<PropertyDefinition> properties)
         {
             var table = Metadata.TablesStream.GetTable<PropertyDefinitionRow>(TableIndex.Property);
+            if (properties is ICollection<PropertyDefinition> collection)
+                table.EnsureCapacity(table.Count + collection.Count);
 
             foreach (var property in properties)
             {
@@ -267,6 +278,8 @@ namespace AsmResolver.DotNet.Builder
         public void DefineEvents(IEnumerable<EventDefinition> events)
         {
             var table = Metadata.TablesStream.GetTable<EventDefinitionRow>(TableIndex.Event);
+            if (events is ICollection<EventDefinition> collection)
+                table.EnsureCapacity(table.Count + collection.Count);
 
             foreach (var @event in events)
             {
@@ -298,6 +311,17 @@ namespace AsmResolver.DotNet.Builder
             uint methodList = 1;
             uint propertyList = 1;
             uint eventList = 1;
+
+            tablesStream.GetTable<FieldPointerRow>(TableIndex.FieldPtr)
+                .EnsureCapacity(tablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field).Count);
+            tablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr)
+                .EnsureCapacity(tablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method).Count);
+            tablesStream.GetTable<ParameterPointerRow>(TableIndex.ParamPtr)
+                .EnsureCapacity(tablesStream.GetTable<ParameterDefinitionRow>(TableIndex.Param).Count);
+            tablesStream.GetTable<PropertyPointerRow>(TableIndex.PropertyPtr)
+                .EnsureCapacity(tablesStream.GetTable<PropertyDefinitionRow>(TableIndex.Property).Count);
+            tablesStream.GetTable<EventPointerRow>(TableIndex.EventPtr)
+                .EnsureCapacity(tablesStream.GetTable<EventDefinitionRow>(TableIndex.Event).Count);
 
             for (uint rid = 1; rid <= typeDefTable.Count; rid++)
             {

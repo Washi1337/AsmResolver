@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -51,6 +52,20 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             Assert.Equal("<Module>", module.TopLevelTypes[0].Name);
             Assert.Equal("Program", module.TopLevelTypes[1].Name);
+        }
+
+        [Fact]
+        public void ReadNameFromNormalMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleStringsStream);
+            Assert.Equal("Class_2", module.TopLevelTypes[1].Name);
+        }
+
+        [Fact]
+        public void ReadNameFromEnCMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleStringsStream_EnC);
+            Assert.Equal("Class_1", module.TopLevelTypes[1].Name);
         }
 
         [Fact]
@@ -570,6 +585,19 @@ namespace AsmResolver.DotNet.Tests
             Assert.Same(scope, corlib.Object.Scope);
             var reference = Assert.IsAssignableFrom<AssemblyReference>(corlib.Object.Scope!.GetAssembly());
             Assert.Same(module, reference.Module);
+        }
+
+        [Fact]
+        public void ReadIsByRefLike()
+        {
+            var resolver = new DotNetCoreAssemblyResolver(new Version(5, 0));
+            var corLib = resolver.Resolve(KnownCorLibs.SystemPrivateCoreLib_v5_0_0_0);
+
+            var intType = corLib.ManifestModule.TopLevelTypes.First(t => t.Name == "Int32");
+            var spanType = corLib.ManifestModule.TopLevelTypes.First(t => t.Name == "Span`1");
+
+            Assert.False(intType.IsByRefLike);
+            Assert.True(spanType.IsByRefLike);
         }
     }
 }

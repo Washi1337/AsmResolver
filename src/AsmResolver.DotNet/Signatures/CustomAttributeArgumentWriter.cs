@@ -7,13 +7,13 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
 {
-    internal sealed class CustomAttributeArgumentWriter
+    internal readonly struct CustomAttributeArgumentWriter
     {
         private readonly BlobSerializationContext _context;
 
         public CustomAttributeArgumentWriter(BlobSerializationContext context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _context = context;
         }
 
         public void WriteArgument(CustomAttributeArgument argument)

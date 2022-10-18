@@ -33,9 +33,6 @@ namespace AsmResolver
         public uint Rva => Segment?.Rva ?? 0;
 
         /// <inheritdoc />
-        public bool CanUpdateOffsets => Segment?.CanUpdateOffsets ?? false;
-
-        /// <inheritdoc />
         public bool IsBounded => true;
 
         /// <inheritdoc />
@@ -49,9 +46,6 @@ namespace AsmResolver
         {
             get;
         }
-
-        /// <inheritdoc />
-        public void UpdateOffsets(ulong newOffset, uint newRva) => Segment?.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
         public BinaryStreamReader CreateReader()

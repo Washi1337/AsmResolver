@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 return signature;
             }
 
-            var sizes = new List<uint>();
+            var sizes = new List<uint>((int) numSizes);
             for (int i = 0; i < numSizes; i++)
             {
                 if (!reader.TryReadCompressedUInt32(out uint size))
@@ -106,7 +106,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 return signature;
             }
 
-            var loBounds = new List<uint>();
+            var loBounds = new List<uint>((int) numLoBounds);
             for (int i = 0; i < numLoBounds; i++)
             {
                 if (!reader.TryReadCompressedUInt32(out uint bound))
@@ -201,7 +201,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitArrayType(this, state);
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context)
+        protected override void WriteContents(in BlobSerializationContext context)
         {
             if (!Validate())
                 throw new InvalidOperationException();

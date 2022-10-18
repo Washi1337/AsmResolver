@@ -39,7 +39,7 @@ namespace AsmResolver.PE.DotNet
             MinorRuntimeVersion = reader.ReadUInt16();
             _metadataDirectory = DataDirectory.FromReader(ref reader);
             Flags = (DotNetDirectoryFlags) reader.ReadUInt32();
-            Entrypoint = reader.ReadUInt32();
+            EntryPoint = reader.ReadUInt32();
             _resourcesDirectory = DataDirectory.FromReader(ref reader);
             _strongNameDirectory = DataDirectory.FromReader(ref reader);
             _codeManagerDirectory = DataDirectory.FromReader(ref reader);
@@ -60,8 +60,7 @@ namespace AsmResolver.PE.DotNet
                 return null;
             }
 
-            return new SerializedMetadata(_context, ref directoryReader);
-
+            return DotNet.Metadata.Metadata.FromReader(directoryReader, MetadataReaderContext.FromReaderContext(_context));
         }
 
         /// <inheritdoc />
@@ -126,7 +125,7 @@ namespace AsmResolver.PE.DotNet
             }
 
             var vtables = new VTableFixupsDirectory();
-            vtables.UpdateOffsets(directoryReader.Offset, directoryReader.Rva);
+            vtables.UpdateOffsets(_context.GetRelocation(directoryReader.Offset, directoryReader.Rva));
 
             for (int i = 0; i < directoryReader.Length / 8; i++)
             {

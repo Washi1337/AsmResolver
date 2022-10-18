@@ -17,7 +17,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// </summary>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedStringsStream(byte[] rawData)
-            : this(DefaultName, ByteArrayDataSource.CreateReader(rawData))
+            : this(DefaultName, new BinaryStreamReader(rawData))
         {
         }
 
@@ -27,7 +27,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedStringsStream(string name, byte[] rawData)
-            : this(name, ByteArrayDataSource.CreateReader(rawData))
+            : this(name, new BinaryStreamReader(rawData))
         {
         }
 
@@ -65,22 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
             if (!_cachedStrings.TryGetValue(index, out var value) && index < _reader.Length)
             {
                 var stringsReader = _reader.ForkRelative(index);
-                byte[] rawData = stringsReader.ReadBytesUntil(0);
-
-                if (rawData.Length == 0)
-                {
-                    value = Utf8String.Empty;
-                }
-                else
-                {
-                    // Trim off null terminator byte if its present.
-                    int actualLength = rawData.Length;
-                    if (rawData[actualLength - 1] == 0)
-                        actualLength--;
-
-                    value = new Utf8String(rawData, 0, actualLength);
-                }
-
+                value = stringsReader.ReadUtf8String();
                 _cachedStrings[index] = value;
             }
 

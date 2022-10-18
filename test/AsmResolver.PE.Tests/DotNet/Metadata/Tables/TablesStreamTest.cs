@@ -1,5 +1,8 @@
 using System.IO;
+using System.Linq;
 using AsmResolver.IO;
+using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Pdb;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 using Xunit;
@@ -34,10 +37,72 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
             var peImage = PEImage.FromFile(peFile);
             var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
+            AssertEquivalentAfterRebuild(tablesStream);
+        }
+
+        [Fact]
+        public void SmallExternalIndicesShouldHaveSmallIndicesInTablesStream()
+        {
+            var pdbMetadata = PE.DotNet.Metadata.Metadata.FromBytes(Properties.Resources.TheAnswerPortablePdb);
+            var stream = pdbMetadata.GetStream<TablesStream>();
+            Assert.Equal(IndexSize.Short, stream.GetIndexEncoder(CodedIndex.HasCustomAttribute).IndexSize);
+        }
+
+        [Fact]
+        public void LargeExternalIndicesShouldHaveLargeIndicesInTablesStream()
+        {
+            var pdbMetadata = PE.DotNet.Metadata.Metadata.FromBytes(Properties.Resources.LargeIndicesPdb);
+            var stream = pdbMetadata.GetStream<TablesStream>();
+            Assert.Equal(IndexSize.Long, stream.GetIndexEncoder(CodedIndex.HasCustomAttribute).IndexSize);
+        }
+
+        [Fact]
+        public void PreservePdbTableStreamWithSmallExternalIndicesNoChange()
+        {
+            var pdbMetadata = PE.DotNet.Metadata.Metadata.FromBytes(Properties.Resources.TheAnswerPortablePdb);
+            AssertEquivalentAfterRebuild(pdbMetadata.GetStream<TablesStream>());
+        }
+
+        [Fact]
+        public void PreservePdbTableStreamWithLargeExternalIndicesNoChange()
+        {
+            var pdbMetadata = PE.DotNet.Metadata.Metadata.FromBytes(Properties.Resources.LargeIndicesPdb);
+            AssertEquivalentAfterRebuild(pdbMetadata.GetStream<TablesStream>());
+        }
+
+        [Fact]
+        public void GetImpliedTableRowCountFromNonPdbMetadataShouldGetLocalRowCount()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var stream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
+            Assert.Equal((uint) stream.GetTable(TableIndex.TypeDef).Count, stream.GetTableRowCount(TableIndex.TypeDef));
+        }
+
+        [Fact]
+        public void GetImpliedTableRowCountFromPdbMetadataShouldGetExternalRowCount()
+        {
+            var pdbMetadata =  PE.DotNet.Metadata.Metadata.FromBytes(Properties.Resources.TheAnswerPortablePdb);
+            var stream = pdbMetadata.GetStream<TablesStream>();
+            Assert.Equal(2u, stream.GetTableRowCount(TableIndex.TypeDef));
+            Assert.Equal(0u ,(uint) stream.GetTable(TableIndex.TypeDef).Count);
+        }
+
+        private static void AssertEquivalentAfterRebuild(TablesStream tablesStream)
+        {
             using var tempStream = new MemoryStream();
             tablesStream.Write(new BinaryStreamWriter(tempStream));
 
-            var newTablesStream = new SerializedTableStream(new PEReaderContext(new PEFile()), tablesStream.Name, tempStream.ToArray());
+            var context = new MetadataReaderContext(VirtualAddressFactory.Instance);
+            var newTablesStream = new SerializedTableStream(context, tablesStream.Name, tempStream.ToArray());
+
+            var metadata = new PE.DotNet.Metadata.Metadata();
+            if (tablesStream.HasExternalRowCounts)
+            {
+                var pdbStream = new PdbStream();
+                pdbStream.UpdateRowCounts(tablesStream.ExternalRowCounts);
+                metadata.Streams.Add(pdbStream);
+            }
+            newTablesStream.Initialize(metadata);
 
             Assert.Equal(tablesStream.Reserved, newTablesStream.Reserved);
             Assert.Equal(tablesStream.MajorVersion, newTablesStream.MajorVersion);
@@ -46,15 +111,19 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
             Assert.Equal(tablesStream.Log2LargestRid, newTablesStream.Log2LargestRid);
             Assert.Equal(tablesStream.ExtraData, newTablesStream.ExtraData);
 
-            for (TableIndex i = 0; i <= TableIndex.GenericParamConstraint; i++)
+            Assert.All(Enumerable.Range(0, (int) TableIndex.Max), i =>
             {
-                var oldTable = tablesStream.GetTable(i);
-                var newTable = newTablesStream.GetTable(i);
+                var tableIndex = (TableIndex) i;
+                if (!tableIndex.IsValidTableIndex())
+                    return;
 
+                var oldTable = tablesStream.GetTable(tableIndex);
+                var newTable = newTablesStream.GetTable(tableIndex);
+
+                Assert.Equal(oldTable.IsSorted, newTable.IsSorted);
                 Assert.Equal(oldTable.Count, newTable.Count);
-                for (int j = 0; j < oldTable.Count; j++)
-                    Assert.Equal(oldTable[j], newTable[j]);
-            }
+                Assert.All(Enumerable.Range(0, oldTable.Count), j => Assert.Equal(oldTable[j], newTable[j]));
+            });
         }
     }
 }

@@ -135,7 +135,7 @@ namespace AsmResolver.PE.File
         /// <param name="raw">The raw bytes representing the contents of the PE file to read.</param>
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromBytes(byte[] raw) => FromReader(ByteArrayDataSource.CreateReader(raw));
+        public static PEFile FromBytes(byte[] raw) => FromReader(new BinaryStreamReader(raw));
 
         /// <summary>
         /// Reads a mapped PE file starting at the provided module base address (HINSTANCE).
@@ -216,8 +216,19 @@ namespace AsmResolver.PE.File
         /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
         public bool TryGetSectionContainingOffset(ulong fileOffset, [NotNullWhen(true)] out PESection? section)
         {
-            section = Sections.FirstOrDefault(s => s.ContainsFileOffset(fileOffset));
-            return section != null;
+            var sections = Sections;
+
+            for (int i = 0; i < sections.Count; i++)
+            {
+                if (sections[i].ContainsFileOffset(fileOffset))
+                {
+                    section = sections[i];
+                    return true;
+                }
+            }
+
+            section = null;
+            return false;
         }
 
         /// <inheritdoc />
@@ -231,8 +242,19 @@ namespace AsmResolver.PE.File
         /// <inheritdoc />
         public bool TryGetSectionContainingRva(uint rva,  [NotNullWhen(true)] out PESection? section)
         {
-            section = Sections.FirstOrDefault(s => s.ContainsRva(rva));
-            return section != null;
+            var sections = Sections;
+
+            for (int i = 0; i < sections.Count; i++)
+            {
+                if (sections[i].ContainsRva(rva))
+                {
+                    section = sections[i];
+                    return true;
+                }
+            }
+
+            section = null;
+            return false;
         }
 
         /// <inheritdoc />
@@ -371,12 +393,15 @@ namespace AsmResolver.PE.File
 
             FileHeader.NumberOfSections = (ushort) Sections.Count;
 
-            FileHeader.UpdateOffsets(
+            var relocation = new RelocationParameters(OptionalHeader.ImageBase, 0, 0,
+                OptionalHeader.Magic == OptionalHeaderMagic.PE32);
+
+            FileHeader.UpdateOffsets(relocation.WithOffsetRva(
                 DosHeader.NextHeaderOffset + 4,
-                DosHeader.NextHeaderOffset + 4);
-            OptionalHeader.UpdateOffsets(
+                DosHeader.NextHeaderOffset + 4));
+            OptionalHeader.UpdateOffsets(relocation.WithOffsetRva(
                 FileHeader.Offset + FileHeader.GetPhysicalSize(),
-                FileHeader.Rva + FileHeader.GetVirtualSize());
+                FileHeader.Rva + FileHeader.GetVirtualSize()));
 
             FileHeader.SizeOfOptionalHeader = (ushort) OptionalHeader.GetPhysicalSize();
             OptionalHeader.SizeOfHeaders = (uint) (OptionalHeader.Offset
@@ -391,7 +416,9 @@ namespace AsmResolver.PE.File
             OptionalHeader.SizeOfImage = lastSection.Rva
                                          + lastSection.GetVirtualSize().Align(OptionalHeader.SectionAlignment);
 
-            EofData?.UpdateOffsets(lastSection.Offset + lastSection.GetPhysicalSize(), OptionalHeader.SizeOfImage);
+            EofData?.UpdateOffsets(relocation.WithOffsetRva(
+                lastSection.Offset + lastSection.GetPhysicalSize(),
+                OptionalHeader.SizeOfImage));
         }
 
         /// <summary>
@@ -399,19 +426,20 @@ namespace AsmResolver.PE.File
         /// </summary>
         public void AlignSections()
         {
-            uint currentFileOffset = OptionalHeader.SizeOfHeaders;
+            var relocation = new RelocationParameters(
+                OptionalHeader.ImageBase,
+                OptionalHeader.SizeOfHeaders.Align(OptionalHeader.FileAlignment),
+                OptionalHeader.SizeOfHeaders.Align(OptionalHeader.SectionAlignment),
+                OptionalHeader.Magic == OptionalHeaderMagic.PE32);
 
             for (int i = 0; i < Sections.Count; i++)
             {
                 var section = Sections[i];
 
-                uint rva = i > 0
-                    ? Sections[i - 1].Rva + Sections[i - 1].GetVirtualSize()
-                    : OptionalHeader.SizeOfHeaders.Align(OptionalHeader.SectionAlignment);
-
-                currentFileOffset = currentFileOffset.Align(OptionalHeader.FileAlignment);
-                section.UpdateOffsets(currentFileOffset, rva.Align(OptionalHeader.SectionAlignment));
-                currentFileOffset += section.GetPhysicalSize();
+                section.UpdateOffsets(relocation);
+                relocation.Advance(
+                    section.GetPhysicalSize().Align(OptionalHeader.FileAlignment),
+                    section.GetVirtualSize().Align(OptionalHeader.SectionAlignment));
             }
         }
 

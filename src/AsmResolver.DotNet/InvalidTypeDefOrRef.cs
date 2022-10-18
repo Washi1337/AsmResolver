@@ -90,6 +90,8 @@ namespace AsmResolver.DotNet
 
         TypeSignature ITypeDescriptor.ToTypeSignature() => throw new InvalidOperationException();
 
+        TypeSignature ITypeDefOrRef.ToTypeSignature(bool isValueType) => throw new InvalidOperationException();
+
         /// <inheritdoc />
         public override string ToString() =>  ((IFullNameProvider) this).Name!;
 

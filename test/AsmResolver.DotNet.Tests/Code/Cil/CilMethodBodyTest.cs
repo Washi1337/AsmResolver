@@ -124,33 +124,6 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             Assert.Single(body.ExceptionHandlers);
         }
 
-        [Fact]
-        public void ReadDynamicMethod()
-        {
-            var module = ModuleDefinition.FromFile(typeof(TDynamicMethod).Assembly.Location);
-
-            var type = module.TopLevelTypes.First(t => t.Name == nameof(TDynamicMethod));
-
-            var method = type.Methods.FirstOrDefault(m => m.Name == nameof(TDynamicMethod.GenerateDynamicMethod));
-
-            DynamicMethod generateDynamicMethod = TDynamicMethod.GenerateDynamicMethod();
-
-            //Dynamic method => CilMethodBody
-            var body = CilMethodBody.FromDynamicMethod(method, generateDynamicMethod);
-
-            Assert.NotNull(body);
-
-            Assert.NotEmpty(body.Instructions);
-
-            Assert.Equal(body.Instructions.Select(q=>q.OpCode),new CilOpCode[]
-            {
-                CilOpCodes.Ldarg_0,
-                CilOpCodes.Call,
-                CilOpCodes.Ldarg_1,
-                CilOpCodes.Ret
-            });
-        }
-
         private static CilMethodBody CreateDummyBody(bool isVoid)
         {
             var module = new ModuleDefinition("DummyModule");
@@ -428,7 +401,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void ExceptionHandlerWithHandlerEndOutsideOfMethodShouldResultInEndLabel()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HandlerEndAtEndOfMethodBody);
-            var body = module.ManagedEntrypointMethod.CilMethodBody;
+            var body = module.ManagedEntryPointMethod.CilMethodBody;
             Assert.Same(body.Instructions.EndLabel, body.ExceptionHandlers[0].HandlerEnd);
             body.VerifyLabels();
         }
@@ -623,6 +596,107 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             body.ExceptionHandlers.Add(handler);
 
             Assert.True(handler.IsFat);
+        }
+
+        [Fact]
+        public void ReadUserStringFromNormalMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleUserStringsStream);
+            var instruction = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions
+                .First(i => i.OpCode.Code == CilCode.Ldstr);
+
+            Assert.Equal("Hello Mars!!", instruction.Operand);
+        }
+
+        [Fact]
+        public void ReadUserStringFromEnCMetadata()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleUserStringsStream_EnC);
+            var instruction = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions
+                .First(i => i.OpCode.Code == CilCode.Ldstr);
+
+            Assert.Equal("Hello World!", instruction.Operand);
+        }
+
+        private CilMethodBody CreateAndReadPatchedBody(IErrorListener listener, Action<CilRawFatMethodBody> patch)
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+
+            // Add new dummy method to type.
+            var method = new MethodDefinition("Dummy", MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
+            module.GetOrCreateModuleType().Methods.Add(method);
+
+            // Give it a method body.
+            var body = new CilMethodBody(method);
+            method.MethodBody = body;
+
+            // Add some random local variables.
+            for (int i = 0; i < 10; i++)
+                body.LocalVariables.Add(new CilLocalVariable(module.CorLibTypeFactory.Object));
+
+            // Add some random instructions.
+            for (int i = 0; i < 100; i++)
+                body.Instructions.Add(CilOpCodes.Nop);
+            body.Instructions.Add(CilOpCodes.Ret);
+
+            // Construct PE image.
+            var result = new ManagedPEImageBuilder().CreateImage(module);
+
+            // Look up raw method body.
+            var token = result.TokenMapping[method];
+            var metadata = result.ConstructedImage!.DotNetDirectory!.Metadata!;
+            var rawBody = (CilRawFatMethodBody) metadata
+                .GetStream<TablesStream>()
+                .GetTable<MethodDefinitionRow>()
+                .GetByRid(token.Rid)
+                .Body.GetSegment();
+
+            Assert.NotNull(rawBody);
+
+            // Patch it.
+            patch(rawBody);
+
+            // Read back module definition and look up interpreted method body.
+            module = ModuleDefinition.FromImage(result.ConstructedImage, new ModuleReaderParameters(listener));
+            return ((MethodDefinition) module.LookupMember(token)).CilMethodBody;
+        }
+
+        [Fact]
+        public void ReadLocalsFromBodyWithInvalidCodeStream()
+        {
+            var body = CreateAndReadPatchedBody(EmptyErrorListener.Instance, raw =>
+            {
+                raw.Code = new DataSegment(new byte[]
+                {
+                    0xFE // 2-byte prefix opcode
+                });
+            });
+
+            Assert.NotEmpty(body.LocalVariables);
+        }
+
+        [Fact]
+        public void ReadCodeStreamFromBodyWithInvalidLocalVariablesSignature()
+        {
+            var body = CreateAndReadPatchedBody(EmptyErrorListener.Instance, raw =>
+            {
+                raw.LocalVarSigToken = new MetadataToken(TableIndex.StandAloneSig, 0x123456);
+            });
+
+            Assert.NotEmpty(body.Instructions);
+        }
+
+        [Fact]
+        public void ReadInvalidBody()
+        {
+            var body = CreateAndReadPatchedBody(EmptyErrorListener.Instance, raw =>
+            {
+                raw.Code = new DataSegment(new byte[] { 0xFE });
+                raw.LocalVarSigToken = new MetadataToken(TableIndex.StandAloneSig, 0x123456);
+            });
+
+            Assert.NotNull(body);
         }
     }
 }

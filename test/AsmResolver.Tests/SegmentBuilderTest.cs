@@ -8,8 +8,6 @@ namespace AsmResolver.Tests
     {
         private static byte[] ToBytes(ISegment segment)
         {
-            segment.UpdateOffsets(0, 0);
-
             using var stream = new MemoryStream();
 
             var writer = new BinaryStreamWriter(stream);
@@ -22,7 +20,7 @@ namespace AsmResolver.Tests
         {
             var collection = new SegmentBuilder();
 
-            collection.UpdateOffsets(0x400, 0x1000);
+            collection.UpdateOffsets(new RelocationParameters(0x400000, 0x400, 0x1000, false));
 
             Assert.Equal(0x400u, collection.Offset);
             Assert.Equal(0x1000u, collection.Rva);
@@ -39,7 +37,7 @@ namespace AsmResolver.Tests
 
             var collection = new SegmentBuilder {segment};
 
-            collection.UpdateOffsets(0x400, 0x1000);
+            collection.UpdateOffsets(new RelocationParameters(0x400000, 0x400, 0x1000, false));
 
             Assert.Equal(0x400u, segment.Offset);
             Assert.Equal(0x1000u, segment.Rva);
@@ -61,7 +59,7 @@ namespace AsmResolver.Tests
 
             var collection = new SegmentBuilder {segment1, segment2, segment3};
 
-            collection.UpdateOffsets(0x400, 0x1000);
+            collection.UpdateOffsets(new RelocationParameters(0x400000, 0x400, 0x1000, false));
 
             Assert.Equal(0x400u, segment1.Offset);
             Assert.Equal(0x1000u, segment1.Rva);
@@ -88,7 +86,7 @@ namespace AsmResolver.Tests
 
             var builder = new SegmentBuilder {segment};
 
-            builder.UpdateOffsets(0x400, 0x1000);
+            builder.UpdateOffsets(new RelocationParameters(0x400000, 0x400, 0x1000, false));
 
             Assert.Equal(0x400u, segment.Offset);
 
@@ -115,7 +113,7 @@ namespace AsmResolver.Tests
                 {segment3, 8}
             };
 
-            builder.UpdateOffsets(0x400, 0x1000);
+            builder.UpdateOffsets(new RelocationParameters(0x400000, 0x400, 0x1000, false));
 
             Assert.Equal(0x400u, segment1.Offset);
             Assert.Equal(0x1000u, segment1.Rva);

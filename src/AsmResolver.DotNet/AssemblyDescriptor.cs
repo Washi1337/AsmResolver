@@ -240,7 +240,6 @@ namespace AsmResolver.DotNet
                 AssemblyHashAlgorithm.None => SHA1.Create(), // Default algo is SHA-1.
                 AssemblyHashAlgorithm.Md5 => MD5.Create(),
                 AssemblyHashAlgorithm.Sha1 => SHA1.Create(),
-                AssemblyHashAlgorithm.Hmac => HMAC.Create(),
                 AssemblyHashAlgorithm.Sha256 => SHA256.Create(),
                 AssemblyHashAlgorithm.Sha384 => SHA384.Create(),
                 AssemblyHashAlgorithm.Sha512 => SHA512.Create(),
