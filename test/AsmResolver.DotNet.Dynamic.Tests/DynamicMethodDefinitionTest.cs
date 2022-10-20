@@ -7,7 +7,9 @@ using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Methods;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 using MethodAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.MethodAttributes;
 
@@ -114,6 +116,37 @@ namespace AsmResolver.DotNet.Dynamic.Tests
             Assert.Equal(nameof(NestedClass), declaringType.Name);
             Assert.NotNull(declaringType.DeclaringType);
             Assert.Equal(nameof(DynamicMethodDefinitionTest), declaringType.DeclaringType.Name);
+        }
+
+        [Fact]
+        public void ReadDynamicMethodInitializedByDynamicILInfoWithTokens() {
+            // Create new dynamic method.
+            var method = new DynamicMethod("Test", typeof(void), Type.EmptyTypes);
+            var info = method.GetDynamicILInfo();
+            info.SetLocalSignature(new byte[] { 0x7, 0x0 });
+
+            // Write some IL.
+            using var codeStream = new MemoryStream();
+            var assembler = new CilAssembler(
+                new BinaryStreamWriter(codeStream),
+                new CilOperandBuilder(new OriginalMetadataTokenProvider(null), EmptyErrorListener.Instance));
+            uint token = (uint)info.GetTokenFor(typeof(Console).GetMethod("WriteLine", Type.EmptyTypes).MethodHandle);
+            assembler.WriteInstruction(new CilInstruction(CilOpCodes.Call, new MetadataToken(token)));
+            assembler.WriteInstruction(new CilInstruction(CilOpCodes.Ret));
+
+            // Set code.
+            info.SetCode(codeStream.ToArray(), 1);
+
+            // Pass into DynamicMethodDefinition
+            var contextModule = ModuleDefinition.FromFile(typeof(DynamicMethodDefinitionTest).Assembly.Location);
+            var definition = new DynamicMethodDefinition(contextModule, method);
+
+            // Verify
+            Assert.NotNull(definition.CilMethodBody);
+            var instruction = definition.CilMethodBody.Instructions[0];
+            Assert.Equal(CilOpCodes.Call, instruction.OpCode);
+            var reference = Assert.IsAssignableFrom<IMethodDescriptor>(instruction.Operand);
+            Assert.Equal("WriteLine", reference.Name);
         }
 
         internal static class NestedClass
