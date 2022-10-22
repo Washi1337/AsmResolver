@@ -89,17 +89,22 @@ namespace AsmResolver.DotNet.Dynamic
         }
 
         public static void ReadReflectionExceptionHandlers(CilMethodBody methodBody,
-            IList<object>? ehInfos, byte[] ehHeader, ReferenceImporter importer)
+            byte[]? ehHeader, IList<object>? ehInfos, ReferenceImporter importer)
         {
-            //Sample needed!
-            if (ehHeader is { Length: > 4 })
-                throw new NotImplementedException("Exception handlers from ehHeader not supported yet.");
-
-            if (ehInfos is { Count: > 0 })
+            if (ehHeader is {Length: > 4})
+            {
+                InterpretEHSection(methodBody, importer, ehHeader);
+            }
+            else if (ehInfos is { Count: > 0 })
             {
                 foreach (var ehInfo in ehInfos)
                     InterpretEHInfo(methodBody, importer, ehInfo);
             }
+        }
+
+        private static void InterpretEHSection(CilMethodBody methodBody, ReferenceImporter importer, byte[] ehHeader)
+        {
+            throw new NotImplementedException("Raw exception data is not supported yet.");
         }
 
         private static void InterpretEHInfo(CilMethodBody methodBody, ReferenceImporter importer, object ehInfo)
