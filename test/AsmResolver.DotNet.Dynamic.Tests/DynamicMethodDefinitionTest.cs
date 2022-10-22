@@ -3,13 +3,16 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 using MethodAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.MethodAttributes;
 
@@ -119,7 +122,8 @@ namespace AsmResolver.DotNet.Dynamic.Tests
         }
 
         [Fact]
-        public void ReadDynamicMethodInitializedByDynamicILInfoWithTokens() {
+        public void ReadDynamicMethodInitializedByDynamicILInfoWithTokens()
+        {
             // Create new dynamic method.
             var method = new DynamicMethod("Test", typeof(void), Type.EmptyTypes);
             var info = method.GetDynamicILInfo();
@@ -147,6 +151,35 @@ namespace AsmResolver.DotNet.Dynamic.Tests
             Assert.Equal(CilOpCodes.Call, instruction.OpCode);
             var reference = Assert.IsAssignableFrom<IMethodDescriptor>(instruction.Operand);
             Assert.Equal("WriteLine", reference.Name);
+        }
+
+        [Fact]
+        public void ReadDynamicMethodInitializedByDynamicILInfoWithLocals()
+        {
+            // Create new dynamic method.
+            var method = new DynamicMethod("Test", typeof(void), Type.EmptyTypes);
+            var info = method.GetDynamicILInfo();
+
+            var helper = SignatureHelper.GetLocalVarSigHelper();
+            helper.AddArgument(typeof(int));
+            helper.AddArgument(typeof(bool));
+            helper.AddArgument(typeof(string));
+            info.SetLocalSignature(helper.GetSignature());
+
+            // Write some IL.
+            info.SetCode(new byte[] {0x2a}, 1);
+
+            // Pass into DynamicMethodDefinition
+            var contextModule = ModuleDefinition.FromFile(typeof(DynamicMethodDefinitionTest).Assembly.Location);
+            var definition = new DynamicMethodDefinition(contextModule, method);
+
+            // Verify
+            Assert.NotNull(definition.CilMethodBody);
+            var locals = definition.CilMethodBody.LocalVariables;
+            Assert.Equal(3, locals.Count);
+            Assert.Equal("Int32", locals[0].VariableType.Name);
+            Assert.Equal("Boolean", locals[1].VariableType.Name);
+            Assert.Equal("String", locals[2].VariableType.Name);
         }
 
         internal static class NestedClass
