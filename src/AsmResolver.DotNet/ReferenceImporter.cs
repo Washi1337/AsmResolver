@@ -523,7 +523,14 @@ namespace AsmResolver.DotNet
 
             var result = new MethodSignature(
                 method.IsStatic ? 0 : CallingConventionAttributes.HasThis,
-                returnType, parameterTypes);
+                returnType,
+                parameterTypes);
+
+            if (method.IsGenericMethodDefinition)
+            {
+                result.IsGeneric = true;
+                result.GenericParameterCount = method.GetGenericArguments().Length;
+            }
 
             if (method.DeclaringType == null)
                 throw new ArgumentException("Method's declaring type is null.");

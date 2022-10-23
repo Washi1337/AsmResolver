@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AsmResolver.DotNet.Dynamic\AsmResolver.DotNet.Dynamic.csproj" />
+    <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Generics\AsmResolver.DotNet.TestCases.Generics.csproj" />
     <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Methods\AsmResolver.DotNet.TestCases.Methods.csproj" />
   </ItemGroup>
 

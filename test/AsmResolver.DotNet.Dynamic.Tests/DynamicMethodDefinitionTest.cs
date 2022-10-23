@@ -3,18 +3,14 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
-using AsmResolver.DotNet.Code.Native;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
-using MethodAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.MethodAttributes;
 
 namespace AsmResolver.DotNet.Dynamic.Tests
 {
@@ -119,6 +115,54 @@ namespace AsmResolver.DotNet.Dynamic.Tests
             Assert.Equal(nameof(NestedClass), declaringType.Name);
             Assert.NotNull(declaringType.DeclaringType);
             Assert.Equal(nameof(DynamicMethodDefinitionTest), declaringType.DeclaringType.Name);
+        }
+
+        [Fact]
+        public void ImportGenericTypeInstantiation()
+        {
+            var method = new DynamicMethod("Test", typeof(void), Type.EmptyTypes);
+            var cil = method.GetILGenerator();
+            cil.Emit(OpCodes.Call, typeof(GenericType<int, string, Stream>)
+                .GetMethod(nameof(GenericType<int, string, Stream>.NonGenericMethodInGenericType))!);
+            cil.Emit(OpCodes.Ret);
+
+            var contextModule = ModuleDefinition.FromFile(typeof(DynamicMethodDefinitionTest).Assembly.Location);
+            var definition = new DynamicMethodDefinition(contextModule, method);
+
+            Assert.NotNull(definition.CilMethodBody);
+            var instruction = definition.CilMethodBody.Instructions[0];
+            Assert.Equal(CilOpCodes.Call, instruction.OpCode);
+            var operand = Assert.IsAssignableFrom<IMethodDescriptor>(instruction.Operand);
+            var type = Assert.IsAssignableFrom<TypeSpecification>(operand.DeclaringType);
+            var signature = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(type.Signature);
+            Assert.Equal("Int32",  signature.TypeArguments[0].Name);
+            Assert.Equal("String", signature.TypeArguments[1].Name);
+            Assert.Equal("Stream", signature.TypeArguments[2].Name);
+        }
+
+        [Fact]
+        public void ImportGenericMethodInstantiation()
+        {
+            var method = new DynamicMethod("Test", typeof(void), Type.EmptyTypes);
+            var cil = method.GetILGenerator();
+            cil.Emit(OpCodes.Call, typeof(NonGenericType)
+                .GetMethod(nameof(NonGenericType.GenericMethodInNonGenericType))!
+                .MakeGenericMethod(typeof(int), typeof(string), typeof(Stream)));
+            cil.Emit(OpCodes.Ret);
+
+            var contextModule = ModuleDefinition.FromFile(typeof(DynamicMethodDefinitionTest).Assembly.Location);
+            var definition = new DynamicMethodDefinition(contextModule, method);
+
+            Assert.NotNull(definition.CilMethodBody);
+            var instruction = definition.CilMethodBody.Instructions[0];
+            Assert.Equal(CilOpCodes.Call, instruction.OpCode);
+            var operand = Assert.IsAssignableFrom<MethodSpecification>(instruction.Operand);
+            Assert.Equal(nameof(NonGenericType.GenericMethodInNonGenericType), operand.Name);
+            Assert.NotNull(operand.Signature);
+            Assert.Equal(3, operand.Method!.Signature!.GenericParameterCount);
+            Assert.Equal("Int32", operand.Signature.TypeArguments[0].Name);
+            Assert.Equal("String", operand.Signature.TypeArguments[1].Name);
+            Assert.Equal("Stream", operand.Signature.TypeArguments[2].Name);
         }
 
         [Fact]
