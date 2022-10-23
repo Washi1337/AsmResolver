@@ -1,102 +1,33 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Dynamic
 {
     internal static class DynamicMethodHelper
     {
-        private static readonly MethodInfo? GetTypeFromHandleUnsafeMethod;
-
-        static DynamicMethodHelper()
-        {
-            // We need to use reflection for this to stay compatible with .netstandard 2.0.
-            GetTypeFromHandleUnsafeMethod = typeof(Type)
-                .GetMethod("GetTypeFromHandleUnsafe",
-                    (BindingFlags) (-1),
-                    null,
-                    new[] {typeof(IntPtr)},
-                    null);
-        }
-
-        [MemberNotNullWhen(true, nameof(GetTypeFromHandleUnsafeMethod))]
-        public static bool IsSupported => GetTypeFromHandleUnsafeMethod is not null;
-
         public static void ReadLocalVariables(CilMethodBody methodBody, MethodDefinition method, byte[] localSig)
         {
             if (method.Module is not SerializedModuleDefinition module)
                 throw new ArgumentException("Method body should reference a serialized module.");
 
             var reader = new BinaryStreamReader(localSig);
-            if (ReadLocalVariableSignature(new BlobReadContext(module.ReaderContext), ref reader)
-                is not { } localsSignature)
+            var context = new BlobReadContext(module.ReaderContext, DynamicTypeSignatureResolver.Instance);
+            if (CallingConventionSignature.FromReader(context, ref reader)
+                is not LocalVariablesSignature localsSignature)
             {
                 throw new ArgumentException("Invalid local variables signature.");
             }
 
             for (int i = 0; i < localsSignature.VariableTypes.Count; i++)
                 methodBody.LocalVariables.Add(new CilLocalVariable(localsSignature.VariableTypes[i]));
-        }
-
-        private static TypeSignature ReadTypeSignature(in BlobReadContext context, ref BinaryStreamReader reader)
-        {
-            return (ElementType) reader.PeekByte() == ElementType.Internal
-                ? ReadInternalTypeSignature(context, ref reader)
-                : TypeSignature.FromReader(in context, ref reader);
-        }
-
-        private static TypeSignature ReadInternalTypeSignature(in BlobReadContext context, ref BinaryStreamReader reader)
-        {
-            if (!IsSupported)
-                throw new PlatformNotSupportedException("The current platform does not support the translation of raw type handles to System.Type instances.");
-
-            // Consume INTERNAL element type.
-            reader.ReadByte();
-
-            // Read address.
-            var address = IntPtr.Size switch
-            {
-                4 => new IntPtr(reader.ReadInt32()),
-                _ => new IntPtr(reader.ReadInt64())
-            };
-
-            // Let the runtime translate the address to a type and import it.
-            var clrType = (Type?) GetTypeFromHandleUnsafeMethod.Invoke(null, new object[] { address });
-
-            var type = clrType is not null
-                ? new ReferenceImporter(context.ReaderContext.ParentModule).ImportType(clrType)
-                : InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.IllegalTypeSpec);
-
-            return new TypeDefOrRefSignature(type);
-        }
-
-        private static LocalVariablesSignature ReadLocalVariableSignature(
-            in BlobReadContext context,
-            ref BinaryStreamReader reader)
-        {
-            var result = new LocalVariablesSignature();
-            result.Attributes = (CallingConventionAttributes) reader.ReadByte();
-
-            if (!reader.TryReadCompressedUInt32(out uint count))
-            {
-                context.ReaderContext.BadImage("Invalid number of local variables in local variable signature.");
-                return result;
-            }
-
-            for (int i = 0; i < count; i++)
-                result.VariableTypes.Add(ReadTypeSignature(context, ref reader));
-
-            return result;
         }
 
         public static void ReadReflectionExceptionHandlers(CilMethodBody methodBody,

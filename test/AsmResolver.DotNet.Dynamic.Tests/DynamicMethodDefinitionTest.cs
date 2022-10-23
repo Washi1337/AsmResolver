@@ -164,6 +164,7 @@ namespace AsmResolver.DotNet.Dynamic.Tests
             helper.AddArgument(typeof(int));
             helper.AddArgument(typeof(bool));
             helper.AddArgument(typeof(Stream));
+            helper.AddArgument(typeof(Stream[]));
             info.SetLocalSignature(helper.GetSignature());
 
             // Write some IL.
@@ -176,10 +177,11 @@ namespace AsmResolver.DotNet.Dynamic.Tests
             // Verify
             Assert.NotNull(definition.CilMethodBody);
             var locals = definition.CilMethodBody.LocalVariables;
-            Assert.Equal(3, locals.Count);
+            Assert.Equal(4, locals.Count);
             Assert.Equal("Int32", locals[0].VariableType.Name);
             Assert.Equal("Boolean", locals[1].VariableType.Name);
             Assert.Equal("Stream", locals[2].VariableType.Name);
+            Assert.Equal("Stream", Assert.IsAssignableFrom<SzArrayTypeSignature>(locals[3].VariableType).BaseType.Name);
         }
 
         internal static class NestedClass

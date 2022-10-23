@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Serialized;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Signatures
@@ -16,7 +17,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="readerContext">The original read context.</param>
         public BlobReadContext(ModuleReaderContext readerContext)
-            : this(readerContext, Enumerable.Empty<MetadataToken>())
+            : this(readerContext, PhysicalTypeSignatureResolver.Instance, Enumerable.Empty<MetadataToken>())
         {
         }
 
@@ -24,10 +25,22 @@ namespace AsmResolver.DotNet.Signatures
         /// Creates a new instance of the <see cref="BlobReadContext"/> structure.
         /// </summary>
         /// <param name="readerContext">The original read context.</param>
+        /// <param name="resolver">The object responsible for resolving raw type metadata tokens and addresses.</param>
+        public BlobReadContext(ModuleReaderContext readerContext, ITypeSignatureResolver resolver)
+            : this(readerContext, resolver, Enumerable.Empty<MetadataToken>())
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="BlobReadContext"/> structure.
+        /// </summary>
+        /// <param name="readerContext">The original read context.</param>
+        /// <param name="resolver">The object responsible for resolving raw type metadata tokens and addresses.</param>
         /// <param name="traversedTokens">A collection of traversed metadata tokens.</param>
-        public BlobReadContext(ModuleReaderContext readerContext, IEnumerable<MetadataToken> traversedTokens)
+        public BlobReadContext(ModuleReaderContext readerContext, ITypeSignatureResolver resolver, IEnumerable<MetadataToken> traversedTokens)
         {
             ReaderContext = readerContext;
+            TypeSignatureResolver = resolver;
             TraversedTokens = new HashSet<MetadataToken>(traversedTokens);
         }
 
@@ -35,6 +48,14 @@ namespace AsmResolver.DotNet.Signatures
         /// Gets the module reader context.
         /// </summary>
         public ModuleReaderContext ReaderContext
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the object responsible for resolving raw type metadata tokens and addresses.
+        /// </summary>
+        public ITypeSignatureResolver TypeSignatureResolver
         {
             get;
         }

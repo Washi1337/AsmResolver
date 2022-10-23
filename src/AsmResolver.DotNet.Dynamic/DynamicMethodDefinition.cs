@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet.Dynamic
         /// <summary>
         /// Determines whether dynamic method reading is fully supported in the current host's .NET environment.
         /// </summary>
-        public static bool IsSupported => DynamicMethodHelper.IsSupported;
+        public static bool IsSupported => DynamicTypeSignatureResolver.IsSupported;
 
         /// <inheritdoc />
         public override ModuleDefinition Module { get; }
