@@ -40,6 +40,14 @@ namespace AsmResolver.DotNet.Dynamic
             CilMethodBody = CreateDynamicMethodBody(this, resolver);
         }
 
+        /// <summary>
+        /// Determines whether dynamic method reading is fully supported in the current host's .NET environment.
+        /// </summary>
+        public static bool IsSupported => DynamicMethodHelper.IsSupported;
+
+        /// <inheritdoc />
+        public override ModuleDefinition Module { get; }
+
         private MethodSignature ResolveSig(MethodBase methodBase, ModuleDefinition module)
         {
             var importer = module.DefaultImporter;
@@ -57,9 +65,6 @@ namespace AsmResolver.DotNet.Dynamic
                 methodBase.IsStatic ? 0 : CallingConventionAttributes.HasThis,
                 returnType, parameterTypes);
         }
-
-        /// <inheritdoc />
-        public override ModuleDefinition Module { get; }
 
         /// <summary>
         /// Creates a CIL method body from a dynamic method.
@@ -89,7 +94,7 @@ namespace AsmResolver.DotNet.Dynamic
             byte[]? ehHeader;
             IList<object>? ehInfos;
 
-            if (resolver.GetType().FullName != "System.Reflection.Emit.DynamicILInfo" && dynamicILInfo is { })
+            if (resolver.GetType().FullName != "System.Reflection.Emit.DynamicILInfo" && dynamicILInfo is not null)
             {
                 code = FieldReader.ReadField<byte[]>(dynamicILInfo, "m_code");
                 scope = FieldReader.ReadField<object>(dynamicILInfo, "m_scope")!;
@@ -118,8 +123,8 @@ namespace AsmResolver.DotNet.Dynamic
             if (code is not null)
             {
                 var reader = new BinaryStreamReader(code);
-                var disassembler =
-                    new CilDisassembler(reader, new DynamicCilOperandResolver(module, result, tokenList));
+                var operandResolver = new DynamicCilOperandResolver(module, result, tokenList);
+                var disassembler = new CilDisassembler(reader, operandResolver);
                 result.Instructions.AddRange(disassembler.ReadInstructions());
             }
 

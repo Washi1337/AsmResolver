@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -15,7 +16,7 @@ namespace AsmResolver.DotNet.Dynamic
 {
     internal static class DynamicMethodHelper
     {
-        private static readonly MethodInfo GetTypeFromHandleUnsafeMethod;
+        private static readonly MethodInfo? GetTypeFromHandleUnsafeMethod;
 
         static DynamicMethodHelper()
         {
@@ -25,8 +26,11 @@ namespace AsmResolver.DotNet.Dynamic
                     (BindingFlags) (-1),
                     null,
                     new[] {typeof(IntPtr)},
-                    null)!;
+                    null);
         }
+
+        [MemberNotNullWhen(true, nameof(GetTypeFromHandleUnsafeMethod))]
+        public static bool IsSupported => GetTypeFromHandleUnsafeMethod is not null;
 
         public static void ReadLocalVariables(CilMethodBody methodBody, MethodDefinition method, byte[] localSig)
         {
@@ -53,6 +57,13 @@ namespace AsmResolver.DotNet.Dynamic
 
         private static TypeSignature ReadInternalTypeSignature(in BlobReadContext context, ref BinaryStreamReader reader)
         {
+            if (!IsSupported)
+                throw new PlatformNotSupportedException("The current platform does not support the translation of raw type handles to System.Type instances.");
+
+            // Consume INTERNAL element type.
+            reader.ReadByte();
+
+            // Read address.
             var address = IntPtr.Size switch
             {
                 4 => new IntPtr(reader.ReadInt32()),
