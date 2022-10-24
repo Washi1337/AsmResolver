@@ -531,5 +531,18 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal("String", imported.Signature.TypeArguments[1].Name);
             Assert.Equal("Stream", imported.Signature.TypeArguments[2].Name);
         }
+
+        [Fact]
+        public void ImportGenericMethodInstantiationWithReturnTypeViaReflection()
+        {
+            var method = typeof(GenericType<int, bool, Stream>)
+                .GetMethod(nameof(GenericType<int, bool, Stream>.NonGenericMethodWithReturnType))!;
+
+            var imported = Assert.IsAssignableFrom<IMethodDescriptor>(_importer.ImportMethod(method));
+            Assert.Equal(nameof(GenericType<int, bool, Stream>.NonGenericMethodWithReturnType), imported.Name);
+            Assert.NotNull(imported.Signature);
+            var signature = Assert.IsAssignableFrom<GenericParameterSignature>(imported.Signature.ReturnType);
+            Assert.Equal(2, signature.Index);
+        }
     }
 }

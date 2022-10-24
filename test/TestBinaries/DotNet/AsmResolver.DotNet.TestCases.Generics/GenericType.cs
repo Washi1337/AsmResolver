@@ -7,9 +7,14 @@ namespace AsmResolver.DotNet.TestCases.Generics
         public static void NonGenericMethodInGenericType()
         {
         }
-        
+
         public static void GenericMethodInGenericType<U1, U2, U3>()
         {
+        }
+
+        public static T3 NonGenericMethodWithReturnType()
+        {
+            return default;
         }
     }
 }
