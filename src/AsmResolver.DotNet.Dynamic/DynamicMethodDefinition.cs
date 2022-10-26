@@ -25,8 +25,8 @@ namespace AsmResolver.DotNet.Dynamic
         public DynamicMethodDefinition(ModuleDefinition module, object dynamicMethodObj) :
             base(new MetadataToken(TableIndex.Method, 0))
         {
-            dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
-            var methodBase = FieldReader.ReadField<MethodBase>(dynamicMethodObj, "m_method");
+            object resolver = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
+            var methodBase = FieldReader.ReadField<MethodBase>(resolver, "m_method");
             if (methodBase is null)
             {
                 throw new ArgumentException(
@@ -37,8 +37,16 @@ namespace AsmResolver.DotNet.Dynamic
             Name = methodBase.Name;
             Attributes = (MethodAttributes)methodBase.Attributes;
             Signature = module.DefaultImporter.ImportMethodSignature(ResolveSig(methodBase, module));
-            CilMethodBody = CreateDynamicMethodBody(this, dynamicMethodObj);
+            CilMethodBody = CreateDynamicMethodBody(this, resolver);
         }
+
+        /// <summary>
+        /// Determines whether dynamic method reading is fully supported in the current host's .NET environment.
+        /// </summary>
+        public static bool IsSupported => DynamicTypeSignatureResolver.IsSupported;
+
+        /// <inheritdoc />
+        public override ModuleDefinition Module { get; }
 
         private MethodSignature ResolveSig(MethodBase methodBase, ModuleDefinition module)
         {
@@ -58,9 +66,6 @@ namespace AsmResolver.DotNet.Dynamic
                 returnType, parameterTypes);
         }
 
-        /// <inheritdoc />
-        public override ModuleDefinition Module { get; }
-
         /// <summary>
         /// Creates a CIL method body from a dynamic method.
         /// </summary>
@@ -73,55 +78,58 @@ namespace AsmResolver.DotNet.Dynamic
                 throw new ArgumentException("Method body should reference a serialized module.");
 
             var result = new CilMethodBody(method);
-            dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
+            object resolver = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
 
-            // Attempt to get the code field.
-            byte[]? code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code");
-
+            // We prefer to extract the information from DynamicILInfo if it is there, as it has more accurate info
+            // if the DynamicMethod code is not flushed yet into the resolver (e.g., it hasn't been invoked yet).
             object? dynamicILInfo = null;
+            if (FieldReader.TryReadField<MethodBase>(resolver, "m_method", out var m) && m is not null)
+                FieldReader.TryReadField(m, "m_DynamicILInfo", out dynamicILInfo);
 
-            // If it is still null, it might still be set using DynamicILInfo::SetCode.
-            // Find the code stored in the DynamicILInfo if available.
-            if (code is null
-                && FieldReader.TryReadField<MethodBase>(dynamicMethodObj, "m_method", out var methodBase)
-                && methodBase is not null
-                && FieldReader.TryReadField(methodBase, "m_DynamicILInfo", out dynamicILInfo)
-                && dynamicILInfo is not null)
+            // Extract all required information to construct the body.
+            byte[]? code;
+            object scope;
+            List<object?> tokenList;
+            byte[]? localSig;
+            byte[]? ehHeader;
+            IList<object>? ehInfos;
+
+            if (resolver.GetType().FullName != "System.Reflection.Emit.DynamicILInfo" && dynamicILInfo is not null)
             {
                 code = FieldReader.ReadField<byte[]>(dynamicILInfo, "m_code");
-            }
-
-            if (code is null)
-                throw new InvalidOperationException("Dynamic method does not have a CIL code stream.");
-
-            // Get remaining fields.
-
-            object scope;
-
-            if (dynamicMethodObj.GetType().FullName != "System.Reflection.Emit.DynamicILInfo" && dynamicILInfo is { })
-            {
                 scope = FieldReader.ReadField<object>(dynamicILInfo, "m_scope")!;
+                tokenList = FieldReader.ReadField<List<object?>>(scope, "m_tokens")!;
+                localSig = FieldReader.ReadField<byte[]>(dynamicILInfo, "m_localSignature");
+                ehHeader = FieldReader.ReadField<byte[]>(dynamicILInfo, "m_exceptions");
+
+                // DynamicILInfo does not have EH info. Try recover it from the resolver.
+                ehInfos = FieldReader.ReadField<IList<object>>(resolver, "m_exceptions");
             }
             else
             {
-                scope = FieldReader.ReadField<object>(dynamicMethodObj, "m_scope")!;
+                code = FieldReader.ReadField<byte[]>(resolver, "m_code");
+                scope = FieldReader.ReadField<object>(resolver, "m_scope")!;
+                tokenList = FieldReader.ReadField<List<object?>>(scope, "m_tokens")!;
+                localSig = FieldReader.ReadField<byte[]>(resolver, "m_localSignature");
+                ehHeader = FieldReader.ReadField<byte[]>(resolver, "m_exceptionHeader");
+                ehInfos = FieldReader.ReadField<IList<object>>(resolver, "m_exceptions");
             }
 
-            var tokenList = FieldReader.ReadField<List<object?>>(scope, "m_tokens")!;
-            byte[] localSig = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_localSignature")!;
-            byte[] ehHeader = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_exceptionHeader")!;
-            var ehInfos = FieldReader.ReadField<IList<object>>(dynamicMethodObj, "m_exceptions")!;
-
-            //Local Variables
-            DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
+            // Interpret local variables signatures.
+            if (localSig is not null)
+                DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
 
             // Read raw instructions.
-            var reader = new BinaryStreamReader(code);
-            var disassembler = new CilDisassembler(reader, new DynamicCilOperandResolver(module, result, tokenList));
-            result.Instructions.AddRange(disassembler.ReadInstructions());
+            if (code is not null)
+            {
+                var reader = new BinaryStreamReader(code);
+                var operandResolver = new DynamicCilOperandResolver(module, result, tokenList);
+                var disassembler = new CilDisassembler(reader, operandResolver);
+                result.Instructions.AddRange(disassembler.ReadInstructions());
+            }
 
-            //Exception Handlers
-            DynamicMethodHelper.ReadReflectionExceptionHandlers(result, ehInfos, ehHeader, module.DefaultImporter);
+            // Interpret exception handler information or header.
+            DynamicMethodHelper.ReadReflectionExceptionHandlers(result, ehHeader, ehInfos, module.DefaultImporter);
 
             return result;
         }

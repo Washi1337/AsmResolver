@@ -506,14 +506,26 @@ namespace AsmResolver.DotNet
             if (method is null)
                 throw new ArgumentNullException(nameof(method));
 
+            // We need to create a method spec if this method is a generic instantiation.
             if (method.IsGenericMethod && !method.IsGenericMethodDefinition)
                 return ImportGenericMethod((MethodInfo) method);
+
+            // Test whether we have a declaring type.
+            var originalDeclaringType = method.DeclaringType;
+            if (originalDeclaringType is null)
+                throw new ArgumentException("Method's declaring type is null.");
+
+            // System.Reflection substitutes all type parameters in the MethodInfo instance with their concrete
+            // arguments if the declaring type is a generic instantiation. However in metadata, we need the original
+            // parameter references. Thus, resolve the original method info first if required.
+            if (originalDeclaringType.IsGenericType && !originalDeclaringType.IsGenericTypeDefinition)
+                method = method.Module.ResolveMethod(method.MetadataToken)!;
 
             var returnType = method is MethodInfo info
                 ? ImportTypeSignature(info.ReturnType)
                 : TargetModule.CorLibTypeFactory.Void;
 
-            var parameters = method.DeclaringType is { IsConstructedGenericType: true }
+            var parameters = originalDeclaringType is { IsConstructedGenericType: true }
                 ? method.Module.ResolveMethod(method.MetadataToken)!.GetParameters()
                 : method.GetParameters();
 
@@ -523,12 +535,16 @@ namespace AsmResolver.DotNet
 
             var result = new MethodSignature(
                 method.IsStatic ? 0 : CallingConventionAttributes.HasThis,
-                returnType, parameterTypes);
+                returnType,
+                parameterTypes);
 
-            if (method.DeclaringType == null)
-                throw new ArgumentException("Method's declaring type is null.");
+            if (method.IsGenericMethodDefinition)
+            {
+                result.IsGeneric = true;
+                result.GenericParameterCount = method.GetGenericArguments().Length;
+            }
 
-            return new MemberReference(ImportType(method.DeclaringType), method.Name, result);
+            return new MemberReference(ImportType(originalDeclaringType), method.Name, result);
         }
 
         [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Calls AsmResolver.DotNet.ReferenceImporter.ImportMethod(System.Reflection.MethodBase)")]
