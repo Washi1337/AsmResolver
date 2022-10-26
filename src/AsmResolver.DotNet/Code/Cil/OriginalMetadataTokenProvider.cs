@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
         private MetadataToken GetToken(IMetadataMember member)
         {
-            if (_module is not null && member is IModuleProvider provider && provider.Module == _module)
+            if (_module is not null && member is IModuleProvider provider && provider.Module != _module)
                 throw new MemberNotImportedException(member);
 
             return member.MetadataToken;

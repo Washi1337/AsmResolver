@@ -144,9 +144,11 @@ namespace AsmResolver.DotNet.Signatures.Types
                     return new BoxedTypeSignature(FromReader(context, ref reader));
 
                 case ElementType.Internal:
-                    throw new NotSupportedException(
-                        "Encountered an COR_ELEMENT_TYPE_INTERNAL type signature which is not supported by this "
-                        + " type signature reader. Use the AsmResolver.DotNet.Dynamic extension package instead.");
+                    return context.TypeSignatureResolver.ResolveRuntimeType(context, IntPtr.Size switch
+                    {
+                        4 => new IntPtr(reader.ReadInt32()),
+                        _ => new IntPtr(reader.ReadInt64())
+                    });
 
                 default:
                     throw new ArgumentOutOfRangeException($"Invalid or unsupported element type {elementType}.");
@@ -177,38 +179,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.IllegalTypeSpec);
             }
 
-            ITypeDefOrRef result;
-            switch (token.Table)
-            {
-                // Check for infinite recursion.
-                case TableIndex.TypeSpec when !context.TraversedTokens.Add(token):
-                    context.ReaderContext.BadImage("Infinite metadata loop was detected.");
-                    result = InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.MetadataLoop);
-                    break;
-
-                // Any other type is legal.
-                case TableIndex.TypeSpec:
-                case TableIndex.TypeDef:
-                case TableIndex.TypeRef:
-                    if (module.TryLookupMember(token, out var member) && member is ITypeDefOrRef typeDefOrRef)
-                    {
-                        result = typeDefOrRef;
-                    }
-                    else
-                    {
-                        context.ReaderContext.BadImage($"Metadata token in type signature refers to a non-existing TypeDefOrRef member {token}.");
-                        result = InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
-                    }
-
-                    break;
-
-                default:
-                    context.ReaderContext.BadImage("Invalid coded index.");
-                    result = InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
-                    break;
-            }
-
-            return result;
+            return context.TypeSignatureResolver.ResolveToken(context, token);
         }
 
         /// <summary>

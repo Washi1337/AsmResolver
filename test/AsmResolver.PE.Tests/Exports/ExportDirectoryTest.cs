@@ -32,22 +32,24 @@ namespace AsmResolver.PE.Tests.Exports
         public void ReadExportAddresses()
         {
             var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
+            Assert.NotNull(image.Exports);
             Assert.Equal(new[]
             {
                 0x000111DBu,
                 0x00011320u,
-            }, image.Exports?.Entries.Select(e => e.Address.Rva));
+            }, image.Exports.Entries.Select(e => e.Address.Rva));
         }
 
         [Fact]
         public void ReadOrdinals()
         {
             var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
+            Assert.NotNull(image.Exports);
             Assert.Equal(new[]
             {
                 1u,
                 2u,
-            }, image.Exports?.Entries.Select(e => e.Ordinal));
+            }, image.Exports.Entries.Select(e => e.Ordinal));
         }
 
         [Fact]

@@ -5,6 +5,7 @@ using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Fields;
+using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -500,6 +501,48 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.NotNull(resolved);
             Assert.Equal(field, Assert.IsAssignableFrom<IFieldDescriptor>(resolved), Comparer);
+        }
+
+        [Fact]
+        public void ImportGenericTypeInstantiationViaReflection()
+        {
+            var type = typeof(GenericType<int, string, Stream>);
+
+            var imported = Assert.IsAssignableFrom<TypeSpecification>(_importer.ImportType(type));
+            var signature = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(imported.Signature);
+            Assert.Equal("Int32",  signature.TypeArguments[0].Name);
+            Assert.Equal("String", signature.TypeArguments[1].Name);
+            Assert.Equal("Stream", signature.TypeArguments[2].Name);
+        }
+
+        [Fact]
+        public void ImportGenericMethodInstantiationViaReflection()
+        {
+            var method = typeof(NonGenericType)
+                .GetMethod(nameof(NonGenericType.GenericMethodInNonGenericType))!
+                .MakeGenericMethod(typeof(int), typeof(string), typeof(Stream));
+
+            var imported = Assert.IsAssignableFrom<MethodSpecification>(_importer.ImportMethod(method));
+            Assert.Equal(nameof(NonGenericType.GenericMethodInNonGenericType), imported.Name);
+            Assert.NotNull(imported.Signature);
+            Assert.True(imported.Method!.Signature!.IsGeneric);
+            Assert.Equal(3, imported.Method!.Signature!.GenericParameterCount);
+            Assert.Equal("Int32", imported.Signature.TypeArguments[0].Name);
+            Assert.Equal("String", imported.Signature.TypeArguments[1].Name);
+            Assert.Equal("Stream", imported.Signature.TypeArguments[2].Name);
+        }
+
+        [Fact]
+        public void ImportGenericMethodInstantiationWithReturnTypeViaReflection()
+        {
+            var method = typeof(GenericType<int, bool, Stream>)
+                .GetMethod(nameof(GenericType<int, bool, Stream>.NonGenericMethodWithReturnType))!;
+
+            var imported = Assert.IsAssignableFrom<IMethodDescriptor>(_importer.ImportMethod(method));
+            Assert.Equal(nameof(GenericType<int, bool, Stream>.NonGenericMethodWithReturnType), imported.Name);
+            Assert.NotNull(imported.Signature);
+            var signature = Assert.IsAssignableFrom<GenericParameterSignature>(imported.Signature.ReturnType);
+            Assert.Equal(2, signature.Index);
         }
     }
 }
