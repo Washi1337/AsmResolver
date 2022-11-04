@@ -45,6 +45,11 @@ public class ProcedureReferenceSymbol : CodeViewSymbol
     }
 
     /// <summary>
+    /// Is the symbol a Local Procedure Reference?
+    /// </summary>
+    public bool IsLocal => _local;
+
+    /// <summary>
     /// Gets the checksum of the referenced symbol name. The checksum used is the
     /// one specified in the header of the global symbols stream or static symbols stream.
     /// </summary>

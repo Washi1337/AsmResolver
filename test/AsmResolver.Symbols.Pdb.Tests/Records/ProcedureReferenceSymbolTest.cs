@@ -16,6 +16,12 @@ public class ProcedureReferenceSymbolTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void Name()
     {
-        Assert.Equal("DllMain", _fixture.SimplePdb.Symbols.OfType<ProcedureReferenceSymbol>().First().Name);
+        Assert.Equal("DllMain", _fixture.SimplePdb.Symbols.OfType<ProcedureReferenceSymbol>().First(s => !s.IsLocal).Name);
+    }
+
+    [Fact]
+    public void LocalName()
+    {
+        Assert.Equal("__get_entropy", _fixture.SimplePdb.Symbols.OfType<ProcedureReferenceSymbol>().First(s => s.IsLocal).Name);
     }
 }
