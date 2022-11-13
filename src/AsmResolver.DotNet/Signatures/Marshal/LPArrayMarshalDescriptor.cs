@@ -38,6 +38,9 @@ namespace AsmResolver.DotNet.Signatures.Marshal
             return descriptor;
         }
 
+        /// <summary>
+        /// Creates a new empty instance of the <see cref="LPArrayMarshalDescriptor"/> class.
+        /// </summary>
         public LPArrayMarshalDescriptor()
         {
         }
