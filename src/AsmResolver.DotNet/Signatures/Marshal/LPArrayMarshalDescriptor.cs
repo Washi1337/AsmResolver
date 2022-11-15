@@ -17,7 +17,11 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// </remarks>
         public static LPArrayMarshalDescriptor FromReader(ref BinaryStreamReader reader)
         {
-            var descriptor = new LPArrayMarshalDescriptor((NativeType) reader.ReadByte());
+            var descriptor = new LPArrayMarshalDescriptor();
+
+            if (!reader.CanRead(sizeof(byte)))
+                return descriptor;
+            descriptor.ArrayElementType = (NativeType) reader.ReadByte();
 
             if (!reader.TryReadCompressedUInt32(out uint value))
                 return descriptor;
@@ -35,10 +39,17 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         }
 
         /// <summary>
+        /// Creates a new empty instance of the <see cref="LPArrayMarshalDescriptor"/> class.
+        /// </summary>
+        public LPArrayMarshalDescriptor()
+        {
+        }
+
+        /// <summary>
         /// Creates a new instance of the <see cref="LPArrayMarshalDescriptor"/> class.
         /// </summary>
         /// <param name="arrayElementType">The type of elements stored in the array.</param>
-        public LPArrayMarshalDescriptor(NativeType arrayElementType)
+        public LPArrayMarshalDescriptor(NativeType? arrayElementType)
         {
             ArrayElementType = arrayElementType;
         }
@@ -49,7 +60,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <summary>
         /// Gets the type of elements stored in the array.
         /// </summary>
-        public NativeType ArrayElementType
+        public NativeType? ArrayElementType
         {
             get;
             set;
@@ -86,20 +97,22 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         protected override void WriteContents(in BlobSerializationContext context)
         {
             var writer = context.Writer;
-
             writer.WriteByte((byte) NativeType);
+
+            if (!ArrayElementType.HasValue)
+                return;
             writer.WriteByte((byte) ArrayElementType);
 
-            if (ParameterIndex.HasValue)
-            {
-                writer.WriteCompressedUInt32((uint) ParameterIndex.Value);
-                if (NumberOfElements.HasValue)
-                {
-                    writer.WriteCompressedUInt32((uint) NumberOfElements.Value);
-                    if (Flags.HasValue)
-                        writer.WriteCompressedUInt32((uint) Flags.Value);
-                }
-            }
+            if (!ParameterIndex.HasValue)
+                return;
+            writer.WriteCompressedUInt32((uint) ParameterIndex.Value);
+
+            if (!NumberOfElements.HasValue)
+                return;
+            writer.WriteCompressedUInt32((uint) NumberOfElements.Value);
+
+            if (Flags.HasValue)
+                writer.WriteCompressedUInt32((uint) Flags.Value);
         }
     }
 }
