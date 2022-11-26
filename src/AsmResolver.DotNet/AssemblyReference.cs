@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -128,9 +129,14 @@ namespace AsmResolver.DotNet
             if (!HasPublicKey)
                 return PublicKeyOrToken;
 
-            _publicKeyToken ??= PublicKeyOrToken != null
-                ? ComputePublicKeyToken(PublicKeyOrToken, Resolve()?.HashAlgorithm ?? AssemblyHashAlgorithm.Sha1)
-                : null;
+            if (_publicKeyToken is null && PublicKeyOrToken is not null)
+            {
+                lock (_publicKeyOrToken)
+                {
+                    if (_publicKeyToken is null && PublicKeyOrToken is not null)
+                        _publicKeyToken = ComputePublicKeyToken(PublicKeyOrToken, AssemblyHashAlgorithm.Sha1);
+                }
+            }
 
             return _publicKeyToken;
         }
