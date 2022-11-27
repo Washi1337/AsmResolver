@@ -17,7 +17,7 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input blob stream.</param>
         /// <returns>The security attribute.</returns>
-        public static SecurityAttribute FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
+        public static SecurityAttribute FromReader(in BlobReaderContext context, ref BinaryStreamReader reader)
         {
             string? typeName = reader.ReadSerString();
             var type = string.IsNullOrEmpty(typeName)

@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet.Serialized
                     $"Invalid signature blob index in stand-alone signature {MetadataToken.ToString()}.");
             }
 
-            var context = new BlobReadContext(_context);
+            var context = new BlobReaderContext(_context);
             return CallingConventionSignature.FromReader(ref context, ref reader);
         }
 

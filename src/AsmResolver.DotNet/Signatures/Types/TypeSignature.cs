@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <returns>The type signature.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the blob reader points to an element type that is
         /// invalid or unsupported.</exception>
-        public static TypeSignature FromReader(ref BlobReadContext context, ref BinaryStreamReader reader)
+        public static TypeSignature FromReader(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {
             var elementType = (ElementType) reader.ReadByte();
             switch (elementType)
@@ -163,7 +163,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="allowTypeSpec">Indicates the coded index to the type is allowed to be decoded to a member in
         /// the type specification table.</param>
         /// <returns>The decoded and resolved type definition or reference.</returns>
-        protected static ITypeDefOrRef ReadTypeDefOrRef(ref BlobReadContext context, ref BinaryStreamReader reader, bool allowTypeSpec)
+        protected static ITypeDefOrRef ReadTypeDefOrRef(ref BlobReaderContext context, ref BinaryStreamReader reader, bool allowTypeSpec)
         {
             if (!reader.TryReadCompressedUInt32(out uint codedIndex))
                 return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.BlobTooShort);
@@ -206,7 +206,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             context.Writer.WriteCompressedUInt32(index);
         }
 
-        internal static TypeSignature ReadFieldOrPropType(in BlobReadContext context, ref BinaryStreamReader reader)
+        internal static TypeSignature ReadFieldOrPropType(in BlobReaderContext context, ref BinaryStreamReader reader)
         {
             var module = context.ReaderContext.ParentModule;
 

@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet.Serialized
                     $"Invalid signature blob index in property {MetadataToken.ToString()}.");
             }
 
-            var context = new BlobReadContext(_context);
+            var context = new BlobReaderContext(_context);
             return PropertySignature.FromReader(ref context, ref reader);
         }
 

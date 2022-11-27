@@ -19,8 +19,8 @@ namespace AsmResolver.DotNet.Dynamic
                 throw new ArgumentException("Method body should reference a serialized module.");
 
             var reader = new BinaryStreamReader(localSig);
-            var context = new BlobReadContext(module.ReaderContext, DynamicTypeSignatureResolver.Instance);
-            if (CallingConventionSignature.FromReader(context, ref reader)
+            var context = new BlobReaderContext(module.ReaderContext, DynamicTypeSignatureResolver.Instance);
+            if (CallingConventionSignature.FromReader(ref context, ref reader)
                 is not LocalVariablesSignature localsSignature)
             {
                 throw new ArgumentException("Invalid local variables signature.");

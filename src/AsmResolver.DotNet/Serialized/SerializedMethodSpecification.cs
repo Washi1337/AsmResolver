@@ -52,7 +52,7 @@ namespace AsmResolver.DotNet.Serialized
                     $"Invalid instantiation blob index in method specification {MetadataToken.ToString()}.");
             }
 
-            var context = new BlobReadContext(_context);
+            var context = new BlobReaderContext(_context);
             return GenericInstanceMethodSignature.FromReader(ref context, ref reader);
         }
 

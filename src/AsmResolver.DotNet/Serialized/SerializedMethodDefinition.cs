@@ -52,7 +52,7 @@ namespace AsmResolver.DotNet.Serialized
                     $"Invalid signature blob index in method {MetadataToken.ToString()}.");
             }
 
-            var context = new BlobReadContext(_context);
+            var context = new BlobReaderContext(_context);
             return MethodSignature.FromReader(ref context, ref reader);
         }
 

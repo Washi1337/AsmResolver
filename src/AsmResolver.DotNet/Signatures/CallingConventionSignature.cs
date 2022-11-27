@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Signatures
         /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
         /// <returns>The read signature.</returns>
         public static CallingConventionSignature? FromReader(
-            ref BlobReadContext context,
+            ref BlobReaderContext context,
             ref BinaryStreamReader reader,
             bool readToEnd = true)
         {
@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet.Signatures
             return signature;
         }
 
-        private static CallingConventionSignature? ReadSignature(ref BlobReadContext context, ref BinaryStreamReader reader)
+        private static CallingConventionSignature? ReadSignature(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {
             byte flag = reader.ReadByte();
             reader.Offset--;

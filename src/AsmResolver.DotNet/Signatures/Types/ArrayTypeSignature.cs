@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             get;
         }
 
-        internal new static ArrayTypeSignature FromReader(ref BlobReadContext context, ref BinaryStreamReader reader)
+        internal new static ArrayTypeSignature FromReader(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {
             var signature = new ArrayTypeSignature(TypeSignature.FromReader(ref context, ref reader));
 

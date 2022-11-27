@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public class SerializedCustomAttributeSignature : CustomAttributeSignature
     {
-        private readonly BlobReadContext _context;
+        private readonly BlobReaderContext _context;
         private readonly TypeSignature[] _fixedArgTypes;
         private readonly BinaryStreamReader _reader;
 
@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="fixedArgTypes">The types of all fixed arguments.</param>
         /// <param name="reader">The input blob reader.</param>
         public SerializedCustomAttributeSignature(
-            in BlobReadContext context,
+            in BlobReaderContext context,
             IEnumerable<TypeSignature> fixedArgTypes,
             in BinaryStreamReader reader)
         {

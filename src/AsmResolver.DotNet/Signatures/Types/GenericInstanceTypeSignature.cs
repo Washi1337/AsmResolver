@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         private ITypeDefOrRef _genericType;
         private bool _isValueType;
 
-        internal new static GenericInstanceTypeSignature FromReader(ref BlobReadContext context, ref BinaryStreamReader reader)
+        internal new static GenericInstanceTypeSignature FromReader(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {
             var genericType = TypeSignature.FromReader(ref context, ref reader);
             var signature = new GenericInstanceTypeSignature(genericType.ToTypeDefOrRef(), genericType.ElementType == ElementType.ValueType);

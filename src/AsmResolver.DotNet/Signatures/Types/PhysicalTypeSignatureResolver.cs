@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         } = new();
 
         /// <inheritdoc />
-        public virtual ITypeDefOrRef ResolveToken(ref BlobReadContext context, MetadataToken token)
+        public virtual ITypeDefOrRef ResolveToken(ref BlobReaderContext context, MetadataToken token)
         {
             switch (token.Table)
             {
@@ -34,6 +34,9 @@ namespace AsmResolver.DotNet.Signatures.Types
                     if (context.ReaderContext.ParentModule.TryLookupMember(token, out var member)
                         && member is ITypeDefOrRef typeDefOrRef)
                     {
+                        if (token.Table == TableIndex.TypeSpec)
+                            context.StepOutToken();
+
                         return typeDefOrRef;
                     }
 
@@ -47,7 +50,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public virtual TypeSignature ResolveRuntimeType(ref BlobReadContext context, nint address)
+        public virtual TypeSignature ResolveRuntimeType(ref BlobReaderContext context, nint address)
         {
             throw new NotSupportedException(
                 "Encountered an COR_ELEMENT_TYPE_INTERNAL type signature which is not supported by this "

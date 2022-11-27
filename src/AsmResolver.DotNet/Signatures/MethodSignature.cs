@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The method signature.</returns>
-        public static MethodSignature FromReader(ref BlobReadContext context, ref BinaryStreamReader reader)
+        public static MethodSignature FromReader(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {
             var result = new MethodSignature(
                 (CallingConventionAttributes) reader.ReadByte(),

@@ -106,7 +106,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input stream.</param>
-        protected void ReadParametersAndReturnType(ref BlobReadContext context, ref BinaryStreamReader reader)
+        protected void ReadParametersAndReturnType(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {
             // Parameter count.
             if (!reader.TryReadCompressedUInt32(out uint parameterCount))

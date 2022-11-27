@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The signature.</returns>
-        public static LocalVariablesSignature FromReader(ref BlobReadContext context, ref BinaryStreamReader reader)
+        public static LocalVariablesSignature FromReader(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {
             var result = new LocalVariablesSignature();
             result.Attributes = (CallingConventionAttributes) reader.ReadByte();
