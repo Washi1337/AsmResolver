@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the referenced member.</param>
         /// <param name="signature">The signature of the referenced member. This dictates whether the
         /// referenced member is a field or a method.</param>
-        public MemberReference(IMemberRefParent? parent, string? name, MemberSignature? signature)
+        public MemberReference(IMemberRefParent? parent, Utf8String? name, MemberSignature? signature)
             : this(new MetadataToken(TableIndex.MemberRef, 0))
         {
             Parent = parent;

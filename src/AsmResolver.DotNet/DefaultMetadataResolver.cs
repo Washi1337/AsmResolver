@@ -226,7 +226,7 @@ namespace AsmResolver.DotNet
                 }
             }
 
-            private TypeDefinition? FindTypeInAssembly(AssemblyDefinition assembly, string? ns, string name)
+            private TypeDefinition? FindTypeInAssembly(AssemblyDefinition assembly, Utf8String? ns, Utf8String name)
             {
                 for (int i = 0; i < assembly.Modules.Count; i++)
                 {

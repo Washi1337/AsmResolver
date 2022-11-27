@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the property.</param>
         /// <param name="attributes">The attributes.</param>
         /// <param name="eventType">The delegate type of the event.</param>
-        public EventDefinition(string? name, EventAttributes attributes, ITypeDefOrRef? eventType)
+        public EventDefinition(Utf8String? name, EventAttributes attributes, ITypeDefOrRef? eventType)
             : this(new MetadataToken(TableIndex.Event,0))
         {
             Name = name;

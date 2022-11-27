@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the property.</param>
         /// <param name="attributes">The attributes.</param>
         /// <param name="signature">The signature of the property.</param>
-        public PropertyDefinition(string? name, PropertyAttributes attributes, PropertySignature? signature)
+        public PropertyDefinition(Utf8String? name, PropertyAttributes attributes, PropertySignature? signature)
             : this(new MetadataToken(TableIndex.Property,0))
         {
             Name = name;

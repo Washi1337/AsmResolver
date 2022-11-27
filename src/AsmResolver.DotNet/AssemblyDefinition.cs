@@ -106,7 +106,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the assembly.</param>
         /// <param name="version">The version of the assembly.</param>
-        public AssemblyDefinition(string? name, Version version)
+        public AssemblyDefinition(Utf8String? name, Version version)
             : this(new MetadataToken(TableIndex.Assembly, 0))
         {
             Name = name;
@@ -290,11 +290,9 @@ namespace AsmResolver.DotNet
             for (int i = 0; i < Modules.Count; i++)
             {
                 var module = Modules[i];
-                string modulePath;
-                if (module == ManifestModule)
-                    modulePath = filePath;
-                else
-                    modulePath = Path.Combine(directory, module.Name ?? $"module{i}.bin");
+                string modulePath = module == ManifestModule
+                    ? filePath
+                    : Path.Combine(directory, module.Name?.Value ?? $"module{i}.bin");
 
                 module.Write(modulePath, imageBuilder, fileBuilder);
             }

@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet
         /// Creates a new parameter definition using the provided name.
         /// </summary>
         /// <param name="name">The name of the new parameter.</param>
-        public ParameterDefinition(string? name)
+        public ParameterDefinition(Utf8String? name)
             : this(new MetadataToken(TableIndex.Param, 0))
         {
             Name = name;
@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet
         /// <param name="sequence">The sequence number of the new parameter.</param>
         /// <param name="name">The name of the new parameter.</param>
         /// <param name="attributes">The attributes to assign to the parameter.</param>
-        public ParameterDefinition(ushort sequence, string? name, ParameterAttributes attributes)
+        public ParameterDefinition(ushort sequence, Utf8String? name, ParameterAttributes attributes)
             : this(new MetadataToken(TableIndex.Param, 0))
         {
             Sequence = sequence;

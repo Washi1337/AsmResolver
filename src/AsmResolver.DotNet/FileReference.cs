@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the file.</param>
         /// <param name="attributes">The attributes associated to the reference.</param>
-        public FileReference(string? name, FileAttributes attributes)
+        public FileReference(Utf8String? name, FileAttributes attributes)
             : this(new MetadataToken(TableIndex.File, 0))
         {
             Name = name;

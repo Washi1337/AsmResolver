@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the name of the method.
         /// </summary>
-        new Utf8String Name
+        new Utf8String? Name
         {
             get;
         }

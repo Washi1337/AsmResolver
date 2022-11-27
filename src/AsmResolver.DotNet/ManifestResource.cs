@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet
         /// <param name="attributes">The attributes of the resource.</param>
         /// <param name="implementation">The location of the resource data.</param>
         /// <param name="offset">The offset within the file referenced by <paramref name="implementation"/> where the data starts.</param>
-        public ManifestResource(string? name, ManifestResourceAttributes attributes, IImplementation? implementation, uint offset)
+        public ManifestResource(Utf8String? name, ManifestResourceAttributes attributes, IImplementation? implementation, uint offset)
             : this(new MetadataToken(TableIndex.ManifestResource, 0))
         {
             Name = name;
@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the repository.</param>
         /// <param name="attributes">The attributes of the resource.</param>
         /// <param name="data">The embedded resource data.</param>
-        public ManifestResource(string? name, ManifestResourceAttributes attributes, ISegment? data)
+        public ManifestResource(Utf8String? name, ManifestResourceAttributes attributes, ISegment? data)
             : this(new MetadataToken(TableIndex.ManifestResource, 0))
         {
             Name = name;

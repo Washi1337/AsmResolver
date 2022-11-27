@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="name">The name of the assembly.</param>
         /// <param name="version">The version of the assembly.</param>
-        public AssemblyReference(string? name, Version version)
+        public AssemblyReference(Utf8String? name, Version version)
             : this(new MetadataToken(TableIndex.AssemblyRef, 0))
         {
             Name = name;
@@ -51,7 +51,7 @@ namespace AsmResolver.DotNet
         /// unhashed public key used to verify the authenticity of the assembly.</param>
         /// <param name="publicKeyOrToken">Indicates the public key or token (depending on <paramref name="publicKey"/>),
         /// used to verify the authenticity of the assembly.</param>
-        public AssemblyReference(string? name, Version version, bool publicKey, byte[]? publicKeyOrToken)
+        public AssemblyReference(Utf8String? name, Version version, bool publicKey, byte[]? publicKeyOrToken)
             : this(new MetadataToken(TableIndex.AssemblyRef, 0))
         {
             Name = name;
