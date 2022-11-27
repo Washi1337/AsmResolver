@@ -8,6 +8,14 @@ namespace AsmResolver.DotNet
     public interface IMethodDescriptor : IMemberDescriptor, IMetadataMember
     {
         /// <summary>
+        /// Gets the name of the method.
+        /// </summary>
+        new Utf8String Name
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the signature of the method.
         /// </summary>
         MethodSignature? Signature
