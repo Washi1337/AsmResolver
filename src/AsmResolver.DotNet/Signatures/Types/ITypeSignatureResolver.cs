@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="context">The blob reading context the type is situated in.</param>
         /// <param name="token">The token to resolve.</param>
         /// <returns>The type.</returns>
-        ITypeDefOrRef ResolveToken(in BlobReadContext context, MetadataToken token);
+        ITypeDefOrRef ResolveToken(ref BlobReadContext context, MetadataToken token);
 
         /// <summary>
         /// Resolves an address to a runtime method table to a type signature.
@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="context">The blob reading context the type is situated in.</param>
         /// <param name="address">The address to resolve.</param>
         /// <returns>The type.</returns>
-        TypeSignature ResolveRuntimeType(in BlobReadContext context, nint address);
+        TypeSignature ResolveRuntimeType(ref BlobReadContext context, nint address);
     }
 
 }

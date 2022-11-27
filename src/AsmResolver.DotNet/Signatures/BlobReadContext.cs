@@ -10,14 +10,16 @@ namespace AsmResolver.DotNet.Signatures
     /// Provides a context in which a metadata blob parser exists in. This includes the original module reader context
     /// as well as a mechanism to protect against infinite recursion.
     /// </summary>
-    public readonly struct BlobReadContext
+    public struct BlobReadContext
     {
+        private Stack<MetadataToken>? _traversedTokens;
+
         /// <summary>
         /// Creates a new instance of the <see cref="BlobReadContext"/> structure.
         /// </summary>
         /// <param name="readerContext">The original read context.</param>
         public BlobReadContext(ModuleReaderContext readerContext)
-            : this(readerContext, PhysicalTypeSignatureResolver.Instance, Enumerable.Empty<MetadataToken>())
+            : this(readerContext, PhysicalTypeSignatureResolver.Instance)
         {
         }
 
@@ -27,8 +29,10 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="readerContext">The original read context.</param>
         /// <param name="resolver">The object responsible for resolving raw type metadata tokens and addresses.</param>
         public BlobReadContext(ModuleReaderContext readerContext, ITypeSignatureResolver resolver)
-            : this(readerContext, resolver, Enumerable.Empty<MetadataToken>())
         {
+            ReaderContext = readerContext;
+            TypeSignatureResolver = resolver;
+            _traversedTokens = null;
         }
 
         /// <summary>
@@ -41,7 +45,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             ReaderContext = readerContext;
             TypeSignatureResolver = resolver;
-            TraversedTokens = new HashSet<MetadataToken>(traversedTokens);
+            _traversedTokens = new Stack<MetadataToken>(traversedTokens);
         }
 
         /// <summary>
@@ -60,12 +64,15 @@ namespace AsmResolver.DotNet.Signatures
             get;
         }
 
-        /// <summary>
-        /// Gets a collection of metadata tokens that were traversed during the parsing of metadata.
-        /// </summary>
-        public ISet<MetadataToken> TraversedTokens
+        public bool StepInToken(MetadataToken token)
         {
-            get;
+            _traversedTokens ??= new Stack<MetadataToken>();
+
+            if (_traversedTokens.Contains(token))
+                return false;
+
+            _traversedTokens.Push(token);
+            return true;
         }
     }
 }

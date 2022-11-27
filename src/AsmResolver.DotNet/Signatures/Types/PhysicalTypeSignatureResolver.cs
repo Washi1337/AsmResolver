@@ -18,12 +18,12 @@ namespace AsmResolver.DotNet.Signatures.Types
         } = new();
 
         /// <inheritdoc />
-        public virtual ITypeDefOrRef ResolveToken(in BlobReadContext context, MetadataToken token)
+        public virtual ITypeDefOrRef ResolveToken(ref BlobReadContext context, MetadataToken token)
         {
             switch (token.Table)
             {
                 // Check for infinite recursion.
-                case TableIndex.TypeSpec when !context.TraversedTokens.Add(token):
+                case TableIndex.TypeSpec when !context.StepInToken(token):
                     context.ReaderContext.BadImage("Infinite metadata loop was detected.");
                     return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.MetadataLoop);
 
@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public virtual TypeSignature ResolveRuntimeType(in BlobReadContext context, nint address)
+        public virtual TypeSignature ResolveRuntimeType(ref BlobReadContext context, nint address)
         {
             throw new NotSupportedException(
                 "Encountered an COR_ELEMENT_TYPE_INTERNAL type signature which is not supported by this "

@@ -14,9 +14,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         private ITypeDefOrRef _genericType;
         private bool _isValueType;
 
-        internal new static GenericInstanceTypeSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
+        internal new static GenericInstanceTypeSignature FromReader(ref BlobReadContext context, ref BinaryStreamReader reader)
         {
-            var genericType = TypeSignature.FromReader(context, ref reader);
+            var genericType = TypeSignature.FromReader(ref context, ref reader);
             var signature = new GenericInstanceTypeSignature(genericType.ToTypeDefOrRef(), genericType.ElementType == ElementType.ValueType);
 
             if (!reader.TryReadCompressedUInt32(out uint count))
@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             signature._typeArguments.Capacity = (int) count;
             for (int i = 0; i < count; i++)
-                signature._typeArguments.Add(TypeSignature.FromReader(context, ref reader));
+                signature._typeArguments.Add(TypeSignature.FromReader(ref context, ref reader));
 
             return signature;
         }

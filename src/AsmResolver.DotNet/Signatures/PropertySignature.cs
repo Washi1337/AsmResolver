@@ -17,7 +17,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The property signature.</returns>
-        public static PropertySignature? FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
+        public static PropertySignature? FromReader(ref BlobReadContext context, ref BinaryStreamReader reader)
         {
             var attributes = (CallingConventionAttributes) reader.ReadByte();
             if ((attributes & CallingConventionAttributes.Property) == 0)
@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Signatures
                 context.ReaderContext.ParentModule.CorLibTypeFactory.Object,
                 Enumerable.Empty<TypeSignature>());
 
-            result.ReadParametersAndReturnType(context, ref reader);
+            result.ReadParametersAndReturnType(ref context, ref reader);
             return result;
         }
 

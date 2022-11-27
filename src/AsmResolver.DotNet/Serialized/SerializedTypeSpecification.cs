@@ -42,8 +42,8 @@ namespace AsmResolver.DotNet.Serialized
             }
 
             var context = new BlobReadContext(_context);
-            context.TraversedTokens.Add(MetadataToken);
-            return TypeSignature.FromReader(context, ref reader);
+            context.StepInToken(MetadataToken);
+            return TypeSignature.FromReader(ref context, ref reader);
         }
 
         /// <inheritdoc />

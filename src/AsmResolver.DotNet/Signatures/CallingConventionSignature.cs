@@ -20,11 +20,11 @@ namespace AsmResolver.DotNet.Signatures
         /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
         /// <returns>The read signature.</returns>
         public static CallingConventionSignature? FromReader(
-            in BlobReadContext context,
+            ref BlobReadContext context,
             ref BinaryStreamReader reader,
             bool readToEnd = true)
         {
-            var signature = ReadSignature(context, ref reader);
+            var signature = ReadSignature(ref context, ref reader);
             if (readToEnd)
             {
                 byte[] extraData = reader.ReadToEnd();
@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet.Signatures
             return signature;
         }
 
-        private static CallingConventionSignature? ReadSignature(in BlobReadContext context, ref BinaryStreamReader reader)
+        private static CallingConventionSignature? ReadSignature(ref BlobReadContext context, ref BinaryStreamReader reader)
         {
             byte flag = reader.ReadByte();
             reader.Offset--;
@@ -50,19 +50,19 @@ namespace AsmResolver.DotNet.Signatures
                 case CallingConventionAttributes.ThisCall:
                 case CallingConventionAttributes.VarArg:
                 case CallingConventionAttributes.Unmanaged:
-                    return MethodSignature.FromReader(context, ref reader);
+                    return MethodSignature.FromReader(ref context, ref reader);
 
                 case CallingConventionAttributes.Property:
-                    return PropertySignature.FromReader(context, ref reader);
+                    return PropertySignature.FromReader(ref context, ref reader);
 
                 case CallingConventionAttributes.Local:
-                    return LocalVariablesSignature.FromReader(context, ref reader);
+                    return LocalVariablesSignature.FromReader(ref context, ref reader);
 
                 case CallingConventionAttributes.GenericInstance:
-                    return GenericInstanceMethodSignature.FromReader(context, ref reader);
+                    return GenericInstanceMethodSignature.FromReader(ref context, ref reader);
 
                 case CallingConventionAttributes.Field:
-                    return FieldSignature.FromReader(context, ref reader);
+                    return FieldSignature.FromReader(ref context, ref reader);
             }
 
             throw new NotSupportedException($"Invalid or unsupported calling convention signature header {flag:X2}.");

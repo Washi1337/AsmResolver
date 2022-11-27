@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Dynamic
         public static bool IsSupported => GetTypeFromHandleUnsafeMethod is not null;
 
         /// <inheritdoc />
-        public override TypeSignature ResolveRuntimeType(in BlobReadContext context, nint address)
+        public override TypeSignature ResolveRuntimeType(ref BlobReadContext context, nint address)
         {
             if (!IsSupported)
                 throw new PlatformNotSupportedException("The current platform does not support the translation of raw type handles to System.Type instances.");

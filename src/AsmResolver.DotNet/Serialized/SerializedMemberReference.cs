@@ -60,7 +60,8 @@ namespace AsmResolver.DotNet.Serialized
                     $"Invalid signature blob index in member reference {MetadataToken.ToString()}.");
             }
 
-            return CallingConventionSignature.FromReader(new BlobReadContext(_context), ref reader, true);
+            var context = new BlobReadContext(_context);
+            return CallingConventionSignature.FromReader(ref context, ref reader, true);
         }
 
         /// <inheritdoc />
