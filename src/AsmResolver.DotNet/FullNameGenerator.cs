@@ -69,9 +69,9 @@ namespace AsmResolver.DotNet
             string returnTypeString = signature?.ReturnType.FullName ?? TypeSignature.NullTypeToString;
             string parameterTypesString = GetParameterTypesString(signature);
 
-            string[] argumentNames = typeArguments.ToArray();
-            string typeArgumentsString = argumentNames.Length>0
-                ? $"<{string.Join(", ", argumentNames)}>"
+            string argumentNames = string.Join(", ", typeArguments);
+            string typeArgumentsString = argumentNames.Length > 0
+                ? $"<{argumentNames}>"
                 : string.Empty;
 
             return declaringType is null
