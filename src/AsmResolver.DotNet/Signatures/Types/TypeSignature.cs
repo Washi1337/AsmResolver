@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public string FullName => this.GetTypeFullName();
+        public string FullName => MemberNameGenerator.GetTypeFullName(this);
 
         /// <inheritdoc />
         public abstract IResolutionScope? Scope

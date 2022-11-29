@@ -105,7 +105,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetFieldFullName(Name, DeclaringType, Signature);
+        public string FullName => MemberNameGenerator.GetFieldFullName(this);
 
         /// <summary>
         /// Gets or sets the attributes associated to the field.

@@ -90,7 +90,7 @@ namespace AsmResolver.DotNet
         string? ITypeDescriptor.Namespace => Namespace;
 
         /// <inheritdoc />
-        public string FullName => this.GetTypeFullName();
+        public string FullName => MemberNameGenerator.GetTypeFullName(this);
 
         /// <inheritdoc />
         public IResolutionScope? Scope

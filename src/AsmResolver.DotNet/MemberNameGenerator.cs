@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,127 +12,17 @@ namespace AsmResolver.DotNet
     /// </summary>
     public sealed class MemberNameGenerator : ITypeSignatureVisitor<StringBuilder, StringBuilder>
     {
+        private MemberNameGenerator()
+        {
+        }
+
+        /// <summary>
+        /// Gets the singleton instance for the member name generator.
+        /// </summary>
         public static MemberNameGenerator Instance
         {
             get;
         } = new();
-
-        /// <summary>
-        /// Computes the full name of a field definition, including its declaring type's full name, as well as its
-        /// field type.
-        /// </summary>
-        /// <param name="name">The name of the field.</param>
-        /// <param name="declaringType">The declaring type of the field, if available.</param>
-        /// <param name="signature">The signature of the field.</param>
-        /// <returns>The full name</returns>
-        public static string GetFieldFullName(string? name, ITypeDescriptor? declaringType, FieldSignature? signature)
-        {
-            string fieldTypeString = signature?.FieldType.FullName ?? TypeSignature.NullTypeToString;
-
-            return declaringType is null
-                ? $"{fieldTypeString} {name}"
-                : $"{fieldTypeString} {declaringType}::{name}";
-        }
-
-        /// <summary>
-        /// Computes the full name of a method definition, including its declaring type's full name, as well as its
-        /// return type and parameters.
-        /// </summary>
-        /// <param name="name">The name of the method.</param>
-        /// <param name="declaringType">The declaring type of the method if available.</param>
-        /// <param name="signature">The signature of the method.</param>
-        /// <returns>The full name</returns>
-        public static string GetMethodFullName(string? name, ITypeDescriptor? declaringType, MethodSignature? signature)
-        {
-            if (signature?.GenericParameterCount > 0)
-            {
-                return GetMethodFullName(name, declaringType, signature,
-                    Enumerable.Repeat<string>("?", signature.GenericParameterCount));
-            }
-
-            string returnTypeString = signature?.ReturnType.FullName ?? TypeSignature.NullTypeToString;
-            string parameterTypesString = GetParameterTypesString(signature);
-
-            return declaringType is null
-                ? $"{returnTypeString} {name}({parameterTypesString})"
-                : $"{returnTypeString} {declaringType}::{name}({parameterTypesString})";
-        }
-
-        /// <summary>
-        /// Computes the full name of a method specification, including its declaring type's full name, as well as its
-        /// return type, parameters and any type arguments.
-        /// </summary>
-        /// <param name="name">The name of the method.</param>
-        /// <param name="declaringType">The declaring type of the method if available.</param>
-        /// <param name="signature">The signature of the method.</param>
-        /// <param name="typeArguments">The type arguments.</param>
-        /// <returns>The full name</returns>
-        public static string GetMethodFullName(
-            string? name,
-            ITypeDescriptor? declaringType,
-            MethodSignature? signature,
-            IEnumerable<string> typeArguments)
-        {
-            string returnTypeString = signature?.ReturnType.FullName ?? TypeSignature.NullTypeToString;
-            string parameterTypesString = GetParameterTypesString(signature);
-
-            string[] argumentNames = typeArguments.ToArray();
-            string typeArgumentsString = argumentNames.Length>0
-                ? $"<{string.Join(", ", argumentNames)}>"
-                : string.Empty;
-
-            return declaringType is null
-                ? $"{returnTypeString} {name}{typeArgumentsString}({parameterTypesString})"
-                : $"{returnTypeString} {declaringType}::{name}{typeArgumentsString}({parameterTypesString})";
-        }
-
-        /// <summary>
-        /// Computes the full name of a property definition, including its declaring type's full name, as well as its
-        /// return type and parameters.
-        /// </summary>
-        /// <param name="name">The name of the property.</param>
-        /// <param name="declaringType">The declaring type of the property if available.</param>
-        /// <param name="signature">The signature of the property.</param>
-        /// <returns>The full name</returns>
-        public static string GetPropertyFullName(string? name, ITypeDescriptor? declaringType, PropertySignature? signature)
-        {
-            string propertyTypeString = signature?.ReturnType.FullName ?? TypeSignature.NullTypeToString;
-            string parameterTypesString = signature?.ParameterTypes.Count > 0
-                ? $"[{GetParameterTypesString(signature)}]"
-                : string.Empty;
-
-            return declaringType is null
-                ? $"{propertyTypeString} {name}{parameterTypesString}"
-                : $"{propertyTypeString} {declaringType}::{name}{parameterTypesString}";
-        }
-
-        /// <summary>
-        /// Computes the full name of a event definition, including its declaring type's full name, as well as its
-        /// event type.
-        /// </summary>
-        /// <param name="name">The name of the field.</param>
-        /// <param name="declaringType">The declaring type of the field, if available.</param>
-        /// <param name="eventType">The type of the event.</param>
-        /// <returns>The full name</returns>
-        public static string GetEventFullName(string? name, ITypeDescriptor? declaringType, ITypeDefOrRef? eventType)
-        {
-            return declaringType is null
-                ? $"{eventType} {name}"
-                : $"{eventType} {declaringType}::{name}";
-        }
-
-        private static string GetParameterTypesString(MethodSignatureBase? signature)
-        {
-            if (signature is null)
-                return string.Empty;
-
-            string parametersString = string.Join(", ", signature.ParameterTypes);
-            string sentinelSuffix = signature.IsSentinel
-                ? ", ..."
-                : string.Empty;
-
-            return $"{parametersString}{sentinelSuffix}";
-        }
 
         /// <summary>
         /// Computes the full name of a type descriptor, including its namespace and/or declaring types.
@@ -140,12 +31,226 @@ namespace AsmResolver.DotNet
         /// <returns>The full name.</returns>
         public static string GetTypeFullName(ITypeDescriptor type)
         {
-            var builder = new StringBuilder();
-            return AppendTypeFullName(builder, type).ToString();
+            var state = new StringBuilder();
+            return AppendTypeFullName(state, type).ToString();
         }
 
-        private static StringBuilder AppendTypeFullName(StringBuilder state, ITypeDescriptor type)
+        /// <summary>
+        /// Computes the full name of a field definition, including its declaring type's full name, as well as its
+        /// field type.
+        /// </summary>
+        /// <param name="descriptor">The field</param>
+        /// <returns>The full name</returns>
+        public static string GetFieldFullName(IFieldDescriptor descriptor)
         {
+            var state = new StringBuilder();
+
+            AppendTypeFullName(state, descriptor.Signature?.FieldType);
+            state.Append(' ');
+            AppendMemberDeclaringType(state, descriptor.DeclaringType);
+
+            return state.Append(descriptor.Name ?? MetadataMember.NullName).ToString();
+        }
+
+        /// <summary>
+        /// Computes the full name of a method reference, including its declaring type's full name, as well as its
+        /// return type and parameters.
+        /// </summary>
+        /// <param name="reference">The reference</param>
+        /// <returns>The full name</returns>
+        public static string GetMethodFullName(MemberReference reference)
+        {
+            var state = new StringBuilder();
+
+            var signature = reference.Signature as MethodSignature;
+
+            AppendTypeFullName(state, signature?.ReturnType);
+            state.Append(' ');
+            AppendMemberDeclaringType(state, reference.DeclaringType);
+            state.Append(reference.Name ?? MetadataMember.NullName);
+
+            AppendTypeArgumentPlaceholders(state, signature);
+
+            state.Append('(');
+            AppendSignatureParameterTypes(state, signature);
+            state.Append(')');
+
+            return state.ToString();
+        }
+
+        /// <summary>
+        /// Computes the full name of a method definition, including its declaring type's full name, as well as its
+        /// return type, parameters and any type arguments.
+        /// </summary>
+        /// <param name="definition">The definition</param>
+        /// <returns>The full name</returns>
+        public static string GetMethodFullName(MethodDefinition definition)
+        {
+            var state = new StringBuilder();
+
+            var signature = definition.Signature;
+
+            AppendTypeFullName(state, signature?.ReturnType);
+            state.Append(' ');
+            AppendMemberDeclaringType(state, definition.DeclaringType);
+            state.Append(definition.Name ?? MetadataMember.NullName.Value);
+
+            AppendTypeParameters(state, definition.GenericParameters);
+
+            state.Append('(');
+            AppendSignatureParameterTypes(state, signature);
+            state.Append(')');
+
+            return state.ToString();
+        }
+
+        /// <summary>
+        /// Computes the full name of a method specification, including its declaring type's full name, as well as its
+        /// return type, parameters and any type arguments.
+        /// </summary>
+        /// <param name="specification">The specification</param>
+        /// <returns>The full name</returns>
+        public static string GetMethodFullName(MethodSpecification specification)
+        {
+            var state = new StringBuilder();
+
+            var signature = specification.Method?.Signature;
+
+            AppendTypeFullName(state, signature?.ReturnType);
+            state.Append(' ');
+            AppendMemberDeclaringType(state, specification.DeclaringType);
+            state.Append(specification.Name);
+
+            AppendTypeParameters(state, specification.Signature?.TypeArguments ?? Array.Empty<TypeSignature>());
+
+            state.Append('(');
+            AppendSignatureParameterTypes(state, signature);
+            state.Append(')');
+
+            return state.ToString();
+        }
+
+        /// <summary>
+        /// Computes the full name of a property definition, including its declaring type's full name, as well as its
+        /// return type and parameters.
+        /// </summary>
+        /// <param name="definition">The property</param>
+        /// <returns>The full name</returns>
+        public static string GetPropertyFullName(PropertyDefinition definition)
+        {
+            var state = new StringBuilder();
+
+            var signature = definition.Signature;
+
+            AppendTypeFullName(state, signature?.ReturnType);
+            state.Append(' ');
+            AppendMemberDeclaringType(state, definition.DeclaringType);
+            state.Append(definition.Name ?? MetadataMember.NullName);
+
+            if (signature?.ParameterTypes.Count > 0)
+            {
+                state.Append('[');
+                AppendSignatureParameterTypes(state, signature);
+                state.Append(']');
+            }
+
+            return state.ToString();
+        }
+
+        /// <summary>
+        /// Computes the full name of a event definition, including its declaring type's full name, as well as its
+        /// event type.
+        /// </summary>
+        /// <param name="definition">The event</param>
+        /// <returns>The full name</returns>
+        public static string GetEventFullName(EventDefinition definition)
+        {
+            var state = new StringBuilder();
+
+            AppendTypeFullName(state, definition.EventType);
+            state.Append(' ');
+            AppendMemberDeclaringType(state, definition.DeclaringType);
+            state.Append(definition.Name);
+
+            return state.ToString();
+        }
+
+        private static StringBuilder AppendMemberDeclaringType(StringBuilder state, ITypeDescriptor? declaringType)
+        {
+            if (declaringType is not null)
+            {
+                AppendTypeFullName(state, declaringType);
+                state.Append("::");
+            }
+
+            return state;
+        }
+
+        private static StringBuilder AppendSignatureParameterTypes(StringBuilder state, MethodSignatureBase? signature)
+        {
+            if (signature is null)
+                return state;
+
+            for (int i = 0; i < signature.ParameterTypes.Count; i++)
+            {
+                signature.ParameterTypes[i].AcceptVisitor(Instance, state);
+                if (i < signature.ParameterTypes.Count - 1)
+                    state.Append(", ");
+            }
+
+            if (signature.IsSentinel)
+                state.Append("...");
+
+            return state;
+        }
+
+        private static StringBuilder AppendTypeParameters(StringBuilder state, IList<GenericParameter> typeArguments)
+        {
+            if (typeArguments.Count > 0)
+            {
+                state.Append('<');
+                AppendCommaSeparatedCollection(state, typeArguments, static (s, t) => s.Append(t.Name));
+                state.Append('>');
+            }
+
+            return state;
+        }
+
+        private static StringBuilder AppendTypeParameters(StringBuilder state, IList<TypeSignature> typeArguments)
+        {
+            if (typeArguments.Count > 0)
+            {
+                state.Append('<');
+                AppendCommaSeparatedCollection(state, typeArguments, static (s, t) => t.AcceptVisitor(Instance, s));
+                state.Append('>');
+            }
+
+            return state;
+        }
+
+        private static StringBuilder AppendTypeFullName(StringBuilder state, ITypeDescriptor? type)
+        {
+            switch (type)
+            {
+                case TypeSignature signature:
+                    return signature.AcceptVisitor(Instance, state);
+
+                case ITypeDefOrRef reference:
+                    return AppendTypeFullName(state, reference);
+
+                case null:
+                    return state.Append(TypeSignature.NullTypeToString);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type));
+            }
+        }
+
+        private static StringBuilder AppendTypeFullName(StringBuilder state, ITypeDefOrRef? type)
+        {
+            if (type is null)
+                return state.Append(TypeSignature.NullTypeToString);
+
             if (type.DeclaringType is { } declaringType)
             {
                 AppendTypeFullName(state, declaringType);
@@ -157,16 +262,50 @@ namespace AsmResolver.DotNet
                 state.Append('.');
             }
 
-            return AppendTypeName(state, type);
+            return state.Append(type.Name ?? MetadataMember.NullName);
         }
 
-        private static StringBuilder AppendTypeName(StringBuilder state, ITypeDescriptor type)
+        private static StringBuilder AppendTypeArgumentPlaceholders(StringBuilder state, MethodSignature? signature)
         {
-            if (type is TypeSignature signature)
-                return signature.AcceptVisitor(Instance, state);
+            if (signature?.GenericParameterCount > 0)
+            {
+                state.Append('<');
+                AppendCommaSeparatedCollection(state,
+                    Enumerable.Range(0, signature.GenericParameterCount).ToArray(),
+                    static (s, _) => s.Append('?'));
+                state.Append('>');
+            }
 
-            string name = type.Name ?? MetadataMember.NullName;
-            state.Append(name);
+            return state;
+        }
+
+        private static StringBuilder AppendMethodSignature(StringBuilder state, MethodSignature signature)
+        {
+            if (signature.HasThis)
+                state.Append("instance ");
+
+            signature.ReturnType.AcceptVisitor(Instance, state);
+
+            state.Append(" *");
+
+            AppendTypeArgumentPlaceholders(state, signature);
+
+            state.Append('(');
+            AppendSignatureParameterTypes(state, signature);
+            return state.Append(')');
+        }
+
+        private static StringBuilder AppendCommaSeparatedCollection<T>(
+            StringBuilder state,
+            IList<T> collection,
+            Action<StringBuilder, T> action)
+        {
+            for (int i = 0; i < collection.Count; i++)
+            {
+                action(state, collection[i]);
+                if (i < collection.Count - 1)
+                    state.Append(", ");
+            }
 
             return state;
         }
@@ -174,79 +313,126 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitArrayType(ArrayTypeSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            signature.BaseType.AcceptVisitor(this, state);
+
+            state.Append('[');
+
+            AppendCommaSeparatedCollection(state, signature.Dimensions, static (s, d) =>
+            {
+                if (d.LowerBound.HasValue)
+                {
+                    if (d.Size.HasValue)
+                    {
+                        AppendDimensionBound(s, d.LowerBound.Value, d.Size.Value);
+                    }
+                    else
+                    {
+                        s.Append(d.LowerBound.Value)
+                            .Append("...");
+                    }
+                }
+
+                if (d.Size.HasValue)
+                    AppendDimensionBound(s, 0, d.Size.Value);
+
+                static void AppendDimensionBound(StringBuilder state, int low, int size)
+                {
+                    state.Append(low)
+                        .Append("...")
+                        .Append(low + size - 1);
+                }
+            });
+
+            return state.Append(']');
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitBoxedType(BoxedTypeSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            return signature.BaseType.AcceptVisitor(this, state);
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitByReferenceType(ByReferenceTypeSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            return signature.BaseType
+                .AcceptVisitor(this, state)
+                .Append('&');
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitCorLibType(CorLibTypeSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            return state.Append("System.").Append(signature.Name);
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitCustomModifierType(CustomModifierTypeSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            signature.BaseType.AcceptVisitor(this, state);
+            state.Append(signature.IsRequired ? " modreq(" : " modopt(");
+            AppendTypeFullName(state, signature.ModifierType);
+            return state.Append(')');
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitGenericInstanceType(GenericInstanceTypeSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            AppendTypeFullName(state, signature.GenericType);
+            return AppendTypeParameters(state, signature.TypeArguments);
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitGenericParameter(GenericParameterSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            state.Append(signature.ParameterType switch
+            {
+                GenericParameterType.Type => "!",
+                GenericParameterType.Method => "!!",
+                _ => throw new ArgumentOutOfRangeException()
+            });
+
+            return state.Append(signature.Index);
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitPinnedType(PinnedTypeSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            return signature.BaseType.AcceptVisitor(this, state);
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitPointerType(PointerTypeSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            return signature.BaseType
+                .AcceptVisitor(this, state)
+                .Append('*');
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitSentinelType(SentinelTypeSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            return state.Append("<<<SENTINEL>>>");
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitSzArrayType(SzArrayTypeSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            return signature.BaseType
+                .AcceptVisitor(this, state)
+                .Append("[]");
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitTypeDefOrRef(TypeDefOrRefSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            return AppendTypeFullName(state, signature.Type);
         }
 
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitFunctionPointerType(FunctionPointerTypeSignature signature, StringBuilder state)
         {
-            throw new System.NotImplementedException();
+            return AppendMethodSignature(state, signature.Signature);
         }
     }
 }

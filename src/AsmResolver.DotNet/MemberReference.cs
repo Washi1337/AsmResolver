@@ -103,9 +103,10 @@ namespace AsmResolver.DotNet
             get
             {
                 if (IsField)
-                    return FullNameGenerator.GetFieldFullName(Name, DeclaringType, (FieldSignature) Signature);
+                    return MemberNameGenerator.GetFieldFullName(this);
                 if (IsMethod)
-                    return FullNameGenerator.GetMethodFullName(Name, DeclaringType, (MethodSignature) Signature);
+                    return MemberNameGenerator.GetMethodFullName(this);
+
                 return Name ?? NullName;
             }
         }
