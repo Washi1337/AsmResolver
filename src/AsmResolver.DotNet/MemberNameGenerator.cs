@@ -12,6 +12,9 @@ namespace AsmResolver.DotNet
     /// </summary>
     public sealed class MemberNameGenerator : ITypeSignatureVisitor<StringBuilder, StringBuilder>
     {
+        [ThreadStatic]
+        private static StringBuilder? _builder;
+
         private MemberNameGenerator()
         {
         }
@@ -24,6 +27,13 @@ namespace AsmResolver.DotNet
             get;
         } = new();
 
+        private static StringBuilder GetBuilder()
+        {
+            _builder ??= new StringBuilder();
+            _builder.Clear();
+            return _builder;
+        }
+
         /// <summary>
         /// Computes the full name of a type descriptor, including its namespace and/or declaring types.
         /// </summary>
@@ -31,7 +41,7 @@ namespace AsmResolver.DotNet
         /// <returns>The full name.</returns>
         public static string GetTypeFullName(ITypeDescriptor type)
         {
-            var state = new StringBuilder();
+            var state = GetBuilder();
             return AppendTypeFullName(state, type).ToString();
         }
 
@@ -43,7 +53,7 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetFieldFullName(IFieldDescriptor descriptor)
         {
-            var state = new StringBuilder();
+            var state = GetBuilder();
 
             AppendTypeFullName(state, descriptor.Signature?.FieldType);
             state.Append(' ');
@@ -60,7 +70,7 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetMethodFullName(MemberReference reference)
         {
-            var state = new StringBuilder();
+            var state = GetBuilder();
 
             var signature = reference.Signature as MethodSignature;
 
@@ -86,7 +96,7 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetMethodFullName(MethodDefinition definition)
         {
-            var state = new StringBuilder();
+            var state = GetBuilder();
 
             var signature = definition.Signature;
 
@@ -112,7 +122,7 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetMethodFullName(MethodSpecification specification)
         {
-            var state = new StringBuilder();
+            var state = GetBuilder();
 
             var signature = specification.Method?.Signature;
 
@@ -138,7 +148,7 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetPropertyFullName(PropertyDefinition definition)
         {
-            var state = new StringBuilder();
+            var state = GetBuilder();
 
             var signature = definition.Signature;
 
@@ -165,7 +175,7 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetEventFullName(EventDefinition definition)
         {
-            var state = new StringBuilder();
+            var state = GetBuilder();
 
             AppendTypeFullName(state, definition.EventType);
             state.Append(' ');
@@ -250,6 +260,9 @@ namespace AsmResolver.DotNet
         {
             if (type is null)
                 return state.Append(TypeSignature.NullTypeToString);
+
+            if (type is TypeSpecification specification)
+                return AppendTypeFullName(state, specification.Signature);
 
             if (type.DeclaringType is { } declaringType)
             {
