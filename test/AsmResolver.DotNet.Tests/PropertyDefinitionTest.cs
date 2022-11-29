@@ -76,5 +76,25 @@ namespace AsmResolver.DotNet.Tests
             var property = type.Properties.First(m => m.Name == nameof(MultipleProperties.ReadWriteProperty));
             Assert.Equal(2, property.Semantics.Count);
         }
+
+        [Fact]
+        public void ReadParameterlessPropertyFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var property = (PropertyDefinition) module.LookupMember(
+                typeof(MultipleProperties).GetProperty(nameof(MultipleProperties.ReadOnlyProperty)).MetadataToken);
+
+            Assert.Equal("System.Int32 AsmResolver.DotNet.TestCases.Properties.MultipleProperties::ReadOnlyProperty", property.FullName);
+        }
+
+        [Fact]
+        public void ReadParameterPropertyFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var property = (PropertyDefinition) module.LookupMember(
+                typeof(MultipleProperties).GetProperty("Item").MetadataToken);
+
+            Assert.Equal("System.Int32 AsmResolver.DotNet.TestCases.Properties.MultipleProperties::Item[System.Int32]", property.FullName);
+        }
     }
 }

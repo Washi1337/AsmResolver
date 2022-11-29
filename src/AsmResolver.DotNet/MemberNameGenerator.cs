@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 
@@ -8,8 +9,13 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides methods for constructing the full name of a member in a .NET module.
     /// </summary>
-    public static class FullNameGenerator
+    public sealed class MemberNameGenerator : ITypeSignatureVisitor<StringBuilder, StringBuilder>
     {
+        public static MemberNameGenerator Instance
+        {
+            get;
+        } = new();
+
         /// <summary>
         /// Computes the full name of a field definition, including its declaring type's full name, as well as its
         /// field type.
@@ -132,17 +138,115 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="type">The type to obtain the full name for.</param>
         /// <returns>The full name.</returns>
-        public static string GetTypeFullName(this ITypeDescriptor type)
+        public static string GetTypeFullName(ITypeDescriptor type)
         {
-            string name = type.Name ?? MetadataMember.NullName;
-
-            if (type.DeclaringType is not null)
-                return $"{type.DeclaringType.FullName}+{name}";
-
-            return !string.IsNullOrEmpty(type.Namespace)
-                ? $"{type.Namespace}.{name}"
-                : name;
+            var builder = new StringBuilder();
+            return AppendTypeFullName(builder, type).ToString();
         }
 
+        private static StringBuilder AppendTypeFullName(StringBuilder state, ITypeDescriptor type)
+        {
+            if (type.DeclaringType is { } declaringType)
+            {
+                AppendTypeFullName(state, declaringType);
+                state.Append('+');
+            }
+            else if (!string.IsNullOrEmpty(type.Namespace))
+            {
+                state.Append(type.Namespace);
+                state.Append('.');
+            }
+
+            return AppendTypeName(state, type);
+        }
+
+        private static StringBuilder AppendTypeName(StringBuilder state, ITypeDescriptor type)
+        {
+            if (type is TypeSignature signature)
+                return signature.AcceptVisitor(Instance, state);
+
+            string name = type.Name ?? MetadataMember.NullName;
+            state.Append(name);
+
+            return state;
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitArrayType(ArrayTypeSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitBoxedType(BoxedTypeSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitByReferenceType(ByReferenceTypeSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitCorLibType(CorLibTypeSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitCustomModifierType(CustomModifierTypeSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitGenericInstanceType(GenericInstanceTypeSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitGenericParameter(GenericParameterSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitPinnedType(PinnedTypeSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitPointerType(PointerTypeSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitSentinelType(SentinelTypeSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitSzArrayType(SzArrayTypeSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitTypeDefOrRef(TypeDefOrRefSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitFunctionPointerType(FunctionPointerTypeSignature signature, StringBuilder state)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

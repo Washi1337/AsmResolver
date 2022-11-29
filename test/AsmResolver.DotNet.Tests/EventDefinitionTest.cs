@@ -49,5 +49,15 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(@event.RemoveMethod);
         }
 
+        [Fact]
+        public void ReadFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var @event = (EventDefinition) module.LookupMember(
+                typeof(SingleEvent).GetEvent(nameof(SingleEvent.SimpleEvent)).MetadataToken);
+
+            Assert.Equal("System.EventHandler AsmResolver.DotNet.TestCases.Events.SingleEvent::SimpleEvent", @event.FullName);
+        }
+
     }
 }
