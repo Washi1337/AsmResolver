@@ -103,7 +103,7 @@ namespace AsmResolver.DotNet
             AppendTypeFullName(state, signature?.ReturnType);
             state.Append(' ');
             AppendMemberDeclaringType(state, definition.DeclaringType);
-            state.Append(definition.Name ?? MetadataMember.NullName.Value);
+            state.Append(definition.Name ?? MetadataMember.NullName);
 
             AppendTypeParameters(state, definition.GenericParameters);
 
@@ -445,6 +445,7 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         StringBuilder ITypeSignatureVisitor<StringBuilder, StringBuilder>.VisitFunctionPointerType(FunctionPointerTypeSignature signature, StringBuilder state)
         {
+            state.Append("method ");
             return AppendMethodSignature(state, signature.Signature);
         }
     }
