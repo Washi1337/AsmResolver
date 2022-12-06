@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         public void GetFunctionPointerTypeFullName()
         {
             var module = new ModuleDefinition("Dummy");
-            Assert.Equal("System.String *(System.Object, System.Int32)",
+            Assert.Equal("method System.String *(System.Object, System.Int32)",
                 MethodSignature.CreateStatic(
                         module.CorLibTypeFactory.String,
                         module.CorLibTypeFactory.Object,
@@ -58,7 +58,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         public void GetInstanceFunctionPointerTypeFullName()
         {
             var module = new ModuleDefinition("Dummy");
-            Assert.Equal("instance System.String *(System.Object, System.Int32)",
+            Assert.Equal("method instance System.String *(System.Object, System.Int32)",
                 MethodSignature.CreateInstance(
                         module.CorLibTypeFactory.String,
                         module.CorLibTypeFactory.Object,
