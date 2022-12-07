@@ -15,7 +15,14 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         where TKey : notnull
         where TRow : struct, IMetadataRow
     {
-        private readonly List<(TKey Key, TRow Row)> _entries = new();
+        /// <summary>
+        /// The entries that this table will contain.
+        /// - Key: The original key to be able to assign metadata tokens easily after sorting.
+        /// - Row: The metadata row that was constructed for this key.
+        /// - InputIndex: An index to ensure a stable sort.
+        /// </summary>
+        private readonly List<(TKey Key, TRow Row, int InputIndex)> _entries = new();
+
         private readonly Dictionary<TKey, MetadataToken> _newTokens = new();
         private readonly MetadataTable<TRow> _table;
         private readonly EntryComparer _comparer;
@@ -48,7 +55,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// <inheritdoc />
         public void Add(TKey originalKey, in TRow row)
         {
-            _entries.Add((originalKey, row));
+            _entries.Add((originalKey, row, _entries.Count));
         }
 
         /// <inheritdoc />
@@ -61,7 +68,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
 
             for (uint rid = 1; rid <= _entries.Count; rid++)
             {
-                var (member, _) = _entries[(int) (rid - 1)];
+                var member = _entries[(int) (rid - 1)].Key;
                 _newTokens[member] = new MetadataToken(_table.TableIndex, rid);
             }
         }
@@ -73,6 +80,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         public void FlushToTable()
         {
             Sort();
+
             _table.Clear();
             foreach (var row in _entries)
                 _table.Add(row.Row);
@@ -85,7 +93,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
             _table.Clear();
         }
 
-        private sealed class EntryComparer : IComparer<(TKey Key, TRow Row)>
+        private sealed class EntryComparer : IComparer<(TKey Key, TRow Row, int InputIndex)>
         {
             private readonly int _primaryColumn;
             private readonly int _secondaryColumn;
@@ -96,11 +104,13 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
                 _secondaryColumn = secondaryColumn;
             }
 
-            public int Compare((TKey Key, TRow Row) x, (TKey Key, TRow Row) y)
+            public int Compare((TKey Key, TRow Row, int InputIndex) x, (TKey Key, TRow Row, int InputIndex) y)
             {
                 int result = x.Row[_primaryColumn].CompareTo(y.Row[_primaryColumn]);
                 if (result == 0)
                     result = x.Row[_secondaryColumn].CompareTo(y.Row[_secondaryColumn]);
+                if (result == 0)
+                    result = x.InputIndex.CompareTo(y.InputIndex);
                 return result;
             }
         }
