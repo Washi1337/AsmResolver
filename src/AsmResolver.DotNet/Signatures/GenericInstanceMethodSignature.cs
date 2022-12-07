@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Signatures
     public class GenericInstanceMethodSignature : CallingConventionSignature, IGenericArgumentsProvider
     {
         internal static GenericInstanceMethodSignature? FromReader(
-            in BlobReadContext context,
+            ref BlobReaderContext context,
             ref BinaryStreamReader reader)
         {
             if (!reader.CanRead(sizeof(byte)))
@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet.Signatures
 
             var result = new GenericInstanceMethodSignature(attributes, (int) count);
             for (int i = 0; i < count; i++)
-                result.TypeArguments.Add(TypeSignature.FromReader(context, ref reader));
+                result.TypeArguments.Add(TypeSignature.FromReader(ref context, ref reader));
 
             return result;
         }

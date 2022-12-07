@@ -2,19 +2,21 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
+        <TargetFrameworks>net6.0</TargetFrameworks>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+      <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
-      <ProjectReference Include="..\..\src\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
-      <ProjectReference Include="..\..\src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj" />
-      <ProjectReference Include="..\..\src\AsmResolver.PE\AsmResolver.PE.csproj" />
-      <ProjectReference Include="..\..\src\AsmResolver\AsmResolver.csproj" />
+      <ProjectReference Include="$(SolutionDir)\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
+      <ProjectReference Include="$(SolutionDir)\src\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
+      <ProjectReference Include="$(SolutionDir)\src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj" />
+      <ProjectReference Include="$(SolutionDir)\src\AsmResolver.PE\AsmResolver.PE.csproj" />
+      <ProjectReference Include="$(SolutionDir)\src\AsmResolver\AsmResolver.csproj" />
     </ItemGroup>
 
 </Project>

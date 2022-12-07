@@ -41,9 +41,9 @@ namespace AsmResolver.DotNet.Serialized
                     $"Invalid blob signature for type specification {MetadataToken.ToString()}");
             }
 
-            var context = new BlobReadContext(_context);
-            context.TraversedTokens.Add(MetadataToken);
-            return TypeSignature.FromReader(context, ref reader);
+            var context = new BlobReaderContext(_context);
+            context.StepInToken(MetadataToken);
+            return TypeSignature.FromReader(ref context, ref reader);
         }
 
         /// <inheritdoc />

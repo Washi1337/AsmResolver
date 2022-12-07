@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet
         /// <param name="ns">The namespace the type resides in.</param>
         /// <param name="name">The name of the type.</param>
         /// <param name="attributes">The attributes associated to the type.</param>
-        public TypeDefinition(string? ns, string? name, TypeAttributes attributes)
+        public TypeDefinition(Utf8String? ns, Utf8String? name, TypeAttributes attributes)
             : this(ns, name, attributes, null)
         {
         }
@@ -75,7 +75,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the type.</param>
         /// <param name="attributes">The attributes associated to the type.</param>
         /// <param name="baseType">The super class that this type extends.</param>
-        public TypeDefinition(string? ns, string? name, TypeAttributes attributes, ITypeDefOrRef? baseType)
+        public TypeDefinition(Utf8String? ns, Utf8String? name, TypeAttributes attributes, ITypeDefOrRef? baseType)
             : this(new MetadataToken(TableIndex.TypeDef, 0))
         {
             Namespace = ns;
@@ -115,7 +115,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the full name (including namespace or declaring type full name) of the type.
         /// </summary>
-        public string FullName => this.GetTypeFullName();
+        public string FullName => MemberNameGenerator.GetTypeFullName(this);
 
         /// <summary>
         /// Gets or sets the attributes associated to the type.

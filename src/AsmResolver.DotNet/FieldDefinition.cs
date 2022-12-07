@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the field.</param>
         /// <param name="attributes">The attributes.</param>
         /// <param name="signature">The signature of the field.</param>
-        public FieldDefinition(string? name, FieldAttributes attributes, FieldSignature? signature)
+        public FieldDefinition(Utf8String? name, FieldAttributes attributes, FieldSignature? signature)
             : this(new MetadataToken(TableIndex.Field, 0))
         {
             Name = name;
@@ -71,7 +71,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the field.</param>
         /// <param name="attributes">The attributes.</param>
         /// <param name="fieldType">The type of values the field contains.</param>
-        public FieldDefinition(string? name, FieldAttributes attributes, TypeSignature? fieldType)
+        public FieldDefinition(Utf8String name, FieldAttributes attributes, TypeSignature? fieldType)
             : this(new MetadataToken(TableIndex.Field, 0))
         {
             Name = name;
@@ -105,7 +105,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetFieldFullName(Name, DeclaringType, Signature);
+        public string FullName => MemberNameGenerator.GetFieldFullName(this);
 
         /// <summary>
         /// Gets or sets the attributes associated to the field.

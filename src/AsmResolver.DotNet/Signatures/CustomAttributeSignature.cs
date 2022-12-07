@@ -86,7 +86,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The signature.</returns>
         /// <exception cref="FormatException">Occurs when the input stream does not point to a valid signature.</exception>
         public static CustomAttributeSignature FromReader(
-            in BlobReadContext context,
+            in BlobReaderContext context,
             ICustomAttributeType ctor,
             in BinaryStreamReader reader)
         {

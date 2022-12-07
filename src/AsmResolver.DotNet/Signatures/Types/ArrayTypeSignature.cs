@@ -69,9 +69,9 @@ namespace AsmResolver.DotNet.Signatures.Types
             get;
         }
 
-        internal new static ArrayTypeSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
+        internal new static ArrayTypeSignature FromReader(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {
-            var signature = new ArrayTypeSignature(TypeSignature.FromReader(context, ref reader));
+            var signature = new ArrayTypeSignature(TypeSignature.FromReader(ref context, ref reader));
 
             // Rank
             if (!reader.TryReadCompressedUInt32(out uint rank))

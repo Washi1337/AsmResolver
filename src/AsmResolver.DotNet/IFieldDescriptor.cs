@@ -8,6 +8,14 @@ namespace AsmResolver.DotNet
     public interface IFieldDescriptor : IMemberDescriptor, IMetadataMember
     {
         /// <summary>
+        /// Gets the name of the field.
+        /// </summary>
+        new Utf8String? Name
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the signature of the field.
         /// </summary>
         FieldSignature? Signature

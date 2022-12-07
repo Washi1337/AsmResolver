@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet
         /// <param name="scope">The scope that declares the imported member.</param>
         /// <param name="name">The name of the imported member.</param>
         /// <param name="attributes">The attributes associated to the implementation mapping.</param>
-        public ImplementationMap(ModuleReference? scope, string? name, ImplementationMapAttributes attributes)
+        public ImplementationMap(ModuleReference? scope, Utf8String? name, ImplementationMapAttributes attributes)
             : this(new MetadataToken(TableIndex.ImplMap, 0))
         {
             Scope = scope;

@@ -106,7 +106,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input stream.</param>
-        protected void ReadParametersAndReturnType(in BlobReadContext context, ref BinaryStreamReader reader)
+        protected void ReadParametersAndReturnType(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {
             // Parameter count.
             if (!reader.TryReadCompressedUInt32(out uint parameterCount))
@@ -116,14 +116,14 @@ namespace AsmResolver.DotNet.Signatures
             }
 
             // Return type.
-            ReturnType = TypeSignature.FromReader(context, ref reader);
+            ReturnType = TypeSignature.FromReader(ref context, ref reader);
 
             // Parameter types.
             _parameterTypes.Capacity = (int) parameterCount;
             bool sentinel = false;
             for (int i = 0; i < parameterCount; i++)
             {
-                var parameterType = TypeSignature.FromReader(context, ref reader);
+                var parameterType = TypeSignature.FromReader(ref context, ref reader);
 
                 if (parameterType.ElementType == ElementType.Sentinel)
                 {

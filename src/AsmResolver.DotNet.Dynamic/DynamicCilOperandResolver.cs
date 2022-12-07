@@ -96,7 +96,8 @@ namespace AsmResolver.DotNet.Dynamic
 
                 case TableIndex.StandAloneSig:
                     var reader = new BinaryStreamReader((byte[])_tokens[(int)token.Rid]!);
-                    return CallingConventionSignature.FromReader(new BlobReadContext(_readerContext), ref reader);
+                    var blobReadContext = new BlobReaderContext(_readerContext);
+                    return CallingConventionSignature.FromReader(ref blobReadContext, ref reader);
             }
 
             return token;

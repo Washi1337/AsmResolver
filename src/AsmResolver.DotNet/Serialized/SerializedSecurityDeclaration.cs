@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Serialized
                     $"Invalid permission set blob index in security declaration {MetadataToken.ToString()}.");
             }
 
-            return PermissionSetSignature.FromReader(new BlobReadContext(_context), ref reader);
+            return PermissionSetSignature.FromReader(new BlobReaderContext(_context), ref reader);
         }
     }
 }

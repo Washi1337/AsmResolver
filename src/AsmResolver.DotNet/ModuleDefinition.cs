@@ -283,7 +283,19 @@ namespace AsmResolver.DotNet
         /// Defines a new .NET module that references mscorlib version 4.0.0.0.
         /// </summary>
         /// <param name="name">The name of the module.</param>
+        /// <remarks>
+        /// This constructor co-exists with the Utf8String overload for backwards compatibility.
+        /// </remarks>
         public ModuleDefinition(string? name)
+            : this((Utf8String?) name)
+        {
+        }
+
+        /// <summary>
+        /// Defines a new .NET module that references mscorlib version 4.0.0.0.
+        /// </summary>
+        /// <param name="name">The name of the module.</param>
+        public ModuleDefinition(Utf8String? name)
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;

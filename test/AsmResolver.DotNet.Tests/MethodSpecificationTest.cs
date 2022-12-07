@@ -26,6 +26,25 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ReadFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(typeof(GenericsTestClass)
+                .GetMethod(nameof(GenericsTestClass.MethodInstantiationFromGenericType))!.MetadataToken);
+
+            var call = method.CilMethodBody!.Instructions.First(i => i.OpCode.Code == CilCode.Call);
+            Assert.IsAssignableFrom<MethodSpecification>(call.Operand);
+
+            var specification = (MethodSpecification) call.Operand;
+            Assert.Equal(
+                "System.Void AsmResolver.DotNet.TestCases.Generics.GenericType`3<System.Byte, System.UInt16, System.UInt32>::GenericMethodInGenericType<System.SByte, System.Int16, System.Int32>()",
+                specification.FullName);
+            Assert.Equal(
+                "System.Void AsmResolver.DotNet.TestCases.Generics.GenericType`3<System.Byte, System.UInt16, System.UInt32>::GenericMethodInGenericType<?, ?, ?>()",
+                specification.Method!.FullName);
+        }
+
+        [Fact]
         public void ReadSignature()
         {
             var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);

@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public string FullName => this.GetTypeFullName();
+        public string FullName => MemberNameGenerator.GetTypeFullName(this);
 
         /// <inheritdoc />
         public abstract IResolutionScope? Scope
@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <returns>The type signature.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the blob reader points to an element type that is
         /// invalid or unsupported.</exception>
-        public static TypeSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
+        public static TypeSignature FromReader(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {
             var elementType = (ElementType) reader.ReadByte();
             switch (elementType)
@@ -89,16 +89,16 @@ namespace AsmResolver.DotNet.Signatures.Types
                     return context.ReaderContext.ParentModule.CorLibTypeFactory.FromElementType(elementType)!;
 
                 case ElementType.ValueType:
-                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(context, ref reader, false), true);
+                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(ref context, ref reader, false), true);
 
                 case ElementType.Class:
-                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(context, ref reader, false), false);
+                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(ref context, ref reader, false), false);
 
                 case ElementType.Ptr:
-                    return new PointerTypeSignature(FromReader(context, ref reader));
+                    return new PointerTypeSignature(FromReader(ref context, ref reader));
 
                 case ElementType.ByRef:
-                    return new ByReferenceTypeSignature(FromReader(context, ref reader));
+                    return new ByReferenceTypeSignature(FromReader(ref context, ref reader));
 
                 case ElementType.Var:
                     return new GenericParameterSignature(context.ReaderContext.ParentModule,
@@ -111,40 +111,40 @@ namespace AsmResolver.DotNet.Signatures.Types
                         (int) reader.ReadCompressedUInt32());
 
                 case ElementType.Array:
-                    return ArrayTypeSignature.FromReader(context, ref reader);
+                    return ArrayTypeSignature.FromReader(ref context, ref reader);
 
                 case ElementType.GenericInst:
-                    return GenericInstanceTypeSignature.FromReader(context, ref reader);
+                    return GenericInstanceTypeSignature.FromReader(ref context, ref reader);
 
                 case ElementType.FnPtr:
-                    return new FunctionPointerTypeSignature(MethodSignature.FromReader(context, ref reader));
+                    return new FunctionPointerTypeSignature(MethodSignature.FromReader(ref context, ref reader));
 
                 case ElementType.SzArray:
-                    return new SzArrayTypeSignature(FromReader(context, ref reader));
+                    return new SzArrayTypeSignature(FromReader(ref context, ref reader));
 
                 case ElementType.CModReqD:
                     return new CustomModifierTypeSignature(
-                        ReadTypeDefOrRef(context, ref reader, true),
+                        ReadTypeDefOrRef(ref context, ref reader, true),
                         true,
-                        FromReader(context, ref reader));
+                        FromReader(ref context, ref reader));
 
                 case ElementType.CModOpt:
                     return new CustomModifierTypeSignature(
-                        ReadTypeDefOrRef(context, ref reader, true),
+                        ReadTypeDefOrRef(ref context, ref reader, true),
                         false,
-                        FromReader(context, ref reader));
+                        FromReader(ref context, ref reader));
 
                 case ElementType.Sentinel:
                     return new SentinelTypeSignature();
 
                 case ElementType.Pinned:
-                    return new PinnedTypeSignature(FromReader(context, ref reader));
+                    return new PinnedTypeSignature(FromReader(ref context, ref reader));
 
                 case ElementType.Boxed:
-                    return new BoxedTypeSignature(FromReader(context, ref reader));
+                    return new BoxedTypeSignature(FromReader(ref context, ref reader));
 
                 case ElementType.Internal:
-                    return context.TypeSignatureResolver.ResolveRuntimeType(context, IntPtr.Size switch
+                    return context.TypeSignatureResolver.ResolveRuntimeType(ref context, IntPtr.Size switch
                     {
                         4 => new IntPtr(reader.ReadInt32()),
                         _ => new IntPtr(reader.ReadInt64())
@@ -163,7 +163,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="allowTypeSpec">Indicates the coded index to the type is allowed to be decoded to a member in
         /// the type specification table.</param>
         /// <returns>The decoded and resolved type definition or reference.</returns>
-        protected static ITypeDefOrRef ReadTypeDefOrRef(in BlobReadContext context, ref BinaryStreamReader reader, bool allowTypeSpec)
+        protected static ITypeDefOrRef ReadTypeDefOrRef(ref BlobReaderContext context, ref BinaryStreamReader reader, bool allowTypeSpec)
         {
             if (!reader.TryReadCompressedUInt32(out uint codedIndex))
                 return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.BlobTooShort);
@@ -179,7 +179,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.IllegalTypeSpec);
             }
 
-            return context.TypeSignatureResolver.ResolveToken(context, token);
+            return context.TypeSignatureResolver.ResolveToken(ref context, token);
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             context.Writer.WriteCompressedUInt32(index);
         }
 
-        internal static TypeSignature ReadFieldOrPropType(in BlobReadContext context, ref BinaryStreamReader reader)
+        internal static TypeSignature ReadFieldOrPropType(in BlobReaderContext context, ref BinaryStreamReader reader)
         {
             var module = context.ReaderContext.ParentModule;
 

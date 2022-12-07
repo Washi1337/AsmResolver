@@ -6,7 +6,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
     {
         public StringsStreamBlob(Utf8String blob, bool isFixed)
         {
-            Blob = blob.GetBytesUnsafe();
+            Blob = blob;
             Flags = isFixed
                 ? StringsStreamBlobFlags.ZeroTerminated | StringsStreamBlobFlags.Fixed
                 : StringsStreamBlobFlags.ZeroTerminated;

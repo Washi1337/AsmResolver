@@ -21,6 +21,28 @@ namespace AsmResolver.DotNet
             type.Name == name && type.Namespace == ns;
 
         /// <summary>
+        /// Determines whether a type matches a namespace and name pair.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="ns">The namespace.</param>
+        /// <param name="name">The name.</param>
+        /// <returns><c>true</c> if the name and the namespace of the type matches the provided values,
+        /// <c>false</c> otherwise.</returns>
+        public static bool IsTypeOfUtf8(this ITypeDefOrRef type, Utf8String? ns, Utf8String? name) =>
+            type.Name == name && type.Namespace == ns;
+
+        /// <summary>
+        /// Determines whether a type matches a namespace and name pair.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="ns">The namespace.</param>
+        /// <param name="name">The name.</param>
+        /// <returns><c>true</c> if the name and the namespace of the type matches the provided values,
+        /// <c>false</c> otherwise.</returns>
+        public static bool IsTypeOfUtf8(this ExportedType type, Utf8String? ns, Utf8String? name) =>
+            type.Name == name && type.Namespace == ns;
+
+        /// <summary>
         /// Constructs a new single-dimension, zero based array signature with the provided type descriptor
         /// as element type.
         /// </summary>

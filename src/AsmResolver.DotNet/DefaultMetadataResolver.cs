@@ -81,12 +81,12 @@ namespace AsmResolver.DotNet
                 return null;
 
             var resolvedType = LookupInCache(exportedType);
-            if (resolvedType != null)
+            if (resolvedType is not null)
                 return resolvedType;
 
             var resolution = new TypeResolution(AssemblyResolver);
             resolvedType = resolution.ResolveExportedType(exportedType);
-            if (resolvedType != null)
+            if (resolvedType is not null)
                 _typeCache[exportedType] = resolvedType;
 
             return resolvedType;
@@ -137,6 +137,10 @@ namespace AsmResolver.DotNet
             if (declaringType is null)
                 return null;
 
+            var name = field is MemberReference member
+                ? member.Name
+                : (Utf8String?) field.Name;
+
             for (int i = 0; i < declaringType.Fields.Count; i++)
             {
                 var candidate = declaringType.Fields[i];
@@ -171,7 +175,7 @@ namespace AsmResolver.DotNet
                 {
                     case TableIndex.AssemblyRef:
                         var assemblyDefScope = _assemblyResolver.Resolve((AssemblyReference) scope);
-                        return assemblyDefScope != null
+                        return assemblyDefScope is not null
                             ? FindTypeInAssembly(assemblyDefScope, reference.Namespace, reference.Name)
                             : null;
 
@@ -180,7 +184,7 @@ namespace AsmResolver.DotNet
 
                     case TableIndex.TypeRef:
                         var typeDefScope = ResolveTypeReference((TypeReference) scope);
-                        return typeDefScope != null
+                        return typeDefScope is not null
                             ? FindTypeInType(typeDefScope, reference.Name)
                             : null;
 
@@ -200,20 +204,20 @@ namespace AsmResolver.DotNet
                 {
                     case TableIndex.AssemblyRef:
                         var assembly = _assemblyResolver.Resolve((AssemblyReference) implementation);
-                        return assembly is {}
+                        return assembly is not null
                             ? FindTypeInAssembly(assembly, exportedType.Namespace, exportedType.Name)
                             : null;
 
                     case TableIndex.File when !string.IsNullOrEmpty(implementation.Name):
                         var module = FindModuleInAssembly(exportedType.Module!.Assembly!, implementation.Name!);
-                        return module is {}
+                        return module is not null
                             ? FindTypeInModule(module, exportedType.Namespace, exportedType.Name)
                             : null;
 
                     case TableIndex.ExportedType:
                         var exportedDeclaringType = (ExportedType) implementation;
                         var declaringType = ResolveExportedType(exportedDeclaringType);
-                        return declaringType is {}
+                        return declaringType is not null
                             ? FindTypeInType(declaringType, exportedType.Name)
                             : null;
 
@@ -222,39 +226,39 @@ namespace AsmResolver.DotNet
                 }
             }
 
-            private TypeDefinition? FindTypeInAssembly(AssemblyDefinition assembly, string? ns, string name)
+            private TypeDefinition? FindTypeInAssembly(AssemblyDefinition assembly, Utf8String? ns, Utf8String name)
             {
                 for (int i = 0; i < assembly.Modules.Count; i++)
                 {
                     var module = assembly.Modules[i];
                     var type = FindTypeInModule(module, ns, name);
-                    if (type != null)
+                    if (type is not null)
                         return type;
                 }
 
                 return null;
             }
 
-            private TypeDefinition? FindTypeInModule(ModuleDefinition module, string? ns, string name)
+            private TypeDefinition? FindTypeInModule(ModuleDefinition module, Utf8String? ns, Utf8String name)
             {
                 for (int i = 0; i < module.ExportedTypes.Count; i++)
                 {
                     var exportedType = module.ExportedTypes[i];
-                    if (exportedType.IsTypeOf(ns, name))
+                    if (exportedType.IsTypeOfUtf8(ns, name))
                         return ResolveExportedType(exportedType);
                 }
 
                 for (int i = 0; i < module.TopLevelTypes.Count; i++)
                 {
                     var type = module.TopLevelTypes[i];
-                    if (type.IsTypeOf(ns, name))
+                    if (type.IsTypeOfUtf8(ns, name))
                         return type;
                 }
 
                 return null;
             }
 
-            private static TypeDefinition? FindTypeInType(TypeDefinition enclosingType, string name)
+            private static TypeDefinition? FindTypeInType(TypeDefinition enclosingType, Utf8String name)
             {
                 for (int i = 0; i < enclosingType.NestedTypes.Count; i++)
                 {
@@ -266,7 +270,7 @@ namespace AsmResolver.DotNet
                 return null;
             }
 
-            private static ModuleDefinition? FindModuleInAssembly(AssemblyDefinition assembly, string name)
+            private static ModuleDefinition? FindModuleInAssembly(AssemblyDefinition assembly, Utf8String name)
             {
                 for (int i = 0; i < assembly.Modules.Count; i++)
                 {

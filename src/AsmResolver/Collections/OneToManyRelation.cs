@@ -46,7 +46,13 @@ namespace AsmResolver.Collections
         {
             if (!_memberOwners.ContainsKey(value))
             {
-                GetValues(key).Items.Add(value);
+                if (!_memberLists.TryGetValue(key, out var valueSet))
+                {
+                    valueSet = new ValueSet();
+                    _memberLists.Add(key, valueSet);
+                }
+
+                valueSet.Items.Add(value);
                 _memberOwners.Add(value, key);
                 return true;
             }
@@ -59,34 +65,29 @@ namespace AsmResolver.Collections
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns>The values.</returns>
-        public ValueSet GetValues(TKey key)
-        {
-            if (!_memberLists.TryGetValue(key, out var items))
-            {
-                items = new ValueSet();
-                _memberLists.Add(key, items);
-            }
-
-            return items;
-        }
+        public ValueSet GetValues(TKey key) => _memberLists.TryGetValue(key, out var valueSet)
+            ? valueSet
+            : ValueSet.Empty;
 
         /// <summary>
         /// Gets the key that maps to the provided value.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The key.</returns>
-        public TKey? GetKey(TValue value)
-        {
-            return _memberOwners.TryGetValue(value, out var key)
-                ? key
-                : default;
-        }
+        public TKey? GetKey(TValue value) => _memberOwners.TryGetValue(value, out var key)
+            ? key
+            : default;
 
         /// <summary>
         /// Represents a collection of values assigned to a single key in a one-to-many relation.
         /// </summary>
         public class ValueSet : ICollection<TValue>
         {
+            /// <summary>
+            /// Represents the empty value set.
+            /// </summary>
+            public static readonly ValueSet Empty = new();
+
             internal List<TValue> Items
             {
                 get;

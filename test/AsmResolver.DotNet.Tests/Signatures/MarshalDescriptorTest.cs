@@ -65,10 +65,24 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var method = LookupMethod(nameof(PlatformInvoke.SimpleMarshaller));
             var newMethod = RebuildAndLookup(method);
-            Assert.Equal(method.Parameters[0].Definition.MarshalDescriptor.NativeType, 
+            Assert.Equal(method.Parameters[0].Definition.MarshalDescriptor.NativeType,
                 newMethod.Parameters[0].Definition.MarshalDescriptor.NativeType);
         }
-        
+
+        [Fact]
+        public void PersistentLPArrayWithoutElementType()
+        {
+            var method = LookupMethod(nameof(PlatformInvoke.LPArrayFixedSizeMarshaller));
+            var originalMarshaller = (LPArrayMarshalDescriptor) method.Parameters[0].Definition!.MarshalDescriptor!;
+            originalMarshaller.ArrayElementType = null;
+
+            var newMethod = RebuildAndLookup(method);
+            var newArrayMarshaller = Assert.IsAssignableFrom<LPArrayMarshalDescriptor>(
+                newMethod.Parameters[0].Definition!.MarshalDescriptor);
+
+            Assert.Null(newArrayMarshaller.ArrayElementType);
+        }
+
         [Fact]
         public void ReadLPArrayMarshallerWithFixedSize()
         {
@@ -85,7 +99,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var method = LookupMethod(nameof(PlatformInvoke.LPArrayFixedSizeMarshaller));
             var originalMarshaller = (LPArrayMarshalDescriptor) method.Parameters[0].Definition.MarshalDescriptor;
-            
+
             var newMethod = RebuildAndLookup(method);
             var newMarshaller = newMethod.Parameters[0].Definition.MarshalDescriptor;
             Assert.IsAssignableFrom<LPArrayMarshalDescriptor>(newMarshaller);
@@ -110,7 +124,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var method = LookupMethod(nameof(PlatformInvoke.LPArrayVariableSizeMarshaller));
             var originalMarshaller = (LPArrayMarshalDescriptor) method.Parameters[0].Definition.MarshalDescriptor;
-            
+
             var newMethod = RebuildAndLookup(method);
             var marshaller = newMethod.Parameters[0].Definition.MarshalDescriptor;
             Assert.IsAssignableFrom<LPArrayMarshalDescriptor>(marshaller);
@@ -135,7 +149,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var method = LookupMethod(nameof(PlatformInvoke.SafeArrayMarshaller));
             var originalMarshaller = (SafeArrayMarshalDescriptor) method.Parameters[0].Definition.MarshalDescriptor;
-            
+
             var newMethod = RebuildAndLookup(method);
             var marshaller = newMethod.Parameters[0].Definition.MarshalDescriptor;
             Assert.IsAssignableFrom<SafeArrayMarshalDescriptor>(marshaller);
@@ -160,7 +174,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var method = LookupMethod(nameof(PlatformInvoke.SafeArrayMarshallerWithSubType));
             var originalMarshaller = (SafeArrayMarshalDescriptor) method.Parameters[0].Definition.MarshalDescriptor;
-            
+
             var newMethod = RebuildAndLookup(method);
             var marshaller = newMethod.Parameters[0].Definition.MarshalDescriptor;
             Assert.IsAssignableFrom<SafeArrayMarshalDescriptor>(marshaller);
@@ -186,7 +200,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var method = LookupMethod(nameof(PlatformInvoke.SafeArrayMarshallerWithUserSubType));
             var originalMarshaller = (SafeArrayMarshalDescriptor) method.Parameters[0].Definition.MarshalDescriptor;
-            
+
             var newMethod = RebuildAndLookup(method);
             var marshaller = newMethod.Parameters[0].Definition.MarshalDescriptor;
             Assert.IsAssignableFrom<SafeArrayMarshalDescriptor>(marshaller);
@@ -195,7 +209,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.NotNull(arrayMarshaller.UserDefinedSubType);
             Assert.Equal(originalMarshaller.UserDefinedSubType.Name, arrayMarshaller.UserDefinedSubType.Name);
         }
-        
+
         [Fact]
         public void ReadFixedArrayMarshaller()
         {
@@ -203,7 +217,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var marshaller = field.MarshalDescriptor;
             Assert.IsAssignableFrom<FixedArrayMarshalDescriptor>(marshaller);
         }
-        
+
         [Fact]
         public void PersistentFixedArrayMarshaller()
         {
@@ -212,18 +226,18 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var marshaller = newField.MarshalDescriptor;
             Assert.IsAssignableFrom<FixedArrayMarshalDescriptor>(marshaller);
         }
-        
+
         [Fact]
         public void ReadFixedArrayMarshallerWithFixedSizeSpecifier()
         {
             var field = LookupField(nameof(Marshalling.FixedArrayMarshallerWithFixedSize));
             var marshaller = field.MarshalDescriptor;
             Assert.IsAssignableFrom<FixedArrayMarshalDescriptor>(marshaller);
-            
+
             var arrayMarshaller = (FixedArrayMarshalDescriptor) marshaller;
             Assert.Equal(10, arrayMarshaller.Size);
         }
-        
+
         [Fact]
         public void PersistentFixedArrayMarshallerWithFixedSizeSpecifier()
         {
@@ -233,33 +247,33 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var newField = RebuildAndLookup(field);
             var marshaller = newField.MarshalDescriptor;
             Assert.IsAssignableFrom<FixedArrayMarshalDescriptor>(marshaller);
-            
+
             var arrayMarshaller = (FixedArrayMarshalDescriptor) marshaller;
             Assert.Equal(originalMarshaller.Size, arrayMarshaller.Size);
         }
-        
+
         [Fact]
         public void ReadFixedArrayMarshallerWithFixedSizeSpecifierAndArrayType()
         {
             var field = LookupField(nameof(Marshalling.FixedArrayMarshallerWithFixedSizeAndArrayType));
             var marshaller = field.MarshalDescriptor;
             Assert.IsAssignableFrom<FixedArrayMarshalDescriptor>(marshaller);
-            
+
             var arrayMarshaller = (FixedArrayMarshalDescriptor) marshaller;
             Assert.Equal(10, arrayMarshaller.Size);
             Assert.Equal(NativeType.U1, arrayMarshaller.ArrayElementType);
         }
-        
+
         [Fact]
         public void PersistentFixedArrayMarshallerWithFixedSizeSpecifierAndArrayType()
         {
             var field = LookupField(nameof(Marshalling.FixedArrayMarshallerWithFixedSizeAndArrayType));
             var originalMarshaller = (FixedArrayMarshalDescriptor) field.MarshalDescriptor;
-            
+
             var newField = RebuildAndLookup(field);
             var marshaller = newField.MarshalDescriptor;
             Assert.IsAssignableFrom<FixedArrayMarshalDescriptor>(marshaller);
-            
+
             var arrayMarshaller = (FixedArrayMarshalDescriptor) marshaller;
             Assert.Equal(originalMarshaller.Size, arrayMarshaller.Size);
             Assert.Equal(originalMarshaller.ArrayElementType, arrayMarshaller.ArrayElementType);
@@ -271,7 +285,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var field = LookupField(nameof(Marshalling.CustomMarshallerWithCustomType));
             var marshaller = field.MarshalDescriptor;
             Assert.IsAssignableFrom<CustomMarshalDescriptor>(marshaller);
-            
+
             var customMarshaller = (CustomMarshalDescriptor) marshaller;
             Assert.Equal(nameof(Marshalling), customMarshaller.MarshalType.Name);
         }
@@ -281,11 +295,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var field = LookupField(nameof(Marshalling.CustomMarshallerWithCustomType));
             var originalMarshaller = (CustomMarshalDescriptor) field.MarshalDescriptor;
-            
+
             var newField = RebuildAndLookup(field);
             var marshaller = newField.MarshalDescriptor;
             Assert.IsAssignableFrom<CustomMarshalDescriptor>(marshaller);
-            
+
             var customMarshaller = (CustomMarshalDescriptor) marshaller;
             Assert.Equal(originalMarshaller.MarshalType.Name, customMarshaller.MarshalType.Name);
         }
@@ -296,7 +310,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var field = LookupField(nameof(Marshalling.CustomMarshallerWithCustomTypeAndCookie));
             var marshaller = field.MarshalDescriptor;
             Assert.IsAssignableFrom<CustomMarshalDescriptor>(marshaller);
-            
+
             var customMarshaller = (CustomMarshalDescriptor) marshaller;
             Assert.Equal(nameof(Marshalling), customMarshaller.MarshalType.Name);
             Assert.Equal("abc", customMarshaller.Cookie);
@@ -307,11 +321,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var field = LookupField(nameof(Marshalling.CustomMarshallerWithCustomTypeAndCookie));
             var originalMarshaller = (CustomMarshalDescriptor) field.MarshalDescriptor;
-            
+
             var newField = RebuildAndLookup(field);
             var marshaller = newField.MarshalDescriptor;
             Assert.IsAssignableFrom<CustomMarshalDescriptor>(marshaller);
-            
+
             var customMarshaller = (CustomMarshalDescriptor) marshaller;
             Assert.Equal(originalMarshaller.MarshalType.Name, customMarshaller.MarshalType.Name);
             Assert.Equal(originalMarshaller.Cookie, customMarshaller.Cookie);
@@ -323,7 +337,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var field = LookupField(nameof(Marshalling.FixedSysString));
             var marshaller = field.MarshalDescriptor;
             Assert.IsAssignableFrom<FixedSysStringMarshalDescriptor>(marshaller);
-            
+
             var stringMarshaller = (FixedSysStringMarshalDescriptor) marshaller;
             Assert.Equal(123, stringMarshaller.Size);
         }
@@ -333,11 +347,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var field = LookupField(nameof(Marshalling.FixedSysString));
             var originalMarshaller = (FixedSysStringMarshalDescriptor) field.MarshalDescriptor;
-            
+
             var newField = RebuildAndLookup(field);
             var marshaller = newField.MarshalDescriptor;
             Assert.IsAssignableFrom<FixedSysStringMarshalDescriptor>(marshaller);
-            
+
             var stringMarshaller = (FixedSysStringMarshalDescriptor) marshaller;
             Assert.Equal(originalMarshaller.Size, stringMarshaller.Size);
         }
@@ -348,7 +362,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var method = LookupMethod(nameof(PlatformInvoke.ComInterface));
             var marshaller = method.Parameters[0].Definition.MarshalDescriptor;
             Assert.IsAssignableFrom<ComInterfaceMarshalDescriptor>(marshaller);
-            
+
             var comMarshaller = (ComInterfaceMarshalDescriptor) marshaller;
             Assert.Null(comMarshaller.IidParameterIndex);
         }
@@ -361,7 +375,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var newMethod = RebuildAndLookup(method);
             var marshaller = newMethod.Parameters[0].Definition.MarshalDescriptor;
             Assert.IsAssignableFrom<ComInterfaceMarshalDescriptor>(marshaller);
-            
+
             var comMarshaller = (ComInterfaceMarshalDescriptor) marshaller;
             Assert.Null(comMarshaller.IidParameterIndex);
         }
@@ -372,7 +386,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var method = LookupMethod(nameof(PlatformInvoke.ComInterfaceWithIidParameter));
             var marshaller = method.Parameters[0].Definition.MarshalDescriptor;
             Assert.IsAssignableFrom<ComInterfaceMarshalDescriptor>(marshaller);
-            
+
             var comMarshaller = (ComInterfaceMarshalDescriptor) marshaller;
             Assert.Equal(1, comMarshaller.IidParameterIndex);
         }
@@ -382,11 +396,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var method = LookupMethod(nameof(PlatformInvoke.ComInterfaceWithIidParameter));
             var originalMarshaller = (ComInterfaceMarshalDescriptor) method.Parameters[0].Definition.MarshalDescriptor;
-            
+
             var newMethod = RebuildAndLookup(method);
             var marshaller = newMethod.Parameters[0].Definition.MarshalDescriptor;
             Assert.IsAssignableFrom<ComInterfaceMarshalDescriptor>(marshaller);
-            
+
             var comMarshaller = (ComInterfaceMarshalDescriptor) marshaller;
             Assert.Equal(originalMarshaller.IidParameterIndex, comMarshaller.IidParameterIndex);
         }

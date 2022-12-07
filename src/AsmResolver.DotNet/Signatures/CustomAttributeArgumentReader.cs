@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet.Signatures
             private set;
         }
 
-        public void ReadValue(in BlobReadContext context, ref BinaryStreamReader reader, TypeSignature valueType)
+        public void ReadValue(in BlobReaderContext context, ref BinaryStreamReader reader, TypeSignature valueType)
         {
             var module = context.ReaderContext.ParentModule;
 

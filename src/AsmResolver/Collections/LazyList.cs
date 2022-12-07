@@ -13,7 +13,6 @@ namespace AsmResolver.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public abstract class LazyList<TItem> : IList<TItem>
     {
-        private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.NoRecursion);
         private readonly List<TItem> _items;
 
         /// <summary>

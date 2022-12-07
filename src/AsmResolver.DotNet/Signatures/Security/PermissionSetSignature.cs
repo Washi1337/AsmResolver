@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input blob stream.</param>
         /// <returns>The permission set.</returns>
-        public static PermissionSetSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
+        public static PermissionSetSignature FromReader(in BlobReaderContext context, ref BinaryStreamReader reader)
         {
             var result = new PermissionSetSignature();
             if (reader.ReadByte() != '.')

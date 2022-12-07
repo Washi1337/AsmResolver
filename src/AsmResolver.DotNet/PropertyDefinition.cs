@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the property.</param>
         /// <param name="attributes">The attributes.</param>
         /// <param name="signature">The signature of the property.</param>
-        public PropertyDefinition(string? name, PropertyAttributes attributes, PropertySignature? signature)
+        public PropertyDefinition(Utf8String? name, PropertyAttributes attributes, PropertySignature? signature)
             : this(new MetadataToken(TableIndex.Property,0))
         {
             Name = name;
@@ -109,7 +109,7 @@ namespace AsmResolver.DotNet
         string? INameProvider.Name => Name;
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetPropertyFullName(Name, DeclaringType, Signature);
+        public string FullName => MemberNameGenerator.GetPropertyFullName(this);
 
         /// <summary>
         /// Gets or sets the signature of the property. This includes the property type, as well as any parameters the

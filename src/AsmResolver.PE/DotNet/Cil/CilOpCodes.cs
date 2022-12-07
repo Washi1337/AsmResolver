@@ -18,7 +18,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Gets a sorted list of all single-byte operation codes.
         /// </summary>
         public static readonly CilOpCode[] SingleByteOpCodes = new CilOpCode[256];
-        
+
         /// <summary>
         /// Gets a sorted list of all multi-byte operation codes.
         /// </summary>
@@ -2824,7 +2824,7 @@ namespace AsmResolver.PE.DotNet.Cil
             (((ushort) CilCode.Endfinally & 0xFF) << ValueOffset)
             | (((ushort) CilCode.Endfinally >> 15) << TwoBytesOffset)
             | ((ushort) Push0 << StackBehaviourPushOffset)
-            | ((ushort) Pop0 << StackBehaviourPopOffset)
+            | ((ushort) PopAll << StackBehaviourPopOffset)
             | ((byte) Primitive << OpCodeTypeOffset)
             | ((byte) InlineNone << OperandTypeOffset)
             | ((byte) Return << FlowControlOffset));
@@ -2890,7 +2890,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((byte) Next << FlowControlOffset));
 
         /// <summary>
-        /// This prefix opcode is reserved and currently not implemented in the runtime 
+        /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
         /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix7?view=net-6.0"/>
@@ -2905,7 +2905,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((byte) Meta << FlowControlOffset));
 
         /// <summary>
-        /// This prefix opcode is reserved and currently not implemented in the runtime 
+        /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
         /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix6?view=net-6.0"/>
@@ -2920,7 +2920,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((byte) Meta << FlowControlOffset));
 
         /// <summary>
-        /// This prefix opcode is reserved and currently not implemented in the runtime 
+        /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
         /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix5?view=net-6.0"/>
@@ -2935,7 +2935,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((byte) Meta << FlowControlOffset));
 
         /// <summary>
-        /// This prefix opcode is reserved and currently not implemented in the runtime 
+        /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
         /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix4?view=net-6.0"/>
@@ -2950,7 +2950,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((byte) Meta << FlowControlOffset));
 
         /// <summary>
-        /// This prefix opcode is reserved and currently not implemented in the runtime 
+        /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
         /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix3?view=net-6.0"/>
@@ -2965,7 +2965,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((byte) Meta << FlowControlOffset));
 
         /// <summary>
-        /// This prefix opcode is reserved and currently not implemented in the runtime 
+        /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
         /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix2?view=net-6.0"/>
@@ -2980,7 +2980,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((byte) Meta << FlowControlOffset));
 
         /// <summary>
-        /// This prefix opcode is reserved and currently not implemented in the runtime 
+        /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
         /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix1?view=net-6.0"/>
@@ -2995,7 +2995,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((byte) Meta << FlowControlOffset));
 
         /// <summary>
-        /// This prefix opcode is reserved and currently not implemented in the runtime 
+        /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
         /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefixref?view=net-6.0"/>
