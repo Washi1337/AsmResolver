@@ -132,6 +132,54 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ReadParameterlessInt32MethodFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.IntParameterlessMethod)).MetadataToken);
+
+            Assert.Equal(
+                "System.Int32 AsmResolver.DotNet.TestCases.Methods.MultipleMethods::IntParameterlessMethod()",
+                method.FullName);
+        }
+
+        [Fact]
+        public void ReadParameterlessMethodFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod)).MetadataToken);
+
+            Assert.Equal(
+                "System.Void AsmResolver.DotNet.TestCases.Methods.MultipleMethods::VoidParameterlessMethod()",
+                method.FullName);
+        }
+
+        [Fact]
+        public void ReadSingleParameterMethodFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.SingleParameterMethod)).MetadataToken);
+
+            Assert.Equal(
+                "System.Void AsmResolver.DotNet.TestCases.Methods.MultipleMethods::SingleParameterMethod(System.Int32)",
+                method.FullName);
+        }
+
+        [Fact]
+        public void ReadMultipleParametersMethodFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod)).MetadataToken);
+
+            Assert.Equal(
+                "System.Void AsmResolver.DotNet.TestCases.Methods.MultipleMethods::MultipleParameterMethod(System.Int32, System.String, AsmResolver.DotNet.TestCases.Methods.MultipleMethods)",
+                method.FullName);
+        }
+
+        [Fact]
         public void ReadNormalMethod()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);

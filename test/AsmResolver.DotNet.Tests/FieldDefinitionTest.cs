@@ -81,6 +81,16 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ReadFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var field = (FieldDefinition) module.LookupMember(
+                typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
+
+            Assert.Equal("System.Int32 AsmResolver.DotNet.TestCases.Fields.SingleField::IntField", field.FullName);
+        }
+
+        [Fact]
         public void ReadFieldRva()
         {
             var module = ModuleDefinition.FromFile(typeof(InitialValues).Assembly.Location);

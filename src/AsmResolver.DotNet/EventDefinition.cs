@@ -94,7 +94,7 @@ namespace AsmResolver.DotNet
         string? INameProvider.Name => Name;
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetEventFullName(Name, DeclaringType, EventType);
+        public string FullName => MemberNameGenerator.GetEventFullName(this);
 
         /// <summary>
         /// Gets or sets the delegate type of the event.

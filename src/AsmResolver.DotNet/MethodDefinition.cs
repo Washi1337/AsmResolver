@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code;
@@ -101,13 +100,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetMethodFullName(
-            Name,
-            DeclaringType,
-            Signature,
-            GenericParameters.Count > 0
-                ? GenericParameters.Select(x => x.Name?.Value ?? NullName)
-                : Enumerable.Empty<string>());
+        public string FullName => MemberNameGenerator.GetMethodFullName(this);
 
         /// <summary>
         /// Gets or sets the attributes associated to the method.

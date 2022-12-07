@@ -90,6 +90,14 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ReadTopLevelTypeFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location);
+            var type = (TypeDefinition) module.LookupMember(typeof(Class).MetadataToken);
+            Assert.Equal("AsmResolver.DotNet.TestCases.Types.Class", type.FullName);
+        }
+
+        [Fact]
         public void NonNullNamespaceIsPersistentAfterRebuild()
         {
             const string newNameSpace = "SomeNamespace";
@@ -177,6 +185,22 @@ namespace AsmResolver.DotNet.Tests
             Assert.Same(module, nested2.Module);
             Assert.Same(module, nested3.Module);
             Assert.Same(module, nested4.Module);
+        }
+
+        [Fact]
+        public void ReadNestedFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var type = (TypeDefinition) module.LookupMember(typeof(TopLevelClass1.Nested1).MetadataToken);
+            Assert.Equal("AsmResolver.DotNet.TestCases.NestedClasses.TopLevelClass1+Nested1", type.FullName);
+        }
+
+        [Fact]
+        public void ReadNestedNestedFullName()
+        {
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var type = (TypeDefinition) module.LookupMember(typeof(TopLevelClass1.Nested1.Nested1Nested2).MetadataToken);
+            Assert.Equal("AsmResolver.DotNet.TestCases.NestedClasses.TopLevelClass1+Nested1+Nested1Nested2", type.FullName);
         }
 
         [Fact]

@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -69,11 +67,7 @@ namespace AsmResolver.DotNet
         string? INameProvider.Name => Name;
 
         /// <inheritdoc />
-        public string FullName => FullNameGenerator.GetMethodFullName(
-            Name,
-            DeclaringType,
-            Method?.Signature,
-            Signature?.TypeArguments.Select(x => x.FullName) ?? Enumerable.Empty<string>());
+        public string FullName => MemberNameGenerator.GetMethodFullName(this);
 
         /// <inheritdoc />
         public ModuleDefinition? Module => Method?.Module;

@@ -115,7 +115,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the full name (including namespace or declaring type full name) of the type.
         /// </summary>
-        public string FullName => this.GetTypeFullName();
+        public string FullName => MemberNameGenerator.GetTypeFullName(this);
 
         /// <summary>
         /// Gets or sets the attributes associated to the type.
