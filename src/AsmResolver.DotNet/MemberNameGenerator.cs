@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
@@ -22,7 +21,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the singleton instance for the member name generator.
         /// </summary>
-        public static MemberNameGenerator Instance
+        private static MemberNameGenerator Instance
         {
             get;
         } = new();
@@ -283,9 +282,14 @@ namespace AsmResolver.DotNet
             if (signature?.GenericParameterCount > 0)
             {
                 state.Append('<');
-                AppendCommaSeparatedCollection(state,
-                    Enumerable.Range(0, signature.GenericParameterCount).ToArray(),
-                    static (s, _) => s.Append('?'));
+
+                for (int i = 0; i < signature.GenericParameterCount; i++)
+                {
+                    state.Append('?');
+                    if (i < signature.GenericParameterCount - 1)
+                        state.Append(", ");
+                }
+
                 state.Append('>');
             }
 

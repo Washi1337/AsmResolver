@@ -70,10 +70,12 @@ namespace AsmResolver.DotNet.Tests.Signatures
         public void GetGenericInstanceTypeFullName()
         {
             var module = new ModuleDefinition("Dummy");
-            Assert.Equal("Namespace.Type<System.Int32, Namespace.Type<System.Object>>",
-                _dummyType.MakeGenericInstanceType(
-                    module.CorLibTypeFactory.Int32,
-                    _dummyType.MakeGenericInstanceType(module.CorLibTypeFactory.Object)).FullName);
+            var genericInstance = _dummyType.MakeGenericInstanceType(
+                module.CorLibTypeFactory.Int32,
+                _dummyType.MakeGenericInstanceType(module.CorLibTypeFactory.Object));
+
+            Assert.Equal("Type<System.Int32, Namespace.Type<System.Object>>", genericInstance.Name);
+            Assert.Equal("Namespace.Type<System.Int32, Namespace.Type<System.Object>>", genericInstance.FullName);
         }
 
         [Fact]
@@ -99,6 +101,26 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 .ToTypeSignature()
                 .MakeSzArrayType()
                 .FullName);
+        }
+
+        [Fact]
+        public void GetRequiredModifierTypeFullName()
+        {
+            Assert.Equal("Namespace.Type modreq(Namespace.Type)",
+                _dummyType
+                    .ToTypeSignature()
+                    .MakeModifierType(_dummyType, true)
+                    .FullName);
+        }
+
+        [Fact]
+        public void GetOptionalModifierTypeFullName()
+        {
+            Assert.Equal("Namespace.Type modopt(Namespace.Type)",
+                _dummyType
+                    .ToTypeSignature()
+                    .MakeModifierType(_dummyType, false)
+                    .FullName);
         }
     }
 }

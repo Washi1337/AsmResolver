@@ -84,7 +84,14 @@ namespace AsmResolver.DotNet.Signatures.Types
         public IList<TypeSignature> TypeArguments => _typeArguments;
 
         /// <inheritdoc />
-        public override string? Name => GenericType.Name ?? NullTypeToString;
+        public override string? Name
+        {
+            get
+            {
+                string genericArgString = string.Join(", ", TypeArguments);
+                return $"{GenericType.Name ?? NullTypeToString}<{genericArgString}>";
+            }
+        }
 
         /// <inheritdoc />
         public override string? Namespace => GenericType.Namespace;
