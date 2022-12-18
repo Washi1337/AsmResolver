@@ -194,8 +194,9 @@ Below an example on how to use the ``ReferenceImporter`` to emit a call to ``Con
 .. code-block:: csharp
 
     var importer = new ReferenceImporter(targetModule);
-    var writeLine = importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] { typeof(string) } );
+    var writeLine = importer.ImportMethod(typeof(Console).GetMethod(nameof(Console.WriteLine), new[] { typeof(string) } );
 
+    body.Instructions.Add(new CilInstruction(CilOpCodes.Ldstr, "Hello, world!"));
     body.Instructions.Add(new CilInstruction(CilOpCodes.Call, writeLine));
 
 
