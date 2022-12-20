@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
@@ -11,6 +5,11 @@ using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading;
 
 namespace AsmResolver.DotNet
 {
@@ -489,6 +488,21 @@ namespace AsmResolver.DotNet
 
                 return baseType.IsTypeOf("System", nameof(Delegate))
                     || baseType.IsTypeOf("System", nameof(MulticastDelegate));
+            }
+        }
+
+        /// <summary>
+        /// <c>true</c> if this is the global (aka. &lt;Module&gt;) type
+        /// </summary>
+        /// <remarks>
+        /// If the Module doesn't exist will be returned false.
+        /// </remarks>
+        public bool IsModuleType
+        {
+            get
+            {
+                var module = Module?.GetModuleType();
+                return module != null && module == this;
             }
         }
 
