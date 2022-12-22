@@ -495,7 +495,7 @@ namespace AsmResolver.DotNet
         /// <c>true</c> if this is the global (aka. &lt;Module&gt;) type, otherwise <c>false</c>
         /// </summary>
         /// <remarks>
-        /// If the global (aka. &lt;Module&gt;) type was not added or not exist yet in the <see cref="Module"/> will return false.
+        /// If the global (aka. &lt;Module&gt;) type was not added or does not exist yet in the <see cref="Module"/> will return false.
         /// </remarks>
         public bool IsModuleType
         {
