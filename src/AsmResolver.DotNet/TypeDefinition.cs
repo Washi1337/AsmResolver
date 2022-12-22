@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
@@ -5,11 +10,6 @@ using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Threading;
 
 namespace AsmResolver.DotNet
 {
@@ -492,10 +492,10 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// <c>true</c> if this is the global (aka. &lt;Module&gt;) type
+        /// <c>true</c> if this is the global (aka. &lt;Module&gt;) type, otherwise <c>false</c>
         /// </summary>
         /// <remarks>
-        /// If the Module doesn't exist will be returned false.
+        /// If the global (aka. &lt;Module&gt;) type was not added or not exist yet in the <see cref="Module"/> will return false.
         /// </remarks>
         public bool IsModuleType
         {
