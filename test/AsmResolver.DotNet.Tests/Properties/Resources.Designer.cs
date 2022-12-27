@@ -331,5 +331,33 @@ namespace AsmResolver.DotNet.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] ModuleCctorAbsentNet6 {
+            get {
+                object obj = ResourceManager.GetObject("ModuleCctorAbsentNet6", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] ModuleCctorLookalikeNet6 {
+            get {
+                object obj = ResourceManager.GetObject("ModuleCctorLookalikeNet6", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] ModuleCctorNet6 {
+            get {
+                object obj = ResourceManager.GetObject("ModuleCctorNet6", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] ModuleCctorNetFramework {
+            get {
+                object obj = ResourceManager.GetObject("ModuleCctorNetFramework", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

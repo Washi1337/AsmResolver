@@ -412,5 +412,63 @@ namespace AsmResolver.DotNet.Tests
             using var stream = new MemoryStream();
             module.Write(stream);
         }
+
+        [Fact]
+        public void GetModuleTypeNetFramework()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorNetFramework);
+
+            // Module type should exist.
+            var type = module.GetModuleType();
+            Assert.NotNull(type);
+            Assert.Equal("CustomModuleType", type.Name);
+
+            // Creating module type should give us the existing type.
+            Assert.Same(type, module.GetOrCreateModuleType());
+        }
+
+        [Fact]
+        public void GetModuleTypeNet6()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorNet6);
+
+            // Module type should exist.
+            var type = module.GetModuleType();
+            Assert.NotNull(type);
+            Assert.Equal("<Module>", type.Name);
+
+            // Creating module type should give us the existing type.
+            Assert.Same(type, module.GetOrCreateModuleType());
+        }
+
+        [Fact]
+        public void GetModuleTypeAbsentNet6()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorAbsentNet6);
+
+            // Module type should not exist.
+            var type = module.GetModuleType();
+            Assert.Null(type);
+
+            // Creating should add it to the module.
+            type = module.GetOrCreateModuleType();
+            Assert.NotNull(type);
+            Assert.Same(type, module.GetModuleType());
+        }
+
+        [Fact]
+        public void GetModuleTypeLookalikeNet6()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorLookalikeNet6);
+
+            // Module type should not exist.
+            var type = module.GetModuleType();
+            Assert.Null(type);
+
+            // Creating should add it to the module.
+            type = module.GetOrCreateModuleType();
+            Assert.NotNull(type);
+            Assert.Same(type, module.GetModuleType());
+        }
     }
 }
