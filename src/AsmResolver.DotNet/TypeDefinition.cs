@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code.Cil;
@@ -489,6 +488,21 @@ namespace AsmResolver.DotNet
 
                 return baseType.IsTypeOf("System", nameof(Delegate))
                     || baseType.IsTypeOf("System", nameof(MulticastDelegate));
+            }
+        }
+
+        /// <summary>
+        /// <c>true</c> if this is the global (aka. &lt;Module&gt;) type, otherwise <c>false</c>.
+        /// </summary>
+        /// <remarks>
+        /// If the global (aka. &lt;Module&gt;) type was not added or does not exist yet in the <see cref="Module"/> will return false.
+        /// </remarks>
+        public bool IsModuleType
+        {
+            get
+            {
+                var module = Module?.GetModuleType();
+                return module != null && module == this;
             }
         }
 
