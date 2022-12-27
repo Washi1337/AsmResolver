@@ -915,7 +915,19 @@ namespace AsmResolver.DotNet
         /// Obtains the global scope type of the .NET module.
         /// </summary>
         /// <returns>The module type.</returns>
-        public TypeDefinition? GetModuleType() => TopLevelTypes.Count > 0 ? TopLevelTypes[0] : null;
+        public TypeDefinition? GetModuleType()
+        {
+            if (TopLevelTypes.Count == 0)
+                return null;
+
+            var firstType = TopLevelTypes[0];
+
+            // Only .NET Framework allows the module type to be renamed to something else.
+            if (!OriginalTargetRuntime.IsNetFramework && !firstType.IsTypeOfUtf8(null, "<Module>"))
+                return null;
+
+            return firstType;
+        }
 
         /// <summary>
         /// Obtains or creates the global scope type of the .NET module.
@@ -923,13 +935,15 @@ namespace AsmResolver.DotNet
         /// <returns>The module type.</returns>
         public TypeDefinition GetOrCreateModuleType()
         {
-            if (TopLevelTypes.Count == 0 || TopLevelTypes[0].Name != "<Module>")
+            var moduleType = GetModuleType();
+
+            if (moduleType is null)
             {
-                var moduleType = new TypeDefinition(null, "<Module>", 0);
+                moduleType = new TypeDefinition(null, "<Module>", 0);
                 TopLevelTypes.Insert(0, moduleType);
             }
 
-            return TopLevelTypes[0];
+            return moduleType;
         }
 
         /// <summary>
