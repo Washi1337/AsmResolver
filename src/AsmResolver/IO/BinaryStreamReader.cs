@@ -350,54 +350,54 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Reads bytes from the input stream until the provided delimeter byte is reached.
+        /// Reads bytes from the input stream until the provided delimiter byte is reached.
         /// </summary>
-        /// <param name="delimeter">The delimeter byte to stop at.</param>
-        /// <returns>The read bytes, including the delimeter if it was found.</returns>
-        public byte[] ReadBytesUntil(byte delimeter) => ReadBytesUntil(delimeter, true);
+        /// <param name="delimiter">The delimiter byte to stop at.</param>
+        /// <returns>The read bytes, including the delimiter if it was found.</returns>
+        public byte[] ReadBytesUntil(byte delimiter) => ReadBytesUntil(delimiter, true);
 
         /// <summary>
-        /// Reads bytes from the input stream until the provided delimeter byte is reached.
+        /// Reads bytes from the input stream until the provided delimiter byte is reached.
         /// </summary>
-        /// <param name="delimeter">The delimeter byte to stop at.</param>
-        /// <param name="includeDelimeterInReturn">
-        /// <c>true</c> if the final delimeter should be included in the return value, <c>false</c> otherwise.
+        /// <param name="delimiter">The delimiter byte to stop at.</param>
+        /// <param name="includeDelimiterInReturn">
+        /// <c>true</c> if the final delimiter should be included in the return value, <c>false</c> otherwise.
         /// </param>
         /// <returns>The read bytes.</returns>
         /// <remarks>
-        /// This function always consumes the delimeter from the input stream if it is present, regardless of the value
-        /// of <paramref name="includeDelimeterInReturn"/>.
+        /// This function always consumes the delimiter from the input stream if it is present, regardless of the value
+        /// of <paramref name="includeDelimiterInReturn"/>.
         /// </remarks>
-        public byte[] ReadBytesUntil(byte delimeter, bool includeDelimeterInReturn)
+        public byte[] ReadBytesUntil(byte delimiter, bool includeDelimiterInReturn)
         {
             var lookahead = Fork();
-            bool hasConsumedDelimeter = lookahead.AdvanceUntil(delimeter, includeDelimeterInReturn);
+            bool hasConsumedDelimiter = lookahead.AdvanceUntil(delimiter, includeDelimiterInReturn);
 
             byte[] buffer = new byte[lookahead.RelativeOffset - RelativeOffset];
             ReadBytes(buffer, 0, buffer.Length);
 
-            if (hasConsumedDelimeter)
+            if (hasConsumedDelimiter)
                 ReadByte();
 
             return buffer;
         }
 
         /// <summary>
-        /// Advances the reader until the provided delimeter byte is reached.
+        /// Advances the reader until the provided delimiter byte is reached.
         /// </summary>
-        /// <param name="delimeter">The delimeter byte to stop at.</param>
-        /// <param name="consumeDelimeter">
-        /// <c>true</c> if the final delimeter should be consumed if available, <c>false</c> otherwise.
+        /// <param name="delimiter">The delimiter byte to stop at.</param>
+        /// <param name="consumeDelimiter">
+        /// <c>true</c> if the final delimiter should be consumed if available, <c>false</c> otherwise.
         /// </param>
-        /// <returns><c>true</c> if the delimeter byte was found and consumed, <c>false</c> otherwise.</returns>
-        public bool AdvanceUntil(byte delimeter, bool consumeDelimeter)
+        /// <returns><c>true</c> if the delimiter byte was found and consumed, <c>false</c> otherwise.</returns>
+        public bool AdvanceUntil(byte delimiter, bool consumeDelimiter)
         {
             while (RelativeOffset < Length)
             {
                 byte b = ReadByte();
-                if (b == delimeter)
+                if (b == delimiter)
                 {
-                    if (!consumeDelimeter)
+                    if (!consumeDelimiter)
                     {
                         RelativeOffset--;
                         return true;
