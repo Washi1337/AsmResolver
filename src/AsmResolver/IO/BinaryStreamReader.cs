@@ -171,7 +171,7 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Reads a single unsigned 16 bit integer from the input stream, and advances the current offset by two.
+        /// Reads a single unsigned 16-bit integer from the input stream, and advances the current offset by two.
         /// </summary>
         /// <returns>The consumed value.</returns>
         public ushort ReadUInt16()
@@ -184,7 +184,7 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Reads a single unsigned 32 bit integer from the input stream, and advances the current offset by four.
+        /// Reads a single unsigned 32-bit integer from the input stream, and advances the current offset by four.
         /// </summary>
         /// <returns>The consumed value.</returns>
         public uint ReadUInt32()
@@ -199,7 +199,7 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Reads a single unsigned 64 bit integer from the input stream, and advances the current offset by eight.
+        /// Reads a single unsigned 64-bit integer from the input stream, and advances the current offset by eight.
         /// </summary>
         /// <returns>The consumed value.</returns>
         public ulong ReadUInt64()
@@ -228,7 +228,7 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Reads a single signed 16 bit integer from the input stream, and advances the current offset by two.
+        /// Reads a single signed 16-bit integer from the input stream, and advances the current offset by two.
         /// </summary>
         /// <returns>The consumed value.</returns>
         public short ReadInt16()
@@ -241,7 +241,7 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Reads a single signed 32 bit integer from the input stream, and advances the current offset by four.
+        /// Reads a single signed 32-bit integer from the input stream, and advances the current offset by four.
         /// </summary>
         /// <returns>The consumed value.</returns>
         public int ReadInt32()
@@ -256,7 +256,7 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Reads a single signed 64 bit integer from the input stream, and advances the current offset by eight.
+        /// Reads a single signed 64-bit integer from the input stream, and advances the current offset by eight.
         /// </summary>
         /// <returns>The consumed value.</returns>
         public long ReadInt64()
@@ -275,7 +275,7 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Reads a single signed 32 bit single precision floating point number from the input stream, and advances the
+        /// Reads a single signed 32-bit single precision floating point number from the input stream, and advances the
         /// current offset by four.
         /// </summary>
         /// <returns>The consumed value.</returns>
@@ -286,7 +286,7 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Reads a single signed 64 bit double precision floating point number from the input stream, and advances the
+        /// Reads a single signed 64-bit double precision floating point number from the input stream, and advances the
         /// current offset by four.
         /// </summary>
         /// <returns>The consumed value.</returns>
