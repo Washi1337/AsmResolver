@@ -336,12 +336,11 @@ namespace AsmResolver.DotNet.Serialized
             // TODO: perhaps check public key tokens.
 
             IResolutionScope? mostRecentCorLib = null;
-            var mostRecentVersion = new Version();
             foreach (var reference in AssemblyReferences)
             {
                 if (reference.Name is not null && KnownCorLibs.KnownCorLibNames.Contains(reference.Name))
                 {
-                    if (mostRecentVersion < reference.Version)
+                    if (mostRecentCorLib is null || reference.Version > mostRecentCorLib.GetAssembly()!.Version)
                         mostRecentCorLib = reference;
                 }
             }

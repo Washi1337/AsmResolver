@@ -25,6 +25,8 @@ namespace AsmResolver.DotNet
         IOwnedCollectionElement<ModuleDefinition>,
         IOwnedCollectionElement<TypeDefinition>
     {
+        internal static readonly Utf8String ModuleTypeName = "<Module>";
+
         private readonly LazyVariable<Utf8String?> _namespace;
         private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<ITypeDefOrRef?> _baseType;
@@ -492,10 +494,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// <c>true</c> if this is the global (aka. &lt;Module&gt;) type, otherwise <c>false</c>.
+        /// <c>true</c> if this is the global (i.e., &lt;Module&gt;) type, otherwise <c>false</c>.
         /// </summary>
         /// <remarks>
-        /// If the global (aka. &lt;Module&gt;) type was not added or does not exist yet in the <see cref="Module"/> will return false.
+        /// If the global (i.e., &lt;Module&gt;) type was not added or does not exist yet in the <see cref="Module"/>,
+        /// this will return <c>false</c>.
         /// </remarks>
         public bool IsModuleType
         {
