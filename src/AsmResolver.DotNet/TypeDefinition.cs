@@ -25,6 +25,8 @@ namespace AsmResolver.DotNet
         IOwnedCollectionElement<ModuleDefinition>,
         IOwnedCollectionElement<TypeDefinition>
     {
+        internal static readonly Utf8String ModuleTypeName = "<Module>";
+
         private readonly LazyVariable<Utf8String?> _namespace;
         private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<ITypeDefOrRef?> _baseType;

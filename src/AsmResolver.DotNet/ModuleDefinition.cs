@@ -304,7 +304,7 @@ namespace AsmResolver.DotNet
             AssemblyReferences.Add((AssemblyReference)CorLibTypeFactory.CorLibScope);
             MetadataResolver = new DefaultMetadataResolver(new DotNetFrameworkAssemblyResolver());
 
-            TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
+            TopLevelTypes.Add(new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0));
         }
 
         /// <summary>
@@ -325,7 +325,7 @@ namespace AsmResolver.DotNet
             OriginalTargetRuntime = DetectTargetRuntime();
             MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver(UncachedFileService.Instance));
 
-            TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
+            TopLevelTypes.Add(new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0));
         }
 
         /// <summary>
@@ -923,7 +923,7 @@ namespace AsmResolver.DotNet
             var firstType = TopLevelTypes[0];
 
             // Only .NET Framework allows the module type to be renamed to something else.
-            if (!OriginalTargetRuntime.IsNetFramework && !firstType.IsTypeOfUtf8(null, "<Module>"))
+            if (!OriginalTargetRuntime.IsNetFramework && !firstType.IsTypeOfUtf8(null, TypeDefinition.ModuleTypeName))
                 return null;
 
             return firstType;
@@ -939,7 +939,7 @@ namespace AsmResolver.DotNet
 
             if (moduleType is null)
             {
-                moduleType = new TypeDefinition(null, "<Module>", 0);
+                moduleType = new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0);
                 TopLevelTypes.Insert(0, moduleType);
             }
 
