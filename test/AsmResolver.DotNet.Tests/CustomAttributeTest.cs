@@ -85,7 +85,7 @@ namespace AsmResolver.DotNet.Tests
                 attributeName += "`1";
 
             var attribute = method.CustomAttributes
-                .First(c => c.Constructor!.DeclaringType!.Name == attributeName);
+                .First(c => c.Constructor!.DeclaringType!.Name.Value.StartsWith(attributeName));
 
             if (access)
             {
@@ -477,7 +477,8 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void FixedGenericInt32Argument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericInt32Argument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericInt32Argument),
+                rebuild, access, true);
             var argument = attribute.Signature!.FixedArguments[0];
 
             int value = Assert.IsAssignableFrom<int>(argument.Element);
@@ -490,10 +491,11 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void FixedGenericStringArgument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericStringArgument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericStringArgument),
+                rebuild, access, true);
             var argument = attribute.Signature!.FixedArguments[0];
 
-            string value = Assert.IsAssignableFrom<string>(argument.Element);
+            string value = Assert.IsAssignableFrom<Utf8String>(argument.Element);
             Assert.Equal("Fixed string generic argument", value);
         }
 
@@ -503,7 +505,8 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void FixedGenericInt32ArrayArgument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericInt32ArrayArgument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericInt32ArrayArgument),
+                rebuild, access, true);
             var argument = attribute.Signature!.FixedArguments[0];
 
             Assert.Equal(new int[] {1, 2, 3, 4}, argument.Elements.Cast<int>());
@@ -515,7 +518,8 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void FixedGenericInt32ArrayAsObjectArgument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericInt32ArrayAsObjectArgument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericInt32ArrayAsObjectArgument),
+                rebuild, access, true);
             var argument = attribute.Signature!.FixedArguments[0];
 
             var boxedArgument = Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
@@ -531,7 +535,8 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void FixedGenericTypeArgument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericTypeArgument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericTypeArgument),
+                rebuild, access, true);
             var argument = attribute.Signature!.FixedArguments[0];
 
             var expected = attribute.Constructor!.Module!.CorLibTypeFactory.Int32;
@@ -545,7 +550,8 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void FixedGenericTypeNullArgument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericTypeNullArgument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericTypeNullArgument),
+                rebuild, access, true);
             var argument = attribute.Signature!.FixedArguments[0];
 
             Assert.Null(argument.Element);
@@ -557,7 +563,8 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void NamedGenericInt32Argument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericInt32Argument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericInt32Argument),
+                rebuild, access, true);
             var argument = attribute.Signature!.NamedArguments[0];
 
             Assert.Equal("Value", argument.MemberName);
@@ -571,11 +578,12 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void NamedGenericStringArgument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericStringArgument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericStringArgument),
+                rebuild, access, true);
             var argument = attribute.Signature!.NamedArguments[0];
 
             Assert.Equal("Value", argument.MemberName);
-            string value = Assert.IsAssignableFrom<string>(argument.Argument.Element);
+            string value = Assert.IsAssignableFrom<Utf8String>(argument.Argument.Element);
             Assert.Equal("Named string generic argument", value);
         }
 
@@ -585,7 +593,8 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void NamedGenericInt32ArrayArgument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericInt32ArrayArgument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericInt32ArrayArgument),
+                rebuild, access, true);
             var argument = attribute.Signature!.NamedArguments[0];
 
             Assert.Equal("Value", argument.MemberName);
@@ -598,7 +607,8 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void NamedGenericInt32ArrayAsObjectArgument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericInt32ArrayAsObjectArgument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericInt32ArrayAsObjectArgument),
+                rebuild, access, true);
             var argument = attribute.Signature!.NamedArguments[0];
 
             Assert.Equal("Value", argument.MemberName);
@@ -615,7 +625,8 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void NamedGenericTypeArgument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericTypeArgument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericTypeArgument),
+                rebuild, access, true);
             var argument = attribute.Signature!.NamedArguments[0];
 
             var expected = attribute.Constructor!.Module!.CorLibTypeFactory.Int32;
@@ -629,7 +640,8 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void NamedGenericTypeNullArgument(bool rebuild, bool access)
         {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericTypeNullArgument), rebuild, access);
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericTypeNullArgument),
+                rebuild, access, true);
             var argument = attribute.Signature!.NamedArguments[0];
 
             Assert.Null(argument.Argument.Element);

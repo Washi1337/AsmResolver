@@ -90,8 +90,9 @@ namespace AsmResolver.DotNet.Signatures
             ICustomAttributeType ctor,
             in BinaryStreamReader reader)
         {
+            var genericContext = GenericContext.FromMethod(ctor);
             var argumentTypes = ctor.Signature?.ParameterTypes ?? Array.Empty<TypeSignature>();
-            return new SerializedCustomAttributeSignature(context, argumentTypes, reader);
+            return new SerializedCustomAttributeSignature(context, argumentTypes, genericContext, reader);
         }
 
         /// <summary>
