@@ -149,11 +149,30 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var member = module.LookupMember(new MetadataToken(TableIndex.TypeRef, 12));
-            Assert.IsAssignableFrom<TypeReference>(member);
 
-            var typeRef = (TypeReference)member;
-            Assert.Equal("System", typeRef.Namespace);
-            Assert.Equal("Object", typeRef.Name);
+            var reference = Assert.IsAssignableFrom<TypeReference>(member);
+            Assert.Equal("System", reference.Namespace);
+            Assert.Equal("Object", reference.Name);
+        }
+
+        [Fact]
+        public void LookupTypeReferenceStronglyTyped()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var reference = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 12));
+
+            Assert.Equal("System", reference.Namespace);
+            Assert.Equal("Object", reference.Name);
+        }
+
+        [Fact]
+        public void TryLookupTypeReferenceStronglyTyped()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            
+            Assert.True(module.TryLookupMember(new MetadataToken(TableIndex.TypeRef, 12), out TypeReference reference));
+            Assert.Equal("System", reference.Namespace);
+            Assert.Equal("Object", reference.Name);
         }
 
         [Fact]
@@ -161,11 +180,20 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var member = module.LookupMember(new MetadataToken(TableIndex.TypeDef, 2));
-            Assert.IsAssignableFrom<TypeDefinition>(member);
 
-            var typeDef = (TypeDefinition)member;
-            Assert.Equal("HelloWorld", typeDef.Namespace);
-            Assert.Equal("Program", typeDef.Name);
+            var definition = Assert.IsAssignableFrom<TypeDefinition>(member);
+            Assert.Equal("HelloWorld", definition.Namespace);
+            Assert.Equal("Program", definition.Name);
+        }
+
+        [Fact]
+        public void LookupTypeDefinitionStronglyTyped()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var definition = module.LookupMember<TypeDefinition>(new MetadataToken(TableIndex.TypeDef, 2));
+
+            Assert.Equal("HelloWorld", definition.Namespace);
+            Assert.Equal("Program", definition.Name);
         }
 
         [Fact]
@@ -173,11 +201,20 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var member = module.LookupMember(new MetadataToken(TableIndex.AssemblyRef, 1));
-            Assert.IsAssignableFrom<AssemblyReference>(member);
 
-            var assemblyRef = (AssemblyReference)member;
-            Assert.Equal("mscorlib", assemblyRef.Name);
-            Assert.Same(module.AssemblyReferences[0], assemblyRef);
+            var reference = Assert.IsAssignableFrom<AssemblyReference>(member);
+            Assert.Equal("mscorlib", reference.Name);
+            Assert.Same(module.AssemblyReferences[0], reference);
+        }
+
+        [Fact]
+        public void LookupAssemblyReferenceStronglyTyped()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var reference = module.LookupMember<AssemblyReference>(new MetadataToken(TableIndex.AssemblyRef, 1));
+
+            Assert.Equal("mscorlib", reference.Name);
+            Assert.Same(module.AssemblyReferences[0], reference);
         }
 
         [Fact]
@@ -185,11 +222,20 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(Path.Combine("Resources", "Manifest.exe"));
             var member = module.LookupMember(new MetadataToken(TableIndex.ModuleRef, 1));
-            Assert.IsAssignableFrom<ModuleReference>(member);
 
-            var moduleRef = (ModuleReference)member;
-            Assert.Equal("MyModel.netmodule", moduleRef.Name);
-            Assert.Same(module.ModuleReferences[0], moduleRef);
+            var reference =Assert.IsAssignableFrom<ModuleReference>(member);
+            Assert.Equal("MyModel.netmodule", reference.Name);
+            Assert.Same(module.ModuleReferences[0], reference);
+        }
+
+        [Fact]
+        public void LookupModuleReferenceStronglyTyped()
+        {
+            var module = ModuleDefinition.FromFile(Path.Combine("Resources", "Manifest.exe"));
+            var reference = module.LookupMember<ModuleReference>(new MetadataToken(TableIndex.ModuleRef, 1));
+
+            Assert.Equal("MyModel.netmodule", reference.Name);
+            Assert.Same(module.ModuleReferences[0], reference);
         }
 
         [Fact]
