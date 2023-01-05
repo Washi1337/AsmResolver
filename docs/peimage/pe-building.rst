@@ -3,7 +3,7 @@
 PE File Building
 ================
 
-An ``IPEImage`` is a higher level abstraction of an actual PE file, and hides many of the actual implementation details such as raw section layout and contents of data directories. While this makes reading and interpretation of a PE very easy, it makes writing a more involved process.
+An ``IPEImage`` is a higher-level abstraction of an actual PE file, and hides many of the actual implementation details such as raw section layout and contents of data directories. While this makes reading and interpreting a PE very easy, it makes writing a more involved process.
 
 Unfortunately, the PE file format is not well-structured. Compilers and linkers have a lot of freedom when it comes to the actual design and layout of the final PE file. For example, one compiler might place the Import Address Table (IAT) in a separate section (such as the MSVC), while others will put it next to the code in the text section (such as the C# compiler). This degree of freedom makes it virtually impossible to make a completely generic PE file builder, and as such AsmResolver does not come with one out of the box.
 
@@ -47,9 +47,9 @@ In a lot of cases, however, sections do not consist of a single data structure, 
 Using complex PE models 
 -----------------------
 
-The PE file format defines many complex data structures. While some these models are represented in AsmResolver using classes that derive from ``ISegment``, a lot of the classes that represent these data structures do not implement this interface, and as such cannot be used as a value for the ``Contents`` property of a ``PESection`` directly. This is due to the fact that most of these models are not required to be one single entity or chunk of continuous memory within the PE file. Instead, they are often scattered around the PE file by a compiler. For example, the Import Directory has a second component the Import Address Table which is often put in a completely different PE section (usually ``.text`` or ``.data``) than the Import Directory itself (in ``.idata`` or ``.rdata``). To make reading and interpreting these data structures more convenient for the end-user, the ``AsmResolver.PE`` package adopted some design choices to abstract these details away to make things more natural to work with. The downside of this is that writing these structures requires you to specify where AsmResolver should place these models in the final PE file.
+The PE file format defines many complex data structures. While some of these models are represented in AsmResolver using classes that derive from ``ISegment``, a lot of the classes that represent these data structures do not implement this interface, and as such cannot be used as a value for the ``Contents`` property of a ``PESection`` directly. This is due to the fact that most of these models are not required to be one single entity or chunk of continuous memory within the PE file. Instead, they are often scattered around the PE file by a compiler. For example, the Import Directory has a second component the Import Address Table which is often put in a completely different PE section (usually ``.text`` or ``.data``) than the Import Directory itself (in ``.idata`` or ``.rdata``). To make reading and interpreting these data structures more convenient for the end-user, the ``AsmResolver.PE`` package adopted some design choices to abstract these details away to make things more natural to work with. The downside of this is that writing these structures requires you to specify where AsmResolver should place these models in the final PE file.
 
-In ``AsmResolver.PE``, most models for which is the case reside in their own namespace, and have their own set of classes dedicated to constructing new segments defined in a ``Builder`` sub namespace. For example, the Win32 resources directory models reside in ``AsmResolver.PE.Win32Resources``, but the actual builder classes are put in a sub namespace called ``AsmResolver.PE.Win32Resources.Builder``.
+In ``AsmResolver.PE``, most models for which is the case reside in their own namespace, and have their own set of classes dedicated to constructing new segments defined in a ``Builder`` sub-namespace. For example, the Win32 resources directory models reside in ``AsmResolver.PE.Win32Resources``, but the actual builder classes are put in a sub namespace called ``AsmResolver.PE.Win32Resources.Builder``.
 
 .. code-block:: csharp
 
@@ -94,7 +94,7 @@ A more complicated structure such as the Imports Directory can be build like the
 Using PEFileBuilders
 --------------------
 
-As a lot of the PE file building process will be similar for many types of PE file layouts (such as the construction of the file and optional headers), AsmResolver comes with a base class called ``PEFileBuilderBase`` that abstracts many of these similarities away. Rather than defining and building up everything yourself, the ``PEFileBuilderBase`` allows you to override a couple of methods:
+As a lot of the PE file-building process will be similar for many types of PE file layouts (such as the construction of the file and optional headers), AsmResolver comes with a base class called ``PEFileBuilderBase`` that abstracts many of these similarities away. Rather than defining and building up everything yourself, the ``PEFileBuilderBase`` allows you to override a couple of methods:
 
 .. code-block:: csharp
 

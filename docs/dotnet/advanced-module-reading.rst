@@ -3,7 +3,7 @@
 Advanced Module Reading
 =======================
 
-Advanced users might have the need to configure AsmResolver's module reader. For example, instead of letting the module reader throw exceptions upon reading invalid data, errors should be ignored and recovered from. Other uses might include changing the way the underlying PE or method bodies are read. These kinds of settings can be configured using the ``ModuleReaderParameters`` class.
+Advanced users might need to configure AsmResolver's module reader. For example, instead of letting the module reader throw exceptions upon reading invalid data, errors should be ignored and recovered from. Other uses might include changing the way the underlying PE or method bodies are read. These kinds of settings can be configured using the ``ModuleReaderParameters`` class.
 
 .. code-block:: csharp
 
@@ -131,7 +131,7 @@ To let the reader use this implementation of the ``IMethodBodyReader``, set the 
 Custom Field RVA reading 
 ------------------------
 
-By default, the field RVA data storing the initial binary value of a field is interpreted as raw byte blobs, and are turned into instances of the ``DataSegment`` class. To adjust this behaviour, it is possible provide a custom implementation of the ``IFieldRvaDataReader`` interface.
+By default, the field RVA data storing the initial binary value of a field is interpreted as raw byte blobs, and are turned into instances of the ``DataSegment`` class. To adjust this behaviour, it is possible to provide a custom implementation of the ``IFieldRvaDataReader`` interface.
 
 
 .. code-block:: csharp

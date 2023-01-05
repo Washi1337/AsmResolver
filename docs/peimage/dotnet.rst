@@ -68,7 +68,7 @@ AsmResolver supports parsing streams using the names in the table below. Any str
 | ``#US``                   | ``UserStringsStream``  |
 +---------------------------+------------------------+
 
-Some streams support reading the raw contents using a ``BinaryStreamReader``. Effectively, every stream that was read from the disk is readable in this way. Below an example of a program that dumps for each readable stream the contents to a file on the disk:
+Some streams support reading the raw contents using a ``BinaryStreamReader``. Effectively, every stream that was read from the disk is readable in this way. Below is an example of a program that dumps for each readable stream the contents to a file on the disk:
 
 .. code-block:: csharp
 
@@ -101,7 +101,7 @@ The ``Streams`` property is mutable. You can add new streams, or remove existing
 Blob, Strings, US and GUID streams
 ----------------------------------
 
-The blob, strings, user-strings and GUID streams are all very similar in the sense that they all provide a storage for data referenced by the tables stream. Each of these streams have a very similar API in AsmResolver.
+The blob, strings, user-strings and GUID streams are all very similar in the sense that they all provide a storage for data referenced by the tables stream. Each of these streams has a very similar API in AsmResolver.
 
 +------------------------+----------------------+
 | Class                  | Method               |
@@ -346,7 +346,7 @@ Creating new segment references not present in the current PE image yet can be d
 TypeReference Hash (TRH)
 ------------------------
 
-Similar to the :ref:`pe-import-hash`, the TypeReference Hash (TRH) can be used to help identifying malware family written in a .NET language. However, unlike the Import Hash, the TRH is based on the names of all imported type references instead of the symbols specified in the imports directory of the PE. This is a more accurate representation for .NET images, as virtually every .NET image only uses one native symbol (either ``mscoree.dll!_CorExeMain`` or ``mscoree.dll!_CorDllMain``).
+Similar to the :ref:`pe-import-hash`, the TypeReference Hash (TRH) can be used to help identify malware families written in a .NET language. However, unlike the Import Hash, the TRH is based on the names of all imported type references instead of the symbols specified in the imports directory of the PE. This is a more accurate representation for .NET images, as virtually every .NET image only uses one native symbol (either ``mscoree.dll!_CorExeMain`` or ``mscoree.dll!_CorDllMain``).
 
 AsmResolver includes a built-in implementation for this that is based on `the reference implementation provided by GData <https://www.gdatasoftware.com/blog/2020/06/36164-introducing-the-typerefhash-trh>`_. The hash can be obtained using the ``GetTypeReferenceHash`` extension method on ``IPEImage`` or on ``IMetadata``:
 

@@ -27,6 +27,8 @@ Basic leaf type signatures:
 +----------------------------------+----------------------------------------------------------------------+
 | ``FunctionPointerTypeSignature`` | ``method void *(int32, int64)``                                      |
 +----------------------------------+----------------------------------------------------------------------+
+| ``GenericParameterSignature``    | ``!0``, ``!!0``                                                      |
++----------------------------------+----------------------------------------------------------------------+
 | ``SentinelTypeSignature``        | (Used as a delimeter for vararg method signatures)                   |
 +----------------------------------+----------------------------------------------------------------------+
 
@@ -42,8 +44,6 @@ Decorator type signatures:
 | ``ByReferenceTypeSignature``     | ``System.Int32&``                                                    |
 +----------------------------------+----------------------------------------------------------------------+
 | ``PointerTypeSignature``         | ``System.Int32*``                                                    |
-+----------------------------------+----------------------------------------------------------------------+
-| ``GenericParameterSignature``    | ``!0``, ``!!0``                                                      |
 +----------------------------------+----------------------------------------------------------------------+
 | ``CustomModifierTypeSignature``  | ``System.Int32 modreq (System.Runtime.CompilerServices.IsVolatile)`` |
 +----------------------------------+----------------------------------------------------------------------+
@@ -77,6 +77,7 @@ Corlib type signatures can also be looked up by their element type, by their ful
 
 If an invalid element type, name or type descriptor is passed on, these methods return ``null``.
 
+
 TypeDefOrRefSignature
 ---------------------
 
@@ -86,6 +87,13 @@ The ``TypeDefOrRefSignature`` class is used to reference types in either the ``T
 
     TypeReference streamTypeRef = new TypeReference(corlibScope, "System.IO", "Stream");
     TypeSignature streamTypeSig = new TypeDefOrRefSignature(streamTypeRef);
+
+
+Alternatively, ``CreateTypeReference`` can be used on any ``IResolutionScope``:
+
+.. code-block:: csharp
+
+    var streamTypeSig = corlibScope.CreateTypeReference("System.IO", "Stream");
 
 
 .. warning::
@@ -109,6 +117,17 @@ The ``GenericInstanceTypeSignature`` class is used to instantiate generic types 
     // listOfString now contains a reference to List<string>.
 
 
+Alternatively, a generic instance can also be generated via the ``MakeGenericType`` fluent syntax method:
+
+.. code-block:: csharp
+
+    var listOfString = corlibScope
+        .CreateTypeReference("System.Collections.Generic", "List`1")
+        .MakeGenericInstanceType(module.CorLibTypeFactory.String);
+
+    // listOfString now contains a reference to List<string>.
+
+
 FunctionPointerTypeSignature
 ----------------------------
 
@@ -127,6 +146,21 @@ Function pointer signatures are strongly-typed pointer types used to describe ad
     // type now contains a reference to `method void *(int32, int32)`.
 
 
+Alternatively, a function pointer signature can also be generated via the ``MakeFunctionPointerType`` fluent syntax method:
+
+.. code-block:: csharp
+
+    var factory = module.CorLibTypeFactory;
+    var type = MethodSignature.CreateStatic(
+            factory.Void,
+            factory.Int32,
+            factory.Int32)
+        .MakeFunctionPointerType();
+
+    // type now contains a reference to `method void *(int32, int32)`.
+
+
+
 Shortcuts
 ---------
 
@@ -139,6 +173,7 @@ To quickly transform any ``ITypeDescriptor`` into a ``TypeSignature``, it is pos
 
 
 Likewise, a ``TypeSignature`` can also be converted back to a ``ITypeDefOrRef``, which can be referenced using a metadata token, using the ``TypeSignature.ToTypeDefOrRef()`` method.
+
 
 Decorating type signatures
 --------------------------

@@ -55,7 +55,7 @@ Adding a new TLS directory to an image can be done using the parameterless const
     var tlsDirectory = new TlsDirectory();
     image.TlsDirectory = tlsDirectory;
 
-A TLS directory references all its sub segments using virtual addresses (VA) rather than relative addresses (RVA). This means that constructing a relocatable PE image with a TLS directory requires base relocation entries to be registered that let the Windows PE loader rebase all virtual addresses used in the directory when necessary. To quickly register all the required base relocations, you can call the ``GetRequiredBaseRelocations`` method and add all returned entries to the base relocation directory of the PE image:
+A TLS directory references all its sub-segments using virtual addresses (VA) rather than relative addresses (RVA). This means that constructing a relocatable PE image with a TLS directory requires base relocation entries to be registered that let the Windows PE loader rebase all virtual addresses used in the directory when necessary. To quickly register all the required base relocations, you can call the ``GetRequiredBaseRelocations`` method and add all returned entries to the base relocation directory of the PE image:
 
 .. code-block:: csharp
 

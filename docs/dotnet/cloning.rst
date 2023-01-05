@@ -1,7 +1,7 @@
 Member Cloning
 ==============
 
-When processing a .NET module, it often involves injecting additional code. Even though all models representing .NET metadata and CIL code are mutable, it might be very time consuming and error-prone to manually import and inject metadata members and/or CIL code into the target module.
+Processing a .NET module often involves injecting additional code. Even though all models representing .NET metadata and CIL code are mutable, it might be very time-consuming and error-prone to manually import and inject metadata members and/or CIL code into the target module.
 
 To help developers in injecting existing code into a module, ``AsmResolver.DotNet`` comes with a feature that involves cloning metadata members from one module and copying it over to another. All relevant classes are in the ``AsmResolver.DotNet.Cloning`` namespace:
 
@@ -116,7 +116,7 @@ When all members are included, it is possible to call ``MemberCloner.Clone`` to 
     var result = cloner.Clone();
 
 
-The ``MemberCloner`` will automatically resolve any cross references between types, fields and methods that are included in the cloning process.
+The ``MemberCloner`` will automatically resolve any cross-references between types, fields and methods that are included in the cloning process.
 
 For instance, going with the example in the previous section, if both the ``Rectangle`` as well as the ``Vector2`` classes are included, any reference in ``Rectangle`` to ``Vector2`` will be replaced with a reference to the cloned ``Vector2``.  If not all members are included, the ``MemberCloner`` will assume that these are references to external libraries, and will use the ``ReferenceImporter`` to construct references to these members instead.
 
@@ -173,12 +173,12 @@ All references to methods defined in the ``System.Runtime.CompilerServices`` nam
 See :ref:`dotnet-importer-common-caveats` for more information on reference importing and its caveats.
 
 
-Post processing of cloned members
+Post-processing of cloned members
 ---------------------------------
 
 In some cases, cloned members may need to be post-processed before they are injected into the target module. The ``MemberCloner`` class can be initialized with an instance of a ``IMemberClonerListener``, that gets notified by the cloner object every time a definition was cloned.
 
-Below an example that appends the string ``_Cloned`` to the  name for every cloned type.
+Below is an example that appends the string ``_Cloned`` to the  name for every cloned type.
 
 .. code-block:: csharp
 
@@ -251,7 +251,7 @@ It is important to note that the ``MemberCloner`` class itself does not inject a
         destinationModule.TopLevelTypes.Add(clonedType);
 
 
-However, since injecting the cloned top level types is a very common use-case for the cloner, AsmResolver defines the ``InjectTypeClonerListener`` class that implements a cloner listener that injects all top level types automatically into the destination module. In such a case, the code can be reduced to the following:
+However, since injecting the cloned top level types is a very common use-case for the cloner, AsmResolver defines the ``InjectTypeClonerListener`` class that implements a cloner listener that injects all top-level types automatically into the destination module. In such a case, the code can be reduced to the following:
 
 .. code-block:: csharp
 

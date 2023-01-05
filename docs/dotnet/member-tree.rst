@@ -22,7 +22,7 @@ Obtaining types in a module
 
 Types are represented by the ``TypeDefinition`` class. To get the types defined in a module, use the ``ModuleDefinition.TopLevelTypes`` property. A top level types is any non-nested type. Nested types are exposed through the ``TypeDefinition.NestedTypes``. Alternatively, to get all types, including nested types, it is possible to call the ``ModuleDefinition.GetAllTypes`` method instead.
 
-Below, an example program that iterates through all types recursively and prints them:
+Below is an example program that iterates through all types recursively and prints them:
 
 .. code-block:: csharp
 

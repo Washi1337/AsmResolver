@@ -12,7 +12,7 @@ The easiest way to write a .NET module to the disk is by using the ``Write`` met
 
 This method is essentially a shortcut for invoking the ``ManagedPEImageBuilder`` and ``ManagedPEFileBuilder`` classes, and will completely reconstruct the PE image, serialize it into a PE file and write the PE file to the disk. 
 
-While this is easy, and would probably work for most .NET module processing, it does not provide much flexibility. To get more control over the construction of the new PE image, it is therefore not recommended to use a different overload of the ``Write`` method, were we pass on a custom ``IPEFileBuilder``, or a configured ``ManagedPEImageBuilder``:
+While this is easy, and would probably work for most .NET module processing, it does not provide much flexibility. To get more control over the construction of the new PE image, it is therefore not recommended to use a different overload of the ``Write`` method, where we pass on a custom ``IPEFileBuilder``, or a configured ``ManagedPEImageBuilder``:
 
 .. code-block:: csharp
 
@@ -22,7 +22,7 @@ While this is easy, and would probably work for most .NET module processing, it 
 
     module.Write(@"C:\Path\To\Output\Binary.exe", imageBuilder);
 
-Alternatively, it is possible to call the ``CreateImage`` method directly. This allows for inspecting all build artifacts, as well as post processing of the constructed PE image before it is written to the disk.
+Alternatively, it is possible to call the ``CreateImage`` method directly. This allows for inspecting all build artifacts, as well as post-processing of the constructed PE image before it is written to the disk.
 
 .. code-block:: csharp
 
