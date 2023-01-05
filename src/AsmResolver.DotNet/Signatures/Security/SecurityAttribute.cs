@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Signatures.Security
             var genericContext = GenericContext.FromType(type);
             for (int i = 0; i < namedArgumentCount; i++)
             {
-                var argument = CustomAttributeNamedArgument.FromReader(context, genericContext, ref reader);
+                var argument = CustomAttributeNamedArgument.FromReader(context, ref reader);
                 result.NamedArguments.Add(argument);
             }
 

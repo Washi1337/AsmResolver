@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="readerContext">The blob reading context the signature is situated in.</param>
         /// <param name="fixedArgTypes">The types of all fixed arguments.</param>
-        /// <param name="genericContext"></param>
+        /// <param name="genericContext">The generic context the arguments live in.</param>
         /// <param name="reader">The input blob reader.</param>
         public SerializedCustomAttributeSignature(in BlobReaderContext readerContext,
             IEnumerable<TypeSignature> fixedArgTypes,
@@ -48,21 +48,14 @@ namespace AsmResolver.DotNet.Signatures
             // Read fixed arguments.
             for (int i = 0; i < _fixedArgTypes.Length; i++)
             {
-                fixedArguments.Add(CustomAttributeArgument.FromReader(
-                    _readerContext,
-                    _fixedArgTypes[i].InstantiateGenericTypes(_genericContext),
-                    ref reader));
+                var instantiatedType = _fixedArgTypes[i].InstantiateGenericTypes(_genericContext);
+                fixedArguments.Add(CustomAttributeArgument.FromReader(_readerContext, instantiatedType, ref reader));
             }
 
             // Read named arguments.
             ushort namedArgumentCount = reader.ReadUInt16();
             for (int i = 0; i < namedArgumentCount; i++)
-            {
-                namedArguments.Add(CustomAttributeNamedArgument.FromReader(
-                    _readerContext,
-                    _genericContext,
-                    ref reader));
-            }
+                namedArguments.Add(CustomAttributeNamedArgument.FromReader(_readerContext, ref reader));
         }
 
         /// <inheritdoc />
