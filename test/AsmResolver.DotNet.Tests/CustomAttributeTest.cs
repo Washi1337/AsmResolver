@@ -70,13 +70,22 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(parentToken, attribute.Parent.MetadataToken);
         }
 
-        private static CustomAttribute GetCustomAttributeTestCase(string methodName, bool rebuild = false, bool access = false)
+        private static CustomAttribute GetCustomAttributeTestCase(
+            string methodName,
+            bool rebuild = false,
+            bool access = false,
+            bool generic = false)
         {
             var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
             var method = type.Methods.First(m => m.Name == methodName);
+
+            string attributeName = nameof(TestCaseAttribute);
+            if (generic)
+                attributeName += "`1";
+
             var attribute = method.CustomAttributes
-                .First(c => c.Constructor!.DeclaringType!.Name == nameof(TestCaseAttribute));
+                .First(c => c.Constructor!.DeclaringType!.Name == attributeName);
 
             if (access)
             {
@@ -286,8 +295,8 @@ namespace AsmResolver.DotNet.Tests
             var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
             var expected = new GenericInstanceTypeSignature(nestedClass, false, module.CorLibTypeFactory.Object);
 
-            Assert.IsAssignableFrom<TypeSignature>(argument.Element);
-            Assert.Equal(expected, (TypeSignature) argument.Element, _comparer);
+            var element = Assert.IsAssignableFrom<TypeSignature>(argument.Element);
+            Assert.Equal(expected, element, _comparer);
         }
 
         [Theory]
@@ -307,8 +316,8 @@ namespace AsmResolver.DotNet.Tests
                 new GenericInstanceTypeSignature(nestedClass, false, module.CorLibTypeFactory.Object)
             );
 
-            Assert.IsAssignableFrom<TypeSignature>(argument.Element);
-            Assert.Equal(expected, (TypeSignature) argument.Element, _comparer);
+            var element = Assert.IsAssignableFrom<TypeSignature>(argument.Element);
+            Assert.Equal(expected, element, _comparer);
         }
 
         [Theory]
@@ -322,8 +331,8 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.Int32PassedAsObject),rebuild, access);
             var argument = attribute.Signature!.FixedArguments[0];
 
-            Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
-            Assert.Equal(123, ((BoxedArgument) argument.Element).Value);
+            var element = Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
+            Assert.Equal(123, element.Value);
         }
 
         [Theory]
@@ -338,8 +347,8 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature!.FixedArguments[0];
 
             var module = attribute.Constructor!.Module!;
-            Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
-            Assert.Equal(module.CorLibTypeFactory.Int32, (ITypeDescriptor) ((BoxedArgument) argument.Element).Value, _comparer);
+            var element = Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
+            Assert.Equal(module.CorLibTypeFactory.Int32, (ITypeDescriptor) element.Value, _comparer);
         }
 
         [Theory]
@@ -391,8 +400,7 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayAsObjectNullArgument),rebuild, access);
             var argument = attribute.Signature!.FixedArguments[0];
 
-            Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
-            var boxedArgument = (BoxedArgument) argument.Element;
+            var boxedArgument = Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
             Assert.Null(boxedArgument.Value);
         }
 
@@ -405,8 +413,7 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayAsObjectEmptyArgument),rebuild, access);
             var argument = attribute.Signature!.FixedArguments[0];
 
-            Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
-            var boxedArgument = (BoxedArgument) argument.Element;
+            var boxedArgument =Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
             Assert.Equal(Array.Empty<object>(), boxedArgument.Value);
         }
 
@@ -419,8 +426,7 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayAsObjectArgument),rebuild, access);
             var argument = attribute.Signature!.FixedArguments[0];
 
-            Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
-            var boxedArgument = (BoxedArgument) argument.Element;
+            var boxedArgument = Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
             Assert.Equal(new[]
             {
                 1, 2, 3, 4
@@ -463,6 +469,170 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(attribute.Signature);
             var argument = Assert.Single(attribute.Signature.FixedArguments);
             Assert.Equal("My Message", argument.Element);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void FixedGenericInt32Argument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericInt32Argument), rebuild, access);
+            var argument = attribute.Signature!.FixedArguments[0];
+
+            int value = Assert.IsAssignableFrom<int>(argument.Element);
+            Assert.Equal(1, value);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void FixedGenericStringArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericStringArgument), rebuild, access);
+            var argument = attribute.Signature!.FixedArguments[0];
+
+            string value = Assert.IsAssignableFrom<string>(argument.Element);
+            Assert.Equal("Fixed string generic argument", value);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void FixedGenericInt32ArrayArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericInt32ArrayArgument), rebuild, access);
+            var argument = attribute.Signature!.FixedArguments[0];
+
+            Assert.Equal(new int[] {1, 2, 3, 4}, argument.Elements.Cast<int>());
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void FixedGenericInt32ArrayAsObjectArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericInt32ArrayAsObjectArgument), rebuild, access);
+            var argument = attribute.Signature!.FixedArguments[0];
+
+            var boxedArgument = Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
+            Assert.Equal(new[]
+            {
+                1, 2, 3, 4
+            }, boxedArgument.Value);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void FixedGenericTypeArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericTypeArgument), rebuild, access);
+            var argument = attribute.Signature!.FixedArguments[0];
+
+            var expected = attribute.Constructor!.Module!.CorLibTypeFactory.Int32;
+            var element = Assert.IsAssignableFrom<TypeSignature>(argument.Element);
+            Assert.Equal(expected, element, _comparer);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void FixedGenericTypeNullArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericTypeNullArgument), rebuild, access);
+            var argument = attribute.Signature!.FixedArguments[0];
+
+            Assert.Null(argument.Element);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void NamedGenericInt32Argument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericInt32Argument), rebuild, access);
+            var argument = attribute.Signature!.NamedArguments[0];
+
+            Assert.Equal("Value", argument.MemberName);
+            int value = Assert.IsAssignableFrom<int>(argument.Argument.Element);
+            Assert.Equal(1, value);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void NamedGenericStringArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericStringArgument), rebuild, access);
+            var argument = attribute.Signature!.NamedArguments[0];
+
+            Assert.Equal("Value", argument.MemberName);
+            string value = Assert.IsAssignableFrom<string>(argument.Argument.Element);
+            Assert.Equal("Named string generic argument", value);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void NamedGenericInt32ArrayArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericInt32ArrayArgument), rebuild, access);
+            var argument = attribute.Signature!.NamedArguments[0];
+
+            Assert.Equal("Value", argument.MemberName);
+            Assert.Equal(new int[] {1,2,3,4}, argument.Argument.Elements.Cast<int>());
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void NamedGenericInt32ArrayAsObjectArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericInt32ArrayAsObjectArgument), rebuild, access);
+            var argument = attribute.Signature!.NamedArguments[0];
+
+            Assert.Equal("Value", argument.MemberName);
+            var boxedArgument = Assert.IsAssignableFrom<BoxedArgument>(argument.Argument.Element);
+            Assert.Equal(new[]
+            {
+                1, 2, 3, 4
+            }, boxedArgument.Value);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void NamedGenericTypeArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericTypeArgument), rebuild, access);
+            var argument = attribute.Signature!.NamedArguments[0];
+
+            var expected = attribute.Constructor!.Module!.CorLibTypeFactory.Int32;
+            var element = Assert.IsAssignableFrom<TypeSignature>(argument.Argument.Element);
+            Assert.Equal(expected, element, _comparer);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void NamedGenericTypeNullArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericTypeNullArgument), rebuild, access);
+            var argument = attribute.Signature!.NamedArguments[0];
+
+            Assert.Null(argument.Argument.Element);
         }
     }
 }
