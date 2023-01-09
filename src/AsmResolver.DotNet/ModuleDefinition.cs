@@ -792,7 +792,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Looks up a member by its metadata token.
         /// </summary>
-        /// <param name="token">The token of the member to lookup.</param>
+        /// <param name="token">The token of the member to look up.</param>
         /// <returns>The member.</returns>
         /// <exception cref="InvalidOperationException">
         /// Occurs when the module does not support looking up members by its token.
@@ -804,9 +804,27 @@ namespace AsmResolver.DotNet
             throw new InvalidOperationException("Cannot lookup members by tokens from a non-serialized module.");
 
         /// <summary>
+        /// Looks up a member by its metadata token, and casts it to the provided metadata member type.
+        /// </summary>
+        /// <param name="token">The token of the member to look up.</param>
+        /// <typeparam name="T">The type of member to look up.</typeparam>
+        /// <returns>The casted member.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Occurs when the module does not support looking up members by its token.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// Occurs when a metadata token indexes a table that cannot be converted to a metadata member.
+        /// </exception>
+        public T LookupMember<T>(MetadataToken token)
+            where T : class, IMetadataMember
+        {
+            return (T) LookupMember(token);
+        }
+
+        /// <summary>
         /// Attempts to look up a member by its metadata token.
         /// </summary>
-        /// <param name="token">The token of the member to lookup.</param>
+        /// <param name="token">The token of the member to look up.</param>
         /// <param name="member">The member, or <c>null</c> if the lookup failed.</param>
         /// <returns><c>true</c> if the member was successfully looked up, false otherwise.</returns>
         public virtual bool TryLookupMember(MetadataToken token, [NotNullWhen(true)] out IMetadataMember? member)
@@ -816,9 +834,29 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Attempts to look up a member by its metadata token, and cast it to the specified metadata member type.
+        /// </summary>
+        /// <param name="token">The token of the member to look up.</param>
+        /// <param name="member">The member, or <c>null</c> if the lookup failed.</param>
+        /// <typeparam name="T">The type of member to look up.</typeparam>
+        /// <returns><c>true</c> if the member was successfully looked up and of the correct type, false otherwise.</returns>
+        public bool TryLookupMember<T>(MetadataToken token, [NotNullWhen((true))] out T? member)
+            where T : class, IMetadataMember
+        {
+            if (TryLookupMember(token, out var resolved) && resolved is T casted)
+            {
+                member = casted;
+                return true;
+            }
+
+            member = null;
+            return false;
+        }
+
+        /// <summary>
         /// Looks up a user string by its string token.
         /// </summary>
-        /// <param name="token">The token of the string to lookup.</param>
+        /// <param name="token">The token of the string to look up.</param>
         /// <returns>The member.</returns>
         /// <exception cref="InvalidOperationException">
         /// Occurs when the module does not support looking up string by its token.
