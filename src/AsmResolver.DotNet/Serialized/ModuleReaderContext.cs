@@ -101,6 +101,9 @@ namespace AsmResolver.DotNet.Serialized
             get;
         }
 
+        /// <summary>
+        /// Gets the original index of the tables stream.
+        /// </summary>
         public int TablesStreamIndex
         {
             get;
@@ -114,6 +117,9 @@ namespace AsmResolver.DotNet.Serialized
             get;
         }
 
+        /// <summary>
+        /// Gets the original index of the blob stream.
+        /// </summary>
         public int BlobStreamIndex
         {
             get;
@@ -127,6 +133,9 @@ namespace AsmResolver.DotNet.Serialized
             get;
         }
 
+        /// <summary>
+        /// Gets the original index of the GUID stream.
+        /// </summary>
         public int GuidStreamIndex
         {
             get;
@@ -140,6 +149,9 @@ namespace AsmResolver.DotNet.Serialized
             get;
         }
 
+        /// <summary>
+        /// Gets the original index of the strings stream.
+        /// </summary>
         public int StringsStreamIndex
         {
             get;
@@ -153,6 +165,9 @@ namespace AsmResolver.DotNet.Serialized
             get;
         }
 
+        /// <summary>
+        /// Gets the original index of the user-strings stream.
+        /// </summary>
         public int UserStringsStreamIndex
         {
             get;
