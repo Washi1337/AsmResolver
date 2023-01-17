@@ -26,7 +26,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             _fixture = fixture;
         }
 
-        private static void ReplaceBodyWithNativeCode(IPEImage image, CodeSegment body, bool is32bit)
+        private static void ReplaceBodyWithNativeCode(IPEImage image, ISegment body, bool is32bit)
         {
             // Adjust image flags appropriately.
             image.DotNetDirectory!.Flags &= ~DotNetDirectoryFlags.ILOnly;
@@ -89,7 +89,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
 
-            ReplaceBodyWithNativeCode(image, new CodeSegment(new byte[]
+            ReplaceBodyWithNativeCode(image, new DataSegment(new byte[]
             {
                 0xb8, 0x39, 0x05, 0x00, 0x00,      // mov rax, 1337
                 0xc3                               // ret
@@ -120,27 +120,24 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             var function = new ImportedSymbol(0x4fc, "puts");
             module.Symbols.Add(function);
 
-            var body = new CodeSegment(new byte[]
-            {
-                /* 00: */ 0x48, 0x83, 0xEC, 0x28,                     // sub rsp, 0x28
-                /* 04: */ 0x48, 0x8D, 0x0D, 0x10, 0x00, 0x00, 0x00,   // lea rcx, qword [rel str]
-                /* 0B: */ 0xFF, 0x15, 0x00, 0x00, 0x00, 0x00,         // call qword [rel puts]
-                /* 11: */ 0xB8, 0x37, 0x13, 0x00, 0x00,               // mov eax, 0x1337
-                /* 16: */ 0x48, 0x83, 0xC4, 0x28,                     // add rsp, 0x28
-                /* 1A: */ 0xC3,                                       // ret
+            var body = new DataSegment(new byte[]
+                {
+                    /* 00: */ 0x48, 0x83, 0xEC, 0x28,                     // sub rsp, 0x28
+                    /* 04: */ 0x48, 0x8D, 0x0D, 0x10, 0x00, 0x00, 0x00,   // lea rcx, qword [rel str]
+                    /* 0B: */ 0xFF, 0x15, 0x00, 0x00, 0x00, 0x00,         // call qword [rel puts]
+                    /* 11: */ 0xB8, 0x37, 0x13, 0x00, 0x00,               // mov eax, 0x1337
+                    /* 16: */ 0x48, 0x83, 0xC4, 0x28,                     // add rsp, 0x28
+                    /* 1A: */ 0xC3,                                       // ret
 
-                                                            // str:
-                0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x66,   // "Hello f"
-                0x72, 0x6f, 0x6d, 0x20, 0x74, 0x68, 0x65,   // "rom the"
-                0x20, 0x75, 0x6e, 0x6d, 0x61, 0x6e, 0x61,   // " unmana"
-                0x67, 0x65, 0x64, 0x20, 0x77, 0x6f, 0x72,   // "ged wor"
-                0x6c, 0x64, 0x21, 0x00                      // "ld!"
-            });
-
-            // Fixup puts call.
-            body.AddressFixups.Add(new AddressFixup(
-                0xD, AddressFixupType.Relative32BitAddress, function
-            ));
+                                                                // str:
+                    0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x66,   // "Hello f"
+                    0x72, 0x6f, 0x6d, 0x20, 0x74, 0x68, 0x65,   // "rom the"
+                    0x20, 0x75, 0x6e, 0x6d, 0x61, 0x6e, 0x61,   // " unmana"
+                    0x67, 0x65, 0x64, 0x20, 0x77, 0x6f, 0x72,   // "ged wor"
+                    0x6c, 0x64, 0x21, 0x00                      // "ld!"
+                })
+                .AsPatchedSegment()
+                .Patch(0xD, AddressFixupType.Relative32BitAddress, function);
 
             // Replace body.
             ReplaceBodyWithNativeCode(image, body, false);
@@ -170,24 +167,22 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             var function = new ImportedSymbol(0x4fc, "puts");
             module.Symbols.Add(function);
 
-            var body = new CodeSegment(new byte[]
-            {
-                /* 00: */  0x55,                                 // push ebp
-                /* 01: */  0x89, 0xE5,                           // mov ebp,esp
-                /* 03: */  0x6A, 0x6F,                           // push byte +0x6f         ; H
-                /* 05: */  0x68, 0x48, 0x65, 0x6C, 0x6C,         // push dword 0x6c6c6548   ; ello
-                /* 0A: */  0x54,                                 // push esp
-                /* 0B: */  0xFF, 0x15, 0x00, 0x00, 0x00, 0x00,   // call [dword puts]
-                /* 11: */  0x83, 0xC4, 0x0C,                     // add esp,byte +0xc
-                /* 14: */  0xB8, 0x37, 0x13, 0x00, 0x00,         // mov eax,0x1337
-                /* 19: */  0x5D,                                 // pop ebp
-                /* 1A: */  0xC3,                                 // ret
-            });
+            var body = new DataSegment(new byte[]
+                {
+                    /* 00: */  0x55,                                 // push ebp
+                    /* 01: */  0x89, 0xE5,                           // mov ebp,esp
+                    /* 03: */  0x6A, 0x6F,                           // push byte +0x6f         ; H
+                    /* 05: */  0x68, 0x48, 0x65, 0x6C, 0x6C,         // push dword 0x6c6c6548   ; ello
+                    /* 0A: */  0x54,                                 // push esp
+                    /* 0B: */  0xFF, 0x15, 0x00, 0x00, 0x00, 0x00,   // call [dword puts]
+                    /* 11: */  0x83, 0xC4, 0x0C,                     // add esp,byte +0xc
+                    /* 14: */  0xB8, 0x37, 0x13, 0x00, 0x00,         // mov eax,0x1337
+                    /* 19: */  0x5D,                                 // pop ebp
+                    /* 1A: */  0xC3,                                 // ret
+                })
+                .AsPatchedSegment()
+                .Patch(0xD, AddressFixupType.Absolute32BitAddress, function);
 
-            // Fix up puts call.
-            body.AddressFixups.Add(new AddressFixup(
-                0xD, AddressFixupType.Absolute32BitAddress, function
-            ));
             image.Relocations.Clear();
             image.Relocations.Add(new BaseRelocation(RelocationType.HighLow, body.ToReference(0xD)));
 

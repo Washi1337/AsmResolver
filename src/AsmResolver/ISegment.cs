@@ -152,7 +152,7 @@ namespace AsmResolver
             : new RelativeReference(segment, additive);
 
         /// <summary>
-        /// Serializes the segment by calling <see cref="ISegment.Write"/> and writes the result into a byte array.
+        /// Serializes the segment by calling <see cref="IWritable.Write"/> and writes the result into a byte array.
         /// </summary>
         /// <param name="segment">The segment to serialize to </param>
         /// <returns>The resulting byte array.</returns>
@@ -164,7 +164,7 @@ namespace AsmResolver
         }
 
         /// <summary>
-        /// Serializes the segment by calling <see cref="ISegment.Write"/> and writes the result into a byte array.
+        /// Serializes the segment by calling <see cref="IWritable.Write"/> and writes the result into a byte array.
         /// </summary>
         /// <param name="segment">The segment to serialize to </param>
         /// <param name="pool">The memory stream writer pool to rent temporary writers from.</param>

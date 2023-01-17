@@ -27,11 +27,12 @@ namespace AsmResolver.PE.Platforms
         /// <inheritdoc />
         public override RelocatableSegment CreateThunkStub(ISymbol entryPoint)
         {
-            var segment = new CodeSegment(new byte[]
-            {
-                0xFF, 0x25, 0x00, 0x00, 0x00, 0x00 // jmp [&symbol]
-            });
-            segment.AddressFixups.Add(new AddressFixup(2, AddressFixupType.Absolute32BitAddress, entryPoint));
+            var segment = new DataSegment(new byte[]
+                {
+                    0xFF, 0x25, 0x00, 0x00, 0x00, 0x00 // jmp [&symbol]
+                })
+                .AsPatchedSegment()
+                .Patch(2, AddressFixupType.Absolute32BitAddress, entryPoint);
 
             return new RelocatableSegment(segment, new[]
             {

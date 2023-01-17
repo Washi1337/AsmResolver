@@ -1,7 +1,7 @@
 namespace AsmResolver.PE.Code
 {
     /// <summary>
-    /// Defines all possible address fixup types that can be applied in a <see cref="CodeSegment"/>.
+    /// Defines all possible address fixup types that can be applied in an <see cref="ISegment"/>.
     /// </summary>
     public enum AddressFixupType
     {

@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.IO;
+using AsmResolver.Patching;
 
 namespace AsmResolver.PE.Code
 {
     /// <summary>
     /// Represents a chunk of native code in a portable executable.
     /// </summary>
+    [Obsolete("This class has been superseded by AsmResolver.Patching.PatchedSegment.")]
     public class CodeSegment : SegmentBase
     {
         /// <summary>
@@ -72,32 +74,9 @@ namespace AsmResolver.PE.Code
             writer.WriteBytes(Code);
 
             for (int i = 0; i < AddressFixups.Count; i++)
-                ApplyAddressFixup(writer, AddressFixups[i]);
+                new AddressFixupPatch(AddressFixups[i]).Apply(new PatchContext(this, ImageBase, writer));
 
             writer.Offset = Offset + GetPhysicalSize();
         }
-
-        private void ApplyAddressFixup(IBinaryStreamWriter writer, in AddressFixup fixup)
-        {
-            writer.Offset = Offset + fixup.Offset;
-            uint writerRva = Rva + fixup.Offset;
-            uint targetRva = fixup.Symbol.GetReference()?.Rva ?? 0;
-
-            switch (fixup.Type)
-            {
-                case AddressFixupType.Absolute32BitAddress:
-                    writer.WriteUInt32((uint) (ImageBase + targetRva));
-                    break;
-                case AddressFixupType.Relative32BitAddress:
-                    writer.WriteInt32((int) (targetRva - (writerRva + 4)));
-                    break;
-                case AddressFixupType.Absolute64BitAddress:
-                    writer.WriteUInt64(ImageBase + targetRva);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
     }
 }

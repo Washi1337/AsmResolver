@@ -24,17 +24,17 @@ namespace AsmResolver.DotNet.Code.Native
             var provider = context.SymbolsProvider;
 
             // Create new raw code segment containing the native code.
-            var segment = new CodeSegment(nativeMethodBody.Code);
+            var segment = new DataSegment(nativeMethodBody.Code).AsPatchedSegment();
 
-            // Process fixups.
+            // Process address fixups.
             for (int i = 0; i < nativeMethodBody.AddressFixups.Count; i++)
             {
                 // Import symbol.
                 var fixup = nativeMethodBody.AddressFixups[i];
                 var symbol = FinalizeSymbol(segment, provider, fixup.Symbol);
 
-                // Create new fixup with imported symbol.
-                segment.AddressFixups.Add(new AddressFixup(fixup.Offset, fixup.Type, symbol));
+                // Fixup address.
+                segment.Patch(fixup.Offset, fixup.Type, symbol);
 
                 // Add base relocation when necessary.
                 AddBaseRelocations(segment, provider, fixup);
@@ -49,7 +49,7 @@ namespace AsmResolver.DotNet.Code.Native
         /// <param name="segment">The code segment that is being constructed.</param>
         /// <param name="provider">The object responsible for providing symbols referenced by the native method body.</param>
         /// <param name="fixup">The fixup to build base relocations for.</param>
-        protected virtual void AddBaseRelocations(CodeSegment segment, INativeSymbolsProvider provider, AddressFixup fixup)
+        protected virtual void AddBaseRelocations(ISegment segment, INativeSymbolsProvider provider, AddressFixup fixup)
         {
             switch (fixup.Type)
             {
@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Code.Native
         /// <param name="provider">The object responsible for providing symbols referenced by the native method body.</param>
         /// <param name="symbol">The symbol to reference.</param>
         /// <returns>The symbol.</returns>
-        protected virtual ISymbol FinalizeSymbol(CodeSegment result, INativeSymbolsProvider provider, ISymbol symbol)
+        protected virtual ISymbol FinalizeSymbol(ISegment result, INativeSymbolsProvider provider, ISymbol symbol)
         {
             if (symbol is NativeLocalSymbol local)
                 return new Symbol(result.ToReference((int) local.Offset));
