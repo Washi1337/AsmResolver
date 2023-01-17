@@ -126,11 +126,23 @@ namespace AsmResolver.DotNet.Builder
             | PreserveAssemblyReferenceIndices | PreserveMethodSpecificationIndices,
 
         /// <summary>
-        /// Indicates any kind of index into a blob or tables stream should be preserved whenever possible during the
-        /// construction of the metadata directory.
+        /// Indicates unconventional / spurious metadata streams present in the .NET metadata directory should be
+        /// preserved when possible.
+        /// </summary>
+        PreserveUnknownStreams = 0x20000,
+
+        /// <summary>
+        /// Indicates unconventional metadata stream order in the .NET metadata directory should be preserved when
+        /// possible.
+        /// </summary>
+        PreserveStreamOrder = 0x40000,
+
+        /// <summary>
+        /// Indicates any kind of index into a blob or tables stream, as well as unknown spurious metadata streams
+        /// should be preserved whenever possible during the construction of the metadata directory.
         /// </summary>
         PreserveAll = PreserveBlobIndices | PreserveGuidIndices | PreserveStringIndices | PreserveUserStringIndices
-                      | PreserveTableIndices,
+                      | PreserveTableIndices | PreserveUnknownStreams | PreserveStreamOrder,
 
         /// <summary>
         /// <para>

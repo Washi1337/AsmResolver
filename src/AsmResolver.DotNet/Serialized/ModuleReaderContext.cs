@@ -46,18 +46,23 @@ namespace AsmResolver.DotNet.Serialized
                 {
                     case TablesStream tablesStream when TablesStream is null:
                         TablesStream = tablesStream;
+                        TablesStreamIndex = i;
                         break;
                     case BlobStream blobStream when BlobStream is null || !isEncMetadata:
                         BlobStream = blobStream;
+                        BlobStreamIndex = i;
                         break;
                     case GuidStream guidStream when GuidStream is null || !isEncMetadata:
                         GuidStream = guidStream;
+                        GuidStreamIndex = i;
                         break;
                     case StringsStream stringsStream when StringsStream is null || !isEncMetadata:
                         StringsStream = stringsStream;
+                        StringsStreamIndex = i;
                         break;
                     case UserStringsStream userStringsStream when UserStringsStream is null || !isEncMetadata:
                         UserStringsStream = userStringsStream;
+                        UserStringsStreamIndex = i;
                         break;
                 }
             }
@@ -96,6 +101,11 @@ namespace AsmResolver.DotNet.Serialized
             get;
         }
 
+        public int TablesStreamIndex
+        {
+            get;
+        } = -1;
+
         /// <summary>
         /// Gets the main blob stream in the metadata directory.
         /// </summary>
@@ -103,6 +113,11 @@ namespace AsmResolver.DotNet.Serialized
         {
             get;
         }
+
+        public int BlobStreamIndex
+        {
+            get;
+        } = -1;
 
         /// <summary>
         /// Gets the main GUID stream in the metadata directory.
@@ -112,6 +127,11 @@ namespace AsmResolver.DotNet.Serialized
             get;
         }
 
+        public int GuidStreamIndex
+        {
+            get;
+        } = -1;
+
         /// <summary>
         /// Gets the main strings stream in the metadata directory.
         /// </summary>
@@ -120,6 +140,11 @@ namespace AsmResolver.DotNet.Serialized
             get;
         }
 
+        public int StringsStreamIndex
+        {
+            get;
+        } = -1;
+
         /// <summary>
         /// Gets the main user-strings stream in the metadata directory.
         /// </summary>
@@ -127,6 +152,11 @@ namespace AsmResolver.DotNet.Serialized
         {
             get;
         }
+
+        public int UserStringsStreamIndex
+        {
+            get;
+        } = -1;
 
         /// <summary>
         /// Gets the reader parameters.
