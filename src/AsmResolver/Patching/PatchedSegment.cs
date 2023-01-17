@@ -82,5 +82,17 @@ namespace AsmResolver.Patching
 
             writer.Offset = offset;
         }
+
+        /// <summary>
+        /// Adds a bytes patch to the list of patches to apply.
+        /// </summary>
+        /// <param name="relativeOffset">The offset to start patching at, relative to the start of the segment.</param>
+        /// <param name="newData">The new data to write.</param>
+        /// <returns>The current <see cref="PatchedSegment"/> instance.</returns>
+        public PatchedSegment Patch(uint relativeOffset, byte[] newData)
+        {
+            Patches.Add(new BytesPatch(relativeOffset, newData));
+            return this;
+        }
     }
 }

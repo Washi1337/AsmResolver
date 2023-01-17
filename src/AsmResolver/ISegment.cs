@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using AsmResolver.IO;
+using AsmResolver.Patching;
 
 namespace AsmResolver
 {
@@ -173,6 +174,39 @@ namespace AsmResolver
             using var rentedWriter = pool.Rent();
             segment.Write(rentedWriter.Writer);
             return rentedWriter.GetData();
+        }
+
+        /// <summary>
+        /// Wraps the provided segment into a <see cref="PatchedSegment"/>, making it eligible for applying
+        /// post-serialization patches.
+        /// </summary>
+        /// <param name="segment">The segment to wrap.</param>
+        /// <returns>
+        /// The wrapped segment, or <paramref name="segment"/> if it is already an instance of
+        /// <see cref="PatchedSegment"/>.
+        /// </returns>
+        public static PatchedSegment AsPatchedSegment(this ISegment segment) => segment.AsPatchedSegment(false);
+
+        /// <summary>
+        /// Wraps the provided segment into a <see cref="PatchedSegment"/>, making it eligible for applying
+        /// post-serialization patches.
+        /// </summary>
+        /// <param name="segment">The segment to wrap.</param>
+        /// <param name="alwaysCreateNew">
+        /// Indicates whether the segment should always be wrapped into a new instance of <see cref="PatchedSegment"/>,
+        /// regardless of whether <paramref name="segment"/> is already an instance of
+        /// <see cref="PatchedSegment"/> or not.
+        /// </param>
+        /// <returns>
+        /// The wrapped segment, or <paramref name="segment"/> if it is already an instance of
+        /// <see cref="PatchedSegment"/> and <paramref name="alwaysCreateNew"/> is set to <c>true</c>.
+        /// </returns>
+        public static PatchedSegment AsPatchedSegment(this ISegment segment, bool alwaysCreateNew)
+        {
+            if (alwaysCreateNew)
+                return new PatchedSegment(segment);
+
+            return segment as PatchedSegment ?? new PatchedSegment(segment);
         }
     }
 }

@@ -27,5 +27,30 @@ namespace AsmResolver.Tests.Patching
             byte[] result = patched.WriteIntoArray();
             Assert.Equal(expected, result);
         }
+
+        [Fact]
+        public void DoublePatchedSegmentShouldReturnSameInstance()
+        {
+            var x = _input.AsPatchedSegment();
+            var y = x.AsPatchedSegment();
+            Assert.Same(x, y);
+        }
+
+        [Fact]
+        public void SimpleBytesPatchFluent()
+        {
+            uint relativeOffset = 10;
+            byte[] newData = {0xFF, 0xFE, 0xFD, 0xFC};
+
+            var patched = _input
+                .AsPatchedSegment()
+                .Patch(10, newData);
+
+            byte[] expected = _input.ToArray();
+            Buffer.BlockCopy(newData, 0, expected, (int) relativeOffset, newData.Length);
+
+            byte[] result = patched.WriteIntoArray();
+            Assert.Equal(expected, result);
+        }
     }
 }
