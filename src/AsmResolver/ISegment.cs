@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Text;
+using AsmResolver.IO;
 
 namespace AsmResolver
 {
@@ -147,5 +149,30 @@ namespace AsmResolver
         public static ISegmentReference ToReference(this ISegment segment, int additive) => additive == 0
             ? new SegmentReference(segment)
             : new RelativeReference(segment, additive);
+
+        /// <summary>
+        /// Serializes the segment by calling <see cref="ISegment.Write"/> and writes the result into a byte array.
+        /// </summary>
+        /// <param name="segment">The segment to serialize to </param>
+        /// <returns>The resulting byte array.</returns>
+        public static byte[] WriteIntoArray(this ISegment segment)
+        {
+            using var stream = new MemoryStream();
+            segment.Write(new BinaryStreamWriter(stream));
+            return stream.ToArray();
+        }
+
+        /// <summary>
+        /// Serializes the segment by calling <see cref="ISegment.Write"/> and writes the result into a byte array.
+        /// </summary>
+        /// <param name="segment">The segment to serialize to </param>
+        /// <param name="pool">The memory stream writer pool to rent temporary writers from.</param>
+        /// <returns>The resulting byte array.</returns>
+        public static byte[] WriteIntoArray(this ISegment segment, MemoryStreamWriterPool pool)
+        {
+            using var rentedWriter = pool.Rent();
+            segment.Write(rentedWriter.Writer);
+            return rentedWriter.GetData();
+        }
     }
 }
