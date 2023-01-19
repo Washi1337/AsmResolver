@@ -1,10 +1,13 @@
 using System;
+using System.Linq;
 using AsmResolver.DotNet.Builder.Discovery;
 using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Code.Native;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -122,7 +125,16 @@ namespace AsmResolver.DotNet.Builder
             else if ((module.Attributes & DotNetDirectoryFlags.StrongNameSigned) != 0)
                 buffer.StrongNameSize = 0x80;
 
-            return buffer.CreateDirectory();
+            var result = buffer.CreateDirectory();
+
+            // If we need to preserve streams or stream order, apply the shifts accordingly.
+            if (module is SerializedModuleDefinition serializedModule
+                && (MetadataBuilderFlags & (MetadataBuilderFlags.PreserveUnknownStreams | MetadataBuilderFlags.PreserveStreamOrder)) != 0)
+            {
+                ReorderMetadataStreams(serializedModule, result.Directory.Metadata!);
+            }
+
+            return result;
         }
 
         private MemberDiscoveryResult DiscoverMemberDefinitionsInModule(ModuleDefinition module)
@@ -277,6 +289,62 @@ namespace AsmResolver.DotNet.Builder
 
             foreach (var member in module.TokenAllocator.GetAssignees(tableIndex))
                 importAction((TMember) member);
+        }
+
+        private void ReorderMetadataStreams(SerializedModuleDefinition serializedModule, IMetadata newMetadata)
+        {
+            IMetadataStream? GetStreamOrNull<TStream>()
+                where TStream : class, IMetadataStream
+            {
+                return newMetadata.TryGetStream(out TStream? stream)
+                    ? stream
+                    : null;
+            }
+
+            var readerContext = serializedModule.ReaderContext;
+            var streamIndices = new (int Index, IMetadataStream? Stream)[]
+            {
+                (readerContext.TablesStreamIndex, GetStreamOrNull<TablesStream>()),
+                (readerContext.BlobStreamIndex, GetStreamOrNull<BlobStream>()),
+                (readerContext.GuidStreamIndex, GetStreamOrNull<GuidStream>()),
+                (readerContext.StringsStreamIndex, GetStreamOrNull<StringsStream>()),
+                (readerContext.UserStringsStreamIndex, GetStreamOrNull<UserStringsStream>()),
+            };
+
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveUnknownStreams) != 0)
+            {
+                var originalStreams = serializedModule.DotNetDirectory.Metadata!.Streams;
+
+                if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStreamOrder) != 0)
+                {
+                    newMetadata.Streams.Clear();
+
+                    for (int i = 0; i < originalStreams.Count; i++)
+                    {
+                        var entry = streamIndices.FirstOrDefault(x => x.Index == i);
+                        newMetadata.Streams.Insert(i, entry.Stream ?? originalStreams[i]);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < originalStreams.Count; i++)
+                    {
+                        if (streamIndices.All(x => x.Index != i))
+                            newMetadata.Streams.Add(originalStreams[i]);
+                    }
+                }
+            }
+            else if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStreamOrder) != 0)
+            {
+                Array.Sort(streamIndices, (a, b) => a.Index.CompareTo(b.Index));
+                newMetadata.Streams.Clear();
+
+                for (int i = 0; i < streamIndices.Length; i++)
+                {
+                    if (streamIndices[i].Stream is { } stream)
+                        newMetadata.Streams.Add(stream);
+                }
+            }
         }
     }
 }
