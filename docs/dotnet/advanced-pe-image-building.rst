@@ -72,10 +72,34 @@ Some .NET modules are carefully crafted and rely on the raw structure of all met
 
 - RIDs of rows within a metadata table.
 - Indices of blobs within the ``#Blob``, ``#Strings``, ``#US`` or ``#GUID`` heaps.
+- Unknown or unconventional metadata streams and their order.
 
-The default PE image builder for .NET modules (``ManagedPEImageBuilder``) defines a property called ``DotNetDirectoryFactory``, which contains the object responsible for constructing the .NET data directory, can be configured to preserve as much of this structure as possible. With the help of the ``MetadataBuilderFlags`` enum, it is possible to indicate which structures of the metadata directory need to preserved.
+The default PE image builder for .NET modules (``ManagedPEImageBuilder``) defines a property called ``DotNetDirectoryFactory``, which contains the object responsible for constructing the .NET data directory, can be configured to preserve as much of this structure as possible. With the help of the ``MetadataBuilderFlags`` enum, it is possible to indicate which structures of the metadata directory need to preserved. The following table provides an overview of all preservation metadata builder flags that can be used and combined:
 
-Below an example on how to configure the image builder to preserve blob data and all metadata tokens to type references:
++----------------------------------------+-------------------------------------------------------------------+
+| flag                                   | Description                                                       |
++========================================+===================================================================+
+| ``PreserveXXXIndices``                 | Preserves all row indices of the original ``XXX`` metadata table. |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveTableIndices``               | Preserves all row indices from all original metadata tables.      |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveBlobIndices``                | Preserves all blob indices in the ``#Blob`` stream.               |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveGuidIndices``                | Preserves all GUID indices in the ``#GUID`` stream.               |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveStringIndices``              | Preserves all string indices in the ``#Strings`` stream.          |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveUserStringIndices``          | Preserves all user-string indices in the ``#US`` stream.          |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveUnknownStreams``             | Preserves any of the unknown / unconventional metadata streams.   |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveStreamOrder``                | Preserves the original order of all metadata streams.             |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveAll``                        | Preserves as much of the original metadata as possible.           |
++----------------------------------------+-------------------------------------------------------------------+
+
+
+Below is an example on how to configure the image builder to preserve blob data and all metadata tokens to type references:
 
 .. code-block:: csharp
 
@@ -84,7 +108,6 @@ Below an example on how to configure the image builder to preserve blob data and
                                  | MetadataBuilderFlags.PreserveTypeReferenceIndices;
     imageBuilder.DotNetDirectoryFactory = factory;
 
-If everything is supposed to be preserved as much as possible, then instead of specifying all flags defined in the ``MetadataBuilderFlags`` enum, we can also use ``MetadataBuilderFlags.PreserveAll`` as a shortcut. 
 
 .. warning::
 
