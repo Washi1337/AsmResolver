@@ -59,15 +59,14 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             return method.NativeMethodBody = new NativeMethodBody(method);
         }
 
-        private static CodeSegment GetNewCodeSegment(IPEImage image)
+        private static IReadableSegment GetNewCodeSegment(IPEImage image)
         {
             var methodTable = image.DotNetDirectory!.Metadata!
                 .GetStream<TablesStream>()
                 .GetTable<MethodDefinitionRow>(TableIndex.Method);
             var row = methodTable.First(r => (r.ImplAttributes & MethodImplAttributes.Native) != 0);
             Assert.True(row.Body.IsBounded);
-            var segment = Assert.IsAssignableFrom<CodeSegment>(row.Body.GetSegment());
-            return segment;
+            return Assert.IsAssignableFrom<IReadableSegment>(row.Body.GetSegment());
         }
 
         [Fact]
@@ -89,7 +88,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             var segment = GetNewCodeSegment(image);
 
             // Verify code segment was created.
-            Assert.Equal(segment.Code, body.Code);
+            Assert.Equal(segment.ToArray(), body.Code);
         }
 
         [Fact]
