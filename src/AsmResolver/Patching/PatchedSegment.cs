@@ -84,6 +84,17 @@ namespace AsmResolver.Patching
         }
 
         /// <summary>
+        /// Adds a patch to the list of patches to apply.
+        /// </summary>
+        /// <param name="patch">The patch to apply.</param>
+        /// <returns>The current <see cref="PatchedSegment"/> instance.</returns>
+        public PatchedSegment Patch(IPatch patch)
+        {
+            Patches.Add(patch);
+            return this;
+        }
+
+        /// <summary>
         /// Adds a bytes patch to the list of patches to apply.
         /// </summary>
         /// <param name="relativeOffset">The offset to start patching at, relative to the start of the segment.</param>
