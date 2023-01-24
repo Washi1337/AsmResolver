@@ -1,5 +1,7 @@
-Segments
-========
+.. _segments:
+
+Reading and Writing File Segments
+=================================
 
 Segments are the basis of everything in AsmResolver.
 They are the fundamental building blocks that together make up a binary file (such as a PE file).
@@ -121,6 +123,8 @@ Any segment can be wrapped into a ``PatchedSegment`` via its constructor:
 
 .. code-block:: csharp
 
+    using AsmResolver.Patching;
+
     ISegment segment = ...
     var patchedSegment = new PatchedSegment(segment);
 
@@ -128,6 +132,8 @@ Any segment can be wrapped into a ``PatchedSegment`` via its constructor:
 Alternatively, you can use (the preferred) fluent syntax:
 
 .. code-block:: csharp
+
+    using AsmResolver.Patching;
 
     ISegment segment = ...
     var patchedSegment = segment.AsPatchedSegment();

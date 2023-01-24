@@ -23,7 +23,7 @@ This can be used to read the data that is present in the section. If you want to
 .. code-block:: csharp
 
         byte[] data = section.ToArray();
-        
+
 
 The ``Sections`` property is mutable, which means you can add new sections and remove others from the PE.
 
@@ -42,8 +42,8 @@ Some sections (such as `.data` or `.bss`) contain uninitialized data, and might 
         var section = new PESection(".asmres", SectionFlags.MemoryRead | SectionFlags.ContentUninitializedData);
         var physicalContents = new DataSegment(new byte[] {1, 2, 3, 4});
         section.Contents = new VirtualSegment(physicalContents, 0x1000); // Create a new segment with a virtual size of 0x1000 bytes.
-        
+
         peFile.Sections.Add(section);
 
 
-For more advanced section building, see :ref:`pe-building-sections`.
+For more advanced section building, see :ref:`pe-building-sections` and :ref:`segments`.
