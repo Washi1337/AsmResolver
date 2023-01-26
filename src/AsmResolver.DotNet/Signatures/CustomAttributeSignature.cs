@@ -181,13 +181,13 @@ namespace AsmResolver.DotNet.Signatures
             if (expectedCount != FixedArguments.Count)
             {
                 listener.MetadataBuilder(
-                    $"{constructor.SafeToString()} expects {expectedCount} arguments but the signature provided {FixedArguments.Count} arguments.");
+                    $"Custom attribute constructor {constructor.SafeToString()} expects {expectedCount} arguments but the signature provided {FixedArguments.Count} arguments.");
                 return false;
             }
 
             if (signature?.SentinelParameterTypes.Count > 0)
             {
-                listener.MetadataBuilder($"{constructor.SafeToString()} defines sentinel parameters.");
+                listener.MetadataBuilder($"Custom attribute constructor {constructor.SafeToString()} defines sentinel parameters.");
                 return false;
             }
 
