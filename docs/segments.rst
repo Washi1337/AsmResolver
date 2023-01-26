@@ -96,8 +96,8 @@ Since ``SegmentBuilder`` implements ``ISegment`` itself, it can also be used wit
     child.Add(new DataSegment(...));
 
     var root = new SegmentBuilder();
-    builder.Add(new DataSegment(...));
-    builder.Add(child); // Nest segment builders into each other.
+    root.Add(new DataSegment(...));
+    root.Add(child); // Nest segment builders into each other.
 
 
 Resizing Segments at Runtime
@@ -200,9 +200,11 @@ Typically, these two measurements are going to be equal, but for some segments (
     ISegment segment = ...
 
     // Measure the size of the segment:
-    uint size segment.GetPhysicalSize();
+    uint physicalSize = segment.GetPhysicalSize();
+    uint virtualSize = segment.GetVirtualSize();
 
-    Console.WriteLine("Size: 0x{0:X8}", size);
+    Console.WriteLine("Physical (File) Size: 0x{0:X8}", physicalSize);
+    Console.WriteLine("Virtual (Runtime) Size: 0x{0:X8}", virtualSize);
 
 
 .. warning::
