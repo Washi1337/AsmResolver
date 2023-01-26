@@ -17,6 +17,11 @@ namespace AsmResolver.DotNet.Builder
         {
             var table = Metadata.TablesStream.GetSortedTable<CustomAttribute, CustomAttributeRow>(TableIndex.CustomAttribute);
 
+            // Ensure the signature defines the right parameters w.r.t. the constructor's parameters.
+            if (attribute.Constructor is not null && attribute.Signature is not null)
+                attribute.Signature.IsCompatibleWith(attribute.Constructor, ErrorListener);
+
+            // Add it.
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
             var row = new CustomAttributeRow(
                 encoder.EncodeToken(ownerToken),
