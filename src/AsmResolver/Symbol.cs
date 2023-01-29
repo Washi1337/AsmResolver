@@ -24,5 +24,8 @@ namespace AsmResolver
 
         /// <inheritdoc />
         public ISegmentReference GetReference() => Address;
+
+        /// <inheritdoc />
+        public override string? ToString() => Address.ToString();
     }
 }

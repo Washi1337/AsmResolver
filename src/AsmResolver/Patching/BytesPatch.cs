@@ -6,7 +6,7 @@ namespace AsmResolver.Patching
     /// <summary>
     /// Patches an instance of <see cref="ISegment"/> with a sequence of bytes.
     /// </summary>
-    [DebuggerDisplay("Patch {NewData.Length} bytes at offset {RelativeOffset}")]
+    [DebuggerDisplay("Patch {RelativeOffset} with {NewData.Length} bytes")]
     public sealed class BytesPatch : IPatch
     {
         /// <summary>

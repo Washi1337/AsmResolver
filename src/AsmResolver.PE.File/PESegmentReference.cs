@@ -43,5 +43,8 @@ namespace AsmResolver.PE.File
 
         /// <inheritdoc />
         public ISegment? GetSegment() => throw new InvalidOperationException();
+
+        /// <inheritdoc />
+        public override string ToString() => $"0x{Rva:X8}";
     }
 }

@@ -33,5 +33,8 @@ namespace AsmResolver
         BinaryStreamReader ISegmentReference.CreateReader() => throw new InvalidOperationException();
 
         ISegment? ISegmentReference.GetSegment() => throw new InvalidOperationException();
+
+        /// <inheritdoc />
+        public override string ToString() => $"0x{Rva:X8}";
     }
 }
