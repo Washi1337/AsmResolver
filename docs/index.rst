@@ -13,7 +13,14 @@ Table of Contents:
 
    overview
    faq
-   segments
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Core API
+   :name: sec-core
+
+   core/segments
 
 
 .. toctree::
