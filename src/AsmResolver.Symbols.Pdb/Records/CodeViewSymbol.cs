@@ -1,4 +1,5 @@
 using AsmResolver.IO;
+using AsmResolver.Symbols.Pdb.Leaves;
 using AsmResolver.Symbols.Pdb.Records.Serialized;
 
 namespace AsmResolver.Symbols.Pdb.Records;
@@ -38,5 +39,20 @@ public abstract class CodeViewSymbol
             CodeViewSymbolType.LProcRef => new SerializedProcedureReferenceSymbol(dataReader, true),
             _ => new UnknownSymbol(type, dataReader.ReadToEnd())
         };
+    }
+
+    private protected T? GetLeafRecord<T>(PdbReaderContext context, uint typeIndex) where T : CodeViewLeaf
+    {
+        return context.ParentImage.TryGetLeafRecord(typeIndex, out var leaf)
+            ? leaf switch
+            {
+                T t => t,
+                UnknownCodeViewLeaf unknownLeaf => context.Parameters.ErrorListener.BadImageAndReturn<T>(
+                    $"{CodeViewSymbolType} references a leaf at {typeIndex:X8} that is of an unknown type {unknownLeaf.LeafKind}."),
+                _ => context.Parameters.ErrorListener.BadImageAndReturn<T>(
+                    $"{CodeViewSymbolType} references a leaf at {typeIndex:X8} that is of an unexpected type ({leaf.LeafKind}).")
+            }
+            : context.Parameters.ErrorListener.BadImageAndReturn<T>(
+                $"{CodeViewSymbolType} contains an invalid type index {typeIndex:X8}.");
     }
 }
