@@ -26,6 +26,23 @@ namespace AsmResolver.PE.Code
         /// Adds an address fixup to the list of patches to apply.
         /// </summary>
         /// <param name="segment">The segment to add the patch to.</param>
+        /// <param name="relativeOffset">The offset to start writing the address at, relative to the start of the segment.</param>
+        /// <param name="type">The type of address to write.</param>
+        /// <param name="symbolOffset">The offset within the segment to point to, relative to the start of the segment.</param>
+        /// <returns>The patched segment.</returns>
+        public static PatchedSegment Patch(this PatchedSegment segment, uint relativeOffset, AddressFixupType type,
+            uint symbolOffset)
+        {
+            return segment.Patch(new AddressFixup(
+                relativeOffset,
+                type,
+                new Symbol(segment.ToReference((int) symbolOffset))));
+        }
+
+        /// <summary>
+        /// Adds an address fixup to the list of patches to apply.
+        /// </summary>
+        /// <param name="segment">The segment to add the patch to.</param>
         /// <param name="fixup">The fixup to apply.</param>
         /// <returns>The patched segment.</returns>
         public static PatchedSegment Patch(this PatchedSegment segment, in AddressFixup fixup)
