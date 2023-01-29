@@ -156,6 +156,43 @@ namespace AsmResolver.DotNet.Signatures
             for (int i = 0; i < NamedArguments.Count; i++)
                 NamedArguments[i].Write(context);
         }
+
+        /// <summary>
+        /// Validates whether the signature is compatible with the provided attribute constructor.
+        /// </summary>
+        /// <param name="constructor">The constructor to validate against.</param>
+        /// <returns><c>true</c> if the constructor is compatible, <c>false</c> otherwise.</returns>
+        public bool IsCompatibleWith(ICustomAttributeType constructor)
+        {
+            return IsCompatibleWith(constructor, EmptyErrorListener.Instance);
+        }
+
+        /// <summary>
+        /// Validates whether the signature is compatible with the provided attribute constructor.
+        /// </summary>
+        /// <param name="constructor">The constructor to validate against.</param>
+        /// <param name="listener">The object responsible for reporting any errors during the validation of the signature.</param>
+        /// <returns><c>true</c> if the constructor is compatible, <c>false</c> otherwise.</returns>
+        public virtual bool IsCompatibleWith(ICustomAttributeType constructor, IErrorListener listener)
+        {
+            var signature = constructor.Signature;
+
+            int expectedCount = signature?.ParameterTypes.Count ?? 0;
+            if (expectedCount != FixedArguments.Count)
+            {
+                listener.MetadataBuilder(
+                    $"Custom attribute constructor {constructor.SafeToString()} expects {expectedCount} arguments but the signature provided {FixedArguments.Count} arguments.");
+                return false;
+            }
+
+            if (signature?.SentinelParameterTypes.Count > 0)
+            {
+                listener.MetadataBuilder($"Custom attribute constructor {constructor.SafeToString()} defines sentinel parameters.");
+                return false;
+            }
+
+            return true;
+        }
     }
 
 }

@@ -646,5 +646,25 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Null(argument.Argument.Element);
         }
+
+        [Fact]
+        public void TestSignatureCompatibility()
+        {
+            var module = new ModuleDefinition("Dummy");
+            var factory = module.CorLibTypeFactory;
+            var ctor = factory.CorLibScope
+                .CreateTypeReference("System", "CLSCompliantAttribute")
+                .CreateMemberReference(".ctor", MethodSignature.CreateInstance(factory.Void, factory.Boolean))
+                .ImportWith(module.DefaultImporter);
+
+            var attribute = new CustomAttribute(ctor);
+
+            // Empty signature is not compatible with a ctor that takes a boolean.
+            Assert.False(attribute.Signature!.IsCompatibleWith(attribute.Constructor!));
+
+            // If we add it, it should be compatible again.
+            attribute.Signature.FixedArguments.Add(new CustomAttributeArgument(factory.Boolean, true));
+            Assert.True(attribute.Signature!.IsCompatibleWith(attribute.Constructor!));
+        }
     }
 }

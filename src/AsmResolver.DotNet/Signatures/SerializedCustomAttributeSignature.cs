@@ -75,5 +75,11 @@ namespace AsmResolver.DotNet.Signatures
             else
                 _reader.Fork().WriteToOutput(context.Writer);
         }
+
+        /// <inheritdoc />
+        public override bool IsCompatibleWith(ICustomAttributeType constructor, IErrorListener listener)
+        {
+            return !IsInitialized || base.IsCompatibleWith(constructor, listener);
+        }
     }
 }
