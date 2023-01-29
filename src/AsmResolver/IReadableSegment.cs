@@ -56,6 +56,5 @@ namespace AsmResolver
         {
             return segment.CreateReader().ReadToEnd();
         }
-
     }
 }

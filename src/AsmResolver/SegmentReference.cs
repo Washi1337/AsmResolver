@@ -56,5 +56,8 @@ namespace AsmResolver
         }
 
         ISegment? ISegmentReference.GetSegment() => Segment;
+
+        /// <inheritdoc />
+        public override string ToString() => Segment?.ToString() ?? "null";
     }
 }

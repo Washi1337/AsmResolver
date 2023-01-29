@@ -6,7 +6,7 @@ A lot of models in a .NET module are assigned a unique metadata token. This toke
 Custom Token Allocation
 -----------------------
 
-Some usecase of AsmResolver will depend on the knowledge of tokens of newly created members prior to serializing the module. Therefore, AsmResolver provides the ``TokenAllocator`` class, which allows for assigning new tokens to members pre-emptively. If a module is then written to the disk with the ``MetadataFlags.PreserveTableIndices`` flags set (see Advanced PE Image Building for more information on how that is done), this token will be preserved in the final image.
+Some use-cases of AsmResolver will depend on the knowledge of tokens of newly created members before serializing the module. Therefore, AsmResolver provides the ``TokenAllocator`` class, which allows for assigning new tokens to members preemptively. If a module is then written to the disk with the ``MetadataFlags.PreserveTableIndices`` flags set (see Advanced PE Image Building for more information on how that is done), this token will be preserved in the final image.
 
 The token allocator for a particular module can be accessed through the ``ModuleDefinition.TokenAllocator`` property:
 

@@ -10,22 +10,25 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public class SerializedCustomAttributeSignature : CustomAttributeSignature
     {
-        private readonly BlobReaderContext _context;
+        private readonly BlobReaderContext _readerContext;
+        private readonly GenericContext _genericContext;
         private readonly TypeSignature[] _fixedArgTypes;
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
         /// Initializes a new lazy custom attribute signature from an input blob stream reader.
         /// </summary>
-        /// <param name="context">The blob reading context the signature is situated in.</param>
+        /// <param name="readerContext">The blob reading context the signature is situated in.</param>
         /// <param name="fixedArgTypes">The types of all fixed arguments.</param>
+        /// <param name="genericContext">The generic context the arguments live in.</param>
         /// <param name="reader">The input blob reader.</param>
-        public SerializedCustomAttributeSignature(
-            in BlobReaderContext context,
+        public SerializedCustomAttributeSignature(in BlobReaderContext readerContext,
             IEnumerable<TypeSignature> fixedArgTypes,
+            in GenericContext genericContext,
             in BinaryStreamReader reader)
         {
-            _context = context;
+            _readerContext = readerContext;
+            _genericContext = genericContext;
             _fixedArgTypes = fixedArgTypes.ToArray();
             _reader = reader;
         }
@@ -40,16 +43,19 @@ namespace AsmResolver.DotNet.Signatures
             // Verify magic header.
             ushort prologue = reader.ReadUInt16();
             if (prologue != CustomAttributeSignaturePrologue)
-                _context.ReaderContext.BadImage("Input stream does not point to a valid custom attribute signature.");
+                _readerContext.ReaderContext.BadImage("Input stream does not point to a valid custom attribute signature.");
 
             // Read fixed arguments.
             for (int i = 0; i < _fixedArgTypes.Length; i++)
-                fixedArguments.Add(CustomAttributeArgument.FromReader(_context, _fixedArgTypes[i], ref reader));
+            {
+                var instantiatedType = _fixedArgTypes[i].InstantiateGenericTypes(_genericContext);
+                fixedArguments.Add(CustomAttributeArgument.FromReader(_readerContext, instantiatedType, ref reader));
+            }
 
             // Read named arguments.
             ushort namedArgumentCount = reader.ReadUInt16();
             for (int i = 0; i < namedArgumentCount; i++)
-                namedArguments.Add(CustomAttributeNamedArgument.FromReader(_context, ref reader));
+                namedArguments.Add(CustomAttributeNamedArgument.FromReader(_readerContext, ref reader));
         }
 
         /// <inheritdoc />
@@ -68,6 +74,12 @@ namespace AsmResolver.DotNet.Signatures
                 base.WriteContents(context);
             else
                 _reader.Fork().WriteToOutput(context.Writer);
+        }
+
+        /// <inheritdoc />
+        public override bool IsCompatibleWith(ICustomAttributeType constructor, IErrorListener listener)
+        {
+            return !IsInitialized || base.IsCompatibleWith(constructor, listener);
         }
     }
 }

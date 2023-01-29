@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code.Cil;
@@ -26,6 +25,8 @@ namespace AsmResolver.DotNet
         IOwnedCollectionElement<ModuleDefinition>,
         IOwnedCollectionElement<TypeDefinition>
     {
+        internal static readonly Utf8String ModuleTypeName = "<Module>";
+
         private readonly LazyVariable<Utf8String?> _namespace;
         private readonly LazyVariable<Utf8String?> _name;
         private readonly LazyVariable<ITypeDefOrRef?> _baseType;
@@ -489,6 +490,22 @@ namespace AsmResolver.DotNet
 
                 return baseType.IsTypeOf("System", nameof(Delegate))
                     || baseType.IsTypeOf("System", nameof(MulticastDelegate));
+            }
+        }
+
+        /// <summary>
+        /// <c>true</c> if this is the global (i.e., &lt;Module&gt;) type, otherwise <c>false</c>.
+        /// </summary>
+        /// <remarks>
+        /// If the global (i.e., &lt;Module&gt;) type was not added or does not exist yet in the <see cref="Module"/>,
+        /// this will return <c>false</c>.
+        /// </remarks>
+        public bool IsModuleType
+        {
+            get
+            {
+                var module = Module?.GetModuleType();
+                return module != null && module == this;
             }
         }
 

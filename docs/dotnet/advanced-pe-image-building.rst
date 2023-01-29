@@ -12,7 +12,7 @@ The easiest way to write a .NET module to the disk is by using the ``Write`` met
 
 This method is essentially a shortcut for invoking the ``ManagedPEImageBuilder`` and ``ManagedPEFileBuilder`` classes, and will completely reconstruct the PE image, serialize it into a PE file and write the PE file to the disk. 
 
-While this is easy, and would probably work for most .NET module processing, it does not provide much flexibility. To get more control over the construction of the new PE image, it is therefore not recommended to use a different overload of the ``Write`` method, were we pass on a custom ``IPEFileBuilder``, or a configured ``ManagedPEImageBuilder``:
+While this is easy, and would probably work for most .NET module processing, it does not provide much flexibility. To get more control over the construction of the new PE image, it is therefore not recommended to use a different overload of the ``Write`` method, where we pass on a custom ``IPEFileBuilder``, or a configured ``ManagedPEImageBuilder``:
 
 .. code-block:: csharp
 
@@ -22,7 +22,7 @@ While this is easy, and would probably work for most .NET module processing, it 
 
     module.Write(@"C:\Path\To\Output\Binary.exe", imageBuilder);
 
-Alternatively, it is possible to call the ``CreateImage`` method directly. This allows for inspecting all build artifacts, as well as post processing of the constructed PE image before it is written to the disk.
+Alternatively, it is possible to call the ``CreateImage`` method directly. This allows for inspecting all build artifacts, as well as post-processing of the constructed PE image before it is written to the disk.
 
 .. code-block:: csharp
 
@@ -72,10 +72,34 @@ Some .NET modules are carefully crafted and rely on the raw structure of all met
 
 - RIDs of rows within a metadata table.
 - Indices of blobs within the ``#Blob``, ``#Strings``, ``#US`` or ``#GUID`` heaps.
+- Unknown or unconventional metadata streams and their order.
 
-The default PE image builder for .NET modules (``ManagedPEImageBuilder``) defines a property called ``DotNetDirectoryFactory``, which contains the object responsible for constructing the .NET data directory, can be configured to preserve as much of this structure as possible. With the help of the ``MetadataBuilderFlags`` enum, it is possible to indicate which structures of the metadata directory need to preserved.
+The default PE image builder for .NET modules (``ManagedPEImageBuilder``) defines a property called ``DotNetDirectoryFactory``, which contains the object responsible for constructing the .NET data directory, can be configured to preserve as much of this structure as possible. With the help of the ``MetadataBuilderFlags`` enum, it is possible to indicate which structures of the metadata directory need to preserved. The following table provides an overview of all preservation metadata builder flags that can be used and combined:
 
-Below an example on how to configure the image builder to preserve blob data and all metadata tokens to type references:
++----------------------------------------+-------------------------------------------------------------------+
+| flag                                   | Description                                                       |
++========================================+===================================================================+
+| ``PreserveXXXIndices``                 | Preserves all row indices of the original ``XXX`` metadata table. |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveTableIndices``               | Preserves all row indices from all original metadata tables.      |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveBlobIndices``                | Preserves all blob indices in the ``#Blob`` stream.               |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveGuidIndices``                | Preserves all GUID indices in the ``#GUID`` stream.               |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveStringIndices``              | Preserves all string indices in the ``#Strings`` stream.          |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveUserStringIndices``          | Preserves all user-string indices in the ``#US`` stream.          |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveUnknownStreams``             | Preserves any of the unknown / unconventional metadata streams.   |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveStreamOrder``                | Preserves the original order of all metadata streams.             |
++----------------------------------------+-------------------------------------------------------------------+
+| ``PreserveAll``                        | Preserves as much of the original metadata as possible.           |
++----------------------------------------+-------------------------------------------------------------------+
+
+
+Below is an example on how to configure the image builder to preserve blob data and all metadata tokens to type references:
 
 .. code-block:: csharp
 
@@ -84,7 +108,6 @@ Below an example on how to configure the image builder to preserve blob data and
                                  | MetadataBuilderFlags.PreserveTypeReferenceIndices;
     imageBuilder.DotNetDirectoryFactory = factory;
 
-If everything is supposed to be preserved as much as possible, then instead of specifying all flags defined in the ``MetadataBuilderFlags`` enum, we can also use ``MetadataBuilderFlags.PreserveAll`` as a shortcut. 
 
 .. warning::
 

@@ -13,7 +13,7 @@ The relevant classes for this article are stored in the following namespace:
 The Debug Data Entries
 ----------------------
 
-The ``IPEImage`` exposes all debug information through the ``DebugData`` property. This is a list of ``DebugDataEntry``, providing access to the type of the debug data, as well as the version and raw contents of the data that is stored.
+The ``IPEImage`` exposes all debug information through the ``DebugData`` property. This is a list of ``DebugDataEntry``, providing access to the type of debug data, as well as the version and raw contents of the data that is stored.
 
 .. code-block:: csharp
 
@@ -24,15 +24,15 @@ The ``IPEImage`` exposes all debug information through the ``DebugData`` propert
         Console.WriteLine("Data start: {0:X8}", entry.Contents.Rva);
     }
 
-Depending on the type of the debug data entry, the ``Contents`` property will be modelled using different implementations of ``IDebugDataSegment``.
+Depending on the type of the debug data entry, the ``Contents`` property will be modeled using different implementations of ``IDebugDataSegment``.
 
 .. note::
     
-    If a PE contains debug data using an unsuported or unrecognized format, then the contents will be modelled with a ``CustomDebugDataSegment`` instance instead, which exposes the raw contents as an ``ISegment``.
+    If a PE contains debug data using an unsupported or unrecognized format, then the contents will be modeled with a ``CustomDebugDataSegment`` instance instead, which exposes the raw contents as an ``ISegment``.
 
 .. note:: 
 
-    Currently, AsmResolver only has rich-support for ``CodeView`` debug data.
+    Currently, AsmResolver only has rich support for ``CodeView`` debug data.
 
 
 CodeView Data

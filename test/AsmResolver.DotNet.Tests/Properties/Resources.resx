@@ -141,4 +141,16 @@
     <data name="MyLibrary_X64" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\MyLibrary.x64.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="ModuleCctorAbsentNet6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\ModuleCctorAbsentNet6.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="ModuleCctorLookalikeNet6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\ModuleCctorLookalikeNet6.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="ModuleCctorNet6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\ModuleCctorNet6.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="ModuleCctorNetFramework" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\ModuleCctorNetFramework.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
 </root>

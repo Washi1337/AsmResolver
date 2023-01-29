@@ -17,6 +17,14 @@ Table of Contents:
 
 .. toctree::
    :maxdepth: 1
+   :caption: Core API
+   :name: sec-core
+
+   core/segments
+
+
+.. toctree::
+   :maxdepth: 1
    :caption: PE Files
    :name: sec-pefile
 
@@ -47,7 +55,7 @@ Table of Contents:
 .. toctree::
    :maxdepth: 1
    :caption: .NET assemblies and modules
-   :name: sec-peimage
+   :name: sec-dotnet
 
    dotnet/index
    dotnet/basics
@@ -55,7 +63,6 @@ Table of Contents:
    dotnet/member-tree
    dotnet/type-signatures
    dotnet/importing
-   dotnet/methods
    dotnet/managed-method-bodies
    dotnet/unmanaged-method-bodies
    dotnet/dynamic-methods

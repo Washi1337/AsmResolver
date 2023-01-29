@@ -134,5 +134,64 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         {
         }
 
+        [TestCase<int>(1)]
+        public void FixedGenericInt32Argument()
+        {
+        }
+
+        [TestCase<string>("Fixed string generic argument")]
+        public void FixedGenericStringArgument()
+        {
+        }
+
+        [TestCase<int[]>(new int[] {1,2,3,4})]
+        public void FixedGenericInt32ArrayArgument()
+        {
+        }
+
+        [TestCase<object>(new int[] {1,2,3,4})]
+        public void FixedGenericInt32ArrayAsObjectArgument()
+        {
+        }
+
+        [TestCase<Type>(typeof(int))]
+        public void FixedGenericTypeArgument()
+        {
+        }
+
+        [TestCase<Type>(null)]
+        public void FixedGenericTypeNullArgument()
+        {
+        }
+
+        [TestCase<int>(Value = 1)]
+        public void NamedGenericInt32Argument()
+        {
+        }
+
+        [TestCase<string>(Value = "Named string generic argument")]
+        public void NamedGenericStringArgument()
+        {
+        }
+
+        [TestCase<int[]>(Value = new int[] {1,2,3,4})]
+        public void NamedGenericInt32ArrayArgument()
+        {
+        }
+
+        [TestCase<object>(Value = new int[] {1,2,3,4})]
+        public void NamedGenericInt32ArrayAsObjectArgument()
+        {
+        }
+
+        [TestCase<Type>(Value = typeof(int))]
+        public void NamedGenericTypeArgument()
+        {
+        }
+
+        [TestCase<Type>(Value = null)]
+        public void NamedGenericTypeNullArgument()
+        {
+        }
     }
 }

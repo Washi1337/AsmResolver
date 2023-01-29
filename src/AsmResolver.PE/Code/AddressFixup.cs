@@ -1,11 +1,12 @@
 using System;
+using System.Diagnostics;
 
 namespace AsmResolver.PE.Code
 {
     /// <summary>
-    /// Provides information about a code or data segment referenced within a code segment for which
-    /// the final RVA is yet to be determined.
+    /// Provides information about a symbol referenced within a segment for which the final RVA is yet to be determined.
     /// </summary>
+    [DebuggerDisplay("Patch {Offset} with &{Symbol} as {Type}")]
     public readonly struct AddressFixup
     {
         /// <summary>
@@ -20,7 +21,7 @@ namespace AsmResolver.PE.Code
             Symbol = referencedObject ?? throw new ArgumentNullException(nameof(referencedObject));
             Type = type;
         }
-        
+
         /// <summary>
         /// Gets the offset relative to the start of the code segment pointing to the reference.
         /// </summary>

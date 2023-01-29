@@ -3,7 +3,7 @@
 Reference Importing
 ===================
 
-.NET modules use entries in the TypeRef or MemberRef tables to reference types or members from external assemblies. Importing references into the current module therefore form a key role when creating new- or modifying existing .NET modules. When a member is not imported into the current module, a ``MemberNotImportedException`` will be thrown when you are trying to create a PE image or write the module to the disk.
+.NET modules use entries in the TypeRef or MemberRef tables to reference types or members from external assemblies. Importing references into the current module, therefore, form a key role when creating new- or modifying existing .NET modules. When a member is not imported into the current module, a ``MemberNotImportedException`` will be thrown when you are trying to create a PE image or write the module to the disk.
 
 AsmResolver provides the ``ReferenceImporter`` class that does most of the heavy lifting. Obtaining an instance of ``ReferenceImporter`` can be done in two ways.
 
@@ -22,7 +22,7 @@ Or obtain the default instance that comes with every ``ModuleDefinition`` object
     var importer = module.DefaultImporter;
 
 
-The example snippets that will follow in this articule assume that there is such a ``ReferenceImporter`` object instantiated using either of these two methods, and is stored in an ``importer`` variable.
+The example snippets that will follow in this article assume that there is such a ``ReferenceImporter`` object instantiated using either of these two methods, and is stored in an ``importer`` variable.
 
 
 Importing existing members
@@ -125,7 +125,7 @@ Instantiations of generic methods are also supported.
 Creating new references
 -----------------------
 
-Member references can also be created and imported without having direct access to its member definition or ``System.Reflection`` instance. It is possible to create new instances of ``TypeReference`` and ``MemberReference`` using the constructors, but the preferred way is to use the factory methods that allow for a more fluent syntax. Below an example on how to create a fully imported reference to ``void System.Console.WriteLine(string)``:
+Member references can also be created and imported without having direct access to its member definition or ``System.Reflection`` instance. It is possible to create new instances of ``TypeReference`` and ``MemberReference`` using the constructors, but the preferred way is to use the factory methods that allow for a more fluent syntax. Below is an example of how to create a fully imported reference to ``void System.Console.WriteLine(string)``:
 
 .. code-block:: csharp
 
