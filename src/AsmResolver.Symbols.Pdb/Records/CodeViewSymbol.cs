@@ -31,6 +31,8 @@ public abstract class CodeViewSymbol
 
         return type switch
         {
+            CodeViewSymbolType.Compile2 => new SerializedCompile2Symbol(dataReader),
+            CodeViewSymbolType.Compile3 => new SerializedCompile3Symbol(dataReader),
             CodeViewSymbolType.Constant => new SerializedConstantSymbol(context, dataReader),
             CodeViewSymbolType.LProcRef => new SerializedProcedureReferenceSymbol(dataReader, true),
             CodeViewSymbolType.ObjName => new SerializedObjectNameSymbol(dataReader),
