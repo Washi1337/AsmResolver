@@ -75,6 +75,12 @@ public class ModiStream : SegmentBase
         set => _globalReferences.Value = value;
     }
 
+    /// <summary>
+    /// Reads a Module Info stream from the provided input stream.
+    /// </summary>
+    /// <param name="reader">The input stream to read from.</param>
+    /// <param name="module">The module this modi stream is associated with.</param>
+    /// <returns>The stream.</returns>
     public static ModiStream FromReader(BinaryStreamReader reader, ModuleDescriptor module)
     {
         return new SerializedModiStream(reader, module);

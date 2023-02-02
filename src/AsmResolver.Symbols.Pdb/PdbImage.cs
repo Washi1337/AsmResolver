@@ -15,8 +15,10 @@ namespace AsmResolver.Symbols.Pdb;
 /// </summary>
 public class PdbImage
 {
+    private readonly ConcurrentDictionary<uint, SimpleTypeRecord> _simpleTypes = new();
+
     private IList<CodeViewSymbol>? _symbols;
-    private ConcurrentDictionary<uint, SimpleTypeRecord> _simpleTypes = new();
+    private IList<PdbModule>? _modules;
 
     /// <summary>
     /// Gets a collection of all symbols stored in the PDB image.
@@ -28,6 +30,19 @@ public class PdbImage
             if (_symbols is null)
                 Interlocked.CompareExchange(ref _symbols, GetSymbols(), null);
             return _symbols;
+        }
+    }
+
+    /// <summary>
+    /// Gets a collection of all modules stored in the PDB image.
+    /// </summary>
+    public IList<PdbModule> Modules
+    {
+        get
+        {
+            if (_modules is null)
+                Interlocked.CompareExchange(ref _modules, GetModules(), null);
+            return _modules;
         }
     }
 
@@ -120,4 +135,13 @@ public class PdbImage
     /// This method is called upon initialization of the <see cref="Symbols"/> property.
     /// </remarks>
     protected virtual IList<CodeViewSymbol> GetSymbols() => new List<CodeViewSymbol>();
+
+    /// <summary>
+    /// Obtains a collection of modules stored in the DBI stream of the PDB image.
+    /// </summary>
+    /// <returns>The modules.</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="Modules"/> property.
+    /// </remarks>
+    protected virtual IList<PdbModule> GetModules() => new List<PdbModule>();
 }
