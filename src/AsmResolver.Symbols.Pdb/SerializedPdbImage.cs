@@ -1,11 +1,11 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.Symbols.Pdb.Leaves;
 using AsmResolver.Symbols.Pdb.Metadata.Dbi;
 using AsmResolver.Symbols.Pdb.Metadata.Info;
+using AsmResolver.Symbols.Pdb.Metadata.Modi;
 using AsmResolver.Symbols.Pdb.Metadata.Tpi;
 using AsmResolver.Symbols.Pdb.Msf;
 using AsmResolver.Symbols.Pdb.Records;
@@ -107,6 +107,25 @@ public class SerializedPdbImage : PdbImage
         var reader = _file.Streams[DbiStream.SymbolRecordStreamIndex].CreateReader();
         while (reader.CanRead(sizeof(ushort) * 2))
             result.Add(CodeViewSymbol.FromReader(ReaderContext, ref reader));
+
+        return result;
+    }
+
+    /// <inheritdoc />
+    protected override IList<PdbModule> GetModules()
+    {
+        var result = new List<PdbModule>();
+
+        foreach (var descriptor in DbiStream.Modules)
+        {
+            int index = descriptor.SymbolStreamIndex;
+            if (index >= _file.Streams.Count)
+                continue;
+
+            var stream = _file.Streams[index];
+            var modi = ModiStream.FromReader(stream.CreateReader(), descriptor);
+            result.Add(new SerializedPdbModule(ReaderContext, descriptor, modi));
+        }
 
         return result;
     }

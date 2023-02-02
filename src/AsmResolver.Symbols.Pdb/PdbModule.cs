@@ -64,7 +64,7 @@ public class PdbModule
     /// Gets or sets the name of the object file name.
     /// </summary>
     /// <remarks>
-    /// In the case this module is linked directly passed to <c>link.exe</c>, this is the same as <see cref="ModuleName"/>.
+    /// In the case this module is linked directly passed to <c>link.exe</c>, this is the same as <see cref="Name"/>.
     /// If the module comes from an archive, this is the full path to that archive.
     /// </remarks>
     public Utf8String? ObjectFileName
@@ -131,4 +131,7 @@ public class PdbModule
     /// This method is called upon the initialization of the <see cref="Symbols"/> property.
     /// </remarks>
     protected virtual IList<CodeViewSymbol> GetSymbols() => new List<CodeViewSymbol>();
+
+    /// <inheritdoc />
+    public override string ToString() => Name ?? ObjectFileName ?? "<<<NULL NAME>>>";
 }
