@@ -19,7 +19,8 @@ public class SerializedPdbImage : PdbImage
 {
     private const int MinimalRequiredStreamCount = 5;
     private readonly MsfFile _file;
-    private CodeViewLeaf?[]? _leaves;
+    private readonly TpiStreamCache _tpi;
+    private readonly TpiStreamCache _ipi;
 
     /// <summary>
     /// Interprets a PDB image from the provided MSF file.
@@ -35,9 +36,13 @@ public class SerializedPdbImage : PdbImage
 
         InfoStream = InfoStream.FromReader(file.Streams[InfoStream.StreamIndex].CreateReader());
         DbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
-        TpiStream = TpiStream.FromReader(file.Streams[TpiStream.StreamIndex].CreateReader());
+        TpiStream = TpiStream.FromReader(file.Streams[TpiStream.TpiStreamIndex].CreateReader());
+        IpiStream = TpiStream.FromReader(file.Streams[TpiStream.IpiStreamIndex].CreateReader());
 
         ReaderContext = new PdbReaderContext(this, readerParameters);
+
+        _tpi = new TpiStreamCache(ReaderContext, TpiStream);
+        _ipi = new TpiStreamCache(ReaderContext, IpiStream);
     }
 
     internal PdbReaderContext ReaderContext
@@ -60,39 +65,21 @@ public class SerializedPdbImage : PdbImage
         get;
     }
 
-    [MemberNotNull(nameof(_leaves))]
-    private void EnsureLeavesInitialized()
+    internal TpiStream IpiStream
     {
-        if (_leaves is null)
-        {
-            Interlocked.CompareExchange(ref _leaves,
-                new CodeViewLeaf?[TpiStream.TypeIndexEnd - TpiStream.TypeIndexBegin], null);
-        }
+        get;
     }
 
     /// <inheritdoc />
     public override bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewLeaf? leaf)
     {
-        if (typeIndex < TpiStream.TypeIndexBegin)
-            return base.TryGetLeafRecord(typeIndex, out leaf);
+        return _tpi.TryGetRecord(typeIndex, out leaf) || base.TryGetLeafRecord(typeIndex, out leaf);
+    }
 
-        EnsureLeavesInitialized();
-
-        if (typeIndex >= TpiStream.TypeIndexBegin && typeIndex < TpiStream.TypeIndexEnd)
-        {
-            leaf = _leaves[typeIndex - TpiStream.TypeIndexBegin];
-            if (leaf is null && TpiStream.TryGetLeafRecordReader(typeIndex, out var reader))
-            {
-                leaf = CodeViewLeaf.FromReader(ReaderContext, typeIndex, ref reader);
-                Interlocked.CompareExchange(ref _leaves[typeIndex - TpiStream.TypeIndexBegin], leaf, null);
-            }
-
-            leaf = _leaves[typeIndex - TpiStream.TypeIndexBegin];
-            return leaf is not null;
-        }
-
-        leaf = null;
-        return false;
+    /// <inheritdoc />
+    public override bool TryGetIdLeafRecord(uint idIndex, [NotNullWhen(true)] out CodeViewLeaf? leaf)
+    {
+        return _ipi.TryGetRecord(idIndex, out leaf) || base.TryGetLeafRecord(idIndex, out leaf);
     }
 
     /// <inheritdoc />
@@ -128,5 +115,56 @@ public class SerializedPdbImage : PdbImage
         }
 
         return result;
+    }
+
+    private class TpiStreamCache
+    {
+        private readonly PdbReaderContext _context;
+        private readonly TpiStream _stream;
+        private CodeViewLeaf?[]? _leaves;
+
+        public TpiStreamCache(PdbReaderContext context, TpiStream stream)
+        {
+            _context = context;
+            _stream = stream;
+        }
+
+        [MemberNotNull(nameof(_leaves))]
+        private void EnsureLeavesInitialized()
+        {
+            if (_leaves is null)
+            {
+                Interlocked.CompareExchange(ref _leaves,
+                    new CodeViewLeaf?[_stream.TypeIndexEnd - _stream.TypeIndexBegin], null);
+            }
+        }
+
+        public bool TryGetRecord(uint typeIndex, out CodeViewLeaf? leaf)
+        {
+            if (typeIndex < _stream.TypeIndexBegin)
+            {
+                leaf = null;
+                return false;
+            }
+
+            EnsureLeavesInitialized();
+
+            if (typeIndex >= _stream.TypeIndexBegin && typeIndex < _stream.TypeIndexEnd)
+            {
+                leaf = _leaves[typeIndex - _stream.TypeIndexBegin];
+                if (leaf is null && _stream.TryGetLeafRecordReader(typeIndex, out var reader))
+                {
+                    leaf = CodeViewLeaf.FromReader(_context, typeIndex, ref reader);
+                    Interlocked.CompareExchange(ref _leaves[typeIndex - _stream.TypeIndexBegin], leaf, null);
+                }
+
+                leaf = _leaves[typeIndex - _stream.TypeIndexBegin];
+                return leaf is not null;
+            }
+
+            leaf = null;
+            return false;
+        }
+
     }
 }

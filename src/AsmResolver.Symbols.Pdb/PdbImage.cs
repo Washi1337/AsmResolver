@@ -96,7 +96,7 @@ public class PdbImage
     }
 
     /// <summary>
-    /// Attempts to obtain a type record from the TPI or IPI stream based on its type index.
+    /// Attempts to obtain a type record from the TPI stream based on its type index.
     /// </summary>
     /// <param name="typeIndex">The type index.</param>
     /// <param name="leaf">The resolved type.</param>
@@ -115,7 +115,7 @@ public class PdbImage
     }
 
     /// <summary>
-    /// Obtains a type record from the TPI or IPI stream based on its type index.
+    /// Obtains a type record from the TPI stream based on its type index.
     /// </summary>
     /// <param name="typeIndex">The type index.</param>
     /// <returns>The resolved type.</returns>
@@ -125,6 +125,31 @@ public class PdbImage
         if (!TryGetLeafRecord(typeIndex, out var type))
             throw new ArgumentException("Invalid type index.");
         return type;
+    }
+
+    /// <summary>
+    /// Attempts to obtain an ID record from the IPI stream based on its ID index.
+    /// </summary>
+    /// <param name="idIndex">The ID index.</param>
+    /// <param name="leaf">The resolved leaf.</param>
+    /// <returns><c>true</c> if the leaf was found, <c>false</c> otherwise.</returns>
+    public virtual bool TryGetIdLeafRecord(uint idIndex, [NotNullWhen(true)] out CodeViewLeaf? leaf)
+    {
+        leaf = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Obtains an ID record from the IPI stream based on its ID index.
+    /// </summary>
+    /// <param name="idIndex">The ID index.</param>
+    /// <returns>The resolved leaf</returns>
+    /// <exception cref="ArgumentException">Occurs when the ID index is invalid.</exception>
+    public CodeViewLeaf GetIdLeafRecord(uint idIndex)
+    {
+        if (!TryGetIdLeafRecord(idIndex, out var leaf))
+            throw new ArgumentException("Invalid ID index.");
+        return leaf;
     }
 
     /// <summary>

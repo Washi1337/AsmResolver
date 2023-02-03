@@ -1,5 +1,6 @@
 using AsmResolver.IO;
 using AsmResolver.Symbols.Pdb.Records.Serialized;
+using static AsmResolver.Symbols.Pdb.Records.CodeViewSymbolType;
 
 namespace AsmResolver.Symbols.Pdb.Records;
 
@@ -31,14 +32,15 @@ public abstract class CodeViewSymbol
 
         return type switch
         {
-            CodeViewSymbolType.Compile2 => new SerializedCompile2Symbol(dataReader),
-            CodeViewSymbolType.Compile3 => new SerializedCompile3Symbol(dataReader),
-            CodeViewSymbolType.Constant => new SerializedConstantSymbol(context, dataReader),
-            CodeViewSymbolType.LProcRef => new SerializedProcedureReferenceSymbol(dataReader, true),
-            CodeViewSymbolType.ObjName => new SerializedObjectNameSymbol(dataReader),
-            CodeViewSymbolType.ProcRef => new SerializedProcedureReferenceSymbol(dataReader, false),
-            CodeViewSymbolType.Pub32 => new SerializedPublicSymbol(dataReader),
-            CodeViewSymbolType.Udt => new SerializedUserDefinedTypeSymbol(context, dataReader),
+            BuildInfo => new SerializedBuildInfoSymbol(context, dataReader),
+            Compile2 => new SerializedCompile2Symbol(dataReader),
+            Compile3 => new SerializedCompile3Symbol(dataReader),
+            Constant => new SerializedConstantSymbol(context, dataReader),
+            LProcRef => new SerializedProcedureReferenceSymbol(dataReader, true),
+            ObjName => new SerializedObjectNameSymbol(dataReader),
+            ProcRef => new SerializedProcedureReferenceSymbol(dataReader, false),
+            Pub32 => new SerializedPublicSymbol(dataReader),
+            Udt => new SerializedUserDefinedTypeSymbol(context, dataReader),
             _ => new UnknownSymbol(type, dataReader.ReadToEnd())
         };
     }
