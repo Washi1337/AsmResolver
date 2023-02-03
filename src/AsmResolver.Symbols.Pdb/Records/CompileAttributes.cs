@@ -9,62 +9,67 @@ namespace AsmResolver.Symbols.Pdb.Records;
 public enum CompileAttributes
 {
     /// <summary>
+    /// Indicates the file is compiled without any extra flags.
+    /// </summary>
+    None = 0,
+
+    /// <summary>
     /// Indicates the file is compiled for Edit-and-Continue.
     /// </summary>
-    EC = 1 << 1,
+    EC = 1 << 0,
 
     /// <summary>
     /// Indicates the file is not compiled with debug info.
     /// </summary>
-    NoDbgInfo = 1 << 2,
+    NoDbgInfo = 1 << 1,
 
     /// <summary>
     /// Indicates the file is compiled with LTCG.
     /// </summary>
-    Ltcg = 1 << 3,
+    Ltcg = 1 << 2,
 
     /// <summary>
     /// Indicates the file is compiled with <c>-Bzalign</c>.
     /// </summary>
-    NoDataAlign = 1 << 4,
+    NoDataAlign = 1 << 3,
 
     /// <summary>
     /// Indicates managed code/data is present in the file.
     /// </summary>
-    ManagedPresent = 1 << 5,
+    ManagedPresent = 1 << 4,
 
     /// <summary>
     /// Indicates the file is compiled with <c>/GS</c>.
     /// </summary>
-    SecurityChecks = 1 << 6,
+    SecurityChecks = 1 << 5,
 
     /// <summary>
     /// Indicates the file is compiled with <c>/hotpatch</c>.
     /// </summary>
-    HotPatch = 1 << 7,
+    HotPatch = 1 << 6,
 
     /// <summary>
-    /// Indicates thef ile is converted with CVTCIL.
+    /// Indicates the file is converted with CVTCIL.
     /// </summary>
-    CvtCil = 1 << 8,
+    CvtCil = 1 << 7,
 
     /// <summary>
     /// Indicates the file is a MSIL netmodule.
     /// </summary>
-    MsilModule = 1 << 9,
+    MsilModule = 1 << 8,
 
     /// <summary>
-    /// Indicates thef ile is compiled with <c>/sdl</c>.
+    /// Indicates the file is compiled with <c>/sdl</c>.
     /// </summary>
-    Sdl = 1 << 10,
+    Sdl = 1 << 9,
 
     /// <summary>
     /// Indicates the file is compiled with <c>/ltcg:pgo</c> or <c>pgu</c>.
     /// </summary>
-    Pgo = 1 << 11,
+    Pgo = 1 << 10,
 
     /// <summary>
     /// Indicates the file is a <c>.exp</c> module.
     /// </summary>
-    Exp = 1 << 12,
+    Exp = 1 << 11
 }
