@@ -115,6 +115,25 @@ public class PdbImage
     }
 
     /// <summary>
+    /// Attempts to obtain a type record from the TPI stream based on its type index.
+    /// </summary>
+    /// <param name="typeIndex">The type index.</param>
+    /// <param name="leaf">The resolved type.</param>
+    /// <returns><c>true</c> if the type was found, <c>false</c> otherwise.</returns>
+    public virtual bool TryGetLeafRecord<TLeaf>(uint typeIndex, [NotNullWhen(true)] out TLeaf? leaf)
+        where TLeaf : CodeViewLeaf
+    {
+        if (TryGetLeafRecord(typeIndex, out var x) && x is TLeaf resolved)
+        {
+            leaf = resolved;
+            return true;
+        }
+
+        leaf = default;
+        return false;
+    }
+
+    /// <summary>
     /// Obtains a type record from the TPI stream based on its type index.
     /// </summary>
     /// <param name="typeIndex">The type index.</param>
@@ -125,6 +144,18 @@ public class PdbImage
         if (!TryGetLeafRecord(typeIndex, out var type))
             throw new ArgumentException("Invalid type index.");
         return type;
+    }
+
+    /// <summary>
+    /// Obtains a type record from the TPI stream based on its type index.
+    /// </summary>
+    /// <param name="typeIndex">The type index.</param>
+    /// <returns>The resolved type.</returns>
+    /// <exception cref="ArgumentException">Occurs when the type index is invalid.</exception>
+    public TLeaf GetLeafRecord<TLeaf>(uint typeIndex)
+        where TLeaf : CodeViewLeaf
+    {
+        return (TLeaf) GetLeafRecord(typeIndex);
     }
 
     /// <summary>

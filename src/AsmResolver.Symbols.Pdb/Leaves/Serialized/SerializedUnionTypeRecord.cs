@@ -47,7 +47,7 @@ public class SerializedUnionTypeRecord : UnionTypeRecord
         if (_fieldIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_fieldIndex, out var leaf) && leaf is SerializedFieldListLeaf list
+        return _context.ParentImage.TryGetLeafRecord(_fieldIndex, out SerializedFieldListLeaf? list)
             ? list
             : _context.Parameters.ErrorListener.BadImageAndReturn<FieldListLeaf>(
                 $"Union type {TypeIndex:X8} contains an invalid field list index {_fieldIndex:X8}.");

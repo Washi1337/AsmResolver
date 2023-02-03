@@ -37,7 +37,7 @@ public class SerializedMemberFunctionLeaf : MemberFunctionLeaf
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetReturnType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_returnTypeIndex, out var leaf) && leaf is CodeViewTypeRecord type
+        return _context.ParentImage.TryGetLeafRecord(_returnTypeIndex, out CodeViewTypeRecord? type)
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"Member function {TypeIndex:X8} contains an invalid return type index {_returnTypeIndex:X8}.");
@@ -46,7 +46,7 @@ public class SerializedMemberFunctionLeaf : MemberFunctionLeaf
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetDeclaringType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_declaringTypeIndex, out var leaf) && leaf is CodeViewTypeRecord type
+        return _context.ParentImage.TryGetLeafRecord(_declaringTypeIndex, out CodeViewTypeRecord? type)
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"Member function {TypeIndex:X8} contains an invalid declaring type index {_declaringTypeIndex:X8}.");
@@ -55,7 +55,7 @@ public class SerializedMemberFunctionLeaf : MemberFunctionLeaf
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetThisType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_thisTypeIndex, out var leaf) && leaf is CodeViewTypeRecord type
+        return _context.ParentImage.TryGetLeafRecord(_thisTypeIndex, out CodeViewTypeRecord? type)
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"Member function {TypeIndex:X8} contains an invalid this-type index {_thisTypeIndex:X8}.");
@@ -67,7 +67,7 @@ public class SerializedMemberFunctionLeaf : MemberFunctionLeaf
         if (_argumentListIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_argumentListIndex, out var leaf) && leaf is ArgumentListLeaf list
+        return _context.ParentImage.TryGetLeafRecord(_argumentListIndex, out ArgumentListLeaf? list)
             ? list
             : _context.Parameters.ErrorListener.BadImageAndReturn<ArgumentListLeaf>(
                 $"Member function {TypeIndex:X8} contains an invalid argument list index {_argumentListIndex:X8}.");

@@ -36,7 +36,7 @@ public class SerializedEnumTypeRecord : EnumTypeRecord
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetBaseType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_underlyingType, out var leaf) && leaf is CodeViewTypeRecord type
+        return _context.ParentImage.TryGetLeafRecord(_underlyingType, out CodeViewTypeRecord? type)
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"Enum type {TypeIndex:X8} contains an invalid underlying enum type index {_underlyingType:X8}.");
@@ -48,7 +48,7 @@ public class SerializedEnumTypeRecord : EnumTypeRecord
         if (_fieldIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_fieldIndex, out var leaf) && leaf is FieldListLeaf list
+        return _context.ParentImage.TryGetLeafRecord(_fieldIndex, out FieldListLeaf? list)
             ? list
             : _context.Parameters.ErrorListener.BadImageAndReturn<FieldListLeaf>(
                 $"Enum type {TypeIndex:X8} contains an invalid field list index {_fieldIndex:X8}.");
