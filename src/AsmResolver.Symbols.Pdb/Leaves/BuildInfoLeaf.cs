@@ -1,20 +1,19 @@
-using System.Collections.Generic;
-
 namespace AsmResolver.Symbols.Pdb.Leaves;
 
-public class BuildInfoLeaf : CodeViewLeaf
+/// <summary>
+/// Represents a leaf containing build information for a file in a PDB image.
+/// </summary>
+public class BuildInfoLeaf : SubStringListLeaf
 {
+    /// <summary>
+    /// Initializes an empty build information leaf.
+    /// </summary>
+    /// <param name="typeIndex">The type index associated to the leaf.</param>
     protected BuildInfoLeaf(uint typeIndex)
         : base(typeIndex)
     {
     }
 
+    /// <inheritdoc />
     public override CodeViewLeafKind LeafKind => CodeViewLeafKind.BuildInfo;
-
-    public IList<string> Entries
-    {
-        get;
-    }
-
-    protected virtual IList<string> GetEntries() => new List<string>();
 }

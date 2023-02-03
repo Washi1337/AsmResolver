@@ -71,6 +71,8 @@ public abstract class CodeViewLeaf
             Pointer => new SerializedPointerTypeRecord(context, typeIndex, dataReader),
             Procedure => new SerializedProcedureTypeRecord(context, typeIndex, dataReader),
             StMember => new SerializedStaticDataField(context, typeIndex, ref dataReader),
+            StringId => new SerializedStringIdLeaf(context, typeIndex, dataReader),
+            SubstrList => new SerializedSubStringListLeaf(context, typeIndex, dataReader),
             Union => new SerializedUnionTypeRecord(context, typeIndex, dataReader),
             VFuncTab => new SerializedVTableField(context, typeIndex, ref dataReader),
             VTShape => new SerializedVTableShapeLeaf(context, typeIndex, dataReader),

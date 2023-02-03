@@ -120,7 +120,7 @@ public class PdbImage
     /// <param name="typeIndex">The type index.</param>
     /// <param name="leaf">The resolved type.</param>
     /// <returns><c>true</c> if the type was found, <c>false</c> otherwise.</returns>
-    public virtual bool TryGetLeafRecord<TLeaf>(uint typeIndex, [NotNullWhen(true)] out TLeaf? leaf)
+    public bool TryGetLeafRecord<TLeaf>(uint typeIndex, [NotNullWhen(true)] out TLeaf? leaf)
         where TLeaf : CodeViewLeaf
     {
         if (TryGetLeafRecord(typeIndex, out var x) && x is TLeaf resolved)
@@ -171,6 +171,25 @@ public class PdbImage
     }
 
     /// <summary>
+    /// Attempts to obtain an ID record from the IPI stream based on its ID index.
+    /// </summary>
+    /// <param name="idIndex">The ID index.</param>
+    /// <param name="leaf">The resolved leaf.</param>
+    /// <returns><c>true</c> if the leaf was found, <c>false</c> otherwise.</returns>
+    public bool TryGetIdLeafRecord<TLeaf>(uint idIndex, [NotNullWhen(true)] out TLeaf? leaf)
+        where TLeaf : CodeViewLeaf
+    {
+        if (TryGetIdLeafRecord(idIndex, out var x) && x is TLeaf resolved)
+        {
+            leaf = resolved;
+            return true;
+        }
+
+        leaf = default;
+        return false;
+    }
+
+    /// <summary>
     /// Obtains an ID record from the IPI stream based on its ID index.
     /// </summary>
     /// <param name="idIndex">The ID index.</param>
@@ -181,6 +200,18 @@ public class PdbImage
         if (!TryGetIdLeafRecord(idIndex, out var leaf))
             throw new ArgumentException("Invalid ID index.");
         return leaf;
+    }
+
+    /// <summary>
+    /// Obtains an ID record from the IPI stream based on its ID index.
+    /// </summary>
+    /// <param name="idIndex">The ID index.</param>
+    /// <returns>The resolved leaf</returns>
+    /// <exception cref="ArgumentException">Occurs when the ID index is invalid.</exception>
+    public TLeaf GetIdLeafRecord<TLeaf>(uint idIndex)
+        where TLeaf : CodeViewLeaf
+    {
+        return (TLeaf) GetIdLeafRecord(idIndex);
     }
 
     /// <summary>

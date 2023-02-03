@@ -1,5 +1,4 @@
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 
