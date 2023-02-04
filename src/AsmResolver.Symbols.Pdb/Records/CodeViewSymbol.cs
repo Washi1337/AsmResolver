@@ -44,6 +44,7 @@ public abstract class CodeViewSymbol
             ObjName => new SerializedObjectNameSymbol(dataReader),
             ProcRef => new SerializedProcedureReferenceSymbol(dataReader, false),
             Pub32 => new SerializedPublicSymbol(dataReader),
+            RegRel32 => new SerializedRelativeRegisterSymbol(context, dataReader),
             Udt => new SerializedUserDefinedTypeSymbol(context, dataReader),
             _ => new UnknownSymbol(type, dataReader.ReadToEnd())
         };

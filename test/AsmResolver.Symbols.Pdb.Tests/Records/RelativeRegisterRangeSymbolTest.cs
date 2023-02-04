@@ -4,11 +4,11 @@ using Xunit;
 
 namespace AsmResolver.Symbols.Pdb.Tests.Records;
 
-public class RelativeRegisterRangeTest : IClassFixture<MockPdbFixture>
+public class RelativeRegisterRangeSymbolTest : IClassFixture<MockPdbFixture>
 {
     private readonly MockPdbFixture _fixture;
 
-    public RelativeRegisterRangeTest(MockPdbFixture fixture)
+    public RelativeRegisterRangeSymbolTest(MockPdbFixture fixture)
     {
         _fixture = fixture;
     }
