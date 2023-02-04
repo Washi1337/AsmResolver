@@ -36,6 +36,7 @@ public abstract class CodeViewSymbol
             Compile2 => new SerializedCompile2Symbol(dataReader),
             Compile3 => new SerializedCompile3Symbol(dataReader),
             Constant => new SerializedConstantSymbol(context, dataReader),
+            Local => new SerializedLocalSymbol(context, dataReader),
             LProcRef => new SerializedProcedureReferenceSymbol(dataReader, true),
             ObjName => new SerializedObjectNameSymbol(dataReader),
             ProcRef => new SerializedProcedureReferenceSymbol(dataReader, false),
