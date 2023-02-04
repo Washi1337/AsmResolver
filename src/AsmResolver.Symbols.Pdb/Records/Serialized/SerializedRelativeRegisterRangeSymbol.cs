@@ -4,9 +4,9 @@ using AsmResolver.IO;
 namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 
 /// <summary>
-/// Represents a lazily initialized implementation of <see cref="RelativeRegisterRange"/> that is read from a PDB image.
+/// Represents a lazily initialized implementation of <see cref="RelativeRegisterRangeSymbol"/> that is read from a PDB image.
 /// </summary>
-public class SerializedRelativeRegisterRange : RelativeRegisterRange
+public class SerializedRelativeRegisterRangeSymbol : RelativeRegisterRangeSymbol
 {
     private readonly BinaryStreamReader _gapsReader;
 
@@ -14,7 +14,7 @@ public class SerializedRelativeRegisterRange : RelativeRegisterRange
     /// Reads a relative register def-range symbol from the provided input stream.
     /// </summary>
     /// <param name="reader">The input stream to read from.</param>
-    public SerializedRelativeRegisterRange(BinaryStreamReader reader)
+    public SerializedRelativeRegisterRangeSymbol(BinaryStreamReader reader)
     {
         BaseRegister = reader.ReadUInt16();
 

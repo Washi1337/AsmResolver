@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading;
 
 namespace AsmResolver.Symbols.Pdb.Records;
 
@@ -7,14 +6,12 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// Defines an address range in which a local variable or parameter is defined that is fully defined by a register and
 /// a relative starting offset and length.
 /// </summary>
-public class RelativeRegisterRange : CodeViewSymbol
+public class RelativeRegisterRangeSymbol : DefinitionRangeSymbol
 {
-    private IList<LocalAddressGap>? _gaps;
-
     /// <summary>
     /// Initializes an empty relative register range.
     /// </summary>
-    protected RelativeRegisterRange()
+    protected RelativeRegisterRangeSymbol()
     {
     }
 
@@ -25,12 +22,11 @@ public class RelativeRegisterRange : CodeViewSymbol
     /// <param name="offset">The offset.</param>
     /// <param name="range">The address range this range is valid.</param>
     /// <param name="gaps">A collection of gaps within the range that the symbol is invalid.</param>
-    public RelativeRegisterRange(ushort baseRegister, int offset, LocalAddressRange range, IEnumerable<LocalAddressGap> gaps)
+    public RelativeRegisterRangeSymbol(ushort baseRegister, int offset, LocalAddressRange range, IEnumerable<LocalAddressGap> gaps)
+        : base(range, gaps)
     {
         BaseRegister = baseRegister;
         Offset = offset;
-        Range = range;
-        _gaps = new List<LocalAddressGap>(gaps);
     }
 
     /// <inheritdoc />
@@ -71,35 +67,4 @@ public class RelativeRegisterRange : CodeViewSymbol
         get;
         set;
     }
-
-    /// <summary>
-    /// Gets or sets the range of addresses within the program where this symbol is valid.
-    /// </summary>
-    public LocalAddressRange Range
-    {
-        get;
-        set;
-    }
-
-    /// <summary>
-    /// Gets a collection of gaps in <see cref="Range"/> where this symbol is not available.
-    /// </summary>
-    public IList<LocalAddressGap> Gaps
-    {
-        get
-        {
-            if (_gaps is null)
-                Interlocked.CompareExchange(ref _gaps, GetGaps(), null);
-            return _gaps;
-        }
-    }
-
-    /// <summary>
-    /// Obtains the collection of ranges the symbol is unavailable.
-    /// </summary>
-    /// <returns>The gaps.</returns>
-    /// <remarks>
-    /// This method is called upon initialization of the <see cref="Gaps"/> property.
-    /// </remarks>
-    protected virtual IList<LocalAddressGap> GetGaps() => new List<LocalAddressGap>();
 }

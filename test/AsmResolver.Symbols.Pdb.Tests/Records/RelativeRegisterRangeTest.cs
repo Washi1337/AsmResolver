@@ -17,8 +17,8 @@ public class RelativeRegisterRangeTest : IClassFixture<MockPdbFixture>
     public void BasicProperties()
     {
         var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name.Contains("dllmain.obj"))
-            .Symbols.OfType<RelativeRegisterRange>()
+            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
+            .Symbols.OfType<RelativeRegisterRangeSymbol>()
             .First();
 
         Assert.Equal(4, symbol.Offset);
@@ -31,8 +31,8 @@ public class RelativeRegisterRangeTest : IClassFixture<MockPdbFixture>
     public void NoGaps()
     {
         var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name.Contains("dllmain.obj"))
-            .Symbols.OfType<RelativeRegisterRange>()
+            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
+            .Symbols.OfType<RelativeRegisterRangeSymbol>()
             .First();
 
         Assert.Empty(symbol.Gaps);
