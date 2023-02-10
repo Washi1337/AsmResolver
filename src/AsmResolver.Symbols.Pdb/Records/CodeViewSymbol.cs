@@ -35,6 +35,8 @@ public abstract class CodeViewSymbol
             BPRel32 => new SerializedBasePointerRelativeSymbol(context, dataReader),
             BuildInfo => new SerializedBuildInfoSymbol(context, dataReader),
             CallSiteInfo => new SerializedCallSiteSymbol(context, dataReader),
+            Callees => new SerializedFunctionListSymbol(context, dataReader, false),
+            Callers => new SerializedFunctionListSymbol(context, dataReader, true),
             Compile2 => new SerializedCompile2Symbol(dataReader),
             Compile3 => new SerializedCompile3Symbol(dataReader),
             Constant => new SerializedConstantSymbol(context, dataReader),

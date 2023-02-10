@@ -61,6 +61,7 @@ public abstract class CodeViewLeaf
             Enum => new SerializedEnumTypeRecord(context, typeIndex, dataReader),
             Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
             FieldList => new SerializedFieldListLeaf(context, typeIndex, dataReader),
+            FuncId => new SerializedFunctionIdLeaf(context, typeIndex, dataReader),
             Member => new SerializedInstanceDataField(context, typeIndex, ref dataReader),
             Method => new SerializedOverloadedMethod(context, typeIndex, ref dataReader),
             MethodList => new SerializedMethodListLeaf(context, typeIndex, dataReader),
