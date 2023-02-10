@@ -43,6 +43,7 @@ public abstract class CodeViewSymbol
             DefRangeFramePointerRel => new SerializedFramePointerRangeSymbol(dataReader, false),
             DefRangeFramePointerRelFullScope => new SerializedFramePointerRangeSymbol(dataReader, true),
             DefRangeRegisterRel => new SerializedRegisterRelativeRangeSymbol(dataReader),
+            EnvBlock => new SerializedEnvironmentBlockSymbol(dataReader),
             FrameProc => new SerializedFrameProcedureSymbol(dataReader),
             Local => new SerializedLocalSymbol(context, dataReader),
             LProcRef => new SerializedProcedureReferenceSymbol(dataReader, true),
