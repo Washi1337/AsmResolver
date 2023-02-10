@@ -4,9 +4,9 @@ using AsmResolver.Symbols.Pdb.Leaves;
 namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 
 /// <summary>
-/// Represents a lazily initialized implementation of <see cref="RelativeRegisterSymbol"/> that is read from a PDB image.
+/// Represents a lazily initialized implementation of <see cref="RegisterRelativeSymbol"/> that is read from a PDB image.
 /// </summary>
-public class SerializedRelativeRegisterSymbol : RelativeRegisterSymbol
+public class SerializedRegisterRelativeSymbol : RegisterRelativeSymbol
 {
     private readonly PdbReaderContext _context;
     private readonly uint _typeIndex;
@@ -17,7 +17,7 @@ public class SerializedRelativeRegisterSymbol : RelativeRegisterSymbol
     /// </summary>
     /// <param name="context">The reading context in which the symbol is situated in.</param>
     /// <param name="reader">The input stream to read from.</param>
-    public SerializedRelativeRegisterSymbol(PdbReaderContext context, BinaryStreamReader reader)
+    public SerializedRegisterRelativeSymbol(PdbReaderContext context, BinaryStreamReader reader)
     {
         _context = context;
 

@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a symbol that is defined by a register+offset pair.
 /// </summary>
-public class RelativeRegisterSymbol : CodeViewSymbol
+public class RegisterRelativeSymbol : CodeViewSymbol, IRegisterRelativeSymbol
 {
     private readonly LazyVariable<CodeViewTypeRecord?> _variableType;
     private readonly LazyVariable<Utf8String?> _name;
@@ -13,7 +13,7 @@ public class RelativeRegisterSymbol : CodeViewSymbol
     /// <summary>
     /// Initializes an empty relative register symbol.
     /// </summary>
-    protected RelativeRegisterSymbol()
+    protected RegisterRelativeSymbol()
     {
         _variableType = new LazyVariable<CodeViewTypeRecord?>(GetVariableType);
         _name = new LazyVariable<Utf8String?>(GetName);
@@ -26,7 +26,7 @@ public class RelativeRegisterSymbol : CodeViewSymbol
     /// <param name="baseRegister">The base register.</param>
     /// <param name="offset">The offset to the register.</param>
     /// <param name="variableType">The type of variable the register+offset pair stores.</param>
-    public RelativeRegisterSymbol(Utf8String name, ushort baseRegister, int offset, CodeViewTypeRecord variableType)
+    public RegisterRelativeSymbol(Utf8String name, ushort baseRegister, int offset, CodeViewTypeRecord variableType)
     {
         _name = new LazyVariable<Utf8String?>(name);
         BaseRegister = baseRegister;

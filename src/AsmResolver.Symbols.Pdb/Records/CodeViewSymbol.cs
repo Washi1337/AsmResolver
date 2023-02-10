@@ -32,20 +32,21 @@ public abstract class CodeViewSymbol
 
         return type switch
         {
+            BPRel32 => new SerializedBasePointerRelativeSymbol(context, dataReader),
             BuildInfo => new SerializedBuildInfoSymbol(context, dataReader),
             Compile2 => new SerializedCompile2Symbol(dataReader),
             Compile3 => new SerializedCompile3Symbol(dataReader),
             Constant => new SerializedConstantSymbol(context, dataReader),
             DefRangeFramePointerRel => new SerializedFramePointerRangeSymbol(dataReader, false),
             DefRangeFramePointerRelFullScope => new SerializedFramePointerRangeSymbol(dataReader, true),
-            DefRangeRegisterRel => new SerializedRelativeRegisterRangeSymbol(dataReader),
+            DefRangeRegisterRel => new SerializedRegisterRelativeRangeSymbol(dataReader),
             FrameProc => new SerializedFrameProcedureSymbol(dataReader),
             Local => new SerializedLocalSymbol(context, dataReader),
             LProcRef => new SerializedProcedureReferenceSymbol(dataReader, true),
             ObjName => new SerializedObjectNameSymbol(dataReader),
             ProcRef => new SerializedProcedureReferenceSymbol(dataReader, false),
             Pub32 => new SerializedPublicSymbol(dataReader),
-            RegRel32 => new SerializedRelativeRegisterSymbol(context, dataReader),
+            RegRel32 => new SerializedRegisterRelativeSymbol(context, dataReader),
             Udt => new SerializedUserDefinedTypeSymbol(context, dataReader),
             UNamespace => new SerializedUsingNamespaceSymbol(dataReader),
             _ => new UnknownSymbol(type, dataReader.ReadToEnd())

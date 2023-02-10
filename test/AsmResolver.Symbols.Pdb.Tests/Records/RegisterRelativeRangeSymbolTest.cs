@@ -4,11 +4,11 @@ using Xunit;
 
 namespace AsmResolver.Symbols.Pdb.Tests.Records;
 
-public class RelativeRegisterRangeSymbolTest : IClassFixture<MockPdbFixture>
+public class RegisterRelativeRangeSymbolTest : IClassFixture<MockPdbFixture>
 {
     private readonly MockPdbFixture _fixture;
 
-    public RelativeRegisterRangeSymbolTest(MockPdbFixture fixture)
+    public RegisterRelativeRangeSymbolTest(MockPdbFixture fixture)
     {
         _fixture = fixture;
     }
@@ -18,7 +18,7 @@ public class RelativeRegisterRangeSymbolTest : IClassFixture<MockPdbFixture>
     {
         var symbol = _fixture.SimplePdb
             .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<RelativeRegisterRangeSymbol>()
+            .Symbols.OfType<RegisterRelativeRangeSymbol>()
             .First();
 
         Assert.Equal(4, symbol.Offset);
@@ -32,7 +32,7 @@ public class RelativeRegisterRangeSymbolTest : IClassFixture<MockPdbFixture>
     {
         var symbol = _fixture.SimplePdb
             .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<RelativeRegisterRangeSymbol>()
+            .Symbols.OfType<RegisterRelativeRangeSymbol>()
             .First();
 
         Assert.Empty(symbol.Gaps);

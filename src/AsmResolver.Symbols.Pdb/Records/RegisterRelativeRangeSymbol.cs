@@ -6,12 +6,12 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// Defines an address range in which a local variable or parameter is defined that is fully defined by a register and
 /// a relative starting offset and length.
 /// </summary>
-public class RelativeRegisterRangeSymbol : DefinitionRangeSymbol
+public class RegisterRelativeRangeSymbol : DefinitionRangeSymbol
 {
     /// <summary>
     /// Initializes an empty relative register range.
     /// </summary>
-    protected RelativeRegisterRangeSymbol()
+    protected RegisterRelativeRangeSymbol()
     {
     }
 
@@ -22,7 +22,7 @@ public class RelativeRegisterRangeSymbol : DefinitionRangeSymbol
     /// <param name="offset">The offset.</param>
     /// <param name="range">The address range this range is valid.</param>
     /// <param name="gaps">A collection of gaps within the range that the symbol is invalid.</param>
-    public RelativeRegisterRangeSymbol(ushort baseRegister, int offset, LocalAddressRange range, IEnumerable<LocalAddressGap> gaps)
+    public RegisterRelativeRangeSymbol(ushort baseRegister, int offset, LocalAddressRange range, IEnumerable<LocalAddressGap> gaps)
         : base(range, gaps)
     {
         BaseRegister = baseRegister;

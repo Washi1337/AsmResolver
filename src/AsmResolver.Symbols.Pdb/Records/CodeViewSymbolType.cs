@@ -505,7 +505,7 @@ public enum CodeViewSymbolType : ushort
     /// <summary>
     /// Indicates the symbol is a BP-relative
     /// </summary>
-    BBRel32 = 0x110b,
+    BPRel32 = 0x110b,
 
     /// <summary>
     /// Indicates the symbol is a Module-local symbol

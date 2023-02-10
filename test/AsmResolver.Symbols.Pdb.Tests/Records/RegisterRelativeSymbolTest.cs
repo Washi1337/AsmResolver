@@ -5,11 +5,11 @@ using Xunit;
 
 namespace AsmResolver.Symbols.Pdb.Tests.Records;
 
-public class RelativeRegisterSymbolTest : IClassFixture<MockPdbFixture>
+public class RegisterRelativeSymbolTest : IClassFixture<MockPdbFixture>
 {
     private readonly MockPdbFixture _fixture;
 
-    public RelativeRegisterSymbolTest(MockPdbFixture fixture)
+    public RegisterRelativeSymbolTest(MockPdbFixture fixture)
     {
         _fixture = fixture;
     }
@@ -19,7 +19,7 @@ public class RelativeRegisterSymbolTest : IClassFixture<MockPdbFixture>
     {
         var symbol = _fixture.SimplePdb
             .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<RelativeRegisterSymbol>()
+            .Symbols.OfType<RegisterRelativeSymbol>()
             .First();
 
         Assert.Equal(8, symbol.Offset);
@@ -30,7 +30,7 @@ public class RelativeRegisterSymbolTest : IClassFixture<MockPdbFixture>
     {
         var symbol = _fixture.SimplePdb
             .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<RelativeRegisterSymbol>()
+            .Symbols.OfType<RegisterRelativeSymbol>()
             .First();
 
         Assert.IsAssignableFrom<PointerTypeRecord>(symbol.VariableType);
@@ -41,7 +41,7 @@ public class RelativeRegisterSymbolTest : IClassFixture<MockPdbFixture>
     {
         var symbol = _fixture.SimplePdb
             .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<RelativeRegisterSymbol>()
+            .Symbols.OfType<RegisterRelativeSymbol>()
             .First();
 
         Assert.Equal("hModule", symbol.Name);
