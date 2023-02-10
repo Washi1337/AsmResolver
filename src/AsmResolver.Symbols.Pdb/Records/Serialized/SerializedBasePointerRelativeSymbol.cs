@@ -13,7 +13,7 @@ public class SerializedBasePointerRelativeSymbol : BasePointerRelativeSymbol
     private readonly BinaryStreamReader _nameReader;
 
     /// <summary>
-    /// Reads a register+offset pair symbol from the provided input stream.
+    /// Reads a base-pointer relative symbol from the provided input stream.
     /// </summary>
     /// <param name="context">The reading context in which the symbol is situated in.</param>
     /// <param name="reader">The input stream to read from.</param>
