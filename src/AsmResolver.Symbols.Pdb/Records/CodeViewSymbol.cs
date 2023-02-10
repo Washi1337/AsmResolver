@@ -47,6 +47,7 @@ public abstract class CodeViewSymbol
             Pub32 => new SerializedPublicSymbol(dataReader),
             RegRel32 => new SerializedRelativeRegisterSymbol(context, dataReader),
             Udt => new SerializedUserDefinedTypeSymbol(context, dataReader),
+            UNamespace => new SerializedUsingNamespaceSymbol(dataReader),
             _ => new UnknownSymbol(type, dataReader.ReadToEnd())
         };
     }
