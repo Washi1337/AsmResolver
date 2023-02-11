@@ -83,9 +83,9 @@ public class SerializedPdbImage : PdbImage
     }
 
     /// <inheritdoc />
-    protected override IList<CodeViewSymbol> GetSymbols()
+    protected override IList<ICodeViewSymbol> GetSymbols()
     {
-        var result = new List<CodeViewSymbol>();
+        var result = new List<ICodeViewSymbol>();
 
         int index = DbiStream.SymbolRecordStreamIndex;
         if (index >= _file.Streams.Count)

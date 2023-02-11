@@ -2,7 +2,10 @@ using AsmResolver.Symbols.Pdb.Leaves;
 
 namespace AsmResolver.Symbols.Pdb.Records;
 
-public interface IRegisterRelativeSymbol
+/// <summary>
+/// Describes a variable symbol that is defined by a register and an offset relative to that register.
+/// </summary>
+public interface IRegisterRelativeSymbol : ICodeViewSymbol
 {
     /// <summary>
     /// Gets or sets the offset relative to the base register.

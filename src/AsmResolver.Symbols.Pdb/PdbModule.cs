@@ -8,13 +8,13 @@ namespace AsmResolver.Symbols.Pdb;
 /// <summary>
 /// Represents a single module stored in a PDB image.
 /// </summary>
-public class PdbModule
+public class PdbModule : ICodeViewSymbolProvider
 {
     private readonly LazyVariable<Utf8String?> _name;
     private readonly LazyVariable<Utf8String?> _objectFileName;
     private readonly LazyVariable<SectionContribution> _sectionContribution;
 
-    private IList<CodeViewSymbol>? _symbols;
+    private IList<ICodeViewSymbol>? _symbols;
 
     /// <summary>
     /// Initialize an empty module in a PDB image.
@@ -83,10 +83,8 @@ public class PdbModule
         set => _sectionContribution.Value = value;
     }
 
-    /// <summary>
-    /// Gets a collection of symbols that are defined in the module.
-    /// </summary>
-    public IList<CodeViewSymbol> Symbols
+    /// <inheritdoc />
+    public IList<ICodeViewSymbol> Symbols
     {
         get
         {
@@ -130,7 +128,7 @@ public class PdbModule
     /// <remarks>
     /// This method is called upon the initialization of the <see cref="Symbols"/> property.
     /// </remarks>
-    protected virtual IList<CodeViewSymbol> GetSymbols() => new List<CodeViewSymbol>();
+    protected virtual IList<ICodeViewSymbol> GetSymbols() => new List<ICodeViewSymbol>();
 
     /// <inheritdoc />
     public override string ToString() => Name ?? ObjectFileName ?? "<<<NULL NAME>>>";

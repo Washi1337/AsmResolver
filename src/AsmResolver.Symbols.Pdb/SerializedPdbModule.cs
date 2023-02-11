@@ -37,9 +37,9 @@ public class SerializedPdbModule : PdbModule
     protected override SectionContribution? GetSectionContribution() => _descriptor.SectionContribution;
 
     /// <inheritdoc />
-    protected override IList<CodeViewSymbol> GetSymbols()
+    protected override IList<ICodeViewSymbol> GetSymbols()
     {
-        var result = new List<CodeViewSymbol>();
+        var result = new List<ICodeViewSymbol>();
 
         if (_stream.Symbols is null)
             return result;

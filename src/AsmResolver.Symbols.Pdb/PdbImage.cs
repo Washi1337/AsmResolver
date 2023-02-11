@@ -13,17 +13,15 @@ namespace AsmResolver.Symbols.Pdb;
 /// <summary>
 /// Represents a single Program Debug Database (PDB) image.
 /// </summary>
-public class PdbImage
+public class PdbImage : ICodeViewSymbolProvider
 {
     private readonly ConcurrentDictionary<uint, SimpleTypeRecord> _simpleTypes = new();
 
-    private IList<CodeViewSymbol>? _symbols;
+    private IList<ICodeViewSymbol>? _symbols;
     private IList<PdbModule>? _modules;
 
-    /// <summary>
-    /// Gets a collection of all symbols stored in the PDB image.
-    /// </summary>
-    public IList<CodeViewSymbol> Symbols
+    /// <inheritdoc />
+    public IList<ICodeViewSymbol> Symbols
     {
         get
         {
@@ -221,7 +219,7 @@ public class PdbImage
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Symbols"/> property.
     /// </remarks>
-    protected virtual IList<CodeViewSymbol> GetSymbols() => new List<CodeViewSymbol>();
+    protected virtual IList<ICodeViewSymbol> GetSymbols() => new List<ICodeViewSymbol>();
 
     /// <summary>
     /// Obtains a collection of modules stored in the DBI stream of the PDB image.

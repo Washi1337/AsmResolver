@@ -7,7 +7,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a single symbol record within the symbol record stream of a PDB file.
 /// </summary>
-public abstract class CodeViewSymbol
+public abstract class CodeViewSymbol : ICodeViewSymbol
 {
     /// <summary>
     /// Gets the type of symbol this record encodes.
