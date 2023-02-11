@@ -5,6 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public enum ThunkOrdinal : byte
 {
+#pragma warning disable CS1591
     NoType,
     Adjustor,
     VCall,
@@ -12,4 +13,5 @@ public enum ThunkOrdinal : byte
     Load,
     IncrementalTrampoline,
     BranchIslandTrampoline
+#pragma warning restore CS1591
 }

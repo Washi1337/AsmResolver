@@ -18,6 +18,7 @@ public class SerializedFunctionListSymbol : FunctionListSymbol
     /// </summary>
     /// <param name="context">The reading context in which the symbol is situated in.</param>
     /// <param name="reader">The input stream to read from.</param>
+    /// <param name="isCallers">Indicates the functions in the list are callers of the procedure.</param>
     public SerializedFunctionListSymbol(PdbReaderContext context, BinaryStreamReader reader, bool isCallers)
     {
         IsCallersList = isCallers;

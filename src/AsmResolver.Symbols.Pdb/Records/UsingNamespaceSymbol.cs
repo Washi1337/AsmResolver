@@ -45,5 +45,6 @@ public class UsingNamespaceSymbol : CodeViewSymbol
     /// </remarks>
     protected virtual Utf8String? GetName() => Utf8String.Empty;
 
+    /// <inheritdoc />
     public override string ToString() => Name;
 }

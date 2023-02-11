@@ -3,6 +3,9 @@ using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 
+/// <summary>
+/// Represents a lazily initialized implementation of <see cref="EnvironmentBlockSymbol"/> that is read from a PDB image.
+/// </summary>
 public class SerializedEnvironmentBlockSymbol : EnvironmentBlockSymbol
 {
     private readonly BinaryStreamReader _entriesReader;
