@@ -99,5 +99,26 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 newReferences.Select(r => r.MetadataToken).ToHashSet());
         }
 
+        [Fact]
+        public void PreserveMethodDefinitionParents()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ArgListTest);
+            var reference = (MemberReference) module.ManagedEntryPointMethod!.CilMethodBody!
+                .Instructions.First(i => i.OpCode.Code == CilCode.Call)
+                .Operand!;
+
+
+            var newModule = RebuildAndReloadModule(module,
+                MetadataBuilderFlags.PreserveMemberReferenceIndices
+                | MetadataBuilderFlags.PreserveMethodDefinitionIndices);
+            var newReference = (MemberReference) newModule.ManagedEntryPointMethod!.CilMethodBody!
+                .Instructions.First(i => i.OpCode.Code == CilCode.Call)
+                .Operand!;
+
+            Assert.IsAssignableFrom<MethodDefinition>(reference.Parent);
+            Assert.IsAssignableFrom<MethodDefinition>(newReference.Parent);
+            Assert.Equal(reference.Parent.Name, newReference.Parent.Name);
+        }
+
     }
 }
