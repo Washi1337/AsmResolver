@@ -226,11 +226,12 @@ namespace AsmResolver.DotNet.Signatures
             string parameterTypesString = string.Join(", ", ParameterTypes);
 
             string sentinelSuffix;
-            if (IsSentinel)
+            if (CallingConvention == CallingConventionAttributes.VarArg)
             {
                 sentinelSuffix = ParameterTypes.Count > 0
                     ? ", ..."
-                    : " ...";}
+                    : "...";
+            }
             else
             {
                 sentinelSuffix = string.Empty;
