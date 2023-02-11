@@ -6,28 +6,27 @@ namespace AsmResolver.Symbols.Pdb.Tests.Records;
 
 public class FrameProcedureSymbolTest : IClassFixture<MockPdbFixture>
 {
-    private readonly MockPdbFixture _fixture;
+    private readonly FrameProcedureSymbol _symbol;
 
     public FrameProcedureSymbolTest(MockPdbFixture fixture)
     {
-        _fixture = fixture;
+        _symbol = fixture.SimplePdb
+            .Modules.First(m => m.Name!.Contains("cpu_disp.obj"))
+            .Symbols.OfType<ProcedureSymbol>().First()
+            .Symbols.OfType<FrameProcedureSymbol>()
+            .First();
     }
 
     [Fact]
     public void BasicProperties()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("cpu_disp.obj"))
-            .Symbols.OfType<FrameProcedureSymbol>()
-            .First();
-
-        Assert.Equal(0x24u, symbol.FrameSize);
-        Assert.Equal(0u, symbol.PaddingSize);
-        Assert.Equal(0, symbol.PaddingOffset);
-        Assert.Equal(0xCu, symbol.CalleeSavesSize);
-        Assert.Equal(0, symbol.ExceptionHandlerOffset);
-        Assert.Equal(0, symbol.ExceptionHandlerSection);
-        Assert.False((symbol.Attributes & FrameProcedureAttributes.ValidCounts) != 0);
-        Assert.True((symbol.Attributes & FrameProcedureAttributes.GuardCF) != 0);
+        Assert.Equal(0x24u, _symbol.FrameSize);
+        Assert.Equal(0u, _symbol.PaddingSize);
+        Assert.Equal(0, _symbol.PaddingOffset);
+        Assert.Equal(0xCu, _symbol.CalleeSavesSize);
+        Assert.Equal(0, _symbol.ExceptionHandlerOffset);
+        Assert.Equal(0, _symbol.ExceptionHandlerSection);
+        Assert.False((_symbol.Attributes & FrameProcedureAttributes.ValidCounts) != 0);
+        Assert.True((_symbol.Attributes & FrameProcedureAttributes.GuardCF) != 0);
     }
 }

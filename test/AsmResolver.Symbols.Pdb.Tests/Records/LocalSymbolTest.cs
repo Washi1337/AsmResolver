@@ -7,32 +7,26 @@ namespace AsmResolver.Symbols.Pdb.Tests.Records;
 
 public class LocalSymbolTest : IClassFixture<MockPdbFixture>
 {
-    private readonly MockPdbFixture _fixture;
+    private readonly LocalSymbol _symbol;
 
     public LocalSymbolTest(MockPdbFixture fixture)
     {
-        _fixture = fixture;
+        _symbol = fixture.SimplePdb
+            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
+            .Symbols.OfType<ProcedureSymbol>().First()
+            .Symbols.OfType<LocalSymbol>()
+            .First();
     }
 
     [Fact]
     public void Name()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<LocalSymbol>()
-            .First();
-
-        Assert.Equal("hModule", symbol.Name);
+        Assert.Equal("hModule", _symbol.Name);
     }
 
     [Fact]
     public void Type()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<LocalSymbol>()
-            .First();
-
-        Assert.IsAssignableFrom<PointerTypeRecord>(symbol.VariableType);
+        Assert.IsAssignableFrom<PointerTypeRecord>(_symbol.VariableType);
     }
 }

@@ -44,6 +44,6 @@ public class SerializedPdbModule : PdbModule
             return new List<ICodeViewSymbol>();
 
         var reader = _stream.Symbols.CreateReader();
-        return SymbolStreamReader.ReadSymbols(_context, ref reader, false);
+        return SymbolStreamReader.ReadSymbols(_context, ref reader);
     }
 }

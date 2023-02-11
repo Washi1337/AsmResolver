@@ -7,44 +7,33 @@ namespace AsmResolver.Symbols.Pdb.Tests.Records;
 
 public class RegisterRelativeSymbolTest : IClassFixture<MockPdbFixture>
 {
-    private readonly MockPdbFixture _fixture;
+    private readonly RegisterRelativeSymbol _symbol;
 
     public RegisterRelativeSymbolTest(MockPdbFixture fixture)
     {
-        _fixture = fixture;
+        _symbol = fixture.SimplePdb
+            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
+            .Symbols.OfType<ProcedureSymbol>().First()
+            .Symbols.OfType<RegisterRelativeSymbol>()
+            .First();
     }
 
     [Fact]
     public void Offset()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<RegisterRelativeSymbol>()
-            .First();
-
-        Assert.Equal(8, symbol.Offset);
+        Assert.Equal(8, _symbol.Offset);
     }
 
     [Fact]
     public void Type()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<RegisterRelativeSymbol>()
-            .First();
-
-        Assert.IsAssignableFrom<PointerTypeRecord>(symbol.VariableType);
+        Assert.IsAssignableFrom<PointerTypeRecord>(_symbol.VariableType);
     }
 
     [Fact]
     public void Name()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<RegisterRelativeSymbol>()
-            .First();
-
-        Assert.Equal("hModule", symbol.Name);
+        Assert.Equal("hModule", _symbol.Name);
     }
 
 }

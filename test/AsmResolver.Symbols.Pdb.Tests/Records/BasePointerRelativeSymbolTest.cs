@@ -7,44 +7,33 @@ namespace AsmResolver.Symbols.Pdb.Tests.Records;
 
 public class BasePointerRelativeSymbolTest : IClassFixture<MockPdbFixture>
 {
-    private readonly MockPdbFixture _fixture;
+    private readonly BasePointerRelativeSymbol _symbol;
 
     public BasePointerRelativeSymbolTest(MockPdbFixture fixture)
     {
-        _fixture = fixture;
+        _symbol = fixture.SimplePdb
+            .Modules.First(m => m.Name!.Contains("gs_report.obj"))
+            .Symbols.OfType<ProcedureSymbol>().First()
+            .Symbols.OfType<BasePointerRelativeSymbol>()
+            .First();
     }
 
     [Fact]
     public void Name()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("gs_report.obj"))
-            .Symbols.OfType<BasePointerRelativeSymbol>()
-            .First();
-
-        Assert.Equal("exception_pointers", symbol.Name);
+        Assert.Equal("exception_pointers", _symbol.Name);
     }
 
     [Fact]
     public void Offset()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("gs_report.obj"))
-            .Symbols.OfType<BasePointerRelativeSymbol>()
-            .First();
-
-        Assert.Equal(8, symbol.Offset);
+        Assert.Equal(8, _symbol.Offset);
     }
 
     [Fact]
     public void Type()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("gs_report.obj"))
-            .Symbols.OfType<BasePointerRelativeSymbol>()
-            .First();
-
-        Assert.IsAssignableFrom<PointerTypeRecord>(symbol.VariableType);
+        Assert.IsAssignableFrom<PointerTypeRecord>(_symbol.VariableType);
     }
 
 }

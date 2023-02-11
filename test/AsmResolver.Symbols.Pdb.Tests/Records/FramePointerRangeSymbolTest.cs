@@ -7,34 +7,30 @@ namespace AsmResolver.Symbols.Pdb.Tests.Records;
 public class FramePointerRangeSymbolTest : IClassFixture<MockPdbFixture>
 {
     private readonly MockPdbFixture _fixture;
+    private readonly FramePointerRangeSymbol _symbol;
 
     public FramePointerRangeSymbolTest(MockPdbFixture fixture)
     {
         _fixture = fixture;
+        _symbol = fixture.SimplePdb
+            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
+            .Symbols.OfType<ProcedureSymbol>().First()
+            .Symbols.OfType<FramePointerRangeSymbol>()
+            .First();
     }
 
     [Fact]
     public void Offset()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<FramePointerRangeSymbol>()
-            .First();
-
-        Assert.Equal(8, symbol.Offset);
+        Assert.Equal(8, _symbol.Offset);
     }
 
     [Fact]
     public void FullScope()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<FramePointerRangeSymbol>()
-            .First();
-
-        Assert.True(symbol.IsFullScope);
-        Assert.Equal(default, symbol.Range);
-        Assert.Empty(symbol.Gaps);
+        Assert.True(_symbol.IsFullScope);
+        Assert.Equal(default, _symbol.Range);
+        Assert.Empty(_symbol.Gaps);
     }
 
     [Fact]
@@ -44,6 +40,7 @@ public class FramePointerRangeSymbolTest : IClassFixture<MockPdbFixture>
 
         var symbol = _fixture.SimplePdb
             .Modules.First(m => m.Name == path)
+            .Symbols.OfType<ProcedureSymbol>().First()
             .Symbols.OfType<FramePointerRangeSymbol>()
             .First();
 

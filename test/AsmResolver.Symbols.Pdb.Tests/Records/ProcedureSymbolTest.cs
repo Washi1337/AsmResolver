@@ -92,4 +92,30 @@ public class ProcedureSymbolTest : IClassFixture<MockPdbFixture>
 
         Assert.NotNull(symbol.ProcedureType);
     }
+
+    [Fact]
+    public void Children()
+    {
+        var symbol = _fixture.SimplePdb
+            .Modules.First(m => m.Name!.Contains(@"SimpleDll\Release\dllmain.obj"))
+            .Symbols.OfType<ProcedureSymbol>()
+            .First();
+
+        Assert.Equal(new[]
+        {
+            CodeViewSymbolType.Local,
+            CodeViewSymbolType.DefRangeRegisterRel,
+            CodeViewSymbolType.DefRangeFramePointerRelFullScope,
+            CodeViewSymbolType.Local,
+            CodeViewSymbolType.DefRangeRegisterRel,
+            CodeViewSymbolType.DefRangeFramePointerRelFullScope,
+            CodeViewSymbolType.Local,
+            CodeViewSymbolType.DefRangeRegisterRel,
+            CodeViewSymbolType.DefRangeFramePointerRelFullScope,
+            CodeViewSymbolType.FrameProc,
+            CodeViewSymbolType.RegRel32,
+            CodeViewSymbolType.RegRel32,
+            CodeViewSymbolType.RegRel32,
+        }, symbol.Symbols.Select(s => s.CodeViewSymbolType));
+    }
 }

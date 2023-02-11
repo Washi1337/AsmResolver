@@ -6,35 +6,29 @@ namespace AsmResolver.Symbols.Pdb.Tests.Records;
 
 public class RegisterRelativeRangeSymbolTest : IClassFixture<MockPdbFixture>
 {
-    private readonly MockPdbFixture _fixture;
+    private readonly RegisterRelativeRangeSymbol _symbol;
 
     public RegisterRelativeRangeSymbolTest(MockPdbFixture fixture)
     {
-        _fixture = fixture;
+        _symbol = fixture.SimplePdb
+            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
+            .Symbols.OfType<ProcedureSymbol>().First()
+            .Symbols.OfType<RegisterRelativeRangeSymbol>()
+            .First();
     }
 
     [Fact]
     public void BasicProperties()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<RegisterRelativeRangeSymbol>()
-            .First();
-
-        Assert.Equal(4, symbol.Offset);
-        Assert.Equal(0u, symbol.Range.Start);
-        Assert.Equal(1u, symbol.Range.SectionStart);
-        Assert.Equal(1u, symbol.Range.Length);
+        Assert.Equal(4, _symbol.Offset);
+        Assert.Equal(0u, _symbol.Range.Start);
+        Assert.Equal(1u, _symbol.Range.SectionStart);
+        Assert.Equal(1u, _symbol.Range.Length);
     }
 
     [Fact]
     public void NoGaps()
     {
-        var symbol = _fixture.SimplePdb
-            .Modules.First(m => m.Name!.Contains("dllmain.obj"))
-            .Symbols.OfType<RegisterRelativeRangeSymbol>()
-            .First();
-
-        Assert.Empty(symbol.Gaps);
+        Assert.Empty(_symbol.Gaps);
     }
 }

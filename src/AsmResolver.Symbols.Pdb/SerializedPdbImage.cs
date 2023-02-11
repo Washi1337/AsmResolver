@@ -91,7 +91,7 @@ public class SerializedPdbImage : PdbImage
             return new List<ICodeViewSymbol>();
 
         var reader = _file.Streams[DbiStream.SymbolRecordStreamIndex].CreateReader();
-        return SymbolStreamReader.ReadSymbols(ReaderContext, ref reader, false);
+        return SymbolStreamReader.ReadSymbols(ReaderContext, ref reader);
     }
 
     /// <inheritdoc />
