@@ -30,7 +30,9 @@ namespace AsmResolver.DotNet.Signatures.Marshal
                 _ => new SimpleMarshalDescriptor(nativeType)
             };
 
-            descriptor.ExtraData = reader.ReadToEnd();
+            if (reader.CanRead(1))
+                descriptor.ExtraData = reader.ReadToEnd();
+
             return descriptor;
         }
 

@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Signatures
             bool readToEnd = true)
         {
             var signature = ReadSignature(ref context, ref reader);
-            if (readToEnd)
+            if (readToEnd && reader.CanRead(1))
             {
                 byte[] extraData = reader.ReadToEnd();
                 if (signature is not null)
