@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using AsmResolver.Symbols.Pdb.Metadata.Dbi;
 using AsmResolver.Symbols.Pdb.Metadata.Modi;
 using AsmResolver.Symbols.Pdb.Records;
+using AsmResolver.Symbols.Pdb.Records.Serialized;
 
 namespace AsmResolver.Symbols.Pdb;
 
@@ -39,15 +40,10 @@ public class SerializedPdbModule : PdbModule
     /// <inheritdoc />
     protected override IList<ICodeViewSymbol> GetSymbols()
     {
-        var result = new List<ICodeViewSymbol>();
-
         if (_stream.Symbols is null)
-            return result;
+            return new List<ICodeViewSymbol>();
 
         var reader = _stream.Symbols.CreateReader();
-        while (reader.CanRead(sizeof(ushort) * 2))
-            result.Add(CodeViewSymbol.FromReader(_context, ref reader));
-
-        return result;
+        return SymbolStreamReader.ReadSymbols(_context, ref reader, false);
     }
 }

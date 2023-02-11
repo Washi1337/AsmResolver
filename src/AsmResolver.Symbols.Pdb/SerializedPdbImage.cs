@@ -9,6 +9,7 @@ using AsmResolver.Symbols.Pdb.Metadata.Modi;
 using AsmResolver.Symbols.Pdb.Metadata.Tpi;
 using AsmResolver.Symbols.Pdb.Msf;
 using AsmResolver.Symbols.Pdb.Records;
+using AsmResolver.Symbols.Pdb.Records.Serialized;
 
 namespace AsmResolver.Symbols.Pdb;
 
@@ -85,17 +86,12 @@ public class SerializedPdbImage : PdbImage
     /// <inheritdoc />
     protected override IList<ICodeViewSymbol> GetSymbols()
     {
-        var result = new List<ICodeViewSymbol>();
-
         int index = DbiStream.SymbolRecordStreamIndex;
         if (index >= _file.Streams.Count)
-            return result;
+            return new List<ICodeViewSymbol>();
 
         var reader = _file.Streams[DbiStream.SymbolRecordStreamIndex].CreateReader();
-        while (reader.CanRead(sizeof(ushort) * 2))
-            result.Add(CodeViewSymbol.FromReader(ReaderContext, ref reader));
-
-        return result;
+        return SymbolStreamReader.ReadSymbols(ReaderContext, ref reader, false);
     }
 
     /// <inheritdoc />
