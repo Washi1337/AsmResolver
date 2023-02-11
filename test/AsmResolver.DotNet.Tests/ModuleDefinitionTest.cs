@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.IO;
@@ -169,7 +170,7 @@ namespace AsmResolver.DotNet.Tests
         public void TryLookupTypeReferenceStronglyTyped()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
-            
+
             Assert.True(module.TryLookupMember(new MetadataToken(TableIndex.TypeRef, 12), out TypeReference reference));
             Assert.Equal("System", reference.Namespace);
             Assert.Equal("Object", reference.Name);
