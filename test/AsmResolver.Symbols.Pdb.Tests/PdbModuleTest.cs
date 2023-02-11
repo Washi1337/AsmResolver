@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+using AsmResolver.Symbols.Pdb.Records;
 using Xunit;
 
 namespace AsmResolver.Symbols.Pdb.Tests;
@@ -25,5 +28,18 @@ public class PdbModuleTest : IClassFixture<MockPdbFixture>
         Assert.Equal(
             @"C:\Program Files (x86)\Windows Kits\10\lib\10.0.19041.0\um\x86\kernel32.lib",
             module.ObjectFileName);
+    }
+
+    [Fact]
+    public void Children()
+    {
+        var module = _fixture.SimplePdb.Modules.First(m => m.Name!.Contains("dllmain.obj"));
+        Assert.Equal(new[]
+        {
+            CodeViewSymbolType.ObjName,
+            CodeViewSymbolType.Compile3,
+            CodeViewSymbolType.BuildInfo,
+            CodeViewSymbolType.GProc32,
+        }, module.Symbols.Select(x => x.CodeViewSymbolType));
     }
 }
