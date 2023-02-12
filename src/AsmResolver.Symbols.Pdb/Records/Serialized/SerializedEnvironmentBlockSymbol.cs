@@ -11,7 +11,7 @@ public class SerializedEnvironmentBlockSymbol : EnvironmentBlockSymbol
     private readonly BinaryStreamReader _entriesReader;
 
     /// <summary>
-    /// Reads a constant symbol from the provided input stream.
+    /// Reads an environment block symbol from the provided input stream.
     /// </summary>
     /// <param name="reader">The input stream to read from.</param>
     public SerializedEnvironmentBlockSymbol(BinaryStreamReader reader)

@@ -3,43 +3,45 @@ using AsmResolver.Symbols.Pdb.Leaves;
 namespace AsmResolver.Symbols.Pdb.Records;
 
 /// <summary>
-/// Represents a symbol describing a local variable in a function or method.
+/// Represents a file static variable symbol.
 /// </summary>
-public class LocalSymbol : CodeViewSymbol, IVariableSymbol
+public class FileStaticSymbol : CodeViewSymbol, IVariableSymbol
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _variableType;
     private readonly LazyVariable<Utf8String?> _name;
+    private readonly LazyVariable<CodeViewTypeRecord?> _variableType;
 
     /// <summary>
-    /// Initializes an empty local variable symbol.
+    /// Initializes an empty file static symbol.
     /// </summary>
-    protected LocalSymbol()
+    protected FileStaticSymbol()
     {
-        _variableType = new LazyVariable<CodeViewTypeRecord?>(GetVariableType);
         _name = new LazyVariable<Utf8String?>(GetName);
+        _variableType = new LazyVariable<CodeViewTypeRecord?>(GetVariableType);
     }
 
     /// <summary>
-    /// Creates a new local variable symbol.
+    /// Creates a new file static variable symbol.
     /// </summary>
     /// <param name="name">The name of the variable.</param>
-    /// <param name="variableType">The type of the variable.</param>
+    /// <param name="variableType">The data type of the variable.</param>
     /// <param name="attributes">The attributes describing the variable.</param>
-    public LocalSymbol(Utf8String? name, CodeViewTypeRecord? variableType, LocalAttributes attributes)
+    public FileStaticSymbol(Utf8String name, CodeViewTypeRecord variableType, LocalAttributes attributes)
     {
-        _variableType = new LazyVariable<CodeViewTypeRecord?>(variableType);
-        _name = new LazyVariable<Utf8String?>(name);
         Attributes = attributes;
+        _name = new LazyVariable<Utf8String?>(name);
+        _variableType = new LazyVariable<CodeViewTypeRecord?>(variableType);
     }
 
     /// <inheritdoc />
-    public override CodeViewSymbolType CodeViewSymbolType => CodeViewSymbolType.Local;
+    public override CodeViewSymbolType CodeViewSymbolType => CodeViewSymbolType.FileStatic;
 
-    /// <inheritdoc />
-    public CodeViewTypeRecord? VariableType
+    /// <summary>
+    /// Gets or sets the index of the module's file name within the string table.
+    /// </summary>
+    public uint ModuleFileNameOffset
     {
-        get => _variableType.Value;
-        set => _variableType.Value = value;
+        get;
+        set;
     }
 
     /// <inheritdoc />
@@ -54,6 +56,13 @@ public class LocalSymbol : CodeViewSymbol, IVariableSymbol
     {
         get => _name.Value;
         set => _name.Value = value;
+    }
+
+    /// <inheritdoc />
+    public CodeViewTypeRecord? VariableType
+    {
+        get => _variableType.Value;
+        set => _variableType.Value = value;
     }
 
     /// <summary>
@@ -73,4 +82,5 @@ public class LocalSymbol : CodeViewSymbol, IVariableSymbol
     /// This method is called upon initialization of the <see cref="Name"/> property.
     /// </remarks>
     protected virtual Utf8String? GetName() => null;
+
 }
