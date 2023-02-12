@@ -53,6 +53,7 @@ public abstract class CodeViewSymbol : ICodeViewSymbol
             GProc32 => new SerializedProcedureSymbol(context, dataReader, true, false),
             GProc32Id => new SerializedProcedureSymbol(context, dataReader, true, true),
             InlineSite => new SerializedInlineSiteSymbol(context, dataReader),
+            Label32 => new SerializedLabelSymbol(dataReader),
             Local => new SerializedLocalSymbol(context, dataReader),
             LData32 => new SerializedDataSymbol(context, dataReader, false),
             LProc32 => new SerializedProcedureSymbol(context, dataReader, false, false),

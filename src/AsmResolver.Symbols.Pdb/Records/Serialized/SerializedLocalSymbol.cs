@@ -26,7 +26,7 @@ public class SerializedLocalSymbol : LocalSymbol
     }
 
     /// <inheritdoc />
-    protected override Utf8String? GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
 
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetVariableType()
