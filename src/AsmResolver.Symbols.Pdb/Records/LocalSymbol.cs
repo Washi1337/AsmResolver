@@ -42,7 +42,9 @@ public class LocalSymbol : CodeViewSymbol, IVariableSymbol
         set => _variableType.Value = value;
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets or sets the attributes describing the variable.
+    /// </summary>
     public LocalAttributes Attributes
     {
         get;

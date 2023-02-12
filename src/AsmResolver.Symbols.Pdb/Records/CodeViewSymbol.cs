@@ -62,6 +62,7 @@ public abstract class CodeViewSymbol : ICodeViewSymbol
             ObjName => new SerializedObjectNameSymbol(dataReader),
             ProcRef => new SerializedProcedureReferenceSymbol(dataReader, false),
             Pub32 => new SerializedPublicSymbol(dataReader),
+            Register => new SerializedRegisterSymbol(context, dataReader),
             RegRel32 => new SerializedRegisterRelativeSymbol(context, dataReader),
             Thunk32 => new SerializedThunkSymbol(context, dataReader),
             Udt => new SerializedUserDefinedTypeSymbol(context, dataReader),

@@ -24,14 +24,4 @@ public interface IVariableSymbol : ICodeViewSymbol
         get;
         set;
     }
-
-    /// <summary>
-    /// Gets or sets the attributes describing the variable.
-    /// </summary>
-
-    public LocalAttributes Attributes
-    {
-        get;
-        set;
-    }
 }
