@@ -119,5 +119,5 @@ public class PublicSymbol : CodeViewSymbol
     protected virtual Utf8String GetName() => Utf8String.Empty;
 
     /// <inheritdoc />
-    public override string ToString() => $"{CodeViewSymbolType}: [{SegmentIndex:X4}:{Offset:X8}] {Name}";
+    public override string ToString() => $"S_PUB32: [{SegmentIndex:X4}:{Offset:X8}] {Name}";
 }

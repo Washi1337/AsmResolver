@@ -92,5 +92,5 @@ public class CoffGroupSymbol : CodeViewSymbol
     protected virtual Utf8String? GetName() => null;
 
     /// <inheritdoc />
-    public override string ToString() => $"{Name}: [{SegmentIndex:X4}:{Offset:X8}], Cb: {Size:X8}";
+    public override string ToString() => $"S_COFFGROUP: [{SegmentIndex:X4}:{Offset:X8}], Cb: {Size:X8}, Name: {Name}";
 }

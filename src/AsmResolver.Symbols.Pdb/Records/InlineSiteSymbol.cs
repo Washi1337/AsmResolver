@@ -93,4 +93,7 @@ public class InlineSiteSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// This method is called upon initialization of the <see cref="Annotations"/> property.
     /// </remarks>
     protected virtual IList<BinaryAnnotation> GetAnnotations() => new List<BinaryAnnotation>();
+
+    /// <inheritdoc />
+    public override string ToString() => $"S_INLINESITE: {Inlinee} (Annotation Count: {Annotations.Count})";
 }

@@ -68,4 +68,7 @@ public class CallSiteSymbol : CodeViewSymbol
     /// This method is called upon initialization of the <see cref="FunctionType"/> property.
     /// </remarks>
     protected virtual CodeViewTypeRecord? GetFunctionType() => null;
+
+    /// <inheritdoc />
+    public override string ToString() => $"S_CALLSITEINFO [{SectionIndex:X4}:{Offset:X8}]: {FunctionType}";
 }

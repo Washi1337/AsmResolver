@@ -57,5 +57,5 @@ public class ObjectNameSymbol : CodeViewSymbol
     protected virtual Utf8String GetName() => Utf8String.Empty;
 
     /// <inheritdoc />
-    public override string ToString() => Name;
+    public override string ToString() => $"S_OBJNAME: {Name}";
 }

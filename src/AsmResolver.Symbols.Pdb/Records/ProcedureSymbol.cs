@@ -208,4 +208,11 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// This method is called upon initialization of the <see cref="Name"/> property.
     /// </remarks>
     protected virtual Utf8String? GetName() => null;
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        string prefix = CodeViewSymbolType.ToString().ToUpper();
+        return $"S_{prefix}: [{SegmentIndex:X4}:{Offset:X8}] {Name} ({Type})";
+    }
 }

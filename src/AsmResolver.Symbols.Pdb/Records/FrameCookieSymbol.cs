@@ -68,4 +68,7 @@ public class FrameCookieSymbol : CodeViewSymbol
         get;
         set;
     }
+
+    /// <inheritdoc />
+    public override string ToString() => $"S_FRAMECOOKIE: {CookieType} +{FrameOffset:X}";
 }

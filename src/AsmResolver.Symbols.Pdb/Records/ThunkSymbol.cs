@@ -107,4 +107,7 @@ public class ThunkSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// This method is called upon initialization of the <see cref="Name"/> property.
     /// </remarks>
     protected virtual Utf8String? GetName() => null;
+
+    /// <inheritdoc />
+    public override string ToString() => $"S_THUNK32: [{SegmentIndex:X4}:{Offset:X8}] {Name} ({Ordinal})";
 }

@@ -71,4 +71,7 @@ public abstract class CodeViewSymbol : ICodeViewSymbol
             _ => new UnknownSymbol(type, dataReader.ReadToEnd())
         };
     }
+
+    /// <inheritdoc />
+    public override string ToString() => $"S_{CodeViewSymbolType.ToString().ToUpper()}";
 }

@@ -85,4 +85,7 @@ public class FileStaticSymbol : CodeViewSymbol, IVariableSymbol
     /// </remarks>
     protected virtual Utf8String? GetName() => null;
 
+    /// <inheritdoc />
+    public override string ToString() => $"S_FILESTATIC: {VariableType} {Name}";
+
 }

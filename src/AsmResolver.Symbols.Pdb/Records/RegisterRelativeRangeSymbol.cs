@@ -67,4 +67,7 @@ public class RegisterRelativeRangeSymbol : DefinitionRangeSymbol
         get;
         set;
     }
+
+    /// <inheritdoc />
+    public override string ToString() => $"S_DEFRANGE_REGISTER_REL: {Range} (Gap Count: {Gaps.Count})";
 }

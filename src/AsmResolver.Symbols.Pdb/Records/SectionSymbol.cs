@@ -94,4 +94,7 @@ public class SectionSymbol : CodeViewSymbol
     /// This method is called upon initialization of the <see cref="Name"/> property.
     /// </remarks>
     protected virtual Utf8String? GetName() => null;
+
+    /// <inheritdoc />
+    public override string ToString() => $"S_SECTION: [{SectionNumber:X4}] {Name}";
 }

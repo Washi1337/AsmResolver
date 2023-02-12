@@ -89,5 +89,8 @@ public class RegisterRelativeSymbol : CodeViewSymbol, IRegisterRelativeSymbol
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Name"/> property.
     /// </remarks>
-    protected virtual  Utf8String? GetName() => null;
+    protected virtual Utf8String? GetName() => null;
+
+    /// <inheritdoc />
+    public override string ToString() => $"S_REGREL32: [+{Offset:X}] {VariableType} {Name}";
 }

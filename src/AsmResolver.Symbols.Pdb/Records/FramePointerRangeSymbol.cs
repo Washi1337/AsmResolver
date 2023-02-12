@@ -62,4 +62,14 @@ public class FramePointerRangeSymbol : DefinitionRangeSymbol
         get;
         set;
     }
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        string prefix = IsFullScope
+            ? "S_DEFRANGE_FRAMEPOINTER_FULLSCOPE"
+            : "S_DEFRANGE_FRAMEPOINTER";
+
+        return $"{prefix}: [{Offset:X}] Range: {Range} (Gap Count: {Gaps.Count})";
+    }
 }

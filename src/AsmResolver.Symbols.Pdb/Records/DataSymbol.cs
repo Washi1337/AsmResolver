@@ -106,4 +106,10 @@ public class DataSymbol : CodeViewSymbol
     /// This method is called upon initialization of the <see cref="VariableType"/> property.
     /// </remarks>
     protected virtual CodeViewTypeRecord? GetVariableType() => null;
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        return $"S_{CodeViewSymbolType.ToString().ToUpper()}: [{SegmentIndex:X4}:{Offset:X8}] {VariableType} {Name}";
+    }
 }

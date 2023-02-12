@@ -44,4 +44,7 @@ public class RegisterRangeSymbol : DefinitionRangeSymbol
         get;
         set;
     }
+
+    /// <inheritdoc />
+    public override string ToString() => $"S_DEFRANGE_REGISTER: {Range} (Gap Count: {Gaps.Count})";
 }
