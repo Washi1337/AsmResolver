@@ -37,6 +37,7 @@ public abstract class CodeViewSymbol : ICodeViewSymbol
             CallSiteInfo => new SerializedCallSiteSymbol(context, dataReader),
             Callees => new SerializedFunctionListSymbol(context, dataReader, false),
             Callers => new SerializedFunctionListSymbol(context, dataReader, true),
+            CoffGroup => new SerializedCoffGroup(dataReader),
             Compile2 => new SerializedCompile2Symbol(dataReader),
             Compile3 => new SerializedCompile3Symbol(dataReader),
             Constant => new SerializedConstantSymbol(context, dataReader),
