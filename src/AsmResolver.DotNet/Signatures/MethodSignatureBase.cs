@@ -120,17 +120,17 @@ namespace AsmResolver.DotNet.Signatures
 
             // Parameter types.
             _parameterTypes.Capacity = (int) parameterCount;
-            bool sentinel = false;
+            IncludeSentinel = false;
             for (int i = 0; i < parameterCount; i++)
             {
                 var parameterType = TypeSignature.FromReader(ref context, ref reader);
 
                 if (parameterType.ElementType == ElementType.Sentinel)
                 {
-                    sentinel = true;
+                    IncludeSentinel = true;
                     i--;
                 }
-                else if (sentinel)
+                else if (IncludeSentinel)
                 {
                     SentinelParameterTypes.Add(parameterType);
                 }
@@ -146,7 +146,11 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         protected void WriteParametersAndReturnType(BlobSerializationContext context)
         {
-            context.Writer.WriteCompressedUInt32((uint) ParameterTypes.Count);
+            uint totalCount = (uint) ParameterTypes.Count;
+            if (IncludeSentinel)
+                totalCount += (uint) SentinelParameterTypes.Count;
+
+            context.Writer.WriteCompressedUInt32(totalCount);
 
             ReturnType.Write(context);
 

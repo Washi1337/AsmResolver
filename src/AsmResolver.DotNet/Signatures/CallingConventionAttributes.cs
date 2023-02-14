@@ -65,6 +65,12 @@ namespace AsmResolver.DotNet.Signatures
         GenericInstance = 0xA,
 
         /// <summary>
+        /// Indicates the method supports supplying a variable amount of arguments. This really is exactly native
+        /// varargs (no cookie) and should only appear in PInvoke IL stubs.
+        /// </summary>
+        NativeVarArg = 0xB,
+
+        /// <summary>
         /// Indicates the member defines generic parameters.
         /// </summary>
         Generic = 0x10,
@@ -83,6 +89,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Indicates the signature is part of a vararg method signature.
         /// </summary>
+        [Obsolete("This value should not be used. Use VarArg instead.")]
         Sentinel = 0x41,
     }
 }

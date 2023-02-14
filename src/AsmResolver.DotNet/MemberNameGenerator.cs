@@ -207,7 +207,7 @@ namespace AsmResolver.DotNet
                     state.Append(", ");
             }
 
-            if (signature.IsSentinel)
+            if (signature.CallingConvention == CallingConventionAttributes.VarArg)
                 state.Append("...");
 
             return state;

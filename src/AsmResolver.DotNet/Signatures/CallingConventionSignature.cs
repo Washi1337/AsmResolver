@@ -50,6 +50,7 @@ namespace AsmResolver.DotNet.Signatures
                 case CallingConventionAttributes.ThisCall:
                 case CallingConventionAttributes.VarArg:
                 case CallingConventionAttributes.Unmanaged:
+                case CallingConventionAttributes.NativeVarArg:
                     return MethodSignature.FromReader(ref context, ref reader);
 
                 case CallingConventionAttributes.Property:
@@ -84,6 +85,15 @@ namespace AsmResolver.DotNet.Signatures
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// When this signature references a method signature, gets or sets the calling convention that is used.
+        /// </summary>
+        public CallingConventionAttributes CallingConvention
+        {
+            get => Attributes & SignatureTypeMask;
+            set => Attributes = (Attributes & ~SignatureTypeMask) | value;
         }
 
         /// <summary>
@@ -137,16 +147,6 @@ namespace AsmResolver.DotNet.Signatures
             get => (Attributes & CallingConventionAttributes.ExplicitThis) != 0;
             set => Attributes = (Attributes & ~CallingConventionAttributes.ExplicitThis)
                                 | (value ? CallingConventionAttributes.ExplicitThis : 0);
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the signature is part of a vararg method signature.
-        /// </summary>
-        public bool IsSentinel
-        {
-            get => (Attributes & CallingConventionAttributes.Sentinel) != 0;
-            set => Attributes = (Attributes & ~CallingConventionAttributes.Sentinel)
-                                | (value ? CallingConventionAttributes.Sentinel : 0);
         }
 
         /// <inheritdoc />
