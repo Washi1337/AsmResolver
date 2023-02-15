@@ -3,9 +3,9 @@ using AsmResolver.IO;
 namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 
 /// <summary>
-/// Provides a lazily initialized implementation of <see cref="FunctionIdLeaf"/> that is read from a PDB image.
+/// Provides a lazily initialized implementation of <see cref="FunctionIdentifier"/> that is read from a PDB image.
 /// </summary>
-public class SerializedFunctionIdLeaf : FunctionIdLeaf
+public class SerializedFunctionIdentifier : FunctionIdentifier
 {
     private readonly PdbReaderContext _context;
     private readonly uint _typeIndex;
@@ -17,7 +17,7 @@ public class SerializedFunctionIdLeaf : FunctionIdLeaf
     /// <param name="context">The reading context in which the identifier is situated in.</param>
     /// <param name="typeIndex">The type index to assign to the identifier.</param>
     /// <param name="reader">The input stream to read from.</param>
-    public SerializedFunctionIdLeaf(PdbReaderContext context, uint typeIndex, BinaryStreamReader reader)
+    public SerializedFunctionIdentifier(PdbReaderContext context, uint typeIndex, BinaryStreamReader reader)
         : base(typeIndex)
     {
         _context = context;

@@ -25,25 +25,25 @@ public class SerializedSubStringListLeaf : SubStringListLeaf
     }
 
     /// <inheritdoc />
-    protected override IList<StringIdLeaf> GetEntries()
+    protected override IList<StringIdentifier> GetEntries()
     {
         var reader = _reader.Fork();
         uint count = reader.ReadUInt32();
         return ReadEntries(_context, TypeIndex, count, ref reader);
     }
 
-    internal static IList<StringIdLeaf> ReadEntries(
+    internal static IList<StringIdentifier> ReadEntries(
         PdbReaderContext context,
         uint originIndex,
         uint count,
         ref BinaryStreamReader reader)
     {
-        var result = new List<StringIdLeaf>();
+        var result = new List<StringIdentifier>();
 
         for (int i = 0; i < count; i++)
         {
             uint index = reader.ReadUInt32();
-            if (!context.ParentImage.TryGetIdLeafRecord(index, out StringIdLeaf? entry))
+            if (!context.ParentImage.TryGetIdLeafRecord(index, out StringIdentifier? entry))
             {
                 context.Parameters.ErrorListener.BadImage(
                     $"String List {originIndex:X8} contains an invalid string index {index:X8}.");

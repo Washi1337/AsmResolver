@@ -20,8 +20,8 @@ public class SerializedPdbImage : PdbImage
 {
     private const int MinimalRequiredStreamCount = 5;
     private readonly MsfFile _file;
-    private readonly TpiStreamCache _tpi;
-    private readonly TpiStreamCache _ipi;
+    private readonly LeafStreamCache _tpi;
+    private readonly LeafStreamCache _ipi;
 
     /// <summary>
     /// Interprets a PDB image from the provided MSF file.
@@ -42,8 +42,8 @@ public class SerializedPdbImage : PdbImage
 
         ReaderContext = new PdbReaderContext(this, readerParameters);
 
-        _tpi = new TpiStreamCache(ReaderContext, TpiStream);
-        _ipi = new TpiStreamCache(ReaderContext, IpiStream);
+        _tpi = new LeafStreamCache(ReaderContext, TpiStream);
+        _ipi = new LeafStreamCache(ReaderContext, IpiStream);
     }
 
     internal PdbReaderContext ReaderContext
@@ -72,15 +72,27 @@ public class SerializedPdbImage : PdbImage
     }
 
     /// <inheritdoc />
-    public override bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewLeaf? leaf)
+    public override bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out ITpiLeaf? leaf)
     {
-        return _tpi.TryGetRecord(typeIndex, out leaf) || base.TryGetLeafRecord(typeIndex, out leaf);
+        if (_tpi.TryGetRecord(typeIndex, out var x) && x is ITpiLeaf y)
+        {
+            leaf = y;
+            return true;
+        }
+
+        return base.TryGetLeafRecord(typeIndex, out leaf);
     }
 
     /// <inheritdoc />
-    public override bool TryGetIdLeafRecord(uint idIndex, [NotNullWhen(true)] out CodeViewLeaf? leaf)
+    public override bool TryGetIdLeafRecord(uint idIndex, [NotNullWhen(true)] out IIpiLeaf? leaf)
     {
-        return _ipi.TryGetRecord(idIndex, out leaf) || base.TryGetLeafRecord(idIndex, out leaf);
+        if (_ipi.TryGetRecord(idIndex, out var x) && x is IIpiLeaf y)
+        {
+            leaf = y;
+            return true;
+        }
+
+        return base.TryGetIdLeafRecord(idIndex, out leaf);
     }
 
     /// <inheritdoc />
@@ -113,13 +125,13 @@ public class SerializedPdbImage : PdbImage
         return result;
     }
 
-    private class TpiStreamCache
+    private class LeafStreamCache
     {
         private readonly PdbReaderContext _context;
         private readonly TpiStream _stream;
-        private CodeViewLeaf?[]? _leaves;
+        private ICodeViewLeaf?[]? _leaves;
 
-        public TpiStreamCache(PdbReaderContext context, TpiStream stream)
+        public LeafStreamCache(PdbReaderContext context, TpiStream stream)
         {
             _context = context;
             _stream = stream;
@@ -131,11 +143,11 @@ public class SerializedPdbImage : PdbImage
             if (_leaves is null)
             {
                 Interlocked.CompareExchange(ref _leaves,
-                    new CodeViewLeaf?[_stream.TypeIndexEnd - _stream.TypeIndexBegin], null);
+                    new ICodeViewLeaf?[_stream.TypeIndexEnd - _stream.TypeIndexBegin], null);
             }
         }
 
-        public bool TryGetRecord(uint typeIndex, out CodeViewLeaf? leaf)
+        public bool TryGetRecord(uint typeIndex, out ICodeViewLeaf? leaf)
         {
             if (typeIndex < _stream.TypeIndexBegin)
             {

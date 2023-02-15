@@ -25,7 +25,7 @@ public class SerializedBuildInfoLeaf : BuildInfoLeaf
     }
 
     /// <inheritdoc />
-    protected override IList<StringIdLeaf> GetEntries()
+    protected override IList<StringIdentifier> GetEntries()
     {
         var reader = _reader.Fork();
         uint count = reader.ReadUInt16();

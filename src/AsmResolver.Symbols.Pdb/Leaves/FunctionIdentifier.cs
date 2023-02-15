@@ -3,7 +3,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a function identifier, consisting of its name and its signature.
 /// </summary>
-public class FunctionIdLeaf : CodeViewLeaf
+public class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
 {
     private readonly LazyVariable<Utf8String?> _name;
     private readonly LazyVariable<CodeViewTypeRecord?> _functionType;
@@ -12,7 +12,7 @@ public class FunctionIdLeaf : CodeViewLeaf
     /// Initializes an empty function identifier leaf.
     /// </summary>
     /// <param name="typeIndex">The type index.</param>
-    protected FunctionIdLeaf(uint typeIndex)
+    protected FunctionIdentifier(uint typeIndex)
         : base(typeIndex)
     {
         _name = new LazyVariable<Utf8String?>(GetName);
@@ -25,7 +25,7 @@ public class FunctionIdLeaf : CodeViewLeaf
     /// <param name="scopeId">The identifier of the scope defining the function (if available).</param>
     /// <param name="name">The name of the function.</param>
     /// <param name="functionType">The type describing the shape of the function.</param>
-    public FunctionIdLeaf(uint scopeId, Utf8String name, CodeViewTypeRecord functionType)
+    public FunctionIdentifier(uint scopeId, Utf8String name, CodeViewTypeRecord functionType)
         : base(0)
     {
         ScopeId = scopeId;

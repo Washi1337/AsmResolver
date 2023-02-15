@@ -16,21 +16,21 @@ public class StringIdInfoTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void Value()
     {
-        var id = _fixture.SimplePdb.GetIdLeafRecord<StringIdLeaf>(0x1000);
+        var id = _fixture.SimplePdb.GetIdLeafRecord<StringIdentifier>(0x1000);
         Assert.Equal(@"C:\Users\Admin\source\repos\AsmResolver\test\TestBinaries\Native\SimpleDll", id.Value);
     }
 
     [Fact]
     public void NoSubStrings()
     {
-        var id = _fixture.SimplePdb.GetIdLeafRecord<StringIdLeaf>(0x1000);
+        var id = _fixture.SimplePdb.GetIdLeafRecord<StringIdentifier>(0x1000);
         Assert.Null(id.SubStrings);
     }
 
     [Fact]
     public void SubStrings()
     {
-        var id = _fixture.SimplePdb.GetIdLeafRecord<StringIdLeaf>(0x100c);
+        var id = _fixture.SimplePdb.GetIdLeafRecord<StringIdentifier>(0x100c);
         var subStrings = id.SubStrings;
 
         Assert.NotNull(subStrings);

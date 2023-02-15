@@ -7,9 +7,9 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a list of sub strings associated to a String ID entry.
 /// </summary>
-public class SubStringListLeaf : CodeViewLeaf
+public class SubStringListLeaf : CodeViewLeaf, IIpiLeaf
 {
-    private IList<StringIdLeaf>? _entries;
+    private IList<StringIdentifier>? _entries;
 
     /// <summary>
     /// Initializes an empty sub-string list.
@@ -24,7 +24,7 @@ public class SubStringListLeaf : CodeViewLeaf
     /// Creates a new empty list of sub-strings.
     /// </summary>
     public SubStringListLeaf()
-        : this(Enumerable.Empty<StringIdLeaf>())
+        : this(Enumerable.Empty<StringIdentifier>())
     {
     }
 
@@ -32,7 +32,7 @@ public class SubStringListLeaf : CodeViewLeaf
     /// Creates a new list of sub-strings.
     /// </summary>
     /// <param name="elements">The strings to add.</param>
-    public SubStringListLeaf(params StringIdLeaf[] elements)
+    public SubStringListLeaf(params StringIdentifier[] elements)
         : this(elements.AsEnumerable())
     {
     }
@@ -41,10 +41,10 @@ public class SubStringListLeaf : CodeViewLeaf
     /// Creates a new list of sub-strings.
     /// </summary>
     /// <param name="elements">The strings to add.</param>
-    public SubStringListLeaf(IEnumerable<StringIdLeaf> elements)
+    public SubStringListLeaf(IEnumerable<StringIdentifier> elements)
         : base(0)
     {
-        _entries = new List<StringIdLeaf>(elements);
+        _entries = new List<StringIdentifier>(elements);
     }
 
     /// <inheritdoc />
@@ -53,7 +53,7 @@ public class SubStringListLeaf : CodeViewLeaf
     /// <summary>
     /// Gets a collection of entries stored in the list.
     /// </summary>
-    public IList<StringIdLeaf> Entries
+    public IList<StringIdentifier> Entries
     {
         get
         {
@@ -70,5 +70,5 @@ public class SubStringListLeaf : CodeViewLeaf
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Entries"/> property.
     /// </remarks>
-    protected virtual IList<StringIdLeaf> GetEntries() => new List<StringIdLeaf>();
+    protected virtual IList<StringIdentifier> GetEntries() => new List<StringIdentifier>();
 }

@@ -7,7 +7,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a leaf record containing a list of overloaded methods.
 /// </summary>
-public class MethodListLeaf : CodeViewLeaf
+public class MethodListLeaf : CodeViewLeaf, ITpiLeaf
 {
     private IList<MethodListEntry>? _entries;
 

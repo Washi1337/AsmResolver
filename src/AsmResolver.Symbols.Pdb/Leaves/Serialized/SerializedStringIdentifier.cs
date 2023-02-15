@@ -3,9 +3,9 @@ using AsmResolver.IO;
 namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 
 /// <summary>
-/// Provides a lazily initialized implementation of <see cref="StringIdLeaf"/> that is read from a PDB image.
+/// Provides a lazily initialized implementation of <see cref="StringIdentifier"/> that is read from a PDB image.
 /// </summary>
-public class SerializedStringIdLeaf : StringIdLeaf
+public class SerializedStringIdentifier : StringIdentifier
 {
     private readonly PdbReaderContext _context;
     private readonly BinaryStreamReader _reader;
@@ -17,7 +17,7 @@ public class SerializedStringIdLeaf : StringIdLeaf
     /// <param name="context">The reading context in which the member is situated in.</param>
     /// <param name="typeIndex">The type index to assign to the member.</param>
     /// <param name="reader">The input stream to read from.</param>
-    public SerializedStringIdLeaf(PdbReaderContext context, uint typeIndex, BinaryStreamReader reader)
+    public SerializedStringIdentifier(PdbReaderContext context, uint typeIndex, BinaryStreamReader reader)
         : base(typeIndex)
     {
         _context = context;

@@ -15,14 +15,14 @@ public class FunctionIdLeafTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void Name()
     {
-        var leaf = _fixture.SimplePdb.GetIdLeafRecord<FunctionIdLeaf>(0x1453);
+        var leaf = _fixture.SimplePdb.GetIdLeafRecord<FunctionIdentifier>(0x1453);
         Assert.Equal("__get_entropy", leaf.Name);
     }
 
     [Fact]
     public void FunctionType()
     {
-        var leaf = _fixture.SimplePdb.GetIdLeafRecord<FunctionIdLeaf>(0x1453);
+        var leaf = _fixture.SimplePdb.GetIdLeafRecord<FunctionIdentifier>(0x1453);
         Assert.IsAssignableFrom<ProcedureTypeRecord>(leaf.FunctionType);
     }
 }

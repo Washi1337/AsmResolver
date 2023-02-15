@@ -99,7 +99,7 @@ public class PdbImage : ICodeViewSymbolProvider
     /// <param name="typeIndex">The type index.</param>
     /// <param name="leaf">The resolved type.</param>
     /// <returns><c>true</c> if the type was found, <c>false</c> otherwise.</returns>
-    public virtual bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewLeaf? leaf)
+    public virtual bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out ITpiLeaf? leaf)
     {
         typeIndex &= 0x7fffffff;
         if (typeIndex is > 0 and < 0x1000)
@@ -119,7 +119,7 @@ public class PdbImage : ICodeViewSymbolProvider
     /// <param name="leaf">The resolved type.</param>
     /// <returns><c>true</c> if the type was found, <c>false</c> otherwise.</returns>
     public bool TryGetLeafRecord<TLeaf>(uint typeIndex, [NotNullWhen(true)] out TLeaf? leaf)
-        where TLeaf : CodeViewLeaf
+        where TLeaf : ITpiLeaf
     {
         if (TryGetLeafRecord(typeIndex, out var x) && x is TLeaf resolved)
         {
@@ -137,7 +137,7 @@ public class PdbImage : ICodeViewSymbolProvider
     /// <param name="typeIndex">The type index.</param>
     /// <returns>The resolved type.</returns>
     /// <exception cref="ArgumentException">Occurs when the type index is invalid.</exception>
-    public CodeViewLeaf GetLeafRecord(uint typeIndex)
+    public ITpiLeaf GetLeafRecord(uint typeIndex)
     {
         if (!TryGetLeafRecord(typeIndex, out var type))
             throw new ArgumentException("Invalid type index.");
@@ -151,7 +151,7 @@ public class PdbImage : ICodeViewSymbolProvider
     /// <returns>The resolved type.</returns>
     /// <exception cref="ArgumentException">Occurs when the type index is invalid.</exception>
     public TLeaf GetLeafRecord<TLeaf>(uint typeIndex)
-        where TLeaf : CodeViewLeaf
+        where TLeaf : ITpiLeaf
     {
         return (TLeaf) GetLeafRecord(typeIndex);
     }
@@ -162,7 +162,7 @@ public class PdbImage : ICodeViewSymbolProvider
     /// <param name="idIndex">The ID index.</param>
     /// <param name="leaf">The resolved leaf.</param>
     /// <returns><c>true</c> if the leaf was found, <c>false</c> otherwise.</returns>
-    public virtual bool TryGetIdLeafRecord(uint idIndex, [NotNullWhen(true)] out CodeViewLeaf? leaf)
+    public virtual bool TryGetIdLeafRecord(uint idIndex, [NotNullWhen(true)] out IIpiLeaf? leaf)
     {
         leaf = null;
         return false;
@@ -175,7 +175,7 @@ public class PdbImage : ICodeViewSymbolProvider
     /// <param name="leaf">The resolved leaf.</param>
     /// <returns><c>true</c> if the leaf was found, <c>false</c> otherwise.</returns>
     public bool TryGetIdLeafRecord<TLeaf>(uint idIndex, [NotNullWhen(true)] out TLeaf? leaf)
-        where TLeaf : CodeViewLeaf
+        where TLeaf : IIpiLeaf
     {
         if (TryGetIdLeafRecord(idIndex, out var x) && x is TLeaf resolved)
         {
@@ -193,7 +193,7 @@ public class PdbImage : ICodeViewSymbolProvider
     /// <param name="idIndex">The ID index.</param>
     /// <returns>The resolved leaf</returns>
     /// <exception cref="ArgumentException">Occurs when the ID index is invalid.</exception>
-    public CodeViewLeaf GetIdLeafRecord(uint idIndex)
+    public IIpiLeaf GetIdLeafRecord(uint idIndex)
     {
         if (!TryGetIdLeafRecord(idIndex, out var leaf))
             throw new ArgumentException("Invalid ID index.");

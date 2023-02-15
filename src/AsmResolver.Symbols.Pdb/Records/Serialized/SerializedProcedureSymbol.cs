@@ -49,10 +49,13 @@ public class SerializedProcedureSymbol : ProcedureSymbol
     /// <inheritdoc />
     protected override CodeViewLeaf? GetFunctionType()
     {
+        if (_typeIndex == 0)
+            return null;
+
         if (_isId)
         {
-            return !_context.ParentImage.TryGetIdLeafRecord(_typeIndex, out FunctionIdLeaf? id)
-                ? _context.Parameters.ErrorListener.BadImageAndReturn<FunctionIdLeaf>(
+            return !_context.ParentImage.TryGetIdLeafRecord(_typeIndex, out FunctionIdentifier? id)
+                ? _context.Parameters.ErrorListener.BadImageAndReturn<FunctionIdentifier>(
                     $"Procedure symbol contains an invalid ID index {_typeIndex:X8}.")
                 : id;
         }

@@ -9,7 +9,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class InlineSiteSymbol : CodeViewSymbol, IScopeCodeViewSymbol
 {
-    private readonly LazyVariable<FunctionIdLeaf?> _inlinee;
+    private readonly LazyVariable<FunctionIdentifier?> _inlinee;
 
     private IList<ICodeViewSymbol>? _symbols;
     private IList<BinaryAnnotation>? _annotations;
@@ -19,16 +19,16 @@ public class InlineSiteSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     protected InlineSiteSymbol()
     {
-        _inlinee = new LazyVariable<FunctionIdLeaf?>(GetInlinee);
+        _inlinee = new LazyVariable<FunctionIdentifier?>(GetInlinee);
     }
 
     /// <summary>
     /// Creates a new inline site symbol.
     /// </summary>
     /// <param name="inlinee">The function that is being inlined.</param>
-    public InlineSiteSymbol(FunctionIdLeaf inlinee)
+    public InlineSiteSymbol(FunctionIdentifier inlinee)
     {
-        _inlinee = new LazyVariable<FunctionIdLeaf?>(inlinee);
+        _inlinee = new LazyVariable<FunctionIdentifier?>(inlinee);
     }
 
     /// <inheritdoc />
@@ -48,7 +48,7 @@ public class InlineSiteSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <summary>
     /// Gets or sets the identifier of the function that is being inlined.
     /// </summary>
-    public FunctionIdLeaf? Inlinee
+    public FunctionIdentifier? Inlinee
     {
         get => _inlinee.Value;
         set => _inlinee.Value = value;
@@ -74,7 +74,7 @@ public class InlineSiteSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Inlinee"/> property.
     /// </remarks>
-    protected virtual FunctionIdLeaf? GetInlinee() => null;
+    protected virtual FunctionIdentifier? GetInlinee() => null;
 
     /// <summary>
     /// Obtains the sub-symbols defined in this inline site.

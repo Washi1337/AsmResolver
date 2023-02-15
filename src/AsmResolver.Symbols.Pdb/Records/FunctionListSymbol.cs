@@ -9,7 +9,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 /// <param name="Function">The function that is referenced.</param>
 /// <param name="Count">The number of references this function has.</param>
-public record struct FunctionCountPair(FunctionIdLeaf? Function, int Count);
+public record struct FunctionCountPair(FunctionIdentifier? Function, int Count);
 
 /// <summary>
 /// Represents a symbol containing a list of callers or callees.

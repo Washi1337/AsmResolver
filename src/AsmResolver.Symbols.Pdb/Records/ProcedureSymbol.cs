@@ -28,7 +28,7 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     /// <param name="name">The name of the procedure.</param>
     /// <param name="id">The function identifier of the procedure.</param>
-    public ProcedureSymbol(Utf8String name, FunctionIdLeaf id)
+    public ProcedureSymbol(Utf8String name, FunctionIdentifier id)
     {
         _name = new LazyVariable<Utf8String?>(name);
         _type = new LazyVariable<CodeViewLeaf?>(id);
@@ -131,9 +131,9 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <summary>
     /// Gets or sets the function identifier of the procedure (if available).
     /// </summary>
-    public FunctionIdLeaf? FunctionId
+    public FunctionIdentifier? FunctionId
     {
-        get => Type as FunctionIdLeaf;
+        get => Type as FunctionIdentifier;
         set => Type = value;
     }
 

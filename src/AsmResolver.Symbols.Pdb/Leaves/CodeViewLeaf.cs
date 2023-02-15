@@ -5,9 +5,9 @@ using static AsmResolver.Symbols.Pdb.Leaves.CodeViewLeafKind;
 namespace AsmResolver.Symbols.Pdb.Leaves;
 
 /// <summary>
-/// Represents a single leaf record in a TPI or IPI stream.
+/// Represents the base for a single leaf record in a TPI or IPI stream.
 /// </summary>
-public abstract class CodeViewLeaf
+public abstract class CodeViewLeaf : ICodeViewLeaf
 {
     /// <summary>
     /// Initializes an empty CodeView leaf.
@@ -18,24 +18,20 @@ public abstract class CodeViewLeaf
         TypeIndex = typeIndex;
     }
 
-    /// <summary>
-    /// Gets the type kind this record encodes.
-    /// </summary>
+    /// <inheritdoc />
     public abstract CodeViewLeafKind LeafKind
     {
         get;
     }
 
-    /// <summary>
-    /// Gets the type index the type is associated to.
-    /// </summary>
+    /// <inheritdoc />
     public uint TypeIndex
     {
         get;
         internal set;
     }
 
-    internal static CodeViewLeaf FromReader(PdbReaderContext context, uint typeIndex, ref BinaryStreamReader reader)
+    internal static ICodeViewLeaf FromReader(PdbReaderContext context, uint typeIndex, ref BinaryStreamReader reader)
     {
         ushort length = reader.ReadUInt16();
         var dataReader = reader.Fork();
@@ -61,7 +57,7 @@ public abstract class CodeViewLeaf
             Enum => new SerializedEnumTypeRecord(context, typeIndex, dataReader),
             Enumerate => new SerializedEnumerateField(context, typeIndex, ref dataReader),
             FieldList => new SerializedFieldListLeaf(context, typeIndex, dataReader),
-            FuncId => new SerializedFunctionIdLeaf(context, typeIndex, dataReader),
+            FuncId => new SerializedFunctionIdentifier(context, typeIndex, dataReader),
             Member => new SerializedInstanceDataField(context, typeIndex, ref dataReader),
             Method => new SerializedOverloadedMethod(context, typeIndex, ref dataReader),
             MethodList => new SerializedMethodListLeaf(context, typeIndex, dataReader),
@@ -72,7 +68,7 @@ public abstract class CodeViewLeaf
             Pointer => new SerializedPointerTypeRecord(context, typeIndex, dataReader),
             Procedure => new SerializedProcedureTypeRecord(context, typeIndex, dataReader),
             StMember => new SerializedStaticDataField(context, typeIndex, ref dataReader),
-            StringId => new SerializedStringIdLeaf(context, typeIndex, dataReader),
+            StringId => new SerializedStringIdentifier(context, typeIndex, dataReader),
             SubstrList => new SerializedSubStringListLeaf(context, typeIndex, dataReader),
             Union => new SerializedUnionTypeRecord(context, typeIndex, dataReader),
             VFuncTab => new SerializedVTableField(context, typeIndex, ref dataReader),

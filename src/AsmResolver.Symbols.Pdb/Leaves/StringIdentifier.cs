@@ -3,7 +3,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a String ID entry within the IPI stream of a PDB image.
 /// </summary>
-public class StringIdLeaf : CodeViewLeaf
+public class StringIdentifier : CodeViewLeaf, IIpiLeaf
 {
     private readonly LazyVariable<Utf8String> _value;
     private readonly LazyVariable<SubStringListLeaf?> _subStrings;
@@ -12,7 +12,7 @@ public class StringIdLeaf : CodeViewLeaf
     /// Initializes an empty String ID entry.
     /// </summary>
     /// <param name="typeIndex">The type index.</param>
-    protected StringIdLeaf(uint typeIndex)
+    protected StringIdentifier(uint typeIndex)
         : base(typeIndex)
     {
         _value = new LazyVariable<Utf8String>(GetValue);
@@ -23,7 +23,7 @@ public class StringIdLeaf : CodeViewLeaf
     /// Creates a new String ID entry.
     /// </summary>
     /// <param name="value">The string value to wrap.</param>
-    public StringIdLeaf(Utf8String value)
+    public StringIdentifier(Utf8String value)
         : this(value, null)
     {
     }
@@ -33,7 +33,7 @@ public class StringIdLeaf : CodeViewLeaf
     /// </summary>
     /// <param name="value">The string value to wrap.</param>
     /// <param name="subStrings">A list of sub strings.</param>
-    public StringIdLeaf(Utf8String value, SubStringListLeaf? subStrings)
+    public StringIdentifier(Utf8String value, SubStringListLeaf? subStrings)
         : base(0)
     {
         _value = new LazyVariable<Utf8String>(value);
