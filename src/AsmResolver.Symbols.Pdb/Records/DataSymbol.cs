@@ -7,7 +7,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class DataSymbol : CodeViewSymbol, IVariableSymbol
 {
-    private readonly LazyVariable<Utf8String> _name;
+    private readonly LazyVariable<Utf8String?> _name;
     private readonly LazyVariable<CodeViewTypeRecord?> _variableType;
 
     /// <summary>
@@ -15,7 +15,7 @@ public class DataSymbol : CodeViewSymbol, IVariableSymbol
     /// </summary>
     protected DataSymbol()
     {
-        _name = new LazyVariable<Utf8String>(GetName);
+        _name = new LazyVariable<Utf8String?>(GetName);
         _variableType = new LazyVariable<CodeViewTypeRecord?>(GetVariableType);
     }
 
@@ -26,7 +26,7 @@ public class DataSymbol : CodeViewSymbol, IVariableSymbol
     /// <param name="variableType">The data type of the symbol.</param>
     public DataSymbol(Utf8String name, CodeViewTypeRecord variableType)
     {
-        _name = new LazyVariable<Utf8String>(name);
+        _name = new LazyVariable<Utf8String?>(name);
         _variableType = new LazyVariable<CodeViewTypeRecord?>(variableType);
     }
 
@@ -72,7 +72,7 @@ public class DataSymbol : CodeViewSymbol, IVariableSymbol
     }
 
     /// <inheritdoc />
-    public Utf8String Name
+    public Utf8String? Name
     {
         get => _name.Value;
         set => _name.Value = value;
@@ -92,7 +92,7 @@ public class DataSymbol : CodeViewSymbol, IVariableSymbol
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Name"/> property.
     /// </remarks>
-    protected virtual Utf8String GetName() => Utf8String.Empty;
+    protected virtual Utf8String? GetName() => null;
 
     /// <summary>
     /// Obtains the type of the variable.
