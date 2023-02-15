@@ -51,7 +51,7 @@ public enum CodeViewSymbolType : ushort
     /// <summary>
     /// Indicates the symbol is a path to object file name
     /// </summary>
-    ObjnameSt = 0x0009,
+    ObjNameSt = 0x0009,
 
     /// <summary>
     /// Indicates the symbol is a end of argument/return list
@@ -86,7 +86,7 @@ public enum CodeViewSymbolType : ushort
     /// <summary>
     /// Indicates the symbol is a Module-local symbol
     /// </summary>
-    Ldata16 = 0x0101,
+    LData16 = 0x0101,
 
     /// <summary>
     /// Indicates the symbol is a Global data symbol
@@ -418,7 +418,7 @@ public enum CodeViewSymbolType : ushort
     /// <summary>
     /// Reserved
     /// </summary>
-    RESERVED4 = 0x101f,
+    Reserved4 = 0x101f,
 
     LManDataSt = 0x1020,
 
@@ -570,12 +570,12 @@ public enum CodeViewSymbolType : ushort
     /// <summary>
     /// Indicates the symbol is a Local procedure start (IA64)
     /// </summary>
-    LprocIa64 = 0x1118,
+    LProcIA64 = 0x1118,
 
     /// <summary>
     /// Indicates the symbol is a Global procedure start (IA64)
     /// </summary>
-    GProcIa64 = 0x1119,
+    GProcIA64 = 0x1119,
 
     /// <summary>
     /// Indicates the symbol is a local IL sym with field for local slot index
