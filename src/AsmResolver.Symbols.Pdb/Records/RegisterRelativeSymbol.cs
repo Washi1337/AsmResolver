@@ -55,18 +55,14 @@ public class RegisterRelativeSymbol : CodeViewSymbol, IRegisterRelativeSymbol
         set;
     }
 
-    /// <summary>
-    /// Gets or sets the type of values the symbol stores.
-    /// </summary>
+    /// <inheritdoc />
     public CodeViewTypeRecord? VariableType
     {
         get => _variableType.Value;
         set => _variableType.Value = value;
     }
 
-    /// <summary>
-    /// Gets or sets the name of the symbol.
-    /// </summary>
+    /// <inheritdoc />
     public Utf8String? Name
     {
         get => _name.Value;

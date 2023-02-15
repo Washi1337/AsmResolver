@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a global or local data symbol.
 /// </summary>
-public class DataSymbol : CodeViewSymbol
+public class DataSymbol : CodeViewSymbol, IVariableSymbol
 {
     private readonly LazyVariable<Utf8String> _name;
     private readonly LazyVariable<CodeViewTypeRecord?> _variableType;
@@ -71,18 +71,14 @@ public class DataSymbol : CodeViewSymbol
         set;
     }
 
-    /// <summary>
-    /// Gets or sets the name of the symbol.
-    /// </summary>
+    /// <inheritdoc />
     public Utf8String Name
     {
         get => _name.Value;
         set => _name.Value = value;
     }
 
-    /// <summary>
-    /// Gets or sets the data type of the variable.
-    /// </summary>
+    /// <inheritdoc />
     public CodeViewTypeRecord? VariableType
     {
         get => _variableType.Value;
