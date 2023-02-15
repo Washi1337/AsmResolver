@@ -18,11 +18,11 @@ internal static class SymbolStreamReader
             {
                 var lookahead = reader.Fork();
                 ushort length = lookahead.ReadUInt16();
+                var symbolType = (CodeViewSymbolType) lookahead.ReadUInt16();
 
                 // If we are at an S_END or S_INLINESITEEND symbol, we reached the end of a scope.
                 // Silently consume the end symbol and go up the scope stack.
-                if ((CodeViewSymbolType) lookahead.ReadUInt16()
-                    is CodeViewSymbolType.End or CodeViewSymbolType.InlineSiteEnd)
+                if (symbolType is CodeViewSymbolType.End or CodeViewSymbolType.InlineSiteEnd)
                 {
                     reader.Offset += sizeof(ushort) + (uint) length;
                     scopeStack.Pop();
