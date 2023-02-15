@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a single instance member function.
 /// </summary>
-public class MemberFunctionLeaf : CodeViewLeaf
+public class MemberFunctionLeaf : CodeViewLeaf, ITpiLeaf
 {
     private readonly LazyVariable<CodeViewTypeRecord?> _returnType;
     private readonly LazyVariable<CodeViewTypeRecord?> _declaringType;

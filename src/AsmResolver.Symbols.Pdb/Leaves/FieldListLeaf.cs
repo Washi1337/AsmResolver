@@ -6,7 +6,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a leaf containing a list of fields.
 /// </summary>
-public class FieldListLeaf : CodeViewLeaf
+public class FieldListLeaf : CodeViewLeaf, ITpiLeaf
 {
     private IList<CodeViewField>? _fields;
 

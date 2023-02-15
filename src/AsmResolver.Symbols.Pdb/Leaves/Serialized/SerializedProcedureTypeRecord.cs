@@ -32,7 +32,7 @@ public class SerializedProcedureTypeRecord : ProcedureTypeRecord
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetReturnType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_returnTypeIndex, out var leaf) && leaf is CodeViewTypeRecord type
+        return _context.ParentImage.TryGetLeafRecord(_returnTypeIndex, out CodeViewTypeRecord? type)
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"Procedure type {TypeIndex:X8} contains an invalid return type index {_returnTypeIndex:X8}.");
@@ -44,7 +44,7 @@ public class SerializedProcedureTypeRecord : ProcedureTypeRecord
         if (_argumentListIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_argumentListIndex, out var leaf) && leaf is ArgumentListLeaf list
+        return _context.ParentImage.TryGetLeafRecord(_argumentListIndex, out ArgumentListLeaf? list)
             ? list
             : _context.Parameters.ErrorListener.BadImageAndReturn<ArgumentListLeaf>(
                 $"Procedure type {TypeIndex:X8} contains an invalid argument list index {_argumentListIndex:X8}.");

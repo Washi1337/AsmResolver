@@ -30,7 +30,7 @@ public class SerializedUserDefinedTypeSymbol : UserDefinedTypeSymbol
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetSymbolType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out var leaf) && leaf is CodeViewTypeRecord type
+        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out CodeViewTypeRecord? type)
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"User-defined type contains an invalid type index {_typeIndex:X8}.");

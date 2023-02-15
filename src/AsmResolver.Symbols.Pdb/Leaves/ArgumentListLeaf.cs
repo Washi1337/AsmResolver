@@ -6,7 +6,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a leaf containing a list of type arguments for a function or method.
 /// </summary>
-public class ArgumentListLeaf : CodeViewLeaf
+public class ArgumentListLeaf : CodeViewLeaf, ITpiLeaf
 {
     private IList<CodeViewTypeRecord>? _types;
 

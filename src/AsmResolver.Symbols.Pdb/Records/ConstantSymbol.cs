@@ -81,5 +81,5 @@ public class ConstantSymbol : CodeViewSymbol
     protected virtual CodeViewTypeRecord? GetConstantType() => null;
 
     /// <inheritdoc />
-    public override string ToString() => $"{CodeViewSymbolType}: {Type} {Name} = {Value}";
+    public override string ToString() => $"S_CONSTANT: {Type} {Name} = {Value}";
 }

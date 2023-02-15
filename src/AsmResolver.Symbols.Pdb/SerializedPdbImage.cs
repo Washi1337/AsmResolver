@@ -1,14 +1,15 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.Symbols.Pdb.Leaves;
 using AsmResolver.Symbols.Pdb.Metadata.Dbi;
 using AsmResolver.Symbols.Pdb.Metadata.Info;
+using AsmResolver.Symbols.Pdb.Metadata.Modi;
 using AsmResolver.Symbols.Pdb.Metadata.Tpi;
 using AsmResolver.Symbols.Pdb.Msf;
 using AsmResolver.Symbols.Pdb.Records;
+using AsmResolver.Symbols.Pdb.Records.Serialized;
 
 namespace AsmResolver.Symbols.Pdb;
 
@@ -19,7 +20,8 @@ public class SerializedPdbImage : PdbImage
 {
     private const int MinimalRequiredStreamCount = 5;
     private readonly MsfFile _file;
-    private CodeViewLeaf?[]? _leaves;
+    private readonly LeafStreamCache _tpi;
+    private readonly LeafStreamCache _ipi;
 
     /// <summary>
     /// Interprets a PDB image from the provided MSF file.
@@ -35,9 +37,13 @@ public class SerializedPdbImage : PdbImage
 
         InfoStream = InfoStream.FromReader(file.Streams[InfoStream.StreamIndex].CreateReader());
         DbiStream = DbiStream.FromReader(file.Streams[DbiStream.StreamIndex].CreateReader());
-        TpiStream = TpiStream.FromReader(file.Streams[TpiStream.StreamIndex].CreateReader());
+        TpiStream = TpiStream.FromReader(file.Streams[TpiStream.TpiStreamIndex].CreateReader());
+        IpiStream = TpiStream.FromReader(file.Streams[TpiStream.IpiStreamIndex].CreateReader());
 
         ReaderContext = new PdbReaderContext(this, readerParameters);
+
+        _tpi = new LeafStreamCache(ReaderContext, TpiStream);
+        _ipi = new LeafStreamCache(ReaderContext, IpiStream);
     }
 
     internal PdbReaderContext ReaderContext
@@ -60,54 +66,113 @@ public class SerializedPdbImage : PdbImage
         get;
     }
 
-    [MemberNotNull(nameof(_leaves))]
-    private void EnsureLeavesInitialized()
+    internal TpiStream IpiStream
     {
-        if (_leaves is null)
-        {
-            Interlocked.CompareExchange(ref _leaves,
-                new CodeViewLeaf?[TpiStream.TypeIndexEnd - TpiStream.TypeIndexBegin], null);
-        }
+        get;
     }
 
     /// <inheritdoc />
-    public override bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewLeaf? leaf)
+    public override bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out ITpiLeaf? leaf)
     {
-        if (typeIndex < TpiStream.TypeIndexBegin)
-            return base.TryGetLeafRecord(typeIndex, out leaf);
-
-        EnsureLeavesInitialized();
-
-        if (typeIndex >= TpiStream.TypeIndexBegin && typeIndex < TpiStream.TypeIndexEnd)
+        if (_tpi.TryGetRecord(typeIndex, out var x) && x is ITpiLeaf y)
         {
-            leaf = _leaves[typeIndex - TpiStream.TypeIndexBegin];
-            if (leaf is null && TpiStream.TryGetLeafRecordReader(typeIndex, out var reader))
-            {
-                leaf = CodeViewLeaf.FromReader(ReaderContext, typeIndex, ref reader);
-                Interlocked.CompareExchange(ref _leaves[typeIndex - TpiStream.TypeIndexBegin], leaf, null);
-            }
-
-            leaf = _leaves[typeIndex - TpiStream.TypeIndexBegin];
-            return leaf is not null;
+            leaf = y;
+            return true;
         }
 
-        leaf = null;
-        return false;
+        return base.TryGetLeafRecord(typeIndex, out leaf);
     }
 
     /// <inheritdoc />
-    protected override IList<CodeViewSymbol> GetSymbols()
+    public override bool TryGetIdLeafRecord(uint idIndex, [NotNullWhen(true)] out IIpiLeaf? leaf)
     {
-        var result = new List<CodeViewSymbol>();
+        if (_ipi.TryGetRecord(idIndex, out var x) && x is IIpiLeaf y)
+        {
+            leaf = y;
+            return true;
+        }
 
+        return base.TryGetIdLeafRecord(idIndex, out leaf);
+    }
+
+    /// <inheritdoc />
+    protected override IList<ICodeViewSymbol> GetSymbols()
+    {
         int index = DbiStream.SymbolRecordStreamIndex;
         if (index >= _file.Streams.Count)
-            return result;
+            return new List<ICodeViewSymbol>();
 
         var reader = _file.Streams[DbiStream.SymbolRecordStreamIndex].CreateReader();
-        while (reader.CanRead(sizeof(ushort) * 2))
-            result.Add(CodeViewSymbol.FromReader(ReaderContext, ref reader));
+        return SymbolStreamReader.ReadSymbols(ReaderContext, ref reader);
+    }
+
+    /// <inheritdoc />
+    protected override IList<PdbModule> GetModules()
+    {
+        var result = new List<PdbModule>();
+
+        foreach (var descriptor in DbiStream.Modules)
+        {
+            int index = descriptor.SymbolStreamIndex;
+            if (index >= _file.Streams.Count)
+                continue;
+
+            var stream = _file.Streams[index];
+            var modi = ModiStream.FromReader(stream.CreateReader(), descriptor);
+            result.Add(new SerializedPdbModule(ReaderContext, descriptor, modi));
+        }
 
         return result;
+    }
+
+    private class LeafStreamCache
+    {
+        private readonly PdbReaderContext _context;
+        private readonly TpiStream _stream;
+        private ICodeViewLeaf?[]? _leaves;
+
+        public LeafStreamCache(PdbReaderContext context, TpiStream stream)
+        {
+            _context = context;
+            _stream = stream;
+        }
+
+        [MemberNotNull(nameof(_leaves))]
+        private void EnsureLeavesInitialized()
+        {
+            if (_leaves is null)
+            {
+                Interlocked.CompareExchange(ref _leaves,
+                    new ICodeViewLeaf?[_stream.TypeIndexEnd - _stream.TypeIndexBegin], null);
+            }
+        }
+
+        public bool TryGetRecord(uint typeIndex, out ICodeViewLeaf? leaf)
+        {
+            if (typeIndex < _stream.TypeIndexBegin)
+            {
+                leaf = null;
+                return false;
+            }
+
+            EnsureLeavesInitialized();
+
+            if (typeIndex >= _stream.TypeIndexBegin && typeIndex < _stream.TypeIndexEnd)
+            {
+                leaf = _leaves[typeIndex - _stream.TypeIndexBegin];
+                if (leaf is null && _stream.TryGetLeafRecordReader(typeIndex, out var reader))
+                {
+                    leaf = CodeViewLeaf.FromReader(_context, typeIndex, ref reader);
+                    Interlocked.CompareExchange(ref _leaves[typeIndex - _stream.TypeIndexBegin], leaf, null);
+                }
+
+                leaf = _leaves[typeIndex - _stream.TypeIndexBegin];
+                return leaf is not null;
+            }
+
+            leaf = null;
+            return false;
+        }
+
     }
 }

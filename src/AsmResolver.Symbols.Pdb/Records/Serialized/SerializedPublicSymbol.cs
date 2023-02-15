@@ -17,7 +17,7 @@ public class SerializedPublicSymbol : PublicSymbol
     {
         Attributes = (PublicSymbolAttributes) reader.ReadUInt32();
         Offset = reader.ReadUInt32();
-        Segment = reader.ReadUInt16();
+        SegmentIndex = reader.ReadUInt16();
         _nameReader = reader;
     }
 

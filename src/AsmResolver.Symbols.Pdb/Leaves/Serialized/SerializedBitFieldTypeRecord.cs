@@ -28,7 +28,7 @@ public class SerializedBitFieldTypeRecord : BitFieldTypeRecord
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetBaseType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_baseTypeIndex, out var leaf) && leaf is CodeViewTypeRecord type
+        return _context.ParentImage.TryGetLeafRecord(_baseTypeIndex, out CodeViewTypeRecord? type)
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"Bit field type {TypeIndex:X8} contains an invalid underlying base type index {_baseTypeIndex:X8}.");

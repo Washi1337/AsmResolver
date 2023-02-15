@@ -13,21 +13,34 @@ namespace AsmResolver.Symbols.Pdb;
 /// <summary>
 /// Represents a single Program Debug Database (PDB) image.
 /// </summary>
-public class PdbImage
+public class PdbImage : ICodeViewSymbolProvider
 {
-    private IList<CodeViewSymbol>? _symbols;
-    private ConcurrentDictionary<uint, SimpleTypeRecord> _simpleTypes = new();
+    private readonly ConcurrentDictionary<uint, SimpleTypeRecord> _simpleTypes = new();
 
-    /// <summary>
-    /// Gets a collection of all symbols stored in the PDB image.
-    /// </summary>
-    public IList<CodeViewSymbol> Symbols
+    private IList<ICodeViewSymbol>? _symbols;
+    private IList<PdbModule>? _modules;
+
+    /// <inheritdoc />
+    public IList<ICodeViewSymbol> Symbols
     {
         get
         {
             if (_symbols is null)
                 Interlocked.CompareExchange(ref _symbols, GetSymbols(), null);
             return _symbols;
+        }
+    }
+
+    /// <summary>
+    /// Gets a collection of all modules stored in the PDB image.
+    /// </summary>
+    public IList<PdbModule> Modules
+    {
+        get
+        {
+            if (_modules is null)
+                Interlocked.CompareExchange(ref _modules, GetModules(), null);
+            return _modules;
         }
     }
 
@@ -81,12 +94,12 @@ public class PdbImage
     }
 
     /// <summary>
-    /// Attempts to obtain a type record from the TPI or IPI stream based on its type index.
+    /// Attempts to obtain a type record from the TPI stream based on its type index.
     /// </summary>
     /// <param name="typeIndex">The type index.</param>
     /// <param name="leaf">The resolved type.</param>
     /// <returns><c>true</c> if the type was found, <c>false</c> otherwise.</returns>
-    public virtual bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out CodeViewLeaf? leaf)
+    public virtual bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out ITpiLeaf? leaf)
     {
         typeIndex &= 0x7fffffff;
         if (typeIndex is > 0 and < 0x1000)
@@ -100,16 +113,103 @@ public class PdbImage
     }
 
     /// <summary>
-    /// Obtains a type record from the TPI or IPI stream based on its type index.
+    /// Attempts to obtain a type record from the TPI stream based on its type index.
+    /// </summary>
+    /// <param name="typeIndex">The type index.</param>
+    /// <param name="leaf">The resolved type.</param>
+    /// <returns><c>true</c> if the type was found, <c>false</c> otherwise.</returns>
+    public bool TryGetLeafRecord<TLeaf>(uint typeIndex, [NotNullWhen(true)] out TLeaf? leaf)
+        where TLeaf : ITpiLeaf
+    {
+        if (TryGetLeafRecord(typeIndex, out var x) && x is TLeaf resolved)
+        {
+            leaf = resolved;
+            return true;
+        }
+
+        leaf = default;
+        return false;
+    }
+
+    /// <summary>
+    /// Obtains a type record from the TPI stream based on its type index.
     /// </summary>
     /// <param name="typeIndex">The type index.</param>
     /// <returns>The resolved type.</returns>
     /// <exception cref="ArgumentException">Occurs when the type index is invalid.</exception>
-    public CodeViewLeaf GetLeafRecord(uint typeIndex)
+    public ITpiLeaf GetLeafRecord(uint typeIndex)
     {
         if (!TryGetLeafRecord(typeIndex, out var type))
             throw new ArgumentException("Invalid type index.");
         return type;
+    }
+
+    /// <summary>
+    /// Obtains a type record from the TPI stream based on its type index.
+    /// </summary>
+    /// <param name="typeIndex">The type index.</param>
+    /// <returns>The resolved type.</returns>
+    /// <exception cref="ArgumentException">Occurs when the type index is invalid.</exception>
+    public TLeaf GetLeafRecord<TLeaf>(uint typeIndex)
+        where TLeaf : ITpiLeaf
+    {
+        return (TLeaf) GetLeafRecord(typeIndex);
+    }
+
+    /// <summary>
+    /// Attempts to obtain an ID record from the IPI stream based on its ID index.
+    /// </summary>
+    /// <param name="idIndex">The ID index.</param>
+    /// <param name="leaf">The resolved leaf.</param>
+    /// <returns><c>true</c> if the leaf was found, <c>false</c> otherwise.</returns>
+    public virtual bool TryGetIdLeafRecord(uint idIndex, [NotNullWhen(true)] out IIpiLeaf? leaf)
+    {
+        leaf = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Attempts to obtain an ID record from the IPI stream based on its ID index.
+    /// </summary>
+    /// <param name="idIndex">The ID index.</param>
+    /// <param name="leaf">The resolved leaf.</param>
+    /// <returns><c>true</c> if the leaf was found, <c>false</c> otherwise.</returns>
+    public bool TryGetIdLeafRecord<TLeaf>(uint idIndex, [NotNullWhen(true)] out TLeaf? leaf)
+        where TLeaf : IIpiLeaf
+    {
+        if (TryGetIdLeafRecord(idIndex, out var x) && x is TLeaf resolved)
+        {
+            leaf = resolved;
+            return true;
+        }
+
+        leaf = default;
+        return false;
+    }
+
+    /// <summary>
+    /// Obtains an ID record from the IPI stream based on its ID index.
+    /// </summary>
+    /// <param name="idIndex">The ID index.</param>
+    /// <returns>The resolved leaf</returns>
+    /// <exception cref="ArgumentException">Occurs when the ID index is invalid.</exception>
+    public IIpiLeaf GetIdLeafRecord(uint idIndex)
+    {
+        if (!TryGetIdLeafRecord(idIndex, out var leaf))
+            throw new ArgumentException("Invalid ID index.");
+        return leaf;
+    }
+
+    /// <summary>
+    /// Obtains an ID record from the IPI stream based on its ID index.
+    /// </summary>
+    /// <param name="idIndex">The ID index.</param>
+    /// <returns>The resolved leaf</returns>
+    /// <exception cref="ArgumentException">Occurs when the ID index is invalid.</exception>
+    public TLeaf GetIdLeafRecord<TLeaf>(uint idIndex)
+        where TLeaf : CodeViewLeaf
+    {
+        return (TLeaf) GetIdLeafRecord(idIndex);
     }
 
     /// <summary>
@@ -119,5 +219,14 @@ public class PdbImage
     /// <remarks>
     /// This method is called upon initialization of the <see cref="Symbols"/> property.
     /// </remarks>
-    protected virtual IList<CodeViewSymbol> GetSymbols() => new List<CodeViewSymbol>();
+    protected virtual IList<ICodeViewSymbol> GetSymbols() => new List<ICodeViewSymbol>();
+
+    /// <summary>
+    /// Obtains a collection of modules stored in the DBI stream of the PDB image.
+    /// </summary>
+    /// <returns>The modules.</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="Modules"/> property.
+    /// </remarks>
+    protected virtual IList<PdbModule> GetModules() => new List<PdbModule>();
 }
