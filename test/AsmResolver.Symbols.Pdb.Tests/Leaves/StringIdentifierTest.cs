@@ -4,11 +4,11 @@ using Xunit;
 
 namespace AsmResolver.Symbols.Pdb.Tests.Leaves;
 
-public class StringIdInfoTest : IClassFixture<MockPdbFixture>
+public class StringIdentifierTest : IClassFixture<MockPdbFixture>
 {
     private readonly MockPdbFixture _fixture;
 
-    public StringIdInfoTest(MockPdbFixture fixture)
+    public StringIdentifierTest(MockPdbFixture fixture)
     {
         _fixture = fixture;
     }
