@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using AsmResolver.IO;
 using AsmResolver.Symbols.Pdb.Leaves;
@@ -92,6 +93,18 @@ public class PdbImage : ICodeViewSymbolProvider
     {
         return new SerializedPdbImage(file, readerParameters);
     }
+
+    /// <summary>
+    /// Obtains all records stored in the original TPI stream of the PDB image.
+    /// </summary>
+    /// <returns>An object that lazily enumerates all TPI leaf records.</returns>
+    public virtual IEnumerable<ITpiLeaf> GetLeafRecords() => Enumerable.Empty<ITpiLeaf>();
+
+    /// <summary>
+    /// Obtains all records stored in the original IPI stream of the PDB image.
+    /// </summary>
+    /// <returns>An object that lazily enumerates all IPI leaf records.</returns>
+    public virtual IEnumerable<IIpiLeaf> GetIdLeafRecords() => Enumerable.Empty<IIpiLeaf>();
 
     /// <summary>
     /// Attempts to obtain a type record from the TPI stream based on its type index.

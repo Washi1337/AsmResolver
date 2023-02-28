@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using AsmResolver.Symbols.Pdb.Leaves;
 using AsmResolver.Symbols.Pdb.Metadata.Dbi;
@@ -70,6 +71,12 @@ public class SerializedPdbImage : PdbImage
     {
         get;
     }
+
+    /// <inheritdoc />
+    public override IEnumerable<ITpiLeaf> GetLeafRecords() => _tpi.GetRecords().Cast<ITpiLeaf>();
+
+    /// <inheritdoc />
+    public override IEnumerable<IIpiLeaf> GetIdLeafRecords() => _ipi.GetRecords().Cast<IIpiLeaf>();
 
     /// <inheritdoc />
     public override bool TryGetLeafRecord(uint typeIndex, [NotNullWhen(true)] out ITpiLeaf? leaf)
@@ -147,7 +154,16 @@ public class SerializedPdbImage : PdbImage
             }
         }
 
-        public bool TryGetRecord(uint typeIndex, out ICodeViewLeaf? leaf)
+        public IEnumerable<ICodeViewLeaf> GetRecords()
+        {
+            for (uint typeIndex = _stream.TypeIndexBegin; typeIndex < _stream.TypeIndexEnd; typeIndex++)
+            {
+                if (TryGetRecord(typeIndex, out var leaf))
+                    yield return leaf;
+            }
+        }
+
+        public bool TryGetRecord(uint typeIndex, [NotNullWhen(true)] out ICodeViewLeaf? leaf)
         {
             if (typeIndex < _stream.TypeIndexBegin)
             {
