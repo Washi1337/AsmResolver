@@ -76,6 +76,11 @@ namespace AsmResolver.DotNet.Collections
         /// <inheritdoc />
         public string Name => Definition?.Name ?? GetDummyArgumentName(MethodSignatureIndex);
 
+        /// <summary>
+        /// Creates a <see cref="ParameterDefinition"/> for this parameter and adds it to the method definition if it does not exist.
+        /// </summary>
+        public void CreateParameterDefinition() => _parentCollection?.CreateParameterDefinition(this);
+
         [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
         private static string GetDummyArgumentName(int index)
         {
