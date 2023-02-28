@@ -155,7 +155,8 @@ namespace AsmResolver.DotNet.Collections
             return _owner.ParameterDefinitions.FirstOrDefault(p => p.Sequence == sequence);
         }
 
-        internal void CreateParameterDefinition(Parameter parameter) {
+        internal void CreateParameterDefinition(Parameter parameter)
+        {
             if (parameter == ThisParameter || parameter.Definition is not null)
                 return;
             _owner.ParameterDefinitions.Add(new ParameterDefinition(parameter.Sequence, Utf8String.Empty, 0));
