@@ -24,6 +24,13 @@ namespace AsmResolver.DotNet.Tests.Collections
             return type.Methods.First(m => m.Name == name);
         }
 
+        private static MethodDefinition ObtainGenericInstanceTestMethod(string name)
+        {
+            var module = ModuleDefinition.FromFile(typeof(GenericInstanceMethods<,>).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == "GenericInstanceMethods`2");
+            return type.Methods.First(m => m.Name == name);
+        }
+
         [Fact]
         public void ReadEmptyParametersFromStaticMethod()
         {
@@ -109,6 +116,18 @@ namespace AsmResolver.DotNet.Tests.Collections
 
             Assert.NotNull(method.Parameters.ThisParameter);
             Assert.Equal(nameof(InstanceMethods), method.Parameters.ThisParameter.ParameterType.Name);
+        }
+
+        [Fact]
+        public void ReadEmptyParametersFromGenericInstanceMethod()
+        {
+            var method = ObtainGenericInstanceTestMethod(nameof(GenericInstanceMethods<int, int>.InstanceParameterlessMethod));
+            Assert.Empty(method.Parameters);
+            Assert.NotNull(method.Parameters.ThisParameter);
+            var genericInstanceType = method.Parameters.ThisParameter.ParameterType as GenericInstanceTypeSignature;
+            Assert.NotNull(genericInstanceType);
+            Assert.True(genericInstanceType.TypeArguments.Count == 2);
+            Assert.Equal("GenericInstanceMethods`2", genericInstanceType.GenericType.Name);
         }
 
         [Fact]
