@@ -127,11 +127,24 @@ namespace AsmResolver.DotNet.Collections
 
         private TypeSignature? GetThisParameterType()
         {
-            if (_owner.DeclaringType is null)
+            var declaringType = _owner.DeclaringType;
+            if (declaringType is null)
                 return null;
 
-            var result = _owner.DeclaringType.ToTypeSignature();
-            if (_owner.DeclaringType.IsValueType)
+            TypeSignature result;
+            if (declaringType.GenericParameters.Count > 0)
+            {
+                var genArgs = new TypeSignature[declaringType.GenericParameters.Count];
+                for (int i = 0; i < genArgs.Length; i++)
+                    genArgs[i] = new GenericParameterSignature(_owner.Module, GenericParameterType.Type, i);
+                result = declaringType.MakeGenericInstanceType(genArgs);
+            }
+            else
+            {
+                result = declaringType.ToTypeSignature();
+            }
+
+            if (declaringType.IsValueType)
                 result = result.MakeByReferenceType();
 
             return result;
