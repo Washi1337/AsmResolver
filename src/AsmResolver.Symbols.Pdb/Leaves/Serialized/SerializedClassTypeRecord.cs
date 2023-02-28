@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
@@ -32,7 +33,7 @@ public class SerializedClassTypeRecord : ClassTypeRecord
         _baseTypeIndex = reader.ReadUInt32();
         _vTableShapeIndex = reader.ReadUInt32();
 
-        Size = (uint) ReadNumeric(ref reader);
+        Size = Convert.ToUInt32(ReadNumeric(ref reader));
 
         _nameReader = reader.Fork();
         reader.AdvanceUntil(0, true);
