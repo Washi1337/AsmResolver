@@ -42,4 +42,16 @@ public class PdbModuleTest : IClassFixture<MockPdbFixture>
             CodeViewSymbolType.GProc32,
         }, module.Symbols.Select(x => x.CodeViewSymbolType));
     }
+
+    [Fact]
+    public void SourceFiles()
+    {
+        var module = _fixture.SimplePdb.Modules.First(m => m.Name!.Contains("dllmain.obj"));
+        Assert.Equal(new Utf8String[]
+        {
+            "C:\\Users\\Admin\\source\\repos\\AsmResolver\\test\\TestBinaries\\Native\\SimpleDll\\pch.h",
+            "C:\\Users\\Admin\\source\\repos\\AsmResolver\\test\\TestBinaries\\Native\\SimpleDll\\dllmain.cpp",
+            "C:\\Users\\Admin\\source\\repos\\AsmResolver\\test\\TestBinaries\\Native\\SimpleDll\\Release\\SimpleDll.pch"
+        }, module.SourceFiles);
+    }
 }

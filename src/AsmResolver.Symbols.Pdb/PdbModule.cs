@@ -12,6 +12,7 @@ public class PdbModule : ICodeViewSymbolProvider
 {
     private readonly LazyVariable<Utf8String?> _name;
     private readonly LazyVariable<Utf8String?> _objectFileName;
+    private IList<Utf8String>? _sourceFiles;
     private readonly LazyVariable<SectionContribution> _sectionContribution;
 
     private IList<ICodeViewSymbol>? _symbols;
@@ -74,6 +75,19 @@ public class PdbModule : ICodeViewSymbolProvider
     }
 
     /// <summary>
+    /// Gets a collection of source files that were used to compile the module.
+    /// </summary>
+    public IList<Utf8String> SourceFiles
+    {
+        get
+        {
+            if (_sourceFiles is null)
+                Interlocked.CompareExchange(ref _sourceFiles, GetSourceFiles(), null);
+            return _sourceFiles;
+        }
+    }
+
+    /// <summary>
     /// Gets or sets a description of the section within the final binary which contains code
     /// and/or data from this module.
     /// </summary>
@@ -111,6 +125,15 @@ public class PdbModule : ICodeViewSymbolProvider
     /// This method is called upon the initialization of the <see cref="ObjectFileName"/> property.
     /// </remarks>
     protected virtual Utf8String? GetObjectFileName() => null;
+
+    /// <summary>
+    /// Obtains the source file names associated to the module.
+    /// </summary>
+    /// <returns>The source file names.</returns>
+    /// <remarks>
+    /// This method is called upon the initialization of the <see cref="SourceFiles"/> property.
+    /// </remarks>
+    protected virtual IList<Utf8String> GetSourceFiles() => new List<Utf8String>();
 
     /// <summary>
     /// Obtains the section contribution of the module.

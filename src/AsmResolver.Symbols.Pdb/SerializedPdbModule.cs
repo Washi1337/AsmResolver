@@ -13,19 +13,30 @@ public class SerializedPdbModule : PdbModule
 {
     private readonly PdbReaderContext _context;
     private readonly ModuleDescriptor _descriptor;
-    private readonly ModiStream _stream;
+    private readonly ModiStream? _stream;
 
     /// <summary>
     /// Reads a module from a PDB image based on a module descriptor in the DBI stream and a MoDi stream.
     /// </summary>
     /// <param name="context">The reading context in which the module is situated in.</param>
     /// <param name="descriptor">The module descriptor as described in the DBI stream.</param>
+    /// <param name="sourceFiles">The source files as described in the DBI stream.</param>
     /// <param name="stream">The MoDi stream to read symbols from.</param>
-    public SerializedPdbModule(PdbReaderContext context, ModuleDescriptor descriptor, ModiStream stream)
+    public SerializedPdbModule(
+        PdbReaderContext context,
+        ModuleDescriptor descriptor,
+        SourceFileCollection? sourceFiles,
+        ModiStream? stream)
     {
         _context = context;
         _descriptor = descriptor;
         _stream = stream;
+
+        if (sourceFiles is not null)
+        {
+            foreach (var file in sourceFiles)
+                SourceFiles.Add(file);
+        }
     }
 
     /// <inheritdoc />
@@ -40,7 +51,7 @@ public class SerializedPdbModule : PdbModule
     /// <inheritdoc />
     protected override IList<ICodeViewSymbol> GetSymbols()
     {
-        if (_stream.Symbols is null)
+        if (_stream?.Symbols is null)
             return new List<ICodeViewSymbol>();
 
         var reader = _stream.Symbols.CreateReader();

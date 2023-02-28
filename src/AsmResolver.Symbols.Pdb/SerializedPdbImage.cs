@@ -118,18 +118,35 @@ public class SerializedPdbImage : PdbImage
     {
         var result = new List<PdbModule>();
 
-        foreach (var descriptor in DbiStream.Modules)
+        for (int i = 0; i < DbiStream.Modules.Count; i++)
         {
-            int index = descriptor.SymbolStreamIndex;
-            if (index >= _file.Streams.Count)
-                continue;
+            var descriptor = DbiStream.Modules[i];
+            var modi = GetModiStream(descriptor);
+            var sourceFiles = i < DbiStream.SourceFiles.Count
+                ? DbiStream.SourceFiles[i]
+                : null;
 
-            var stream = _file.Streams[index];
-            var modi = ModiStream.FromReader(stream.CreateReader(), descriptor);
-            result.Add(new SerializedPdbModule(ReaderContext, descriptor, modi));
+            result.Add(new SerializedPdbModule(ReaderContext, descriptor, sourceFiles, modi));
         }
 
         return result;
+    }
+
+    private ModiStream? GetModiStream(ModuleDescriptor descriptor)
+    {
+        ModiStream? modi;
+        int index = descriptor.SymbolStreamIndex;
+        if (index >= _file.Streams.Count)
+        {
+            modi = null;
+        }
+        else
+        {
+            var stream = _file.Streams[index];
+            modi = ModiStream.FromReader(stream.CreateReader(), descriptor);
+        }
+
+        return modi;
     }
 
     private class LeafStreamCache
