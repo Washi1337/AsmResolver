@@ -124,10 +124,15 @@ namespace AsmResolver.DotNet.Tests.Collections
             var method = ObtainGenericInstanceTestMethod(nameof(GenericInstanceMethods<int, int>.InstanceParameterlessMethod));
             Assert.Empty(method.Parameters);
             Assert.NotNull(method.Parameters.ThisParameter);
-            var genericInstanceType = method.Parameters.ThisParameter.ParameterType as GenericInstanceTypeSignature;
-            Assert.NotNull(genericInstanceType);
-            Assert.True(genericInstanceType.TypeArguments.Count == 2);
+            var genericInstanceType = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(method.Parameters.ThisParameter.ParameterType);
             Assert.Equal("GenericInstanceMethods`2", genericInstanceType.GenericType.Name);
+            Assert.Equal(2, genericInstanceType.TypeArguments.Count);
+            Assert.All(genericInstanceType.TypeArguments, (typeArgument, i) =>
+            {
+                var genericParameterSignature = Assert.IsAssignableFrom<GenericParameterSignature>(typeArgument);
+                Assert.Equal(GenericParameterType.Type, genericParameterSignature.ParameterType);
+                Assert.Equal(i, genericParameterSignature.Index);
+            });
         }
 
         [Fact]
