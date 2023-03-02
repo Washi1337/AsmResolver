@@ -77,9 +77,11 @@ namespace AsmResolver.DotNet.Collections
         public string Name => Definition?.Name ?? GetDummyArgumentName(MethodSignatureIndex);
 
         /// <summary>
-        /// Creates a <see cref="ParameterDefinition"/> for this parameter and adds it to the method definition if it does not exist.
+        /// Creates a or returns the existing <see cref="ParameterDefinition"/> corresponding to this parameter.
+        /// If a <see cref="ParameterDefinition"/> is created it is automatically added to the method definition.
         /// </summary>
-        public void CreateParameterDefinition() => _parentCollection?.CreateParameterDefinition(this);
+        /// <returns>The created or existing <see cref="ParameterDefinition"/> or null if this parameter is virtual.</returns>
+        public ParameterDefinition? GetOrCreateDefinition() => _parentCollection?.GetOrCreateParameterDefinition(this);
 
         [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
         private static string GetDummyArgumentName(int index)
