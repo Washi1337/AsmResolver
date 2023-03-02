@@ -175,7 +175,7 @@ namespace AsmResolver.DotNet.Signatures
         public int GetTotalParameterCount()
         {
             int count = ParameterTypes.Count + SentinelParameterTypes.Count;
-            if (HasThis || ExplicitThis)
+            if (HasThis && !ExplicitThis)
                 count++;
             return count;
         }

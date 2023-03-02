@@ -76,6 +76,17 @@ namespace AsmResolver.DotNet.Collections
         /// <inheritdoc />
         public string Name => Definition?.Name ?? GetDummyArgumentName(MethodSignatureIndex);
 
+        /// <summary>
+        /// Creates a or returns the existing <see cref="ParameterDefinition"/> corresponding to this parameter.
+        /// If a <see cref="ParameterDefinition"/> is created it is automatically added to the method definition.
+        /// </summary>
+        public ParameterDefinition GetOrCreateDefinition()
+        {
+            if (_parentCollection is null)
+                throw new InvalidOperationException("Cannot create a parameter definition for a parameter that has been removed from its parent collection.");
+            return _parentCollection.GetOrCreateParameterDefinition(this);
+        }
+
         [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
         private static string GetDummyArgumentName(int index)
         {

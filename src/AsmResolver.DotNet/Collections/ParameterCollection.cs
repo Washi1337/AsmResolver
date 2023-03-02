@@ -127,11 +127,24 @@ namespace AsmResolver.DotNet.Collections
 
         private TypeSignature? GetThisParameterType()
         {
-            if (_owner.DeclaringType is null)
+            var declaringType = _owner.DeclaringType;
+            if (declaringType is null)
                 return null;
 
-            var result = _owner.DeclaringType.ToTypeSignature();
-            if (_owner.DeclaringType.IsValueType)
+            TypeSignature result;
+            if (declaringType.GenericParameters.Count > 0)
+            {
+                var genArgs = new TypeSignature[declaringType.GenericParameters.Count];
+                for (int i = 0; i < genArgs.Length; i++)
+                    genArgs[i] = new GenericParameterSignature(_owner.Module, GenericParameterType.Type, i);
+                result = declaringType.MakeGenericInstanceType(genArgs);
+            }
+            else
+            {
+                result = declaringType.ToTypeSignature();
+            }
+
+            if (declaringType.IsValueType)
                 result = result.MakeByReferenceType();
 
             return result;
@@ -140,6 +153,18 @@ namespace AsmResolver.DotNet.Collections
         internal ParameterDefinition? GetParameterDefinition(int sequence)
         {
             return _owner.ParameterDefinitions.FirstOrDefault(p => p.Sequence == sequence);
+        }
+
+        internal ParameterDefinition GetOrCreateParameterDefinition(Parameter parameter)
+        {
+            if (parameter == ThisParameter)
+                throw new InvalidOperationException("Cannot retrieve a parameter definition for the virtual this parameter.");
+            if (parameter.Definition is not null)
+                return parameter.Definition;
+
+            var parameterDefinition = new ParameterDefinition(parameter.Sequence, Utf8String.Empty, 0);
+            _owner.ParameterDefinitions.Add(parameterDefinition);
+            return parameterDefinition;
         }
 
         internal void PushParameterUpdateToSignature(Parameter parameter)
