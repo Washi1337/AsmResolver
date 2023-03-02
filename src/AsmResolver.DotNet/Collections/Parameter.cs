@@ -80,8 +80,12 @@ namespace AsmResolver.DotNet.Collections
         /// Creates a or returns the existing <see cref="ParameterDefinition"/> corresponding to this parameter.
         /// If a <see cref="ParameterDefinition"/> is created it is automatically added to the method definition.
         /// </summary>
-        /// <returns>The created or existing <see cref="ParameterDefinition"/> or null if this parameter is virtual.</returns>
-        public ParameterDefinition? GetOrCreateDefinition() => _parentCollection?.GetOrCreateParameterDefinition(this);
+        public ParameterDefinition GetOrCreateDefinition()
+        {
+            if (_parentCollection is null)
+                throw new InvalidOperationException("Cannot create a parameter definition for a parameter that has been removed from its parent collection.");
+            return _parentCollection.GetOrCreateParameterDefinition(this);
+        }
 
         [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
         private static string GetDummyArgumentName(int index)

@@ -155,12 +155,13 @@ namespace AsmResolver.DotNet.Collections
             return _owner.ParameterDefinitions.FirstOrDefault(p => p.Sequence == sequence);
         }
 
-        internal ParameterDefinition? GetOrCreateParameterDefinition(Parameter parameter)
+        internal ParameterDefinition GetOrCreateParameterDefinition(Parameter parameter)
         {
             if (parameter == ThisParameter)
-                return null;
+                throw new InvalidOperationException("Cannot retrieve a parameter definition for the virtual this parameter.");
             if (parameter.Definition is not null)
                 return parameter.Definition;
+
             var parameterDefinition = new ParameterDefinition(parameter.Sequence, Utf8String.Empty, 0);
             _owner.ParameterDefinitions.Add(parameterDefinition);
             return parameterDefinition;
