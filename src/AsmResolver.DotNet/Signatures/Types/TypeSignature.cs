@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
 using AsmResolver.IO;
@@ -369,6 +371,78 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// classes type arguments (if any).
         /// </remarks>
         public virtual TypeSignature? GetDirectBaseClass() => null;
+
+        /// <summary>
+        /// Obtains the interfaces that are directly implemented by the type.
+        /// </summary>
+        /// <returns>The interfaces.</returns>
+        /// <remarks>
+        /// The result set of types is computed according to the rules defined in ECMA-335 I.8.7, where interfaces
+        /// will extend <see cref="System.Object"/>, and generic interfaces will be instantiated with the derived
+        /// classes type arguments (if any).
+        /// </remarks>
+        public virtual IEnumerable<TypeSignature> GetDirectlyImplementedInterfaces() => Enumerable.Empty<TypeSignature>();
+
+        /// <summary>
+        /// Determines whether the current type is directly compatible with the provided type.
+        /// </summary>
+        /// <param name="other">The other type.</param>
+        /// <returns><c>true</c> if the types are directly compatible, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.1., excluding the transitivity
+        /// rule.
+        /// </remarks>
+        protected virtual bool IsDirectlyCompatibleWith(TypeSignature other)
+        {
+            return SignatureComparer.Default.Equals(this, other);
+        }
+
+        /// <summary>
+        /// Determines whether the current type is compatible with the provided type.
+        /// </summary>
+        /// <param name="other">The other type.</param>
+        /// <returns><c>true</c> if the type is compatible with <paramref name="other" />, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.1.
+        /// </remarks>
+        public bool IsCompatibleWith(TypeSignature other)
+        {
+            var current = this;
+
+            // Achieve the transitivity rule by moving up the type hierarchy iteratively.
+            while (current is not null)
+            {
+                if (current.IsDirectlyCompatibleWith(other))
+                    return true;
+
+                current = current.GetDirectBaseClass();
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the current type is assignable to the provided type.
+        /// </summary>
+        /// <param name="other">The other type.</param>
+        /// <returns><c>true</c> if the type is assignable to <paramref name="other" />, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.3.
+        /// </remarks>
+        public bool IsAssignableTo(TypeSignature other)
+        {
+            var intermediateType1 = GetIntermediateType();
+            var intermediateType2 = other.GetIntermediateType();
+
+            if (SignatureComparer.Default.Equals(intermediateType1, intermediateType2)
+                || intermediateType1.ElementType == ElementType.I && intermediateType2.ElementType == ElementType.I4
+                || intermediateType1.ElementType == ElementType.I4 && intermediateType2.ElementType == ElementType.I)
+            {
+                return true;
+            }
+
+            return IsCompatibleWith(other);
+        }
 
         /// <summary>
         /// Substitutes any generic type parameter in the type signature with the parameters provided by

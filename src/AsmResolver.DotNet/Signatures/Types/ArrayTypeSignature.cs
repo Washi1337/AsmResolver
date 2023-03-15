@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// <remarks>
     /// For simple single-dimension arrays, use <see cref="SzArrayTypeSignature"/> instead.
     /// </remarks>
-    public class ArrayTypeSignature : TypeSpecificationSignature
+    public class ArrayTypeSignature : ArrayBaseTypeSignature
     {
         /// <summary>
         /// Creates a new array type signature.
@@ -68,6 +68,12 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             get;
         }
+
+        /// <inheritdoc />
+        public override int Rank => Dimensions.Count;
+
+        /// <inheritdoc />
+        public override IEnumerable<ArrayDimension> GetDimensions() => Dimensions;
 
         internal new static ArrayTypeSignature FromReader(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {

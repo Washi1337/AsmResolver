@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -104,6 +106,28 @@ namespace AsmResolver.DotNet.Signatures.Types
             return type.IsInterface
                 ? Module!.CorLibTypeFactory.Object
                 : type.BaseType!.ToTypeSignature(false);
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<TypeSignature> GetDirectlyImplementedInterfaces()
+        {
+            var type = Type.Resolve();
+            if (type is null)
+                return Enumerable.Empty<TypeSignature>();
+
+            return type.Interfaces.Select(i => i.Interface!.ToTypeSignature(false));
+        }
+
+        /// <inheritdoc />
+        protected override bool IsDirectlyCompatibleWith(TypeSignature other)
+        {
+            if (base.IsDirectlyCompatibleWith(other))
+                return true;
+            if (IsValueType)
+                return false;
+
+            return SignatureComparer.Default.Equals(GetDirectBaseClass(), other)
+                   || GetDirectlyImplementedInterfaces().Contains(other, SignatureComparer.Default);
         }
 
         /// <inheritdoc />

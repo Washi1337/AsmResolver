@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -154,6 +155,56 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             // Substitute any generic type arguments present in the signature.
             return signatureBaseType.InstantiateGenericTypes(GenericContext.FromType(this));
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<TypeSignature> GetDirectlyImplementedInterfaces()
+        {
+            var type = GenericType.Resolve();
+            if (type is null)
+                return Enumerable.Empty<TypeSignature>();
+
+            var context = GenericContext.FromType(this);
+            return type.Interfaces.Select(i => i.Interface!.ToTypeSignature(false).InstantiateGenericTypes(context));
+        }
+
+        /// <inheritdoc />
+        protected override bool IsDirectlyCompatibleWith(TypeSignature other)
+        {
+            if (base.IsDirectlyCompatibleWith(other))
+                return true;
+
+            if (other is not GenericInstanceTypeSignature otherGenericInstance
+                || otherGenericInstance.TypeArguments.Count != TypeArguments.Count
+                || !SignatureComparer.Default.Equals(GenericType, otherGenericInstance.GenericType))
+            {
+                return false;
+            }
+
+            // If resolution fails, assume no parameter variance.
+            var genericType = GenericType.Resolve();
+
+            // Check that every type argument is compatible with each other.
+            for (int i = 0; i < TypeArguments.Count; i++)
+            {
+                var variance = genericType?.GenericParameters[i].Attributes & GenericParameterAttributes.VarianceMask;
+
+                bool argumentIsCompatible = variance switch
+                {
+                    GenericParameterAttributes.NonVariant =>
+                        SignatureComparer.Default.Equals(TypeArguments[i], otherGenericInstance.TypeArguments[i]),
+                    GenericParameterAttributes.Covariant =>
+                        TypeArguments[i].IsCompatibleWith(otherGenericInstance.TypeArguments[i]),
+                    GenericParameterAttributes.Contravariant =>
+                        otherGenericInstance.TypeArguments[i].IsCompatibleWith(TypeArguments[i]),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                if (!argumentIsCompatible)
+                    return false;
+            }
+
+            return true;
         }
 
         /// <inheritdoc />
