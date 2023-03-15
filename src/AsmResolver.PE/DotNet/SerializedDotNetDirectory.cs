@@ -1,6 +1,7 @@
 using System;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Resources;
 using AsmResolver.PE.DotNet.VTableFixups;
 using AsmResolver.PE.File.Headers;
@@ -39,7 +40,11 @@ namespace AsmResolver.PE.DotNet
             MinorRuntimeVersion = reader.ReadUInt16();
             _metadataDirectory = DataDirectory.FromReader(ref reader);
             Flags = (DotNetDirectoryFlags) reader.ReadUInt32();
-            EntryPoint = reader.ReadUInt32();
+
+            EntryPoint = (Flags & DotNetDirectoryFlags.NativeEntryPoint) != 0
+                ? new DotNetEntryPoint(context.File.GetReferenceToRva(reader.ReadUInt32()))
+                : new DotNetEntryPoint(new MetadataToken(reader.ReadUInt32()));
+
             _resourcesDirectory = DataDirectory.FromReader(ref reader);
             _strongNameDirectory = DataDirectory.FromReader(ref reader);
             _codeManagerDirectory = DataDirectory.FromReader(ref reader);

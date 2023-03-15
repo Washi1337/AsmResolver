@@ -296,8 +296,8 @@ namespace AsmResolver.DotNet.Serialized
                 return null;
             }
 
-            if (DotNetDirectory.EntryPoint != 0)
-                return LookupMember(DotNetDirectory.EntryPoint) as IManagedEntryPoint;
+            if (DotNetDirectory.EntryPoint.IsManaged)
+                return LookupMember(DotNetDirectory.EntryPoint.MetadataToken) as IManagedEntryPoint;
 
             return null;
         }
