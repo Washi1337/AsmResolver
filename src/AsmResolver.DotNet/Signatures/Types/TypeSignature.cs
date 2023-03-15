@@ -310,7 +310,23 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Gets the underlying base type signature, without any extra adornments.
         /// </summary>
         /// <returns>The base signature.</returns>
+        /// <remarks>
+        /// This is not to be confused with <see cref="GetUnderlyingType"/>, which may resolve enum types to their
+        /// underlying type representation.
+        /// </remarks>
         public abstract ITypeDefOrRef? GetUnderlyingTypeDefOrRef();
+
+        /// <summary>
+        /// Obtains the underlying type of the type signature.
+        /// </summary>
+        /// <returns>The underlying type.</returns>
+        /// <remarks>
+        /// This method computes the underlying type as per ECMA-335 I.8.7, and may therefore attempt to resolve
+        /// assemblies to determine whether the type is an enum or not. It should not be confused with
+        /// <see cref="GetUnderlyingTypeDefOrRef"/>, which merely obtains the <see cref="ITypeDefOrRef"/> instance
+        /// behind the type signature.
+        /// </remarks>
+        public virtual TypeSignature GetUnderlyingType() => this;
 
         /// <summary>
         /// Obtains the reduced type of the type signature.

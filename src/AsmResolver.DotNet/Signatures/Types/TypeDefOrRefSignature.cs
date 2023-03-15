@@ -74,6 +74,26 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => Type;
 
         /// <inheritdoc />
+        public override TypeSignature GetUnderlyingType()
+        {
+            var type = Type.Resolve();
+
+            if (type is {IsEnum: true})
+                return type.GetEnumUnderlyingType() ?? this;
+
+            return this;
+        }
+
+        /// <inheritdoc />
+        public override TypeSignature GetReducedType()
+        {
+            var underlyingType = GetUnderlyingType();
+            return !ReferenceEquals(underlyingType, this)
+                ? underlyingType.GetReducedType()
+                : this;
+        }
+
+        /// <inheritdoc />
         public override TypeSignature? GetDirectBaseClass()
         {
             var type = Type.Resolve();

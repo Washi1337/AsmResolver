@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
@@ -144,6 +145,16 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             Assert.Equal(expected, module.CorLibTypeFactory.FromElementType(type)!.GetReducedType().ElementType);
+        }
+
+        [Theory]
+        [InlineData(typeof(Int32Enum), ElementType.I4)]
+        [InlineData(typeof(Int64Enum), ElementType.I8)]
+        public void GetReducedTypeOfEnum(Type type, ElementType expected)
+        {
+            var module = ModuleDefinition.FromFile(type.Assembly.Location);
+            var signature = module.LookupMember<TypeDefinition>(type.MetadataToken).ToTypeSignature();
+            Assert.Equal(expected, signature.GetReducedType().ElementType);
         }
 
         [Fact]
