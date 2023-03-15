@@ -313,6 +313,48 @@ namespace AsmResolver.DotNet.Signatures.Types
         public abstract ITypeDefOrRef? GetUnderlyingTypeDefOrRef();
 
         /// <summary>
+        /// Obtains the reduced type of the type signature.
+        /// </summary>
+        /// <returns>The reduced type.</returns>
+        /// <remarks>
+        /// As per ECMA-335 I.8.7, the reduced type ignores the semantic differences between enumerations and the signed
+        /// and unsigned integer types; treating these types the same if they have the same number of bits.
+        /// </remarks>
+        public virtual TypeSignature GetReducedType() => this;
+
+        /// <summary>
+        /// Obtains the verification type of the type signature.
+        /// </summary>
+        /// <returns>The verification type.</returns>
+        /// <remarks>
+        /// As per ECMA-335 I.8.7, the verification type ignores the semantic differences between enumerations,
+        /// characters, booleans, the signed and unsigned integer types, and managed pointers to any of these; treating
+        /// these types the same if they have the same number of bits or point to types with the same number of bits.
+        /// </remarks>
+        public virtual TypeSignature GetVerificationType() => this;
+
+        /// <summary>
+        /// Obtains the intermediate type of the type signature.
+        /// </summary>
+        /// <returns>The intermediate type.</returns>
+        /// <remarks>
+        /// As per ECMA-335 I.8.7, intermediate types are a subset of the built-in value types can be represented on the
+        /// evaluation stack.
+        /// </remarks>
+        public virtual TypeSignature GetIntermediateType() => GetVerificationType();
+
+        /// <summary>
+        /// Obtains the direct base class of the type signature.
+        /// </summary>
+        /// <returns>The type representing the immediate base class.</returns>
+        /// <remarks>
+        /// The direct base class is computed according to the rules defined in ECMA-335 I.8.7, where interfaces
+        /// will extend <see cref="System.Object"/>, and generic base types will be instantiated with the derived
+        /// classes type arguments (if any).
+        /// </remarks>
+        public virtual TypeSignature? GetDirectBaseClass() => null;
+
+        /// <summary>
         /// Substitutes any generic type parameter in the type signature with the parameters provided by
         /// the generic context.
         /// </summary>
@@ -337,6 +379,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
 
         /// <summary>
         /// Visit the current type signature using the provided visitor.

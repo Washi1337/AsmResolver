@@ -127,6 +127,36 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
+        public override TypeSignature? GetDirectBaseClass()
+        {
+            var genericType = GenericType.Resolve();
+            if (genericType is null)
+                return null;
+
+            // Interfaces have System.Object as direct base class.
+            if (genericType.IsInterface)
+                return Module!.CorLibTypeFactory.Object;
+
+            if (genericType.BaseType is not { } baseType)
+                return null;
+
+            // If the base type is not generic, treat it as a normal TypeDefOrRef.
+            if (baseType is TypeDefinition or TypeReference)
+                return baseType.ToTypeSignature(IsValueType);
+
+            // At this point we expect a type specification.
+            if (baseType is not TypeSpecification { Signature: {} signatureBaseType})
+                return null;
+
+            // Ignore any modifiers or pinned signatures.
+            while (signatureBaseType is PointerTypeSignature or CustomModifierTypeSignature)
+                signatureBaseType = ((TypeSpecificationSignature) signatureBaseType).BaseType;
+
+            // Substitute any generic type arguments present in the signature.
+            return signatureBaseType.InstantiateGenericTypes(GenericContext.FromType(this));
+        }
+
+        /// <inheritdoc />
         protected override void WriteContents(in BlobSerializationContext context)
         {
             var writer = context.Writer;

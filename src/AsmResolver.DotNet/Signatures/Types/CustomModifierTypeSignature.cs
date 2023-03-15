@@ -67,6 +67,18 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override bool IsValueType => BaseType.IsValueType;
 
         /// <inheritdoc />
+        public override TypeSignature GetReducedType() => BaseType.GetReducedType();
+
+        /// <inheritdoc />
+        public override TypeSignature GetVerificationType() => BaseType.GetVerificationType();
+
+        /// <inheritdoc />
+        public override TypeSignature GetIntermediateType() => BaseType.GetIntermediateType();
+
+        /// <inheritdoc />
+        public override TypeSignature? GetDirectBaseClass() => BaseType.GetDirectBaseClass();
+
+        /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitCustomModifierType(this);
 

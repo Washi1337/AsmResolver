@@ -103,6 +103,49 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ITypeDefOrRef ToTypeDefOrRef() => Type;
 
         /// <inheritdoc />
+        public override TypeSignature GetReducedType()
+        {
+            var factory = Module!.CorLibTypeFactory;
+            return ElementType switch
+            {
+                ElementType.I1 or ElementType.U1 => factory.SByte,
+                ElementType.I2 or ElementType.U2 => factory.Int16,
+                ElementType.I4 or ElementType.U4 => factory.Int32,
+                ElementType.I8 or ElementType.U8 => factory.Int64,
+                ElementType.I or ElementType.U => factory.IntPtr,
+                _ => base.GetReducedType()
+            };
+        }
+
+        /// <inheritdoc />
+        public override TypeSignature GetVerificationType()
+        {
+            var factory = Module!.CorLibTypeFactory;
+            return GetReducedType().ElementType switch
+            {
+                ElementType.I1 or ElementType.Boolean => factory.SByte,
+                ElementType.I2 or ElementType.Char => factory.Int16,
+                ElementType.I4 => factory.Int32,
+                ElementType.I8 => factory.Int64,
+                ElementType.I => factory.IntPtr,
+                _ => base.GetVerificationType()
+            };
+        }
+
+        /// <inheritdoc />
+        public override TypeSignature GetIntermediateType()
+        {
+            var factory = Module!.CorLibTypeFactory;
+            var verificationType = GetVerificationType();
+            return verificationType.ElementType switch
+            {
+                ElementType.I1 or ElementType.I2 or ElementType.I4 => factory.Int32,
+                ElementType.R4 or ElementType.R8 => factory.Double, // Technically, this is F.
+                _ => verificationType
+            };
+        }
+
+        /// <inheritdoc />
         protected override void WriteContents(in BlobSerializationContext context) =>
             context.Writer.WriteByte((byte) ElementType);
 

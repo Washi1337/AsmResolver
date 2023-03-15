@@ -74,6 +74,19 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => Type;
 
         /// <inheritdoc />
+        public override TypeSignature? GetDirectBaseClass()
+        {
+            var type = Type.Resolve();
+            if (type is null)
+                return null;
+
+            // Interfaces have System.Object as direct base class.
+            return type.IsInterface
+                ? Module!.CorLibTypeFactory.Object
+                : type.BaseType!.ToTypeSignature(false);
+        }
+
+        /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitTypeDefOrRef(this);
 

@@ -192,6 +192,12 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
+        public override TypeSignature? GetDirectBaseClass() => Module?.CorLibTypeFactory.CorLibScope
+            .CreateTypeReference("System", "Array")
+            .ToTypeSignature(false)
+            .ImportWith(Module.DefaultImporter);
+
+        /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitArrayType(this);
 
