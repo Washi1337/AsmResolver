@@ -58,9 +58,6 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <inheritdoc />
         public override string Name => $"{BaseType.Name ?? NullTypeToString}{GetDimensionsString()}";
 
-        /// <inheritdoc />
-        public override bool IsValueType => false;
-
         /// <summary>
         /// Gets a collection of dimensions.
         /// </summary>

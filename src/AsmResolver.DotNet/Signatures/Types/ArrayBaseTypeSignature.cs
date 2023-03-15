@@ -16,6 +16,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
         }
 
+        /// <inheritdoc />
+        public override bool IsValueType => false;
+
         /// <summary>
         /// Gets the number of dimensions this array defines.
         /// </summary>

@@ -26,9 +26,6 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override string Name => $"{BaseType.Name ?? NullTypeToString}[]";
 
         /// <inheritdoc />
-        public override bool IsValueType => false;
-
-        /// <inheritdoc />
         public override int Rank => 1;
 
         /// <inheritdoc />

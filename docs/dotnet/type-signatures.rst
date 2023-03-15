@@ -274,7 +274,7 @@ These rules are implemented in AsmResolver using the ``IsCompatibleWith`` and ``
 
 .. code-block:: csharp
 
-    if (comparer.IsCompatibleWith(type1, type2)) 
+    if (type1.IsCompatibleWith(type2)) 
     {
         // type1 can be converted to type2.
     }
@@ -282,7 +282,7 @@ These rules are implemented in AsmResolver using the ``IsCompatibleWith`` and ``
 
 .. code-block:: csharp
 
-    if (comparer.IsAssignableTo(type1, type2)) 
+    if (type1.IsAssignableTo(type2)) 
     {
         // Values of type1 can be assigned to variables of type2.
     }
