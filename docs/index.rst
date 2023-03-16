@@ -72,3 +72,14 @@ Table of Contents:
    dotnet/type-memory-layout
    dotnet/bundles
    dotnet/advanced-pe-image-building.rst
+
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: PDB Symbols
+   :name: sec-pdb
+
+   dotnet/index
+   dotnet/basics
+   dotnet/symbols
