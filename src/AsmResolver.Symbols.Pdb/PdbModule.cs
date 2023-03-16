@@ -12,7 +12,7 @@ public class PdbModule : ICodeViewSymbolProvider
 {
     private readonly LazyVariable<Utf8String?> _name;
     private readonly LazyVariable<Utf8String?> _objectFileName;
-    private IList<Utf8String>? _sourceFiles;
+    private IList<PdbSourceFile>? _sourceFiles;
     private readonly LazyVariable<SectionContribution> _sectionContribution;
 
     private IList<ICodeViewSymbol>? _symbols;
@@ -77,7 +77,7 @@ public class PdbModule : ICodeViewSymbolProvider
     /// <summary>
     /// Gets a collection of source files that were used to compile the module.
     /// </summary>
-    public IList<Utf8String> SourceFiles
+    public IList<PdbSourceFile> SourceFiles
     {
         get
         {
@@ -133,7 +133,7 @@ public class PdbModule : ICodeViewSymbolProvider
     /// <remarks>
     /// This method is called upon the initialization of the <see cref="SourceFiles"/> property.
     /// </remarks>
-    protected virtual IList<Utf8String> GetSourceFiles() => new List<Utf8String>();
+    protected virtual IList<PdbSourceFile> GetSourceFiles() => new List<PdbSourceFile>();
 
     /// <summary>
     /// Obtains the section contribution of the module.

@@ -52,6 +52,6 @@ public class PdbModuleTest : IClassFixture<MockPdbFixture>
             "C:\\Users\\Admin\\source\\repos\\AsmResolver\\test\\TestBinaries\\Native\\SimpleDll\\pch.h",
             "C:\\Users\\Admin\\source\\repos\\AsmResolver\\test\\TestBinaries\\Native\\SimpleDll\\dllmain.cpp",
             "C:\\Users\\Admin\\source\\repos\\AsmResolver\\test\\TestBinaries\\Native\\SimpleDll\\Release\\SimpleDll.pch"
-        }, module.SourceFiles);
+        }, module.SourceFiles.Select(f => f.FileName));
     }
 }
