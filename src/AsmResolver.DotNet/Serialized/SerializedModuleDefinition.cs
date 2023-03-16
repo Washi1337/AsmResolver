@@ -297,7 +297,12 @@ namespace AsmResolver.DotNet.Serialized
             }
 
             if (DotNetDirectory.EntryPoint.IsManaged)
-                return LookupMember(DotNetDirectory.EntryPoint.MetadataToken) as IManagedEntryPoint;
+            {
+                var token = DotNetDirectory.EntryPoint.MetadataToken;
+                return !TryLookupMember<IManagedEntryPoint>(token, out var member)
+                    ? ReaderContext.BadImageAndReturn<IManagedEntryPoint>("Module contained an invalid managed entry point metadata token.")
+                    : member;
+            }
 
             return null;
         }
