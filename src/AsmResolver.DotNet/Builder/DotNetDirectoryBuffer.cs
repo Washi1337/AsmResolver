@@ -152,7 +152,7 @@ namespace AsmResolver.DotNet.Builder
             return new DotNetDirectoryBuildResult(directory, _tokenMapping);
         }
 
-        private uint GetEntryPoint()
+        private DotNetEntryPoint GetEntryPoint()
         {
             if (Module.ManagedEntryPoint is null)
                 return 0;

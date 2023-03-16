@@ -55,7 +55,12 @@ namespace AsmResolver.PE.DotNet
         /// Gets or sets the metadata token or entry point virtual address, depending on whether
         /// <see cref="DotNetDirectoryFlags.NativeEntryPoint"/> is set in <see cref="Flags" />.
         /// </summary>
-        uint EntryPoint
+        /// <remarks>
+        /// Setting this property will not alter <see cref="Flags"/>. This means that even if a native entry point is
+        /// assigned to this property, the <see cref="DotNetDirectoryFlags.NativeEntryPoint"/> flag should be set
+        /// manually for a properly working .NET module.
+        /// </remarks>
+        DotNetEntryPoint EntryPoint
         {
             get;
             set;
