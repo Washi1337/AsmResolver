@@ -80,6 +80,6 @@ Table of Contents:
    :caption: PDB Symbols
    :name: sec-pdb
 
-   dotnet/index
-   dotnet/basics
-   dotnet/symbols
+   pdb/index
+   pdb/basics
+   pdb/symbols
