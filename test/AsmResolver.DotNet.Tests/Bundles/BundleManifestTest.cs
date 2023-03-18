@@ -7,6 +7,7 @@ using System.Text;
 using AsmResolver.DotNet.Bundles;
 using AsmResolver.IO;
 using AsmResolver.PE;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Win32Resources.Version;
@@ -120,10 +121,9 @@ namespace AsmResolver.DotNet.Tests.Bundles
             string appHostTemplatePath = FindAppHostTemplate("6.0");
 
             using var stream = new MemoryStream();
-            manifest.WriteUsingTemplate(stream, new BundlerParameters(appHostTemplatePath, "HelloWorld.dll")
-            {
-                SubSystem = subSystem
-            });
+            var parameters = BundlerParameters.FromTemplate(appHostTemplatePath, "HelloWorld.dll");
+            parameters.SubSystem = subSystem;
+            manifest.WriteUsingTemplate(stream, parameters);
 
             var newFile = PEFile.FromBytes(stream.ToArray());
             Assert.Equal(subSystem, newFile.OptionalHeader.SubSystem);
@@ -143,7 +143,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
 
             // Bundle with PE image as template for PE headers and resources.
             using var stream = new MemoryStream();
-            manifest.WriteUsingTemplate(stream, new BundlerParameters(
+            manifest.WriteUsingTemplate(stream, BundlerParameters.FromTemplate(
                 File.ReadAllBytes(appHostTemplatePath),
                 "HelloWorld.dll",
                 oldImage));
@@ -186,7 +186,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             Assert.Null(manifest.BundleID);
 
             using var stream = new MemoryStream();
-            manifest.WriteUsingTemplate(stream, new BundlerParameters(
+            manifest.WriteUsingTemplate(stream, BundlerParameters.FromTemplate(
                 FindAppHostTemplate("6.0"),
                 "HelloWorld.dll"));
 
@@ -205,6 +205,43 @@ namespace AsmResolver.DotNet.Tests.Bundles
             Assert.Equal(manifest.BundleID, newManifest.GenerateDeterministicBundleID());
         }
 
+        [Fact]
+        public void PatchAndRepackageExistingBundleV6()
+        {
+            // Read manifest and locate main entry point file.
+            var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6);
+            var mainFile = manifest.Files.First(f => f.RelativePath.Contains("HelloWorld.dll"));
+
+            // Patch entry point file.
+            var module = ModuleDefinition.FromBytes(mainFile.GetData());
+            module.ManagedEntryPointMethod!.CilMethodBody!
+                .Instructions.First(i => i.OpCode.Code == CilCode.Ldstr)
+                .Operand = "Hello, Mars!";
+
+            using var moduleStream = new MemoryStream();
+            module.Write(moduleStream);
+
+            mainFile.Contents = new DataSegment(moduleStream.ToArray());
+            mainFile.IsCompressed = false;
+
+            // Repackage bundle using existing bundle as template.
+            using var bundleStream = new MemoryStream();
+            manifest.WriteUsingTemplate(bundleStream, BundlerParameters.FromExistingFile(
+                Properties.Resources.HelloWorld_SingleFile_V6,
+                mainFile.RelativePath));
+
+            // Verify application runs as expected.
+            string output = _fixture
+                .GetRunner<NativePERunner>()
+                .RunAndCaptureOutput(
+                    "HelloWorld.exe",
+                    bundleStream.ToArray(),
+                    null,
+                    5000);
+
+            Assert.Equal($"Hello, Mars!{Environment.NewLine}", output);
+        }
+
         private void AssertWriteManifestWindowsPreservesOutput(
             BundleManifest manifest,
             string sdkVersion,
@@ -216,7 +253,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             string appHostTemplatePath = FindAppHostTemplate(sdkVersion);
 
             using var stream = new MemoryStream();
-            manifest.WriteUsingTemplate(stream, new BundlerParameters(appHostTemplatePath, fileName));
+            manifest.WriteUsingTemplate(stream, BundlerParameters.FromTemplate(appHostTemplatePath, fileName));
 
             var newManifest = BundleManifest.FromBytes(stream.ToArray());
             AssertBundlesAreEqual(manifest, newManifest);
