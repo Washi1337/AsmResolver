@@ -350,9 +350,9 @@ namespace AsmResolver.DotNet.Bundles
         /// This method uses heuristics to determine the right offsets within the existing apphost bundle file, and is
         /// not guaranteed to always produce the right bundler parameters.
         /// </remarks>
-        public static BundlerParameters FromExistingFile(string originalFile, string appBinaryPath)
+        public static BundlerParameters FromExistingBundle(string originalFile, string appBinaryPath)
         {
-            return FromExistingFile(File.ReadAllBytes(originalFile), appBinaryPath, appBinaryPath);
+            return FromExistingBundle(File.ReadAllBytes(originalFile), appBinaryPath, appBinaryPath);
         }
 
         /// <summary>
@@ -368,7 +368,7 @@ namespace AsmResolver.DotNet.Bundles
         /// </remarks>
         public static BundlerParameters FromExistingFile(byte[] originalFile, string appBinaryPath)
         {
-            return FromExistingFile(originalFile, appBinaryPath, appBinaryPath);
+            return FromExistingBundle(originalFile, appBinaryPath, appBinaryPath);
         }
 
         /// <summary>
@@ -385,7 +385,7 @@ namespace AsmResolver.DotNet.Bundles
         /// This method uses heuristics to determine the right offsets within the existing apphost bundle file, and is
         /// not guaranteed to always produce the right bundler parameters.
         /// </remarks>
-        public static BundlerParameters FromExistingFile(byte[] originalFile, string originalAppBinaryPath, string newAppBinaryPath)
+        public static BundlerParameters FromExistingBundle(byte[] originalFile, string originalAppBinaryPath, string newAppBinaryPath)
         {
             PEFile file;
             try
