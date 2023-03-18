@@ -127,6 +127,33 @@ namespace AsmResolver.DotNet.Tests.Signatures
                     .FullName);
         }
 
+        [Fact]
+        public void StripModifiersPinnedType()
+        {
+            var type = _dummyType.ToTypeSignature();
+            Assert.Equal(type, type.MakePinnedType().StripModifiers(), SignatureComparer.Default);
+        }
+
+        [Fact]
+        public void StripModifiersCustomModifierType()
+        {
+            var type = _dummyType.ToTypeSignature();
+            Assert.Equal(type, type.MakeModifierType(_dummyType, false).StripModifiers(), SignatureComparer.Default);
+        }
+
+        [Fact]
+        public void StripMultipleModifiers()
+        {
+            var type = _dummyType.ToTypeSignature();
+            Assert.Equal(type,
+                type
+                    .MakeModifierType(_dummyType, false)
+                    .MakeModifierType(_dummyType, true)
+                    .MakePinnedType()
+                    .StripModifiers(),
+                SignatureComparer.Default);
+        }
+
         [Theory]
         [InlineData(ElementType.I, ElementType.I)]
         [InlineData(ElementType.I1, ElementType.I1)]
@@ -518,6 +545,55 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var type2 = module.CorLibTypeFactory.FromElementType(elementType2)!;
 
             Assert.Equal(expected, type1.IsAssignableTo(type2));
+        }
+
+        [Fact]
+        public void IgnoreCustomModifiers()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+
+            var type1 = module.CorLibTypeFactory.Int32;
+            var type2 = module.CorLibTypeFactory.Int32.MakeModifierType(module.CorLibTypeFactory.CorLibScope
+                    .CreateTypeReference("System.Runtime.CompilerServices", "IsVolatile")
+                    .ImportWith(module.DefaultImporter),
+                true);
+
+            Assert.True(type1.IsCompatibleWith(type2));
+            Assert.True(type2.IsCompatibleWith(type1));
+        }
+
+        [Fact]
+        public void IgnoreNestedCustomModifiers()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+
+            var type1 = module.CorLibTypeFactory.Int32;
+            var type2 = module.CorLibTypeFactory.Int32.MakeModifierType(module.CorLibTypeFactory.CorLibScope
+                    .CreateTypeReference("System.Runtime.CompilerServices", "IsVolatile")
+                    .ImportWith(module.DefaultImporter),
+                true);
+
+            var genericType = module.CorLibTypeFactory.CorLibScope
+                .CreateTypeReference("System.Collections.Generic", "List`1")
+                .ImportWith(module.DefaultImporter);
+
+            var genericType1 = genericType.MakeGenericInstanceType(type1);
+            var genericType2 = genericType.MakeGenericInstanceType(type2);
+
+            Assert.True(genericType1.IsCompatibleWith(genericType2));
+            Assert.True(genericType2.IsCompatibleWith(genericType1));
+        }
+
+        [Fact]
+        public void IgnorePinnedModifiers()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+
+            var type1 = module.CorLibTypeFactory.Int32;
+            var type2 = module.CorLibTypeFactory.Int32.MakePinnedType();
+
+            Assert.True(type1.IsCompatibleWith(type2));
+            Assert.True(type2.IsCompatibleWith(type1));
         }
     }
 }

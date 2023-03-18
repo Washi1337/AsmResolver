@@ -145,16 +145,10 @@ namespace AsmResolver.DotNet.Signatures.Types
             if (baseType is TypeDefinition or TypeReference)
                 return baseType.ToTypeSignature(IsValueType);
 
-            // At this point we expect a type specification.
-            if (baseType is not TypeSpecification { Signature: {} signatureBaseType})
-                return null;
-
-            // Ignore any modifiers or pinned signatures.
-            while (signatureBaseType is PointerTypeSignature or CustomModifierTypeSignature)
-                signatureBaseType = ((TypeSpecificationSignature) signatureBaseType).BaseType;
-
-            // Substitute any generic type arguments present in the signature.
-            return signatureBaseType.InstantiateGenericTypes(GenericContext.FromType(this));
+            // At this point we expect a type specification. Substitute any generic type arguments present in it.
+            return baseType is TypeSpecification { Signature: { } signatureBaseType }
+                ? signatureBaseType.StripModifiers().InstantiateGenericTypes(GenericContext.FromType(this))
+                : null;
         }
 
         /// <inheritdoc />
@@ -192,7 +186,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 bool argumentIsCompatible = variance switch
                 {
                     GenericParameterAttributes.NonVariant =>
-                        SignatureComparer.Default.Equals(TypeArguments[i], otherGenericInstance.TypeArguments[i]),
+                        SignatureComparer.Default.Equals(TypeArguments[i].StripModifiers(), otherGenericInstance.TypeArguments[i].StripModifiers()),
                     GenericParameterAttributes.Covariant =>
                         TypeArguments[i].IsCompatibleWith(otherGenericInstance.TypeArguments[i]),
                     GenericParameterAttributes.Contravariant =>

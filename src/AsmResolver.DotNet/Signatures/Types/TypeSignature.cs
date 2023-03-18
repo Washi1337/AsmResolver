@@ -384,6 +384,18 @@ namespace AsmResolver.DotNet.Signatures.Types
         public virtual IEnumerable<TypeSignature> GetDirectlyImplementedInterfaces() => Enumerable.Empty<TypeSignature>();
 
         /// <summary>
+        /// Strips any top-level custom type modifier and pinned type annotations from the signature.
+        /// </summary>
+        /// <returns>The stripped type signature.</returns>
+        /// <remarks>
+        /// This method does not necessarily recursively strip away every modifier type from the signature, nor does it
+        /// allocate new type signatures or change existing ones. It only traverses the type signature until a non-modifier
+        /// or pinned type is encountered. Annotations that are embedded in the type signature (e.g., as a type argument
+        /// of a generic instance type), will not be automatically removed.
+        /// </remarks>
+        public virtual TypeSignature StripModifiers() => this;
+
+        /// <summary>
         /// Determines whether the current type is directly compatible with the provided type.
         /// </summary>
         /// <param name="other">The other type.</param>
@@ -407,7 +419,8 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// </remarks>
         public bool IsCompatibleWith(TypeSignature other)
         {
-            var current = this;
+            var current = StripModifiers();
+            other = other.StripModifiers();
 
             // Achieve the transitivity rule by moving up the type hierarchy iteratively.
             while (current is not null)
@@ -415,7 +428,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 if (current.IsDirectlyCompatibleWith(other))
                     return true;
 
-                current = current.GetDirectBaseClass();
+                current = current.GetDirectBaseClass()?.StripModifiers();
             }
 
             return false;

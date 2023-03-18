@@ -105,7 +105,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             // Interfaces have System.Object as direct base class.
             return type.IsInterface
                 ? Module!.CorLibTypeFactory.Object
-                : type.BaseType!.ToTypeSignature(false);
+                : type.BaseType!.ToTypeSignature(false).StripModifiers();
         }
 
         /// <inheritdoc />

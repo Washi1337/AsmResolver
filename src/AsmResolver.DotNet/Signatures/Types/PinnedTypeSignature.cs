@@ -39,6 +39,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override TypeSignature? GetDirectBaseClass() => BaseType.GetDirectBaseClass();
 
         /// <inheritdoc />
+        public override TypeSignature StripModifiers() => BaseType.StripModifiers();
+
+        /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitPinnedType(this);
 
