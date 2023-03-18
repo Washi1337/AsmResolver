@@ -35,7 +35,7 @@ public class SerializedPdbModule : PdbModule
         if (sourceFiles is not null)
         {
             foreach (var file in sourceFiles)
-                SourceFiles.Add(file);
+                SourceFiles.Add(new PdbSourceFile(file));
         }
     }
 
