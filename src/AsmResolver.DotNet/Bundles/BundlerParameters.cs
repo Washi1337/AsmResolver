@@ -366,7 +366,7 @@ namespace AsmResolver.DotNet.Bundles
         /// This method uses heuristics to determine the right offsets within the existing apphost bundle file, and is
         /// not guaranteed to always produce the right bundler parameters.
         /// </remarks>
-        public static BundlerParameters FromExistingFile(byte[] originalFile, string appBinaryPath)
+        public static BundlerParameters FromExistingBundle(byte[] originalFile, string appBinaryPath)
         {
             return FromExistingBundle(originalFile, appBinaryPath, appBinaryPath);
         }

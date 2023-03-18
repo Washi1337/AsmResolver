@@ -226,7 +226,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
 
             // Repackage bundle using existing bundle as template.
             using var bundleStream = new MemoryStream();
-            manifest.WriteUsingTemplate(bundleStream, BundlerParameters.FromExistingFile(
+            manifest.WriteUsingTemplate(bundleStream, BundlerParameters.FromExistingBundle(
                 Properties.Resources.HelloWorld_SingleFile_V6,
                 mainFile.RelativePath));
 

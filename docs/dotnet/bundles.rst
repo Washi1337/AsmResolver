@@ -123,7 +123,7 @@ For bundle executable files targeting Windows, it may be required to copy over s
             imagePathToCopyHeadersFrom: @"C:\Path\To\Original\HelloWorld.exe"));
 
 
-If you do not have access to a template file (e.g., if the SDK is not installed) but have another existing PE file that was packaged in a similar fashion, it is then possible to use this file as a template instead by extracting the bundler parameters using the ``BudnlerParameters::FromExistingFile`` method. This is in particularly useful when trying to patch existing AppHost bundles. Below is a full example for patching a bundled Hello World application to let it print ``Hello, Mars!`` instead:
+If you do not have access to a template file (e.g., if the SDK is not installed) but have another existing PE file that was packaged in a similar fashion, it is then possible to use this file as a template instead by extracting the bundler parameters using the ``BudnlerParameters::FromExistingBundle`` method. This is in particularly useful when trying to patch existing AppHost bundles. Below is a full example for patching a bundled Hello World application to let it print ``Hello, Mars!`` instead:
 
 .. code-block:: csharp
 
@@ -132,32 +132,23 @@ If you do not have access to a template file (e.g., if the SDK is not installed)
 
     // Read manifest and locate main embedded file.
     var manifest = BundleManifest.FromFile(inputPath);
-    var mainFile = manifest.Files.First(f => f.RelativePath == "HelloWorld.dll");
 
-    // Read the file as a module, and patch the "Hello, World!" string with "Hello, Mars!".
-    var module = ModuleDefinition.FromBytes(mainFile.GetData());
-    module.ManagedEntryPointMethod!.CilMethodBody!
-        .Instructions.First(i => i.OpCode.Code == CilCode.Ldstr)
-        .Operand = "Hello, Mars!";
-
-    // Replace the contents of the embedded HelloWorld.dll with the new version:
-    using var moduleStream = new MemoryStream();
-    module.Write(moduleStream);
-    mainFile.Contents = new DataSegment(moduleStream.ToArray());
-    mainFile.IsCompressed = false;
-
+    /* ... Make changes to manifest and its files ... */ 
+    
     // Repackage bundle using existing bundle as template.
-    manifest.WriteUsingTemplate(outputPath, BundlerParameters.FromExistingFile(
-        inputPath,
-        mainFile.RelativePath));
+    manifest.WriteUsingTemplate(
+        outputPath, 
+        BundlerParameters.FromExistingBundle(
+            originalFile: inputPath, 
+            appBinaryPath: mainFile.RelativePath));
 
 
 .. warning::
 
-    The ``BundlerParameters.FromExistingFile`` method applies heuristics on the input file to determine the parameters for patching the input file. As heuristics are not perfect, this is not guaranteed to always work.
+    The ``BundlerParameters.FromExistingBundle`` method applies heuristics on the input file to determine the parameters for patching the input file. As heuristics are not perfect, this is not guaranteed to always work.
 
 
-``BundleManifest`` and ``BundlerParameters`` also define overloads of the ``WriteUsingTemplate`` and ``FromTemplate`` / ``FromExistingFile`` respectively, taking ``byte[]``, ``IDataSource`` or ``IPEImage`` instances instead of file paths.
+``BundleManifest`` and ``BundlerParameters`` also define overloads of the ``WriteUsingTemplate`` and ``FromTemplate`` / ``FromExistingBundle`` respectively, taking ``byte[]``, ``IDataSource`` or ``IPEImage`` instances instead of file paths.
 
 
 Managing Files
