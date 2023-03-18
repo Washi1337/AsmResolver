@@ -163,14 +163,14 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        protected override bool IsDirectlyCompatibleWith(TypeSignature other)
+        protected override bool IsDirectlyCompatibleWith(TypeSignature other, SignatureComparer comparer)
         {
-            if (base.IsDirectlyCompatibleWith(other))
+            if (base.IsDirectlyCompatibleWith(other, comparer))
                 return true;
 
             if (other is not GenericInstanceTypeSignature otherGenericInstance
                 || otherGenericInstance.TypeArguments.Count != TypeArguments.Count
-                || !SignatureComparer.Default.Equals(GenericType, otherGenericInstance.GenericType))
+                || !comparer.Equals(GenericType, otherGenericInstance.GenericType))
             {
                 return false;
             }
@@ -186,11 +186,11 @@ namespace AsmResolver.DotNet.Signatures.Types
                 bool argumentIsCompatible = variance switch
                 {
                     GenericParameterAttributes.NonVariant =>
-                        SignatureComparer.Default.Equals(TypeArguments[i].StripModifiers(), otherGenericInstance.TypeArguments[i].StripModifiers()),
+                        comparer.Equals(TypeArguments[i].StripModifiers(), otherGenericInstance.TypeArguments[i].StripModifiers()),
                     GenericParameterAttributes.Covariant =>
-                        TypeArguments[i].IsCompatibleWith(otherGenericInstance.TypeArguments[i]),
+                        TypeArguments[i].IsCompatibleWith(otherGenericInstance.TypeArguments[i], comparer),
                     GenericParameterAttributes.Contravariant =>
-                        otherGenericInstance.TypeArguments[i].IsCompatibleWith(TypeArguments[i]),
+                        otherGenericInstance.TypeArguments[i].IsCompatibleWith(TypeArguments[i], comparer),
                     _ => throw new ArgumentOutOfRangeException()
                 };
 

@@ -26,9 +26,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override bool IsValueType => false;
 
         /// <inheritdoc />
-        protected override bool IsDirectlyCompatibleWith(TypeSignature other)
+        protected override bool IsDirectlyCompatibleWith(TypeSignature other, SignatureComparer comparer)
         {
-            if (base.IsDirectlyCompatibleWith(other))
+            if (base.IsDirectlyCompatibleWith(other, comparer))
                 return true;
 
             if (other is not PointerTypeSignature otherPointer)
@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             var v = BaseType.GetVerificationType();
             var w = otherPointer.BaseType.GetVerificationType();
-            return SignatureComparer.Default.Equals(v, w);
+            return comparer.Equals(v, w);
         }
 
         /// <inheritdoc />

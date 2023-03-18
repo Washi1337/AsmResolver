@@ -399,14 +399,15 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Determines whether the current type is directly compatible with the provided type.
         /// </summary>
         /// <param name="other">The other type.</param>
+        /// <param name="comparer">The comparer to use for comparing type signatures.</param>
         /// <returns><c>true</c> if the types are directly compatible, <c>false</c> otherwise.</returns>
         /// <remarks>
         /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.1., excluding the transitivity
         /// rule.
         /// </remarks>
-        protected virtual bool IsDirectlyCompatibleWith(TypeSignature other)
+        protected virtual bool IsDirectlyCompatibleWith(TypeSignature other, SignatureComparer comparer)
         {
-            return SignatureComparer.Default.Equals(this, other);
+            return comparer.Equals(this, other);
         }
 
         /// <summary>
@@ -417,7 +418,18 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <remarks>
         /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.1.
         /// </remarks>
-        public bool IsCompatibleWith(TypeSignature other)
+        public bool IsCompatibleWith(TypeSignature other) => IsCompatibleWith(other, SignatureComparer.Default);
+
+        /// <summary>
+        /// Determines whether the current type is compatible with the provided type.
+        /// </summary>
+        /// <param name="other">The other type.</param>
+        /// <param name="comparer">The comparer to use for comparing type signatures.</param>
+        /// <returns><c>true</c> if the type is compatible with <paramref name="other" />, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.1.
+        /// </remarks>
+        public bool IsCompatibleWith(TypeSignature other, SignatureComparer comparer)
         {
             var current = StripModifiers();
             other = other.StripModifiers();
@@ -425,7 +437,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             // Achieve the transitivity rule by moving up the type hierarchy iteratively.
             while (current is not null)
             {
-                if (current.IsDirectlyCompatibleWith(other))
+                if (current.IsDirectlyCompatibleWith(other, comparer))
                     return true;
 
                 current = current.GetDirectBaseClass()?.StripModifiers();
@@ -442,19 +454,30 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <remarks>
         /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.3.
         /// </remarks>
-        public bool IsAssignableTo(TypeSignature other)
+        public bool IsAssignableTo(TypeSignature other) => IsAssignableTo(other, SignatureComparer.Default);
+
+        /// <summary>
+        /// Determines whether the current type is assignable to the provided type.
+        /// </summary>
+        /// <param name="other">The other type.</param>
+        /// <param name="comparer">The comparer to use for comparing type signatures.</param>
+        /// <returns><c>true</c> if the type is assignable to <paramref name="other" />, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.3.
+        /// </remarks>
+        public bool IsAssignableTo(TypeSignature other, SignatureComparer comparer)
         {
             var intermediateType1 = GetIntermediateType();
             var intermediateType2 = other.GetIntermediateType();
 
-            if (SignatureComparer.Default.Equals(intermediateType1, intermediateType2)
+            if (comparer.Equals(intermediateType1, intermediateType2)
                 || intermediateType1.ElementType == ElementType.I && intermediateType2.ElementType == ElementType.I4
                 || intermediateType1.ElementType == ElementType.I4 && intermediateType2.ElementType == ElementType.I)
             {
                 return true;
             }
 
-            return IsCompatibleWith(other);
+            return IsCompatibleWith(other, comparer);
         }
 
         /// <summary>

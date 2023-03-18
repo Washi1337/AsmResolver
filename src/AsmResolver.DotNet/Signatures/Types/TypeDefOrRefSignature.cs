@@ -119,15 +119,15 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        protected override bool IsDirectlyCompatibleWith(TypeSignature other)
+        protected override bool IsDirectlyCompatibleWith(TypeSignature other, SignatureComparer comparer)
         {
-            if (base.IsDirectlyCompatibleWith(other))
+            if (base.IsDirectlyCompatibleWith(other, comparer))
                 return true;
             if (IsValueType)
                 return false;
 
-            return SignatureComparer.Default.Equals(GetDirectBaseClass(), other)
-                   || GetDirectlyImplementedInterfaces().Contains(other, SignatureComparer.Default);
+            return comparer.Equals(GetDirectBaseClass(), other)
+                   || GetDirectlyImplementedInterfaces().Contains(other, comparer);
         }
 
         /// <inheritdoc />
