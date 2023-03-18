@@ -437,9 +437,18 @@ namespace AsmResolver.DotNet.Signatures.Types
             // Achieve the transitivity rule by moving up the type hierarchy iteratively.
             while (current is not null)
             {
+                // Is the current type compatible?
                 if (current.IsDirectlyCompatibleWith(other, comparer))
                     return true;
 
+                // Are any of the interfaces compatible instead?
+                foreach (var @interface in current.GetDirectlyImplementedInterfaces())
+                {
+                    if (@interface.IsCompatibleWith(other, comparer))
+                        return true;
+                }
+
+                // If neither, move up type hierarchy.
                 current = current.GetDirectBaseClass()?.StripModifiers();
             }
 

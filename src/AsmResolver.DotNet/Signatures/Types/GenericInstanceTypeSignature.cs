@@ -165,13 +165,10 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <inheritdoc />
         protected override bool IsDirectlyCompatibleWith(TypeSignature other, SignatureComparer comparer)
         {
-            return base.IsDirectlyCompatibleWith(other, comparer)
-                   || IsDirectlyClassCompatibleWith(other, comparer)
-                   || IsDirectlyInterfaceCompatibleWith(other, comparer);
-        }
+            if (base.IsDirectlyCompatibleWith(other, comparer))
+                return true;
 
-        private bool IsDirectlyClassCompatibleWith(TypeSignature other, SignatureComparer comparer)
-        {
+            // Other type must be a generic instance with the same generic base type and type argument count.
             if (other is not GenericInstanceTypeSignature otherGenericInstance
                 || otherGenericInstance.TypeArguments.Count != TypeArguments.Count
                 || !comparer.Equals(GenericType, otherGenericInstance.GenericType))
@@ -201,18 +198,8 @@ namespace AsmResolver.DotNet.Signatures.Types
                 if (!argumentIsCompatible)
                     return false;
             }
+
             return true;
-        }
-
-        private bool IsDirectlyInterfaceCompatibleWith(TypeSignature other, SignatureComparer comparer)
-        {
-            foreach (var @interface in GetDirectlyImplementedInterfaces())
-            {
-                if (@interface.IsCompatibleWith(other, comparer))
-                    return true;
-            }
-
-            return false;
         }
 
         /// <inheritdoc />

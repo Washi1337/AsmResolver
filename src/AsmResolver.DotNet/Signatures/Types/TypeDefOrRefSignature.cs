@@ -119,18 +119,6 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        protected override bool IsDirectlyCompatibleWith(TypeSignature other, SignatureComparer comparer)
-        {
-            if (base.IsDirectlyCompatibleWith(other, comparer))
-                return true;
-            if (IsValueType)
-                return false;
-
-            return comparer.Equals(GetDirectBaseClass(), other)
-                   || GetDirectlyImplementedInterfaces().Contains(other, comparer);
-        }
-
-        /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitTypeDefOrRef(this);
 
