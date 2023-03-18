@@ -420,6 +420,30 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Theory]
+        [InlineData(new[] { ElementType.I4, ElementType.I4 }, new[] { ElementType.I4, ElementType.I4, ElementType.String }, true)]
+        [InlineData(new[] { ElementType.I4, ElementType.I8 }, new[] { ElementType.I4, ElementType.I4, ElementType.String }, false)]
+        [InlineData(new[] { ElementType.I4, ElementType.I4 }, new[] { ElementType.I4, ElementType.I8, ElementType.String }, false)]
+        [InlineData(new[] { ElementType.I4, ElementType.I4 }, new[] { ElementType.I4, ElementType.I4, ElementType.Boolean }, false)]
+        public void IsCompatibleWithGenericInterface(ElementType[] typeArguments1, ElementType[] typeArguments2, bool expected)
+        {
+            var module = ModuleDefinition.FromFile(typeof(GenericInterfaceImplementation<,>).Assembly.Location);
+
+            var type1 = module.LookupMember<TypeDefinition>(typeof(GenericInterfaceImplementation<,>).MetadataToken)
+                .ToTypeSignature(false)
+                .MakeGenericInstanceType(
+                    typeArguments1.Select(x => (TypeSignature) module.CorLibTypeFactory.FromElementType(x)!).ToArray()
+                );
+
+            var type2 = module.LookupMember<TypeDefinition>(typeof(IGenericInterface<,,>).MetadataToken)
+                .ToTypeSignature(false)
+                .MakeGenericInstanceType(
+                    typeArguments2.Select(x => (TypeSignature) module.CorLibTypeFactory.FromElementType(x)!).ToArray()
+                );
+
+            Assert.Equal(expected, type1.IsCompatibleWith(type2));
+        }
+
+        [Theory]
         [InlineData(ElementType.I1, ElementType.I1, true)]
         [InlineData(ElementType.U1, ElementType.I1, true)]
         [InlineData(ElementType.I1, ElementType.U1, true)]
