@@ -206,10 +206,33 @@ namespace AsmResolver.DotNet.Tests.Bundles
         }
 
         [Fact]
+        public void PatchAndRepackageExistingBundleV1()
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            AssertPatchAndRepackageChangesOutput(Properties.Resources.HelloWorld_SingleFile_V1);
+        }
+
+        [Fact]
+        public void PatchAndRepackageExistingBundleV2()
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            AssertPatchAndRepackageChangesOutput(Properties.Resources.HelloWorld_SingleFile_V2);
+        }
+
+        [Fact]
         public void PatchAndRepackageExistingBundleV6()
         {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            AssertPatchAndRepackageChangesOutput(Properties.Resources.HelloWorld_SingleFile_V6);
+        }
+
+        private void AssertPatchAndRepackageChangesOutput(
+            byte[] original,
+            [CallerFilePath] string className = "File",
+            [CallerMemberName] string methodName = "Method")
+        {
             // Read manifest and locate main entry point file.
-            var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6);
+            var manifest = BundleManifest.FromBytes(original);
             var mainFile = manifest.Files.First(f => f.RelativePath.Contains("HelloWorld.dll"));
 
             // Patch entry point file.
@@ -224,20 +247,25 @@ namespace AsmResolver.DotNet.Tests.Bundles
             mainFile.Contents = new DataSegment(moduleStream.ToArray());
             mainFile.IsCompressed = false;
 
+            manifest.BundleID = manifest.GenerateDeterministicBundleID();
+
             // Repackage bundle using existing bundle as template.
             using var bundleStream = new MemoryStream();
             manifest.WriteUsingTemplate(bundleStream, BundlerParameters.FromExistingBundle(
-                Properties.Resources.HelloWorld_SingleFile_V6,
+                original,
                 mainFile.RelativePath));
 
             // Verify application runs as expected.
+            DeleteTempExtractionDirectory(manifest, "HelloWorld.dll");
             string output = _fixture
                 .GetRunner<NativePERunner>()
                 .RunAndCaptureOutput(
                     "HelloWorld.exe",
                     bundleStream.ToArray(),
                     null,
-                    5000);
+                    5000,
+                    className,
+                    methodName);
 
             Assert.Equal($"Hello, Mars!{Environment.NewLine}", output);
         }
@@ -251,6 +279,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             [CallerMemberName] string methodName = "Method")
         {
             string appHostTemplatePath = FindAppHostTemplate(sdkVersion);
+            DeleteTempExtractionDirectory(manifest, fileName);
 
             using var stream = new MemoryStream();
             manifest.WriteUsingTemplate(stream, BundlerParameters.FromTemplate(appHostTemplatePath, fileName));
@@ -269,6 +298,15 @@ namespace AsmResolver.DotNet.Tests.Bundles
                     methodName);
 
             Assert.Equal(expectedOutput, output);
+        }
+        private static void DeleteTempExtractionDirectory(BundleManifest manifest, string fileName)
+        {
+            if (manifest.MajorVersion != 1 || manifest.BundleID is null || !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return;
+
+            string tempPath = Path.Combine(Path.GetTempPath(), ".net", Path.GetFileNameWithoutExtension(fileName), manifest.BundleID);
+            if (Directory.Exists(tempPath))
+                Directory.Delete(tempPath, true);
         }
 
         private static string FindAppHostTemplate(string sdkVersion)

@@ -123,14 +123,14 @@ For bundle executable files targeting Windows, it may be required to copy over s
             imagePathToCopyHeadersFrom: @"C:\Path\To\Original\HelloWorld.exe"));
 
 
-If you do not have access to a template file (e.g., if the SDK is not installed) but have another existing PE file that was packaged in a similar fashion, it is then possible to use this file as a template instead by extracting the bundler parameters using the ``BudnlerParameters::FromExistingBundle`` method. This is in particularly useful when trying to patch existing AppHost bundles. Below is a full example for patching a bundled Hello World application to let it print ``Hello, Mars!`` instead:
+If you do not have access to a template file (e.g., if the SDK is not installed) but have another existing PE file that was packaged in a similar fashion, it is then possible to use this file as a template instead by extracting the bundler parameters using the ``BundlerParameters::FromExistingBundle`` method. This is in particularly useful when trying to patch existing AppHost bundles:
 
 .. code-block:: csharp
 
     string inputPath = @"C:\Path\To\Bundled\HelloWorld.exe";
     string outputPath = Path.ChangeExtension(inputPath, ".patched.exe");
 
-    // Read manifest and locate main embedded file.
+    // Read manifest.
     var manifest = BundleManifest.FromFile(inputPath);
 
     /* ... Make changes to manifest and its files ... */ 
