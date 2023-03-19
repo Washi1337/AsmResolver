@@ -155,7 +155,7 @@ namespace AsmResolver.DotNet.Builder
         private DotNetEntryPoint GetEntryPoint()
         {
             if (Module.ManagedEntryPoint is null)
-                return 0;
+                return MetadataToken.Zero;
 
             var entryPointToken = MetadataToken.Zero;
 
@@ -174,7 +174,7 @@ namespace AsmResolver.DotNet.Builder
                     break;
             }
 
-            return entryPointToken.ToUInt32();
+            return entryPointToken;
         }
 
         private void AddMethodSemantics(MetadataToken ownerToken, IHasSemantics provider)

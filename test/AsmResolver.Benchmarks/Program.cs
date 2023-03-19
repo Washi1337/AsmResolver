@@ -55,8 +55,10 @@ namespace AsmResolver.Benchmarks
 
                 if (string.IsNullOrEmpty(benchmarkType))
                     BenchmarkRunner.Run(Assembly.GetExecutingAssembly(), config);
+                else if (Type.GetType($"AsmResolver.Benchmarks.{benchmarkType}") is { } type)
+                    BenchmarkRunner.Run(type, config);
                 else
-                    BenchmarkRunner.Run(Type.GetType($"AsmResolver.Benchmarks.{benchmarkType}"), config);
+                    Console.Error.WriteLine($"Could not find benchmark {benchmarkType}.");
 
             }, baselineVersionOption, onlyOption);
 
