@@ -219,3 +219,70 @@ Below an overview of all factory shortcut methods:
 +-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
 | ``MakeGenericInstanceType(TypeSignature[] typeArguments)``        | Wraps the type in a new ``GenericInstanceTypeSignature`` with the provided type arguments.                       |
 +-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+
+
+
+Comparing Type Signatures
+-------------------------
+
+Type signatures can be tested for semantic equivalence using the ``SignatureComparer`` class. 
+Most use-cases of this class will not require any customization. 
+In these cases, the default ``SignatureComparer`` can be used:
+
+.. code-block:: csharp
+
+    var comparer = SignatureComparer.Default;
+
+
+However, if you wish to configure the comparer (e.g., for relaxing some of the declaring assembly version comparison rules), it is possible to create a new instance instead:
+
+.. code-block:: csharp
+
+    var comparer = new SignatureComparer(SignatureComparisonFlags.AllowNewerVersions);
+
+
+Once a comparer is obtained, we can test for type equality using any of the overloaded ``Equals`` methods:
+
+.. code-block:: csharp
+
+    TypeSignature type1 = ...;
+    TypeSignature type2 = ...;
+
+    if (comparer.Equals(type1, type2)) 
+    {
+        // type1 and type2 are semantically equivalent.
+    }
+
+
+The ``SignatureComparer`` class implements various instances of the ``IEqualityComparer<T>`` interface, and as such, it can be used as a comparer for dictionaries and related types:
+
+.. code-block:: csharp
+
+    var dictionary = new Dictionary<TypeSignature, TValue>(comparer);
+
+
+.. note:: 
+
+    The ``SignatureComparer`` class also implements equality comparers for other kinds of metadata, such as field and method descriptors and their signatures.
+
+
+In some cases, however, exact type equivalence is too strict of a test.
+Since .NET facilitates an object oriented environment, many types will inherit or derive from each other, making it difficult to pinpoint exactly which types we would need to compare to test whether two types are compatible with each other.  
+
+Section I.8.7 of the ECMA-335 specification defines a set of rules that dictate whether values of a certain type are compatible with or assignable to variables of another type. 
+These rules are implemented in AsmResolver using the ``IsCompatibleWith`` and ``IsAssignableTo`` methods:
+
+.. code-block:: csharp
+
+    if (type1.IsCompatibleWith(type2)) 
+    {
+        // type1 can be converted to type2.
+    }
+
+
+.. code-block:: csharp
+
+    if (type1.IsAssignableTo(type2)) 
+    {
+        // Values of type1 can be assigned to variables of type2.
+    }

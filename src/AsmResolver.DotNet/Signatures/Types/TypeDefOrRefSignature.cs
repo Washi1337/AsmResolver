@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -72,6 +74,49 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => Type;
+
+        /// <inheritdoc />
+        public override TypeSignature GetUnderlyingType()
+        {
+            var type = Type.Resolve();
+
+            if (type is {IsEnum: true})
+                return type.GetEnumUnderlyingType() ?? this;
+
+            return this;
+        }
+
+        /// <inheritdoc />
+        public override TypeSignature GetReducedType()
+        {
+            var underlyingType = GetUnderlyingType();
+            return !ReferenceEquals(underlyingType, this)
+                ? underlyingType.GetReducedType()
+                : this;
+        }
+
+        /// <inheritdoc />
+        public override TypeSignature? GetDirectBaseClass()
+        {
+            var type = Type.Resolve();
+            if (type is null)
+                return null;
+
+            // Interfaces have System.Object as direct base class.
+            return type.IsInterface
+                ? Module!.CorLibTypeFactory.Object
+                : type.BaseType!.ToTypeSignature(false).StripModifiers();
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<TypeSignature> GetDirectlyImplementedInterfaces()
+        {
+            var type = Type.Resolve();
+            if (type is null)
+                return Enumerable.Empty<TypeSignature>();
+
+            return type.Interfaces.Select(i => i.Interface!.ToTypeSignature(false));
+        }
 
         /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>

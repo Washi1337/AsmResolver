@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -51,6 +50,29 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         public override bool IsImportedInModule(ModuleDefinition module) => Signature.IsImportedInModule(module);
+
+        /// <inheritdoc />
+        protected override bool IsDirectlyCompatibleWith(TypeSignature other, SignatureComparer comparer)
+        {
+            if (base.IsDirectlyCompatibleWith(other, comparer))
+                return true;
+
+            if (other is not FunctionPointerTypeSignature {Signature: { } otherSignature}
+                || Signature.GenericParameterCount != otherSignature.GenericParameterCount
+                || Signature.ParameterTypes.Count != otherSignature.ParameterTypes.Count
+                || !Signature.ReturnType.IsAssignableTo(otherSignature.ReturnType, comparer))
+            {
+                return false;
+            }
+
+            for (int i = 0; i < Signature.ParameterTypes.Count; i++)
+            {
+                if (!Signature.ParameterTypes[i].IsAssignableTo(otherSignature.ParameterTypes[i], comparer))
+                    return false;
+            }
+
+            return true;
+        }
 
         /// <inheritdoc />
         protected override void WriteContents(in BlobSerializationContext context)

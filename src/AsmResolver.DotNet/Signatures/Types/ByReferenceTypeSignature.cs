@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -24,6 +25,24 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         public override bool IsValueType => false;
+
+        /// <inheritdoc />
+        public override TypeSignature GetVerificationType()
+        {
+            if (Module is null)
+                throw new InvalidOperationException("Cannot determine verification type of a non-imported type.");
+
+            var factory = Module.CorLibTypeFactory;
+            return BaseType.GetReducedType().ElementType switch
+            {
+                ElementType.I1 or ElementType.Boolean => factory.SByte.MakeByReferenceType(),
+                ElementType.I2 or ElementType.Char => factory.Int16.MakeByReferenceType(),
+                ElementType.I4 => factory.Int32.MakeByReferenceType(),
+                ElementType.I8 => factory.Int64.MakeByReferenceType(),
+                ElementType.I => factory.IntPtr.MakeByReferenceType(),
+                _ => base.GetVerificationType()
+            };
+        }
 
         /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>

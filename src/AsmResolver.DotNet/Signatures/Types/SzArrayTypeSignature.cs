@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -5,8 +6,10 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// <summary>
     /// Represents a type signature describing a single dimension array with 0 as a lower bound.
     /// </summary>
-    public class SzArrayTypeSignature : TypeSpecificationSignature
+    public class SzArrayTypeSignature : ArrayBaseTypeSignature
     {
+        private static readonly ArrayDimension[] SzDimensions = { new() };
+
         /// <summary>
         /// Creates a new single-dimension array signature with 0 as a lower bound.
         /// </summary>
@@ -23,7 +26,17 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override string Name => $"{BaseType.Name ?? NullTypeToString}[]";
 
         /// <inheritdoc />
-        public override bool IsValueType => false;
+        public override int Rank => 1;
+
+        /// <inheritdoc />
+        public override IEnumerable<ArrayDimension> GetDimensions() => SzDimensions;
+
+        /// <inheritdoc />
+        public override TypeSignature? GetDirectBaseClass() => Module?.CorLibTypeFactory.CorLibScope
+            .CreateTypeReference("System", "Array")
+            .ToTypeSignature(false)
+            .ImportWith(Module.DefaultImporter);
+
 
         /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
