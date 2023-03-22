@@ -399,6 +399,16 @@ namespace AsmResolver.PE.File.Headers
         /// <returns>The data directory entry.</returns>
         public DataDirectory GetDataDirectory(DataDirectoryIndex index) => DataDirectories[(int) index];
 
+        /// <summary>
+        /// Sets a data directory by its index.
+        /// </summary>
+        /// <param name="index">The index.</param>
+        /// <param name="directory">The new data directory entry.</param>
+        public void SetDataDirectory(DataDirectoryIndex index, DataDirectory directory)
+        {
+            DataDirectories[(int) index] = directory;
+        }
+
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {

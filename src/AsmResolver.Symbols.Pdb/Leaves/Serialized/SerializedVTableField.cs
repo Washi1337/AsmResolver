@@ -27,7 +27,7 @@ public class SerializedVTableField : VTableField
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetPointerType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_pointerTypeIndex, out var leaf) && leaf is CodeViewTypeRecord type
+        return _context.ParentImage.TryGetLeafRecord(_pointerTypeIndex, out CodeViewTypeRecord? type)
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"Virtual function table type {TypeIndex:X8} contains an invalid pointer type index {_pointerTypeIndex:X8}.");

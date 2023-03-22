@@ -7,6 +7,7 @@ using System.Text;
 using AsmResolver.DotNet.Bundles;
 using AsmResolver.IO;
 using AsmResolver.PE;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Win32Resources.Version;
@@ -120,10 +121,9 @@ namespace AsmResolver.DotNet.Tests.Bundles
             string appHostTemplatePath = FindAppHostTemplate("6.0");
 
             using var stream = new MemoryStream();
-            manifest.WriteUsingTemplate(stream, new BundlerParameters(appHostTemplatePath, "HelloWorld.dll")
-            {
-                SubSystem = subSystem
-            });
+            var parameters = BundlerParameters.FromTemplate(appHostTemplatePath, "HelloWorld.dll");
+            parameters.SubSystem = subSystem;
+            manifest.WriteUsingTemplate(stream, parameters);
 
             var newFile = PEFile.FromBytes(stream.ToArray());
             Assert.Equal(subSystem, newFile.OptionalHeader.SubSystem);
@@ -143,7 +143,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
 
             // Bundle with PE image as template for PE headers and resources.
             using var stream = new MemoryStream();
-            manifest.WriteUsingTemplate(stream, new BundlerParameters(
+            manifest.WriteUsingTemplate(stream, BundlerParameters.FromTemplate(
                 File.ReadAllBytes(appHostTemplatePath),
                 "HelloWorld.dll",
                 oldImage));
@@ -186,7 +186,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             Assert.Null(manifest.BundleID);
 
             using var stream = new MemoryStream();
-            manifest.WriteUsingTemplate(stream, new BundlerParameters(
+            manifest.WriteUsingTemplate(stream, BundlerParameters.FromTemplate(
                 FindAppHostTemplate("6.0"),
                 "HelloWorld.dll"));
 
@@ -205,6 +205,71 @@ namespace AsmResolver.DotNet.Tests.Bundles
             Assert.Equal(manifest.BundleID, newManifest.GenerateDeterministicBundleID());
         }
 
+        [Fact]
+        public void PatchAndRepackageExistingBundleV1()
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            AssertPatchAndRepackageChangesOutput(Properties.Resources.HelloWorld_SingleFile_V1);
+        }
+
+        [Fact]
+        public void PatchAndRepackageExistingBundleV2()
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            AssertPatchAndRepackageChangesOutput(Properties.Resources.HelloWorld_SingleFile_V2);
+        }
+
+        [Fact]
+        public void PatchAndRepackageExistingBundleV6()
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            AssertPatchAndRepackageChangesOutput(Properties.Resources.HelloWorld_SingleFile_V6);
+        }
+
+        private void AssertPatchAndRepackageChangesOutput(
+            byte[] original,
+            [CallerFilePath] string className = "File",
+            [CallerMemberName] string methodName = "Method")
+        {
+            // Read manifest and locate main entry point file.
+            var manifest = BundleManifest.FromBytes(original);
+            var mainFile = manifest.Files.First(f => f.RelativePath.Contains("HelloWorld.dll"));
+
+            // Patch entry point file.
+            var module = ModuleDefinition.FromBytes(mainFile.GetData());
+            module.ManagedEntryPointMethod!.CilMethodBody!
+                .Instructions.First(i => i.OpCode.Code == CilCode.Ldstr)
+                .Operand = "Hello, Mars!";
+
+            using var moduleStream = new MemoryStream();
+            module.Write(moduleStream);
+
+            mainFile.Contents = new DataSegment(moduleStream.ToArray());
+            mainFile.IsCompressed = false;
+
+            manifest.BundleID = manifest.GenerateDeterministicBundleID();
+
+            // Repackage bundle using existing bundle as template.
+            using var bundleStream = new MemoryStream();
+            manifest.WriteUsingTemplate(bundleStream, BundlerParameters.FromExistingBundle(
+                original,
+                mainFile.RelativePath));
+
+            // Verify application runs as expected.
+            DeleteTempExtractionDirectory(manifest, "HelloWorld.dll");
+            string output = _fixture
+                .GetRunner<NativePERunner>()
+                .RunAndCaptureOutput(
+                    "HelloWorld.exe",
+                    bundleStream.ToArray(),
+                    null,
+                    5000,
+                    className,
+                    methodName);
+
+            Assert.Equal($"Hello, Mars!{Environment.NewLine}", output);
+        }
+
         private void AssertWriteManifestWindowsPreservesOutput(
             BundleManifest manifest,
             string sdkVersion,
@@ -214,9 +279,10 @@ namespace AsmResolver.DotNet.Tests.Bundles
             [CallerMemberName] string methodName = "Method")
         {
             string appHostTemplatePath = FindAppHostTemplate(sdkVersion);
+            DeleteTempExtractionDirectory(manifest, fileName);
 
             using var stream = new MemoryStream();
-            manifest.WriteUsingTemplate(stream, new BundlerParameters(appHostTemplatePath, fileName));
+            manifest.WriteUsingTemplate(stream, BundlerParameters.FromTemplate(appHostTemplatePath, fileName));
 
             var newManifest = BundleManifest.FromBytes(stream.ToArray());
             AssertBundlesAreEqual(manifest, newManifest);
@@ -232,6 +298,15 @@ namespace AsmResolver.DotNet.Tests.Bundles
                     methodName);
 
             Assert.Equal(expectedOutput, output);
+        }
+        private static void DeleteTempExtractionDirectory(BundleManifest manifest, string fileName)
+        {
+            if (manifest.MajorVersion != 1 || manifest.BundleID is null || !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return;
+
+            string tempPath = Path.Combine(Path.GetTempPath(), ".net", Path.GetFileNameWithoutExtension(fileName), manifest.BundleID);
+            if (Directory.Exists(tempPath))
+                Directory.Delete(tempPath, true);
         }
 
         private static string FindAppHostTemplate(string sdkVersion)

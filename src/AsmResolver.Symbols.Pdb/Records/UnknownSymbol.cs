@@ -31,5 +31,5 @@ public class UnknownSymbol : CodeViewSymbol
     }
 
     /// <inheritdoc />
-    public override string ToString() => $"{CodeViewSymbolType.ToString()} ({Data.Length.ToString()} bytes)";
+    public override string ToString() => $"S_{CodeViewSymbolType.ToString().ToUpper()} ({Data.Length.ToString()} bytes)";
 }

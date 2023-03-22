@@ -6,7 +6,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Describes the shape of the virtual function table of a class or structure type.
 /// </summary>
-public class VTableShapeLeaf : CodeViewLeaf
+public class VTableShapeLeaf : CodeViewLeaf, ITpiLeaf
 {
     private IList<VTableShapeEntry>? _entries;
 

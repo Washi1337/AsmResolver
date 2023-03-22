@@ -18,13 +18,13 @@ public class PublicSymbol : CodeViewSymbol
     /// <summary>
     /// Creates a new public symbol.
     /// </summary>
-    /// <param name="segment">The segment index.</param>
+    /// <param name="segmentIndex">The segment index.</param>
     /// <param name="offset">The offset within the segment the symbol starts at.</param>
     /// <param name="name">The name of the symbol.</param>
     /// <param name="attributes">The attributes associated to the symbol.</param>
-    public PublicSymbol(ushort segment, uint offset, Utf8String name, PublicSymbolAttributes attributes)
+    public PublicSymbol(ushort segmentIndex, uint offset, Utf8String name, PublicSymbolAttributes attributes)
     {
-        Segment = segment;
+        SegmentIndex = segmentIndex;
         Offset = offset;
         _name = new LazyVariable<Utf8String>(name);
         Attributes = attributes;
@@ -36,7 +36,7 @@ public class PublicSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the file segment index this symbol is located in.
     /// </summary>
-    public ushort Segment
+    public ushort SegmentIndex
     {
         get;
         set;
@@ -119,5 +119,5 @@ public class PublicSymbol : CodeViewSymbol
     protected virtual Utf8String GetName() => Utf8String.Empty;
 
     /// <inheritdoc />
-    public override string ToString() => $"{CodeViewSymbolType}: [{Segment:X4}:{Offset:X8}] {Name}";
+    public override string ToString() => $"S_PUB32: [{SegmentIndex:X4}:{Offset:X8}] {Name}";
 }

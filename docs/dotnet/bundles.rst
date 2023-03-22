@@ -3,7 +3,7 @@ AppHost / SingleFileHost Bundles
 
 Since the release of .NET Core 3.1, it is possible to deploy .NET assemblies as a single binary. These files are executables that do not contain a traditional .NET metadata header, and run natively on the underlying operating system via a platform-specific application host bootstrapper.
 
-AsmResolver supports extracting the embedded files from these types of binaries. Additionally, given an application host template provided by the .NET SDK, AsmResolver also supports constructing new bundles as well. All relevant code is found in the following namespace:
+AsmResolver supports extracting the embedded files from these types of binaries. Additionally, given the original file or an application host template provided by the .NET SDK, AsmResolver also supports constructing new bundles as well. All relevant code is found in the following namespace:
 
 .. code-block:: csharp
 
@@ -96,14 +96,14 @@ Constructing new bundled executable files requires a template file that AsmResol
 - ``<DOTNET-INSTALLATION-PATH>/sdk/<version>/AppHostTemplate``
 - ``<DOTNET-INSTALLATION-PATH>/packs/Microsoft.NETCore.App.Host.<runtime-identifier>/<version>/runtimes/<runtime-identifier>/native``
 
-Using this template file, it is then possible to write a new bundled executable file using ``WriteUsingTemplate``:
+Using this template file, it is then possible to write a new bundled executable file using ``WriteUsingTemplate`` and the ``BundlerParameters::FromTemplate`` method:
 
 .. code-block:: csharp
 
     BundleManifest manifest = ...
     manifest.WriteUsingTemplate(
         @"C:\Path\To\Output\File.exe",
-        new BundlerParameters(
+        BundlerParameters.FromTemplate(
             appHostTemplatePath: @"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\6.0.0\runtimes\win-x64\native\apphost.exe",
             appBinaryPath: @"HelloWorld.dll"));
 
@@ -117,12 +117,38 @@ For bundle executable files targeting Windows, it may be required to copy over s
     BundleManifest manifest = ...
     manifest.WriteUsingTemplate(
         @"C:\Path\To\Output\File.exe",
-        new BundlerParameters(
+        BundlerParameters.FromTemplate(
             appHostTemplatePath: @"C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Host.win-x64\6.0.0\runtimes\win-x64\native\apphost.exe",
             appBinaryPath: @"HelloWorld.dll",
             imagePathToCopyHeadersFrom: @"C:\Path\To\Original\HelloWorld.exe"));
 
-``BundleManifest`` also defines other ```WriteUsingTemplate`` overloads taking ``byte[]``, ``IDataSource`` or ``IPEImage`` instances instead of paths.
+
+If you do not have access to a template file (e.g., if the SDK is not installed) but have another existing PE file that was packaged in a similar fashion, it is then possible to use this file as a template instead by extracting the bundler parameters using the ``BundlerParameters::FromExistingBundle`` method. This is in particularly useful when trying to patch existing AppHost bundles:
+
+.. code-block:: csharp
+
+    string inputPath = @"C:\Path\To\Bundled\HelloWorld.exe";
+    string outputPath = Path.ChangeExtension(inputPath, ".patched.exe");
+
+    // Read manifest.
+    var manifest = BundleManifest.FromFile(inputPath);
+
+    /* ... Make changes to manifest and its files ... */ 
+    
+    // Repackage bundle using existing bundle as template.
+    manifest.WriteUsingTemplate(
+        outputPath, 
+        BundlerParameters.FromExistingBundle(
+            originalFile: inputPath, 
+            appBinaryPath: mainFile.RelativePath));
+
+
+.. warning::
+
+    The ``BundlerParameters.FromExistingBundle`` method applies heuristics on the input file to determine the parameters for patching the input file. As heuristics are not perfect, this is not guaranteed to always work.
+
+
+``BundleManifest`` and ``BundlerParameters`` also define overloads of the ``WriteUsingTemplate`` and ``FromTemplate`` / ``FromExistingBundle`` respectively, taking ``byte[]``, ``IDataSource`` or ``IPEImage`` instances instead of file paths.
 
 
 Managing Files

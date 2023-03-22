@@ -152,7 +152,7 @@ public enum CodeViewLeafKind : ushort
 
     FuncId = 0x1601,
     MFuncId = 0x1602,
-    Buildinfo = 0x1603,
+    BuildInfo = 0x1603,
     SubstrList = 0x1604,
     StringId = 0x1605,
 

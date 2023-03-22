@@ -70,5 +70,5 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     protected virtual CodeViewTypeRecord? GetSymbolType() => null;
 
     /// <inheritdoc />
-    public override string ToString() => $"{CodeViewSymbolType}: {Type} {Name}";
+    public override string ToString() => $"S_UDT: {Type} {Name}";
 }

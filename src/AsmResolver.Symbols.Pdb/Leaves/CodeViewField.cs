@@ -1,9 +1,9 @@
 namespace AsmResolver.Symbols.Pdb.Leaves;
 
 /// <summary>
-/// Represents a single record in a field list of a TPI or IPI stream.
+/// Represents a single record in a field list of a TPI stream.
 /// </summary>
-public abstract class CodeViewField : CodeViewLeaf
+public abstract class CodeViewField : CodeViewLeaf, ITpiLeaf
 {
     /// <summary>
     /// Initializes an empty CodeView field leaf.

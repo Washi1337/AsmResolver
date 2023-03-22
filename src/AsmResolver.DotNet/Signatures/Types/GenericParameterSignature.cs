@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="module">The module in which this generic parameter signature resides.</param>
         /// <param name="parameterType">Indicates the parameter signature is declared by a type or a method.</param>
         /// <param name="index">The index of the referenced parameter.</param>
-        public GenericParameterSignature(ModuleDefinition module, GenericParameterType parameterType, int index)
+        public GenericParameterSignature(ModuleDefinition? module, GenericParameterType parameterType, int index)
         {
             Scope = module;
             ParameterType = parameterType;

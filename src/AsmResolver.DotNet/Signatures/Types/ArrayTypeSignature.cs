@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// <remarks>
     /// For simple single-dimension arrays, use <see cref="SzArrayTypeSignature"/> instead.
     /// </remarks>
-    public class ArrayTypeSignature : TypeSpecificationSignature
+    public class ArrayTypeSignature : ArrayBaseTypeSignature
     {
         /// <summary>
         /// Creates a new array type signature.
@@ -58,9 +58,6 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <inheritdoc />
         public override string Name => $"{BaseType.Name ?? NullTypeToString}{GetDimensionsString()}";
 
-        /// <inheritdoc />
-        public override bool IsValueType => false;
-
         /// <summary>
         /// Gets a collection of dimensions.
         /// </summary>
@@ -68,6 +65,12 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             get;
         }
+
+        /// <inheritdoc />
+        public override int Rank => Dimensions.Count;
+
+        /// <inheritdoc />
+        public override IEnumerable<ArrayDimension> GetDimensions() => Dimensions;
 
         internal new static ArrayTypeSignature FromReader(ref BlobReaderContext context, ref BinaryStreamReader reader)
         {
@@ -190,6 +193,12 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             return true;
         }
+
+        /// <inheritdoc />
+        public override TypeSignature? GetDirectBaseClass() => Module?.CorLibTypeFactory.CorLibScope
+            .CreateTypeReference("System", "Array")
+            .ToTypeSignature(false)
+            .ImportWith(Module.DefaultImporter);
 
         /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>

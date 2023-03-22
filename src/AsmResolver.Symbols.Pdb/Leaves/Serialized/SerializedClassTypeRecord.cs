@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
@@ -32,7 +33,7 @@ public class SerializedClassTypeRecord : ClassTypeRecord
         _baseTypeIndex = reader.ReadUInt32();
         _vTableShapeIndex = reader.ReadUInt32();
 
-        Size = (uint) ReadNumeric(ref reader);
+        Size = Convert.ToUInt32(ReadNumeric(ref reader));
 
         _nameReader = reader.Fork();
         reader.AdvanceUntil(0, true);
@@ -51,7 +52,7 @@ public class SerializedClassTypeRecord : ClassTypeRecord
         if (_baseTypeIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_baseTypeIndex, out var leaf) && leaf is CodeViewTypeRecord type
+        return _context.ParentImage.TryGetLeafRecord(_baseTypeIndex, out CodeViewTypeRecord? type)
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"Class type {TypeIndex:X8} contains an invalid underlying enum type index {_baseTypeIndex:X8}.");
@@ -63,7 +64,7 @@ public class SerializedClassTypeRecord : ClassTypeRecord
         if (_fieldIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_fieldIndex, out var leaf) && leaf is SerializedFieldListLeaf list
+        return _context.ParentImage.TryGetLeafRecord(_fieldIndex, out SerializedFieldListLeaf? list)
             ? list
             : _context.Parameters.ErrorListener.BadImageAndReturn<FieldListLeaf>(
                 $"Class type {TypeIndex:X8} contains an invalid field list index {_fieldIndex:X8}.");
@@ -75,7 +76,7 @@ public class SerializedClassTypeRecord : ClassTypeRecord
         if (_vTableShapeIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_vTableShapeIndex, out var leaf) && leaf is VTableShapeLeaf shape
+        return _context.ParentImage.TryGetLeafRecord(_vTableShapeIndex, out VTableShapeLeaf? shape)
             ? shape
             : _context.Parameters.ErrorListener.BadImageAndReturn<VTableShapeLeaf>(
                 $"Class type {TypeIndex:X8} contains an invalid VTable shape index {_fieldIndex:X8}.");

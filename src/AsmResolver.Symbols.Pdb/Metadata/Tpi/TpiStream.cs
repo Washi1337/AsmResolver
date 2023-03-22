@@ -11,7 +11,12 @@ public abstract class TpiStream : SegmentBase
     /// <summary>
     /// Gets the default fixed MSF stream index for the TPI stream.
     /// </summary>
-    public const int StreamIndex = 2;
+    public const int TpiStreamIndex = 2;
+
+    /// <summary>
+    /// Gets the default fixed MSF stream index for the IPI stream.
+    /// </summary>
+    public const int IpiStreamIndex = 4;
 
     internal const uint TpiStreamHeaderSize =
             sizeof(TpiStreamVersion) // Version

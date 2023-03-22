@@ -33,7 +33,7 @@ public class SerializedNestedTypeField : NestedTypeField
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetNestedType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out var leaf) && leaf is CodeViewTypeRecord type
+        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out CodeViewTypeRecord? type)
             ? type
             : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
                 $"Nested type {TypeIndex:X8} contains an invalid type index {_typeIndex:X8}.");

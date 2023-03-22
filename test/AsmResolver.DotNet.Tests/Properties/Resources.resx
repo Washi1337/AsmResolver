@@ -153,4 +153,7 @@
     <data name="ModuleCctorNetFramework" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\ModuleCctorNetFramework.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="ArgListTest" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\ArgListTest.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
 </root>

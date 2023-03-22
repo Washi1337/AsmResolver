@@ -9,6 +9,7 @@ using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Win32Resources;
 using AsmResolver.PE.Win32Resources.Builder;
 
 namespace AsmResolver.DotNet.Bundles
@@ -27,9 +28,6 @@ namespace AsmResolver.DotNet.Bundles
             0x13, 0xf5, 0xb9, 0xe6, 0xef, 0xae, 0x33, 0x18,
             0xee, 0x3b, 0x2d, 0xce, 0x24, 0xb3, 0x6a, 0xae
         };
-
-        private static readonly byte[] AppBinaryPathPlaceholder =
-            Encoding.UTF8.GetBytes("c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2");
 
         private IList<BundleFile>? _files;
 
@@ -194,7 +192,7 @@ namespace AsmResolver.DotNet.Bundles
         /// <returns>The read manifest.</returns>
         public static BundleManifest FromReader(BinaryStreamReader reader) => new SerializedBundleManifest(reader);
 
-        private static long FindInFile(IDataSource source, byte[] data)
+        internal static long FindInFile(IDataSource source, byte[] needle)
         {
             // Note: For performance reasons, we read data from the data source in blocks, such that we avoid
             // virtual-dispatch calls and do the searching directly on a byte array instead.
@@ -206,12 +204,12 @@ namespace AsmResolver.DotNet.Bundles
             {
                 int read = source.ReadBytes(start, buffer, 0, buffer.Length);
 
-                for (int i = sizeof(ulong); i < read - data.Length; i++)
+                for (int i = sizeof(ulong); i < read - needle.Length; i++)
                 {
                     bool fullMatch = true;
-                    for (int j = 0; fullMatch && j < data.Length; j++)
+                    for (int j = 0; fullMatch && j < needle.Length; j++)
                     {
-                        if (buffer[i + j] != data[j])
+                        if (buffer[i + j] != needle[j])
                             fullMatch = false;
                     }
 
@@ -317,6 +315,7 @@ namespace AsmResolver.DotNet.Bundles
         /// <param name="parameters">The parameters to use for bundling all files into a single executable.</param>
         public void WriteUsingTemplate(IBinaryStreamWriter writer, BundlerParameters parameters)
         {
+            // Verify entry point assembly exists within the bundle and is a correct length.
             var appBinaryEntry = Files.FirstOrDefault(f => f.RelativePath == parameters.ApplicationBinaryPath);
             if (appBinaryEntry is null)
                 throw new ArgumentException($"Application {parameters.ApplicationBinaryPath} does not exist within the bundle.");
@@ -325,6 +324,7 @@ namespace AsmResolver.DotNet.Bundles
             if (appBinaryPathBytes.Length > 1024)
                 throw new ArgumentException("Application binary path cannot exceed 1024 bytes.");
 
+            // Patch headers when necessary.
             if (!parameters.IsArm64Linux)
                 EnsureAppHostPEHeadersAreUpToDate(ref parameters);
 
@@ -333,21 +333,26 @@ namespace AsmResolver.DotNet.Bundles
             if (signatureAddress == -1)
                 throw new ArgumentException("AppHost template does not contain the bundle signature.");
 
-            long appBinaryPathAddress = FindInFile(appHostTemplateSource, AppBinaryPathPlaceholder);
+            long appBinaryPathAddress = FindInFile(appHostTemplateSource, parameters.PathPlaceholder);
             if (appBinaryPathAddress == -1)
                 throw new ArgumentException("AppHost template does not contain the application binary path placeholder.");
 
+            // Write template.
             writer.WriteBytes(parameters.ApplicationHostTemplate);
+
+            // Append manifest.
             writer.Offset = writer.Length;
             ulong headerAddress = WriteManifest(writer, parameters.IsArm64Linux);
 
+            // Update header address in apphost template.
             writer.Offset = (ulong) signatureAddress - sizeof(ulong);
             writer.WriteUInt64(headerAddress);
 
+            // Replace binary path placeholder with actual path.
             writer.Offset = (ulong) appBinaryPathAddress;
             writer.WriteBytes(appBinaryPathBytes);
-            if (AppBinaryPathPlaceholder.Length > appBinaryPathBytes.Length)
-                writer.WriteZeroes(AppBinaryPathPlaceholder.Length - appBinaryPathBytes.Length);
+            if (parameters.PathPlaceholder.Length > appBinaryPathBytes.Length)
+                writer.WriteZeroes(parameters.PathPlaceholder.Length - appBinaryPathBytes.Length);
         }
 
         private static void EnsureAppHostPEHeadersAreUpToDate(ref BundlerParameters parameters)

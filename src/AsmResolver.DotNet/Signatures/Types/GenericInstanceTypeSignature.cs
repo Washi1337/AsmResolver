@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -120,6 +121,81 @@ namespace AsmResolver.DotNet.Signatures.Types
             for (int i = 0; i < TypeArguments.Count; i++)
             {
                 if (!TypeArguments[i].IsImportedInModule(module))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public override TypeSignature? GetDirectBaseClass()
+        {
+            var genericType = GenericType.Resolve();
+            if (genericType is null)
+                return null;
+
+            // Interfaces have System.Object as direct base class.
+            if (genericType.IsInterface)
+                return Module!.CorLibTypeFactory.Object;
+
+            if (genericType.BaseType is not { } baseType)
+                return null;
+
+            // If the base type is not generic, treat it as a normal TypeDefOrRef.
+            if (baseType is TypeDefinition or TypeReference)
+                return baseType.ToTypeSignature(IsValueType);
+
+            // At this point we expect a type specification. Substitute any generic type arguments present in it.
+            return baseType is TypeSpecification { Signature: { } signatureBaseType }
+                ? signatureBaseType.StripModifiers().InstantiateGenericTypes(GenericContext.FromType(this))
+                : null;
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<TypeSignature> GetDirectlyImplementedInterfaces()
+        {
+            var type = GenericType.Resolve();
+            if (type is null)
+                return Enumerable.Empty<TypeSignature>();
+
+            var context = GenericContext.FromType(this);
+            return type.Interfaces.Select(i => i.Interface!.ToTypeSignature(false).InstantiateGenericTypes(context));
+        }
+
+        /// <inheritdoc />
+        protected override bool IsDirectlyCompatibleWith(TypeSignature other, SignatureComparer comparer)
+        {
+            if (base.IsDirectlyCompatibleWith(other, comparer))
+                return true;
+
+            // Other type must be a generic instance with the same generic base type and type argument count.
+            if (other is not GenericInstanceTypeSignature otherGenericInstance
+                || otherGenericInstance.TypeArguments.Count != TypeArguments.Count
+                || !comparer.Equals(GenericType, otherGenericInstance.GenericType))
+            {
+                return false;
+            }
+
+            // If resolution fails, assume no parameter variance.
+            var genericType = GenericType.Resolve();
+
+            // Check that every type argument is compatible with each other.
+            for (int i = 0; i < TypeArguments.Count; i++)
+            {
+                var variance = genericType?.GenericParameters[i].Attributes & GenericParameterAttributes.VarianceMask;
+
+                bool argumentIsCompatible = variance switch
+                {
+                    GenericParameterAttributes.NonVariant =>
+                        comparer.Equals(TypeArguments[i].StripModifiers(), otherGenericInstance.TypeArguments[i].StripModifiers()),
+                    GenericParameterAttributes.Covariant =>
+                        TypeArguments[i].IsCompatibleWith(otherGenericInstance.TypeArguments[i], comparer),
+                    GenericParameterAttributes.Contravariant =>
+                        otherGenericInstance.TypeArguments[i].IsCompatibleWith(TypeArguments[i], comparer),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                if (!argumentIsCompatible)
                     return false;
             }
 

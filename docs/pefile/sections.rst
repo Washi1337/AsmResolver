@@ -1,6 +1,6 @@
 .. _pe-file-sections:
 
-PE sections
+PE Sections
 ===========
 
 Sections can be read and modified by accessing the ``PEFile.Sections`` property, which is a collection of ``PESection`` objects.

@@ -359,5 +359,12 @@ namespace AsmResolver.DotNet.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] ArgListTest {
+            get {
+                object obj = ResourceManager.GetObject("ArgListTest", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

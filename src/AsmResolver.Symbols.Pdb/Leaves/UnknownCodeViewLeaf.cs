@@ -3,7 +3,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents an unknown or unsupported CodeView type record.
 /// </summary>
-public class UnknownCodeViewLeaf : CodeViewLeaf
+public class UnknownCodeViewLeaf : CodeViewLeaf, ITpiLeaf, IIpiLeaf
 {
     /// <summary>
     /// Creates a new unknown type record.
