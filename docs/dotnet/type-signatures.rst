@@ -11,8 +11,8 @@ All relevant classes in this document can be found in the following namespaces:
     using AsmResolver.DotNet.Signatures.Types;
 
 
-Overview of all Type Signatures 
--------------------------------
+Overview
+--------
 
 Basic leaf type signatures: 
 
@@ -78,8 +78,8 @@ Corlib type signatures can also be looked up by their element type, by their ful
 If an invalid element type, name or type descriptor is passed on, these methods return ``null``.
 
 
-TypeDefOrRefSignature
----------------------
+Class and Struct Types
+----------------------
 
 The ``TypeDefOrRefSignature`` class is used to reference types in either the ``TypeDef`` or ``TypeRef`` (and sometimes ``TypeSpec``) metadata table. 
 
@@ -101,8 +101,8 @@ Alternatively, ``CreateTypeReference`` can be used on any ``IResolutionScope``:
     While it is technically possible to reference a basic type such as ``System.Int32`` as a ``TypeDefOrRefSignature``, it renders the .NET module invalid by most implementations of the CLR. Always use the ``CorLibTypeSignature`` to reference basic types within your blob signatures.
 
 
-GenericInstanceTypeSignature
-----------------------------
+Generic Instance Types
+----------------------
 
 The ``GenericInstanceTypeSignature`` class is used to instantiate generic types with type arguments:
 
@@ -128,8 +128,8 @@ Alternatively, a generic instance can also be generated via the ``MakeGenericTyp
     // listOfString now contains a reference to List<string>.
 
 
-FunctionPointerTypeSignature
-----------------------------
+Function Pointer Types
+----------------------
 
 Function pointer signatures are strongly-typed pointer types used to describe addresses to functions or methods. In AsmResolver, they are represented using a ``MethodSignature``:
 
@@ -175,8 +175,8 @@ To quickly transform any ``ITypeDescriptor`` into a ``TypeSignature``, it is pos
 Likewise, a ``TypeSignature`` can also be converted back to a ``ITypeDefOrRef``, which can be referenced using a metadata token, using the ``TypeSignature.ToTypeDefOrRef()`` method.
 
 
-Decorating type signatures
---------------------------
+Decorating Types
+----------------
 
 Type signatures can be annotated with extra properties, such as an array or pointer specifier.
 
@@ -205,7 +205,7 @@ Below an overview of all factory shortcut methods:
 +===================================================================+==================================================================================================================+
 | ``MakeArrayType(int dimensionCount)``                             | Wraps the type in a new ``ArrayTypeSignature`` with ``dimensionCount`` zero based dimensions with no upperbound. |
 +-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
-| ``MakeArrayType(ArrayDimension[] dimensinos)``                    | Wraps the type in a new ``ArrayTypeSignature`` with ``dimensions`` set as dimensions                             |
+| ``MakeArrayType(ArrayDimension[] dimensions)``                    | Wraps the type in a new ``ArrayTypeSignature`` with ``dimensions`` set as dimensions                             |
 +-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
 | ``MakeByReferenceType()``                                         | Wraps the type in a new ``ByReferenceTypeSignature``                                                             |
 +-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
@@ -222,8 +222,8 @@ Below an overview of all factory shortcut methods:
 
 
 
-Comparing Type Signatures
--------------------------
+Comparing Types
+---------------
 
 Type signatures can be tested for semantic equivalence using the ``SignatureComparer`` class. 
 Most use-cases of this class will not require any customization. 

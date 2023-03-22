@@ -1,4 +1,4 @@
-PE headers
+PE Headers
 ==========
 
 After you obtained an instance of the ``PEFile`` class, it is possible to read and edit various properties in the DOS header, COFF file header and optional header. They each have a designated property:
