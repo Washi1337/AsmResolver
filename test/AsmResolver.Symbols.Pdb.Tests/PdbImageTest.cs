@@ -1,5 +1,8 @@
+using System;
 using System.Linq;
+using AsmResolver.PE.File.Headers;
 using AsmResolver.Symbols.Pdb.Leaves;
+using AsmResolver.Symbols.Pdb.Metadata.Dbi;
 using Xunit;
 
 namespace AsmResolver.Symbols.Pdb.Tests;
@@ -11,6 +14,19 @@ public class PdbImageTest : IClassFixture<MockPdbFixture>
     public PdbImageTest(MockPdbFixture fixture)
     {
         _fixture = fixture;
+    }
+
+    [Fact]
+    public void BasicMetadata()
+    {
+        var image = _fixture.SimplePdb;
+
+        Assert.Equal(1u, image.Age);
+        Assert.Equal(Guid.Parse("205dc366-d8f8-4175-8e06-26dd76722df5"), image.UniqueId);
+        Assert.Equal(DbiAttributes.None, image.Attributes);
+        Assert.Equal(MachineType.I386, image.Machine);
+        Assert.Equal(14, image.BuildMajorVersion);
+        Assert.Equal(29, image.BuildMinorVersion);
     }
 
     [Theory]

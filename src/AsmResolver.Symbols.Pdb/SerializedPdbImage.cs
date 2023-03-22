@@ -33,6 +33,7 @@ public class SerializedPdbImage : PdbImage
     {
         _file = file;
 
+        // Obtain relevant core PDB streams.
         if (file.Streams.Count < MinimalRequiredStreamCount)
             throw new BadImageFormatException("MSF does not contain the minimal required amount of streams.");
 
@@ -41,10 +42,22 @@ public class SerializedPdbImage : PdbImage
         TpiStream = TpiStream.FromReader(file.Streams[TpiStream.TpiStreamIndex].CreateReader());
         IpiStream = TpiStream.FromReader(file.Streams[TpiStream.IpiStreamIndex].CreateReader());
 
+        // Initialize TPI/IPI caches.
         ReaderContext = new PdbReaderContext(this, readerParameters);
-
         _tpi = new LeafStreamCache(ReaderContext, TpiStream);
         _ipi = new LeafStreamCache(ReaderContext, IpiStream);
+
+        // Copy over INFO stream metadata.
+        Timestamp = new DateTime(1970, 1, 1) + TimeSpan.FromSeconds(InfoStream.Signature);
+        Age = InfoStream.Age;
+        UniqueId = InfoStream.UniqueId;
+
+        // Copy over DBI stream metadata.
+        BuildMajorVersion = DbiStream.BuildMajorVersion;
+        BuildMinorVersion = DbiStream.BuildMinorVersion;
+        PdbDllVersion = DbiStream.PdbDllVersion;
+        Attributes = DbiStream.Attributes;
+        Machine = DbiStream.Machine;
     }
 
     internal PdbReaderContext ReaderContext
@@ -134,19 +147,12 @@ public class SerializedPdbImage : PdbImage
 
     private ModiStream? GetModiStream(ModuleDescriptor descriptor)
     {
-        ModiStream? modi;
         int index = descriptor.SymbolStreamIndex;
         if (index >= _file.Streams.Count)
-        {
-            modi = null;
-        }
-        else
-        {
-            var stream = _file.Streams[index];
-            modi = ModiStream.FromReader(stream.CreateReader(), descriptor);
-        }
+            return null;
 
-        return modi;
+        var stream = _file.Streams[index];
+        return ModiStream.FromReader(stream.CreateReader(), descriptor);
     }
 
     private class LeafStreamCache

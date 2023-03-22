@@ -5,7 +5,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using AsmResolver.IO;
+using AsmResolver.PE.File.Headers;
 using AsmResolver.Symbols.Pdb.Leaves;
+using AsmResolver.Symbols.Pdb.Metadata.Dbi;
+using AsmResolver.Symbols.Pdb.Metadata.Info;
 using AsmResolver.Symbols.Pdb.Msf;
 using AsmResolver.Symbols.Pdb.Records;
 
@@ -20,6 +23,78 @@ public class PdbImage : ICodeViewSymbolProvider
 
     private IList<ICodeViewSymbol>? _symbols;
     private IList<PdbModule>? _modules;
+
+    /// <summary>
+    /// Gets or sets the time-stamp of the PDB file.
+    /// </summary>
+    public DateTime Timestamp
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Gets or sets the number of times the PDB file has been written.
+    /// </summary>
+    public uint Age
+    {
+        get;
+        set;
+    } = 1;
+
+    /// <summary>
+    /// Gets or sets the unique identifier assigned to the PDB file.
+    /// </summary>
+    public Guid UniqueId
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Gets or sets the major version of the toolchain that was used to build the program.
+    /// </summary>
+    public byte BuildMajorVersion
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Gets or sets the minor version of the toolchain that was used to build the program.
+    /// </summary>
+    public byte BuildMinorVersion
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Gets or sets the version number of mspdbXXXX.dll that was used to produce this PDB file.
+    /// </summary>
+    public ushort PdbDllVersion
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Gets or sets attributes associated to the DBI stream.
+    /// </summary>
+    public DbiAttributes Attributes
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Gets or sets the machine type the program was compiled for.
+    /// </summary>
+    public MachineType Machine
+    {
+        get;
+        set;
+    }
 
     /// <inheritdoc />
     public IList<ICodeViewSymbol> Symbols
