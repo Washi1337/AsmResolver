@@ -35,24 +35,24 @@ namespace AsmResolver.DotNet
     {
         private static MethodInfo? GetHINSTANCEMethod;
 
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<Guid> _mvid;
-        private readonly LazyVariable<Guid> _encId;
-        private readonly LazyVariable<Guid> _encBaseId;
+        private readonly LazyVariable<ModuleDefinition, Utf8String?> _name;
+        private readonly LazyVariable<ModuleDefinition, Guid> _mvid;
+        private readonly LazyVariable<ModuleDefinition, Guid> _encId;
+        private readonly LazyVariable<ModuleDefinition, Guid> _encBaseId;
 
         private IList<TypeDefinition>? _topLevelTypes;
         private IList<AssemblyReference>? _assemblyReferences;
         private IList<CustomAttribute>? _customAttributes;
 
-        private readonly LazyVariable<IManagedEntryPoint?> _managedEntryPoint;
+        private readonly LazyVariable<ModuleDefinition, IManagedEntryPoint?> _managedEntryPoint;
         private IList<ModuleReference>? _moduleReferences;
         private IList<FileReference>? _fileReferences;
         private IList<ManifestResource>? _resources;
         private IList<ExportedType>? _exportedTypes;
         private TokenAllocator? _tokenAllocator;
 
-        private readonly LazyVariable<string> _runtimeVersion;
-        private readonly LazyVariable<IResourceDirectory?> _nativeResources;
+        private readonly LazyVariable<ModuleDefinition, string> _runtimeVersion;
+        private readonly LazyVariable<ModuleDefinition, IResourceDirectory?> _nativeResources;
         private IList<DebugDataEntry>? _debugData;
         private ReferenceImporter? _defaultImporter;
 
@@ -267,13 +267,13 @@ namespace AsmResolver.DotNet
         protected ModuleDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _mvid = new LazyVariable<Guid>(GetMvid);
-            _encId = new LazyVariable<Guid>(GetEncId);
-            _encBaseId = new LazyVariable<Guid>(GetEncBaseId);
-            _managedEntryPoint = new LazyVariable<IManagedEntryPoint?>(GetManagedEntryPoint);
-            _runtimeVersion = new LazyVariable<string>(GetRuntimeVersion);
-            _nativeResources = new LazyVariable<IResourceDirectory?>(GetNativeResources);
+            _name = new LazyVariable<ModuleDefinition, Utf8String?>(x => x.GetName());
+            _mvid = new LazyVariable<ModuleDefinition, Guid>(x => x.GetMvid());
+            _encId = new LazyVariable<ModuleDefinition, Guid>(x => x.GetEncId());
+            _encBaseId = new LazyVariable<ModuleDefinition, Guid>(x => x.GetEncBaseId());
+            _managedEntryPoint = new LazyVariable<ModuleDefinition, IManagedEntryPoint?>(x => x.GetManagedEntryPoint());
+            _runtimeVersion = new LazyVariable<ModuleDefinition, string>(x => x.GetRuntimeVersion());
+            _nativeResources = new LazyVariable<ModuleDefinition, IResourceDirectory?>(x => x.GetNativeResources());
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
 
@@ -384,8 +384,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -416,8 +416,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Guid Mvid
         {
-            get => _mvid.Value;
-            set => _mvid.Value = value;
+            get => _mvid.GetValue(this);
+            set => _mvid.SetValue(value);
         }
 
         /// <summary>
@@ -428,8 +428,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Guid EncId
         {
-            get => _encId.Value;
-            set => _encId.Value = value;
+            get => _encId.GetValue(this);
+            set => _encId.SetValue(value);
         }
 
         /// <summary>
@@ -440,8 +440,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Guid EncBaseId
         {
-            get => _encBaseId.Value;
-            set => _encBaseId.Value = value;
+            get => _encBaseId.GetValue(this);
+            set => _encBaseId.SetValue(value);
         }
 
         /// <summary>
@@ -635,8 +635,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public string RuntimeVersion
         {
-            get => _runtimeVersion.Value;
-            set => _runtimeVersion.Value = value;
+            get => _runtimeVersion.GetValue(this);
+            set => _runtimeVersion.SetValue(value);
         }
 
         /// <summary>
@@ -645,8 +645,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IResourceDirectory? NativeResourceDirectory
         {
-            get => _nativeResources.Value;
-            set => _nativeResources.Value = value;
+            get => _nativeResources.GetValue(this);
+            set => _nativeResources.SetValue(value);
         }
 
         /// <summary>
@@ -772,8 +772,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IManagedEntryPoint? ManagedEntryPoint
         {
-            get => _managedEntryPoint.Value;
-            set => _managedEntryPoint.Value = value;
+            get => _managedEntryPoint.GetValue(this);
+            set => _managedEntryPoint.SetValue(value);
         }
 
         /// <summary>

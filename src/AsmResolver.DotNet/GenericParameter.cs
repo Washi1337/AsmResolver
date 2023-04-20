@@ -16,8 +16,8 @@ namespace AsmResolver.DotNet
         IModuleProvider,
         IOwnedCollectionElement<IHasGenericParameters>
     {
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<IHasGenericParameters?> _owner;
+        private readonly LazyVariable<GenericParameter, Utf8String?> _name;
+        private readonly LazyVariable<GenericParameter, IHasGenericParameters?> _owner;
         private IList<GenericParameterConstraint>? _constraints;
         private IList<CustomAttribute>? _customAttributes;
 
@@ -28,8 +28,8 @@ namespace AsmResolver.DotNet
         protected GenericParameter(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _owner = new LazyVariable<IHasGenericParameters?>(GetOwner);
+            _name = new LazyVariable<GenericParameter, Utf8String?>(x => x.GetName());
+            _owner = new LazyVariable<GenericParameter, IHasGenericParameters?>(x => x.GetOwner());
         }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IHasGenericParameters? Owner
         {
-            get => _owner.Value;
-            private set => _owner.Value = value;
+            get => _owner.GetValue(this);
+            private set => _owner.SetValue(value);
         }
 
         IHasGenericParameters? IOwnedCollectionElement<IHasGenericParameters>.Owner
@@ -77,8 +77,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;

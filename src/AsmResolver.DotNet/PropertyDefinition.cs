@@ -20,10 +20,10 @@ namespace AsmResolver.DotNet
         IHasConstant,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<TypeDefinition?> _declaringType;
-        private readonly LazyVariable<PropertySignature?> _signature;
-        private readonly LazyVariable<Constant?> _constant;
+        private readonly LazyVariable<PropertyDefinition, Utf8String?> _name;
+        private readonly LazyVariable<PropertyDefinition, TypeDefinition?> _declaringType;
+        private readonly LazyVariable<PropertyDefinition, PropertySignature?> _signature;
+        private readonly LazyVariable<PropertyDefinition, Constant?> _constant;
         private IList<MethodSemantics>? _semantics;
         private IList<CustomAttribute>? _customAttributes;
 
@@ -34,10 +34,10 @@ namespace AsmResolver.DotNet
         protected PropertyDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _signature = new LazyVariable<PropertySignature?>(GetSignature);
-            _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
-            _constant = new LazyVariable<Constant?>(GetConstant);
+            _name = new LazyVariable<PropertyDefinition, Utf8String?>(x => x.GetName());
+            _signature = new LazyVariable<PropertyDefinition, PropertySignature?>(x => x.GetSignature());
+            _declaringType = new LazyVariable<PropertyDefinition, TypeDefinition?>(x => x.GetDeclaringType());
+            _constant = new LazyVariable<PropertyDefinition, Constant?>(x => x.GetConstant());
         }
 
         /// <summary>
@@ -102,8 +102,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -117,8 +117,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public PropertySignature? Signature
         {
-            get => _signature.Value;
-            set => _signature.Value = value;
+            get => _signature.GetValue(this);
+            set => _signature.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -129,8 +129,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public TypeDefinition? DeclaringType
         {
-            get => _declaringType.Value;
-            private set => _declaringType.Value = value;
+            get => _declaringType.GetValue(this);
+            private set => _declaringType.SetValue(value);
         }
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
@@ -166,8 +166,8 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public Constant? Constant
         {
-            get => _constant.Value;
-            set => _constant.Value = value;
+            get => _constant.GetValue(this);
+            set => _constant.SetValue(value);
         }
 
         /// <summary>

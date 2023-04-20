@@ -16,9 +16,9 @@ namespace AsmResolver.DotNet
         ITypeDescriptor,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<Utf8String?> _namespace;
-        private readonly LazyVariable<IImplementation?> _implementation;
+        private readonly LazyVariable<ExportedType, Utf8String?> _name;
+        private readonly LazyVariable<ExportedType, Utf8String?> _namespace;
+        private readonly LazyVariable<ExportedType, IImplementation?> _implementation;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -28,9 +28,9 @@ namespace AsmResolver.DotNet
         protected ExportedType(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _namespace = new LazyVariable<Utf8String?>(GetNamespace);
-            _implementation = new LazyVariable<IImplementation?>(GetImplementation);
+            _name = new LazyVariable<ExportedType, Utf8String?>(x => x.GetName());
+            _namespace = new LazyVariable<ExportedType, Utf8String?>(x => x.GetNamespace());
+            _implementation = new LazyVariable<ExportedType, IImplementation?>(x => x.GetImplementation());
         }
 
         /// <summary>
@@ -73,8 +73,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -87,8 +87,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Namespace
         {
-            get => _namespace.Value;
-            set => _namespace.Value = value;
+            get => _namespace.GetValue(this);
+            set => _namespace.SetValue(value);
         }
 
         string? ITypeDescriptor.Namespace => Namespace;
@@ -114,8 +114,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IImplementation? Implementation
         {
-            get => _implementation.Value;
-            set => _implementation.Value = value;
+            get => _implementation.GetValue(this);
+            set => _implementation.SetValue(value);
         }
 
         /// <summary>

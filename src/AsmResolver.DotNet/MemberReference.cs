@@ -13,9 +13,9 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class MemberReference : MetadataMember, ICustomAttributeType, IFieldDescriptor
     {
-        private readonly LazyVariable<IMemberRefParent?> _parent;
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<CallingConventionSignature?> _signature;
+        private readonly LazyVariable<MemberReference, IMemberRefParent?> _parent;
+        private readonly LazyVariable<MemberReference, Utf8String?> _name;
+        private readonly LazyVariable<MemberReference, CallingConventionSignature?> _signature;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -25,9 +25,9 @@ namespace AsmResolver.DotNet
         protected MemberReference(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<IMemberRefParent?>(GetParent);
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _signature = new LazyVariable<CallingConventionSignature?>(GetSignature);
+            _parent = new LazyVariable<MemberReference, IMemberRefParent?>(x => x.GetParent());
+            _name = new LazyVariable<MemberReference, Utf8String?>(x => x.GetName());
+            _signature = new LazyVariable<MemberReference, CallingConventionSignature?>(x => x.GetSignature());
         }
 
         /// <summary>
@@ -50,8 +50,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IMemberRefParent? Parent
         {
-            get => _parent.Value;
-            set => _parent.Value = value;
+            get => _parent.GetValue(this);
+            set => _parent.SetValue(value);
         }
 
         /// <summary>
@@ -62,8 +62,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -77,8 +77,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public CallingConventionSignature? Signature
         {
-            get => _signature.Value;
-            set => _signature.Value = value;
+            get => _signature.GetValue(this);
+            set => _signature.SetValue(value);
         }
 
         MethodSignature? IMethodDescriptor.Signature => Signature as MethodSignature;

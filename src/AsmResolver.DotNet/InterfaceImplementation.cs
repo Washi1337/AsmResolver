@@ -14,8 +14,8 @@ namespace AsmResolver.DotNet
         IOwnedCollectionElement<TypeDefinition>,
         IHasCustomAttribute
     {
-        private readonly LazyVariable<TypeDefinition?> _class;
-        private readonly LazyVariable<ITypeDefOrRef?> _interface;
+        private readonly LazyVariable<InterfaceImplementation, TypeDefinition?> _class;
+        private readonly LazyVariable<InterfaceImplementation, ITypeDefOrRef?> _interface;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -25,8 +25,8 @@ namespace AsmResolver.DotNet
         protected InterfaceImplementation(MetadataToken token)
             : base(token)
         {
-            _class = new LazyVariable<TypeDefinition?>(GetClass);
-            _interface = new LazyVariable<ITypeDefOrRef?>(GetInterface);
+            _class = new LazyVariable<InterfaceImplementation, TypeDefinition?>(x => x.GetClass());
+            _interface = new LazyVariable<InterfaceImplementation, ITypeDefOrRef?>(x => x.GetInterface());
         }
 
         /// <summary>
@@ -44,8 +44,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public TypeDefinition? Class
         {
-            get => _class.Value;
-            private set => _class.Value = value;
+            get => _class.GetValue(this);
+            private set => _class.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -60,8 +60,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public ITypeDefOrRef? Interface
         {
-            get => _interface.Value;
-            set => _interface.Value = value;
+            get => _interface.GetValue(this);
+            set => _interface.SetValue(value);
         }
 
         /// <inheritdoc />

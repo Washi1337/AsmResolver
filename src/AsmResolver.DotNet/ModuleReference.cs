@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<Utf8String?> _name;
+        private readonly LazyVariable<ModuleReference, Utf8String?> _name;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet
         protected ModuleReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
+            _name = new LazyVariable<ModuleReference, Utf8String?>(x => x.GetName());
         }
 
         /// <summary>
@@ -46,8 +46,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;

@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class ClassLayout : MetadataMember
     {
-        private readonly LazyVariable<TypeDefinition?> _parent;
+        private readonly LazyVariable<ClassLayout, TypeDefinition?> _parent;
 
         /// <summary>
         /// Initializes the class layout with a metadata token.
@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet
         protected ClassLayout(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<TypeDefinition?>(GetParent);
+            _parent = new LazyVariable<ClassLayout, TypeDefinition?>(x => x.GetParent());
         }
 
         /// <summary>
@@ -58,8 +58,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public TypeDefinition? Parent
         {
-            get => _parent.Value;
-            internal set => _parent.Value = value;
+            get => _parent.GetValue(this);
+            internal set => _parent.SetValue(value);
         }
 
         /// <summary>

@@ -15,8 +15,8 @@ namespace AsmResolver.DotNet
         IManagedEntryPoint,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<byte[]?> _hashValue;
+        private readonly LazyVariable<FileReference, Utf8String?> _name;
+        private readonly LazyVariable<FileReference, byte[]?> _hashValue;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -26,8 +26,8 @@ namespace AsmResolver.DotNet
         protected FileReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _hashValue = new LazyVariable<byte[]?>(GetHashValue);
+            _name = new LazyVariable<FileReference, Utf8String?>(x => x.GetName());
+            _hashValue = new LazyVariable<FileReference, byte[]?>(x => x.GetHashValue());
         }
 
         /// <summary>
@@ -78,8 +78,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -105,8 +105,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public byte[]? HashValue
         {
-            get => _hashValue.Value;
-            set => _hashValue.Value = value;
+            get => _hashValue.GetValue(this);
+            set => _hashValue.SetValue(value);
         }
 
         /// <inheritdoc />

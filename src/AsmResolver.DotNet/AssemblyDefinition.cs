@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet
     {
         private IList<ModuleDefinition>? _modules;
         private IList<SecurityDeclaration>? _securityDeclarations;
-        private readonly LazyVariable<byte[]?> _publicKey;
+        private readonly LazyVariable<AssemblyDefinition, byte[]?> _publicKey;
         private byte[]? _publicKeyToken;
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet
         protected AssemblyDefinition(MetadataToken token)
             : base(token)
         {
-            _publicKey = new LazyVariable<byte[]?>(GetPublicKey);
+            _publicKey = new LazyVariable<AssemblyDefinition, byte[]?>(x => x.GetPublicKey());
         }
 
         /// <summary>
@@ -169,10 +169,10 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public byte[]? PublicKey
         {
-            get => _publicKey.Value;
+            get => _publicKey.GetValue(this);
             set
             {
-                _publicKey.Value = value;
+                _publicKey.SetValue(value);
                 _publicKeyToken = null;
             }
         }
