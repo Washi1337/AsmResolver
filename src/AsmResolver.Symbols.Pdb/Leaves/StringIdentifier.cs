@@ -5,8 +5,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class StringIdentifier : CodeViewLeaf, IIpiLeaf
 {
-    private readonly LazyVariable<Utf8String> _value;
-    private readonly LazyVariable<SubStringListLeaf?> _subStrings;
+    private readonly LazyVariable<StringIdentifier, Utf8String> _value;
+    private readonly LazyVariable<StringIdentifier, SubStringListLeaf?> _subStrings;
 
     /// <summary>
     /// Initializes an empty String ID entry.
@@ -15,8 +15,8 @@ public class StringIdentifier : CodeViewLeaf, IIpiLeaf
     protected StringIdentifier(uint typeIndex)
         : base(typeIndex)
     {
-        _value = new LazyVariable<Utf8String>(GetValue);
-        _subStrings = new LazyVariable<SubStringListLeaf?>(GetSubStrings);
+        _value = new LazyVariable<StringIdentifier, Utf8String>(x =>x .GetValue());
+        _subStrings = new LazyVariable<StringIdentifier, SubStringListLeaf?>(x =>x .GetSubStrings());
     }
 
     /// <summary>
@@ -36,8 +36,8 @@ public class StringIdentifier : CodeViewLeaf, IIpiLeaf
     public StringIdentifier(Utf8String value, SubStringListLeaf? subStrings)
         : base(0)
     {
-        _value = new LazyVariable<Utf8String>(value);
-        _subStrings = new LazyVariable<SubStringListLeaf?>(subStrings);
+        _value = new LazyVariable<StringIdentifier, Utf8String>(value);
+        _subStrings = new LazyVariable<StringIdentifier, SubStringListLeaf?>(subStrings);
     }
 
     /// <inheritdoc />
@@ -48,8 +48,8 @@ public class StringIdentifier : CodeViewLeaf, IIpiLeaf
     /// </summary>
     public Utf8String Value
     {
-        get => _value.Value;
-        set => _value.Value = value;
+        get => _value.GetValue(this);
+        set => _value.SetValue(value);
     }
 
     /// <summary>
@@ -57,8 +57,8 @@ public class StringIdentifier : CodeViewLeaf, IIpiLeaf
     /// </summary>
     public SubStringListLeaf? SubStrings
     {
-        get => _subStrings.Value;
-        set => _subStrings.Value = value;
+        get => _subStrings.GetValue(this);
+        set => _subStrings.SetValue(value);
     }
 
     /// <summary>

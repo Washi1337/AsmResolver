@@ -5,8 +5,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public abstract class CodeViewCompositeTypeRecord : CodeViewTypeRecord
 {
-    private readonly LazyVariable<Utf8String> _name;
-    private readonly LazyVariable<FieldListLeaf?> _fields;
+    private readonly LazyVariable<CodeViewCompositeTypeRecord, Utf8String> _name;
+    private readonly LazyVariable<CodeViewCompositeTypeRecord, FieldListLeaf?> _fields;
 
     /// <summary>
     /// Initializes a new empty composite type.
@@ -15,8 +15,8 @@ public abstract class CodeViewCompositeTypeRecord : CodeViewTypeRecord
     protected CodeViewCompositeTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _name = new LazyVariable<Utf8String>(GetName);
-        _fields = new LazyVariable<FieldListLeaf?>(GetFields);
+        _name = new LazyVariable<CodeViewCompositeTypeRecord, Utf8String>(x => x.GetName());
+        _fields = new LazyVariable<CodeViewCompositeTypeRecord, FieldListLeaf?>(x => x.GetFields());
     }
 
     /// <summary>
@@ -33,8 +33,8 @@ public abstract class CodeViewCompositeTypeRecord : CodeViewTypeRecord
     /// </summary>
     public Utf8String Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>
@@ -42,8 +42,8 @@ public abstract class CodeViewCompositeTypeRecord : CodeViewTypeRecord
     /// </summary>
     public FieldListLeaf? Fields
     {
-        get => _fields.Value;
-        set => _fields.Value = value;
+        get => _fields.GetValue(this);
+        set => _fields.SetValue(value);
     }
 
     /// <summary>

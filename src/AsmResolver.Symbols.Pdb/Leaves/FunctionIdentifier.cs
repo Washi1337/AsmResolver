@@ -5,8 +5,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
 {
-    private readonly LazyVariable<Utf8String?> _name;
-    private readonly LazyVariable<CodeViewTypeRecord?> _functionType;
+    private readonly LazyVariable<FunctionIdentifier, Utf8String?> _name;
+    private readonly LazyVariable<FunctionIdentifier, CodeViewTypeRecord?> _functionType;
 
     /// <summary>
     /// Initializes an empty function identifier leaf.
@@ -15,8 +15,8 @@ public class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
     protected FunctionIdentifier(uint typeIndex)
         : base(typeIndex)
     {
-        _name = new LazyVariable<Utf8String?>(GetName);
-        _functionType = new LazyVariable<CodeViewTypeRecord?>(GetFunctionType);
+        _name = new LazyVariable<FunctionIdentifier, Utf8String?>(x => x.GetName());
+        _functionType = new LazyVariable<FunctionIdentifier, CodeViewTypeRecord?>(x => x.GetFunctionType());
     }
 
     /// <summary>
@@ -29,8 +29,8 @@ public class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
         : base(0)
     {
         ScopeId = scopeId;
-        _name = new LazyVariable<Utf8String?>(name);
-        _functionType = new LazyVariable<CodeViewTypeRecord?>(functionType);
+        _name = new LazyVariable<FunctionIdentifier, Utf8String?>(name);
+        _functionType = new LazyVariable<FunctionIdentifier, CodeViewTypeRecord?>(functionType);
     }
 
     /// <inheritdoc />
@@ -50,8 +50,8 @@ public class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
     /// </summary>
     public Utf8String? Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>
@@ -59,8 +59,8 @@ public class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
     /// </summary>
     public CodeViewTypeRecord? FunctionType
     {
-        get => _functionType.Value;
-        set => _functionType.Value = value;
+        get => _functionType.GetValue(this);
+        set => _functionType.SetValue(value);
     }
 
     /// <summary>

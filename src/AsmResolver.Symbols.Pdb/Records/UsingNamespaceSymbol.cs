@@ -5,14 +5,14 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class UsingNamespaceSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<Utf8String> _name;
+    private readonly LazyVariable<UsingNamespaceSymbol, Utf8String> _name;
 
     /// <summary>
     /// Initializes a new empty using namespace.
     /// </summary>
     protected UsingNamespaceSymbol()
     {
-        _name = new LazyVariable<Utf8String>(GetName);
+        _name = new LazyVariable<UsingNamespaceSymbol, Utf8String>(x => x.GetName());
     }
 
     /// <summary>
@@ -21,7 +21,7 @@ public class UsingNamespaceSymbol : CodeViewSymbol
     /// <param name="name">The namespace to use.</param>
     public UsingNamespaceSymbol(Utf8String name)
     {
-        _name = new LazyVariable<Utf8String>(name);
+        _name = new LazyVariable<UsingNamespaceSymbol, Utf8String>(name);
     }
 
     /// <inheritdoc />
@@ -32,8 +32,8 @@ public class UsingNamespaceSymbol : CodeViewSymbol
     /// </summary>
     public Utf8String Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>

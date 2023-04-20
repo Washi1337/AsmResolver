@@ -7,16 +7,16 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class ConstantSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<Utf8String> _name;
-    private readonly LazyVariable<CodeViewTypeRecord> _type;
+    private readonly LazyVariable<ConstantSymbol, Utf8String> _name;
+    private readonly LazyVariable<ConstantSymbol, CodeViewTypeRecord> _type;
 
     /// <summary>
     /// Initializes a named constant
     /// </summary>
     protected ConstantSymbol()
     {
-        _name = new LazyVariable<Utf8String>(GetName);
-        _type = new LazyVariable<CodeViewTypeRecord>(GetConstantType);
+        _name = new LazyVariable<ConstantSymbol, Utf8String>(x => x.GetName());
+        _type = new LazyVariable<ConstantSymbol, CodeViewTypeRecord>(x => x.GetConstantType());
     }
 
     /// <summary>
@@ -27,8 +27,8 @@ public class ConstantSymbol : CodeViewSymbol
     /// <param name="value">The value to assign to the constant.</param>
     public ConstantSymbol(Utf8String name, CodeViewTypeRecord type, ushort value)
     {
-        _name = new LazyVariable<Utf8String>(name);
-        _type = new LazyVariable<CodeViewTypeRecord>(type);
+        _name = new LazyVariable<ConstantSymbol, Utf8String>(name);
+        _type = new LazyVariable<ConstantSymbol, CodeViewTypeRecord>(type);
         Value = value;
     }
 
@@ -40,8 +40,8 @@ public class ConstantSymbol : CodeViewSymbol
     /// </summary>
     public CodeViewTypeRecord Type
     {
-        get => _type.Value;
-        set => _type.Value = value;
+        get => _type.GetValue(this);
+        set => _type.SetValue(value);
     }
 
     /// <summary>
@@ -58,8 +58,8 @@ public class ConstantSymbol : CodeViewSymbol
     /// </summary>
     public Utf8String Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>

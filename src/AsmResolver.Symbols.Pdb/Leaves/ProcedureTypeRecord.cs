@@ -7,8 +7,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class ProcedureTypeRecord : CodeViewTypeRecord
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _returnType;
-    private readonly LazyVariable<ArgumentListLeaf?> _argumentList;
+    private readonly LazyVariable<ProcedureTypeRecord, CodeViewTypeRecord?> _returnType;
+    private readonly LazyVariable<ProcedureTypeRecord, ArgumentListLeaf?> _argumentList;
 
     /// <summary>
     /// Initializes an empty procedure type.
@@ -17,8 +17,8 @@ public class ProcedureTypeRecord : CodeViewTypeRecord
     protected ProcedureTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _returnType = new LazyVariable<CodeViewTypeRecord?>(GetReturnType);
-        _argumentList = new LazyVariable<ArgumentListLeaf?>(GetArguments);
+        _returnType = new LazyVariable<ProcedureTypeRecord, CodeViewTypeRecord?>(x => x.GetReturnType());
+        _argumentList = new LazyVariable<ProcedureTypeRecord, ArgumentListLeaf?>(x => x.GetArguments());
     }
 
     /// <summary>
@@ -31,8 +31,8 @@ public class ProcedureTypeRecord : CodeViewTypeRecord
         : base(0)
     {
         CallingConvention = callingConvention;
-        _returnType = new LazyVariable<CodeViewTypeRecord?>(returnType);
-        _argumentList = new LazyVariable<ArgumentListLeaf?>(arguments);
+        _returnType = new LazyVariable<ProcedureTypeRecord, CodeViewTypeRecord?>(returnType);
+        _argumentList = new LazyVariable<ProcedureTypeRecord, ArgumentListLeaf?>(arguments);
     }
 
     /// <inheritdoc />
@@ -43,8 +43,8 @@ public class ProcedureTypeRecord : CodeViewTypeRecord
     /// </summary>
     public CodeViewTypeRecord? ReturnType
     {
-        get => _returnType.Value;
-        set => _returnType.Value = value;
+        get => _returnType.GetValue(this);
+        set => _returnType.SetValue(value);
     }
 
     /// <summary>
@@ -70,8 +70,8 @@ public class ProcedureTypeRecord : CodeViewTypeRecord
     /// </summary>
     public ArgumentListLeaf? Arguments
     {
-        get => _argumentList.Value;
-        set => _argumentList.Value = value;
+        get => _argumentList.GetValue(this);
+        set => _argumentList.SetValue(value);
     }
 
     /// <summary>

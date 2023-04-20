@@ -20,8 +20,8 @@ public class DbiStream : SegmentBase
     private IList<ModuleDescriptor>? _modules;
     private IList<SectionContribution>? _sectionContributions;
     private IList<SectionMap>? _sectionMaps;
-    private readonly LazyVariable<ISegment?> _typeServerMapStream;
-    private readonly LazyVariable<ISegment?> _ecStream;
+    private readonly LazyVariable<DbiStream, ISegment?> _typeServerMapStream;
+    private readonly LazyVariable<DbiStream, ISegment?> _ecStream;
     private IList<SourceFileCollection>? _sourceFiles;
     private IList<ushort>? _extraStreamIndices;
 
@@ -30,8 +30,8 @@ public class DbiStream : SegmentBase
     /// </summary>
     public DbiStream()
     {
-        _typeServerMapStream = new LazyVariable<ISegment?>(GetTypeServerMapStream);
-        _ecStream = new LazyVariable<ISegment?>(GetECStream);
+        _typeServerMapStream = new LazyVariable<DbiStream, ISegment?>(x => x.GetTypeServerMapStream());
+        _ecStream = new LazyVariable<DbiStream, ISegment?>(x => x.GetECStream());
         IsNewVersionFormat = true;
     }
 
@@ -228,8 +228,8 @@ public class DbiStream : SegmentBase
     /// </remarks>
     public ISegment? TypeServerMapStream
     {
-        get => _typeServerMapStream.Value;
-        set => _typeServerMapStream.Value = value;
+        get => _typeServerMapStream.GetValue(this);
+        set => _typeServerMapStream.SetValue(value);
     }
 
     /// <summary>
@@ -241,8 +241,8 @@ public class DbiStream : SegmentBase
     /// </remarks>
     public ISegment? ECStream
     {
-        get => _ecStream.Value;
-        set => _ecStream.Value = value;
+        get => _ecStream.GetValue(this);
+        set => _ecStream.SetValue(value);
     }
 
     /// <summary>

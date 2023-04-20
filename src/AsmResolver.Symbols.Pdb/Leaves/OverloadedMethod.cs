@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class OverloadedMethod : CodeViewNamedField
 {
-    private readonly LazyVariable<MethodListLeaf?> _methods;
+    private readonly LazyVariable<OverloadedMethod, MethodListLeaf?> _methods;
 
     /// <summary>
     /// Initializes an empty overloaded method.
@@ -14,7 +14,7 @@ public class OverloadedMethod : CodeViewNamedField
     protected OverloadedMethod(uint typeIndex)
         : base(typeIndex)
     {
-        _methods = new LazyVariable<MethodListLeaf?>(GetMethods);
+        _methods = new LazyVariable<OverloadedMethod, MethodListLeaf?>(x => x.GetMethods());
     }
 
     /// <summary>
@@ -23,7 +23,7 @@ public class OverloadedMethod : CodeViewNamedField
     public OverloadedMethod()
         : base(0)
     {
-        _methods = new LazyVariable<MethodListLeaf?>(new MethodListLeaf());
+        _methods = new LazyVariable<OverloadedMethod, MethodListLeaf?>(new MethodListLeaf());
     }
 
     /// <summary>
@@ -32,7 +32,7 @@ public class OverloadedMethod : CodeViewNamedField
     public OverloadedMethod(MethodListLeaf methods)
         : base(0)
     {
-        _methods = new LazyVariable<MethodListLeaf?>(methods);
+        _methods = new LazyVariable<OverloadedMethod, MethodListLeaf?>(methods);
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public class OverloadedMethod : CodeViewNamedField
     public OverloadedMethod(params MethodListEntry[] methods)
         : base(0)
     {
-        _methods = new LazyVariable<MethodListLeaf?>(new MethodListLeaf(methods));
+        _methods = new LazyVariable<OverloadedMethod, MethodListLeaf?>(new MethodListLeaf(methods));
     }
 
     /// <inheritdoc />
@@ -52,8 +52,8 @@ public class OverloadedMethod : CodeViewNamedField
     /// </summary>
     public MethodListLeaf? Methods
     {
-        get => _methods.Value;
-        set => _methods.Value = value;
+        get => _methods.GetValue(this);
+        set => _methods.SetValue(value);
     }
 
     /// <summary>

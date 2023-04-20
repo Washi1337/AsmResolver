@@ -5,13 +5,13 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public abstract class CodeViewDerivedTypeRecord : CodeViewCompositeTypeRecord
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _baseType;
+    private readonly LazyVariable<CodeViewDerivedTypeRecord, CodeViewTypeRecord?> _baseType;
 
     /// <inheritdoc />
     protected CodeViewDerivedTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _baseType = new LazyVariable<CodeViewTypeRecord?>(GetBaseType);
+        _baseType = new LazyVariable<CodeViewDerivedTypeRecord, CodeViewTypeRecord?>(x => x.GetBaseType());
     }
 
     /// <summary>
@@ -19,8 +19,8 @@ public abstract class CodeViewDerivedTypeRecord : CodeViewCompositeTypeRecord
     /// </summary>
     public CodeViewTypeRecord? BaseType
     {
-        get => _baseType.Value;
-        set => _baseType.Value = value;
+        get => _baseType.GetValue(this);
+        set => _baseType.SetValue(value);
     }
 
     /// <summary>

@@ -77,9 +77,17 @@ namespace AsmResolver
                 }
             }
         }
-
     }
 
+    /// <summary>
+    /// Represents a variable that can be lazily initialized and/or assigned a new value.
+    /// </summary>
+    /// <typeparam name="TOwner">The type of the owner of the variable.</typeparam>
+    /// <typeparam name="TValue">The type of the values that the variable stores.</typeparam>
+    /// <remarks>
+    /// For performance reasons, this class locks on itself for thread synchronization. Therefore, consumers
+    /// should not lock instances of this class as a lock object to avoid dead-locks.
+    /// </remarks>
     public sealed class LazyVariable<TOwner, TValue>
     {
         private TValue? _value;
@@ -114,6 +122,11 @@ namespace AsmResolver
             private set;
         }
 
+        /// <summary>
+        /// Obtains the value stored in the variable, initializing the variable if necessary.
+        /// </summary>
+        /// <param name="owner">The owner of the variable.</param>
+        /// <returns>The value.</returns>
         public TValue GetValue(TOwner owner)
         {
             if (!IsInitialized)
@@ -121,6 +134,10 @@ namespace AsmResolver
             return _value!;
         }
 
+        /// <summary>
+        /// Assigns a new value to the variable.
+        /// </summary>
+        /// <param name="value">The new value.</param>
         public void SetValue(TValue value)
         {
             lock (this)
@@ -141,7 +158,5 @@ namespace AsmResolver
                 }
             }
         }
-
     }
-
 }

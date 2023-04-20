@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class PointerTypeRecord : CodeViewTypeRecord
 {
-    private readonly LazyVariable<CodeViewTypeRecord> _baseType;
+    private readonly LazyVariable<PointerTypeRecord, CodeViewTypeRecord> _baseType;
 
     /// <summary>
     /// Initializes a new empty pointer type.
@@ -14,7 +14,7 @@ public class PointerTypeRecord : CodeViewTypeRecord
     protected PointerTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _baseType = new LazyVariable<CodeViewTypeRecord>(GetBaseType);
+        _baseType = new LazyVariable<PointerTypeRecord, CodeViewTypeRecord>(x => x.GetBaseType());
     }
 
     /// <summary>
@@ -25,7 +25,7 @@ public class PointerTypeRecord : CodeViewTypeRecord
     public PointerTypeRecord(CodeViewTypeRecord type, PointerAttributes attributes)
         : base(0)
     {
-        _baseType = new LazyVariable<CodeViewTypeRecord>(type);
+        _baseType = new LazyVariable<PointerTypeRecord, CodeViewTypeRecord>(type);
         Attributes = attributes;
     }
 
@@ -38,7 +38,7 @@ public class PointerTypeRecord : CodeViewTypeRecord
     public PointerTypeRecord(CodeViewTypeRecord type, PointerAttributes attributes, byte size)
         : base(0)
     {
-        _baseType = new LazyVariable<CodeViewTypeRecord>(type);
+        _baseType = new LazyVariable<PointerTypeRecord, CodeViewTypeRecord>(type);
         Attributes = attributes;
         Size = size;
     }
@@ -51,8 +51,8 @@ public class PointerTypeRecord : CodeViewTypeRecord
     /// </summary>
     public CodeViewTypeRecord BaseType
     {
-        get => _baseType.Value;
-        set => _baseType.Value = value;
+        get => _baseType.GetValue(this);
+        set => _baseType.SetValue(value);
     }
 
     /// <summary>

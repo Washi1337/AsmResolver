@@ -5,14 +5,14 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public abstract class CompileSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<Utf8String> _compilerVersion;
+    private readonly LazyVariable<CompileSymbol, Utf8String> _compilerVersion;
 
     /// <summary>
     /// Initializes an empty compile symbol.
     /// </summary>
     protected CompileSymbol()
     {
-        _compilerVersion = new LazyVariable<Utf8String>(GetCompilerVersion);
+        _compilerVersion = new LazyVariable<CompileSymbol, Utf8String>(x => x.GetCompilerVersion());
     }
 
     /// <summary>
@@ -101,8 +101,8 @@ public abstract class CompileSymbol : CodeViewSymbol
     /// </summary>
     public Utf8String CompilerVersion
     {
-        get => _compilerVersion.Value;
-        set => _compilerVersion.Value = value;
+        get => _compilerVersion.GetValue(this);
+        set => _compilerVersion.SetValue(value);
     }
 
     /// <summary>

@@ -5,8 +5,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class VBaseClassField : CodeViewField
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _baseType;
-    private readonly LazyVariable<CodeViewTypeRecord?> _basePointerType;
+    private readonly LazyVariable<VBaseClassField, CodeViewTypeRecord?> _baseType;
+    private readonly LazyVariable<VBaseClassField, CodeViewTypeRecord?> _basePointerType;
 
     /// <summary>
     /// Initializes a new empty virtual base class field.
@@ -15,8 +15,8 @@ public class VBaseClassField : CodeViewField
     protected VBaseClassField(uint typeIndex)
         : base(typeIndex)
     {
-        _baseType = new LazyVariable<CodeViewTypeRecord?>(GetBaseType);
-        _basePointerType = new LazyVariable<CodeViewTypeRecord?>(GetBasePointerType);
+        _baseType = new LazyVariable<VBaseClassField, CodeViewTypeRecord?>(x => x.GetBaseType());
+        _basePointerType = new LazyVariable<VBaseClassField, CodeViewTypeRecord?>(x => x.GetBasePointerType());
     }
 
     /// <summary>
@@ -35,8 +35,8 @@ public class VBaseClassField : CodeViewField
         bool isIndirect)
         : base(0)
     {
-        _baseType = new LazyVariable<CodeViewTypeRecord?>(baseType);
-        _basePointerType = new LazyVariable<CodeViewTypeRecord?>(pointerType);
+        _baseType = new LazyVariable<VBaseClassField, CodeViewTypeRecord?>(baseType);
+        _basePointerType = new LazyVariable<VBaseClassField, CodeViewTypeRecord?>(pointerType);
         PointerOffset = pointerOffset;
         TableOffset = tableOffset;
         IsIndirect = isIndirect;
@@ -61,8 +61,8 @@ public class VBaseClassField : CodeViewField
     /// </summary>
     public CodeViewTypeRecord? Type
     {
-        get => _baseType.Value;
-        set => _baseType.Value = value;
+        get => _baseType.GetValue(this);
+        set => _baseType.SetValue(value);
     }
 
     /// <summary>
@@ -70,8 +70,8 @@ public class VBaseClassField : CodeViewField
     /// </summary>
     public CodeViewTypeRecord? PointerType
     {
-        get => _basePointerType.Value;
-        set => _basePointerType.Value = value;
+        get => _basePointerType.GetValue(this);
+        set => _basePointerType.SetValue(value);
     }
 
     /// <summary>
