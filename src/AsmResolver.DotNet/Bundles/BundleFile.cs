@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Bundles
     /// </summary>
     public class BundleFile : IOwnedCollectionElement<BundleManifest>
     {
-        private readonly LazyVariable<ISegment> _contents;
+        private readonly LazyVariable<BundleFile, ISegment> _contents;
 
         /// <summary>
         /// Creates a new empty bundle file.
@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Bundles
         public BundleFile(string relativePath)
         {
             RelativePath = relativePath;
-            _contents = new LazyVariable<ISegment>(GetContents);
+            _contents = new LazyVariable<BundleFile, ISegment>(x => x.GetContents());
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Bundles
         {
             RelativePath = relativePath;
             Type = type;
-            _contents = new LazyVariable<ISegment>(contents);
+            _contents = new LazyVariable<BundleFile, ISegment>(contents);
         }
 
         /// <summary>
@@ -102,8 +102,8 @@ namespace AsmResolver.DotNet.Bundles
         /// </summary>
         public ISegment Contents
         {
-            get => _contents.Value;
-            set => _contents.Value = value;
+            get => _contents.GetValue(this);
+            set => _contents.SetValue(value);
         }
 
         /// <summary>

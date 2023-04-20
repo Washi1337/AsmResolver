@@ -11,26 +11,26 @@ namespace AsmResolver.PE.DotNet
     /// </summary>
     public class DotNetDirectory : SegmentBase, IDotNetDirectory
     {
-        private readonly LazyVariable<IMetadata?> _metadata;
-        private readonly LazyVariable<DotNetResourcesDirectory?> _resources;
-        private readonly LazyVariable<IReadableSegment?> _strongName;
-        private readonly LazyVariable<IReadableSegment?> _codeManagerTable;
-        private readonly LazyVariable<IReadableSegment?> _exportAddressTable;
-        private readonly LazyVariable<VTableFixupsDirectory?> _vtableFixups;
-        private readonly LazyVariable<IReadableSegment?> _managedNativeHeader;
+        private readonly LazyVariable<DotNetDirectory, IMetadata?> _metadata;
+        private readonly LazyVariable<DotNetDirectory, DotNetResourcesDirectory?> _resources;
+        private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _strongName;
+        private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _codeManagerTable;
+        private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _exportAddressTable;
+        private readonly LazyVariable<DotNetDirectory, VTableFixupsDirectory?> _vtableFixups;
+        private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _managedNativeHeader;
 
         /// <summary>
         /// Creates a new .NET data directory.
         /// </summary>
         public DotNetDirectory()
         {
-            _metadata = new LazyVariable<IMetadata?>(GetMetadata);
-            _resources = new LazyVariable<DotNetResourcesDirectory?>(GetResources);
-            _strongName = new LazyVariable<IReadableSegment?>(GetStrongName);
-            _codeManagerTable = new LazyVariable<IReadableSegment?>(GetCodeManagerTable);
-            _exportAddressTable = new LazyVariable<IReadableSegment?>(GetExportAddressTable);
-            _vtableFixups = new LazyVariable<VTableFixupsDirectory?>(GetVTableFixups);
-            _managedNativeHeader = new LazyVariable<IReadableSegment?>(GetManagedNativeHeader);
+            _metadata = new LazyVariable<DotNetDirectory, IMetadata?>(x => x.GetMetadata());
+            _resources = new LazyVariable<DotNetDirectory, DotNetResourcesDirectory?>(x => x.GetResources());
+            _strongName = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetStrongName());
+            _codeManagerTable = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetCodeManagerTable());
+            _exportAddressTable = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetExportAddressTable());
+            _vtableFixups = new LazyVariable<DotNetDirectory, VTableFixupsDirectory?>(x => x.GetVTableFixups());
+            _managedNativeHeader = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetManagedNativeHeader());
         }
 
         /// <inheritdoc />
@@ -50,8 +50,8 @@ namespace AsmResolver.PE.DotNet
         /// <inheritdoc />
         public IMetadata? Metadata
         {
-            get => _metadata.Value;
-            set => _metadata.Value = value;
+            get => _metadata.GetValue(this);
+            set => _metadata.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -71,43 +71,43 @@ namespace AsmResolver.PE.DotNet
         /// <inheritdoc />
         public DotNetResourcesDirectory? DotNetResources
         {
-            get => _resources.Value;
-            set => _resources.Value = value;
+            get => _resources.GetValue(this);
+            set => _resources.SetValue(value);
         }
 
         /// <inheritdoc />
         public IReadableSegment? StrongName
         {
-            get => _strongName.Value;
-            set => _strongName.Value = value;
+            get => _strongName.GetValue(this);
+            set => _strongName.SetValue(value);
         }
 
         /// <inheritdoc />
         public IReadableSegment? CodeManagerTable
         {
-            get => _codeManagerTable.Value;
-            set => _codeManagerTable.Value = value;
+            get => _codeManagerTable.GetValue(this);
+            set => _codeManagerTable.SetValue(value);
         }
 
         /// <inheritdoc />
         public VTableFixupsDirectory? VTableFixups
         {
-            get => _vtableFixups.Value;
-            set => _vtableFixups.Value = value;
+            get => _vtableFixups.GetValue(this);
+            set => _vtableFixups.SetValue(value);
         }
 
         /// <inheritdoc />
         public IReadableSegment? ExportAddressTable
         {
-            get => _exportAddressTable.Value;
-            set => _exportAddressTable.Value = value;
+            get => _exportAddressTable.GetValue(this);
+            set => _exportAddressTable.SetValue(value);
         }
 
         /// <inheritdoc />
         public IReadableSegment? ManagedNativeHeader
         {
-            get => _managedNativeHeader.Value;
-            set => _managedNativeHeader.Value = value;
+            get => _managedNativeHeader.GetValue(this);
+            set => _managedNativeHeader.SetValue(value);
         }
 
         /// <inheritdoc />

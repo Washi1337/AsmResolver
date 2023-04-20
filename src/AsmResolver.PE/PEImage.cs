@@ -21,13 +21,13 @@ namespace AsmResolver.PE
     public class PEImage : IPEImage
     {
         private IList<IImportedModule>? _imports;
-        private readonly LazyVariable<IExportDirectory?> _exports;
-        private readonly LazyVariable<IResourceDirectory?> _resources;
-        private readonly LazyVariable<IExceptionDirectory?> _exceptions;
+        private readonly LazyVariable<PEImage, IExportDirectory?> _exports;
+        private readonly LazyVariable<PEImage, IResourceDirectory?> _resources;
+        private readonly LazyVariable<PEImage, IExceptionDirectory?> _exceptions;
         private IList<BaseRelocation>? _relocations;
-        private readonly LazyVariable<IDotNetDirectory?> _dotNetDirectory;
+        private readonly LazyVariable<PEImage, IDotNetDirectory?> _dotNetDirectory;
         private IList<DebugDataEntry>? _debugData;
-        private readonly LazyVariable<ITlsDirectory?> _tlsDirectory;
+        private readonly LazyVariable<PEImage, ITlsDirectory?> _tlsDirectory;
 
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
@@ -169,11 +169,11 @@ namespace AsmResolver.PE
         /// </summary>
         public PEImage()
         {
-            _exports = new LazyVariable<IExportDirectory?>(GetExports);
-            _resources = new LazyVariable<IResourceDirectory?>(GetResources);
-            _exceptions = new LazyVariable<IExceptionDirectory?>(GetExceptions);
-            _dotNetDirectory = new LazyVariable<IDotNetDirectory?>(GetDotNetDirectory);
-            _tlsDirectory = new LazyVariable<ITlsDirectory?>(GetTlsDirectory);
+            _exports = new LazyVariable<PEImage, IExportDirectory?>(x => x.GetExports());
+            _resources = new LazyVariable<PEImage, IResourceDirectory?>(x => x.GetResources());
+            _exceptions = new LazyVariable<PEImage, IExceptionDirectory?>(x => x.GetExceptions());
+            _dotNetDirectory = new LazyVariable<PEImage, IDotNetDirectory?>(x => x.GetDotNetDirectory());
+            _tlsDirectory = new LazyVariable<PEImage, ITlsDirectory?>(x => x.GetTlsDirectory());
         }
 
         /// <inheritdoc />
@@ -247,22 +247,22 @@ namespace AsmResolver.PE
         /// <inheritdoc />
         public IExportDirectory? Exports
         {
-            get => _exports.Value;
-            set => _exports.Value = value;
+            get => _exports.GetValue(this);
+            set => _exports.SetValue(value);
         }
 
         /// <inheritdoc />
         public IResourceDirectory? Resources
         {
-            get => _resources.Value;
-            set => _resources.Value = value;
+            get => _resources.GetValue(this);
+            set => _resources.SetValue(value);
         }
 
         /// <inheritdoc />
         public IExceptionDirectory? Exceptions
         {
-            get => _exceptions.Value;
-            set => _exceptions.Value = value;
+            get => _exceptions.GetValue(this);
+            set => _exceptions.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -279,8 +279,8 @@ namespace AsmResolver.PE
         /// <inheritdoc />
         public IDotNetDirectory? DotNetDirectory
         {
-            get => _dotNetDirectory.Value;
-            set => _dotNetDirectory.Value = value;
+            get => _dotNetDirectory.GetValue(this);
+            set => _dotNetDirectory.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -297,8 +297,8 @@ namespace AsmResolver.PE
         /// <inheritdoc />
         public ITlsDirectory? TlsDirectory
         {
-            get => _tlsDirectory.Value;
-            set => _tlsDirectory.Value = value;
+            get => _tlsDirectory.GetValue(this);
+            set => _tlsDirectory.SetValue(value);
         }
 
         /// <summary>
