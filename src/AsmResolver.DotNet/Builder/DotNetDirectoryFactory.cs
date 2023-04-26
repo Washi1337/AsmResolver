@@ -76,13 +76,13 @@ namespace AsmResolver.DotNet.Builder
         public virtual DotNetDirectoryBuildResult CreateDotNetDirectory(
             ModuleDefinition module,
             INativeSymbolsProvider symbolsProvider,
-            DiagnosticBag diagnosticBag)
+            IErrorListener errorListener)
         {
             // Find all members in the module.
             var discoveryResult = DiscoverMemberDefinitionsInModule(module);
 
             // Creat new .NET dir buffer.
-            var buffer = CreateDotNetDirectoryBuffer(module, symbolsProvider, diagnosticBag);
+            var buffer = CreateDotNetDirectoryBuffer(module, symbolsProvider, errorListener);
             buffer.DefineModule(module);
 
             // When specified, import existing AssemblyRef, ModuleRef, TypeRef and MemberRef prior to adding any other
@@ -164,10 +164,10 @@ namespace AsmResolver.DotNet.Builder
         private DotNetDirectoryBuffer CreateDotNetDirectoryBuffer(
             ModuleDefinition module,
             INativeSymbolsProvider symbolsProvider,
-            DiagnosticBag diagnosticBag)
+            IErrorListener errorListener)
         {
             var metadataBuffer = CreateMetadataBuffer(module);
-            return new DotNetDirectoryBuffer(module, MethodBodySerializer, symbolsProvider, metadataBuffer, diagnosticBag);
+            return new DotNetDirectoryBuffer(module, MethodBodySerializer, symbolsProvider, metadataBuffer, errorListener);
         }
 
         private IMetadataBuffer CreateMetadataBuffer(ModuleDefinition module)

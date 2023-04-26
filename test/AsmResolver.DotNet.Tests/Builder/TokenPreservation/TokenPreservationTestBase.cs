@@ -39,7 +39,10 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
             var result = builder.CreateImage(module);
             if (result.HasFailed)
-                throw new AggregateException(result.DiagnosticBag.Exceptions);
+                if (result.ErrorListener is DiagnosticBag diagnosticBag)
+                    throw new AggregateException(diagnosticBag.Exceptions);
+                else
+                    throw new Exception("Image creation failed.");
 
             var newImage = result.ConstructedImage;
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE;
@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Builder
                 var result = DotNetDirectoryFactory.CreateDotNetDirectory(
                     module,
                     symbolProvider,
-                    context.DiagnosticBag);
+                    context.ErrorListener);
                 image.DotNetDirectory = result.Directory;
                 tokenMapping = result.TokenMapping;
 
@@ -108,12 +108,12 @@ namespace AsmResolver.DotNet.Builder
             }
             catch (Exception ex)
             {
-                context.DiagnosticBag.RegisterException(ex);
-                context.DiagnosticBag.MarkAsFatal();
+                context.ErrorListener.RegisterException(ex);
+                context.ErrorListener.MarkAsFatal();
             }
 
             tokenMapping ??= new TokenMapping();
-            return new PEImageBuildResult(image, context.DiagnosticBag, tokenMapping);
+            return new PEImageBuildResult(image, context.ErrorListener, tokenMapping);
         }
     }
 }

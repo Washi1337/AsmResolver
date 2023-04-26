@@ -1295,14 +1295,18 @@ namespace AsmResolver.DotNet
         public IPEImage ToPEImage(IPEImageBuilder imageBuilder)
         {
             var result = imageBuilder.CreateImage(this);
-            if (result.DiagnosticBag.HasErrors)
+            if (result.ErrorListener is DiagnosticBag diagnosticBag && diagnosticBag.HasErrors)
             {
                 throw new AggregateException(
                     "Construction of the PE image failed with one or more errors.",
-                    result.DiagnosticBag.Exceptions);
+                    diagnosticBag.Exceptions);
+            }
+            else if (result.HasFailed)
+            {
+                throw new Exception("Construction of the PE image failed.");
             }
 
-            return result.ConstructedImage!;
+            return result.ConstructedImage;
         }
     }
  }
