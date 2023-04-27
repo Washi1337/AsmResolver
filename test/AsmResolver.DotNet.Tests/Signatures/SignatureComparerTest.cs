@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
@@ -186,6 +187,22 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(
                 comparer.GetHashCode((AssemblyDescriptor) assembly1),
                 comparer.GetHashCode((AssemblyDescriptor) assembly2));
+        }
+
+        [Fact]
+        public void CorlibComparison()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/427
+            
+            var comparer = new SignatureComparer(SignatureComparisonFlags.VersionAgnostic);
+
+            var reference1 = KnownCorLibs.SystemRuntime_v5_0_0_0;
+            var reference2 = KnownCorLibs.SystemRuntime_v6_0_0_0;
+            Assert.Equal(reference1, reference2, comparer);
+
+            var set = new HashSet<AssemblyReference>(comparer);
+            Assert.True(set.Add(reference1));
+            Assert.False(set.Add(reference2));
         }
 
         private class NestedTypes
