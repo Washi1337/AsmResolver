@@ -165,6 +165,29 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.NotEqual(type2, resolvedType1, _comparer); // Fails
         }
 
+        [Fact]
+        public void AssemblyHashCodeStrict()
+        {
+            var assembly1 = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
+            var assembly2 = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
+
+            Assert.Equal(
+                _comparer.GetHashCode((AssemblyDescriptor) assembly1),
+                _comparer.GetHashCode((AssemblyDescriptor) assembly2));
+        }
+
+        [Fact]
+        public void AssemblyHashCodeVersionAgnostic()
+        {
+            var assembly1 = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
+            var assembly2 = new AssemblyReference("SomeAssembly", new Version(5, 6, 7, 8));
+
+            var comparer = new SignatureComparer(SignatureComparisonFlags.VersionAgnostic);
+            Assert.Equal(
+                comparer.GetHashCode((AssemblyDescriptor) assembly1),
+                comparer.GetHashCode((AssemblyDescriptor) assembly2));
+        }
+
         private class NestedTypes
         {
             public class FirstType
