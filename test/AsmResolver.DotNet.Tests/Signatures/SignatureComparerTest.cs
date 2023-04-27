@@ -193,7 +193,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         public void CorlibComparison()
         {
             // https://github.com/Washi1337/AsmResolver/issues/427
-            
+
             var comparer = new SignatureComparer(SignatureComparisonFlags.VersionAgnostic);
 
             var reference1 = KnownCorLibs.SystemRuntime_v5_0_0_0;
