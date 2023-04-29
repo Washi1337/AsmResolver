@@ -9,6 +9,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Win32Resources;
 using Xunit;
 using FileAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.FileAttributes;
@@ -516,6 +517,54 @@ namespace AsmResolver.DotNet.Tests
             type = module.GetOrCreateModuleType();
             Assert.NotNull(type);
             Assert.Same(type, module.GetModuleType());
+        }
+
+        [Theory]
+        [InlineData(false, false, false)]
+        [InlineData(false, true, false)]
+        [InlineData(true, false, true)]
+        [InlineData(true, true, true)]
+        public void IsLoadedAs32BitAnyCPUModule(bool assume32Bit, bool prefer32Bit, bool expected)
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            Assert.Equal(expected, module.IsLoadedAs32Bit(assume32Bit, prefer32Bit));
+        }
+
+        [Theory]
+        [InlineData(false, false, false)]
+        [InlineData(false, true, true)]
+        [InlineData(true, false, true)]
+        [InlineData(true, true, true)]
+        public void IsLoadedAs32BitAnyCPUModulePrefer32Bit(bool assume32Bit, bool prefer32Bit, bool expected)
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            module.IsBit32Preferred = true;
+            Assert.Equal(expected, module.IsLoadedAs32Bit(assume32Bit, prefer32Bit));
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void IsLoadedAs32Bit64BitModule(bool assume32Bit, bool prefer32Bit)
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            module.MachineType = MachineType.Amd64;
+            Assert.False(module.IsLoadedAs32Bit(assume32Bit, prefer32Bit));
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void IsLoadedAs32Bit32BitModule(bool assume32Bit, bool prefer32Bit)
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            module.MachineType = MachineType.I386;
+            module.IsBit32Required = true;
+            Assert.True(module.IsLoadedAs32Bit(assume32Bit, prefer32Bit));
         }
     }
 }

@@ -19,6 +19,7 @@ using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Platforms;
 using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.DotNet
@@ -787,6 +788,29 @@ namespace AsmResolver.DotNet
                     Interlocked.CompareExchange(ref _defaultImporter, GetDefaultImporter(), null);
                 return _defaultImporter;
             }
+        }
+
+        /// <summary>
+        /// Determines whether the module is loaded as a 32-bit process.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if the module is loaded as a 32-bit process, <c>false</c> if it is loaded as a 64-bit process.
+        /// </returns>
+        public bool IsLoadedAs32Bit() => IsLoadedAs32Bit(false, true);
+
+        /// <summary>
+        /// Determines whether the module is loaded as a 32-bit process.
+        /// </summary>
+        /// <param name="assume32BitSystem"><c>true</c> if a 32-bit system should be assumed.</param>
+        /// <param name="prefer32Bit"><c>true</c> if a 32-bit load is preferred.</param>
+        /// <returns>
+        /// <c>true</c> if the module is loaded as a 32-bit process, <c>false</c> if it is loaded as a 64-bit process.
+        /// </returns>
+        public bool IsLoadedAs32Bit(bool assume32BitSystem, bool prefer32Bit)
+        {
+            // Assume 32-bit if platform is unknown.
+            return Platform.TryGet(MachineType, out var platform)
+                   && Attributes.IsLoadedAs32Bit(platform, assume32BitSystem, prefer32Bit);
         }
 
         /// <summary>

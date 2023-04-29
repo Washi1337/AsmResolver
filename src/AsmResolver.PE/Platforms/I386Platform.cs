@@ -25,6 +25,9 @@ namespace AsmResolver.PE.Platforms
         public override bool IsClrBootstrapperRequired => true;
 
         /// <inheritdoc />
+        public override bool Is32Bit => true;
+
+        /// <inheritdoc />
         public override RelocatableSegment CreateThunkStub(ISymbol entryPoint)
         {
             var segment = new DataSegment(new byte[]
