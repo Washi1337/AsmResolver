@@ -134,11 +134,21 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.FieldRvaTest);
             Assert.Throws<NotSupportedException>(() =>
-                module.GetModuleType().Fields.First(f => f.Name == "InvalidFieldRva").FieldRva);
+                module.GetModuleType()!.Fields.First(f => f.Name == "InvalidFieldRva").FieldRva);
 
             module = ModuleDefinition.FromBytes(Properties.Resources.FieldRvaTest,
                 new ModuleReaderParameters(EmptyErrorListener.Instance));
-            Assert.Null(module.GetModuleType().Fields.First(f => f.Name == "InvalidFieldRva").FieldRva);
+            Assert.Null(module.GetModuleType()!.Fields.First(f => f.Name == "InvalidFieldRva").FieldRva);
+        }
+
+        [Fact]
+        public void ReadVirtualFieldRva()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_VirtualSegment);
+            var data = module.GetModuleType()!.Fields.First(f => f.Name == "__dummy__").FieldRva;
+            var readableData = Assert.IsAssignableFrom<IReadableSegment>(data);
+            Assert.Equal(new byte[4], readableData.ToArray());
+            Assert.Equal(new byte[4], data.WriteIntoArray());
         }
 
         [Theory]

@@ -3,6 +3,8 @@ using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.File;
+using AsmResolver.PE.Platforms;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -12,40 +14,59 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class FieldRvaDataReader : IFieldRvaDataReader
     {
         /// <inheritdoc />
-        public ISegment? ResolveFieldData(IErrorListener listener, IMetadata metadata, in FieldRvaRow fieldRvaRow)
+        public ISegment? ResolveFieldData(
+            IErrorListener listener,
+            Platform platform,
+            IDotNetDirectory directory,
+            in FieldRvaRow fieldRvaRow)
         {
             if (fieldRvaRow.Data.IsBounded)
                 return fieldRvaRow.Data.GetSegment();
 
+            var metadata = directory.Metadata;
+            if (metadata is null)
+            {
+                listener.BadImage(".NET directory does not contain a metadata directory.");
+                return null;
+            }
+
+            if (!metadata.TryGetStream<TablesStream>(out var tablesStream))
+            {
+                listener.BadImage("Metadata does not contain a tables stream.");
+                return null;
+            }
+
+            var table = tablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
+            if (fieldRvaRow.Field > table.Count)
+            {
+                listener.BadImage("FieldRva row has an invalid Field column value.");
+                return null;
+            }
+
+            var field = table.GetByRid(fieldRvaRow.Field);
+            int valueSize = DetermineFieldSize(directory, field);
+
             if (fieldRvaRow.Data.CanRead)
             {
-                 if (!metadata.TryGetStream<TablesStream>(out var tablesStream))
-                 {
-                     listener.BadImage("Metadata does not contain a tables stream.");
-                     return null;
-                 }
-
-                 var table = tablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
-                 if (fieldRvaRow.Field > table.Count)
-                {
-                    listener.BadImage("FieldRva row has an invalid Field column value.");
-                    return null;
-                }
-
-                var field = table.GetByRid(fieldRvaRow.Field);
-                int valueSize = DetermineFieldSize(metadata, field);
-
                 var reader = fieldRvaRow.Data.CreateReader();
                 return DataSegment.FromReader(ref reader, valueSize);
+            }
+
+            if (fieldRvaRow.Data is PESegmentReference {IsValidAddress: true})
+            {
+                // We are reading from a virtual segment that is resized at runtime, assume zeroes.
+                var segment = new ZeroesSegment((uint) valueSize);
+                segment.UpdateOffsets(new RelocationParameters(fieldRvaRow.Data.Offset, fieldRvaRow.Data.Rva));
+                return segment;
             }
 
             listener.NotSupported("FieldRva row has an invalid or unsupported data column.");
             return null;
         }
 
-        private int DetermineFieldSize(IMetadata metadata, in FieldDefinitionRow field)
+        private int DetermineFieldSize(IDotNetDirectory directory, in FieldDefinitionRow field)
         {
-            if (!metadata.TryGetStream<BlobStream>(out var blobStream)
+            if (!directory.Metadata!.TryGetStream<BlobStream>(out var blobStream)
                 || !blobStream.TryGetBlobReaderByIndex(field.Signature, out var reader))
             {
                 return 0;
@@ -67,8 +88,8 @@ namespace AsmResolver.PE.DotNet.Metadata
                 ElementType.U8 => sizeof(ulong),
                 ElementType.R4 => sizeof(float),
                 ElementType.R8 => sizeof(double),
-                ElementType.ValueType => GetCustomTypeSize(metadata, ref reader),
-                ElementType.Class => GetCustomTypeSize(metadata, ref reader),
+                ElementType.ValueType => GetCustomTypeSize(directory.Metadata, ref reader),
+                ElementType.Class => GetCustomTypeSize(directory.Metadata, ref reader),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
