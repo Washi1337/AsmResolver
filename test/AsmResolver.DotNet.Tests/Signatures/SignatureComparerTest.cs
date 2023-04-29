@@ -205,6 +205,20 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.False(set.Add(reference2));
         }
 
+        [Fact]
+        public void CompareSimpleTypeDescriptors()
+        {
+            var assembly = new DotNetFrameworkAssemblyResolver().Resolve(KnownCorLibs.MsCorLib_v4_0_0_0);
+            var definition = assembly.ManifestModule!.TopLevelTypes.First(x => x.IsTypeOf("System.IO", "Stream"));
+            var reference = definition.ToTypeReference();
+            var signature = reference.ToTypeSignature();
+
+            Assert.Equal((ITypeDescriptor) reference, signature, _comparer);
+            Assert.Equal((ITypeDescriptor) definition, signature, _comparer);
+            Assert.Equal(_comparer.GetHashCode(reference), _comparer.GetHashCode(signature));
+            Assert.Equal(_comparer.GetHashCode(definition), _comparer.GetHashCode(signature));
+        }
+
         private class NestedTypes
         {
             public class FirstType

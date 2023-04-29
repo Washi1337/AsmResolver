@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -30,12 +31,20 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(ITypeDescriptor obj)
+        public int GetHashCode(ITypeDescriptor obj) => obj switch
+        {
+            InvalidTypeDefOrRef invalidType => GetHashCode(invalidType),
+            ITypeDefOrRef typeDefOrRef => GetHashCode(typeDefOrRef),
+            TypeSignature signature => GetHashCode(signature),
+            _ => SimpleTypeHashCode(obj)
+        };
+
+        private int SimpleTypeHashCode(ITypeDescriptor obj)
         {
             unchecked
             {
-                int hashCode = obj.Name is null ? 0 : obj.Name.GetHashCode();
-                hashCode = (hashCode * 397) ^ (obj.Namespace is null ? 0 : obj.Namespace.GetHashCode());
+                int hashCode = obj.Name?.GetHashCode() ?? 0;
+                hashCode = (hashCode * 397) ^ (obj.Namespace?.GetHashCode() ?? 0);
                 hashCode = (hashCode * 397) ^ (obj.DeclaringType is null ? 0 : GetHashCode(obj.DeclaringType));
                 return hashCode;
             }
@@ -67,19 +76,21 @@ namespace AsmResolver.DotNet.Signatures
         public bool Equals(ITypeDefOrRef? x, ITypeDefOrRef? y) => Equals(x as ITypeDescriptor, y);
 
         /// <inheritdoc />
-        public int GetHashCode(ITypeDefOrRef obj) => GetHashCode((ITypeDescriptor) obj);
+        public int GetHashCode(ITypeDefOrRef obj) => obj.MetadataToken.Table == TableIndex.TypeSpec
+            ? GetHashCode((TypeSpecification) obj)
+            : SimpleTypeHashCode(obj);
 
         /// <inheritdoc />
         public bool Equals(TypeDefinition? x, TypeDefinition? y) => Equals(x as ITypeDescriptor, y);
 
         /// <inheritdoc />
-        public int GetHashCode(TypeDefinition obj) => GetHashCode((ITypeDescriptor) obj);
+        public int GetHashCode(TypeDefinition obj) => SimpleTypeHashCode(obj);
 
         /// <inheritdoc />
         public bool Equals(TypeReference? x, TypeReference? y) => Equals(x as ITypeDescriptor, y);
 
         /// <inheritdoc />
-        public int GetHashCode(TypeReference obj) => GetHashCode((ITypeDescriptor) obj);
+        public int GetHashCode(TypeReference obj) => SimpleTypeHashCode(obj);
 
         /// <inheritdoc />
         public bool Equals(TypeSpecification? x, TypeSpecification? y)
