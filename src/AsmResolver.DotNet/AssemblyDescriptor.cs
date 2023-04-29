@@ -19,8 +19,8 @@ namespace AsmResolver.DotNet
     {
         private const int PublicKeyTokenLength = 8;
 
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<Utf8String?> _culture;
+        private readonly LazyVariable<AssemblyDescriptor, Utf8String?> _name;
+        private readonly LazyVariable<AssemblyDescriptor, Utf8String?> _culture;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -30,8 +30,8 @@ namespace AsmResolver.DotNet
         protected AssemblyDescriptor(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _culture = new LazyVariable<Utf8String?>(GetCulture);
+            _name = new LazyVariable<AssemblyDescriptor, Utf8String?>(x => x.GetName());
+            _culture = new LazyVariable<AssemblyDescriptor, Utf8String?>(x => x.GetCulture());
             Version = new Version(0, 0, 0, 0);
         }
 
@@ -43,8 +43,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -175,8 +175,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Culture
         {
-            get => _culture.Value;
-            set => _culture.Value = value;
+            get => _culture.GetValue(this);
+            set => _culture.SetValue(value);
         }
 
         /// <summary>

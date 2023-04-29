@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class VTableField : CodeViewField
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _type;
+    private readonly LazyVariable<VTableField, CodeViewTypeRecord?> _type;
 
     /// <summary>
     /// Initializes an empty virtual function table field.
@@ -14,7 +14,7 @@ public class VTableField : CodeViewField
     protected VTableField(uint typeIndex)
         : base(typeIndex)
     {
-        _type = new LazyVariable<CodeViewTypeRecord?>(GetPointerType);
+        _type = new LazyVariable<VTableField, CodeViewTypeRecord?>(x => x.GetPointerType());
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ public class VTableField : CodeViewField
     public VTableField(CodeViewTypeRecord pointerType)
         : base(0)
     {
-        _type = new LazyVariable<CodeViewTypeRecord?>(pointerType);
+        _type = new LazyVariable<VTableField, CodeViewTypeRecord?>(pointerType);
     }
 
     /// <inheritdoc />
@@ -35,8 +35,8 @@ public class VTableField : CodeViewField
     /// </summary>
     public CodeViewTypeRecord? PointerType
     {
-        get => _type.Value;
-        set => _type.Value = value;
+        get => _type.GetValue(this);
+        set => _type.SetValue(value);
     }
 
     /// <summary>

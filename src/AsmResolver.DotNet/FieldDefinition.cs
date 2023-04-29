@@ -23,14 +23,14 @@ namespace AsmResolver.DotNet
         IHasFieldMarshal,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<FieldSignature?> _signature;
-        private readonly LazyVariable<TypeDefinition?> _declaringType;
-        private readonly LazyVariable<Constant?> _constant;
-        private readonly LazyVariable<MarshalDescriptor?> _marshalDescriptor;
-        private readonly LazyVariable<ImplementationMap?> _implementationMap;
-        private readonly LazyVariable<ISegment?> _fieldRva;
-        private readonly LazyVariable<int?> _fieldOffset;
+        private readonly LazyVariable<FieldDefinition, Utf8String?> _name;
+        private readonly LazyVariable<FieldDefinition, FieldSignature?> _signature;
+        private readonly LazyVariable<FieldDefinition, TypeDefinition?> _declaringType;
+        private readonly LazyVariable<FieldDefinition, Constant?> _constant;
+        private readonly LazyVariable<FieldDefinition, MarshalDescriptor?> _marshalDescriptor;
+        private readonly LazyVariable<FieldDefinition, ImplementationMap?> _implementationMap;
+        private readonly LazyVariable<FieldDefinition, ISegment?> _fieldRva;
+        private readonly LazyVariable<FieldDefinition, int?> _fieldOffset;
 
         private IList<CustomAttribute>? _customAttributes;
 
@@ -41,14 +41,14 @@ namespace AsmResolver.DotNet
         protected FieldDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _signature = new LazyVariable<FieldSignature?>(GetSignature);
-            _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
-            _constant = new LazyVariable<Constant?>(GetConstant);
-            _marshalDescriptor = new LazyVariable<MarshalDescriptor?>(GetMarshalDescriptor);
-            _implementationMap = new LazyVariable<ImplementationMap?>(GetImplementationMap);
-            _fieldRva = new LazyVariable<ISegment?>(GetFieldRva);
-            _fieldOffset = new LazyVariable<int?>(GetFieldOffset);
+            _name = new LazyVariable<FieldDefinition, Utf8String?>(x => x.GetName());
+            _signature = new LazyVariable<FieldDefinition, FieldSignature?>(x => x.GetSignature());
+            _declaringType = new LazyVariable<FieldDefinition, TypeDefinition?>(x => x.GetDeclaringType());
+            _constant = new LazyVariable<FieldDefinition, Constant?>(x => x.GetConstant());
+            _marshalDescriptor = new LazyVariable<FieldDefinition, MarshalDescriptor?>(x => x.GetMarshalDescriptor());
+            _implementationMap = new LazyVariable<FieldDefinition, ImplementationMap?>(x => x.GetImplementationMap());
+            _fieldRva = new LazyVariable<FieldDefinition, ISegment?>(x => x.GetFieldRva());
+            _fieldOffset = new LazyVariable<FieldDefinition, int?>(x => x.GetFieldOffset());
         }
 
         /// <summary>
@@ -89,8 +89,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -100,8 +100,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public FieldSignature? Signature
         {
-            get => _signature.Value;
-            set => _signature.Value = value;
+            get => _signature.GetValue(this);
+            set => _signature.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -308,8 +308,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public TypeDefinition? DeclaringType
         {
-            get => _declaringType.Value;
-            private set => _declaringType.Value = value;
+            get => _declaringType.GetValue(this);
+            private set => _declaringType.SetValue(value);
         }
 
         TypeDefinition? IOwnedCollectionElement<TypeDefinition>.Owner
@@ -334,29 +334,29 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public Constant? Constant
         {
-            get => _constant.Value;
-            set => _constant.Value = value;
+            get => _constant.GetValue(this);
+            set => _constant.SetValue(value);
         }
 
         /// <inheritdoc />
         public MarshalDescriptor? MarshalDescriptor
         {
-            get => _marshalDescriptor.Value;
-            set => _marshalDescriptor.Value = value;
+            get => _marshalDescriptor.GetValue(this);
+            set => _marshalDescriptor.SetValue(value);
         }
 
         /// <inheritdoc />
         public ImplementationMap? ImplementationMap
         {
-            get => _implementationMap.Value;
+            get => _implementationMap.GetValue(this);
             set
             {
-                if (value?.MemberForwarded is {})
+                if (value?.MemberForwarded is not null)
                     throw new ArgumentException("Cannot add an implementation map that was already added to another member.");
-                if (_implementationMap.Value is {})
-                    _implementationMap.Value.MemberForwarded = null;
-                _implementationMap.Value = value;
-                if (value is {})
+                if (_implementationMap.GetValue(this) is { } map)
+                    map.MemberForwarded = null;
+                _implementationMap.SetValue(value);
+                if (value is not null)
                     value.MemberForwarded = this;
             }
         }
@@ -371,8 +371,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public ISegment? FieldRva
         {
-            get => _fieldRva.Value;
-            set => _fieldRva.Value = value;
+            get => _fieldRva.GetValue(this);
+            set => _fieldRva.SetValue(value);
         }
 
         /// <summary>
@@ -380,8 +380,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public int? FieldOffset
         {
-            get => _fieldOffset.Value;
-            set => _fieldOffset.Value = value;
+            get => _fieldOffset.GetValue(this);
+            set => _fieldOffset.SetValue(value);
         }
 
         FieldDefinition IFieldDescriptor.Resolve() => this;

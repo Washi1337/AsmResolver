@@ -7,14 +7,14 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class BuildInfoSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<BuildInfoLeaf?> _info;
+    private readonly LazyVariable<BuildInfoSymbol, BuildInfoLeaf?> _info;
 
     /// <summary>
     /// Initializes an empty build information symbol.
     /// </summary>
     protected BuildInfoSymbol()
     {
-        _info = new LazyVariable<BuildInfoLeaf?>(GetInfo);
+        _info = new LazyVariable<BuildInfoSymbol, BuildInfoLeaf?>(x => x.GetInfo());
     }
 
     /// <summary>
@@ -23,7 +23,7 @@ public class BuildInfoSymbol : CodeViewSymbol
     /// <param name="info">The information to wrap.</param>
     public BuildInfoSymbol(BuildInfoLeaf info)
     {
-        _info = new LazyVariable<BuildInfoLeaf?>(info);
+        _info = new LazyVariable<BuildInfoSymbol, BuildInfoLeaf?>(info);
     }
 
     /// <inheritdoc />
@@ -34,8 +34,8 @@ public class BuildInfoSymbol : CodeViewSymbol
     /// </summary>
     public BuildInfoLeaf? Info
     {
-        get => _info.Value;
-        set => _info.Value = value;
+        get => _info.GetValue(this);
+        set => _info.SetValue(value);
     }
 
     /// <summary>

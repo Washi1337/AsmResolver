@@ -10,8 +10,8 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class MethodSemantics : MetadataMember, IOwnedCollectionElement<IHasSemantics>
     {
-        private readonly LazyVariable<MethodDefinition?> _method;
-        private readonly LazyVariable<IHasSemantics?> _association;
+        private readonly LazyVariable<MethodSemantics, MethodDefinition?> _method;
+        private readonly LazyVariable<MethodSemantics, IHasSemantics?> _association;
 
         /// <summary>
         /// Initializes an empty method semantics object.
@@ -20,8 +20,8 @@ namespace AsmResolver.DotNet
         protected MethodSemantics(MetadataToken token)
             : base(token)
         {
-            _method = new LazyVariable<MethodDefinition?>(GetMethod);
-            _association = new LazyVariable<IHasSemantics?>(GetAssociation);
+            _method = new LazyVariable<MethodSemantics, MethodDefinition?>(x => x.GetMethod());
+            _association = new LazyVariable<MethodSemantics, IHasSemantics?>(x => x.GetAssociation());
         }
 
         /// <summary>
@@ -50,8 +50,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public MethodDefinition? Method
         {
-            get => _method.Value;
-            private set => _method.Value = value;
+            get => _method.GetValue(this);
+            private set => _method.SetValue(value);
         }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IHasSemantics? Association
         {
-            get => _association.Value;
-            private set => _association.Value = value;
+            get => _association.GetValue(this);
+            private set => _association.SetValue(value);
         }
 
         IHasSemantics? IOwnedCollectionElement<IHasSemantics>.Owner

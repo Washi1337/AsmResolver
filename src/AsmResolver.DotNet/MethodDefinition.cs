@@ -27,13 +27,13 @@ namespace AsmResolver.DotNet
         IHasSecurityDeclaration,
         IManagedEntryPoint
     {
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<TypeDefinition?> _declaringType;
-        private readonly LazyVariable<MethodSignature?> _signature;
-        private readonly LazyVariable<MethodBody?> _methodBody;
-        private readonly LazyVariable<ImplementationMap?> _implementationMap;
-        private readonly LazyVariable<MethodSemantics?> _semantics;
-        private readonly LazyVariable<UnmanagedExportInfo?> _exportInfo;
+        private readonly LazyVariable<MethodDefinition, Utf8String?> _name;
+        private readonly LazyVariable<MethodDefinition, TypeDefinition?> _declaringType;
+        private readonly LazyVariable<MethodDefinition, MethodSignature?> _signature;
+        private readonly LazyVariable<MethodDefinition, MethodBody?> _methodBody;
+        private readonly LazyVariable<MethodDefinition, ImplementationMap?> _implementationMap;
+        private readonly LazyVariable<MethodDefinition, MethodSemantics?> _semantics;
+        private readonly LazyVariable<MethodDefinition, UnmanagedExportInfo?> _exportInfo;
         private IList<ParameterDefinition>? _parameterDefinitions;
         private ParameterCollection? _parameters;
         private IList<CustomAttribute>? _customAttributes;
@@ -47,13 +47,13 @@ namespace AsmResolver.DotNet
         protected MethodDefinition(MetadataToken token)
             : base(token)
         {
-            _name  =new LazyVariable<Utf8String?>(GetName);
-            _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
-            _signature = new LazyVariable<MethodSignature?>(GetSignature);
-            _methodBody = new LazyVariable<MethodBody?>(GetBody);
-            _implementationMap = new LazyVariable<ImplementationMap?>(GetImplementationMap);
-            _semantics = new LazyVariable<MethodSemantics?>(GetSemantics);
-            _exportInfo = new LazyVariable<UnmanagedExportInfo?>(GetExportInfo);
+            _name = new LazyVariable<MethodDefinition, Utf8String?>(x => GetName());
+            _declaringType = new LazyVariable<MethodDefinition, TypeDefinition?>(x => GetDeclaringType());
+            _signature = new LazyVariable<MethodDefinition, MethodSignature?>(x => x.GetSignature());
+            _methodBody = new LazyVariable<MethodDefinition, MethodBody?>(x => x.GetBody());
+            _implementationMap = new LazyVariable<MethodDefinition, ImplementationMap?>(x => x.GetImplementationMap());
+            _semantics = new LazyVariable<MethodDefinition, MethodSemantics?>(x => x.GetSemantics());
+            _exportInfo = new LazyVariable<MethodDefinition, UnmanagedExportInfo?>(x => x.GetExportInfo());
         }
 
         /// <summary>
@@ -83,8 +83,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -95,8 +95,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public MethodSignature? Signature
         {
-            get => _signature.Value;
-            set => _signature.Value = value;
+            get => _signature.GetValue(this);
+            set => _signature.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -483,8 +483,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public TypeDefinition? DeclaringType
         {
-            get => _declaringType.Value;
-            set => _declaringType.Value = value;
+            get => _declaringType.GetValue(this);
+            set => _declaringType.SetValue(value);
         }
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
@@ -546,8 +546,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public MethodBody? MethodBody
         {
-            get => _methodBody.Value;
-            set => _methodBody.Value = value;
+            get => _methodBody.GetValue(this);
+            set => _methodBody.SetValue(value);
         }
 
         /// <summary>
@@ -594,15 +594,15 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public ImplementationMap? ImplementationMap
         {
-            get => _implementationMap.Value;
+            get => _implementationMap.GetValue(this);
             set
             {
-                if (value?.MemberForwarded is {})
+                if (value?.MemberForwarded is not null)
                     throw new ArgumentException("Cannot add an implementation map that was already added to another member.");
-                if (_implementationMap.Value is {})
-                    _implementationMap.Value.MemberForwarded = null;
-                _implementationMap.Value = value;
-                if (value is {})
+                if (_implementationMap.GetValue(this) is { } map)
+                    map.MemberForwarded = null;
+                _implementationMap.SetValue(value);
+                if (value is not null)
                     value.MemberForwarded = this;
             }
         }
@@ -645,8 +645,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public MethodSemantics? Semantics
         {
-            get => _semantics.Value;
-            set => _semantics.Value = value;
+            get => _semantics.GetValue(this);
+            set => _semantics.SetValue(value);
         }
 
         /// <summary>
@@ -685,8 +685,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public UnmanagedExportInfo? ExportInfo
         {
-            get => _exportInfo.Value;
-            set => _exportInfo.Value = value;
+            get => _exportInfo.GetValue(this);
+            set => _exportInfo.SetValue(value);
         }
 
         MethodDefinition IMethodDescriptor.Resolve() => this;

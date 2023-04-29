@@ -8,20 +8,20 @@ namespace AsmResolver.Symbols.Pdb.Metadata.Modi;
 /// </summary>
 public class ModiStream : SegmentBase
 {
-    private readonly LazyVariable<IReadableSegment?> _symbols;
-    private readonly LazyVariable<IReadableSegment?> _c11LineInfo;
-    private readonly LazyVariable<IReadableSegment?> _c13LineInfo;
-    private readonly LazyVariable<IReadableSegment?> _globalReferences;
+    private readonly LazyVariable<ModiStream, IReadableSegment?> _symbols;
+    private readonly LazyVariable<ModiStream, IReadableSegment?> _c11LineInfo;
+    private readonly LazyVariable<ModiStream, IReadableSegment?> _c13LineInfo;
+    private readonly LazyVariable<ModiStream, IReadableSegment?> _globalReferences;
 
     /// <summary>
     /// Creates a new empty module info stream.
     /// </summary>
     public ModiStream()
     {
-        _symbols = new LazyVariable<IReadableSegment?>(GetSymbols);
-        _c11LineInfo = new LazyVariable<IReadableSegment?>(GetC11LineInfo);
-        _c13LineInfo = new LazyVariable<IReadableSegment?>(GetC13LineInfo);
-        _globalReferences = new LazyVariable<IReadableSegment?>(GetGlobalReferences);
+        _symbols = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetSymbols());
+        _c11LineInfo = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetC11LineInfo());
+        _c13LineInfo = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetC13LineInfo());
+        _globalReferences = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetGlobalReferences());
     }
 
     /// <summary>
@@ -41,8 +41,8 @@ public class ModiStream : SegmentBase
     /// </summary>
     public IReadableSegment? Symbols
     {
-        get => _symbols.Value;
-        set => _symbols.Value = value;
+        get => _symbols.GetValue(this);
+        set => _symbols.SetValue(value);
     }
 
     /// <summary>
@@ -50,8 +50,8 @@ public class ModiStream : SegmentBase
     /// </summary>
     public IReadableSegment? C11LineInfo
     {
-        get => _c11LineInfo.Value;
-        set => _c11LineInfo.Value = value;
+        get => _c11LineInfo.GetValue(this);
+        set => _c11LineInfo.SetValue(value);
     }
 
     /// <summary>
@@ -59,8 +59,8 @@ public class ModiStream : SegmentBase
     /// </summary>
     public IReadableSegment? C13LineInfo
     {
-        get => _c13LineInfo.Value;
-        set => _c13LineInfo.Value = value;
+        get => _c13LineInfo.GetValue(this);
+        set => _c13LineInfo.SetValue(value);
     }
 
     /// <summary>
@@ -71,8 +71,8 @@ public class ModiStream : SegmentBase
     /// </remarks>
     public IReadableSegment? GlobalReferences
     {
-        get => _globalReferences.Value;
-        set => _globalReferences.Value = value;
+        get => _globalReferences.GetValue(this);
+        set => _globalReferences.SetValue(value);
     }
 
     /// <summary>

@@ -9,14 +9,14 @@ namespace AsmResolver.PE.Win32Resources
     /// </summary>
     public class ResourceData : IResourceData
     {
-        private readonly LazyVariable<ISegment?> _contents;
+        private readonly LazyVariable<ResourceData, ISegment?> _contents;
 
         /// <summary>
         /// Initializes a new resource data entry.
         /// </summary>
         protected ResourceData()
         {
-            _contents = new LazyVariable<ISegment?>(GetContents);
+            _contents = new LazyVariable<ResourceData, ISegment?>(x => x.GetContents());
         }
 
         /// <summary>
@@ -79,8 +79,8 @@ namespace AsmResolver.PE.Win32Resources
         /// <inheritdoc />
         public ISegment? Contents
         {
-            get => _contents.Value;
-            set => _contents.Value = value;
+            get => _contents.GetValue(this);
+            set => _contents.SetValue(value);
         }
 
         /// <inheritdoc />

@@ -21,14 +21,14 @@ namespace AsmResolver.PE.Debug
                 + sizeof(uint) // PointerToRawData
             ;
 
-        private readonly LazyVariable<IDebugDataSegment?> _contents;
+        private readonly LazyVariable<DebugDataEntry, IDebugDataSegment?> _contents;
 
         /// <summary>
         /// Initializes an empty <see cref="DebugDataEntry"/> instance.
         /// </summary>
         protected DebugDataEntry()
         {
-            _contents = new LazyVariable<IDebugDataSegment?>(GetContents);
+            _contents = new LazyVariable<DebugDataEntry, IDebugDataSegment?>(x => x.GetContents());
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace AsmResolver.PE.Debug
         /// <param name="contents">The contents.</param>
         public DebugDataEntry(IDebugDataSegment contents)
         {
-            _contents = new LazyVariable<IDebugDataSegment?>(contents);
+            _contents = new LazyVariable<DebugDataEntry, IDebugDataSegment?>(contents);
         }
 
         /// <summary>
@@ -81,8 +81,8 @@ namespace AsmResolver.PE.Debug
         /// </summary>
         public IDebugDataSegment? Contents
         {
-            get => _contents.Value;
-            set => _contents.Value = value;
+            get => _contents.GetValue(this);
+            set => _contents.SetValue(value);
         }
 
         /// <summary>

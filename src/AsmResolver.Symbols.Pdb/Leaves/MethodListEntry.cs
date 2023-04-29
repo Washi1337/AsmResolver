@@ -5,14 +5,14 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class MethodListEntry
 {
-    private readonly LazyVariable<MemberFunctionLeaf?> _function;
+    private readonly LazyVariable<MethodListEntry, MemberFunctionLeaf?> _function;
 
     /// <summary>
     /// Initializes an empty method list entry.
     /// </summary>
     protected MethodListEntry()
     {
-        _function = new LazyVariable<MemberFunctionLeaf?>(GetFunction);
+        _function = new LazyVariable<MethodListEntry, MemberFunctionLeaf?>(x => x.GetFunction());
     }
 
     /// <summary>
@@ -23,7 +23,7 @@ public class MethodListEntry
     public MethodListEntry(CodeViewFieldAttributes attributes, MemberFunctionLeaf function)
     {
         Attributes = attributes;
-        _function = new LazyVariable<MemberFunctionLeaf?>(function);
+        _function = new LazyVariable<MethodListEntry, MemberFunctionLeaf?>(function);
         VTableOffset = 0;
     }
 
@@ -36,7 +36,7 @@ public class MethodListEntry
     public MethodListEntry(CodeViewFieldAttributes attributes, MemberFunctionLeaf function, uint vTableOffset)
     {
         Attributes = attributes;
-        _function = new LazyVariable<MemberFunctionLeaf?>(function);
+        _function = new LazyVariable<MethodListEntry, MemberFunctionLeaf?>(function);
         VTableOffset = vTableOffset;
     }
 
@@ -54,8 +54,8 @@ public class MethodListEntry
     /// </summary>
     public MemberFunctionLeaf? Function
     {
-        get => _function.Value;
-        set => _function.Value = value;
+        get => _function.GetValue(this);
+        set => _function.SetValue(value);
     }
 
     /// <summary>

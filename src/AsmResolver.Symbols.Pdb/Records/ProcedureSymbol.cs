@@ -9,8 +9,8 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
 {
-    private readonly LazyVariable<Utf8String?> _name;
-    private readonly LazyVariable<CodeViewLeaf?> _type;
+    private readonly LazyVariable<ProcedureSymbol, Utf8String?> _name;
+    private readonly LazyVariable<ProcedureSymbol, CodeViewLeaf?> _type;
 
     private IList<ICodeViewSymbol>? _symbols;
 
@@ -19,8 +19,8 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     protected ProcedureSymbol()
     {
-        _name = new LazyVariable<Utf8String?>(GetName);
-        _type = new LazyVariable<CodeViewLeaf?>(GetFunctionType);
+        _name = new LazyVariable<ProcedureSymbol, Utf8String?>(x => x.GetName());
+        _type = new LazyVariable<ProcedureSymbol, CodeViewLeaf?>(x => x.GetFunctionType());
     }
 
     /// <summary>
@@ -30,8 +30,8 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <param name="id">The function identifier of the procedure.</param>
     public ProcedureSymbol(Utf8String name, FunctionIdentifier id)
     {
-        _name = new LazyVariable<Utf8String?>(name);
-        _type = new LazyVariable<CodeViewLeaf?>(id);
+        _name = new LazyVariable<ProcedureSymbol, Utf8String?>(name);
+        _type = new LazyVariable<ProcedureSymbol, CodeViewLeaf?>(id);
     }
 
     /// <summary>
@@ -41,8 +41,8 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <param name="type">The type describing the shape of the procedure.</param>
     public ProcedureSymbol(Utf8String name, ProcedureTypeRecord type)
     {
-        _name = new LazyVariable<Utf8String?>(name);
-        _type = new LazyVariable<CodeViewLeaf?>(type);
+        _name = new LazyVariable<ProcedureSymbol, Utf8String?>(name);
+        _type = new LazyVariable<ProcedureSymbol, CodeViewLeaf?>(type);
     }
 
     /// <inheritdoc />
@@ -124,8 +124,8 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     public CodeViewLeaf? Type
     {
-        get => _type.Value;
-        set => _type.Value = value;
+        get => _type.GetValue(this);
+        set => _type.SetValue(value);
     }
 
     /// <summary>
@@ -178,8 +178,8 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     public Utf8String? Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>

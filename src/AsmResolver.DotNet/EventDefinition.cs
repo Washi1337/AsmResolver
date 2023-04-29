@@ -18,9 +18,9 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<TypeDefinition?> _declaringType;
-        private readonly LazyVariable<ITypeDefOrRef?> _eventType;
+        private readonly LazyVariable<EventDefinition, Utf8String?> _name;
+        private readonly LazyVariable<EventDefinition, TypeDefinition?> _declaringType;
+        private readonly LazyVariable<EventDefinition, ITypeDefOrRef?> _eventType;
         private IList<MethodSemantics>? _semantics;
         private IList<CustomAttribute>? _customAttributes;
 
@@ -31,9 +31,9 @@ namespace AsmResolver.DotNet
         protected EventDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(() => GetName());
-            _eventType = new LazyVariable<ITypeDefOrRef?>(GetEventType);
-            _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
+            _name = new LazyVariable<EventDefinition, Utf8String?>(x => x.GetName());
+            _eventType = new LazyVariable<EventDefinition, ITypeDefOrRef?>(x => x.GetEventType());
+            _declaringType = new LazyVariable<EventDefinition, TypeDefinition?>(x => x.GetDeclaringType());
         }
 
         /// <summary>
@@ -87,8 +87,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -101,8 +101,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public ITypeDefOrRef? EventType
         {
-            get => _eventType.Value;
-            set => _eventType.Value = value;
+            get => _eventType.GetValue(this);
+            set => _eventType.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -113,8 +113,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public TypeDefinition? DeclaringType
         {
-            get => _declaringType.Value;
-            private set => _declaringType.Value = value;
+            get => _declaringType.GetValue(this);
+            private set => _declaringType.SetValue(value);
         }
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;

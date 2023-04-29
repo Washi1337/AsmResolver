@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class BaseClassField : CodeViewField
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _type;
+    private readonly LazyVariable<BaseClassField, CodeViewTypeRecord?> _type;
 
     /// <summary>
     /// Initializes an empty base class.
@@ -14,7 +14,7 @@ public class BaseClassField : CodeViewField
     protected BaseClassField(uint typeIndex)
         : base(typeIndex)
     {
-        _type = new LazyVariable<CodeViewTypeRecord?>(GetBaseType);
+        _type = new LazyVariable<BaseClassField, CodeViewTypeRecord?>(x => x.GetBaseType());
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ public class BaseClassField : CodeViewField
     public BaseClassField(CodeViewTypeRecord type)
         : base(0)
     {
-        _type = new LazyVariable<CodeViewTypeRecord?>(type);
+        _type = new LazyVariable<BaseClassField, CodeViewTypeRecord?>(type);
     }
 
     /// <inheritdoc />
@@ -35,8 +35,8 @@ public class BaseClassField : CodeViewField
     /// </summary>
     public CodeViewTypeRecord? Type
     {
-        get => _type.Value;
-        set => _type.Value = value;
+        get => _type.GetValue(this);
+        set => _type.SetValue(value);
     }
 
     /// <summary>

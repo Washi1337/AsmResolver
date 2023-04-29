@@ -7,8 +7,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class ClassTypeRecord : CodeViewDerivedTypeRecord
 {
-    private readonly LazyVariable<Utf8String> _uniqueName;
-    private readonly LazyVariable<VTableShapeLeaf?> _vtableShape;
+    private readonly LazyVariable<ClassTypeRecord, Utf8String> _uniqueName;
+    private readonly LazyVariable<ClassTypeRecord, VTableShapeLeaf?> _vtableShape;
 
     /// <summary>
     /// Initializes an empty class type.
@@ -25,8 +25,8 @@ public class ClassTypeRecord : CodeViewDerivedTypeRecord
             throw new ArgumentOutOfRangeException(nameof(kind));
 
         LeafKind = kind;
-        _uniqueName = new LazyVariable<Utf8String>(GetUniqueName);
-        _vtableShape = new LazyVariable<VTableShapeLeaf?>(GetVTableShape);
+        _uniqueName = new LazyVariable<ClassTypeRecord, Utf8String>(x => x.GetUniqueName());
+        _vtableShape = new LazyVariable<ClassTypeRecord, VTableShapeLeaf?>(x => x.GetVTableShape());
     }
 
     /// <summary>
@@ -50,8 +50,8 @@ public class ClassTypeRecord : CodeViewDerivedTypeRecord
 
         LeafKind = kind;
         Name = name;
-        _uniqueName = new LazyVariable<Utf8String>(uniqueName);
-        _vtableShape = new LazyVariable<VTableShapeLeaf?>(default(VTableShapeLeaf));
+        _uniqueName = new LazyVariable<ClassTypeRecord, Utf8String>(uniqueName);
+        _vtableShape = new LazyVariable<ClassTypeRecord, VTableShapeLeaf?>(default(VTableShapeLeaf));
         Size = size;
         StructureAttributes = attributes;
         BaseType = baseType;
@@ -77,8 +77,8 @@ public class ClassTypeRecord : CodeViewDerivedTypeRecord
     /// </summary>
     public Utf8String UniqueName
     {
-        get => _uniqueName.Value;
-        set => _uniqueName.Value = value;
+        get => _uniqueName.GetValue(this);
+        set => _uniqueName.SetValue(value);
     }
 
     /// <summary>
@@ -86,8 +86,8 @@ public class ClassTypeRecord : CodeViewDerivedTypeRecord
     /// </summary>
     public VTableShapeLeaf? VTableShape
     {
-        get => _vtableShape.Value;
-        set => _vtableShape.Value = value;
+        get => _vtableShape.GetValue(this);
+        set => _vtableShape.SetValue(value);
     }
 
     /// <summary>

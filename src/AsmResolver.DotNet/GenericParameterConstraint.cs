@@ -14,8 +14,8 @@ namespace AsmResolver.DotNet
         IModuleProvider,
         IOwnedCollectionElement<GenericParameter>
     {
-        private readonly LazyVariable<GenericParameter?> _owner;
-        private readonly LazyVariable<ITypeDefOrRef?> _constraint;
+        private readonly LazyVariable<GenericParameterConstraint, GenericParameter?> _owner;
+        private readonly LazyVariable<GenericParameterConstraint, ITypeDefOrRef?> _constraint;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -25,8 +25,8 @@ namespace AsmResolver.DotNet
         protected GenericParameterConstraint(MetadataToken token)
             : base(token)
         {
-            _owner = new LazyVariable<GenericParameter?>(GetOwner);
-            _constraint = new LazyVariable<ITypeDefOrRef?>(GetConstraint);
+            _owner = new LazyVariable<GenericParameterConstraint, GenericParameter?>(x => x.GetOwner());
+            _constraint = new LazyVariable<GenericParameterConstraint, ITypeDefOrRef?>(x => x.GetConstraint());
         }
 
         /// <summary>
@@ -44,8 +44,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public GenericParameter? Owner
         {
-            get => _owner.Value;
-            private set => _owner.Value = value;
+            get => _owner.GetValue(this);
+            private set => _owner.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -60,8 +60,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public ITypeDefOrRef? Constraint
         {
-            get => _constraint.Value;
-            set => _constraint.Value = value;
+            get => _constraint.GetValue(this);
+            set => _constraint.SetValue(value);
         }
 
         /// <inheritdoc />

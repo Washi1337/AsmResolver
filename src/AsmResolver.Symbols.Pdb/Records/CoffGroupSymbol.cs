@@ -7,14 +7,14 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class CoffGroupSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<Utf8String?> _name;
+    private readonly LazyVariable<CoffGroupSymbol, Utf8String?> _name;
 
     /// <summary>
     /// Initializes an empty COFF group symbol.
     /// </summary>
     protected CoffGroupSymbol()
     {
-        _name = new LazyVariable<Utf8String?>(GetName);
+        _name = new LazyVariable<CoffGroupSymbol, Utf8String?>(x => x.GetName());
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ public class CoffGroupSymbol : CodeViewSymbol
     /// <param name="characteristics">The characteristics describing the group.</param>
     public CoffGroupSymbol(Utf8String name, ushort segmentIndex, uint offset, uint size, SectionFlags characteristics)
     {
-        _name = new LazyVariable<Utf8String?>(name);
+        _name = new LazyVariable<CoffGroupSymbol, Utf8String?>(name);
         SegmentIndex = segmentIndex;
         Offset = offset;
         Size = size;
@@ -78,8 +78,8 @@ public class CoffGroupSymbol : CodeViewSymbol
     /// </summary>
     public Utf8String? Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>

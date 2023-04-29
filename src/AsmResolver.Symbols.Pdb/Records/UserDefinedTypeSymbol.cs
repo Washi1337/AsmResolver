@@ -7,16 +7,16 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class UserDefinedTypeSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<Utf8String> _name;
-    private readonly LazyVariable<CodeViewTypeRecord> _type;
+    private readonly LazyVariable<UserDefinedTypeSymbol, Utf8String> _name;
+    private readonly LazyVariable<UserDefinedTypeSymbol, CodeViewTypeRecord> _type;
 
     /// <summary>
     /// Initializes a new empty user-defined type symbol.
     /// </summary>
     protected UserDefinedTypeSymbol()
     {
-        _name = new LazyVariable<Utf8String>(GetName);
-        _type = new LazyVariable<CodeViewTypeRecord>(GetSymbolType);
+        _name = new LazyVariable<UserDefinedTypeSymbol, Utf8String>(x => x.GetName());
+        _type = new LazyVariable<UserDefinedTypeSymbol, CodeViewTypeRecord>(x => x.GetSymbolType());
     }
 
     /// <summary>
@@ -26,8 +26,8 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     /// <param name="type">The type.</param>
     public UserDefinedTypeSymbol(Utf8String name, CodeViewTypeRecord type)
     {
-        _name = new LazyVariable<Utf8String>(name);
-        _type = new LazyVariable<CodeViewTypeRecord>(type);
+        _name = new LazyVariable<UserDefinedTypeSymbol, Utf8String>(name);
+        _type = new LazyVariable<UserDefinedTypeSymbol, CodeViewTypeRecord>(type);
     }
 
     /// <inheritdoc />
@@ -38,8 +38,8 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     /// </summary>
     public Utf8String Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>
@@ -47,8 +47,8 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     /// </summary>
     public CodeViewTypeRecord Type
     {
-        get => _type.Value;
-        set => _type.Value = value;
+        get => _type.GetValue(this);
+        set => _type.SetValue(value);
     }
 
     /// <summary>

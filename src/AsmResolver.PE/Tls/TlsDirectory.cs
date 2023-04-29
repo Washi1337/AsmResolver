@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Tls
     /// </summary>
     public class TlsDirectory : SegmentBase, ITlsDirectory
     {
-        private readonly LazyVariable<IReadableSegment?> _templateData;
+        private readonly LazyVariable<TlsDirectory, IReadableSegment?> _templateData;
         private TlsCallbackCollection? _callbackFunctions;
         private ulong _imageBase = 0x00400000;
         private bool _is32Bit = true;
@@ -20,15 +20,15 @@ namespace AsmResolver.PE.Tls
         /// </summary>
         public TlsDirectory()
         {
-            _templateData = new LazyVariable<IReadableSegment?>(GetTemplateData);
+            _templateData = new LazyVariable<TlsDirectory, IReadableSegment?>(x => x.GetTemplateData());
             Index = SegmentReference.Null;
         }
 
         /// <inheritdoc />
         public IReadableSegment? TemplateData
         {
-            get => _templateData.Value;
-            set => _templateData.Value = value;
+            get => _templateData.GetValue(this);
+            set => _templateData.SetValue(value);
         }
 
         /// <inheritdoc />

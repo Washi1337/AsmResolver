@@ -7,10 +7,10 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class MemberFunctionLeaf : CodeViewLeaf, ITpiLeaf
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _returnType;
-    private readonly LazyVariable<CodeViewTypeRecord?> _declaringType;
-    private readonly LazyVariable<CodeViewTypeRecord?> _thisType;
-    private readonly LazyVariable<ArgumentListLeaf?> _argumentList;
+    private readonly LazyVariable<MemberFunctionLeaf, CodeViewTypeRecord?> _returnType;
+    private readonly LazyVariable<MemberFunctionLeaf, CodeViewTypeRecord?> _declaringType;
+    private readonly LazyVariable<MemberFunctionLeaf, CodeViewTypeRecord?> _thisType;
+    private readonly LazyVariable<MemberFunctionLeaf, ArgumentListLeaf?> _argumentList;
 
     /// <summary>
     /// Initializes an empty member function.
@@ -19,10 +19,10 @@ public class MemberFunctionLeaf : CodeViewLeaf, ITpiLeaf
     protected MemberFunctionLeaf(uint typeIndex)
         : base(typeIndex)
     {
-        _returnType = new LazyVariable<CodeViewTypeRecord?>(GetReturnType);
-        _declaringType = new LazyVariable<CodeViewTypeRecord?>(GetDeclaringType);
-        _thisType = new LazyVariable<CodeViewTypeRecord?>(GetThisType);
-        _argumentList = new LazyVariable<ArgumentListLeaf?>(GetArguments);
+        _returnType = new LazyVariable<MemberFunctionLeaf, CodeViewTypeRecord?>(x => x.GetReturnType());
+        _declaringType = new LazyVariable<MemberFunctionLeaf, CodeViewTypeRecord?>(x => x.GetDeclaringType());
+        _thisType = new LazyVariable<MemberFunctionLeaf, CodeViewTypeRecord?>(x => x.GetThisType());
+        _argumentList = new LazyVariable<MemberFunctionLeaf, ArgumentListLeaf?>(x => x.GetArguments());
     }
 
     /// <summary>
@@ -34,10 +34,10 @@ public class MemberFunctionLeaf : CodeViewLeaf, ITpiLeaf
     public MemberFunctionLeaf(CodeViewTypeRecord returnType, CodeViewTypeRecord declaringType, ArgumentListLeaf arguments)
         : base(0)
     {
-        _returnType = new LazyVariable<CodeViewTypeRecord?>(returnType);
-        _declaringType = new LazyVariable<CodeViewTypeRecord?>(declaringType);
-        _thisType = new LazyVariable<CodeViewTypeRecord?>(default(CodeViewTypeRecord));
-        _argumentList = new LazyVariable<ArgumentListLeaf?>(arguments);
+        _returnType = new LazyVariable<MemberFunctionLeaf, CodeViewTypeRecord?>(returnType);
+        _declaringType = new LazyVariable<MemberFunctionLeaf, CodeViewTypeRecord?>(declaringType);
+        _thisType = new LazyVariable<MemberFunctionLeaf, CodeViewTypeRecord?>(default(CodeViewTypeRecord));
+        _argumentList = new LazyVariable<MemberFunctionLeaf, ArgumentListLeaf?>(arguments);
         CallingConvention = CodeViewCallingConvention.NearC;
         Attributes = 0;
         ThisAdjuster = 0;
@@ -51,8 +51,8 @@ public class MemberFunctionLeaf : CodeViewLeaf, ITpiLeaf
     /// </summary>
     public CodeViewTypeRecord? ReturnType
     {
-        get => _returnType.Value;
-        set => _returnType.Value = value;
+        get => _returnType.GetValue(this);
+        set => _returnType.SetValue(value);
     }
 
     /// <summary>
@@ -60,8 +60,8 @@ public class MemberFunctionLeaf : CodeViewLeaf, ITpiLeaf
     /// </summary>
     public CodeViewTypeRecord? DeclaringType
     {
-        get => _declaringType.Value;
-        set => _declaringType.Value = value;
+        get => _declaringType.GetValue(this);
+        set => _declaringType.SetValue(value);
     }
 
     /// <summary>
@@ -69,8 +69,8 @@ public class MemberFunctionLeaf : CodeViewLeaf, ITpiLeaf
     /// </summary>
     public CodeViewTypeRecord? ThisType
     {
-        get => _thisType.Value;
-        set => _thisType.Value = value;
+        get => _thisType.GetValue(this);
+        set => _thisType.SetValue(value);
     }
 
     /// <summary>
@@ -96,8 +96,8 @@ public class MemberFunctionLeaf : CodeViewLeaf, ITpiLeaf
     /// </summary>
     public ArgumentListLeaf? Arguments
     {
-        get => _argumentList.Value;
-        set => _argumentList.Value = value;
+        get => _argumentList.GetValue(this);
+        set => _argumentList.SetValue(value);
     }
 
     /// <summary>

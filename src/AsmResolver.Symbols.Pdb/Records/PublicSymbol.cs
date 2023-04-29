@@ -5,14 +5,14 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class PublicSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<Utf8String> _name;
+    private readonly LazyVariable<PublicSymbol, Utf8String> _name;
 
     /// <summary>
     /// Initializes a new empty public symbol.
     /// </summary>
     protected PublicSymbol()
     {
-        _name = new LazyVariable<Utf8String>(GetName);
+        _name = new LazyVariable<PublicSymbol, Utf8String>(x => x.GetName());
     }
 
     /// <summary>
@@ -26,7 +26,7 @@ public class PublicSymbol : CodeViewSymbol
     {
         SegmentIndex = segmentIndex;
         Offset = offset;
-        _name = new LazyVariable<Utf8String>(name);
+        _name = new LazyVariable<PublicSymbol, Utf8String>(name);
         Attributes = attributes;
     }
 
@@ -105,8 +105,8 @@ public class PublicSymbol : CodeViewSymbol
     /// </summary>
     public Utf8String Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>

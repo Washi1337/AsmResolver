@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class BitFieldTypeRecord : CodeViewTypeRecord
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _type;
+    private readonly LazyVariable<BitFieldTypeRecord, CodeViewTypeRecord?> _type;
 
     /// <summary>
     /// Initializes an empty bit field record.
@@ -14,7 +14,7 @@ public class BitFieldTypeRecord : CodeViewTypeRecord
     protected BitFieldTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _type = new LazyVariable<CodeViewTypeRecord?>(GetBaseType);
+        _type = new LazyVariable<BitFieldTypeRecord, CodeViewTypeRecord?>(x => x.GetBaseType());
     }
 
     /// <summary>
@@ -26,7 +26,7 @@ public class BitFieldTypeRecord : CodeViewTypeRecord
     public BitFieldTypeRecord(CodeViewTypeRecord type, byte position, byte length)
         : base(0)
     {
-        _type = new LazyVariable<CodeViewTypeRecord?>(type);
+        _type = new LazyVariable<BitFieldTypeRecord, CodeViewTypeRecord?>(type);
         Position = position;
         Length = length;
     }
@@ -39,8 +39,8 @@ public class BitFieldTypeRecord : CodeViewTypeRecord
     /// </summary>
     public CodeViewTypeRecord? Type
     {
-        get => _type.Value;
-        set => _type.Value = value;
+        get => _type.GetValue(this);
+        set => _type.SetValue(value);
     }
 
     /// <summary>

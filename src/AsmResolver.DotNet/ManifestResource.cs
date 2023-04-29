@@ -18,9 +18,9 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<IImplementation?> _implementation;
-        private readonly LazyVariable<ISegment?> _embeddedData;
+        private readonly LazyVariable<ManifestResource, Utf8String?> _name;
+        private readonly LazyVariable<ManifestResource, IImplementation?> _implementation;
+        private readonly LazyVariable<ManifestResource, ISegment?> _embeddedData;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -30,9 +30,9 @@ namespace AsmResolver.DotNet
         protected ManifestResource(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _implementation = new LazyVariable<IImplementation?>(GetImplementation);
-            _embeddedData = new LazyVariable<ISegment?>(GetEmbeddedDataSegment);
+            _name = new LazyVariable<ManifestResource, Utf8String?>(x => x.GetName());
+            _implementation = new LazyVariable<ManifestResource, IImplementation?>(x => x.GetImplementation());
+            _embeddedData = new LazyVariable<ManifestResource, ISegment?>(x => x.GetEmbeddedDataSegment());
         }
 
         /// <summary>
@@ -110,8 +110,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -121,8 +121,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IImplementation? Implementation
         {
-            get => _implementation.Value;
-            set => _implementation.Value = value;
+            get => _implementation.GetValue(this);
+            set => _implementation.SetValue(value);
         }
 
         /// <summary>
@@ -135,8 +135,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public ISegment? EmbeddedDataSegment
         {
-            get => _embeddedData.Value;
-            set => _embeddedData.Value = value;
+            get => _embeddedData.GetValue(this);
+            set => _embeddedData.SetValue(value);
         }
 
         /// <summary>

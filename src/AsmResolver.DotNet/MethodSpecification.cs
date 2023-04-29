@@ -11,8 +11,8 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class MethodSpecification : MetadataMember, IMethodDescriptor, IHasCustomAttribute
     {
-        private readonly LazyVariable<IMethodDefOrRef?> _method;
-        private readonly LazyVariable<GenericInstanceMethodSignature?> _signature;
+        private readonly LazyVariable<MethodSpecification, IMethodDefOrRef?> _method;
+        private readonly LazyVariable<MethodSpecification, GenericInstanceMethodSignature?> _signature;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -22,8 +22,8 @@ namespace AsmResolver.DotNet
         protected MethodSpecification(MetadataToken token)
             : base(token)
         {
-            _method = new LazyVariable<IMethodDefOrRef?>(GetMethod);
-            _signature = new LazyVariable<GenericInstanceMethodSignature?>(GetSignature);
+            _method = new LazyVariable<MethodSpecification, IMethodDefOrRef?>(x => x.GetMethod());
+            _signature = new LazyVariable<MethodSpecification, GenericInstanceMethodSignature?>(x => x.GetSignature());
         }
 
         /// <summary>
@@ -43,8 +43,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IMethodDefOrRef? Method
         {
-            get => _method.Value;
-            set => _method.Value = value;
+            get => _method.GetValue(this);
+            set => _method.SetValue(value);
         }
 
         MethodSignature? IMethodDescriptor.Signature => Method?.Signature;
@@ -54,8 +54,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public GenericInstanceMethodSignature? Signature
         {
-            get => _signature.Value;
-            set => _signature.Value = value;
+            get => _signature.GetValue(this);
+            set => _signature.SetValue(value);
         }
 
 

@@ -7,16 +7,16 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class RegisterRelativeSymbol : CodeViewSymbol, IRegisterRelativeSymbol
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _variableType;
-    private readonly LazyVariable<Utf8String?> _name;
+    private readonly LazyVariable<RegisterRelativeSymbol, CodeViewTypeRecord?> _variableType;
+    private readonly LazyVariable<RegisterRelativeSymbol, Utf8String?> _name;
 
     /// <summary>
     /// Initializes an empty relative register symbol.
     /// </summary>
     protected RegisterRelativeSymbol()
     {
-        _variableType = new LazyVariable<CodeViewTypeRecord?>(GetVariableType);
-        _name = new LazyVariable<Utf8String?>(GetName);
+        _variableType = new LazyVariable<RegisterRelativeSymbol, CodeViewTypeRecord?>(x => x.GetVariableType());
+        _name = new LazyVariable<RegisterRelativeSymbol, Utf8String?>(x => x.GetName());
     }
 
     /// <summary>
@@ -28,10 +28,10 @@ public class RegisterRelativeSymbol : CodeViewSymbol, IRegisterRelativeSymbol
     /// <param name="variableType">The type of variable the register+offset pair stores.</param>
     public RegisterRelativeSymbol(Utf8String name, ushort baseRegister, int offset, CodeViewTypeRecord variableType)
     {
-        _name = new LazyVariable<Utf8String?>(name);
+        _name = new LazyVariable<RegisterRelativeSymbol, Utf8String?>(name);
         BaseRegister = baseRegister;
         Offset = offset;
-        _variableType = new LazyVariable<CodeViewTypeRecord?>(variableType);
+        _variableType = new LazyVariable<RegisterRelativeSymbol, CodeViewTypeRecord?>(variableType);
     }
 
     /// <inheritdoc />
@@ -58,15 +58,15 @@ public class RegisterRelativeSymbol : CodeViewSymbol, IRegisterRelativeSymbol
     /// <inheritdoc />
     public CodeViewTypeRecord? VariableType
     {
-        get => _variableType.Value;
-        set => _variableType.Value = value;
+        get => _variableType.GetValue(this);
+        set => _variableType.SetValue(value);
     }
 
     /// <inheritdoc />
     public Utf8String? Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>
