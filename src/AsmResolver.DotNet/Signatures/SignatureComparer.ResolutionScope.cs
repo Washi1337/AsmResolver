@@ -92,7 +92,10 @@ namespace AsmResolver.DotNet.Signatures
                 int hashCode = obj.Name is null ? 0 : obj.Name.GetHashCode();
                 hashCode = (hashCode * 397) ^ (obj.Culture is not null ? obj.Culture.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (int) TableIndex.AssemblyRef;
-                hashCode = (hashCode * 397) ^ obj.Version.GetHashCode();
+
+                if (!AcceptNewerAssemblyVersionNumbers && !AcceptOlderAssemblyVersionNumbers)
+                    hashCode = (hashCode * 397) ^ obj.Version.GetHashCode();
+
                 hashCode = (hashCode * 397) ^ (int) obj.Attributes;
 
                 byte[]? publicKeyToken = obj.GetPublicKeyToken();
