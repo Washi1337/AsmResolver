@@ -44,7 +44,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             }
 
             var field = table.GetByRid(fieldRvaRow.Field);
-            int valueSize = DetermineFieldSize(directory, field);
+            int valueSize = DetermineFieldSize(platform, directory, field);
 
             if (fieldRvaRow.Data.CanRead)
             {
@@ -64,7 +64,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             return null;
         }
 
-        private int DetermineFieldSize(IDotNetDirectory directory, in FieldDefinitionRow field)
+        private int DetermineFieldSize(Platform platform, IDotNetDirectory directory, in FieldDefinitionRow field)
         {
             if (!directory.Metadata!.TryGetStream<BlobStream>(out var blobStream)
                 || !blobStream.TryGetBlobReaderByIndex(field.Signature, out var reader))
@@ -88,6 +88,9 @@ namespace AsmResolver.PE.DotNet.Metadata
                 ElementType.U8 => sizeof(ulong),
                 ElementType.R4 => sizeof(float),
                 ElementType.R8 => sizeof(double),
+                ElementType.I or ElementType.U => directory.Flags.IsLoadedAs32Bit(platform)
+                    ? sizeof(uint)
+                    : sizeof(ulong),
                 ElementType.ValueType => GetCustomTypeSize(directory.Metadata, ref reader),
                 ElementType.Class => GetCustomTypeSize(directory.Metadata, ref reader),
                 _ => throw new ArgumentOutOfRangeException()

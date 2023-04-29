@@ -151,6 +151,24 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(new byte[4], data.WriteIntoArray());
         }
 
+        [Fact]
+        public void ReadNativeIntFieldRvaX86()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_IntPtrFieldRva_X86);
+            var data = module.GetModuleType()!.Fields.First(f => f.Name == "__dummy__").FieldRva;
+            var readableData = Assert.IsAssignableFrom<IReadableSegment>(data);
+            Assert.Equal(new byte[] {0xEF, 0xCD, 0xAB, 0x89}, readableData.ToArray());
+        }
+
+        [Fact]
+        public void ReadNativeIntFieldRvaX64()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_IntPtrFieldRva_X64);
+            var data = module.GetModuleType()!.Fields.First(f => f.Name == "__dummy__").FieldRva;
+            var readableData = Assert.IsAssignableFrom<IReadableSegment>(data);
+            Assert.Equal(new byte[] {0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01}, readableData.ToArray());
+        }
+
         [Theory]
         [InlineData(nameof(ExplicitOffsetsStruct.IntField), 0)]
         [InlineData(nameof(ExplicitOffsetsStruct.ByteField), 10)]
