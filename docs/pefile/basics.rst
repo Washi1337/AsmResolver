@@ -8,10 +8,23 @@ Every raw PE file interaction is done through classes defined by the ``AsmResolv
     using AsmResolver.PE.File;
 
 
+Creating a new PE file
+----------------------
+
+Creating a PE file can be done through one of the ``PEFile`` constructors:
+
+.. code-block:: csharp
+
+    var peFile = new PEFile();
+
+
+This will create a new empty PE file with 0 sections, and sets some values in the file header and optional header that are typical for a 32-bit Windows console application targeting the x86 platform.
+
+
 Opening a PE file
 -----------------
 
-Opening a file can be done through one of the `FromXXX` methods:
+Opening a PE file can be done through one of the ``FromXXX`` methods:
 
 .. code-block:: csharp
 
