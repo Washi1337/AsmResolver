@@ -73,7 +73,9 @@ namespace AsmResolver.PE.Imports
                 ? (0x8000_0000ul, sizeof(uint))
                 : (0x8000_0000_0000_0000ul, sizeof(ulong));
 
-            if (!_context.File.TryCreateReaderAtRva(_lookupRva, out var lookupItemReader))
+            // Prefer OriginalFirstThunk over FirstThunk if it is available and valid.
+            if (!_context.File.TryCreateReaderAtRva(_lookupRva, out var lookupItemReader)
+                && !_context.File.TryCreateReaderAtRva(_addressRva, out lookupItemReader))
             {
                 _context.BadImage($"Imported module \"{Name}\" has an invalid import lookup thunk table RVA.");
                 return result;
@@ -83,16 +85,19 @@ namespace AsmResolver.PE.Imports
             {
                 ImportedSymbol entry;
 
+                // Read next thunk data.
                 ulong lookupItem = lookupItemReader.ReadNativeInt(is32Bit);
                 if (lookupItem == 0)
                     break;
 
+                // Are we an import by ordinal or by name?
                 if ((lookupItem & ordinalMask) != 0)
                 {
                     entry = new ImportedSymbol((ushort) (lookupItem & 0xFFFF));
                 }
                 else
                 {
+                    // Resolve hint and name.
                     uint hintNameRva = (uint) (lookupItem & 0xFFFFFFFF);
                     if (!_context.File.TryCreateReaderAtRva(hintNameRva, out var reader))
                     {
