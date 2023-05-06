@@ -4,6 +4,7 @@ using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.Platforms;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.DotNet.Metadata
@@ -46,7 +47,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         {
             // Open image.
             var image = PEImage.FromFile(typeof(InitialValues).Assembly.Location);
-            var metadata = image.DotNetDirectory!.Metadata!;
+            var directory = image.DotNetDirectory!;
 
             // Get token of field.
             var cctorToken = (MetadataToken) typeof(InitialValues)
@@ -57,14 +58,18 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
                 !.MetadataToken;
 
             // Find associated field rva row.
-            var fieldRvaRow = FindFieldRvaRow(metadata.GetStream<TablesStream>(), cctorToken, fieldToken);
+            var fieldRvaRow = FindFieldRvaRow(directory.Metadata!.GetStream<TablesStream>(), cctorToken, fieldToken);
 
             // Read the data.
             var dataReader = new FieldRvaDataReader();
-            var segment = dataReader.ResolveFieldData(ThrowErrorListener.Instance, metadata, fieldRvaRow) as IReadableSegment;
+            var segment = dataReader.ResolveFieldData(
+                ThrowErrorListener.Instance,
+                Platform.Get(image.MachineType),
+                directory,
+                fieldRvaRow) as IReadableSegment;
 
             Assert.NotNull(segment);
-            Assert.Equal(InitialValues.ByteArray, segment!.ToArray());
+            Assert.Equal(InitialValues.ByteArray, segment.ToArray());
         }
     }
 }

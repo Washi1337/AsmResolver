@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.Builder;
-using AsmResolver.PE.Code;
-using AsmResolver.PE.Debug;
 using AsmResolver.PE.Debug.Builder;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
@@ -495,10 +493,10 @@ namespace AsmResolver.PE.DotNet.Builder
 
         private static void AddFieldRvasToTable(ManagedPEBuilderContext context)
         {
-            var metadata = context.DotNetSegment.DotNetDirectory.Metadata;
-            var fieldRvaTable = metadata
-                !.GetStream<TablesStream>()
-                !.GetTable<FieldRvaRow>(TableIndex.FieldRva);
+            var directory = context.DotNetSegment.DotNetDirectory;
+            var fieldRvaTable = directory.Metadata!
+                .GetStream<TablesStream>()
+                .GetTable<FieldRvaRow>(TableIndex.FieldRva);
 
             if (fieldRvaTable.Count == 0)
                 return;
@@ -508,7 +506,12 @@ namespace AsmResolver.PE.DotNet.Builder
 
             for (int i = 0; i < fieldRvaTable.Count; i++)
             {
-                var data = reader.ResolveFieldData(ThrowErrorListener.Instance, metadata, fieldRvaTable[i]);
+                var data = reader.ResolveFieldData(
+                    ThrowErrorListener.Instance,
+                    context.Platform,
+                    directory,
+                    fieldRvaTable[i]);
+
                 if (data is null)
                     continue;
 

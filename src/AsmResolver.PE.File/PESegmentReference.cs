@@ -33,10 +33,15 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public bool CanRead => _peFile.TryGetSectionContainingRva(Rva, out _);
+        public bool CanRead => _peFile.TryGetSectionContainingRva(Rva, out var section) && section.IsReadable;
 
         /// <inheritdoc />
         public bool IsBounded => false;
+
+        /// <summary>
+        /// Gets a value indicating whether the reference points to a valid section within the PE file.
+        /// </summary>
+        public bool IsValidAddress => _peFile.TryGetSectionContainingRva(Rva, out _);
 
         /// <inheritdoc />
         public BinaryStreamReader CreateReader() => _peFile.CreateReaderAtRva(Rva);

@@ -204,7 +204,9 @@ namespace AsmResolver.PE.File
         /// Gets a value indicating whether the section is readable using a binary stream reader.
         /// </summary>
         [MemberNotNullWhen(true, nameof(Contents))]
-        public bool IsReadable => Contents is IReadableSegment;
+        public bool IsReadable => Contents is VirtualSegment segment
+            ? segment.IsReadable
+            : Contents is IReadableSegment;
 
         /// <inheritdoc />
         public ulong Offset => Contents?.Offset ?? 0;

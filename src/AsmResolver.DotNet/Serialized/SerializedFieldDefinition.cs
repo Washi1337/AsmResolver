@@ -7,6 +7,7 @@ using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.Platforms;
 
 namespace AsmResolver.DotNet.Serialized
 {
@@ -84,15 +85,24 @@ namespace AsmResolver.DotNet.Serialized
         protected override ISegment? GetFieldRva()
         {
             var module = _context.ParentModule;
+            if (!Platform.TryGet(module.MachineType, out var platform))
+                return null;
 
             uint rid = module.GetFieldRvaRid(MetadataToken);
             bool result = _context.TablesStream
                 .GetTable<FieldRvaRow>(TableIndex.FieldRva)
                 .TryGetByRid(rid, out var fieldRvaRow);
 
-            return result
-                ? _context.Parameters.FieldRvaDataReader.ResolveFieldData(_context, _context.Metadata, fieldRvaRow)
-                : null;
+            if (result)
+            {
+                return _context.Parameters.FieldRvaDataReader.ResolveFieldData(
+                    _context,
+                    platform,
+                    _context.ParentModule.DotNetDirectory,
+                    fieldRvaRow);
+            }
+
+            return null;
         }
 
         /// <inheritdoc />

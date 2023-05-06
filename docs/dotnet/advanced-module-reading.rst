@@ -19,11 +19,11 @@ These parameters can then be passed on to any of the ``ModuleDefinition.FromXXX`
 PE image reading parameters
 ---------------------------
 
-.NET modules are stored in a normal PE file. To customize the way AsmResolver reads the underlying PE image before it is being interpreted as a .NET image, ``ModuleReaderParameters`` provides a ``PEReaderParameters`` property that can be modified or replaced completely. 
+.NET modules are stored in a normal PE file. To customize the way AsmResolver reads the underlying PE image before it is being interpreted as a .NET image, ``ModuleReaderParameters`` provides a ``PEReaderParameters`` property that can be modified or replaced completely.
 
 .. code-block:: csharp
 
-    parameters.PEReaderParameters = new PEReaderParameters 
+    parameters.PEReaderParameters = new PEReaderParameters
     {
         ...
     };
@@ -34,7 +34,7 @@ For example, this can be in particular useful if you want to let AsmResolver ign
 
     parameters.PEReaderParameters.ErrorListener = EmptyErrorListener.Instance;
 
-   
+
 Alternatively, this property can also be set through the constructor of the ``ModuleReaderParameters`` class directly:
 
 .. code-block:: csharp
@@ -53,7 +53,7 @@ Modules often depend on other assemblies. These assemblies often are placed in t
 
     parameters.WorkingDirectory = @"C:\Path\To\Different\Folder";
 
-   
+
 Alternatively, this property can also be set through the constructor of the ``ModuleReaderParameters`` class directly:
 
 .. code-block:: csharp
@@ -83,10 +83,10 @@ To let the reader use this implementation of the ``INetModuleResolver``, set the
     parameters.NetModuleResolver = new CustomNetModuleResolver();
 
 
-Custom method body readers 
+Custom method body readers
 --------------------------
 
-Some .NET obfuscators store the implementation of method definitions in an encrypted form, use native method bodies, or use a custom format that is interpreted at runtime by the means of JIT hooking. To change the way of how method bodies are being read, it is possible to provide a custom implementation of the ``IMethodBodyReader`` interface, or extend the default implementation. 
+Some .NET obfuscators store the implementation of method definitions in an encrypted form, use native method bodies, or use a custom format that is interpreted at runtime by the means of JIT hooking. To change the way of how method bodies are being read, it is possible to provide a custom implementation of the ``IMethodBodyReader`` interface, or extend the default implementation.
 
 Below an example of how to add support for reading simple x86 method bodies:
 
@@ -95,11 +95,11 @@ Below an example of how to add support for reading simple x86 method bodies:
     public class CustomMethodBodyReader : DefaultMethodBodyReader
     {
         public override MethodBody ReadMethodBody(
-            ModuleReaderContext context, 
-            MethodDefinition owner, 
+            ModuleReaderContext context,
+            MethodDefinition owner,
             in MethodDefinitionRow row)
         {
-            if (owner.IsNative && row.Body.CanRead) 
+            if (owner.IsNative && row.Body.CanRead)
             {
                 // Create raw binary reader if method is native.
                 var reader = row.Body.CreateReader();
@@ -109,7 +109,7 @@ Below an example of how to add support for reading simple x86 method bodies:
                 // a very accurate heuristic for finding the boundaries of native
                 // method bodies.
 
-                var code = reader.ReadBytesUntil(0xC3); 
+                var code = reader.ReadBytesUntil(0xC3);
 
                 // Create native method body.
                 return new NativeMethodBody(owner, code);
@@ -128,7 +128,7 @@ To let the reader use this implementation of the ``IMethodBodyReader``, set the 
     parameters.MethodBodyReader = new CustomMethodBodyReader();
 
 
-Custom Field RVA reading 
+Custom Field RVA reading
 ------------------------
 
 By default, the field RVA data storing the initial binary value of a field is interpreted as raw byte blobs, and are turned into instances of the ``DataSegment`` class. To adjust this behaviour, it is possible to provide a custom implementation of the ``IFieldRvaDataReader`` interface.
@@ -139,8 +139,9 @@ By default, the field RVA data storing the initial binary value of a field is in
     public class CustomFieldRvaDataReader : FieldRvaDataReader
     {
         public override ISegment ResolveFieldData(
-            IErrorListener listener, 
-            IMetadata metadata, 
+            IErrorListener listener,
+            Platform platform,
+            IDotNetDirectory directory,
             in FieldRvaRow fieldRvaRow)
         {
             // ...
