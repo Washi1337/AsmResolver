@@ -51,13 +51,10 @@ namespace AsmResolver.DotNet.Builder
         public bool HasFailed => ConstructedImage is null;
 
         /// <summary>
-        /// Gets the bag containing the diagnostics that were collected during the construction of the image.
+        /// Gets the bag containing the diagnostics that were collected during the construction of the image (if available).
         /// </summary>
-        [Obsolete]
-        public DiagnosticBag DiagnosticBag
-        {
-            get=> (DiagnosticBag)ErrorListener;
-        }
+        [Obsolete("Use the ErrorListener property instead.")]
+        public DiagnosticBag? DiagnosticBag => ErrorListener as DiagnosticBag;
 
         /// <summary>
         /// Gets the error listener handling the diagnostics that were collected during the construction of the image.

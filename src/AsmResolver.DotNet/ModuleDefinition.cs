@@ -1291,20 +1291,29 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         /// <returns>IPEImage built by the specified IPEImageBuilder</returns>
-        /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
+        /// <exception cref="AggregateException">
+        /// Occurs when the construction of the image threw exceptions, and the used error listener is an instance of
+        /// a <see cref="DiagnosticBag"/>.
+        /// </exception>
+        /// <exception cref="MetadataBuilderException">
+        /// Occurs when the construction of the PE image failed completely.
+        /// </exception>
         public IPEImage ToPEImage(IPEImageBuilder imageBuilder)
         {
             var result = imageBuilder.CreateImage(this);
-            if (result.ErrorListener is DiagnosticBag diagnosticBag && diagnosticBag.HasErrors)
+
+            // If the error listener is a diagnostic bag, we can pull out the exceptions that were thrown.
+            if (result.ErrorListener is DiagnosticBag {HasErrors: true} diagnosticBag)
             {
                 throw new AggregateException(
                     "Construction of the PE image failed with one or more errors.",
                     diagnosticBag.Exceptions);
             }
-            else if (result.HasFailed)
-            {
-                throw new Exception("Construction of the PE image failed.");
-            }
+
+            // If we still failed but we don't have special handling for the provided error listener, just throw a
+            // simple exception instead.
+            if (result.HasFailed)
+                throw new MetadataBuilderException("Construction of the PE image failed.");
 
             return result.ConstructedImage;
         }
