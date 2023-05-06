@@ -26,11 +26,11 @@ namespace AsmResolver.PE.DotNet
         /// <param name="flags">The flags of the module as specified in its COR20 header.</param>
         /// <param name="platform">The platform to assume the module is loaded on.</param>
         /// <param name="assume32BitSystem"><c>true</c> if a 32-bit system should be assumed.</param>
-        /// <param name="prefer32Bit"><c>true</c> if a 32-bit load is preferred.</param>
+        /// <param name="canLoadAs32Bit"><c>true</c> if the application can be loaded as a 32-bit process.</param>
         /// <returns>
         /// <c>true</c> if the module is loaded as a 32-bit process, <c>false</c> if it is loaded as a 64-bit process.
         /// </returns>
-        public static bool IsLoadedAs32Bit(this DotNetDirectoryFlags flags, Platform platform, bool assume32BitSystem, bool prefer32Bit)
+        public static bool IsLoadedAs32Bit(this DotNetDirectoryFlags flags, Platform platform, bool assume32BitSystem, bool canLoadAs32Bit)
         {
             // Short-circuit all 64-bit platforms.
             if (!platform.Is32Bit)
@@ -50,7 +50,7 @@ namespace AsmResolver.PE.DotNet
 
             // Try cater to preference.
             if ((flags & DotNetDirectoryFlags.Bit32Preferred) != 0)
-                return assume32BitSystem | prefer32Bit;
+                return assume32BitSystem | canLoadAs32Bit;
 
             return assume32BitSystem;
         }

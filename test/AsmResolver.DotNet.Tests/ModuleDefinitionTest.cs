@@ -524,10 +524,10 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(false, true, false)]
         [InlineData(true, false, true)]
         [InlineData(true, true, true)]
-        public void IsLoadedAs32BitAnyCPUModule(bool assume32Bit, bool prefer32Bit, bool expected)
+        public void IsLoadedAs32BitAnyCPUModule(bool assume32Bit, bool canLoadAs32Bit, bool expected)
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
-            Assert.Equal(expected, module.IsLoadedAs32Bit(assume32Bit, prefer32Bit));
+            Assert.Equal(expected, module.IsLoadedAs32Bit(assume32Bit, canLoadAs32Bit));
         }
 
         [Theory]
@@ -535,11 +535,11 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(false, true, true)]
         [InlineData(true, false, true)]
         [InlineData(true, true, true)]
-        public void IsLoadedAs32BitAnyCPUModulePrefer32Bit(bool assume32Bit, bool prefer32Bit, bool expected)
+        public void IsLoadedAs32BitAnyCPUModulePrefer32Bit(bool assume32Bit, bool canLoadAs32Bit, bool expected)
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             module.IsBit32Preferred = true;
-            Assert.Equal(expected, module.IsLoadedAs32Bit(assume32Bit, prefer32Bit));
+            Assert.Equal(expected, module.IsLoadedAs32Bit(assume32Bit, canLoadAs32Bit));
         }
 
         [Theory]
@@ -547,11 +547,11 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(false, true)]
         [InlineData(true, false)]
         [InlineData(true, true)]
-        public void IsLoadedAs32Bit64BitModule(bool assume32Bit, bool prefer32Bit)
+        public void IsLoadedAs32Bit64BitModule(bool assume32Bit, bool canLoadAs32Bit)
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             module.MachineType = MachineType.Amd64;
-            Assert.False(module.IsLoadedAs32Bit(assume32Bit, prefer32Bit));
+            Assert.False(module.IsLoadedAs32Bit(assume32Bit, canLoadAs32Bit));
         }
 
         [Theory]
@@ -559,12 +559,12 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(false, true)]
         [InlineData(true, false)]
         [InlineData(true, true)]
-        public void IsLoadedAs32Bit32BitModule(bool assume32Bit, bool prefer32Bit)
+        public void IsLoadedAs32Bit32BitModule(bool assume32Bit, bool canLoadAs32Bit)
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             module.MachineType = MachineType.I386;
             module.IsBit32Required = true;
-            Assert.True(module.IsLoadedAs32Bit(assume32Bit, prefer32Bit));
+            Assert.True(module.IsLoadedAs32Bit(assume32Bit, canLoadAs32Bit));
         }
     }
 }
