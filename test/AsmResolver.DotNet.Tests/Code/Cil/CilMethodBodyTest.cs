@@ -32,10 +32,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
         private CilMethodBody RebuildAndLookup(CilMethodBody methodBody)
         {
-            var module = methodBody.Owner.Module;
-
-            string tempFile = Path.GetTempFileName();
-            module.Write(tempFile);
+            var module = methodBody.Owner.Module!;
 
             var stream = new MemoryStream();
             module.Write(stream);

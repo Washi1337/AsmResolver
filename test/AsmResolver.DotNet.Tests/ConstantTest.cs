@@ -21,9 +21,6 @@ namespace AsmResolver.DotNet.Tests
 
         private Constant RebuildAndLookup(ModuleDefinition module, string name)
         {
-            string tempFile = Path.GetTempFileName();
-            module.Write(tempFile);
-
             var stream = new MemoryStream();
             module.Write(stream);
 
