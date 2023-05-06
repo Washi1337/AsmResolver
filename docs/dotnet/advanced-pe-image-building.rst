@@ -162,6 +162,13 @@ Below an example on how to preserve maximum stack depths for all methods in the 
         ComputeMaxStackOnBuildOverride = false
     }
     
+
+.. warning::
+
+    Disabling max stack computation may have unexpected side-effects (such as rendering certain CIL method bodies invalid). 
+
+
+
 Strong name signing
 -------------------
 
@@ -194,26 +201,56 @@ After writing the module to an output stream, use the ``StrongNameSigner`` class
 Image Builder Diagnostics 
 -------------------------
 
-.NET modules that contain invalid metadata and/or method bodies might cause problems upon serializing it to a PE image or file. To inspect all errors that occurred during the construction of a PE image, call the ``CreateImage`` method directly and get the value of the ``DiagnosticBag`` property. This is a collection that contains all the problems that occurred during the process:
+.NET modules that contain invalid metadata and/or method bodies might cause problems upon serializing it to a PE image or file. 
+To inspect all errors that occurred during the construction of a PE image, call the ``CreateImage`` method with the ``ErrorListener`` property set to an instance of the ``DiagnosticBag`` property. 
+This is an implementation of ``IErrorListener`` that collects all the problems that occurred during the process:
 
 .. code-block:: csharp
 
+    // Set up a diagnostic bag as an error listener.
+    var diagnosticBag = new DiagnosticBag();
+    imageBuilder.ErrorListener = diagnosticBag;
+
+    // Build image.
     var result = imageBuilder.CreateImage(module);
 
-    Console.WriteLine("Construction finished with {0} errors.", result.DiagnosticBag.Exceptions.Count);
-
     // Print all errors.
-    foreach (var error in result.DiagnosticBag.Exceptions)
+    Console.WriteLine("Construction finished with {0} errors.", diagnosticBag.Exceptions.Count);
+    foreach (var error in diagnosticBag.Exceptions)
         Console.WriteLine(error.Message);
 
 
-Whenever a problem is reported, AsmResolver attempts to recover or fill in default data where corrupted data was encountered. To test whether any of the errors resulted in AsmResolver to abort the construction of the image, use the ``IsFatal`` property. If this property is set to ``false``, the image stored in the ``ConstructedImage`` property can be written to the disk:
+Whenever a problem is reported, AsmResolver attempts to recover or fill in default data where corrupted data was encountered. 
+To simply build the PE image ignoring all diagnostic errors, it is also possible to pass in ``EmptyErrorListener.Instance`` instead:
 
 .. code-block:: csharp
 
-    if (!result.DiagnosticBag.IsFatal)
+    imageBuilder.ErrorListener = EmptyErrorListener.Instance;
+
+
+.. warning::
+
+    Using ``EmptyErrorListener`` will surpress any non-critical builder errors, however these errors are typically indicative of an invalid executable being constructed. 
+    Therefore, even if an output file is produced, it may have unexpected side-effects (such as the file not functioning properly).
+
+
+.. note::
+
+    Setting an instance of ``IErrorListener`` in the image builder will only affect the building process.
+    If the input module is initialized from a file containing invalid metadata, you may still experience reader errors, even if an ``EmptyErrorListener`` is specified.
+    See :ref:`dotnet-advanced-module-reading` for handling reader diagnostics.
+
+
+To test whether any of the errors resulted in AsmResolver to abort the construction of the image, use the ``PEImageBuildResult::HasFailed`` property.
+If this property is set to ``false``, the image stored in the ``ConstructedImage`` property can be written to the disk:
+
+.. code-block:: csharp
+
+    if (!result.HasFailed)
     {
         var fileBuilder = new ManagedPEFileBuilder();
         var file = fileBuilder.CreateFile(result.ConstructedImage);
         file.Write("output.exe");
     }
+
+
