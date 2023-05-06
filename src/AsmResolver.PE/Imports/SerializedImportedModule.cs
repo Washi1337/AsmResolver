@@ -18,8 +18,8 @@ namespace AsmResolver.PE.Imports
         public const uint ModuleImportSize = 5 * sizeof(uint);
 
         private readonly PEReaderContext _context;
-        private readonly uint _lookupRva;
-        private readonly uint _addressRva;
+        private readonly uint _originalFirstThunkRva;
+        private readonly uint _firstThunkRva;
 
         /// <summary>
         /// Reads a module import entry from an input stream.
@@ -32,11 +32,11 @@ namespace AsmResolver.PE.Imports
                 throw new ArgumentNullException(nameof(reader));
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
-            _lookupRva = reader.ReadUInt32();
+            _originalFirstThunkRva = reader.ReadUInt32();
             TimeDateStamp = reader.ReadUInt32();
             ForwarderChain = reader.ReadUInt32();
             uint nameRva = reader.ReadUInt32();
-            _addressRva = reader.ReadUInt32();
+            _firstThunkRva = reader.ReadUInt32();
 
             if (nameRva != 0)
             {
@@ -54,11 +54,11 @@ namespace AsmResolver.PE.Imports
         /// The PE file format uses an empty module import entry to indicate the end of the list of imported modules.
         /// </remarks>
         public bool IsEmpty =>
-            _lookupRva == 0
+            _originalFirstThunkRva == 0
             && TimeDateStamp == 0
             && ForwarderChain == 0
             && Name is null
-            && _addressRva == 0;
+            && _firstThunkRva == 0;
 
         /// <inheritdoc />
         protected override IList<ImportedSymbol> GetSymbols()
@@ -74,8 +74,8 @@ namespace AsmResolver.PE.Imports
                 : (0x8000_0000_0000_0000ul, sizeof(ulong));
 
             // Prefer OriginalFirstThunk over FirstThunk if it is available and valid.
-            if (!_context.File.TryCreateReaderAtRva(_lookupRva, out var lookupItemReader)
-                && !_context.File.TryCreateReaderAtRva(_addressRva, out lookupItemReader))
+            if (!_context.File.TryCreateReaderAtRva(_originalFirstThunkRva, out var thunkItemReader)
+                && !_context.File.TryCreateReaderAtRva(_firstThunkRva, out thunkItemReader))
             {
                 _context.BadImage($"Imported module \"{Name}\" has an invalid import lookup thunk table RVA.");
                 return result;
@@ -86,19 +86,19 @@ namespace AsmResolver.PE.Imports
                 ImportedSymbol entry;
 
                 // Read next thunk data.
-                ulong lookupItem = lookupItemReader.ReadNativeInt(is32Bit);
-                if (lookupItem == 0)
+                ulong thunkItem = thunkItemReader.ReadNativeInt(is32Bit);
+                if (thunkItem == 0)
                     break;
 
                 // Are we an import by ordinal or by name?
-                if ((lookupItem & ordinalMask) != 0)
+                if ((thunkItem & ordinalMask) != 0)
                 {
-                    entry = new ImportedSymbol((ushort) (lookupItem & 0xFFFF));
+                    entry = new ImportedSymbol((ushort) (thunkItem & 0xFFFF));
                 }
                 else
                 {
                     // Resolve hint and name.
-                    uint hintNameRva = (uint) (lookupItem & 0xFFFFFFFF);
+                    uint hintNameRva = (uint) (thunkItem & 0xFFFFFFFF);
                     if (!_context.File.TryCreateReaderAtRva(hintNameRva, out var reader))
                     {
                         _context.BadImage($"Invalid Hint-Name RVA for import {Name}!#{result.Count.ToString()}.");
@@ -110,7 +110,7 @@ namespace AsmResolver.PE.Imports
                     }
                 }
 
-                entry.AddressTableEntry = _context.File.GetReferenceToRva((uint) (_addressRva + result.Count * pointerSize));
+                entry.AddressTableEntry = _context.File.GetReferenceToRva((uint) (_firstThunkRva + result.Count * pointerSize));
                 result.Add(entry);
             }
 
