@@ -1284,7 +1284,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <returns>IPEImage built using <see cref="ManagedPEImageBuilder"/> by default</returns>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
-        public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder());
+        public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder(), true);
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
@@ -1298,12 +1298,29 @@ namespace AsmResolver.DotNet
         /// <exception cref="MetadataBuilderException">
         /// Occurs when the construction of the PE image failed completely.
         /// </exception>
-        public IPEImage ToPEImage(IPEImageBuilder imageBuilder)
+        public IPEImage ToPEImage(IPEImageBuilder imageBuilder) => ToPEImage(imageBuilder, true);
+
+        /// <summary>
+        /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
+        /// </summary>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
+        /// <param name="throwOnNonFatalError">
+        /// <c>true</c> if non-fatal errors should be thrown as an exception, <c>false</c> otherwise.
+        /// </param>
+        /// <returns>IPEImage built by the specified IPEImageBuilder</returns>
+        /// <exception cref="AggregateException">
+        /// Occurs when the construction of the image threw exceptions, and the used error listener is an instance of
+        /// a <see cref="DiagnosticBag"/>.
+        /// </exception>
+        /// <exception cref="MetadataBuilderException">
+        /// Occurs when the construction of the PE image failed completely.
+        /// </exception>
+        public IPEImage ToPEImage(IPEImageBuilder imageBuilder, bool throwOnNonFatalError)
         {
             var result = imageBuilder.CreateImage(this);
 
             // If the error listener is a diagnostic bag, we can pull out the exceptions that were thrown.
-            if (result.ErrorListener is DiagnosticBag {HasErrors: true} diagnosticBag)
+            if (result.ErrorListener is DiagnosticBag {HasErrors: true} diagnosticBag && throwOnNonFatalError)
             {
                 throw new AggregateException(
                     "Construction of the PE image failed with one or more errors.",

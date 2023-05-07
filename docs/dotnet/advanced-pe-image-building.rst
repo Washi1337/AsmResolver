@@ -12,7 +12,8 @@ The easiest way to write a .NET module to the disk is by using the ``Write`` met
 
 This method is essentially a shortcut for invoking the ``ManagedPEImageBuilder`` and ``ManagedPEFileBuilder`` classes, and will completely reconstruct the PE image, serialize it into a PE file and write the PE file to the disk. 
 
-While this is easy, and would probably work for most .NET module processing, it does not provide much flexibility. To get more control over the construction of the new PE image, it is therefore not recommended to use a different overload of the ``Write`` method, where we pass on a custom ``IPEFileBuilder``, or a configured ``ManagedPEImageBuilder``:
+While this is easy, and would probably work for most .NET module processing, it does not provide much flexibility. 
+To get more control over the construction of the new PE image, it is therefore not recommended to use a different overload of the ``Write`` method that takes instances of ``IPEImageBuilder`` instead:
 
 .. code-block:: csharp
 
@@ -22,7 +23,26 @@ While this is easy, and would probably work for most .NET module processing, it 
 
     module.Write(@"C:\Path\To\Output\Binary.exe", imageBuilder);
 
-Alternatively, it is possible to call the ``CreateImage`` method directly. This allows for inspecting all build artifacts, as well as post-processing of the constructed PE image before it is written to the disk.
+
+Alternatively, it is possible to call ``ModuleDefinition::ToPEImage`` to turn the module into a ``PEImage`` first, that can then later be post-processed and transformed into a ``PEFile`` to write it to the disk:
+
+.. code-block:: csharp
+
+    var imageBuilder = new ManagedPEImageBuilder();
+    
+    /* Configuration of imageBuilder here... */
+
+    // Construct image.
+    var image = module.ToPEImage(imageBuilder);
+
+    // Write image to the disk.
+    var fileBuilder = new ManagedPEFileBuilder();
+    var file = fileBuilder.CreateFile(image);
+    file.Write(@"C:\Path\To\Output\Binary.exe");
+
+
+To get even more control, it is possible to call the ``CreateImage`` method from the image builder directly. 
+This allows for inspecting all build artifacts, as well as post-processing of the constructed PE image before it is written to the disk.
 
 .. code-block:: csharp
 
@@ -32,6 +52,10 @@ Alternatively, it is possible to call the ``CreateImage`` method directly. This 
 
     // Construct image.
     var result = imageBuilder.CreateImage(module);
+
+    /* Inspect build result ... */
+
+    // Obtain constructed PE image.
     var image = result.ConstructedImage;
     
     /* Post processing of image happens here... */
