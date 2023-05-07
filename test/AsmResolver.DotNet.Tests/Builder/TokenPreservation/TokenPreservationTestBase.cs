@@ -32,14 +32,15 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
         protected static ModuleDefinition RebuildAndReloadModule(ModuleDefinition module, MetadataBuilderFlags builderFlags)
         {
-            var builder = new ManagedPEImageBuilder
-            {
-                DotNetDirectoryFactory = new DotNetDirectoryFactory(builderFlags)
-            };
+            var builder = new ManagedPEImageBuilder(builderFlags);
 
             var result = builder.CreateImage(module);
             if (result.HasFailed)
-                throw new AggregateException(result.DiagnosticBag.Exceptions);
+            {
+                if (result.ErrorListener is DiagnosticBag diagnosticBag)
+                    throw new AggregateException(diagnosticBag.Exceptions);
+                throw new Exception("Image creation failed.");
+            }
 
             var newImage = result.ConstructedImage;
 
