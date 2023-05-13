@@ -1,0 +1,85 @@
+- name: General
+- name: Introduction
+  href: ../index.md
+- name: API Overview
+  href: overview.md
+- name: FAQ
+  href: faq.md
+
+- name: Core API
+- name: Reading and Writing File Segments
+  href: core/segments.md
+
+- name: PE Files
+- name: Overview
+  href: pefile/index.md
+- name: Basic I/O
+  href: pefile/basics.md
+- name: PE Headers
+  href: pefile/headers.md
+- name: PE Sections
+  href: pefile/sections.md
+
+- name: PE Images
+- name: Overview
+  href: peimage/index.md
+- name: Basic I/O
+  href: peimage/basics.md
+- name: Advanced PE Image Reading
+  href: peimage/advanced-pe-reading.md
+- name: Imports Directory
+  href: peimage/imports.md
+- name: Exports Directory
+  href: peimage/exports.md
+- name: Win32 Resources
+  href: peimage/win32resources.md
+- name: Exceptions Directory
+  href: peimage/exceptions.md
+- name: Debug Directory
+  href: peimage/debug.md
+- name: TLS Directory
+  href: peimage/tls.md
+- name: .NET Data Directories
+  href: peimage/dotnet.md
+- name: PE File Building
+  href: peimage/pe-building.md
+
+- name: .NET assemblies and modules
+- name: Overview
+  href: dotnet/index.md
+- name: Basic I/O
+  href: dotnet/basics.md
+- name: Advanced Module Reading
+  href: dotnet/advanced-module-reading.md
+- name: The Member Tree
+  href: dotnet/member-tree.md
+- name: Type Signatures
+  href: dotnet/type-signatures.md
+- name: Reference Importing
+  href: dotnet/importing.md
+- name: CIL Method Bodies
+  href: dotnet/managed-method-bodies.md
+- name: Native Method Bodies
+  href: dotnet/unmanaged-method-bodies.md
+- name: Dynamic Methods
+  href: dotnet/dynamic-methods.md
+- name: Managed Resources
+  href: dotnet/managed-resources.md
+- name: Member Cloning
+  href: dotnet/cloning.md
+- name: Metadata Token Allocation
+  href: dotnet/token-allocation.md
+- name: Type Memory Layout
+  href: dotnet/type-memory-layout.md
+- name: AppHost / SingleFileHost Bundles
+  href: dotnet/bundles.md
+- name: Advanced PE Image Building
+  href: dotnet/advanced-pe-image-building.md
+
+- name: PDB Symbols
+- name: Overview
+  href: pdb/index.md
+- name: Basic I/O
+  href: pdb/basics.md
+- name: Symbols
+  href: pdb/symbols.md

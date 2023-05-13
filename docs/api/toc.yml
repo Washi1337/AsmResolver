@@ -1,0 +1,12 @@
+- name: AsmResolver.dll
+  href: core/toc.yml
+- name: AsmResolver.PE.File.dll
+  href: pe-file/toc.yml
+- name: AsmResolver.PE.dll
+  href: pe/toc.yml
+- name: AsmResolver.PE.Win32Resources.dll
+  href: win32resources/toc.yml
+- name: AsmResolver.DotNet.dll
+  href: dotnet/toc.yml
+- name: AsmResolver.Symbols.Pdb.dll
+  href: symbols/toc.yml
