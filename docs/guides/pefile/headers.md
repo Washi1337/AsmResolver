@@ -27,7 +27,7 @@ and changing this offset if desired:
 PEFile file = ...
 
 // Obtain e_lfanew:
-Console.WriteLine("e_flanew: {0:X8}", file.DosHeader.NextHeaderOffset);
+Console.WriteLine($"e_flanew: {file.DosHeader.NextHeaderOffset:X8}");
 
 // Set a new e_lfanew:
 file.DosHeader.NextHeaderOffset = 0x100;
@@ -49,13 +49,13 @@ readable and writeable:
 PEFile file = ...
 FileHeader header = file.FileHeader;
 
-Console.WriteLine($"Machine:             {header.Machine}");
-Console.WriteLine("NumberOfSections:     {header.NumberOfSections}");
-Console.WriteLine("TimeDateStamp:        0x{header.TimeDateStamp:X8}");
-Console.WriteLine("PointerToSymbolTable: 0x{header.PointerToSymbolTable:X8}");
-Console.WriteLine("NumberOfSymbols:      {header.NumberOfSymbols}");
-Console.WriteLine("SizeOfOptionalHeader: 0x{header.SizeOfOptionalHeader:X4}");
-Console.WriteLine("Characteristics:      {header.Characteristics}");
+Console.WriteLine($"Machine:              {header.Machine}");
+Console.WriteLine($"NumberOfSections:     {header.NumberOfSections}");
+Console.WriteLine($"TimeDateStamp:        0x{header.TimeDateStamp:X8}");
+Console.WriteLine($"PointerToSymbolTable: 0x{header.PointerToSymbolTable:X8}");
+Console.WriteLine($"NumberOfSymbols:      {header.NumberOfSymbols}");
+Console.WriteLine($"SizeOfOptionalHeader: 0x{header.SizeOfOptionalHeader:X4}");
+Console.WriteLine($"Characteristics:      {header.Characteristics}");
 ```
 
 > [!NOTE]
@@ -175,7 +175,7 @@ applications requiring a console window.
 
 ``` csharp
 // Reading the target sub system:
-Console.WriteLine("SubSystem: {header.SubSystem}");
+Console.WriteLine($"SubSystem: {header.SubSystem}");
 
 // Changing the application to a GUI application:
 header.SubSystem = SubSystem.WindowsGui;
@@ -188,8 +188,8 @@ The optional header defines two properties `FileAlignment` and
 disk and in memory at runtime respectively.
 
 ``` csharp
-Console.WriteLine("FileAlignment:    0x{header.FileAlignment}");
-Console.WriteLine("SectionAlignment: 0x{header.SectionAlignment}");
+Console.WriteLine($"FileAlignment:    0x{header.FileAlignment}");
+Console.WriteLine($"SectionAlignment: 0x{header.SectionAlignment}");
 ```
 
 AsmResolver respects the value in `FileAlignment` when writing a

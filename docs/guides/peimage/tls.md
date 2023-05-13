@@ -49,7 +49,7 @@ of every TLS callback function.
 ``` csharp
 for (int i = 0; i < directory.CallbackFunctions.Count; i++)
 {
-    Console.WriteLine("TLS Callback #{0}: {1:X8}", directory.CallbackFunctions.Rva);
+    Console.WriteLine($"TLS Callback #{i} : {directory.CallbackFunctions.Rva:X8}");
 }
 ```
 

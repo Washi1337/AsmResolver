@@ -24,8 +24,8 @@ method, in a platform agnostic manner.
 ``` csharp
 foreach (var function in peImage.Exceptions.GetEntries())
 {
-    Console.WriteLine("Begin: {0:X8}.", function.Begin.Rva);
-    Console.WriteLine("End: {0:X8}.", function.End.Rva);
+    Console.WriteLine($"Begin: {function.Begin.Rva:X8}.");
+    Console.WriteLine($"End:   {function.End.Rva:X8}.");
 }
 ```
 
@@ -49,13 +49,13 @@ var directory = (X64ExceptionsDirectory) peImage.Exceptions;
 
 foreach (var function in directory.Entries)
 {
-    Console.WriteLine("Begin: {0:X8}.", function.Begin.Rva);
-    Console.WriteLine("End: {0:X8}.", function.End.Rva);
+    Console.WriteLine($"Begin: {function.Begin.Rva:X8}.");
+    Console.WriteLine($"End:   {function.End.Rva:X8}.");
 
     var unwindInfo = function.UnwindInfo;
 
     // Get handler start.
-    Console.WriteLine("Handler Start: {0:X8}.", unwindInfo.ExceptionHandler.Rva);
+    Console.WriteLine($"Handler Start: {unwindInfo.ExceptionHandler.Rva:X8}.");
 
     // Read custom SEH data associated to this unwind information.
     var dataReader = function.ExceptionHandlerData.CreateReader();

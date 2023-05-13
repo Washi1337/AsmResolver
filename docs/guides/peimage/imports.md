@@ -22,14 +22,14 @@ a given `IPEImage` instance:
 ``` csharp
 foreach (var module in peImage.Imports)
 {
-    Console.WriteLine("Module: " + module.Name);
+    Console.WriteLine($"Module: {module.Name}");
 
     foreach (var member in module.Symbols)
     {
         if (member.IsImportByName)
-            Console.WriteLine("\t- " + member.Name);
+            Console.WriteLine($"\t- {member.Name}");
         else
-            Console.WriteLine("\t- #" + member.Ordinal);
+            Console.WriteLine($"\t- #{member.Ordinal}");
     }
 
     Console.WriteLine();
@@ -78,4 +78,4 @@ While the Import Hash can be a good identifier for native PE images, for
 .NET images this is not the case. .NET images usually only import a
 single external symbol (either `mscoree.dll!_CorExeMain` or
 `mscoree.dll!_CorDllMain`), and as such they will almost always have the
-exact same Import Hash. See [TypeReference Hash (TRH)](/articles/peimage/dotnet.html#typereference-hash-trh) for an alternative for .NET images.
+exact same Import Hash. See [TypeReference Hash (TRH)](/guides/peimage/dotnet.html#typereference-hash-trh) for an alternative for .NET images.

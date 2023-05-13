@@ -16,7 +16,7 @@ The .NET data directory can be accessed by the
 ``` csharp
 IPEImage peImage = ...
 
-Console.WriteLine("Managed entry point: {0:X8}", peImage.DotNetDirectory.EntryPoint);
+Console.WriteLine($"Managed entry point: {peImage.DotNetDirectory.EntryPoint}");
 ```
 
 ## Metadata directory
@@ -33,8 +33,8 @@ interface:
 ``` csharp
 var metadata = peImage.DotNetDirectory.Metadata;
 
-Console.WriteLine("Metadata file format version: {0}.{1}", metadata.MajorVersion, metadata.MinorVersion);
-Console.WriteLine("Target .NET runtime version: " + metadata.VersionString);
+Console.WriteLine($"Metadata file format version: {metadata.MajorVersion}.{metadata.MinorVersion}");
+Console.WriteLine($"Target .NET runtime version: {metadata.VersionString}");
 ```
 
 ## Metadata streams
@@ -44,7 +44,7 @@ The `IMetadata` interface also exposes the `Streams` property, a list of
 
 ``` csharp
 foreach (var stream in metadata.Streams)
-    Console.WriteLine("Name: " + stream.Name);
+    Console.WriteLine($"Name: {stream.Name}");
 ```
 
 Alternatively, it is possible to get a stream by its name using the
@@ -223,7 +223,7 @@ all row definitions:
 Metadata tables are similar to normal`ICollection\<T\>` instances. They provide 
 enumerators, indexers and methods to add or remove rows from the table.  
 ``` csharp
-Console.WriteLine("Number of types: " + typeDefTable.Count);      /
+Console.WriteLine($"Number of types: {typeDefTable.Count}");
 
 // Get a single row.
 TypeDefinitionRow firstTypeRow = typeDefTable[0];

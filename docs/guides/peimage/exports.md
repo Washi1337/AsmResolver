@@ -38,9 +38,9 @@ given `IPEImage` instance:
 ``` csharp
 foreach (var symbol in peImage.Exports.Entries)
 {
-    Console.WriteLine("Ordinal: " + symbol.Ordinal);
+    Console.WriteLine($"Ordinal: {symbol.Ordinal}");
     if (symbol.IsByName) 
-        Console.WriteLine("Name: " + symbol.Name);
-    Console.WriteLine("Address: " + symbol.Address.Rva.ToString("X8"));
+        Console.WriteLine($"Name: {symbol.Name}");
+    Console.WriteLine($"Address: {symbol.Address.Rva:X8}");
 }
 ```

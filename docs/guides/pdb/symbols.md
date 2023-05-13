@@ -75,7 +75,7 @@ foreach (var module in image.Modules)
 {
     Console.WriteLine(module.Name);
     foreach (var symbol in image.Symbols)
-        Console.WriteLine("\t- {0}", symbol);
+        Console.WriteLine($"\t- {symbol}");
     Console.WriteLine();
 }
 ```

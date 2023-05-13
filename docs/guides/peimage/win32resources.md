@@ -25,9 +25,9 @@ IResourceDirectory root = image.Resources;
 foreach (var entry in root.Entries)
 {
     if (entry.IsDirectory)
-        Console.WriteLine("Directory {0}.", entry.Id);
+        Console.WriteLine($"Directory {entry.Id}.");
     else // if (entry.IsData)
-        Console.WriteLine("Data {0}.", entry.Id);
+        Console.WriteLine($"Data {entry.Id}.");
 }
 ```
 
@@ -135,7 +135,7 @@ private static void PrintResourceDirectory(IResourceDirectory directory, int ind
 
     // Print the name or ID of the directory.
     string displayName = directory.Name ?? "ID: " + directory.Id;
-    Console.WriteLine("{0}+- Directory {1}", indentation, displayName);
+    Console.WriteLine($"{indentation}+- Directory {displayName}");
 
     // Print all entries in the directory.
     foreach (var entry in directory.Entries)
@@ -147,7 +147,7 @@ private static void PrintResourcData(IResourceData data, int indentationLevel)
     string indentation = new string(' ', indentationLevel * IndentationWidth);
 
     // Print the name of the data entry, as well as the size of the contents.
-    string displayName = data.Name ?? "ID: " + data.Id;
-    Console.WriteLine("{0}+- Data {1} ({2} bytes)", indentation, displayName, data.Contents.GetPhysicalSize());
+    string displayName = data.Name ?? $"ID: {data.Id}";
+    Console.WriteLine($"{indentation}+- Data {displayName} ({data.Contents.GetPhysicalSize()} bytes)");
 }
 ```

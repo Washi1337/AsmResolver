@@ -47,7 +47,7 @@ private static void DumpTypes(IEnumerable<TypeDefinition> types, int indentation
     foreach (var type in types)
     {
         // Print the name of the current type.
-        Console.WriteLine("{0}- {1} : {2:X8}", indentation, type.Name, type.MetadataToken.ToInt32());
+        Console.WriteLine($"{indentation}- {type.Name} : {type.MetadataToken}");
 
         // Dump any nested types.
         DumpTypes(type.NestedTypes, indentationLevel + 1);
@@ -62,12 +62,12 @@ that the type defines:
 
 ``` csharp
 foreach (var method in type.Methods)
-    Console.WriteLine("{0} : {1:X8}", method.Name, method.MetadataToken.ToInt32());
+    Console.WriteLine($"{method.Name} : {method.MetadataToken}");
 ```
 
 ``` csharp
 foreach (var field in type.Fields)
-    Console.WriteLine("{0} : {1:X8}", field.Name, field.MetadataToken.ToInt32());
+    Console.WriteLine($"{field.Name} : {field.MetadataToken}");
 ```
 
 Methods and fields have a `Signature` property, that contain the return
@@ -75,13 +75,13 @@ and parameter types, or the field type respectively.
 
 ``` csharp
 MethodDefinition method = ...
-Console.WriteLine("Return type: " + method.Signature.ReturnType);
-Console.WriteLine("Parameter types: " + string.Join(", ", method.Signature.ParameterTypes));
+Console.WriteLine($"Return type:     {method.Signature.ReturnType}");
+Console.WriteLine($"Parameter types: {string.Join(", ", method.Signature.ParameterTypes)}");
 ```
 
 ``` csharp
 FieldDefinition field = ...
-Console.WriteLine("Field type: " + field.Signature.FieldType);
+Console.WriteLine($"Field type: {field.Signature.FieldType}");
 ```
 
 However, for reading parameters from a method definition, it is
@@ -103,12 +103,12 @@ fields; `TypeDefinition` exposes them in a list as well:
 
 ``` csharp
 foreach (var @event in type.Events)
-    Console.WriteLine("{0} : {1:X8}", @event.Name, @event.MetadataToken.ToInt32());
+    Console.WriteLine($"{@event.Name} : {@event.MetadataToken}");
 ```
 
 ``` csharp
 foreach (var property in type.Properties)
-    Console.WriteLine("{0} : {1:X8}", property.Name, property.MetadataToken.ToInt32());
+    Console.WriteLine($"{property.Name} : {property.MetadataToken}");
 ```
 
 Properties and events have methods associated to them. These are
@@ -117,7 +117,6 @@ accessible through the `Semantics` property:
 ``` csharp
 foreach (MethodSemantics semantic in property.Semantics)
 {
-    Console.WriteLine("{0} {1} : {2:X8}", semantic.Attributes, semantic.Method.Name,
-        semantic.MetadataToken.ToInt32());
+    Console.WriteLine($"{semantic.Attributes} {semantic.Method.Name} : {semantic.MetadataToken}");
 }
 ```

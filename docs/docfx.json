@@ -3,19 +3,97 @@
     {
       "src": [
         {
-          "files": [
-                    "**/*.csproj"
-          ],
+          "files": [ "AsmResolver/*.csproj" ],
           "src": "../src"
         }
       ],
-      "dest": "api",
+      "dest": "api/core",
       "includePrivateMembers": false,
       "disableGitFeatures": false,
       "disableDefaultFilter": false,
       "noRestore": false,
       "namespaceLayout": "flattened",
-      "memberLayout": "separatePages",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+    {
+      "src": [
+        {
+          "files": [ "AsmResolver.PE.File/*.csproj" ],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/pe-file",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+    {
+      "src": [
+        {
+          "files": [ "AsmResolver.PE/*.csproj" ],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/pe",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+    {
+      "src": [
+        {
+          "files": [ "AsmResolver.DotNet/*.csproj", "AsmResolver.DotNet.Dynamic/*.csproj" ],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/dotnet",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+    {
+      "src": [
+        {
+          "files": [ "AsmResolver.Symbols.Pdb/*.csproj" ],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/symbols",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+    {
+      "src": [
+        {
+          "files": [ "AsmResolver.PE.Win32Resources/*.csproj" ],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/win32resources",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
       "allowCompilationErrors": false
     }
   ],
@@ -23,14 +101,14 @@
     "content": [
       {
         "files": [
-          "api/**.yml",
+          "api/**/*.yml",
           "api/index.md"
         ]
       },
       {
         "files": [
-          "articles/**.md",
-          "articles/**/toc.yml",
+          "guides/**.md",
+          "guides/**/toc.yml",
           "toc.yml",
           "*.md"
         ]
@@ -51,7 +129,14 @@
       "modern",
       "my-template"
     ],
-    "postProcessors": [],
+    "postProcessors": [
+      "ExtractSearchIndex"
+    ],
+    "globalMetadata": {
+      "_enableSearch": "true",
+      "_appTitle": "AsmResolver",
+      "_appName": "AsmResolver"
+    },
     "keepFileLink": false,
     "disableGitFeatures": false
   }

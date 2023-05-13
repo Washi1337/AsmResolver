@@ -76,7 +76,7 @@ file.Sections.Add(section);
 ```
 
 For more advanced section building, see
-[Building Sections](/articles/peimage/pe-building.html#building-sections)
+[Building Sections](/guides/peimage/pe-building.html#building-sections)
 [Reading and Writing File Segments](../core/segments.md).
 
 ## Updating Section Offsets
@@ -92,7 +92,7 @@ file.Sections.Add(section);
 
 file.AlignSections();
 
-Console.WriteLine("New section RVA: 0x{section.Rva:X8}");
+Console.WriteLine($"New section RVA: 0x{section.Rva:X8}");
 ```
 
 If you want to align the sections and also automatically update the
@@ -105,8 +105,8 @@ file.Sections.Add(section);
 
 file.UpdateHeaders();
 
-Console.WriteLine("New section RVA: 0x{section.Rva:X8}");
-Console.WriteLine("New section count: {file.FileHeader.NumberOfSections}");
+Console.WriteLine($"New section RVA: 0x{section.Rva:X8}");
+Console.WriteLine($"New section count: {file.FileHeader.NumberOfSections}");
 ```
 
 > [!NOTE]

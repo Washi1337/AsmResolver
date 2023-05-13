@@ -21,9 +21,9 @@ that is stored.
 ``` csharp
 foreach (var entry in image.DebugData)
 {
-    Console.WriteLine("Debug Data Type: {0}", entry.Contents.Type);
-    Console.WriteLine("Version: {0}.{1}", entry.MajorVersion, entry.MinorVersion);
-    Console.WriteLine("Data start: {0:X8}", entry.Contents.Rva);
+    Console.WriteLine($"Debug Data Type: {entry.Contents.Type}");
+    Console.WriteLine($"Version:         {entry.MajorVersion}.{entry.MinorVersion}");
+    Console.WriteLine($"Data start:      {entry.Contents.Rva:X8}");
 }
 ```
 
@@ -64,6 +64,6 @@ Debug Database (`*.pdb`) file that is associated to the image.
 if (codeViewData.Signature == CodeViewSignature.Rsds)
 {
     var rsdsData = (RsdsDataSegment) data;
-    Console.WriteLine("PDB Path: {0}", rsdsData.Path);
+    Console.WriteLine($"PDB Path: {rsdsData.Path}");
 }
 ```

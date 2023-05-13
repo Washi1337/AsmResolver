@@ -185,8 +185,8 @@ ISegment segment = ...
 // Relocate a segment to an offsets-rva pair:
 segment.UpdateOffsets(new RelocationParameters(offset: 0x200, rva: 0x2000);
 
-Console.WriteLine("Offset: 0x{0:X8}", segment.Offset); // Prints 0x200
-Console.WriteLine("Rva: 0x{0:X8}", segment.Rva);       // Prints 0x2000
+Console.WriteLine($"Offset: 0x{segment.Offset:X8}"); // Prints 0x200
+Console.WriteLine($"Rva: 0x{segment.Rva:X8}");       // Prints 0x2000
 ```
 
 > [!WARNING]
@@ -207,8 +207,8 @@ ISegment segment = ...
 uint physicalSize = segment.GetPhysicalSize();
 uint virtualSize = segment.GetVirtualSize();
 
-Console.WriteLine("Physical (File) Size: 0x{0:X8}", physicalSize);
-Console.WriteLine("Virtual (Runtime) Size: 0x{0:X8}", virtualSize);
+Console.WriteLine($"Physical (File) Size: 0x{physicalSize:X8}");
+Console.WriteLine($"Virtual (Runtime) Size: 0x{virtualSize:X8}");
 ```
 
 > [!WARNING]

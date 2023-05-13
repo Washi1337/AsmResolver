@@ -191,9 +191,9 @@ includes the name, the type of the resource and the deserialized data:
 ``` csharp
 foreach (var entry in set)
 {
-    Console.WriteLine("Name: " + entry.Name);
-    Console.WriteLine("Type: " + entry.Type.FullName);
-    Console.WriteLine("Data: " + entry.Data);
+    Console.WriteLine($"Name: {entry.Name}");
+    Console.WriteLine($"Type: {entry.Type.FullName}");
+    Console.WriteLine($"Data: {entry.Data}");
 }
 ```
 
