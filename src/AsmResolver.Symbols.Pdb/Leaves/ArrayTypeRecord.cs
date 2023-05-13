@@ -5,9 +5,9 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class ArrayTypeRecord : CodeViewTypeRecord
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _elementType;
-    private readonly LazyVariable<CodeViewTypeRecord?> _indexType;
-    private readonly LazyVariable<Utf8String> _name;
+    private readonly LazyVariable<ArrayTypeRecord, CodeViewTypeRecord?> _elementType;
+    private readonly LazyVariable<ArrayTypeRecord, CodeViewTypeRecord?> _indexType;
+    private readonly LazyVariable<ArrayTypeRecord, Utf8String> _name;
 
     /// <summary>
     /// Initializes a new empty array type.
@@ -16,9 +16,9 @@ public class ArrayTypeRecord : CodeViewTypeRecord
     protected ArrayTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _elementType = new LazyVariable<CodeViewTypeRecord?>(GetElementType);
-        _indexType = new LazyVariable<CodeViewTypeRecord?>(GetIndexType);
-        _name = new LazyVariable<Utf8String>(GetName);
+        _elementType = new LazyVariable<ArrayTypeRecord, CodeViewTypeRecord?>(x => x.GetElementType());
+        _indexType = new LazyVariable<ArrayTypeRecord, CodeViewTypeRecord?>(x => x.GetIndexType());
+        _name = new LazyVariable<ArrayTypeRecord, Utf8String>(x => x.GetName());
     }
 
     /// <summary>
@@ -30,10 +30,10 @@ public class ArrayTypeRecord : CodeViewTypeRecord
     public ArrayTypeRecord(CodeViewTypeRecord elementType, CodeViewTypeRecord indexType, ulong length)
         : base(0)
     {
-        _elementType = new LazyVariable<CodeViewTypeRecord?>(elementType);
-        _indexType = new LazyVariable<CodeViewTypeRecord?>(indexType);
+        _elementType = new LazyVariable<ArrayTypeRecord, CodeViewTypeRecord?>(elementType);
+        _indexType = new LazyVariable<ArrayTypeRecord, CodeViewTypeRecord?>(indexType);
+        _name = new LazyVariable<ArrayTypeRecord, Utf8String>(Utf8String.Empty);
         Length = length;
-        _name = new LazyVariable<Utf8String>(Utf8String.Empty);
     }
 
     /// <summary>
@@ -46,10 +46,10 @@ public class ArrayTypeRecord : CodeViewTypeRecord
     public ArrayTypeRecord(CodeViewTypeRecord elementType, CodeViewTypeRecord indexType, ulong length, Utf8String name)
         : base(0)
     {
-        _elementType = new LazyVariable<CodeViewTypeRecord?>(elementType);
-        _indexType = new LazyVariable<CodeViewTypeRecord?>(indexType);
+        _elementType = new LazyVariable<ArrayTypeRecord, CodeViewTypeRecord?>(elementType);
+        _indexType = new LazyVariable<ArrayTypeRecord, CodeViewTypeRecord?>(indexType);
+        _name = new LazyVariable<ArrayTypeRecord, Utf8String>(name);
         Length = length;
-        _name = new LazyVariable<Utf8String>(Name);
     }
 
     /// <inheritdoc />
@@ -60,8 +60,8 @@ public class ArrayTypeRecord : CodeViewTypeRecord
     /// </summary>
     public CodeViewTypeRecord? ElementType
     {
-        get => _elementType.Value;
-        set => _elementType.Value = value;
+        get => _elementType.GetValue(this);
+        set => _elementType.SetValue(value);
     }
 
     /// <summary>
@@ -69,8 +69,8 @@ public class ArrayTypeRecord : CodeViewTypeRecord
     /// </summary>
     public CodeViewTypeRecord? IndexType
     {
-        get => _indexType.Value;
-        set => _indexType.Value = value;
+        get => _indexType.GetValue(this);
+        set => _indexType.SetValue(value);
     }
 
     /// <summary>
@@ -87,8 +87,8 @@ public class ArrayTypeRecord : CodeViewTypeRecord
     /// </summary>
     public Utf8String Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>

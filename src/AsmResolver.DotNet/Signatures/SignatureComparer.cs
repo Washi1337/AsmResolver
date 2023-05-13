@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Signatures
     public partial class SignatureComparer :
         IEqualityComparer<byte[]>
     {
-        private const int ElementTypeOffset = 24;
+        private const int ElementTypeOffset = 8;
         private const SignatureComparisonFlags DefaultFlags = SignatureComparisonFlags.ExactVersion;
 
         /// <summary>

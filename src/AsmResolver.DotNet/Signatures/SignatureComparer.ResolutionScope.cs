@@ -90,10 +90,10 @@ namespace AsmResolver.DotNet.Signatures
             unchecked
             {
                 int hashCode = obj.Name is null ? 0 : obj.Name.GetHashCode();
-                hashCode = (hashCode * 397) ^ (obj.Culture is not null ? obj.Culture.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (int) TableIndex.AssemblyRef;
-                hashCode = (hashCode * 397) ^ obj.Version.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int) obj.Attributes;
+                hashCode = (hashCode * 397) ^ (!Utf8String.IsNullOrEmpty(obj.Culture) ? obj.Culture.GetHashCode() : 0);
+
+                if (!AcceptNewerAssemblyVersionNumbers && !AcceptOlderAssemblyVersionNumbers)
+                    hashCode = (hashCode * 397) ^ obj.Version.GetHashCode();
 
                 byte[]? publicKeyToken = obj.GetPublicKeyToken();
                 hashCode = (hashCode * 397) ^ (publicKeyToken is not null ? GetHashCode(publicKeyToken) : 0);

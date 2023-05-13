@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet
     /// </remarks>
     public class StandAloneSignature : MetadataMember, IHasCustomAttribute
     {
-        private readonly LazyVariable<BlobSignature?> _signature;
+        private readonly LazyVariable<StandAloneSignature, BlobSignature?> _signature;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet
         protected StandAloneSignature(MetadataToken token)
             : base(token)
         {
-            _signature = new LazyVariable<BlobSignature?>(GetSignature);
+            _signature = new LazyVariable<StandAloneSignature, BlobSignature?>(x => x.GetSignature());
         }
 
         /// <summary>
@@ -43,8 +43,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public BlobSignature? Signature
         {
-            get => _signature.Value;
-            set => _signature.Value = value;
+            get => _signature.GetValue(this);
+            set => _signature.SetValue(value);
         }
 
         /// <inheritdoc />

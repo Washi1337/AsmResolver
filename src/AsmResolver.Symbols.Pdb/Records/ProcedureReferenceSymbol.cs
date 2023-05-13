@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class ProcedureReferenceSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<Utf8String> _name;
+    private readonly LazyVariable<ProcedureReferenceSymbol, Utf8String> _name;
     private readonly bool _local;
 
     /// <summary>
@@ -14,7 +14,7 @@ public class ProcedureReferenceSymbol : CodeViewSymbol
     /// <param name="local">If true, this represents a local procedure reference.</param>
     protected ProcedureReferenceSymbol(bool local)
     {
-        _name = new LazyVariable<Utf8String>(GetName);
+        _name = new LazyVariable<ProcedureReferenceSymbol, Utf8String>(x => x.GetName());
         _local = local;
     }
 
@@ -31,18 +31,14 @@ public class ProcedureReferenceSymbol : CodeViewSymbol
         Checksum = checksum;
         Offset = offset;
         Module = module;
-        _name = new LazyVariable<Utf8String>(name);
+        _name = new LazyVariable<ProcedureReferenceSymbol, Utf8String>(name);
         _local = local;
     }
 
     /// <inheritdoc/>
-    public override CodeViewSymbolType CodeViewSymbolType
-    {
-        get
-        {
-            return _local ? CodeViewSymbolType.LProcRef : CodeViewSymbolType.ProcRef;
-        }
-    }
+    public override CodeViewSymbolType CodeViewSymbolType => _local
+        ? CodeViewSymbolType.LProcRef
+        : CodeViewSymbolType.ProcRef;
 
     /// <summary>
     /// Is the symbol a Local Procedure Reference?
@@ -83,8 +79,8 @@ public class ProcedureReferenceSymbol : CodeViewSymbol
     /// </summary>
     public Utf8String Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>

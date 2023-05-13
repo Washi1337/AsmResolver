@@ -9,9 +9,9 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class CustomAttribute : MetadataMember, IOwnedCollectionElement<IHasCustomAttribute>
     {
-        private readonly LazyVariable<IHasCustomAttribute?> _parent;
-        private readonly LazyVariable<ICustomAttributeType?> _constructor;
-        private readonly LazyVariable<CustomAttributeSignature?> _signature;
+        private readonly LazyVariable<CustomAttribute, IHasCustomAttribute?> _parent;
+        private readonly LazyVariable<CustomAttribute, ICustomAttributeType?> _constructor;
+        private readonly LazyVariable<CustomAttribute, CustomAttributeSignature?> _signature;
 
         /// <summary>
         /// Initializes an empty custom attribute.
@@ -20,9 +20,9 @@ namespace AsmResolver.DotNet
         protected CustomAttribute(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<IHasCustomAttribute?>(GetParent);
-            _constructor = new LazyVariable<ICustomAttributeType?>(GetConstructor);
-            _signature = new LazyVariable<CustomAttributeSignature?>(GetSignature);
+            _parent = new LazyVariable<CustomAttribute, IHasCustomAttribute?>(x => x.GetParent());
+            _constructor = new LazyVariable<CustomAttribute, ICustomAttributeType?>(x => x.GetConstructor());
+            _signature = new LazyVariable<CustomAttribute, CustomAttributeSignature?>(x => x.GetSignature());
         }
 
         /// <summary>
@@ -53,8 +53,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IHasCustomAttribute? Parent
         {
-            get => _parent.Value;
-            private set => _parent.Value = value;
+            get => _parent.GetValue(this);
+            private set => _parent.SetValue(value);
         }
 
         IHasCustomAttribute? IOwnedCollectionElement<IHasCustomAttribute>.Owner
@@ -68,8 +68,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public ICustomAttributeType? Constructor
         {
-            get => _constructor.Value;
-            set => _constructor.Value = value;
+            get => _constructor.GetValue(this);
+            set => _constructor.SetValue(value);
         }
 
         /// <summary>
@@ -77,8 +77,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public CustomAttributeSignature? Signature
         {
-            get => _signature.Value;
-            set => _signature.Value = value;
+            get => _signature.GetValue(this);
+            set => _signature.SetValue(value);
         }
 
         /// <summary>

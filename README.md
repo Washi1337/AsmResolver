@@ -3,59 +3,45 @@
  [![Master branch build status](https://img.shields.io/appveyor/ci/Washi1337/AsmResolver/master.svg)](https://ci.appveyor.com/project/Washi1337/asmresolver/branch/master)
  [![Nuget feed](https://img.shields.io/nuget/v/AsmResolver.svg)](https://www.nuget.org/packages/AsmResolver/)
  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
- [![Documentation Status](https://readthedocs.org/projects/asmresolver/badge/?version=latest)](https://asmresolver.readthedocs.io/en/latest/?badge=latest)
  [![Discord](https://img.shields.io/discord/961647807591243796.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/Y7DTBkbhJJ)
 
-AsmResolver is a PE inspection library allowing .NET programmers to read, modify and write executable files. This includes .NET as well as native images. The library exposes high-level representations of the PE, while still allowing the user to access low-level structures.
+AsmResolver is a Portable Executable (PE) inspection library that is able to read, modify and write executable files. This includes .NET modules as well as native images. The library exposes high-level representations of the PE, while still allowing the user to access low-level structures.
 
 AsmResolver is released under the MIT license.
 
 
-## Features
+## Main Features
 
-AsmResolver has a lot of features. Below a non-exhaustive list:
+AsmResolver has a lot of features. Below is a non-exhaustive list of the highlights:
 
-- [x] Create, read and write PE files
-  - [x] Inspect and update PE headers.
-  - [x] Create, read and write sections.
-- [x] Create, read and write various data directories
-  - [x] Debug Directory (CodeView)
-  - [x] .NET Directory
-    - [x] CIL assembler and disassemblers
-    - [x] Metadata Directory (tables, strings, user-strings, blobs, GUIDs)
-    - [x] Resources Directory
-    - [x] Strong Name Signing
-    - [x] VTable Fixup Directory
-  - [x] Exception Directory (AMD64)
-  - [x] Export Directory
-  - [x] Import Directory
-  - [x] Base Relocation Directory
-  - [x] TLS Directory
-  - [x] Win32 Resources Directory
-- [x] Fully mutable object model for .NET modules that is similar to System.Reflection
-  - [x] Strong type-system with many useful factory methods for quickly constructing new metadata.
-  - [x] Full metadata importing and cloning (useful for injecting metadata into another assembly)
-  - [x] .NET Framework 2.0+, .NET Core and .NET 5+ binary file support.
-  - [x] Infer memory layout of types statically.
-  - [x] Create, read and write managed resource sets (`.resources` files)
-  - [x] Create new method bodies containing native code.
-  - [x] Highly configurable reader and writer options and custom error handling for both.
-  - [x] Rich support for AppHost and SingleFileHost bundled files.
+- [x] Create, read, modify, write and patch PE files.
+  - [x] Full access to sections, data directories and their interpretations.
+- [x] Rich support for .NET modules with an intuitive API similar to `System.Reflection`.
+  - [x] Managed, native and dynamic method body support.
+  - [x] Easy metadata importing and cloning.
+  - [x] Managed resource file serializers and deserializers.
+  - [x] Support for AppHost / SingleFileHost bundles.
+- [x] Read PDB symbols.
+  - [x] Fully managed cross-platform API (No DIA or similar required).
+- [x] .NET Standard 2.0 compatible.
+- [x] Documented.
+- [x] Unit tested.
 
 
 ## Documentation
 
-Check out the [wiki](https://asmresolver.readthedocs.org/) for guides and information on how to use the library.
+- [Guides](https://docs.washi.dev/asmresolver)
+- [API Reference](https://docs.washi.dev/asmresolver/api/core/AsmResolver.html)
 
 
 ## Binaries
 
-Stable builds:
+Stable Builds:
 
-- [GitHub releases](https://github.com/Washi1337/AsmResolver/releases)
-- [NuGet feed](https://www.nuget.org/packages/AsmResolver/)
+- [NuGet Feed](https://www.nuget.org/packages/AsmResolver/)
+- [GitHub Releases](https://github.com/Washi1337/AsmResolver/releases)
 
-Nightly builds:
+Nightly Builds:
 
 - [AppVeyor](https://ci.appveyor.com/project/Washi1337/asmresolver/build/artifacts)
 
@@ -67,36 +53,38 @@ Nightly builds:
 
 ## Compiling
 
-The solution can be build using the .NET SDK or an IDE that works with the .NET SDK (such as Visual Studio and JetBrains Rider). The main packages target .NET Standard 2.0, and the xUnit test projects target .NET Core 3.1.
+The solution can be built using the .NET SDK or an IDE that works with it (e.g., Visual Studio and JetBrains Rider). The main packages target LTS versions of various .NET runtimes (.NET Standard 2.0, .NET Core 3.1 and .NET 6.0).
 
-To build the project from the commandline, use:
+To build the project from the command line, use:
 ```bash
-$ dotnet restore
 $ dotnet build
 ```
 
-To run all tests, simply run:
+To run all tests, use:
 ```bash
 $ dotnet test
 ```
+For running the tests successfully, you will need to have various versions of .NET installed (ranging from .NET Framework to .NET Core 3.1 and .NET 5+), as the unit tests verify reading binaries targeting various .NET runtimes.
+
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on general workflow and code style.
+- See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 
-## Found a bug or have questions?
+## Support
 
-Please use the [issue tracker](https://github.com/Washi1337/AsmResolver/issues). Try to be as descriptive as possible.
+- [Issue Tracker](https://github.com/Washi1337/AsmResolver/issues)
+- [Discussion Board](github.com/washi1337/asmresolver/discussions)
+- [Discord](https://discord.gg/Y7DTBkbhJJ)
 
-You can also join the [Discord](https://discord.gg/Y7DTBkbhJJ) to engage more directly with the community.
 
-## Acknowledgements
+## Acknowledgments
 
-AsmResolver started out as a hobby project, but has grown into a community project with various contributors. Without these people, AsmResolver would not have been where it is today!
+AsmResolver started as a hobby project but has grown into a community project with various contributors. Without these people, AsmResolver would not have been where it is today!
 
 - Special thanks to all the people who contributed [directly with code commits](https://github.com/Washi1337/AsmResolver/graphs/contributors).
 
 - Another big thank you to all the people that suggested new features, provided feedback on the API design, have done extensive testing, and/or reported bugs on the [issue board](https://github.com/Washi1337/AsmResolver/issues), by e-mail, or through DMs.
 
-If you feel you have been under-represented in these acknowledgements, feel free to contact me.
+If you feel you have been under-represented in these acknowledgments, feel free to reach out.

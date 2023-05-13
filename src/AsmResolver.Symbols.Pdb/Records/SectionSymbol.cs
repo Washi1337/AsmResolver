@@ -7,14 +7,14 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class SectionSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<Utf8String?> _name;
+    private readonly LazyVariable<SectionSymbol, Utf8String?> _name;
 
     /// <summary>
     /// Initializes an empty section symbol.
     /// </summary>
     protected SectionSymbol()
     {
-        _name = new LazyVariable<Utf8String?>(GetName);
+        _name = new LazyVariable<SectionSymbol, Utf8String?>(x => x.GetName());
     }
 
     /// <summary>
@@ -23,7 +23,7 @@ public class SectionSymbol : CodeViewSymbol
     /// <param name="name">The name of the section.</param>
     public SectionSymbol(Utf8String name)
     {
-        _name = new LazyVariable<Utf8String?>(name);
+        _name = new LazyVariable<SectionSymbol, Utf8String?>(name);
     }
 
     /// <inheritdoc />
@@ -82,8 +82,8 @@ public class SectionSymbol : CodeViewSymbol
     /// </summary>
     public Utf8String? Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>

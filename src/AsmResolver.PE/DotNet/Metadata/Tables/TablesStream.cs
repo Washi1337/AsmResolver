@@ -33,16 +33,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public const string UncompressedStreamName = "#Schema";
 
         private readonly Dictionary<CodedIndex, IndexEncoder> _indexEncoders;
-        private readonly LazyVariable<IList<IMetadataTable?>> _tables;
-        private readonly LazyVariable<IList<TableLayout>> _layouts;
+        private readonly LazyVariable<TablesStream, IList<IMetadataTable?>> _tables;
+        private readonly LazyVariable<TablesStream, IList<TableLayout>> _layouts;
 
         /// <summary>
         /// Creates a new, empty tables stream.
         /// </summary>
         public TablesStream()
         {
-            _layouts = new LazyVariable<IList<TableLayout>>(GetTableLayouts);
-            _tables = new LazyVariable<IList<IMetadataTable?>>(GetTables);
+            _layouts = new LazyVariable<TablesStream, IList<TableLayout>>(x => x.GetTableLayouts());
+            _tables = new LazyVariable<TablesStream, IList<IMetadataTable?>>(x => x.GetTables());
             _indexEncoders = CreateIndexEncoders();
         }
 
@@ -223,12 +223,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// This collection always contains all tables, in the same order as <see cref="TableIndex"/> defines, regardless
         /// of whether a table actually has elements or not.
         /// </remarks>
-        protected IList<IMetadataTable?> Tables => _tables.Value;
+        protected IList<IMetadataTable?> Tables => _tables.GetValue(this);
 
         /// <summary>
         /// Gets the layout of all tables in the stream.
         /// </summary>
-        protected IList<TableLayout> TableLayouts => _layouts.Value;
+        protected IList<TableLayout> TableLayouts => _layouts.GetValue(this);
 
         /// <inheritdoc />
         public virtual BinaryStreamReader CreateReader() => throw new NotSupportedException();

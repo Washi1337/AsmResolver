@@ -11,6 +11,19 @@ namespace AsmResolver.DotNet.Tests.Builder
 {
     public class StringsStreamBufferTest
     {
+        private static readonly Random Random = new();
+
+        private static void Shuffle<T>(IList<T> list)
+        {
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = Random.Next(n + 1);
+                (list[k], list[n]) = (list[n], list[k]);
+            }
+        }
+
         [Fact]
         public void AddDistinct()
         {
@@ -247,7 +260,7 @@ namespace AsmResolver.DotNet.Tests.Builder
                 strings.Add(templateString1[i..]);
             for (int i = 0; i < templateString2.Length; i++)
                 strings.Add(templateString2[i..]);
-            strings.Sort((_, _) => Guid.NewGuid().CompareTo(Guid.NewGuid()));
+            Shuffle(strings);
 
             var buffer = new StringsStreamBuffer();
             foreach (string s in strings)

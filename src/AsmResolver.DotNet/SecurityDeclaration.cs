@@ -12,8 +12,8 @@ namespace AsmResolver.DotNet
         MetadataMember,
         IOwnedCollectionElement<IHasSecurityDeclaration>
     {
-        private readonly LazyVariable<IHasSecurityDeclaration?> _parent;
-        private readonly LazyVariable<PermissionSetSignature?> _permissionSet;
+        private readonly LazyVariable<SecurityDeclaration, IHasSecurityDeclaration?> _parent;
+        private readonly LazyVariable<SecurityDeclaration, PermissionSetSignature?> _permissionSet;
 
         /// <summary>
         /// Initializes the <see cref="SecurityDeclaration"/> with a metadata token.
@@ -22,8 +22,8 @@ namespace AsmResolver.DotNet
         protected SecurityDeclaration(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<IHasSecurityDeclaration?>(GetParent);
-            _permissionSet = new LazyVariable<PermissionSetSignature?>(GetPermissionSet);
+            _parent = new LazyVariable<SecurityDeclaration, IHasSecurityDeclaration?>(x => x.GetParent());
+            _permissionSet = new LazyVariable<SecurityDeclaration, PermissionSetSignature?>(x => x.GetPermissionSet());
         }
 
         /// <summary>
@@ -52,8 +52,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IHasSecurityDeclaration? Parent
         {
-            get => _parent.Value;
-            private set => _parent.Value = value;
+            get => _parent.GetValue(this);
+            private set => _parent.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -68,8 +68,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public PermissionSetSignature? PermissionSet
         {
-            get => _permissionSet.Value;
-            set => _permissionSet.Value = value;
+            get => _permissionSet.GetValue(this);
+            set => _permissionSet.SetValue(value);
         }
 
         /// <summary>

@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class ThunkSymbol : CodeViewSymbol, IScopeCodeViewSymbol
 {
-    private readonly LazyVariable<Utf8String?> _name;
+    private readonly LazyVariable<ThunkSymbol, Utf8String?> _name;
 
     private IList<ICodeViewSymbol>? _symbols;
 
@@ -17,7 +17,7 @@ public class ThunkSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     protected ThunkSymbol()
     {
-        _name = new LazyVariable<Utf8String?>(GetName);
+        _name = new LazyVariable<ThunkSymbol, Utf8String?>(x => x.GetName());
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ public class ThunkSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <param name="size">The size of the thunk in bytes.</param>
     public ThunkSymbol(Utf8String name, ushort size)
     {
-        _name = new LazyVariable<Utf8String?>(name);
+        _name = new LazyVariable<ThunkSymbol, Utf8String?>(name);
         Size = size;
     }
 
@@ -86,8 +86,8 @@ public class ThunkSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     public Utf8String? Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>

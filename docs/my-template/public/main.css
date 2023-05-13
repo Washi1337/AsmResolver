@@ -1,0 +1,22 @@
+article {
+    line-height: 1.7em;
+}
+
+article h1 {
+    margin: 20px 0px;
+}
+
+article h2 {
+    margin: 50px 0px 15px 0px;
+}
+
+article h3 {
+    margin: 30px 0px 15px 0px;
+}
+
+article code {
+    border: 1px solid rgba(128,128,128,0.4);
+    border-radius: 3px;
+    background: rgba(128,128,128,0.1);
+    padding: 1px 3px;
+}

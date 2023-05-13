@@ -14,9 +14,9 @@ namespace AsmResolver.DotNet
         ITypeDefOrRef,
         IResolutionScope
     {
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<Utf8String?> _namespace;
-        private readonly LazyVariable<IResolutionScope?> _scope;
+        private readonly LazyVariable<TypeReference, Utf8String?> _name;
+        private readonly LazyVariable<TypeReference, Utf8String?> _namespace;
+        private readonly LazyVariable<TypeReference, IResolutionScope?> _scope;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -26,9 +26,9 @@ namespace AsmResolver.DotNet
         protected TypeReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _namespace = new LazyVariable<Utf8String?>(GetNamespace);
-            _scope = new LazyVariable<IResolutionScope?>(GetScope);
+            _name = new LazyVariable<TypeReference, Utf8String?>(x => x.GetName());
+            _namespace = new LazyVariable<TypeReference, Utf8String?>(x => x.GetNamespace());
+            _scope = new LazyVariable<TypeReference, IResolutionScope?>(x => x.GetScope());
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet
         public TypeReference(IResolutionScope? scope, Utf8String? ns, Utf8String? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
-            _scope.Value = scope;
+            _scope.SetValue(scope);
             Namespace = ns;
             Name = name;
         }
@@ -55,7 +55,7 @@ namespace AsmResolver.DotNet
         public TypeReference(ModuleDefinition? module, IResolutionScope? scope, Utf8String? ns, Utf8String? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
-            _scope.Value = scope;
+            _scope.SetValue(scope);
             Module = module;
             Namespace = ns;
             Name = name;
@@ -69,8 +69,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -83,8 +83,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Namespace
         {
-            get => _namespace.Value;
-            set => _namespace.Value = value;
+            get => _namespace.GetValue(this);
+            set => _namespace.SetValue(value);
         }
 
         string? ITypeDescriptor.Namespace => Namespace;
@@ -95,8 +95,8 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public IResolutionScope? Scope
         {
-            get => _scope.Value;
-            set => _scope.Value = value;
+            get => _scope.GetValue(this);
+            set => _scope.SetValue(value);
         }
 
         /// <inheritdoc />

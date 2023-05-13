@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE;
@@ -31,11 +31,30 @@ namespace AsmResolver.DotNet.Builder
 
         /// <summary>
         /// Creates a new instance of the <see cref="ManagedPEImageBuilder"/> class, using the provided
-        /// .NET data directory flags.
+        /// .NET data directory factory.
         /// </summary>
         public ManagedPEImageBuilder(IDotNetDirectoryFactory factory)
+            : this(factory, new DiagnosticBag())
         {
-            DotNetDirectoryFactory = factory ?? throw new ArgumentNullException(nameof(factory));
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ManagedPEImageBuilder"/> class, using the provided
+        /// .NET data directory factory.
+        /// </summary>
+        public ManagedPEImageBuilder(IErrorListener errorListener)
+            : this(new DotNetDirectoryFactory(), errorListener)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ManagedPEImageBuilder"/> class, using the provided
+        /// .NET data directory factory and error listener.
+        /// </summary>
+        public ManagedPEImageBuilder(IDotNetDirectoryFactory factory, IErrorListener errorListener)
+        {
+            DotNetDirectoryFactory = factory;
+            ErrorListener = errorListener;
         }
 
         /// <summary>
@@ -47,10 +66,19 @@ namespace AsmResolver.DotNet.Builder
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the object responsible for keeping track of diagnostics during the building process.
+        /// </summary>
+        public IErrorListener ErrorListener
+        {
+            get;
+            set;
+        }
+
         /// <inheritdoc />
         public PEImageBuildResult CreateImage(ModuleDefinition module)
         {
-            var context = new PEImageBuildContext();
+            var context = new PEImageBuildContext(ErrorListener);
 
             PEImage? image = null;
             ITokenMapping? tokenMapping = null;
@@ -74,7 +102,7 @@ namespace AsmResolver.DotNet.Builder
                 var result = DotNetDirectoryFactory.CreateDotNetDirectory(
                     module,
                     symbolProvider,
-                    context.DiagnosticBag);
+                    context.ErrorListener);
                 image.DotNetDirectory = result.Directory;
                 tokenMapping = result.TokenMapping;
 
@@ -108,12 +136,12 @@ namespace AsmResolver.DotNet.Builder
             }
             catch (Exception ex)
             {
-                context.DiagnosticBag.RegisterException(ex);
-                context.DiagnosticBag.MarkAsFatal();
+                context.ErrorListener.RegisterException(ex);
+                context.ErrorListener.MarkAsFatal();
             }
 
             tokenMapping ??= new TokenMapping();
-            return new PEImageBuildResult(image, context.DiagnosticBag, tokenMapping);
+            return new PEImageBuildResult(image, context.ErrorListener, tokenMapping);
         }
     }
 }

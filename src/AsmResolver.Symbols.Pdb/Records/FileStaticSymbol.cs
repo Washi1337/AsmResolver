@@ -7,16 +7,16 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class FileStaticSymbol : CodeViewSymbol, IVariableSymbol
 {
-    private readonly LazyVariable<Utf8String?> _name;
-    private readonly LazyVariable<CodeViewTypeRecord?> _variableType;
+    private readonly LazyVariable<FileStaticSymbol, Utf8String?> _name;
+    private readonly LazyVariable<FileStaticSymbol, CodeViewTypeRecord?> _variableType;
 
     /// <summary>
     /// Initializes an empty file static symbol.
     /// </summary>
     protected FileStaticSymbol()
     {
-        _name = new LazyVariable<Utf8String?>(GetName);
-        _variableType = new LazyVariable<CodeViewTypeRecord?>(GetVariableType);
+        _name = new LazyVariable<FileStaticSymbol, Utf8String?>(x => x.GetName());
+        _variableType = new LazyVariable<FileStaticSymbol, CodeViewTypeRecord?>(x => x.GetVariableType());
     }
 
     /// <summary>
@@ -28,8 +28,8 @@ public class FileStaticSymbol : CodeViewSymbol, IVariableSymbol
     public FileStaticSymbol(Utf8String name, CodeViewTypeRecord variableType, LocalAttributes attributes)
     {
         Attributes = attributes;
-        _name = new LazyVariable<Utf8String?>(name);
-        _variableType = new LazyVariable<CodeViewTypeRecord?>(variableType);
+        _name = new LazyVariable<FileStaticSymbol, Utf8String?>(name);
+        _variableType = new LazyVariable<FileStaticSymbol, CodeViewTypeRecord?>(variableType);
     }
 
     /// <inheritdoc />
@@ -56,15 +56,15 @@ public class FileStaticSymbol : CodeViewSymbol, IVariableSymbol
     /// <inheritdoc />
     public Utf8String? Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <inheritdoc />
     public CodeViewTypeRecord? VariableType
     {
-        get => _variableType.Value;
-        set => _variableType.Value = value;
+        get => _variableType.GetValue(this);
+        set => _variableType.SetValue(value);
     }
 
     /// <summary>

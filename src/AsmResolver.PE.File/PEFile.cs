@@ -20,8 +20,8 @@ namespace AsmResolver.PE.File
         /// </summary>
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
 
-        private readonly LazyVariable<ISegment?> _extraSectionData;
-        private readonly LazyVariable<ISegment?> _eofData;
+        private readonly LazyVariable<PEFile, ISegment?> _extraSectionData;
+        private readonly LazyVariable<PEFile, ISegment?> _eofData;
         private IList<PESection>? _sections;
 
         /// <summary>
@@ -43,8 +43,8 @@ namespace AsmResolver.PE.File
             DosHeader = dosHeader ?? throw new ArgumentNullException(nameof(dosHeader));
             FileHeader = fileHeader ?? throw new ArgumentNullException(nameof(fileHeader));
             OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
-            _extraSectionData = new LazyVariable<ISegment?>(GetExtraSectionData);
-            _eofData = new LazyVariable<ISegment?>(GetEofData);
+            _extraSectionData = new LazyVariable<PEFile, ISegment?>(x =>x.GetExtraSectionData());
+            _eofData = new LazyVariable<PEFile, ISegment?>(x =>x.GetEofData());
             MappingMode = PEMappingMode.Unmapped;
         }
 
@@ -97,15 +97,15 @@ namespace AsmResolver.PE.File
         /// <inheritdoc />
         public ISegment? ExtraSectionData
         {
-            get => _extraSectionData.Value;
-            set => _extraSectionData.Value = value;
+            get => _extraSectionData.GetValue(this);
+            set => _extraSectionData.SetValue(value);
         }
 
         /// <inheritdoc />
         public ISegment? EofData
         {
-            get => _eofData.Value;
-            set => _eofData.Value = value;
+            get => _eofData.GetValue(this);
+            set => _eofData.SetValue(value);
         }
 
         /// <summary>

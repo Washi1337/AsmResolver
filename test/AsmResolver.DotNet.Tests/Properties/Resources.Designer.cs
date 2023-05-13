@@ -227,6 +227,27 @@ namespace AsmResolver.DotNet.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_VirtualSegment {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_VirtualSegment", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_IntPtrFieldRva_X86 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_IntPtrFieldRva_X86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_IntPtrFieldRva_X64 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_IntPtrFieldRva_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] Assembly1_Forwarder {
             get {
                 object obj = ResourceManager.GetObject("Assembly1_Forwarder", resourceCulture);

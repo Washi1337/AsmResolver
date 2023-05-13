@@ -205,21 +205,21 @@ namespace AsmResolver.DotNet.Tests.Bundles
             Assert.Equal(manifest.BundleID, newManifest.GenerateDeterministicBundleID());
         }
 
-        [Fact]
+        [SkippableFact]
         public void PatchAndRepackageExistingBundleV1()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
             AssertPatchAndRepackageChangesOutput(Properties.Resources.HelloWorld_SingleFile_V1);
         }
 
-        [Fact]
+        [SkippableFact]
         public void PatchAndRepackageExistingBundleV2()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
             AssertPatchAndRepackageChangesOutput(Properties.Resources.HelloWorld_SingleFile_V2);
         }
 
-        [Fact]
+        [SkippableFact]
         public void PatchAndRepackageExistingBundleV6()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));

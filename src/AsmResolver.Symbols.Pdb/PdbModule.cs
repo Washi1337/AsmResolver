@@ -10,10 +10,10 @@ namespace AsmResolver.Symbols.Pdb;
 /// </summary>
 public class PdbModule : ICodeViewSymbolProvider
 {
-    private readonly LazyVariable<Utf8String?> _name;
-    private readonly LazyVariable<Utf8String?> _objectFileName;
+    private readonly LazyVariable<PdbModule, Utf8String?> _name;
+    private readonly LazyVariable<PdbModule, Utf8String?> _objectFileName;
     private IList<PdbSourceFile>? _sourceFiles;
-    private readonly LazyVariable<SectionContribution> _sectionContribution;
+    private readonly LazyVariable<PdbModule, SectionContribution> _sectionContribution;
 
     private IList<ICodeViewSymbol>? _symbols;
 
@@ -22,9 +22,9 @@ public class PdbModule : ICodeViewSymbolProvider
     /// </summary>
     protected PdbModule()
     {
-        _name = new LazyVariable<Utf8String?>(GetName);
-        _objectFileName = new LazyVariable<Utf8String?>(GetObjectFileName);
-        _sectionContribution = new LazyVariable<SectionContribution>(GetSectionContribution);
+        _name = new LazyVariable<PdbModule, Utf8String?>(x => x.GetName());
+        _objectFileName = new LazyVariable<PdbModule, Utf8String?>(x => x.GetObjectFileName());
+        _sectionContribution = new LazyVariable<PdbModule, SectionContribution>(x => x.GetSectionContribution());
     }
 
     /// <summary>
@@ -43,9 +43,9 @@ public class PdbModule : ICodeViewSymbolProvider
     /// <param name="objectFileName">The path to the object file.</param>
     public PdbModule(Utf8String name, Utf8String objectFileName)
     {
-        _name = new LazyVariable<Utf8String?>(name);
-        _objectFileName = new LazyVariable<Utf8String?>(objectFileName);
-        _sectionContribution = new LazyVariable<SectionContribution>(new SectionContribution());
+        _name = new LazyVariable<PdbModule, Utf8String?>(name);
+        _objectFileName = new LazyVariable<PdbModule, Utf8String?>(objectFileName);
+        _sectionContribution = new LazyVariable<PdbModule, SectionContribution>(new SectionContribution());
     }
 
     /// <summary>
@@ -57,8 +57,8 @@ public class PdbModule : ICodeViewSymbolProvider
     /// </remarks>
     public Utf8String? Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>
@@ -70,8 +70,8 @@ public class PdbModule : ICodeViewSymbolProvider
     /// </remarks>
     public Utf8String? ObjectFileName
     {
-        get => _objectFileName.Value;
-        set => _objectFileName.Value = value;
+        get => _objectFileName.GetValue(this);
+        set => _objectFileName.SetValue(value);
     }
 
     /// <summary>
@@ -93,8 +93,8 @@ public class PdbModule : ICodeViewSymbolProvider
     /// </summary>
     public SectionContribution SectionContribution
     {
-        get => _sectionContribution.Value;
-        set => _sectionContribution.Value = value;
+        get => _sectionContribution.GetValue(this);
+        set => _sectionContribution.SetValue(value);
     }
 
     /// <inheritdoc />

@@ -7,14 +7,14 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class CallSiteSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _functionType;
+    private readonly LazyVariable<CallSiteSymbol, CodeViewTypeRecord?> _functionType;
 
     /// <summary>
     /// Initializes an empty call site symbol.
     /// </summary>
     protected CallSiteSymbol()
     {
-        _functionType = new LazyVariable<CodeViewTypeRecord?>(GetFunctionType);
+        _functionType = new LazyVariable<CallSiteSymbol, CodeViewTypeRecord?>(x => x.GetFunctionType());
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ public class CallSiteSymbol : CodeViewSymbol
     {
         SectionIndex = sectionIndex;
         Offset = offset;
-        _functionType = new LazyVariable<CodeViewTypeRecord?>(functionType);
+        _functionType = new LazyVariable<CallSiteSymbol, CodeViewTypeRecord?>(functionType);
     }
 
     /// <inheritdoc />
@@ -56,8 +56,8 @@ public class CallSiteSymbol : CodeViewSymbol
     /// </summary>
     public CodeViewTypeRecord? FunctionType
     {
-        get => _functionType.Value;
-        set => _functionType.Value = value;
+        get => _functionType.GetValue(this);
+        set => _functionType.SetValue(value);
     }
 
     /// <summary>

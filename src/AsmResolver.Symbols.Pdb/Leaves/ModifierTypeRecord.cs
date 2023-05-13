@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public class ModifierTypeRecord : CodeViewTypeRecord
 {
-    private readonly LazyVariable<CodeViewTypeRecord> _baseType;
+    private readonly LazyVariable<ModifierTypeRecord, CodeViewTypeRecord> _baseType;
 
     /// <summary>
     /// Initializes a new empty modifier type.
@@ -14,7 +14,7 @@ public class ModifierTypeRecord : CodeViewTypeRecord
     protected ModifierTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _baseType = new LazyVariable<CodeViewTypeRecord>(GetBaseType);
+        _baseType = new LazyVariable<ModifierTypeRecord, CodeViewTypeRecord>(x => x.GetBaseType());
     }
 
     /// <summary>
@@ -25,7 +25,7 @@ public class ModifierTypeRecord : CodeViewTypeRecord
     public ModifierTypeRecord(CodeViewTypeRecord type, ModifierAttributes attributes)
         : base(0)
     {
-        _baseType = new LazyVariable<CodeViewTypeRecord>(type);
+        _baseType = new LazyVariable<ModifierTypeRecord, CodeViewTypeRecord>(type);
         Attributes = attributes;
     }
 
@@ -37,8 +37,8 @@ public class ModifierTypeRecord : CodeViewTypeRecord
     /// </summary>
     public CodeViewTypeRecord BaseType
     {
-        get => _baseType.Value;
-        set => _baseType.Value = value;
+        get => _baseType.GetValue(this);
+        set => _baseType.SetValue(value);
     }
 
     /// <summary>

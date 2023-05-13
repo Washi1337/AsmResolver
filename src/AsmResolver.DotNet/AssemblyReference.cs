@@ -15,8 +15,8 @@ namespace AsmResolver.DotNet
         IOwnedCollectionElement<ModuleDefinition>,
         IImplementation
     {
-        private readonly LazyVariable<byte[]?> _publicKeyOrToken;
-        private readonly LazyVariable<byte[]?> _hashValue;
+        private readonly LazyVariable<AssemblyReference, byte[]?> _publicKeyOrToken;
+        private readonly LazyVariable<AssemblyReference, byte[]?> _hashValue;
         private byte[]? _publicKeyToken;
 
         /// <summary>
@@ -26,8 +26,8 @@ namespace AsmResolver.DotNet
         protected AssemblyReference(MetadataToken token)
             : base(token)
         {
-            _publicKeyOrToken = new LazyVariable<byte[]?>(GetPublicKeyOrToken);
-            _hashValue = new LazyVariable<byte[]?>(GetHashValue);
+            _publicKeyOrToken = new LazyVariable<AssemblyReference, byte[]?>(x => x.GetPublicKeyOrToken());
+            _hashValue = new LazyVariable<AssemblyReference, byte[]?>(x => x.GetHashValue());
         }
 
         /// <summary>
@@ -107,8 +107,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public byte[]? PublicKeyOrToken
         {
-            get => _publicKeyOrToken.Value;
-            set => _publicKeyOrToken.Value = value;
+            get => _publicKeyOrToken.GetValue(this);
+            set => _publicKeyOrToken.SetValue(value);
         }
 
         /// <summary>
@@ -116,8 +116,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public byte[]? HashValue
         {
-            get => _hashValue.Value;
-            set => _hashValue.Value = value;
+            get => _hashValue.GetValue(this);
+            set => _hashValue.SetValue(value);
         }
 
         /// <inheritdoc />

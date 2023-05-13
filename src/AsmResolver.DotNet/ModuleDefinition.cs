@@ -19,6 +19,7 @@ using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Platforms;
 using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.DotNet
@@ -35,24 +36,24 @@ namespace AsmResolver.DotNet
     {
         private static MethodInfo? GetHINSTANCEMethod;
 
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<Guid> _mvid;
-        private readonly LazyVariable<Guid> _encId;
-        private readonly LazyVariable<Guid> _encBaseId;
+        private readonly LazyVariable<ModuleDefinition, Utf8String?> _name;
+        private readonly LazyVariable<ModuleDefinition, Guid> _mvid;
+        private readonly LazyVariable<ModuleDefinition, Guid> _encId;
+        private readonly LazyVariable<ModuleDefinition, Guid> _encBaseId;
 
         private IList<TypeDefinition>? _topLevelTypes;
         private IList<AssemblyReference>? _assemblyReferences;
         private IList<CustomAttribute>? _customAttributes;
 
-        private readonly LazyVariable<IManagedEntryPoint?> _managedEntryPoint;
+        private readonly LazyVariable<ModuleDefinition, IManagedEntryPoint?> _managedEntryPoint;
         private IList<ModuleReference>? _moduleReferences;
         private IList<FileReference>? _fileReferences;
         private IList<ManifestResource>? _resources;
         private IList<ExportedType>? _exportedTypes;
         private TokenAllocator? _tokenAllocator;
 
-        private readonly LazyVariable<string> _runtimeVersion;
-        private readonly LazyVariable<IResourceDirectory?> _nativeResources;
+        private readonly LazyVariable<ModuleDefinition, string> _runtimeVersion;
+        private readonly LazyVariable<ModuleDefinition, IResourceDirectory?> _nativeResources;
         private IList<DebugDataEntry>? _debugData;
         private ReferenceImporter? _defaultImporter;
 
@@ -267,13 +268,13 @@ namespace AsmResolver.DotNet
         protected ModuleDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _mvid = new LazyVariable<Guid>(GetMvid);
-            _encId = new LazyVariable<Guid>(GetEncId);
-            _encBaseId = new LazyVariable<Guid>(GetEncBaseId);
-            _managedEntryPoint = new LazyVariable<IManagedEntryPoint?>(GetManagedEntryPoint);
-            _runtimeVersion = new LazyVariable<string>(GetRuntimeVersion);
-            _nativeResources = new LazyVariable<IResourceDirectory?>(GetNativeResources);
+            _name = new LazyVariable<ModuleDefinition, Utf8String?>(x => x.GetName());
+            _mvid = new LazyVariable<ModuleDefinition, Guid>(x => x.GetMvid());
+            _encId = new LazyVariable<ModuleDefinition, Guid>(x => x.GetEncId());
+            _encBaseId = new LazyVariable<ModuleDefinition, Guid>(x => x.GetEncBaseId());
+            _managedEntryPoint = new LazyVariable<ModuleDefinition, IManagedEntryPoint?>(x => x.GetManagedEntryPoint());
+            _runtimeVersion = new LazyVariable<ModuleDefinition, string>(x => x.GetRuntimeVersion());
+            _nativeResources = new LazyVariable<ModuleDefinition, IResourceDirectory?>(x => x.GetNativeResources());
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
 
@@ -384,8 +385,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -416,8 +417,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Guid Mvid
         {
-            get => _mvid.Value;
-            set => _mvid.Value = value;
+            get => _mvid.GetValue(this);
+            set => _mvid.SetValue(value);
         }
 
         /// <summary>
@@ -428,8 +429,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Guid EncId
         {
-            get => _encId.Value;
-            set => _encId.Value = value;
+            get => _encId.GetValue(this);
+            set => _encId.SetValue(value);
         }
 
         /// <summary>
@@ -440,8 +441,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Guid EncBaseId
         {
-            get => _encBaseId.Value;
-            set => _encBaseId.Value = value;
+            get => _encBaseId.GetValue(this);
+            set => _encBaseId.SetValue(value);
         }
 
         /// <summary>
@@ -635,8 +636,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public string RuntimeVersion
         {
-            get => _runtimeVersion.Value;
-            set => _runtimeVersion.Value = value;
+            get => _runtimeVersion.GetValue(this);
+            set => _runtimeVersion.SetValue(value);
         }
 
         /// <summary>
@@ -645,8 +646,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IResourceDirectory? NativeResourceDirectory
         {
-            get => _nativeResources.Value;
-            set => _nativeResources.Value = value;
+            get => _nativeResources.GetValue(this);
+            set => _nativeResources.SetValue(value);
         }
 
         /// <summary>
@@ -772,8 +773,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IManagedEntryPoint? ManagedEntryPoint
         {
-            get => _managedEntryPoint.Value;
-            set => _managedEntryPoint.Value = value;
+            get => _managedEntryPoint.GetValue(this);
+            set => _managedEntryPoint.SetValue(value);
         }
 
         /// <summary>
@@ -787,6 +788,29 @@ namespace AsmResolver.DotNet
                     Interlocked.CompareExchange(ref _defaultImporter, GetDefaultImporter(), null);
                 return _defaultImporter;
             }
+        }
+
+        /// <summary>
+        /// Determines whether the module is loaded as a 32-bit process.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if the module is loaded as a 32-bit process, <c>false</c> if it is loaded as a 64-bit process.
+        /// </returns>
+        public bool IsLoadedAs32Bit() => IsLoadedAs32Bit(false, true);
+
+        /// <summary>
+        /// Determines whether the module is loaded as a 32-bit process.
+        /// </summary>
+        /// <param name="assume32BitSystem"><c>true</c> if a 32-bit system should be assumed.</param>
+        /// <param name="canLoadAs32Bit"><c>true</c> if the application can be loaded as a 32-bit process.</param>
+        /// <returns>
+        /// <c>true</c> if the module is loaded as a 32-bit process, <c>false</c> if it is loaded as a 64-bit process.
+        /// </returns>
+        public bool IsLoadedAs32Bit(bool assume32BitSystem, bool canLoadAs32Bit)
+        {
+            // Assume 32-bit if platform is unknown.
+            return Platform.TryGet(MachineType, out var platform)
+                   && Attributes.IsLoadedAs32Bit(platform, assume32BitSystem, canLoadAs32Bit);
         }
 
         /// <summary>
@@ -1284,25 +1308,55 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <returns>IPEImage built using <see cref="ManagedPEImageBuilder"/> by default</returns>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
-        public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder());
+        public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder(), true);
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
         /// </summary>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         /// <returns>IPEImage built by the specified IPEImageBuilder</returns>
-        /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
-        public IPEImage ToPEImage(IPEImageBuilder imageBuilder)
+        /// <exception cref="AggregateException">
+        /// Occurs when the construction of the image threw exceptions, and the used error listener is an instance of
+        /// a <see cref="DiagnosticBag"/>.
+        /// </exception>
+        /// <exception cref="MetadataBuilderException">
+        /// Occurs when the construction of the PE image failed completely.
+        /// </exception>
+        public IPEImage ToPEImage(IPEImageBuilder imageBuilder) => ToPEImage(imageBuilder, true);
+
+        /// <summary>
+        /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
+        /// </summary>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
+        /// <param name="throwOnNonFatalError">
+        /// <c>true</c> if non-fatal errors should be thrown as an exception, <c>false</c> otherwise.
+        /// </param>
+        /// <returns>IPEImage built by the specified IPEImageBuilder</returns>
+        /// <exception cref="AggregateException">
+        /// Occurs when the construction of the image threw exceptions, and the used error listener is an instance of
+        /// a <see cref="DiagnosticBag"/>.
+        /// </exception>
+        /// <exception cref="MetadataBuilderException">
+        /// Occurs when the construction of the PE image failed completely.
+        /// </exception>
+        public IPEImage ToPEImage(IPEImageBuilder imageBuilder, bool throwOnNonFatalError)
         {
             var result = imageBuilder.CreateImage(this);
-            if (result.DiagnosticBag.HasErrors)
+
+            // If the error listener is a diagnostic bag, we can pull out the exceptions that were thrown.
+            if (result.ErrorListener is DiagnosticBag {HasErrors: true} diagnosticBag && throwOnNonFatalError)
             {
                 throw new AggregateException(
                     "Construction of the PE image failed with one or more errors.",
-                    result.DiagnosticBag.Exceptions);
+                    diagnosticBag.Exceptions);
             }
 
-            return result.ConstructedImage!;
+            // If we still failed but we don't have special handling for the provided error listener, just throw a
+            // simple exception instead.
+            if (result.HasFailed)
+                throw new MetadataBuilderException("Construction of the PE image failed.");
+
+            return result.ConstructedImage;
         }
     }
  }

@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Exports
     /// </summary>
     public class ExportDirectory : IExportDirectory
     {
-        private readonly LazyVariable<string?> _name;
+        private readonly LazyVariable<ExportDirectory, string?> _name;
         private IList<ExportedSymbol>? _exports;
 
         /// <summary>
@@ -18,7 +18,7 @@ namespace AsmResolver.PE.Exports
         /// </summary>
         protected ExportDirectory()
         {
-            _name = new LazyVariable<string?>(GetName);
+            _name = new LazyVariable<ExportDirectory, string?>(x => x.GetName());
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace AsmResolver.PE.Exports
         /// <param name="name">The name of the library exporting the symbols.</param>
         public ExportDirectory(string name)
         {
-            _name = new LazyVariable<string?>(name ?? throw new ArgumentNullException(nameof(name)));
+            _name = new LazyVariable<ExportDirectory, string?>(name ?? throw new ArgumentNullException(nameof(name)));
         }
 
         /// <inheritdoc />
@@ -61,8 +61,8 @@ namespace AsmResolver.PE.Exports
         /// <inheritdoc />
         public string? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         /// <inheritdoc />

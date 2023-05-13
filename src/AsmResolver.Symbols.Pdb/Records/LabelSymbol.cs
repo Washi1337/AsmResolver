@@ -5,14 +5,14 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class LabelSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<Utf8String?> _name;
+    private readonly LazyVariable<LabelSymbol, Utf8String?> _name;
 
     /// <summary>
     /// Initializes an empty label symbol.
     /// </summary>
     protected LabelSymbol()
     {
-        _name = new LazyVariable<Utf8String?>(GetName);
+        _name = new LazyVariable<LabelSymbol, Utf8String?>(x => x.GetName());
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ public class LabelSymbol : CodeViewSymbol
     /// <param name="attributes">The attributes describing the label.</param>
     public LabelSymbol(Utf8String name, ushort segmentIndex, uint offset, ProcedureAttributes attributes)
     {
-        _name = new LazyVariable<Utf8String?>(name);
+        _name = new LazyVariable<LabelSymbol, Utf8String?>(name);
         SegmentIndex = segmentIndex;
         Offset = offset;
         Attributes = attributes;
@@ -65,8 +65,8 @@ public class LabelSymbol : CodeViewSymbol
     /// </summary>
     public Utf8String? Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>

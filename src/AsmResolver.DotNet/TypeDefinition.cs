@@ -27,11 +27,11 @@ namespace AsmResolver.DotNet
     {
         internal static readonly Utf8String ModuleTypeName = "<Module>";
 
-        private readonly LazyVariable<Utf8String?> _namespace;
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<ITypeDefOrRef?> _baseType;
-        private readonly LazyVariable<TypeDefinition?> _declaringType;
-        private readonly LazyVariable<ClassLayout?> _classLayout;
+        private readonly LazyVariable<TypeDefinition, Utf8String?> _namespace;
+        private readonly LazyVariable<TypeDefinition, Utf8String?> _name;
+        private readonly LazyVariable<TypeDefinition, ITypeDefOrRef?> _baseType;
+        private readonly LazyVariable<TypeDefinition, TypeDefinition?> _declaringType;
+        private readonly LazyVariable<TypeDefinition, ClassLayout?> _classLayout;
         private IList<TypeDefinition>? _nestedTypes;
         private ModuleDefinition? _module;
         private IList<FieldDefinition>? _fields;
@@ -51,11 +51,11 @@ namespace AsmResolver.DotNet
         protected TypeDefinition(MetadataToken token)
             : base(token)
         {
-            _namespace = new LazyVariable<Utf8String?>(GetNamespace);
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _baseType = new LazyVariable<ITypeDefOrRef?>(GetBaseType);
-            _declaringType = new LazyVariable<TypeDefinition?>(GetDeclaringType);
-            _classLayout = new LazyVariable<ClassLayout?>(GetClassLayout);
+            _namespace = new LazyVariable<TypeDefinition, Utf8String?>(x => x.GetNamespace());
+            _name = new LazyVariable<TypeDefinition, Utf8String?>(x => x.GetName());
+            _baseType = new LazyVariable<TypeDefinition, ITypeDefOrRef?>(x => x.GetBaseType());
+            _declaringType = new LazyVariable<TypeDefinition, TypeDefinition?>(x => x.GetDeclaringType());
+            _classLayout = new LazyVariable<TypeDefinition, ClassLayout?>(x => x.GetClassLayout());
         }
 
         /// <summary>
@@ -93,8 +93,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Namespace
         {
-            get => _namespace.Value;
-            set => _namespace.Value = value;
+            get => _namespace.GetValue(this);
+            set => _namespace.SetValue(value);
         }
 
         string? ITypeDescriptor.Namespace => Namespace;
@@ -107,8 +107,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -415,8 +415,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public ITypeDefOrRef? BaseType
         {
-            get => _baseType.Value;
-            set => _baseType.Value = value;
+            get => _baseType.GetValue(this);
+            set => _baseType.SetValue(value);
         }
 
         /// <summary>
@@ -435,8 +435,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public TypeDefinition? DeclaringType
         {
-            get => _declaringType.Value;
-            private set => _declaringType.Value = value;
+            get => _declaringType.GetValue(this);
+            private set => _declaringType.SetValue(value);
         }
 
         ITypeDefOrRef? ITypeDefOrRef.DeclaringType => DeclaringType;
@@ -642,8 +642,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public ClassLayout? ClassLayout
         {
-            get => _classLayout.Value;
-            set => _classLayout.Value = value;
+            get => _classLayout.GetValue(this);
+            set => _classLayout.SetValue(value);
         }
 
         /// <summary>

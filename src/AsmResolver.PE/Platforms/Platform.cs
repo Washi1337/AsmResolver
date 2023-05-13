@@ -67,6 +67,24 @@ namespace AsmResolver.PE.Platforms
         }
 
         /// <summary>
+        /// Gets a value indicating whether the platform is a 32-bit platform.
+        /// </summary>
+        public abstract bool Is32Bit
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the platform is a 64-bit platform.
+        /// </summary>
+        public bool Is64Bit => !Is32Bit;
+
+        /// <summary>
+        /// Gets a value indicating the size of a single pointer.
+        /// </summary>
+        public int PointerSize => Is32Bit ? sizeof(uint) : sizeof(ulong);
+
+        /// <summary>
         /// Creates a new thunk stub that transfers control to the provided symbol.
         /// </summary>
         /// <param name="entryPoint">The symbol to jump to.</param>

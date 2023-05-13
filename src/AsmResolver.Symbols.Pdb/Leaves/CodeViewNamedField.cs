@@ -5,7 +5,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public abstract class CodeViewNamedField : CodeViewField
 {
-    private readonly LazyVariable<Utf8String> _name;
+    private readonly LazyVariable<CodeViewNamedField, Utf8String> _name;
 
     /// <summary>
     /// Initializes an empty CodeView field leaf.
@@ -14,7 +14,7 @@ public abstract class CodeViewNamedField : CodeViewField
     protected CodeViewNamedField(uint typeIndex)
         : base(typeIndex)
     {
-        _name = new LazyVariable<Utf8String>(GetName);
+        _name = new LazyVariable<CodeViewNamedField, Utf8String>(x => x.GetName());
     }
 
     /// <summary>
@@ -22,8 +22,8 @@ public abstract class CodeViewNamedField : CodeViewField
     /// </summary>
     public Utf8String Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <summary>

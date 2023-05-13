@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Resources
     /// </summary>
     public class ResourceSetEntry
     {
-        private readonly LazyVariable<object?> _data;
+        private readonly LazyVariable<ResourceSetEntry, object?> _data;
 
         /// <summary>
         /// Creates a new empty resource set entry.
@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet.Resources
         {
             Name = name;
             Type = IntrinsicResourceType.Get(typeCode);
-            _data = new LazyVariable<object?>(GetData);
+            _data = new LazyVariable<ResourceSetEntry, object?>(x => x.GetData());
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Resources
         {
             Name = name;
             Type = type;
-            _data = new LazyVariable<object?>(GetData);
+            _data = new LazyVariable<ResourceSetEntry, object?>(x => x.GetData());
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Resources
         {
             Name = name;
             Type = IntrinsicResourceType.Get(typeCode);
-            _data = new LazyVariable<object?>(data);
+            _data = new LazyVariable<ResourceSetEntry, object?>(data);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet.Resources
         {
             Name = name;
             Type = type;
-            _data = new LazyVariable<object?>(data);
+            _data = new LazyVariable<ResourceSetEntry, object?>(data);
         }
 
         /// <summary>
@@ -81,8 +81,8 @@ namespace AsmResolver.DotNet.Resources
         /// </summary>
         public object? Data
         {
-            get => _data.Value;
-            set => _data.Value = value;
+            get => _data.GetValue(this);
+            set => _data.SetValue(value);
         }
 
         /// <summary>

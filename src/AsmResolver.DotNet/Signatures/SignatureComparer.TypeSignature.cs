@@ -187,17 +187,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(TypeDefOrRefSignature obj)
-        {
-            unchecked
-            {
-                int hashCode = (int) obj.ElementType << ElementTypeOffset;
-                hashCode = (hashCode * 397) ^ obj.Name.GetHashCode();
-                hashCode = (hashCode * 397) ^ (obj.Namespace is null ? 0 : obj.Namespace.GetHashCode());
-                hashCode = (hashCode * 397) ^ (obj.Scope is null ? 0 : GetHashCode(obj.Scope));
-                return hashCode;
-            }
-        }
+        public int GetHashCode(TypeDefOrRefSignature obj) => SimpleTypeHashCode(obj);
 
         /// <inheritdoc />
         public bool Equals(CustomModifierTypeSignature? x, CustomModifierTypeSignature? y)
@@ -274,8 +264,12 @@ namespace AsmResolver.DotNet.Signatures
             return Equals(x.BaseType, y.BaseType);
         }
 
-        private int GetHashCode(TypeSpecificationSignature obj) =>
-            (int) obj.ElementType << ElementTypeOffset ^ GetHashCode(obj.BaseType);
+        private int GetHashCode(TypeSpecificationSignature obj) => SimpleTypeSpecHashCode(obj);
+
+        private int SimpleTypeSpecHashCode(TypeSpecificationSignature obj)
+        {
+            return (int) obj.ElementType << ElementTypeOffset ^ GetHashCode(obj.BaseType);
+        }
 
         /// <inheritdoc />
         public bool Equals(ArrayTypeSignature? x, ArrayTypeSignature? y)

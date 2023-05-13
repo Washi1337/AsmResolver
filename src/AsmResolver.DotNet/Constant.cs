@@ -9,8 +9,8 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class Constant : MetadataMember
     {
-        private readonly LazyVariable<IHasConstant?> _parent;
-        private readonly LazyVariable<DataBlobSignature?> _value;
+        private readonly LazyVariable<Constant, IHasConstant?> _parent;
+        private readonly LazyVariable<Constant, DataBlobSignature?> _value;
 
         /// <summary>
         /// Initializes the constant with a metadata token.
@@ -19,8 +19,8 @@ namespace AsmResolver.DotNet
         protected Constant(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<IHasConstant?>(GetParent);
-            _value = new LazyVariable<DataBlobSignature?>(GetValue);
+            _parent = new LazyVariable<Constant, IHasConstant?>(x => x.GetParent());
+            _value = new LazyVariable<Constant, DataBlobSignature?>(x => x.GetValue());
         }
 
         /// <summary>
@@ -50,8 +50,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IHasConstant? Parent
         {
-            get => _parent.Value;
-            internal set => _parent.Value = value;
+            get => _parent.GetValue(this);
+            internal set => _parent.SetValue(value);
         }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public DataBlobSignature? Value
         {
-            get => _value.Value;
-            set => _value.Value = value;
+            get => _value.GetValue(this);
+            set => _value.SetValue(value);
         }
 
         /// <summary>

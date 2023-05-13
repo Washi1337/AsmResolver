@@ -22,10 +22,10 @@ namespace AsmResolver.DotNet
         IHasFieldMarshal,
         IOwnedCollectionElement<MethodDefinition>
     {
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<MethodDefinition?> _method;
-        private readonly LazyVariable<Constant?> _constant;
-        private readonly LazyVariable<MarshalDescriptor?> _marshalDescriptor;
+        private readonly LazyVariable<ParameterDefinition, Utf8String?> _name;
+        private readonly LazyVariable<ParameterDefinition, MethodDefinition?> _method;
+        private readonly LazyVariable<ParameterDefinition, Constant?> _constant;
+        private readonly LazyVariable<ParameterDefinition, MarshalDescriptor?> _marshalDescriptor;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -35,10 +35,10 @@ namespace AsmResolver.DotNet
         protected ParameterDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _method = new LazyVariable<MethodDefinition?>(GetMethod);
-            _constant = new LazyVariable<Constant?>(GetConstant);
-            _marshalDescriptor = new LazyVariable<MarshalDescriptor?>(GetMarshalDescriptor);
+            _name = new LazyVariable<ParameterDefinition, Utf8String?>(x => x.GetName());
+            _method = new LazyVariable<ParameterDefinition, MethodDefinition?>(x => x.GetMethod());
+            _constant = new LazyVariable<ParameterDefinition, Constant?>(x => x.GetConstant());
+            _marshalDescriptor = new LazyVariable<ParameterDefinition, MarshalDescriptor?>(x => x.GetMarshalDescriptor());
         }
 
         /// <summary>
@@ -73,8 +73,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -162,8 +162,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public MethodDefinition? Method
         {
-            get => _method.Value;
-            private set => _method.Value = value;
+            get => _method.GetValue(this);
+            private set => _method.SetValue(value);
         }
 
         MethodDefinition? IOwnedCollectionElement<MethodDefinition>.Owner
@@ -194,8 +194,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Constant? Constant
         {
-            get => _constant.Value;
-            set => _constant.Value = value;
+            get => _constant.GetValue(this);
+            set => _constant.SetValue(value);
         }
 
         /// <inheritdoc />
@@ -206,8 +206,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public MarshalDescriptor? MarshalDescriptor
         {
-            get => _marshalDescriptor.Value;
-            set => _marshalDescriptor.Value = value;
+            get => _marshalDescriptor.GetValue(this);
+            set => _marshalDescriptor.SetValue(value);
         }
 
         /// <summary>

@@ -12,24 +12,39 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         public PEImageBuildContext()
         {
-            DiagnosticBag = new DiagnosticBag();
+            ErrorListener = new DiagnosticBag();
         }
-        
+
         /// <summary>
         /// Creates a new build context.
         /// </summary>
         /// <param name="diagnosticBag">The diagnostic bag to use.</param>
         public PEImageBuildContext(DiagnosticBag diagnosticBag)
         {
-            DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
+            ErrorListener = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
         }
-        
+
         /// <summary>
-        /// Gets the bag that collects all diagnostic information during the building process. 
+        /// Creates a new build context.
         /// </summary>
-        public DiagnosticBag DiagnosticBag
+        /// <param name="errorListener">The diagnostic bag to use.</param>
+        public PEImageBuildContext(IErrorListener errorListener)
+        {
+            ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
+        }
+
+        /// <summary>
+        /// Gets the bag that collects all diagnostic information during the building process.
+        /// </summary>
+        [Obsolete("Use ErrorListener instead.")]
+        public DiagnosticBag? DiagnosticBag => ErrorListener as DiagnosticBag;
+
+        /// <summary>
+        /// Gets the error listener that handles all diagnostic information during the building process.
+        /// </summary>
+        public IErrorListener ErrorListener
         {
             get;
-        } 
+        }
     }
 }

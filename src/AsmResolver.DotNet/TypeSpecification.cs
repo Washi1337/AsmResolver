@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet
         MetadataMember,
         ITypeDefOrRef
     {
-        private readonly LazyVariable<TypeSignature?> _signature;
+        private readonly LazyVariable<TypeSpecification, TypeSignature?> _signature;
         private IList<CustomAttribute>? _customAttributes;
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet
         protected TypeSpecification(MetadataToken token)
             : base(token)
         {
-            _signature = new LazyVariable<TypeSignature?>(GetSignature);
+            _signature = new LazyVariable<TypeSpecification, TypeSignature?>(x => x.GetSignature());
         }
 
         /// <summary>
@@ -42,8 +42,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public TypeSignature? Signature
         {
-            get => _signature.Value;
-            set => _signature.Value = value;
+            get => _signature.GetValue(this);
+            set => _signature.SetValue(value);
         }
 
         /// <summary>

@@ -9,9 +9,9 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class ImplementationMap : MetadataMember, IFullNameProvider
     {
-        private readonly LazyVariable<Utf8String?> _name;
-        private readonly LazyVariable<ModuleReference?> _scope;
-        private readonly LazyVariable<IMemberForwarded?> _memberForwarded;
+        private readonly LazyVariable<ImplementationMap, Utf8String?> _name;
+        private readonly LazyVariable<ImplementationMap, ModuleReference?> _scope;
+        private readonly LazyVariable<ImplementationMap, IMemberForwarded?> _memberForwarded;
 
         /// <summary>
         /// Initializes the <see cref="ImplementationMap"/> with a metadata token.
@@ -20,9 +20,9 @@ namespace AsmResolver.DotNet
         protected ImplementationMap(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<Utf8String?>(GetName);
-            _scope = new LazyVariable<ModuleReference?>(GetScope);
-            _memberForwarded = new LazyVariable<IMemberForwarded?>(GetMemberForwarded);
+            _name = new LazyVariable<ImplementationMap, Utf8String?>(x => x.GetName());
+            _scope = new LazyVariable<ImplementationMap, ModuleReference?>(x => x.GetScope());
+            _memberForwarded = new LazyVariable<ImplementationMap, IMemberForwarded?>(x => x.GetMemberForwarded());
         }
 
         /// <summary>
@@ -53,8 +53,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IMemberForwarded? MemberForwarded
         {
-            get => _memberForwarded.Value;
-            internal set => _memberForwarded.Value = value;
+            get => _memberForwarded.GetValue(this);
+            internal set => _memberForwarded.SetValue(value);
         }
 
         /// <summary>
@@ -65,8 +65,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public Utf8String? Name
         {
-            get => _name.Value;
-            set => _name.Value = value;
+            get => _name.GetValue(this);
+            set => _name.SetValue(value);
         }
 
         string? INameProvider.Name => Name;
@@ -81,8 +81,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public ModuleReference? Scope
         {
-            get => _scope.Value;
-            set => _scope.Value = value;
+            get => _scope.GetValue(this);
+            set => _scope.SetValue(value);
         }
 
         /// <summary>

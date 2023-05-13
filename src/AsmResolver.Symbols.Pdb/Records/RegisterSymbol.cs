@@ -7,16 +7,16 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public class RegisterSymbol : CodeViewSymbol, IVariableSymbol
 {
-    private readonly LazyVariable<CodeViewTypeRecord?> _variableType;
-    private readonly LazyVariable<Utf8String?> _name;
+    private readonly LazyVariable<RegisterSymbol, CodeViewTypeRecord?> _variableType;
+    private readonly LazyVariable<RegisterSymbol, Utf8String?> _name;
 
     /// <summary>
     /// Initializes an empty register variable symbol.
     /// </summary>
     protected RegisterSymbol()
     {
-        _variableType = new LazyVariable<CodeViewTypeRecord?>(GetVariableType);
-        _name = new LazyVariable<Utf8String?>(GetName);
+        _variableType = new LazyVariable<RegisterSymbol, CodeViewTypeRecord?>(x => x.GetVariableType());
+        _name = new LazyVariable<RegisterSymbol, Utf8String?>(x => x.GetName());
     }
 
     /// <summary>
@@ -28,8 +28,8 @@ public class RegisterSymbol : CodeViewSymbol, IVariableSymbol
     public RegisterSymbol(Utf8String? name, CodeViewTypeRecord? variableType, ushort register)
     {
         Register = register;
-        _variableType = new LazyVariable<CodeViewTypeRecord?>(variableType);
-        _name = new LazyVariable<Utf8String?>(name);
+        _variableType = new LazyVariable<RegisterSymbol, CodeViewTypeRecord?>(variableType);
+        _name = new LazyVariable<RegisterSymbol, Utf8String?>(name);
     }
 
     /// <inheritdoc />
@@ -47,15 +47,15 @@ public class RegisterSymbol : CodeViewSymbol, IVariableSymbol
     /// <inheritdoc />
     public Utf8String? Name
     {
-        get => _name.Value;
-        set => _name.Value = value;
+        get => _name.GetValue(this);
+        set => _name.SetValue(value);
     }
 
     /// <inheritdoc />
     public CodeViewTypeRecord? VariableType
     {
-        get => _variableType.Value;
-        set => _variableType.Value = value;
+        get => _variableType.GetValue(this);
+        set => _variableType.SetValue(value);
     }
 
     /// <summary>
