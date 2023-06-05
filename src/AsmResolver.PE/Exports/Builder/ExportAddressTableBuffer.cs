@@ -10,6 +10,16 @@ namespace AsmResolver.PE.Exports.Builder
     public class ExportAddressTableBuffer : SegmentBase
     {
         private readonly List<ExportedSymbol> _entries = new();
+        private readonly NameTableBuffer _nameTableBuffer;
+
+        /// <summary>
+        /// Constructs a new export address table buffer.
+        /// </summary>
+        /// <param name="nameTableBuffer">The name table buffer to use for obtaining the RVAs of forwarder symbols.</param>
+        public ExportAddressTableBuffer(NameTableBuffer nameTableBuffer)
+        {
+            _nameTableBuffer = nameTableBuffer;
+        }
 
         /// <summary>
         /// Adds a single symbol to the address table buffer.
@@ -24,7 +34,11 @@ namespace AsmResolver.PE.Exports.Builder
         public override void Write(IBinaryStreamWriter writer)
         {
             foreach (var entry in _entries)
-                writer.WriteUInt32(entry.Address.Rva);
+            {
+                writer.WriteUInt32(entry.IsForwarder
+                    ? _nameTableBuffer.GetNameRva(entry.ForwarderName)
+                    : entry.Address.Rva);
+            }
         }
     }
 }

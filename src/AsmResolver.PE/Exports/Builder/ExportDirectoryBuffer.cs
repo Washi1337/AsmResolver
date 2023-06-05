@@ -40,8 +40,8 @@ namespace AsmResolver.PE.Exports.Builder
         public ExportDirectoryBuffer()
         {
             // Initialize table buffers.
-            _addressTableBuffer = new ExportAddressTableBuffer();
             _nameTableBuffer = new NameTableBuffer();
+            _addressTableBuffer = new ExportAddressTableBuffer(_nameTableBuffer);
             _ordinalNamePointerTable = new OrdinalNamePointerTableBuffer(_nameTableBuffer);
 
             _contentsBuilder = new SegmentBuilder
@@ -77,8 +77,12 @@ namespace AsmResolver.PE.Exports.Builder
             {
                 _addressTableBuffer.AddSymbol(symbol);
                 _ordinalNamePointerTable.AddSymbol(symbol);
+
                 if (symbol.IsByName)
                     _nameTableBuffer.AddName(symbol.Name);
+
+                if (symbol.IsForwarder)
+                    _nameTableBuffer.AddName(symbol.ForwarderName);
             }
         }
 
