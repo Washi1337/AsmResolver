@@ -207,5 +207,18 @@ namespace AsmResolver.PE.Tests.Exports
             Assert.Equal(unnamedSymbol3.Ordinal, newSymbol.Ordinal);
             Assert.Equal(unnamedSymbol3.Address.Rva, newSymbol.Address.Rva);
         }
+
+        [Fact]
+        public void ReadForwarderSymbol()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.ForwarderDlls_ProxyDll);
+
+            var bar = image.Exports!.Entries.First(x=>x.Name == "Bar");
+            var baz = image.Exports.Entries.First(x=>x.Name == "Baz");
+
+            Assert.True(bar.IsForwarder);
+            Assert.Equal("ActualDll.Foo", bar.ForwarderName);
+            Assert.False(baz.IsForwarder);
+        }
     }
 }
