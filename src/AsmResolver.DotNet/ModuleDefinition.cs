@@ -1195,14 +1195,17 @@ namespace AsmResolver.DotNet
                     when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
                     resolver = new DotNetFrameworkAssemblyResolver(fileService);
                     break;
+
                 case DotNetRuntimeInfo.NetStandard
                     when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(
                         runtime.Version, out var coreVersion):
                     resolver = new DotNetCoreAssemblyResolver(fileService, coreVersion);
                     break;
+
                 case DotNetRuntimeInfo.NetCoreApp:
                     resolver = new DotNetCoreAssemblyResolver(fileService, runtime.Version);
                     break;
+
                 default:
                     resolver = new DotNetFrameworkAssemblyResolver(fileService);
                     break;

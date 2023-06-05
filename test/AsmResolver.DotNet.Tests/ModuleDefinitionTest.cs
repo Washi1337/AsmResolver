@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.IO;
@@ -46,6 +47,64 @@ namespace AsmResolver.DotNet.Tests
             var reflectionModule = Assembly.Load(Properties.Resources.ActualLibrary).ManifestModule;
             var module = ModuleDefinition.FromModule(reflectionModule);
             Assert.Equal("ActualLibrary.dll", module.Name);
+        }
+
+        [Fact]
+        public void LoadFromFileShouldPopulateResolverSearchDirectories()
+        {
+            string path = typeof(ModuleDefinitionTest).Assembly.Location;
+            var module = ModuleDefinition.FromFile(path);
+
+            Assert.Contains(
+                Path.GetDirectoryName(path),
+                ((AssemblyResolverBase) module.MetadataResolver.AssemblyResolver).SearchDirectories);
+        }
+
+        [Fact]
+        public void LoadFromBytesShouldLeaveSearchDirectoriesEmpty()
+        {
+            string path = typeof(ModuleDefinitionTest).Assembly.Location;
+            var module = ModuleDefinition.FromBytes(File.ReadAllBytes(path));
+
+            Assert.DoesNotContain(
+                Path.GetDirectoryName(path),
+                ((AssemblyResolverBase) module.MetadataResolver.AssemblyResolver).SearchDirectories);
+        }
+
+        [Fact]
+        public void LoadFromBytesWithWorkingDirectoryShouldPopulateSearchDirectories()
+        {
+            string path = typeof(ModuleDefinitionTest).Assembly.Location;
+            var module = ModuleDefinition.FromBytes(
+                File.ReadAllBytes(path),
+                new ModuleReaderParameters(Path.GetDirectoryName(path)));
+
+            Assert.Contains(
+                Path.GetDirectoryName(path),
+                ((AssemblyResolverBase) module.MetadataResolver.AssemblyResolver).SearchDirectories);
+        }
+
+        [Fact]
+        public void LoadFromFileWithSameWorkingDirectoryShouldNotPopulateSearchDirectoriesTwice()
+        {
+            string path = typeof(ModuleDefinitionTest).Assembly.Location;
+            var module = ModuleDefinition.FromFile(path,
+                new ModuleReaderParameters(Path.GetDirectoryName(path)));
+
+            Assert.Equal(1, ((AssemblyResolverBase) module.MetadataResolver.AssemblyResolver)
+                .SearchDirectories.Count(x => x == Path.GetDirectoryName(path)));
+        }
+
+        [Fact]
+        public void LoadFromFileWithDifferentWorkingDirectoryShouldPopulateSearchDirectoriesTwice()
+        {
+            string path = typeof(ModuleDefinitionTest).Assembly.Location;
+            string otherPath = @"C:\other\path";
+            var module = ModuleDefinition.FromFile(path, new ModuleReaderParameters(otherPath));
+
+            var searchDirectories = ((AssemblyResolverBase) module.MetadataResolver.AssemblyResolver).SearchDirectories;
+            Assert.Contains(Path.GetDirectoryName(path), searchDirectories);
+            Assert.Contains(otherPath, searchDirectories);
         }
 
         [Fact]
