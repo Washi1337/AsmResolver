@@ -240,5 +240,26 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] ForwarderDlls_ActualDll {
+            get {
+                object obj = ResourceManager.GetObject("ForwarderDlls_ActualDll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] ForwarderDlls_ProxyDll {
+            get {
+                object obj = ResourceManager.GetObject("ForwarderDlls_ProxyDll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] ForwarderDlls_ForwarderTest {
+            get {
+                object obj = ResourceManager.GetObject("ForwarderDlls_ForwarderTest", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

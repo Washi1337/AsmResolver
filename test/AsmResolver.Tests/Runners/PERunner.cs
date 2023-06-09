@@ -34,7 +34,7 @@ namespace AsmResolver.Tests.Runners
             Assert.Equal(expectedOutput, actualOutput);
         }
 
-        protected string GetTestDirectory(string testClass, string testName)
+        public string GetTestDirectory(string testClass, string testName)
         {
             string path = Path.Combine(BasePath, testClass, testName);
             if (!Directory.Exists(path))
