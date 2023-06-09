@@ -71,10 +71,18 @@ namespace AsmResolver.DotNet.Serialized
             // Find assembly definition and corlib assembly.
             Assembly = FindParentAssembly();
             CorLibTypeFactory = CreateCorLibTypeFactory();
-
             OriginalTargetRuntime = DetectTargetRuntime();
-            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver(
-                readerParameters.PEReaderParameters.FileService));
+
+            // Initialize metadata resolution engines.
+            var resolver = CreateAssemblyResolver(readerParameters.PEReaderParameters.FileService);
+            if (!string.IsNullOrEmpty(readerParameters.WorkingDirectory)
+                && resolver is AssemblyResolverBase resolverBase
+                && !resolverBase.SearchDirectories.Contains(readerParameters.WorkingDirectory!))
+            {
+                resolverBase.SearchDirectories.Add(readerParameters.WorkingDirectory!);
+            }
+
+            MetadataResolver = new DefaultMetadataResolver(resolver);
 
             // Prepare lazy RID lists.
             _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.Field, TableIndex.TypeDef,
