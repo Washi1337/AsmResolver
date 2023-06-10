@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.PE.Certificates;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exceptions;
@@ -181,6 +182,14 @@ namespace AsmResolver.PE
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Gets a collection of attribute certificates that were added to the executable.
+        /// </summary>
+        CertificateCollection Certificates
+        {
+            get;
         }
     }
 }
