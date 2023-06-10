@@ -162,6 +162,8 @@ namespace AsmResolver.PE
             if (!PEFile.TryCreateReaderAtFileOffset(dataDirectory.VirtualAddress, dataDirectory.Size, out var reader))
                 return result;
 
+            result.UpdateOffsets(new RelocationParameters(dataDirectory.VirtualAddress, dataDirectory.VirtualAddress));
+
             var certificateReader = ReaderContext.Parameters.CertificateReader;
 
             while (reader.CanRead(AttributeCertificate.HeaderSize))
