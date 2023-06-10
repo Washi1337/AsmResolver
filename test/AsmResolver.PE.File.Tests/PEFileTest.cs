@@ -186,6 +186,16 @@ namespace AsmResolver.PE.File.Tests
         }
 
         [Fact]
+        public void ReadEofDataFromFileOffset()
+        {
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld_EOF);
+            Assert.NotNull(file.EofData);
+            Assert.True(file.TryCreateReaderAtFileOffset((uint) file.EofData.Offset, out var reader));
+            byte[] data = reader.ReadToEnd();
+            Assert.Equal(Encoding.ASCII.GetBytes("abcdefghijklmnopqrstuvwxyz"), data);
+        }
+
+        [Fact]
         public void AddNewEofData()
         {
             byte[] expected = { 1, 2, 3, 4 };
