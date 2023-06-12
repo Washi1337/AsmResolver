@@ -294,9 +294,6 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             // Define local symbol.
             var messageSymbol = new NativeLocalSymbol(body, symbolOffset);
 
-            // Fixup address in mov instruction.
-            body.AddressFixups.Add(new AddressFixup(fixupOffset, fixupType, messageSymbol));
-
             InjectCallToNativeBody(body, messageSymbol, fixupOffset, fixupType);
 
             // Verify.
@@ -314,7 +311,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             false,
             new byte[] {0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // mov rax, message
             2u, AddressFixupType.Absolute64BitAddress)]
-        public void NativeBodyWithSectionSymbol(bool is32Bit, byte[] movInstruction, uint fixupOffset, AddressFixupType fixupType)
+        public void NativeBodyWithGlobalSymbol(bool is32Bit, byte[] movInstruction, uint fixupOffset, AddressFixupType fixupType)
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
 
@@ -328,7 +325,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             body.Code = code.ToArray();
 
             // Define new symbol.
-            var messageSegment = new DataSegment(Encoding.ASCII.GetBytes("Hello, world!\0"));
+            var messageSegment = new DataSegment(Encoding.Unicode.GetBytes("Hello, world!\0"));
             var messageSymbol = new Symbol(messageSegment.ToReference());
 
             InjectCallToNativeBody(body, messageSymbol, fixupOffset, fixupType);
