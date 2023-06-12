@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Memory;
 using Xunit;
@@ -17,11 +18,8 @@ namespace AsmResolver.DotNet.Tests.Memory
             get;
         }
 
-        protected TypeDefinition FindTestType(Type type)
-        {
-            return (TypeDefinition) Module.LookupMember(type.MetadataToken);
-        }     
-        
+        private ITypeDescriptor FindTestType(Type type) => Module.DefaultImporter.ImportType(type);
+
         protected void VerifySize<T>()
         {
             var type = FindTestType(typeof(T));

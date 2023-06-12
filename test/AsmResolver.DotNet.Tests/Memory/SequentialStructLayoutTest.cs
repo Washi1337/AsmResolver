@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Memory;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -51,62 +52,68 @@ namespace AsmResolver.DotNet.Tests.Memory
         [Fact]
         public void MultipleFieldsSequentialStructDefaultPack() =>
             VerifySize<SequentialTestStructs.MultipleFieldsSequentialStructDefaultPack>();
-        
+
         [Fact]
         public void MultipleFieldsSequentialStructPack1() =>
             VerifySize<SequentialTestStructs.MultipleFieldsSequentialStructPack1>();
-        
+
         [Fact]
         public void LargeAndSmallFieldSequentialDefaultPack() =>
             VerifySize<SequentialTestStructs.LargeAndSmallFieldSequentialDefaultPack>();
-        
+
         [Fact]
         public void NestedStruct1() => VerifySize<SequentialTestStructs.NestedStruct1>();
-        
+
         [Fact]
         public void NestedStruct2() => VerifySize<SequentialTestStructs.NestedStruct2>();
-        
+
         [Fact]
         public void NestedStructWithEnclosingPack1() => VerifySize<SequentialTestStructs.NestedStructWithEnclosingPack1>();
-        
+
         [Fact]
         public void NestedStructWithNestedPack1() => VerifySize<SequentialTestStructs.NestedStructWithNestedPack1>();
-        
+
         [Fact]
         public void NestedStructInNestedStruct() => VerifySize<SequentialTestStructs.NestedStructInNestedStruct>();
-        
+
         [Fact]
-        public void ThreeLevelsNestingSequentialStructDefaultPack() => 
+        public void ThreeLevelsNestingSequentialStructDefaultPack() =>
             VerifySize<SequentialTestStructs.ThreeLevelsNestingSequentialStructDefaultPack>();
-        
+
         [Fact]
-        public void ThreeLevelsNestingSequentialStructPack1() => 
+        public void ThreeLevelsNestingSequentialStructPack1() =>
             VerifySize<SequentialTestStructs.ThreeLevelsNestingSequentialWithNestedStructPack1>();
-        
+
         [Fact]
         public void ExplicitlySizedEmptyStruct() => VerifySize<SequentialTestStructs.ExplicitlySizedEmptyStruct>();
-        
+
         [Fact]
         public void ExplicitlySizedSingleField() => VerifySize<SequentialTestStructs.ExplicitlySizedSingleField>();
-        
+
         [Fact]
         public void ExplicitlySizedSmallerExplicitSizeThanActualSize() =>
             VerifySize<SequentialTestStructs.ExplicitlySizedSmallerExplicitSizeThanActualSize>();
-        
+
         [Fact]
         public void StructWithPrimitiveFieldSmallerThanPack() =>
             VerifySize<SequentialTestStructs.StructWithPrimitiveFieldSmallerThanPack>();
-        
+
         [Fact]
         public void StructWithStructFieldSmallerThanPack() =>
             VerifySize<SequentialTestStructs.StructWithStructFieldSmallerThanPack>();
-        
+
         [Fact]
         public void PackLargerThanLargestField() =>
             VerifySize<SequentialTestStructs.PackLargerThanLargestField>();
-        
+
         [Fact]
         public void PackLargerThanLargestFieldWithImplicitAlignment() =>
             VerifySize<SequentialTestStructs.PackLargerThanLargestFieldWithImplicitAlignment>();
+
+        [Fact]
+        public void GenericStruct() => VerifySize<SequentialTestStructs.GenericStruct<int, byte>>();
+
+        [Fact]
+        public void GenericNestedStruct() => VerifySize<SequentialTestStructs.GenericStruct<int, byte>.NestedStruct>();
     }
 }
