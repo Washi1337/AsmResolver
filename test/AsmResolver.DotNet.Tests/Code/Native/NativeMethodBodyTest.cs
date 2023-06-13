@@ -3,16 +3,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.Patching;
 using AsmResolver.PE;
 using AsmResolver.PE.Code;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
+using AsmResolver.PE.Platforms;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -33,17 +38,18 @@ namespace AsmResolver.DotNet.Tests.Code.Native
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.TheAnswer_NetFx);
 
-            module.Attributes &= ~DotNetDirectoryFlags.ILOnly;
+            module.IsILOnly = false;
             if (is32Bit)
             {
                 module.PEKind = OptionalHeaderMagic.PE32;
                 module.MachineType = MachineType.I386;
-                module.Attributes |= DotNetDirectoryFlags.Bit32Required;
+                module.IsBit32Required = true;
             }
             else
             {
                 module.PEKind = OptionalHeaderMagic.PE32Plus;
                 module.MachineType = MachineType.Amd64;
+                module.IsBit32Required = false;
             }
 
             var method = module
@@ -53,7 +59,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             method.ImplAttributes |= MethodImplAttributes.Unmanaged
                                      | MethodImplAttributes.Native
                                      | MethodImplAttributes.PreserveSig;
-            method.DeclaringType.Methods.Remove(method);
+            method.DeclaringType!.Methods.Remove(method);
             module.GetOrCreateModuleType().Methods.Add(method);
 
             return method.NativeMethodBody = new NativeMethodBody(method);
@@ -81,7 +87,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             };
 
             // Serialize module to PE image.
-            var module = body.Owner.Module;
+            var module = body.Owner.Module!;
             var image = module.ToPEImage();
 
             // Lookup method row.
@@ -288,26 +294,79 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             // Define local symbol.
             var messageSymbol = new NativeLocalSymbol(body, symbolOffset);
 
+            InjectCallToNativeBody(body, messageSymbol, fixupOffset, fixupType);
+
+            // Verify.
+            _fixture
+                .GetRunner<FrameworkPERunner>()
+                .RebuildAndRun(body.Owner.Module!, "StringPointer.exe", $"Hello, world!{Environment.NewLine}");
+        }
+
+        [SkippableTheory]
+        [InlineData(
+            true,
+            new byte[] {0xB8, 0x00, 0x00, 0x00, 0x00}, // mov eax, message
+            1u, AddressFixupType.Absolute32BitAddress)]
+        [InlineData(
+            false,
+            new byte[] {0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // mov rax, message
+            2u, AddressFixupType.Absolute64BitAddress)]
+        public void NativeBodyWithGlobalSymbol(bool is32Bit, byte[] movInstruction, uint fixupOffset, AddressFixupType fixupType)
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+
+            // Create native body.
+            var code = new List<byte>(movInstruction)
+            {
+                0xc3 // ret
+            };
+
+            var body = CreateDummyBody(false, is32Bit);
+            body.Code = code.ToArray();
+
+            // Define new symbol.
+            var messageSegment = new DataSegment(Encoding.Unicode.GetBytes("Hello, world!\0"));
+            var messageSymbol = new Symbol(messageSegment.ToReference());
+
+            InjectCallToNativeBody(body, messageSymbol, fixupOffset, fixupType);
+
+            // Add symbol to new section.
+            var image = body.Owner.Module!.ToPEImage();
+            var file = new ManagedPEFileBuilder().CreateFile(image);
+            file.Sections.Add(new PESection(
+                ".asmres",
+                SectionFlags.MemoryRead | SectionFlags.ContentInitializedData,
+                messageSegment));
+
+            // Verify.
+            _fixture
+                .GetRunner<FrameworkPERunner>()
+                .RebuildAndRun(file, "StringPointer.exe", $"Hello, world!{Environment.NewLine}");
+        }
+
+        private static void InjectCallToNativeBody(NativeMethodBody body, ISymbol messageSymbol, uint fixupOffset, AddressFixupType fixupType)
+        {
             // Fixup address in mov instruction.
             body.AddressFixups.Add(new AddressFixup(fixupOffset, fixupType, messageSymbol));
 
             // Update main to call native method, convert the returned pointer to a String, and write to stdout.
-            var module = body.Owner.Module;
-            body.Owner!.Signature!.ReturnType = body.Owner.Module!.CorLibTypeFactory.IntPtr;
-            var stringConstructor = new MemberReference(
-                module!.CorLibTypeFactory.String.Type,
-                ".ctor",
-                MethodSignature.CreateInstance(
-                    module.CorLibTypeFactory.Void,
-                    module.CorLibTypeFactory.Char.MakePointerType())
-            );
-            var writeLine = new MemberReference(
-                new TypeReference(module, module.CorLibTypeFactory.CorLibScope, "System", "Console"),
-                "WriteLine",
-                MethodSignature.CreateStatic(
-                    module.CorLibTypeFactory.Void,
-                    module.CorLibTypeFactory.String)
-            );
+            var module = body.Owner.Module!;
+            body.Owner.Signature!.ReturnType = module.CorLibTypeFactory.IntPtr;
+
+            var stringConstructor = module.CorLibTypeFactory.String.Type
+                .CreateMemberReference(".ctor", MethodSignature.CreateInstance(
+                        module.CorLibTypeFactory.Void,
+                        module.CorLibTypeFactory.Char.MakePointerType()
+                    ))
+                .ImportWith(module.DefaultImporter);
+
+            var writeLine = module.CorLibTypeFactory.CorLibScope
+                .CreateTypeReference("System", "Console")
+                .CreateMemberReference("WriteLine", MethodSignature.CreateStatic(
+                        module.CorLibTypeFactory.Void,
+                        module.CorLibTypeFactory.String
+                    ))
+                .ImportWith(module.DefaultImporter);
 
             var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
             instructions.Clear();
@@ -315,11 +374,6 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             instructions.Add(CilOpCodes.Newobj, stringConstructor);
             instructions.Add(CilOpCodes.Call, writeLine);
             instructions.Add(CilOpCodes.Ret);
-
-            // Verify.
-            _fixture
-                .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(module, "StringPointer.exe", $"Hello, world!{Environment.NewLine}");
         }
     }
 }
