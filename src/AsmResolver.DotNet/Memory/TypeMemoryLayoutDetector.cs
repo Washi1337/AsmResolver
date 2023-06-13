@@ -150,8 +150,14 @@ namespace AsmResolver.DotNet.Memory
             {
                 TableIndex.TypeRef => VisitTypeReference((TypeReference) type),
                 TableIndex.TypeDef => VisitTypeDefinition((TypeDefinition) type),
+                TableIndex.TypeSpec => VisitTypeSpecification((TypeSpecification) type),
                 _ => throw new ArgumentException("Invalid type.")
             };
+        }
+
+        private TypeMemoryLayout VisitTypeSpecification(TypeSpecification type)
+        {
+            return type.Signature!.AcceptVisitor(this);
         }
 
         private TypeMemoryLayout VisitTypeReference(TypeReference type) =>

@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         [StructLayout(LayoutKind.Sequential)]
         public struct EmptyStruct
         {
-            
+
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -134,7 +134,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         public struct PackLargerThanLargestField
         {
             public FixedSizeStruct133 Field1;
-            
+
             public FixedSizeStruct133 Field2;
         }
 
@@ -148,8 +148,23 @@ namespace AsmResolver.DotNet.Tests.Memory
         public struct PackLargerThanLargestFieldWithImplicitAlignment
         {
             public FixedSizeStruct133WithField Field1;
-            
+
             public FixedSizeStruct133WithField Field2;
         }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct GenericStruct<T1, T2>
+        {
+            public T1 Field1;
+            public T2 Field2;
+
+            [StructLayout(LayoutKind.Sequential, Pack = 1)]
+            public struct NestedStruct
+            {
+                public T1 Field1;
+                public T2 Field2;
+            }
+        }
+
     }
 }
