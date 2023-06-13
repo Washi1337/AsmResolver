@@ -33,6 +33,21 @@ namespace AsmResolver.PE.Certificates
             get;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the raw contents of the signature can be read using a
+        /// <see cref="BinaryStreamReader"/> instance.
+        /// </summary>
+        public abstract bool CanRead
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Creates a binary reader that reads the raw contents of the stored signature.
+        /// </summary>
+        /// <returns>The reader.</returns>
+        public abstract BinaryStreamReader CreateContentReader();
+
         /// <inheritdoc />
         public override uint GetPhysicalSize() => HeaderSize + GetContentsSize();
 

@@ -1,4 +1,6 @@
+using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.Certificates
@@ -52,6 +54,15 @@ namespace AsmResolver.PE.Certificates
             get;
             set;
         }
+
+        /// <inheritdoc />
+        [MemberNotNullWhen(true, nameof(Contents))]
+        public override bool CanRead => Contents is not null;
+
+        /// <inheritdoc />
+        public override BinaryStreamReader CreateContentReader() => CanRead
+            ? Contents.CreateReader()
+            : throw new InvalidOperationException("Signature cannot be read.");
 
         /// <inheritdoc />
         public override void UpdateOffsets(in RelocationParameters parameters)

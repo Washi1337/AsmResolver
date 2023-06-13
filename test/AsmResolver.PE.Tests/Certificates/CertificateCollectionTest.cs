@@ -14,6 +14,7 @@ namespace AsmResolver.PE.Tests.Certificates
             var certificate = Assert.Single(image.Certificates);
             Assert.Equal(CertificateRevision.Revision_v2_0, certificate.Revision);
             Assert.Equal(CertificateType.PkcsSignedData, certificate.Type);
+            Assert.Equal(0x580u, certificate.CreateContentReader().Length);
         }
 
         [Fact]
@@ -32,6 +33,7 @@ namespace AsmResolver.PE.Tests.Certificates
             var newCertificate = Assert.Single(newImage.Certificates);
             Assert.Equal(certificate.Revision, newCertificate.Revision);
             Assert.Equal(certificate.Type, newCertificate.Type);
+            Assert.Equal(certificate.CreateContentReader().ReadToEnd(), newCertificate.CreateContentReader().ReadToEnd());
             Assert.Equal(certificate.WriteIntoArray(), newCertificate.WriteIntoArray());
         }
     }
