@@ -25,9 +25,9 @@ writing).
 
 AsmResolver often can ignore and recover from kinds of errors, but this
 is not enabled by default. To enable these, please refer to
-[Advanced PE Image Reading](/guides/peimage/advanced-pe-reading.html#custom-error-handling) (PE)
-or [Advanced Module Reading](/guides/dotnet/advanced-module-reading.html#pe-image-reading-parameters) (.NET),
-and [Image Builder Diagnostics](/guides/dotnet/advanced-pe-image-building.html#image-builder-diagnostics) (.NET).
+[Advanced PE Image Reading](peimage/advanced-pe-reading.md#custom-error-handling) (PE)
+or [Advanced Module Reading](dotnet/advanced-module-reading.md#pe-image-reading-parameters) (.NET),
+and [Image Builder Diagnostics](dotnet/advanced-pe-image-building.md#image-builder-diagnostics) (.NET).
 Be careful with ignoring errors though. Especially for disabling writer
 verification can cause the output to not work anymore unless you know
 what you are doing.

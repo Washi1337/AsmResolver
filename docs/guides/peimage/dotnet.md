@@ -321,7 +321,7 @@ var fieldRva = new FieldRvaRow(myData.ToReference(), 0);
 
 ## TypeReference Hash (TRH) 
 
-Similar to the :ref:`pe-import-hash`, the TypeReference Hash (TRH) can be used
+Similar to the [Import Hash](imports.md#import-hash), the TypeReference Hash (TRH) can be used
 to help identify malware families written in a .NET language. However, unlike 
 the Import Hash, the TRH is based on the names of all imported type references 
 instead of the symbols specified in the imports directory of the PE. This is a

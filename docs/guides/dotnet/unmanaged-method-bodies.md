@@ -54,7 +54,7 @@ module.IsBit32Required = true;
 As per ECMA-335 specification, a method definition can only represent a
 native function via Platform Invoke (P/Invoke). While P/Invoke is
 usually used for importing functions from external libraries (such as
-[kernel32.dll]{.title-ref}), it is also needed for implementing native
+`kernel32.dll`), it is also needed for implementing native
 methods that are defined within the current .NET module itself.
 Therefore, to be able to assign a valid native body to a method, the
 right flags need to be set in both the `Attributes` and `ImplAttributes`
