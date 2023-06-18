@@ -115,5 +115,18 @@ namespace AsmResolver.DotNet.Tests.Memory
 
         [Fact]
         public void GenericNestedStruct() => VerifySize<SequentialTestStructs.GenericStruct<int, byte>.NestedStruct>();
+
+        [Fact]
+        public void UninstantiatedGenericStructShouldThrow()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                var type = Module.LookupMember<TypeDefinition>(
+                    typeof(SequentialTestStructs.GenericStruct<,>).MetadataToken
+                );
+
+                type.GetImpliedMemoryLayout(IntPtr.Size == 4);
+            });
+        }
     }
 }
