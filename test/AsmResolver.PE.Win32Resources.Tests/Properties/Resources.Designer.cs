@@ -51,5 +51,12 @@ namespace AsmResolver.PE.Win32Resources.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        internal static byte[] HelloWorld_PaddedVersionInfo {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_PaddedVersionInfo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
