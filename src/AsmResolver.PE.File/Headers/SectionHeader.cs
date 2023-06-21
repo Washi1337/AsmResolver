@@ -20,35 +20,6 @@ namespace AsmResolver.PE.File.Headers
         private string _name;
 
         /// <summary>
-        /// Reads a single section header at the current position of the provided input stream.
-        /// </summary>
-        /// <param name="reader">The input stream to read from.</param>
-        /// <returns>The section header that was read.</returns>
-        public static SectionHeader FromReader(ref BinaryStreamReader reader)
-        {
-            ulong offset = reader.Offset;
-            uint rva = reader.Rva;
-
-            var nameBytes = new byte[8];
-            reader.ReadBytes(nameBytes, 0, nameBytes.Length);
-
-            return new SectionHeader(Encoding.UTF8.GetString(nameBytes).Replace("\0", ""), 0)
-            {
-                Offset = offset,
-                Rva = rva,
-                VirtualSize = reader.ReadUInt32(),
-                VirtualAddress = reader.ReadUInt32(),
-                SizeOfRawData = reader.ReadUInt32(),
-                PointerToRawData = reader.ReadUInt32(),
-                PointerToRelocations = reader.ReadUInt32(),
-                PointerToLineNumbers = reader.ReadUInt32(),
-                NumberOfRelocations = reader.ReadUInt16(),
-                NumberOfLineNumbers = reader.ReadUInt16(),
-                Characteristics = (SectionFlags) reader.ReadUInt32()
-            };
-        }
-
-        /// <summary>
         /// Creates a new section header with the provided name.
         /// </summary>
         /// <param name="name">The name of the new section.</param>
@@ -192,6 +163,46 @@ namespace AsmResolver.PE.File.Headers
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Reads a single section header at the current position of the provided input stream.
+        /// </summary>
+        /// <param name="reader">The input stream to read from.</param>
+        /// <returns>The section header that was read.</returns>
+        public static SectionHeader FromReader(ref BinaryStreamReader reader)
+        {
+            ulong offset = reader.Offset;
+            uint rva = reader.Rva;
+
+            // Read name field.
+            byte[] nameBytes = new byte[8];
+            reader.ReadBytes(nameBytes, 0, nameBytes.Length);
+
+            // Interpret as UTF-8, discarding all invalid UTF-8 characters.
+            string name = Encoding.UTF8.GetString(nameBytes).Replace("\xfffd", "");
+
+            // Trim to last null-byte if it exists.
+            int index = name.IndexOf('\0');
+            if (index >= 0)
+                name = name.Remove(index);
+
+            return new SectionHeader(name, 0)
+            {
+                Offset = offset,
+                Rva = rva,
+
+                // Read remainder of section header.
+                VirtualSize = reader.ReadUInt32(),
+                VirtualAddress = reader.ReadUInt32(),
+                SizeOfRawData = reader.ReadUInt32(),
+                PointerToRawData = reader.ReadUInt32(),
+                PointerToRelocations = reader.ReadUInt32(),
+                PointerToLineNumbers = reader.ReadUInt32(),
+                NumberOfRelocations = reader.ReadUInt16(),
+                NumberOfLineNumbers = reader.ReadUInt16(),
+                Characteristics = (SectionFlags) reader.ReadUInt32()
+            };
         }
 
         /// <inheritdoc />

@@ -93,6 +93,16 @@ namespace AsmResolver.PE.File.Tests.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        public static byte[] HelloWorld_InvalidSectionName {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_InvalidSectionName", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         public static byte[] NativeMemoryDemos
         {
             get
