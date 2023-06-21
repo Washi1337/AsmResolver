@@ -15,6 +15,34 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         public const string VsVersionInfoKey = "VS_VERSION_INFO";
 
+        private FixedVersionInfo _fixedVersionInfo = new FixedVersionInfo();
+        private readonly Dictionary<string, VersionTableEntry> _entries = new Dictionary<string, VersionTableEntry>();
+
+        /// <inheritdoc />
+        public override string Key => VsVersionInfoKey;
+
+        /// <inheritdoc />
+        protected override VersionTableValueType ValueType => VersionTableValueType.Binary;
+
+        /// <summary>
+        /// Gets the fixed version info stored in this version resource.
+        /// </summary>
+        public FixedVersionInfo FixedVersionInfo
+        {
+            get => _fixedVersionInfo;
+            set => _fixedVersionInfo = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Gets or sets a version table entry by its name.
+        /// </summary>
+        /// <param name="name">The name of the child.</param>
+        public VersionTableEntry this[string name]
+        {
+            get => _entries[name];
+            set => _entries[name] = value;
+        }
+
         /// <summary>
         /// Obtains the version info resource from the provided root win32 resources directory.
         /// </summary>
@@ -97,34 +125,6 @@ namespace AsmResolver.PE.Win32Resources.Version
             };
         }
 
-        private FixedVersionInfo _fixedVersionInfo = new FixedVersionInfo();
-        private readonly Dictionary<string, VersionTableEntry> _entries = new Dictionary<string, VersionTableEntry>();
-
-        /// <inheritdoc />
-        public override string Key => VsVersionInfoKey;
-
-        /// <inheritdoc />
-        protected override VersionTableValueType ValueType => VersionTableValueType.Binary;
-
-        /// <summary>
-        /// Gets the fixed version info stored in this version resource.
-        /// </summary>
-        public FixedVersionInfo FixedVersionInfo
-        {
-            get => _fixedVersionInfo;
-            set => _fixedVersionInfo = value ?? throw new ArgumentNullException(nameof(value));
-        }
-
-        /// <summary>
-        /// Gets or sets a version table entry by its name.
-        /// </summary>
-        /// <param name="name">The name of the child.</param>
-        public VersionTableEntry this[string name]
-        {
-            get => _entries[name];
-            set => _entries[name] = value;
-        }
-
         /// <summary>
         /// Gets a collection of entries stored in the version resource.
         /// </summary>
@@ -181,9 +181,11 @@ namespace AsmResolver.PE.Win32Resources.Version
         protected override void WriteValue(IBinaryStreamWriter writer)
         {
             FixedVersionInfo.Write(writer);
-            writer.Align(4);
             foreach (var entry in _entries.Values)
+            {
+                writer.Align(4);
                 entry.Write(writer);
+            }
         }
 
         /// <inheritdoc />
