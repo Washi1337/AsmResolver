@@ -282,8 +282,9 @@ namespace AsmResolver.PE.File
         /// <inheritdoc />
         public BinaryStreamReader CreateReaderAtFileOffset(uint fileOffset)
         {
-            var section = GetSectionContainingOffset(fileOffset);
-            return section.CreateReader(fileOffset);
+            return !TryCreateReaderAtFileOffset(fileOffset, out var reader)
+                ? throw new ArgumentOutOfRangeException(nameof(fileOffset))
+                : reader;
         }
 
         /// <inheritdoc />
@@ -292,6 +293,14 @@ namespace AsmResolver.PE.File
             if (TryGetSectionContainingOffset(fileOffset, out var section))
             {
                 reader = section.CreateReader(fileOffset);
+                return true;
+            }
+
+            if (EofData is IReadableSegment eofData
+                && fileOffset >= eofData.Offset
+                && fileOffset < eofData.Offset + eofData.GetPhysicalSize())
+            {
+                reader = eofData.CreateReader(fileOffset);
                 return true;
             }
 
@@ -312,6 +321,14 @@ namespace AsmResolver.PE.File
             if (TryGetSectionContainingOffset(fileOffset, out var section))
             {
                 reader = section.CreateReader(fileOffset, size);
+                return true;
+            }
+
+            if (EofData is IReadableSegment eofData
+                && fileOffset >= eofData.Offset
+                && fileOffset < eofData.Offset + eofData.GetPhysicalSize())
+            {
+                reader = eofData.CreateReader(fileOffset, size);
                 return true;
             }
 

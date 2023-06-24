@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.IO;
+using AsmResolver.PE.Certificates;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exceptions;
@@ -28,6 +29,7 @@ namespace AsmResolver.PE
         private readonly LazyVariable<PEImage, IDotNetDirectory?> _dotNetDirectory;
         private IList<DebugDataEntry>? _debugData;
         private readonly LazyVariable<PEImage, ITlsDirectory?> _tlsDirectory;
+        private CertificateCollection? _certificates;
 
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
@@ -301,6 +303,17 @@ namespace AsmResolver.PE
             set => _tlsDirectory.SetValue(value);
         }
 
+        /// <inheritdoc />
+        public CertificateCollection Certificates
+        {
+            get
+            {
+                if (_certificates is null)
+                    Interlocked.CompareExchange(ref _certificates, GetCertificates(), null);
+                return _certificates;
+            }
+        }
+
         /// <summary>
         /// Obtains the list of modules that were imported into the PE.
         /// </summary>
@@ -372,5 +385,15 @@ namespace AsmResolver.PE
         /// This method is called upon initialization of the <see cref="TlsDirectory"/> property.
         /// </remarks>
         protected virtual ITlsDirectory? GetTlsDirectory() => null;
+
+        /// <summary>
+        /// Obtains the data directory containing the attribute certificates table of the executable.
+        /// </summary>
+        /// <returns>The attribute certificates.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Certificates"/> property.
+        /// </remarks>
+        protected virtual CertificateCollection GetCertificates() => new();
+
     }
 }
