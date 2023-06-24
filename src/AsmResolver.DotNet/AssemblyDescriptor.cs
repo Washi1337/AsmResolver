@@ -54,12 +54,16 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                var publicKeyToken = GetPublicKeyToken();
+                string cultureString = !Utf8String.IsNullOrEmpty(Culture)
+                    ? Culture
+                    : "neutral";
+
+                byte[]? publicKeyToken = GetPublicKeyToken();
                 string publicKeyTokenString = publicKeyToken is not null
                     ? string.Join(string.Empty, publicKeyToken.Select(x => x.ToString("x2")))
                     : "null";
 
-                return $"{Name}, Version={Version}, PublicKeyToken={publicKeyTokenString}";
+                return $"{Name}, Version={Version}, Culture={cultureString}, PublicKeyToken={publicKeyTokenString}";
             }
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace AsmResolver.DotNet.Tests
             var assemblyRef = module.AssemblyReferences[0];
             Assert.Equal("mscorlib", assemblyRef.Name);
         }
-        
+
         [Fact]
         public void ReadVersion()
         {
@@ -21,7 +22,7 @@ namespace AsmResolver.DotNet.Tests
             var assemblyRef = module.AssemblyReferences[0];
             Assert.Equal(new Version(4,0,0,0), assemblyRef.Version);
         }
-        
+
         [Fact]
         public void ReadPublicKeyOrToken()
         {
@@ -31,6 +32,29 @@ namespace AsmResolver.DotNet.Tests
             var expectedToken = new byte[] {0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89};
             Assert.Equal(expectedToken, assemblyRef.PublicKeyOrToken);
             Assert.Equal(expectedToken, assemblyRef.GetPublicKeyToken());
+        }
+
+        [Fact]
+        public void GetFullNameCultureNeutralAssembly()
+        {
+            var name = new AssemblyName(KnownCorLibs.MsCorLib_v4_0_0_0.FullName);
+            Assert.Equal("mscorlib", name.Name);
+            Assert.Equal(new Version(4,0,0,0), name.Version);
+            Assert.Equal(string.Empty, name.CultureName);
+            Assert.Equal(new byte[] {0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89}, name.GetPublicKeyToken());
+        }
+
+        [Fact]
+        public void GetFullNameCultureNonNeutralAssembly()
+        {
+            var assembly = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
+            assembly.Culture = "en-US";
+
+            var name = new AssemblyName(assembly.FullName);
+            Assert.Equal("SomeAssembly", name.Name);
+            Assert.Equal(new Version(1,2,3,4), name.Version);
+            Assert.Equal("en-US", name.CultureName);
+            Assert.Equal(Array.Empty<byte>(), name.GetPublicKeyToken());
         }
 
         [Fact]
