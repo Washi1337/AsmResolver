@@ -15,8 +15,8 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         public const string VsVersionInfoKey = "VS_VERSION_INFO";
 
-        private FixedVersionInfo _fixedVersionInfo = new FixedVersionInfo();
-        private readonly Dictionary<string, VersionTableEntry> _entries = new Dictionary<string, VersionTableEntry>();
+        private FixedVersionInfo _fixedVersionInfo = new();
+        private readonly Dictionary<string, VersionTableEntry> _entries = new();
 
         /// <inheritdoc />
         public override string Key => VsVersionInfoKey;
@@ -198,7 +198,7 @@ namespace AsmResolver.PE.Win32Resources.Version
                 {
                     new ResourceDirectory(1)
                     {
-                        Entries = {new ResourceData(0u, this)}
+                        Entries = {new ResourceData(1033, this)}
                     }
                 }
             };
