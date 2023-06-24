@@ -250,5 +250,19 @@ namespace AsmResolver.PE.File.Tests
             var newFile = PEFile.FromBytes(newFileBytes);
             Assert.Null(newFile.EofData);
         }
+
+        [Fact]
+        public void ReadSections()
+        {
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            Assert.Equal(new[] {".text", ".rsrc", ".reloc"}, file.Sections.Select(x => x.Name));
+        }
+
+        [Fact]
+        public void ReadInvalidSectionName()
+        {
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld_InvalidSectionName);
+            Assert.Equal(new[] {".text", ".rsrc", ".reloc"}, file.Sections.Select(x => x.Name));
+        }
     }
 }
