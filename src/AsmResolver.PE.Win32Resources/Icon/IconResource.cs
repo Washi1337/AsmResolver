@@ -98,7 +98,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
                 foreach (var (groupEntry, iconEntry) in entry.Value.GetIconEntries())
                 {
                     newIconDirectory.Entries.Add(new ResourceDirectory(groupEntry.Id)
-                        {Entries = {new ResourceData(0u, iconEntry)}});
+                        {Entries = {new ResourceData(1033, iconEntry)}});
                 }
             }
 

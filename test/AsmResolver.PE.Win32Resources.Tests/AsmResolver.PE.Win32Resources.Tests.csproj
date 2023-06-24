@@ -23,6 +23,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj" />
       <ProjectReference Include="..\..\src\AsmResolver.PE\AsmResolver.PE.csproj" />
+      <ProjectReference Include="..\AsmResolver.Tests\AsmResolver.Tests.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -38,10 +39,6 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>Resources.resx</DependentUpon>
       </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Resources" />
     </ItemGroup>
 
 </Project>
