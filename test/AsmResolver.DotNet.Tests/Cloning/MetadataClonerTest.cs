@@ -401,8 +401,8 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             var result = new MemberCloner(targetModule)
                 .Include(type)
-                .WithListener(new InjectTypeClonerListener(targetModule))
-                .WithListener(new AssignTokensClonerListener(targetModule))
+                .AddListener(new InjectTypeClonerListener(targetModule))
+                .AddListener(new AssignTokensClonerListener(targetModule))
                 .Clone();
 
             Assert.All(result.ClonedTopLevelTypes, t => Assert.Contains(t, targetModule.TopLevelTypes));

@@ -269,7 +269,7 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="listener">The listener to add.</param>
         /// <returns>The metadata cloner that the listener is added to.</returns>
-        public MemberCloner WithListener(Action<IMemberDefinition, IMemberDefinition> listener)
+        public MemberCloner AddListener(Action<IMemberDefinition, IMemberDefinition> listener)
         {
             _listeners.Add(new CallbackClonerListener(listener));
             return this;
@@ -280,7 +280,7 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="listener">The listener to add.</param>
         /// <returns>The metadata cloner that the listener is added to.</returns>
-        public MemberCloner WithListener(IMemberClonerListener listener)
+        public MemberCloner AddListener(IMemberClonerListener listener)
         {
             _listeners.Add(listener);
             return this;

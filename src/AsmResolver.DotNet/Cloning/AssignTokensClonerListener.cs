@@ -1,7 +1,7 @@
 namespace AsmResolver.DotNet.Cloning
 {
     /// <summary>
-    /// Provides an implementation of a <see cref="IMemberClonerListener"/> that pre-emptively assigns new metadata
+    /// Provides an implementation of a <see cref="IMemberClonerListener"/> that preemptively assigns new metadata
     /// tokens to the cloned metadata members using the target module's <see cref="TokenAllocator"/>.
     /// </summary>
     public class AssignTokensClonerListener : MemberClonerListener
