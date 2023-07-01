@@ -17,7 +17,7 @@ namespace AsmResolver.DotNet.Cloning
     /// </remarks>
     public partial class MemberCloner
     {
-        private readonly IMemberClonerListener _clonerListener;
+        private readonly MemberClonerListenerList _listeners;
         private readonly Func<MemberCloneContext, CloneContextAwareReferenceImporter>? _importerFactory;
         private readonly ModuleDefinition _targetModule;
 
@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="targetModule">The target module to copy the members into.</param>
         public MemberCloner(ModuleDefinition targetModule)
-            : this(targetModule, (original, cloned) => { })
+            : this(targetModule, null, null)
         {
         }
 
@@ -79,7 +79,9 @@ namespace AsmResolver.DotNet.Cloning
         {
             _targetModule = targetModule ?? throw new ArgumentNullException(nameof(targetModule));
             _importerFactory = importerFactory;
-            _clonerListener = clonerListener ?? CallbackClonerListener.EmptyInstance;
+            _listeners = new MemberClonerListenerList();
+            if (clonerListener is not null)
+                _listeners.Add(clonerListener);
         }
 
         /// <summary>
@@ -263,6 +265,28 @@ namespace AsmResolver.DotNet.Cloning
         }
 
         /// <summary>
+        /// Adds a member cloner listener to the cloner.
+        /// </summary>
+        /// <param name="listener">The listener to add.</param>
+        /// <returns>The metadata cloner that the listener is added to.</returns>
+        public MemberCloner AddListener(Action<IMemberDefinition, IMemberDefinition> listener)
+        {
+            _listeners.Add(new CallbackClonerListener(listener));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a member cloner listener to the cloner.
+        /// </summary>
+        /// <param name="listener">The listener to add.</param>
+        /// <returns>The metadata cloner that the listener is added to.</returns>
+        public MemberCloner AddListener(IMemberClonerListener listener)
+        {
+            _listeners.Add(listener);
+            return this;
+        }
+
+        /// <summary>
         /// Clones all included members.
         /// </summary>
         /// <returns>An object representing the result of the cloning process.</returns>
@@ -313,8 +337,8 @@ namespace AsmResolver.DotNet.Cloning
             {
                 DeepCopyType(context, type);
                 var clonedMember = (TypeDefinition)context.ClonedMembers[type];
-                _clonerListener.OnClonedMember(type, clonedMember);
-                _clonerListener.OnClonedType(type, clonedMember);
+                _listeners.OnClonedMember(type, clonedMember);
+                _listeners.OnClonedType(type, clonedMember);
             }
         }
 

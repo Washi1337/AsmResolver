@@ -103,9 +103,8 @@ cloner.Include(rectangleType);
 cloner.Include(vectorType);
 ```
 
-`Include` returns the same `MemberCloner` instance. It is therefore also
-possible to create a long method chain of members to include in the
-cloning process.
+`Include` returns the same `MemberCloner` instance, allowing for more fluent 
+syntax:
 
 ``` csharp
 cloner
@@ -255,7 +254,24 @@ var cloner = new MemberCloner(destinationModule, (original, cloned) => {
 });
 ```
 
-## Injecting the cloned members
+Multiple listeners can also be chained together using the `AddListener` method:
+
+```csharp
+var cloner = new MemberCloner(destinationModule);
+cloner.AddListener(new MyListener1());
+cloner.AddListener(new MyListener2());
+```
+
+This can also be used in the fluent syntax form:
+
+```csharp
+var cloner = new MemberCloner(destinationModule)
+    .AddListener(new MyListener1())
+    .AddListener(new MyListener2());
+```
+
+
+## Injecting cloned members
 
 The `Clone` method returns a `MemberCloneResult`, which contains a
 register of all members cloned by the member cloner.
@@ -288,17 +304,37 @@ foreach (var clonedType in clonedTypes)
     destinationModule.TopLevelTypes.Add(clonedType);
 ```
 
-However, since injecting the cloned top level types is a very common
-use-case for the cloner, AsmResolver defines the
-`InjectTypeClonerListener` class that implements a cloner listener that
-injects all top-level types automatically into the destination module.
-In such a case, the code can be reduced to the following:
+Injecting the cloned top level types is a very common use-case for the cloner.
+AsmResolver defines the `InjectTypeClonerListener` class that implements a 
+cloner listener that injects all top-level types automatically into 
+the destination module. In such a case, the code can be reduced to the following:
 
 ``` csharp
-new MemberCloner(destinationModule, new InjectTypeClonerListener(destinationModule))
+new MemberCloner(destinationModule)
     .Include(rectangleType)
     .Include(vectorType)
+    .AddListener(new InjectTypeClonerListener(destinationModule))
     .Clone();
 
 // `destinationModule` now contains copies of `rectangleType` and `vectorType`.
 ```
+
+AsmResolver provides another built-in listener `AssignTokensClonerListener` that
+also allows for preemptively assigning new metadata tokens automatically, should
+this be necessary.
+
+``` csharp
+new MemberCloner(destinationModule)
+    .Include(rectangleType)
+    .Include(vectorType)
+    .AddListener(new InjectTypeClonerListener(destinationModule))
+    .AddListener(new AssignTokensClonerListener(destinationModule))
+    .Clone();
+
+// `destinationModule` now contains copies of `rectangleType` and `vectorType`
+// and all its members have been assigned a metadata token preemptively.
+```
+
+The `AssignTokensClonerListener` uses the target module's `TokenAllocator`. See
+[Metadata Token Allocation](token-allocation.md) for more information on how this
+class operates.
