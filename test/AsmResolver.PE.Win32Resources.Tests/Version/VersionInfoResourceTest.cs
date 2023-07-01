@@ -238,6 +238,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources!)!;
             var newInfo = newVersionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);
             Assert.Equal("This is a test application", newInfo.Tables[0][StringTable.FileDescriptionKey]);
+            Assert.Equal(versionInfo.Lcid, newVersionInfo.Lcid);
         }
     }
 }
