@@ -24,7 +24,16 @@ references in the `KnownCorLibs` class to target another version of the
 library.
 
 ``` csharp
-var module = new ModuleDefinition("MyModule.exe", KnownCorLibs.SystemRuntime_v4_2_2_0);
+var module = new ModuleDefinition("MyModule.dll", KnownCorLibs.SystemRuntime_v4_2_2_0);
+```
+
+If you have a .NET runtime identifier as specified in the 
+`TargetFrameworkAttribute` of an assembly, you can use the `DotNetRuntimeInfo` 
+structure to get the corresponding default corlib:
+
+``` csharp
+var runtime = DotNetRuntimeInfo.Parse(".NETCoreApp,Version=v3.1");
+var module = new ModuleDefinition("MyModule.dll", runtime.GetDefaultCorLib());
 ```
 
 ## Opening a .NET module

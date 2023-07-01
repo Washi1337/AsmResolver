@@ -10,8 +10,20 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class ReflectionAssemblyDescriptor : AssemblyDescriptor
     {
-        private readonly ModuleDefinition _parentModule;
+        private readonly ModuleDefinition? _parentModule;
         private readonly AssemblyName _assemblyName;
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ReflectionAssemblyDescriptor"/> class.
+        /// </summary>
+        /// <param name="assemblyName">The assembly name to import.</param>
+        public ReflectionAssemblyDescriptor(AssemblyName assemblyName)
+            : base(new MetadataToken(TableIndex.AssemblyRef, 0))
+        {
+            _parentModule = null;
+            _assemblyName = assemblyName;
+            Version = assemblyName.Version ?? new Version();
+        }
 
         /// <summary>
         /// Creates a new instance of the <see cref="ReflectionAssemblyDescriptor"/> class.
@@ -46,6 +58,6 @@ namespace AsmResolver.DotNet
         public override byte[]? GetPublicKeyToken() => _assemblyName.GetPublicKeyToken();
 
         /// <inheritdoc />
-        public override AssemblyDefinition? Resolve() => _parentModule.MetadataResolver.AssemblyResolver.Resolve(this);
+        public override AssemblyDefinition? Resolve() => _parentModule?.MetadataResolver.AssemblyResolver.Resolve(this);
     }
 }
