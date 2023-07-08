@@ -4,6 +4,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Types;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
@@ -618,6 +619,39 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             Assert.True(type1.IsCompatibleWith(type2));
             Assert.True(type2.IsCompatibleWith(type1));
+        }
+
+        [Fact]
+        public void GetModuleOfTypeDefOrRef()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var signature = module.GetOrCreateModuleType().ToTypeSignature();
+            Assert.Same(module, signature.Module);
+        }
+
+        [Fact]
+        public void GetModuleOfTypeDefOrRefWithNullScope()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_CurrentModule);
+            var signature = module
+                .LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 2))
+                .ToTypeSignature();
+
+            Assert.Null(signature.Scope);
+            Assert.Same(module, signature.Module);
+        }
+
+        [Fact]
+        public void GetModuleOfSpecificationTypeWithNullScope()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_CurrentModule);
+            var signature = module
+                .LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 2))
+                .ToTypeSignature()
+                .MakeSzArrayType();
+
+            Assert.Null(signature.Scope);
+            Assert.Same(module, signature.Module);
         }
     }
 }
