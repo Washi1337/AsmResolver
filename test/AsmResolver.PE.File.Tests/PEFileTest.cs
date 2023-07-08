@@ -264,5 +264,46 @@ namespace AsmResolver.PE.File.Tests
             var file = PEFile.FromBytes(Properties.Resources.HelloWorld_InvalidSectionName);
             Assert.Equal(new[] {".text", ".rsrc", ".reloc"}, file.Sections.Select(x => x.Name));
         }
+
+        [Fact]
+        public void ReadExtraSectionData()
+        {
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld_ExtraSectionData);
+            var reader = Assert.IsAssignableFrom<IReadableSegment>(file.ExtraSectionData).CreateReader();
+            Assert.Equal("Hello, world", reader.ReadAsciiString());
+        }
+
+        [Fact]
+        public void PersistExtraSectionData()
+        {
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            file.ExtraSectionData = new DataSegment(Encoding.ASCII.GetBytes("Hello, mars"));
+
+            using var stream = new MemoryStream();
+            file.Write(stream);
+
+            var newFile = PEFile.FromBytes(stream.ToArray());
+            var reader = Assert.IsAssignableFrom<IReadableSegment>(newFile.ExtraSectionData).CreateReader();
+            Assert.Equal("Hello, mars", reader.ReadAsciiString());
+        }
+
+        [Fact]
+        public void PersistLargeExtraSectionData()
+        {
+            byte[] data = Enumerable.Range(0, 255).Select(x => (byte) x).ToArray();
+
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            file.ExtraSectionData = new DataSegment(data);
+
+            using var stream = new MemoryStream();
+            file.Write(stream);
+
+            var newFile = PEFile.FromBytes(stream.ToArray());
+            var reader = Assert.IsAssignableFrom<IReadableSegment>(newFile.ExtraSectionData).CreateReader();
+
+            byte[] actualBytes = new byte[data.Length];
+            Assert.Equal(data.Length, reader.ReadBytes(actualBytes, 0, actualBytes.Length));
+            Assert.Equal(data, actualBytes);
+        }
     }
 }
