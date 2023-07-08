@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace HelloWorld
 {
@@ -6,7 +7,9 @@ namespace HelloWorld
     {
         private static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            var list = args.ToList();
+            foreach (var item in list)
+                Console.WriteLine(item);
         }
     }
 }
