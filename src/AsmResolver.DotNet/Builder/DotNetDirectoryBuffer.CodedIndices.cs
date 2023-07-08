@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Builder
                 TableIndex.AssemblyRef => AddAssemblyReference(scope as AssemblyReference, allowDuplicates, preserveRid),
                 TableIndex.TypeRef => AddTypeReference(scope as TypeReference, allowDuplicates, preserveRid),
                 TableIndex.ModuleRef => AddModuleReference(scope as ModuleReference, allowDuplicates, preserveRid),
-                TableIndex.Module => 0,
+                TableIndex.Module => new MetadataToken(TableIndex.Module, 1),
                 _ => throw new ArgumentOutOfRangeException(nameof(scope))
             };
 
