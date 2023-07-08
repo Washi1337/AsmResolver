@@ -31,7 +31,8 @@ namespace AsmResolver.DotNet.Tests
                 FieldAttributes.Static,
                 new TypeDefOrRefSignature(new TypeReference(
                     new AssemblyReference("SomeAssembly", new Version(1, 0, 0, 0)),
-                    "SomeNamespace", "SomeName")
+                    "SomeNamespace",
+                    "SomeName")
                 ).ImportWith(module.DefaultImporter)
             ));
 
@@ -64,7 +65,8 @@ namespace AsmResolver.DotNet.Tests
                 new TypeDefOrRefSignature(new TypeReference(
                     new TypeReference(
                         new AssemblyReference("SomeAssembly", new Version(1, 0, 0, 0)),
-                        "SomeNamespace", "SomeName"),
+                        "SomeNamespace",
+                        "SomeName"),
                     null,
                     "SomeNestedType"
                 )).ImportWith(module.DefaultImporter)
@@ -98,7 +100,8 @@ namespace AsmResolver.DotNet.Tests
                 FieldAttributes.Static,
                 new TypeDefOrRefSignature(new TypeReference(
                     module,
-                    "SomeNamepace", "SomeName")
+                    "SomeNamepace",
+                    "SomeName")
                 ).ImportWith(module.DefaultImporter)
             ));
 
@@ -120,7 +123,8 @@ namespace AsmResolver.DotNet.Tests
                 FieldAttributes.Static,
                 new TypeDefOrRefSignature(new TypeReference(
                     null,
-                    "SomeNamespace", "SomeName")
+                    "SomeNamespace",
+                    "SomeName")
                 ).ImportWith(module.DefaultImporter)
             ));
 
