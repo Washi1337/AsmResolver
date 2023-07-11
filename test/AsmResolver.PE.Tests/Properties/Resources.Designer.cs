@@ -268,5 +268,12 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] FieldRvaTest {
+            get {
+                object obj = ResourceManager.GetObject("FieldRvaTest", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
