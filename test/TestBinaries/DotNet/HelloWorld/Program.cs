@@ -7,9 +7,7 @@ namespace HelloWorld
     {
         private static void Main(string[] args)
         {
-            var list = args.ToList();
-            foreach (var item in list)
-                Console.WriteLine(item);
+            Console.WriteLine("Hello, World!");
         }
     }
 }
