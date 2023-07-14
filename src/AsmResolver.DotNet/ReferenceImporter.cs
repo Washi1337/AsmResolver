@@ -30,20 +30,12 @@ namespace AsmResolver.DotNet
             get;
         }
 
-        private static void AssertTypeIsValid(ITypeDefOrRef? type)
-        {
-            if (type is null)
-                throw new ArgumentNullException(nameof(type));
-            if (type.Scope is null)
-                throw new ArgumentException("Cannot import types that are not added to a module.");
-        }
-
         /// <summary>
         /// Imports a resolution scope.
         /// </summary>
         /// <param name="scope">The resolution scope to import.</param>
         /// <returns>The imported resolution scope.</returns>
-        public IResolutionScope ImportScope(IResolutionScope? scope)
+        public IResolutionScope ImportScope(IResolutionScope scope)
         {
             if (scope is null)
                 throw new ArgumentNullException(nameof(scope));
@@ -181,14 +173,16 @@ namespace AsmResolver.DotNet
         /// <returns>The imported type.</returns>
         protected virtual ITypeDefOrRef ImportType(TypeDefinition type)
         {
-            AssertTypeIsValid(type);
-
+            if (type is null)
+                throw new ArgumentNullException(nameof(type));
             if (type.IsImportedInModule(TargetModule))
                 return type;
+            if (((ITypeDescriptor) type).Scope is not { } scope)
+                throw new ArgumentException("Cannot import a type that has not been added to a module.");
 
             return new TypeReference(
                 TargetModule,
-                ImportScope(((ITypeDescriptor) type).Scope),
+                ImportScope(scope),
                 type.Namespace,
                 type.Name);
         }
@@ -200,12 +194,18 @@ namespace AsmResolver.DotNet
         /// <returns>The imported type.</returns>
         protected virtual ITypeDefOrRef ImportType(TypeReference type)
         {
-            AssertTypeIsValid(type);
-
+            if (type is null)
+                throw new ArgumentNullException(nameof(type));
             if (type.IsImportedInModule(TargetModule))
                 return type;
 
-            return new TypeReference(TargetModule, ImportScope(type.Scope!), type.Namespace, type.Name);
+            return new TypeReference(
+                TargetModule,
+                type.Scope is not null
+                    ? ImportScope(type.Scope)
+                    : null,
+                type.Namespace,
+                type.Name);
         }
 
         /// <summary>
@@ -215,7 +215,8 @@ namespace AsmResolver.DotNet
         /// <returns>The imported type.</returns>
         protected virtual ITypeDefOrRef ImportType(TypeSpecification type)
         {
-            AssertTypeIsValid(type);
+            if (type is null)
+                throw new ArgumentNullException(nameof(type));
             if (type.Signature is null)
                 throw new ArgumentNullException(nameof(type));
 
