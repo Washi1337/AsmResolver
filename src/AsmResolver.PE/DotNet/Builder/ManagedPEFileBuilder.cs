@@ -154,6 +154,31 @@ namespace AsmResolver.PE.DotNet.Builder
             }
         }
 
+        /// <summary>
+        /// Creates a new managed PE file builder with default settings.
+        /// </summary>
+        public ManagedPEFileBuilder()
+            : this(ThrowErrorListener.Instance)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new managed PE file builder with the provided error listener.
+        /// </summary>
+        public ManagedPEFileBuilder(IErrorListener errorListener)
+        {
+            ErrorListener = errorListener;
+        }
+
+        /// <summary>
+        /// Gets or sets the object responsible for recording diagnostic information during the building process.
+        /// </summary>
+        public IErrorListener ErrorListener
+        {
+            get;
+            set;
+        }
+
         /// <inheritdoc />
         protected override ManagedPEBuilderContext CreateContext(IPEImage image) => new(image);
 
@@ -436,7 +461,7 @@ namespace AsmResolver.PE.DotNet.Builder
         protected override uint GetImageBase(PEFile peFile, IPEImage image, ManagedPEBuilderContext context)
             => (uint) image.ImageBase;
 
-        private static void ProcessRvasInMetadataTables(ManagedPEBuilderContext context)
+        private void ProcessRvasInMetadataTables(ManagedPEBuilderContext context)
         {
             var dotNetSegment = context.DotNetSegment;
             var tablesStream = dotNetSegment.DotNetDirectory.Metadata?.GetStream<TablesStream>();
@@ -447,7 +472,7 @@ namespace AsmResolver.PE.DotNet.Builder
             AddFieldRvasToTable(context);
         }
 
-        private static void AddMethodBodiesToTable(MethodBodyTableBuffer table, TablesStream tablesStream)
+        private void AddMethodBodiesToTable(MethodBodyTableBuffer table, TablesStream tablesStream)
         {
             var methodTable = tablesStream.GetTable<MethodDefinitionRow>();
             for (int i = 0; i < methodTable.Count; i++)
@@ -472,7 +497,7 @@ namespace AsmResolver.PE.DotNet.Builder
             }
         }
 
-        private static ISegment? GetMethodBodySegment(MethodDefinitionRow methodRow)
+        private ISegment? GetMethodBodySegment(MethodDefinitionRow methodRow)
         {
             if (methodRow.Body.IsBounded)
                 return methodRow.Body.GetSegment();
@@ -485,13 +510,13 @@ namespace AsmResolver.PE.DotNet.Builder
                     return CilRawMethodBody.FromReader(ThrowErrorListener.Instance, ref reader);
                 }
 
-                throw new NotImplementedException("Native unbounded method bodies cannot be reassembled yet.");
+                ErrorListener.NotSupported("Native unbounded method bodies cannot be reassembled yet.");
             }
 
             return null;
         }
 
-        private static void AddFieldRvasToTable(ManagedPEBuilderContext context)
+        private void AddFieldRvasToTable(ManagedPEBuilderContext context)
         {
             var directory = context.DotNetSegment.DotNetDirectory;
             var fieldRvaTable = directory.Metadata!
@@ -504,18 +529,21 @@ namespace AsmResolver.PE.DotNet.Builder
             var table = context.DotNetSegment.FieldRvaTable;
             var reader = context.FieldRvaDataReader;
 
-            for (int i = 0; i < fieldRvaTable.Count; i++)
+            for (uint rid = 1; rid <= fieldRvaTable.Count; rid++)
             {
+                ref var row = ref fieldRvaTable.GetRowRef(rid);
                 var data = reader.ResolveFieldData(
-                    ThrowErrorListener.Instance,
+                    ErrorListener,
                     context.Platform,
                     directory,
-                    fieldRvaTable[i]);
+                    row
+                );
 
                 if (data is null)
                     continue;
 
                 table.Add(data);
+                row.Data = data.ToReference();
             }
         }
     }
