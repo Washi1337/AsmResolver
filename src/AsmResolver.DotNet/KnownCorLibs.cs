@@ -101,7 +101,7 @@ namespace AsmResolver.DotNet
             });
 
         /// <summary>
-        /// References System.Runtime.dll, Version=4.0.0.0, PublicKeyToken=B03F5F7F11D50A3A. This is used by .NET
+        /// References System.Runtime.dll, Version=4.0.10.0, PublicKeyToken=B03F5F7F11D50A3A. This is used by .NET
         /// assemblies targeting .NET standard 1.2.
         /// </summary>
         public static readonly AssemblyReference SystemRuntime_v4_0_10_0 = new("System.Runtime",
@@ -121,7 +121,7 @@ namespace AsmResolver.DotNet
             });
 
         /// <summary>
-        /// References System.Runtime.dll, Version=4.0.0.0, PublicKeyToken=B03F5F7F11D50A3A. This is used by .NET
+        /// References System.Runtime.dll, Version=4.1.0.0, PublicKeyToken=B03F5F7F11D50A3A. This is used by .NET
         /// assemblies targeting .NET standard 1.5, 1.6 and 1.7, and .NET Core 1.0 and 1.1.
         /// </summary>
         public static readonly AssemblyReference SystemRuntime_v4_1_0_0 = new("System.Runtime",
