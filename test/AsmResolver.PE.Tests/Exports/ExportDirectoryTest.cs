@@ -138,7 +138,7 @@ namespace AsmResolver.PE.Tests.Exports
             var newImage = RebuildAndReloadManagedPE(image);
 
             // Verify.
-            Assert.Equal(1, newImage.Exports!.Entries.Count);
+            Assert.Single(newImage.Exports!.Entries);
             var newExportedSymbol = newImage.Exports.Entries[0];
             Assert.Equal(exportedSymbol.Name, newExportedSymbol.Name);
             Assert.Equal(exportedSymbol.Ordinal, newExportedSymbol.Ordinal);
@@ -160,7 +160,7 @@ namespace AsmResolver.PE.Tests.Exports
             var newImage = RebuildAndReloadManagedPE(image);
 
             // Verify.
-            Assert.Equal(1, newImage.Exports!.Entries.Count);
+            Assert.Single(newImage.Exports!.Entries);
             var newExportedSymbol = newImage.Exports.Entries[0];
             Assert.True(exportedSymbol.IsByOrdinal);
             Assert.Equal(exportedSymbol.Ordinal, newExportedSymbol.Ordinal);

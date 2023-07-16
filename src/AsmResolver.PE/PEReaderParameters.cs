@@ -58,6 +58,10 @@ namespace AsmResolver.PE
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the object responsible for reading certificates (such as authenticode signatures) in the
+        /// security data directory of the input PE file.
+        /// </summary>
         public ICertificateReader CertificateReader
         {
             get;
