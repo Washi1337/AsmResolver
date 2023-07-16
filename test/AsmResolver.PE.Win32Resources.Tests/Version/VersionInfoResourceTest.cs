@@ -2,13 +2,24 @@ using System.Diagnostics;
 using System.IO;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Win32Resources.Builder;
 using AsmResolver.PE.Win32Resources.Version;
+using AsmResolver.Tests.Runners;
 using Xunit;
 
 namespace AsmResolver.PE.Win32Resources.Tests.Version
 {
-    public class VersionInfoSegmentTest
+    public class VersionInfoResourceTest : IClassFixture<TemporaryDirectoryFixture>
     {
+        private readonly TemporaryDirectoryFixture _fixture;
+
+        public VersionInfoResourceTest(TemporaryDirectoryFixture fixture)
+        {
+            _fixture = fixture;
+        }
+
         [Fact]
         public void ReadFixedVersion()
         {
@@ -192,5 +203,42 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             Assert.Equal(versionInfo.FixedVersionInfo.ProductVersion, newVersionInfo.FixedVersionInfo.ProductVersion);
         }
 
+        [Fact]
+        public void VersionInfoAlignment()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/202
+
+            // Open dummy
+            var file = PEFile.FromBytes(Properties.Resources.HelloWorld_PaddedVersionInfo);
+            var image = PEImage.FromFile(file);
+
+            // Update version info.
+            var versionInfo = VersionInfoResource.FromDirectory(image.Resources!)!;
+            var info = versionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);
+            info.Tables[0][StringTable.FileDescriptionKey] = "This is a test application";
+            versionInfo.WriteToDirectory(image.Resources!);
+
+            // Replace section.
+            var resourceBuffer = new ResourceDirectoryBuffer();
+            resourceBuffer.AddDirectory(image.Resources!);
+
+            var section = file.GetSectionContainingRva(file.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ResourceDirectory).VirtualAddress);
+            section.Contents = resourceBuffer;
+
+            file.UpdateHeaders();
+            file.OptionalHeader.SetDataDirectory(DataDirectoryIndex.ResourceDirectory,
+                new DataDirectory(resourceBuffer.Rva, resourceBuffer.GetPhysicalSize()));
+
+            // Rebuild
+            using var stream = new MemoryStream();
+            file.Write(stream);
+
+            // Reopen and verify.
+            var newImage = PEImage.FromBytes(stream.ToArray());
+            var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources!)!;
+            var newInfo = newVersionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);
+            Assert.Equal("This is a test application", newInfo.Tables[0][StringTable.FileDescriptionKey]);
+            Assert.Equal(versionInfo.Lcid, newVersionInfo.Lcid);
+        }
     }
 }

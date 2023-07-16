@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Serialized
         protected override IResolutionScope? GetScope()
         {
             if (_row.ResolutionScope == 0)
-                return _context.ParentModule;
+                return null;
 
             var tablesStream = _context.TablesStream;
             var decoder = tablesStream.GetIndexEncoder(CodedIndex.ResolutionScope);

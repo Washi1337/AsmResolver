@@ -78,4 +78,4 @@ While the Import Hash can be a good identifier for native PE images, for
 .NET images this is not the case. .NET images usually only import a
 single external symbol (either `mscoree.dll!_CorExeMain` or
 `mscoree.dll!_CorDllMain`), and as such they will almost always have the
-exact same Import Hash. See [TypeReference Hash (TRH)](/guides/peimage/dotnet.html#typereference-hash-trh) for an alternative for .NET images.
+exact same Import Hash. See [TypeReference Hash (TRH)](dotnet.md#typereference-hash-trh) for an alternative for .NET images.

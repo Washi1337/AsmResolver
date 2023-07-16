@@ -23,13 +23,9 @@ namespace AsmResolver.DotNet.Code.Native
         private readonly List<ExportedSymbol> _floatingExportedSymbols = new();
 
         /// <inheritdoc />
-        public ISymbol ImportSymbol(ISymbol symbol)
-        {
-            if (symbol is ImportedSymbol importedSymbol)
-                return GetImportedSymbol(importedSymbol);
-
-            throw new NotSupportedException($"Symbols of type {symbol.GetType()} are not supported.");
-        }
+        public ISymbol ImportSymbol(ISymbol symbol) => symbol is ImportedSymbol importedSymbol
+            ? GetImportedSymbol(importedSymbol)
+            : symbol;
 
         private ImportedSymbol GetImportedSymbol(ImportedSymbol symbol)
         {

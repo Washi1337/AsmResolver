@@ -29,15 +29,11 @@ The major version number refers to the file format that should be used
 when saving the manifest. Below an overview of the values that are
 recognized by the CLR:
 
-  ---------------------------------------------------
-  .NET Version Number    Bundle File Format Version
-  ---------------------- ----------------------------
-  .NET Core 3.1          1
-
-  .NET 5.0               2
-
-  .NET 6.0               6
-  ---------------------------------------------------
+| Minimum .NET Version Number | Bundle File Format Version  |
+|-----------------------------|-----------------------------|
+| .NET Core 3.1               | 1                           |
+| .NET 5.0                    | 2                           |
+| .NET 6.0                    | 6                           |
 
 To create a new bundle with a specific bundle identifier, use the
 overloaded constructor
@@ -108,8 +104,12 @@ var manifest = BundleManifest.FromDataSource(contents, bundleAddress);
 
 Constructing new bundled executable files requires a template file that
 AsmResolver can base the final output on. This is similar how .NET
-compilers themselves do this as well. By default, the .NET SDK installs
-template binaries in one of the following directories:
+compilers themselves do this as well.
+
+### Using the .NET SDK's template 
+
+By default, the .NET SDK installs template apphost binaries in one of the 
+following directories:
 
 -   `<DOTNET-INSTALLATION-PATH>/sdk/<version>/AppHostTemplate`
 -   `<DOTNET-INSTALLATION-PATH>/packs/Microsoft.NETCore.App.Host.<runtime-identifier>/<version>/runtimes/<runtime-identifier>/native`
@@ -150,6 +150,15 @@ manifest.WriteUsingTemplate(
         imagePathToCopyHeadersFrom: @"C:\Path\To\Original\HelloWorld.exe"));
 ```
 
+> [!NOTE]
+> `BundleManifest` and `BundlerParameters` also define overloads of the
+> `WriteUsingTemplate` and `FromTemplate` / `FromExistingBundle`
+> respectively, taking `byte[]`, `IDataSource` or `IPEImage` instances
+> instead of file paths.
+
+
+### Using an input binary as template
+
 If you do not have access to a template file (e.g., if the SDK is not
 installed) but have another existing PE file that was packaged in a
 similar fashion, it is then possible to use this file as a template
@@ -179,10 +188,6 @@ manifest.WriteUsingTemplate(
 > the input file to determine the parameters for patching the input file.
 > As heuristics are not perfect, this is not guaranteed to always work.
 
-`BundleManifest` and `BundlerParameters` also define overloads of the
-`WriteUsingTemplate` and `FromTemplate` / `FromExistingBundle`
-respectively, taking `byte[]`, `IDataSource` or `IPEImage` instances
-instead of file paths.
 
 ## Managing Files
 

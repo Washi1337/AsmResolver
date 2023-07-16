@@ -4,7 +4,7 @@
       - master
 
   image: Visual Studio 2022
-  version: 5.3.0-master-build.{build}
+  version: 5.4.0-master-build.{build}
   configuration: Release
 
   skip_commits:
@@ -23,7 +23,7 @@
   deploy:
     provider: NuGet
     api_key:
-      secure: L3fXsS7umzD8zwAvTsdGxOg/E6tQ4IR4MfwBAcO8elE7ZwjZ8HO8UPwjiWbp4RMw
+      secure: orcP0C1iuBVKxnv/uAUehgU1KEI/lCpbSxDqbckd3sZ7XxcuENj6PrExs6SdJIf1
     skip_symbols: false
     artifact: /.*\.nupkg/
 
@@ -33,7 +33,7 @@
       - development
 
   image: Visual Studio 2022
-  version: 5.3.0-dev-build.{build}
+  version: 5.4.0-dev-build.{build}
   configuration: Release
 
   skip_commits:

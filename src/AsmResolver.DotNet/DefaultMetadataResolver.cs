@@ -166,8 +166,11 @@ namespace AsmResolver.DotNet
 
             public TypeDefinition? ResolveTypeReference(TypeReference? reference)
             {
-                var scope = reference?.Scope;
-                if (reference?.Name is null || scope is null || _scopeStack.Contains(scope))
+                if (reference is null)
+                    return null;
+
+                var scope = reference.Scope ?? reference.Module;
+                if (reference.Name is null || scope is null || _scopeStack.Contains(scope))
                     return null;
                 _scopeStack.Push(scope);
 
@@ -241,18 +244,18 @@ namespace AsmResolver.DotNet
 
             private TypeDefinition? FindTypeInModule(ModuleDefinition module, Utf8String? ns, Utf8String name)
             {
-                for (int i = 0; i < module.ExportedTypes.Count; i++)
-                {
-                    var exportedType = module.ExportedTypes[i];
-                    if (exportedType.IsTypeOfUtf8(ns, name))
-                        return ResolveExportedType(exportedType);
-                }
-
                 for (int i = 0; i < module.TopLevelTypes.Count; i++)
                 {
                     var type = module.TopLevelTypes[i];
                     if (type.IsTypeOfUtf8(ns, name))
                         return type;
+                }
+
+                for (int i = 0; i < module.ExportedTypes.Count; i++)
+                {
+                    var exportedType = module.ExportedTypes[i];
+                    if (exportedType.IsTypeOfUtf8(ns, name))
+                        return ResolveExportedType(exportedType);
                 }
 
                 return null;

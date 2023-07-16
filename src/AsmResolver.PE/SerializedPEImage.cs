@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.PE.Certificates;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exceptions;
@@ -145,6 +146,47 @@ namespace AsmResolver.PE
                 return null;
 
             return new SerializedTlsDirectory(ReaderContext, ref reader);
+        }
+
+        /// <inheritdoc />
+        protected override CertificateCollection GetCertificates()
+        {
+            var result = new CertificateCollection();
+
+            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.CertificateDirectory);
+            if (!dataDirectory.IsPresentInPE)
+                return result;
+
+            // Certificate directory interprets the VirtualAddress of the data directory as a file offset as opposed to
+            // an RVA. Hence, we cannot use the normal TryCreateDataDirectoryReader method.
+            if (!PEFile.TryCreateReaderAtFileOffset(dataDirectory.VirtualAddress, dataDirectory.Size, out var reader))
+                return result;
+
+            result.UpdateOffsets(new RelocationParameters(dataDirectory.VirtualAddress, dataDirectory.VirtualAddress));
+
+            var certificateReader = ReaderContext.Parameters.CertificateReader;
+
+            while (reader.CanRead(AttributeCertificate.HeaderSize))
+            {
+                // Read header.
+                uint length = reader.ReadUInt32();
+                var revision = (CertificateRevision) reader.ReadUInt16();
+                var type = (CertificateType) reader.ReadUInt16();
+
+                // Bound contents reader to just the contents as indicated by the header.
+                var contentsReader = reader.ForkRelative(
+                    AttributeCertificate.HeaderSize,
+                    length - AttributeCertificate.HeaderSize);
+
+                // Read it.
+                result.Add(certificateReader.ReadCertificate(ReaderContext, revision, type, contentsReader));
+
+                // Advance to next certificate in the table.
+                reader.RelativeOffset += length - AttributeCertificate.HeaderSize;
+                reader.Align(8);
+            }
+
+            return result;
         }
     }
 }

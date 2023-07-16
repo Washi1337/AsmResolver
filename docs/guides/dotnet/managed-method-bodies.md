@@ -290,7 +290,7 @@ body.Instructions[i].ReplaceWith(CilOpCodes.Ldc_I4, 1234);
 ```
 
 Since it is very common to replace instructions with a
-[nop]{.title-ref}, AsmResolver also defines a special `ReplaceWithNop`
+`nop`, AsmResolver also defines a special `ReplaceWithNop`
 helper function:
 
 ``` csharp

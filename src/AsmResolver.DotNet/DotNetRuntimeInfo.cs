@@ -69,6 +69,16 @@ namespace AsmResolver.DotNet
         public bool IsNetStandard => Name == NetStandard;
 
         /// <summary>
+        /// Parses the framework name as provided in <see cref="TargetFrameworkAttribute"/>.
+        /// </summary>
+        /// <param name="frameworkName">The full runtime name.</param>
+        /// <returns>The parsed version info.</returns>
+        public static DotNetRuntimeInfo Parse(string frameworkName)
+        {
+            return TryParse(frameworkName, out var info) ? info : throw new FormatException();
+        }
+
+        /// <summary>
         /// Attempts to parse the framework name as provided in <see cref="TargetFrameworkAttribute"/>.
         /// </summary>
         /// <param name="frameworkName">The full runtime name.</param>
@@ -88,6 +98,13 @@ namespace AsmResolver.DotNet
             info = new DotNetRuntimeInfo(name, version);
             return true;
         }
+
+        /// <summary>
+        /// Obtains a reference to the default core lib reference of this runtime.
+        /// </summary>
+        /// <returns>The reference to the default core lib.</returns>
+        /// <exception cref="ArgumentException">The runtime information is invalid or unsupported.</exception>
+        public AssemblyReference GetDefaultCorLib() => KnownCorLibs.FromRuntimeInfo(this);
 
         /// <inheritdoc />
         public override string ToString() => $"{Name},Version=v{Version}";

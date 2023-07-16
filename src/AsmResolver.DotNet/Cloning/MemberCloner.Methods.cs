@@ -57,8 +57,8 @@ namespace AsmResolver.DotNet.Cloning
             {
                 DeepCopyMethod(context, method);
                 var clonedMember = (MethodDefinition)context.ClonedMembers[method];
-                _clonerListener.OnClonedMember(method, clonedMember);
-                _clonerListener.OnClonedMethod(method, clonedMember);
+                _listeners.OnClonedMember(method, clonedMember);
+                _listeners.OnClonedMethod(method, clonedMember);
             }
         }
 

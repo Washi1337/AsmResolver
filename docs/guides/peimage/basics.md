@@ -17,8 +17,8 @@ var peImage = new PEImage();
 
 ## Opening a PE image
 
-Opening an image can be done through one of the [FromXXX]{.title-ref}
-methods from the `PEImage` class:
+Opening an image can be done through one of the `FromXXX` methods from the
+`PEImage` class:
 
 ``` csharp
 byte[] raw = ...

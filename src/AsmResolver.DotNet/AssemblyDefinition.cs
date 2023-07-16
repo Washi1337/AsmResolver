@@ -245,7 +245,7 @@ namespace AsmResolver.DotNet
 
                 if (ctor?.DeclaringType is not null
                     && ctor.DeclaringType.IsTypeOf("System.Runtime.Versioning", nameof(TargetFrameworkAttribute))
-                    && CustomAttributes[i].Signature?.FixedArguments[0].Element is string name
+                    && CustomAttributes[i].Signature?.FixedArguments[0].Element?.ToString() is { } name
                     && DotNetRuntimeInfo.TryParse(name, out info))
                 {
                     return true;

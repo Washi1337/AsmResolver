@@ -73,6 +73,53 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         public const string SpecialBuildKey = "SpecialBuild";
 
+        private readonly Dictionary<string, string> _entries = new();
+
+        /// <summary>
+        /// Creates a new string table.
+        /// </summary>
+        /// <param name="languageIdentifier">The language identifier.</param>
+        /// <param name="codePage">The code page.</param>
+        public StringTable(ushort languageIdentifier, ushort codePage)
+        {
+            LanguageIdentifier = languageIdentifier;
+            CodePage = codePage;
+        }
+
+        /// <inheritdoc />
+        public override string Key => $"{LanguageIdentifier:x4}{CodePage:x4}";
+
+        /// <summary>
+        /// Gets or sets the language identifier of this string table.
+        /// </summary>
+        public ushort LanguageIdentifier
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the code page of this string table.
+        /// </summary>
+        public ushort CodePage
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        protected override VersionTableValueType ValueType => VersionTableValueType.Binary;
+
+        /// <summary>
+        /// Gets or sets the value of a single field in the string table.
+        /// </summary>
+        /// <param name="key">The name of the field in the string table.</param>
+        public string this[string key]
+        {
+            get => _entries[key];
+            set => _entries[key] = value;
+        }
+
         /// <summary>
         /// Reads a single StringTable structure from the provided input stream.
         /// </summary>
@@ -120,53 +167,6 @@ namespace AsmResolver.PE.Win32Resources.Version
             reader.Offset = start + header.Length;
 
             return new KeyValuePair<string, string>(header.Key, value);
-        }
-
-        private readonly Dictionary<string, string> _entries = new Dictionary<string, string>();
-
-        /// <summary>
-        /// Creates a new string table.
-        /// </summary>
-        /// <param name="languageIdentifier">The language identifier.</param>
-        /// <param name="codePage">The code page.</param>
-        public StringTable(ushort languageIdentifier, ushort codePage)
-        {
-            LanguageIdentifier = languageIdentifier;
-            CodePage = codePage;
-        }
-
-        /// <inheritdoc />
-        public override string Key => $"{LanguageIdentifier:X4}{CodePage:X4}";
-
-        /// <summary>
-        /// Gets or sets the language identifier of this string table.
-        /// </summary>
-        public ushort LanguageIdentifier
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the code page of this string table.
-        /// </summary>
-        public ushort CodePage
-        {
-            get;
-            set;
-        }
-
-        /// <inheritdoc />
-        protected override VersionTableValueType ValueType => VersionTableValueType.Binary;
-
-        /// <summary>
-        /// Gets or sets the value of a single field in the string table.
-        /// </summary>
-        /// <param name="key">The name of the field in the string table.</param>
-        public string this[string key]
-        {
-            get => _entries[key];
-            set => _entries[key] = value;
         }
 
         /// <summary>

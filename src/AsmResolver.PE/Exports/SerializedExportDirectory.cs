@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.IO;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Exports
 {
@@ -10,6 +11,7 @@ namespace AsmResolver.PE.Exports
     public class SerializedExportDirectory : ExportDirectory
     {
         private readonly PEReaderContext _context;
+        private readonly DataDirectory _dataDirectory;
         private readonly uint _nameRva;
         private readonly uint _numberOfFunctions;
         private readonly uint _numberOfNames;
@@ -27,6 +29,7 @@ namespace AsmResolver.PE.Exports
             if (!reader.IsValid)
                 throw new ArgumentNullException(nameof(reader));
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _dataDirectory = new DataDirectory(reader.StartRva, reader.Length);
 
             ExportFlags = reader.ReadUInt32();
             TimeDateStamp = reader.ReadUInt32();
@@ -87,7 +90,15 @@ namespace AsmResolver.PE.Exports
                 string? name = null;
                 ordinalNameTable?.TryGetValue(i, out name);
 
-                result.Add(new ExportedSymbol(_context.File.GetReferenceToRva(rva), name));
+                string? forwarderName = null;
+                if (rva >= _dataDirectory.VirtualAddress
+                    && rva < _dataDirectory.VirtualAddress + _dataDirectory.Size
+                    && _context.File.TryCreateReaderAtRva(rva, out var forwarderReader))
+                {
+                    forwarderName = forwarderReader.ReadAsciiString();
+                }
+
+                result.Add(new ExportedSymbol(_context.File.GetReferenceToRva(rva), name, forwarderName));
             }
 
             return result;

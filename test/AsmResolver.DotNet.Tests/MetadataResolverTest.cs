@@ -4,6 +4,7 @@ using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -52,6 +53,7 @@ namespace AsmResolver.DotNet.Tests
             var reference = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Object");
             var definition = _coreResolver.ResolveType(reference);
 
+            Assert.NotNull(definition);
             Assert.True(definition.IsTypeOf(reference.Namespace, reference.Name));
         }
 
@@ -69,8 +71,8 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
 
-            var topLevelClass1 = new TypeReference(new AssemblyReference(module.Assembly),
-                typeof(TopLevelClass1).Namespace, typeof(TopLevelClass1).Name);
+            var topLevelClass1 = new TypeReference(new AssemblyReference(module.Assembly!),
+                typeof(TopLevelClass1).Namespace, nameof(TopLevelClass1));
 
             var definition = _coreResolver.ResolveType(topLevelClass1);
             Assert.Equal((ITypeDefOrRef) topLevelClass1, definition, _comparer);
@@ -104,7 +106,7 @@ namespace AsmResolver.DotNet.Tests
 
             ITypeDefOrRef expected = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Object");
             var reference = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Object");
-            var definition = _fwResolver.ResolveType(reference);
+            var definition = _fwResolver.ResolveType(reference)!;
             Assert.Equal(expected, definition, _comparer);
             definition.Name = "String";
             Assert.NotEqual(expected, _fwResolver.ResolveType(reference), _comparer);
@@ -115,9 +117,9 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
 
-            var topLevelClass1 = new TypeReference(new AssemblyReference(module.Assembly),
-                typeof(TopLevelClass1).Namespace, typeof(TopLevelClass1).Name);
-            var nested1 = new TypeReference(topLevelClass1,null, typeof(TopLevelClass1.Nested1).Name);
+            var topLevelClass1 = new TypeReference(new AssemblyReference(module.Assembly!),
+                typeof(TopLevelClass1).Namespace, nameof(TopLevelClass1));
+            var nested1 = new TypeReference(topLevelClass1,null, nameof(TopLevelClass1.Nested1));
 
             var definition = _coreResolver.ResolveType(nested1);
 
@@ -129,14 +131,50 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
 
-            var topLevelClass1 = new TypeReference(new AssemblyReference(module.Assembly),
-                typeof(TopLevelClass1).Namespace, typeof(TopLevelClass1).Name);
-            var nested1 = new TypeReference(topLevelClass1,null, typeof(TopLevelClass1.Nested1).Name);
-            var nested1nested1 = new TypeReference(nested1,null, typeof(TopLevelClass1.Nested1.Nested1Nested1).Name);
+            var topLevelClass1 = new TypeReference(new AssemblyReference(module.Assembly!),
+                typeof(TopLevelClass1).Namespace, nameof(TopLevelClass1));
+            var nested1 = new TypeReference(topLevelClass1,null, nameof(TopLevelClass1.Nested1));
+            var nested1nested1 = new TypeReference(nested1,null, nameof(TopLevelClass1.Nested1.Nested1Nested1));
 
             var definition = _fwResolver.ResolveType(nested1nested1);
 
             Assert.Equal((ITypeDefOrRef) nested1nested1, definition, _comparer);
+        }
+
+        [Fact]
+        public void ResolveTypeWithModuleScope()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefModuleScope);
+            var reference = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 2));
+
+            var definition = reference.Resolve();
+
+            Assert.NotNull(definition);
+            Assert.Same(module, definition.Module);
+        }
+
+        [Fact]
+        public void ResolveTypeWithNullScopeCurrentModule()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_CurrentModule);
+            var reference = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 2));
+
+            var definition = reference.Resolve();
+
+            Assert.NotNull(definition);
+            Assert.Same(module, definition.Module);
+        }
+
+        [Fact]
+        public void ResolveTypeWithNullScopeExportedType()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_ExportedType);
+            var reference = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 1));
+
+            var definition = reference.Resolve();
+
+            Assert.NotNull(definition);
+            Assert.Equal("mscorlib", definition.Module!.Assembly!.Name);
         }
 
         [Fact]
@@ -187,13 +225,13 @@ namespace AsmResolver.DotNet.Tests
             var resolver = (AssemblyResolverBase) module.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly1, assembly1);
             resolver.AddToCache(assembly2, assembly2);
-            resolver = (AssemblyResolverBase) assembly1.ManifestModule.MetadataResolver.AssemblyResolver;
+            resolver = (AssemblyResolverBase) assembly1.ManifestModule!.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly1, assembly1);
             resolver.AddToCache(assembly2, assembly2);
 
             // Resolve
-            var instructions = module.ManagedEntryPointMethod.CilMethodBody.Instructions;
-            Assert.NotNull(((IMethodDescriptor) instructions[0].Operand).Resolve());
+            var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
+            Assert.NotNull(((IMethodDescriptor) instructions[0].Operand!).Resolve());
         }
 
         [Fact]
@@ -208,10 +246,10 @@ namespace AsmResolver.DotNet.Tests
             var resolver = (AssemblyResolverBase) module.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly1, assembly1);
             resolver.AddToCache(assembly2, assembly2);
-            resolver = (AssemblyResolverBase) assembly1.ManifestModule.MetadataResolver.AssemblyResolver;
+            resolver = (AssemblyResolverBase) assembly1.ManifestModule!.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly1, assembly1);
             resolver.AddToCache(assembly2, assembly2);
-            resolver = (AssemblyResolverBase) assembly2.ManifestModule.MetadataResolver.AssemblyResolver;
+            resolver = (AssemblyResolverBase) assembly2.ManifestModule!.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly1, assembly1);
             resolver.AddToCache(assembly2, assembly2);
 

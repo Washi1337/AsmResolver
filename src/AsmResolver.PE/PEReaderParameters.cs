@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.IO;
+using AsmResolver.PE.Certificates;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet.Metadata;
 
@@ -26,6 +27,7 @@ namespace AsmResolver.PE
         {
             MetadataStreamReader = new DefaultMetadataStreamReader();
             DebugDataReader = new DefaultDebugDataReader();
+            CertificateReader = new DefaultCertificateReader();
             ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
         }
 
@@ -51,6 +53,16 @@ namespace AsmResolver.PE
         /// Gets or sets the object responsible for reading debug data streams in the debug data directory.
         /// </summary>
         public IDebugDataReader DebugDataReader
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the object responsible for reading certificates (such as authenticode signatures) in the
+        /// security data directory of the input PE file.
+        /// </summary>
+        public ICertificateReader CertificateReader
         {
             get;
             set;

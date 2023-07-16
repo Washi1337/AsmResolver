@@ -282,8 +282,9 @@ namespace AsmResolver.PE.File
         /// <inheritdoc />
         public BinaryStreamReader CreateReaderAtFileOffset(uint fileOffset)
         {
-            var section = GetSectionContainingOffset(fileOffset);
-            return section.CreateReader(fileOffset);
+            return !TryCreateReaderAtFileOffset(fileOffset, out var reader)
+                ? throw new ArgumentOutOfRangeException(nameof(fileOffset))
+                : reader;
         }
 
         /// <inheritdoc />
@@ -292,6 +293,14 @@ namespace AsmResolver.PE.File
             if (TryGetSectionContainingOffset(fileOffset, out var section))
             {
                 reader = section.CreateReader(fileOffset);
+                return true;
+            }
+
+            if (EofData is IReadableSegment eofData
+                && fileOffset >= eofData.Offset
+                && fileOffset < eofData.Offset + eofData.GetPhysicalSize())
+            {
+                reader = eofData.CreateReader(fileOffset);
                 return true;
             }
 
@@ -312,6 +321,14 @@ namespace AsmResolver.PE.File
             if (TryGetSectionContainingOffset(fileOffset, out var section))
             {
                 reader = section.CreateReader(fileOffset, size);
+                return true;
+            }
+
+            if (EofData is IReadableSegment eofData
+                && fileOffset >= eofData.Offset
+                && fileOffset < eofData.Offset + eofData.GetPhysicalSize())
+            {
+                reader = eofData.CreateReader(fileOffset, size);
                 return true;
             }
 
@@ -389,33 +406,41 @@ namespace AsmResolver.PE.File
         /// </remarks>
         public void UpdateHeaders()
         {
-            var oldSections = Sections.Select(x => x.CreateHeader()).ToList();
-
-            FileHeader.NumberOfSections = (ushort) Sections.Count;
-
             var relocation = new RelocationParameters(OptionalHeader.ImageBase, 0, 0,
                 OptionalHeader.Magic == OptionalHeaderMagic.PE32);
 
-            FileHeader.UpdateOffsets(relocation.WithOffsetRva(
-                DosHeader.NextHeaderOffset + 4,
-                DosHeader.NextHeaderOffset + 4));
-            OptionalHeader.UpdateOffsets(relocation.WithOffsetRva(
-                FileHeader.Offset + FileHeader.GetPhysicalSize(),
-                FileHeader.Rva + FileHeader.GetVirtualSize()));
+            // Update offsets of PE headers.
+            FileHeader.UpdateOffsets(
+                relocation.WithAdvance(DosHeader.NextHeaderOffset + sizeof(uint))
+            );
+            OptionalHeader.UpdateOffsets(
+                relocation.WithAdvance((uint) FileHeader.Offset + FileHeader.GetPhysicalSize())
+            );
 
+            // Sync file header fields with actual observed values.
+            FileHeader.NumberOfSections = (ushort) Sections.Count;
             FileHeader.SizeOfOptionalHeader = (ushort) OptionalHeader.GetPhysicalSize();
-            OptionalHeader.SizeOfHeaders = (uint) (OptionalHeader.Offset
-                                                   + FileHeader.SizeOfOptionalHeader
-                                                   + SectionHeader.SectionHeaderSize * (uint) Sections.Count)
-                .Align(OptionalHeader.FileAlignment);
 
+            // Compute headers size, and update offsets of extra data.
+            uint peHeadersSize = (uint) OptionalHeader.Offset
+                + FileHeader.SizeOfOptionalHeader
+                + SectionHeader.SectionHeaderSize * (uint) Sections.Count;
+            ExtraSectionData?.UpdateOffsets(relocation.WithAdvance(peHeadersSize));
+
+            uint totalHeadersSize = peHeadersSize + (ExtraSectionData?.GetPhysicalSize() ?? 0);
+            OptionalHeader.SizeOfHeaders = totalHeadersSize.Align(OptionalHeader.FileAlignment);
+
+            // Re-align sections and directories.
+            var oldSections = Sections.Select(x => x.CreateHeader()).ToList();
             AlignSections();
-            AlignDataDirectoryEntries(oldSections);
+            AlignDataDirectoryEntries(oldSections);;
 
+            // Determine full size of image.
             var lastSection = Sections[Sections.Count - 1];
             OptionalHeader.SizeOfImage = lastSection.Rva
-                                         + lastSection.GetVirtualSize().Align(OptionalHeader.SectionAlignment);
+                + lastSection.GetVirtualSize().Align(OptionalHeader.SectionAlignment);
 
+            // Update EOF data offsets.
             EofData?.UpdateOffsets(relocation.WithOffsetRva(
                 lastSection.Offset + lastSection.GetPhysicalSize(),
                 OptionalHeader.SizeOfImage));

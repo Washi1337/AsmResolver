@@ -76,7 +76,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
             return clonedMethod;
         }
 
-        private static FieldDefinition CloneIntializerField(FieldInfo field, out FieldDefinition originalFieldDef)
+        private static FieldDefinition CloneInitializerField(FieldInfo field, out FieldDefinition originalFieldDef)
         {
             var sourceModule = ModuleDefinition.FromFile(field.Module.Assembly.Location);
             originalFieldDef = (FieldDefinition) sourceModule.LookupMember(field.MetadataToken);
@@ -279,10 +279,10 @@ namespace AsmResolver.DotNet.Tests.Cloning
         public void CloneFieldRva()
         {
             var clonedInitializerField =
-                CloneIntializerField(typeof(InitialValues).GetField(nameof(InitialValues.ByteArray)), out var field);
+                CloneInitializerField(typeof(InitialValues).GetField(nameof(InitialValues.ByteArray)), out var field);
 
-            var originalData = ((IReadableSegment) field.FieldRva).ToArray();
-            var newData = ((IReadableSegment) clonedInitializerField.FieldRva).ToArray();
+            var originalData = ((IReadableSegment) field.FieldRva!).ToArray();
+            var newData = ((IReadableSegment) clonedInitializerField.FieldRva!).ToArray();
 
             Assert.Equal(originalData, newData);
         }
@@ -391,5 +391,22 @@ namespace AsmResolver.DotNet.Tests.Cloning
             Assert.All(result.ClonedTopLevelTypes, t => Assert.Contains(t, targetModule.TopLevelTypes));
         }
 
+        [Fact]
+        public void CloneAndInjectAndAssignToken()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var targetModule = PrepareTempModule();
+
+            var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
+
+            var result = new MemberCloner(targetModule)
+                .Include(type)
+                .AddListener(new InjectTypeClonerListener(targetModule))
+                .AddListener(new AssignTokensClonerListener(targetModule))
+                .Clone();
+
+            Assert.All(result.ClonedTopLevelTypes, t => Assert.Contains(t, targetModule.TopLevelTypes));
+            Assert.All(result.ClonedMembers, m => Assert.NotEqual(0u, ((IMetadataMember) m).MetadataToken.Rid));
+        }
     }
 }

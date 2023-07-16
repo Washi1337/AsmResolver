@@ -140,7 +140,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Empty(attribute.Signature.NamedArguments);
 
             var argument = attribute.Signature.FixedArguments[0];
-            Assert.Equal("String fixed arg", argument.Element);
+            Assert.Equal("String fixed arg",  Assert.IsAssignableFrom<Utf8String>(argument.Element));
         }
 
         [Theory]
@@ -232,7 +232,7 @@ namespace AsmResolver.DotNet.Tests
 
             var argument = attribute.Signature.NamedArguments[0];
             Assert.Equal(nameof(TestCaseAttribute.StringValue), argument.MemberName);
-            Assert.Equal("String named arg", argument.Argument.Element);
+            Assert.Equal("String named arg", Assert.IsAssignableFrom<Utf8String>(argument.Argument.Element));
         }
 
         [Theory]

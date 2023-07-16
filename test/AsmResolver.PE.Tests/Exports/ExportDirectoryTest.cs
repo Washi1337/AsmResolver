@@ -4,12 +4,23 @@ using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.Exports;
+using AsmResolver.PE.Exports.Builder;
+using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
+using AsmResolver.Tests.Runners;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.Exports
 {
-    public class ExportDirectoryTest
+    public class ExportDirectoryTest : IClassFixture<TemporaryDirectoryFixture>
     {
+        private readonly TemporaryDirectoryFixture _fixture;
+
+        public ExportDirectoryTest(TemporaryDirectoryFixture fixture)
+        {
+            _fixture = fixture;
+        }
+
         [Fact]
         public void ReadName()
         {
@@ -127,7 +138,7 @@ namespace AsmResolver.PE.Tests.Exports
             var newImage = RebuildAndReloadManagedPE(image);
 
             // Verify.
-            Assert.Equal(1, newImage.Exports!.Entries.Count);
+            Assert.Single(newImage.Exports!.Entries);
             var newExportedSymbol = newImage.Exports.Entries[0];
             Assert.Equal(exportedSymbol.Name, newExportedSymbol.Name);
             Assert.Equal(exportedSymbol.Ordinal, newExportedSymbol.Ordinal);
@@ -149,7 +160,7 @@ namespace AsmResolver.PE.Tests.Exports
             var newImage = RebuildAndReloadManagedPE(image);
 
             // Verify.
-            Assert.Equal(1, newImage.Exports!.Entries.Count);
+            Assert.Single(newImage.Exports!.Entries);
             var newExportedSymbol = newImage.Exports.Entries[0];
             Assert.True(exportedSymbol.IsByOrdinal);
             Assert.Equal(exportedSymbol.Ordinal, newExportedSymbol.Ordinal);
@@ -206,6 +217,72 @@ namespace AsmResolver.PE.Tests.Exports
             Assert.True(newSymbol.IsByOrdinal);
             Assert.Equal(unnamedSymbol3.Ordinal, newSymbol.Ordinal);
             Assert.Equal(unnamedSymbol3.Address.Rva, newSymbol.Address.Rva);
+        }
+
+        [Fact]
+        public void ReadForwarderSymbol()
+        {
+            var exports = PEImage.FromBytes(Properties.Resources.ForwarderDlls_ProxyDll).Exports!;
+
+            var bar = exports.Entries.First(x => x.Name == "Bar");
+            var baz = exports.Entries.First(x => x.Name == "Baz");
+
+            Assert.True(bar.IsForwarder);
+            Assert.Equal("ActualDll.Foo", bar.ForwarderName);
+            Assert.False(baz.IsForwarder);
+        }
+
+        [Fact]
+        public void RebuildForwarderSymbol()
+        {
+            var file = PEFile.FromBytes(Properties.Resources.ForwarderDlls_ProxyDll);
+
+            // Update a forwarder name.
+            var exports = PEImage.FromFile(file).Exports!;
+            var bar = exports.Entries.First(x => x.Name == "Bar");
+            bar.ForwarderName = "ActualDll.Bar";
+
+            // Rebuild export directory.
+            var buffer = new ExportDirectoryBuffer();
+            buffer.AddDirectory(exports);
+
+            var section = new PESection(
+                ".export",
+                SectionFlags.MemoryRead | SectionFlags.ContentInitializedData,
+                buffer);
+
+            // Rebuild.
+            file.Sections.Add(section);
+            file.UpdateHeaders();
+            file.OptionalHeader.SetDataDirectory(
+                DataDirectoryIndex.ExportDirectory,
+                new DataDirectory(section.Rva, section.GetPhysicalSize()));
+
+            using var stream = new MemoryStream();
+            file.Write(stream);
+
+            // Verify new forwarder symbol is present.
+            var newExports = PEImage.FromBytes(stream.ToArray()).Exports!;
+            var newBar = newExports.Entries.First(x => x.Name == "Bar");
+            Assert.Equal("ActualDll.Bar", newBar.ForwarderName);
+
+            // Try running it.
+            var runner = _fixture.GetRunner<NativePERunner>();
+            string basePath = runner.GetTestDirectory(nameof(ExportDirectoryTest), nameof(RebuildForwarderSymbol));
+            string exePath = Path.Combine(basePath, "ForwarderTest.exe");
+
+            System.IO.File.WriteAllBytes(
+                Path.Combine(basePath, "ActualDll.dll"),
+                Properties.Resources.ForwarderDlls_ActualDll);
+            System.IO.File.WriteAllBytes(
+                exePath,
+                Properties.Resources.ForwarderDlls_ForwarderTest);
+            System.IO.File.WriteAllBytes(
+                Path.Combine(basePath, "ProxyDll.dll"),
+                stream.ToArray());
+
+            string output = runner.RunAndCaptureOutput(exePath);
+            Assert.Equal("ActualDLL::Bar\r\nProxyDll::Baz\r\nHello World!\r\n", output);
         }
     }
 }

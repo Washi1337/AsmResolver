@@ -387,5 +387,26 @@ namespace AsmResolver.DotNet.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] TypeRefModuleScope {
+            get {
+                object obj = ResourceManager.GetObject("TypeRefModuleScope", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] TypeRefNullScope_CurrentModule {
+            get {
+                object obj = ResourceManager.GetObject("TypeRefNullScope_CurrentModule", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] TypeRefNullScope_ExportedType {
+            get {
+                object obj = ResourceManager.GetObject("TypeRefNullScope_ExportedType", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

@@ -4,8 +4,7 @@ Dynamically linked libraries (DLLs) often expose symbols through
 defining exports in the exports directory.
 
 The `IPEImage` interface exposes the `Exports` property, exposing a
-mutable instance of [ExportDirectory]{.title-ref}, which defines the
-following properties:
+mutable instance of `ExportDirectory`, which defines the following properties:
 
 -   `Name`: The name of the dynamically linked library.
 -   `BaseOrdinal`: The base ordinal of all exported symbols.

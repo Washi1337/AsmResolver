@@ -1,4 +1,6 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Exports
@@ -27,6 +29,19 @@ namespace AsmResolver.PE.Exports
         {
             Name = name;
             Address = address;
+        }
+
+        /// <summary>
+        /// Creates a new forwarder symbol that is exported by name.
+        /// </summary>
+        /// <param name="address">The reference to the segment representing the symbol.</param>
+        /// <param name="name">The name of the symbol.</param>
+        /// <param name="forwarderName">The name of the forwarded symbol.</param>
+        public ExportedSymbol(ISegmentReference address, string? name, string? forwarderName)
+        {
+            Name = name;
+            Address = address;
+            ForwarderName = forwarderName;
         }
 
         /// <summary>
@@ -82,6 +97,7 @@ namespace AsmResolver.PE.Exports
         /// <remarks>
         /// For exported functions, this reference points to the first instruction that is executed.
         /// For exported fields, this reference points to the first byte of data that this field consists of.
+        /// For forwarded symbols, this reference points to the name of the symbol the forwarder is referencing.
         /// </remarks>
         public ISegmentReference Address
         {
@@ -89,14 +105,46 @@ namespace AsmResolver.PE.Exports
             set;
         }
 
-        /// <inheritdoc />
-        public override string ToString()
+        /// <summary>
+        /// When the symbol is a forwarder symbol, gets or sets the full name of the symbol that this export is forwarded to.
+        /// </summary>
+        /// <remarks>
+        /// For exports by name, this name should be in the format <c>ModuleName.ExportName</c>.
+        /// For exports by ordinal, this name should be in the format <c>ModuleName.#1</c>.
+        /// Failure in doing so will make the Windows PE loader not able to resolve the forwarder symbol.
+        /// </remarks>
+        public string? ForwarderName
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the symbol is forwarded to another external symbol.
+        /// </summary>
+        [MemberNotNullWhen(true, nameof(ForwarderName))]
+        public bool IsForwarder => ForwarderName is not null;
+
+        /// <summary>
+        /// Obtains a name that can be used as a <see cref="ForwarderName"/> in another export.
+        /// </summary>
+        /// <returns>The name.</returns>
+        public string FormatNameAsForwarderSymbol() => FormatFullName('.');
+
+        private string FormatFullName(char separator)
         {
             string displayName = Name ?? $"#{Ordinal.ToString()}";
-            return ParentDirectory is null
-                ? displayName
-                : $"{ParentDirectory.Name}!{displayName}";
+            if (ParentDirectory is not {Name: { } parentName})
+                return displayName;
+
+            if (string.Equals(Path.GetExtension(parentName), ".dll", StringComparison.OrdinalIgnoreCase))
+                parentName = Path.GetFileNameWithoutExtension(parentName);
+
+            return $"{parentName}{separator}{displayName}";
         }
+
+        /// <inheritdoc />
+        public override string ToString() => FormatFullName('!');
 
         /// <inheritdoc />
         public ISegmentReference GetReference() => Address;

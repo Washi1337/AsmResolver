@@ -157,6 +157,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_Signed {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_Signed", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] HelloWorldPortablePdb {
             get {
                 object obj = ResourceManager.GetObject("HelloWorldPortablePdb", resourceCulture);
@@ -237,6 +244,34 @@ namespace AsmResolver.PE.Tests.Properties {
         public static byte[] LargeIndicesPdb {
             get {
                 object obj = ResourceManager.GetObject("LargeIndicesPdb", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] ForwarderDlls_ActualDll {
+            get {
+                object obj = ResourceManager.GetObject("ForwarderDlls_ActualDll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] ForwarderDlls_ProxyDll {
+            get {
+                object obj = ResourceManager.GetObject("ForwarderDlls_ProxyDll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] ForwarderDlls_ForwarderTest {
+            get {
+                object obj = ResourceManager.GetObject("ForwarderDlls_ForwarderTest", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] FieldRvaTest {
+            get {
+                object obj = ResourceManager.GetObject("FieldRvaTest", resourceCulture);
                 return ((byte[])(obj));
             }
         }

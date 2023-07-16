@@ -64,7 +64,7 @@ Some sections (such as `.data` or `.bss`) contain uninitialized data,
 and might be resized in virtual memory at runtime. As such, the virtual
 size of the contents might be different than its physical size. To make
 dynamically sized sections, it is possible to use the `VirtualSegment`
-to decorate a normal [ISegment]{.title-ref} with a different virtual
+to decorate a normal `ISegment` with a different virtual
 size.
 
 ``` csharp
@@ -76,7 +76,7 @@ file.Sections.Add(section);
 ```
 
 For more advanced section building, see
-[Building Sections](/guides/peimage/pe-building.html#building-sections)
+[Building Sections](../peimage/pe-building.md#building-sections)
 [Reading and Writing File Segments](../core/segments.md).
 
 ## Updating Section Offsets

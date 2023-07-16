@@ -112,32 +112,41 @@ namespace AsmResolver.DotNet.Memory
         }
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitGenericParameter(GenericParameterSignature signature) =>
-            _currentGenericContext.GetTypeArgument(signature).AcceptVisitor(this);
+        public TypeMemoryLayout VisitGenericParameter(GenericParameterSignature signature)
+        {
+            var resolved = _currentGenericContext.GetTypeArgument(signature);
+
+            // GenericContext::GetTypeArgument returns the same object if it could not be resolved to a concrete
+            // type argument. This means the generic type was not instantiated yet, or the type argument is invalid.
+            if (ReferenceEquals(resolved, signature))
+                throw new ArgumentException($"The type parameter {signature} could not be resolved to a concrete type argument in the current context.");
+
+            return resolved.AcceptVisitor(this);
+        }
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitPinnedType(PinnedTypeSignature signature) =>
-            CreatePointerLayout(signature);
+        public TypeMemoryLayout VisitPinnedType(PinnedTypeSignature signature)
+            => CreatePointerLayout(signature);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitPointerType(PointerTypeSignature signature) =>
-            CreatePointerLayout(signature);
+        public TypeMemoryLayout VisitPointerType(PointerTypeSignature signature)
+            => CreatePointerLayout(signature);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitSentinelType(SentinelTypeSignature signature) =>
-            throw new ArgumentException("Sentinel types do not have a size.");
+        public TypeMemoryLayout VisitSentinelType(SentinelTypeSignature signature)
+            => throw new ArgumentException("Sentinel types do not have a size.");
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitSzArrayType(SzArrayTypeSignature signature) =>
-            CreatePointerLayout(signature);
+        public TypeMemoryLayout VisitSzArrayType(SzArrayTypeSignature signature)
+            => CreatePointerLayout(signature);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitTypeDefOrRef(TypeDefOrRefSignature signature) =>
-            VisitTypeDefOrRef(signature.Type);
+        public TypeMemoryLayout VisitTypeDefOrRef(TypeDefOrRefSignature signature)
+            => VisitTypeDefOrRef(signature.Type);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitFunctionPointerType(FunctionPointerTypeSignature signature) =>
-            CreatePointerLayout(signature);
+        public TypeMemoryLayout VisitFunctionPointerType(FunctionPointerTypeSignature signature)
+            => CreatePointerLayout(signature);
 
         /// <summary>
         /// Visits an instance of a <see cref="ITypeDefOrRef"/> class.
@@ -150,8 +159,14 @@ namespace AsmResolver.DotNet.Memory
             {
                 TableIndex.TypeRef => VisitTypeReference((TypeReference) type),
                 TableIndex.TypeDef => VisitTypeDefinition((TypeDefinition) type),
+                TableIndex.TypeSpec => VisitTypeSpecification((TypeSpecification) type),
                 _ => throw new ArgumentException("Invalid type.")
             };
+        }
+
+        private TypeMemoryLayout VisitTypeSpecification(TypeSpecification type)
+        {
+            return type.Signature!.AcceptVisitor(this);
         }
 
         private TypeMemoryLayout VisitTypeReference(TypeReference type) =>

@@ -51,8 +51,8 @@ namespace AsmResolver.DotNet.Memory
             };
         }
 
-        public uint VisitCustomModifierType(CustomModifierTypeSignature signature) =>
-            signature.BaseType.AcceptVisitor(this);
+        public uint VisitCustomModifierType(CustomModifierTypeSignature signature)
+            => signature.BaseType.AcceptVisitor(this);
 
         public uint VisitGenericInstanceType(GenericInstanceTypeSignature signature)
         {
@@ -67,15 +67,24 @@ namespace AsmResolver.DotNet.Memory
             return result;
         }
 
-        public uint VisitGenericParameter(GenericParameterSignature signature) =>
-            _currentGenericContext.GetTypeArgument(signature).AcceptVisitor(this);
+        public uint VisitGenericParameter(GenericParameterSignature signature)
+        {
+            var resolved = _currentGenericContext.GetTypeArgument(signature);
+
+            // GenericContext::GetTypeArgument returns the same object if it could not be resolved to a concrete
+            // type argument. This means the generic type was not instantiated yet, or the type argument is invalid.
+            if (ReferenceEquals(resolved, signature))
+                throw new ArgumentException($"The type parameter {signature} could not be resolved to a concrete type argument in the current context.");
+
+            return resolved.AcceptVisitor(this);
+        }
 
         public uint VisitPinnedType(PinnedTypeSignature signature) => signature.BaseType.AcceptVisitor(this);
 
         public uint VisitPointerType(PointerTypeSignature signature) => PointerSize;
 
-        public uint VisitSentinelType(SentinelTypeSignature signature) =>
-            throw new ArgumentException("Sentinel types do not have a size.");
+        public uint VisitSentinelType(SentinelTypeSignature signature)
+            => throw new ArgumentException("Sentinel types do not have a size.");
 
         public uint VisitSzArrayType(SzArrayTypeSignature signature) => PointerSize;
 
@@ -94,8 +103,8 @@ namespace AsmResolver.DotNet.Memory
             };
         }
 
-        private uint VisitTypeReference(TypeReference type) =>
-            VisitTypeDefinition(type.Resolve() ?? throw new ArgumentException($"Could not resolve {type.SafeToString()}."));
+        private uint VisitTypeReference(TypeReference type)
+            => VisitTypeDefinition(type.Resolve() ?? throw new ArgumentException($"Could not resolve {type.SafeToString()}."));
 
         public uint VisitTypeDefinition(TypeDefinition type)
         {

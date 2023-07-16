@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromBytes(byte[] buffer, ModuleReaderParameters readerParameters) =>
-            FromImage(PEImage.FromBytes(buffer, readerParameters.PEReaderParameters));
+            FromImage(PEImage.FromBytes(buffer, readerParameters.PEReaderParameters), readerParameters);
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -1195,14 +1195,17 @@ namespace AsmResolver.DotNet
                     when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
                     resolver = new DotNetFrameworkAssemblyResolver(fileService);
                     break;
+
                 case DotNetRuntimeInfo.NetStandard
                     when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(
                         runtime.Version, out var coreVersion):
                     resolver = new DotNetCoreAssemblyResolver(fileService, coreVersion);
                     break;
+
                 case DotNetRuntimeInfo.NetCoreApp:
                     resolver = new DotNetCoreAssemblyResolver(fileService, runtime.Version);
                     break;
+
                 default:
                     resolver = new DotNetFrameworkAssemblyResolver(fileService);
                     break;

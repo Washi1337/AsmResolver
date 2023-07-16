@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 
 namespace AsmResolver.Tests.Runners
@@ -19,6 +20,16 @@ namespace AsmResolver.Tests.Runners
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             };
+
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                info.FileName = filePath;
+            }
+            else
+            {
+                info.FileName = "wine";
+                info.ArgumentList.Add(filePath);
+            }
 
             if (arguments is not null)
             {
