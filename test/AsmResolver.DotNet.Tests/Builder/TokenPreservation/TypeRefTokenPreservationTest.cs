@@ -101,6 +101,36 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         }
 
         [Fact]
+        public void PreserveDuplicatedTypeRefsInBaseType()
+        {
+            // Prepare temp module with two references to System.Object
+            var module = new ModuleDefinition("Test");
+            var assembly = new AssemblyDefinition("Test", new Version(1, 0, 0, 0));
+            assembly.Modules.Add(module);
+
+            var ref1 = (TypeReference) module.CorLibTypeFactory.CorLibScope
+                .CreateTypeReference("System", "Object")
+                .ImportWith(module.DefaultImporter);
+            var ref2 = (TypeReference) module.CorLibTypeFactory.CorLibScope
+                .CreateTypeReference("System", "Object")
+                .ImportWith(module.DefaultImporter);
+
+            // Force assign new tokens to instruct builder that both type references need to be added.
+            module.TokenAllocator.AssignNextAvailableToken(ref1);
+            module.TokenAllocator.AssignNextAvailableToken(ref2);
+
+            module.TopLevelTypes.Add(new TypeDefinition(null, "A", TypeAttributes.Public, ref1));
+            module.TopLevelTypes.Add(new TypeDefinition(null, "B", TypeAttributes.Public, ref2));
+
+            // Rebuild.
+            var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveTypeReferenceIndices));
+
+            // Verify that both object references are still there.
+            var newModule = ModuleDefinition.FromImage(image);
+            Assert.Equal(2, newModule.GetImportedTypeReferences().Count(t => t.Name == "Object"));
+        }
+
+        [Fact]
         public void PreserveNestedTypeRefOrdering()
         {
             // https://github.com/Washi1337/AsmResolver/issues/329
@@ -113,5 +143,6 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
             Assert.Equal(originalTypeRefs, newTypeRefs.Take(originalTypeRefs.Count), Comparer);
         }
+
     }
 }
