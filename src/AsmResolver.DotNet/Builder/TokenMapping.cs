@@ -64,12 +64,14 @@ namespace AsmResolver.DotNet.Builder
             if (member.MetadataToken.Table != newToken.Table)
                 throw new ArgumentException($"Cannot assign a {newToken.Table} metadata token to a {member.MetadataToken.Table}.");
 
-            if (TryGetNewToken(member, out var existingToken))
-            {
-                if (existingToken.Rid != newToken.Rid)
-                    throw new ArgumentException($"Member {member.SafeToString()} was already assigned a metadata token.");
+            // We allow for members to be duplicated in the mapping, but we will only keep track of the first token that
+            // was registered for this member. This may result in a slightly different binary if token preservation is
+            // enabled (e.g., a member may originally have referenced a duplicated member as opposed to the first one,
+            // and this would always make it reference the first one), but since both members are semantically equivalent,
+            // referencing one or the other should also be semantics-preserving. Note that both duplicated members will
+            // still be present in the final binary with their original RIDs.
+            if (TryGetNewToken(member, out _))
                 return;
-            }
 
             switch (member.MetadataToken.Table)
             {

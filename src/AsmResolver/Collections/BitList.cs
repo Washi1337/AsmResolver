@@ -46,7 +46,7 @@ namespace AsmResolver.Collections
         {
             get
             {
-                if (index >= Count)
+                if (index < 0 || index >= Count)
                     throw new IndexOutOfRangeException();
 
                 (int wordIndex, int bitIndex) = SplitWordBitIndex(index);
@@ -54,7 +54,7 @@ namespace AsmResolver.Collections
             }
             set
             {
-                if (index >= Count)
+                if (index < 0 || index >= Count)
                     throw new IndexOutOfRangeException();
 
                 (int wordIndex, int bitIndex) = SplitWordBitIndex(index);
@@ -119,7 +119,7 @@ namespace AsmResolver.Collections
         /// <inheritdoc />
         public void Insert(int index, bool item)
         {
-            if (index > Count)
+            if (index < 0 || index > Count)
                 throw new IndexOutOfRangeException();
 
             EnsureCapacity(Count++);
