@@ -82,8 +82,8 @@ look up the members by metadata token.
 
 ``` csharp
 var sourceModule = ModuleDefinition.FromFile(typeof(Rectangle).Assembly.Location);
-var rectangleType = (TypeDefinition) sourceModule.LookupMember(typeof(Rectangle).MetadataToken);
-var vectorType = (TypeDefinition) sourceModule.LookupMember(typeof(Vector2).MetadataToken);
+var rectangleType = sourceModule.LookupMember<TypeDefinition>(typeof(Rectangle).MetadataToken);
+var vectorType = sourceModule.LookupMember<TypeDefinition>(typeof(Vector2).MetadataToken);
 ```
 
 We can then use `MemberCloner.Include` to include the types in the
@@ -103,7 +103,7 @@ cloner.Include(rectangleType);
 cloner.Include(vectorType);
 ```
 
-`Include` returns the same `MemberCloner` instance, allowing for more fluent 
+`Include` returns the same `MemberCloner` instance, allowing for more fluent
 syntax:
 
 ``` csharp
@@ -305,8 +305,8 @@ foreach (var clonedType in clonedTypes)
 ```
 
 Injecting the cloned top level types is a very common use-case for the cloner.
-AsmResolver defines the `InjectTypeClonerListener` class that implements a 
-cloner listener that injects all top-level types automatically into 
+AsmResolver defines the `InjectTypeClonerListener` class that implements a
+cloner listener that injects all top-level types automatically into
 the destination module. In such a case, the code can be reduced to the following:
 
 ``` csharp
