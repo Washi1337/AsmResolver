@@ -792,15 +792,18 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the static constructor that is executed when the CLR loads this type.
+        /// Finds the static constructor that is executed when the CLR loads this type.
         /// </summary>
         /// <returns>The static constructor, or <c>null</c> if none is present.</returns>
         public MethodDefinition? GetStaticConstructor()
         {
-            return Methods.FirstOrDefault(m =>
-                m.IsConstructor
-                && m.IsStatic
-                && m.Parameters.Count == 0);
+            for (int i = 0; i < Methods.Count; i++)
+            {
+                if (Methods[i] is {IsConstructor: true, IsStatic: true, Parameters.Count: 0} method)
+                    return method;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -843,6 +846,66 @@ namespace AsmResolver.DotNet
             }
 
             return cctor;
+        }
+
+        /// <summary>
+        /// Finds the instance parameterless constructor this type defines.
+        /// </summary>
+        /// <returns>The constructor, or <c>null</c> if none is present.</returns>
+        public MethodDefinition? GetConstructor()
+        {
+            return GetConstructor(SignatureComparer.Default, (IList<TypeSignature>) Array.Empty<TypeSignature>());
+        }
+
+        /// <summary>
+        /// Finds the instance constructor with the provided parameter types this type defines.
+        /// </summary>
+        /// <param name="arguments">An ordered list of types the parameters of the constructor should have.</param>
+        /// <returns>The constructor, or <c>null</c> if none is present.</returns>
+        public MethodDefinition? GetConstructor(params TypeSignature[] arguments)
+        {
+            return GetConstructor(SignatureComparer.Default, arguments);
+        }
+
+        /// <summary>
+        /// Finds the instance constructor with the provided parameter types this type defines.
+        /// </summary>
+        /// <param name="comparer">The signature comparer to use when comparing the parameter types.</param>
+        /// <param name="arguments">An ordered list of types the parameters of the constructor should have.</param>
+        /// <returns>The constructor, or <c>null</c> if none is present.</returns>
+        public MethodDefinition? GetConstructor(SignatureComparer comparer, params TypeSignature[] arguments)
+        {
+            return GetConstructor(comparer, (IList<TypeSignature>) arguments);
+        }
+
+        /// <summary>
+        /// Finds the instance constructor with the provided parameter types this type defines.
+        /// </summary>
+        /// <param name="comparer">The signature comparer to use when comparing the parameter types.</param>
+        /// <param name="arguments">An ordered list of types the parameters of the constructor should have.</param>
+        /// <returns>The constructor, or <c>null</c> if none is present.</returns>
+        public MethodDefinition? GetConstructor(SignatureComparer comparer, IList<TypeSignature> arguments)
+        {
+            for (int i = 0; i < Methods.Count; i++)
+            {
+                if (Methods[i] is not {IsConstructor: true, IsStatic: false} method)
+                    continue;
+
+                if (method.Parameters.Count != arguments.Count)
+                    continue;
+
+                bool fullMatch = true;
+                for (int j = 0; j < method.Parameters.Count && fullMatch; j++)
+                {
+                    if (!comparer.Equals(method.Parameters[j].ParameterType, arguments[j]))
+                        fullMatch = false;
+                }
+
+                if (fullMatch)
+                    return method;
+            }
+
+            return null;
         }
 
         /// <summary>

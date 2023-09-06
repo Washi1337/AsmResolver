@@ -13,7 +13,6 @@ using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.DotNet.TestCases.Types;
 using AsmResolver.DotNet.TestCases.Types.Structs;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -27,7 +26,7 @@ namespace AsmResolver.DotNet.Tests
         private TypeDefinition RebuildAndLookup(TypeDefinition type)
         {
             var stream = new MemoryStream();
-            type.Module.Write(stream);
+            type.Module!.Write(stream);
 
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
             return newModule.TopLevelTypes.FirstOrDefault(t => t.FullName == type.FullName);
@@ -489,7 +488,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(new HashSet<Utf8String>(new Utf8String[]
             {
                 nameof(IInterface1), nameof(IInterface2),
-            }), new HashSet<Utf8String>(type.Interfaces.Select(i => i.Interface.Name)));
+            }), new HashSet<Utf8String>(type.Interfaces.Select(i => i.Interface?.Name)));
         }
 
         [Fact]
@@ -501,7 +500,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(new HashSet<Utf8String>(new Utf8String[]
             {
                 nameof(IInterface1), nameof(IInterface2),
-            }), new HashSet<Utf8String>(newType.Interfaces.Select(i => i.Interface.Name)));
+            }), new HashSet<Utf8String>(newType.Interfaces.Select(i => i.Interface?.Name)));
         }
 
         [Fact]
@@ -550,8 +549,8 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(DerivedDerivedClass).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(DerivedDerivedClass));
 
-            Assert.True(type.InheritsFrom(typeof(AbstractClass).FullName));
-            Assert.False(type.InheritsFrom(typeof(Class).FullName));
+            Assert.True(type.InheritsFrom(typeof(AbstractClass).FullName!));
+            Assert.False(type.InheritsFrom(typeof(Class).FullName!));
         }
 
         [Fact]
@@ -560,17 +559,17 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(DerivedInterfaceImplementations).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(DerivedInterfaceImplementations));
 
-            Assert.True(type.Implements(typeof(IInterface1).FullName));
-            Assert.True(type.Implements(typeof(IInterface2).FullName));
-            Assert.True(type.Implements(typeof(IInterface3).FullName));
-            Assert.False(type.Implements(typeof(IInterface4).FullName));
+            Assert.True(type.Implements(typeof(IInterface1).FullName!));
+            Assert.True(type.Implements(typeof(IInterface2).FullName!));
+            Assert.True(type.Implements(typeof(IInterface3).FullName!));
+            Assert.False(type.Implements(typeof(IInterface4).FullName!));
         }
 
         [Fact]
         public void CorLibTypeDefinitionToSignatureShouldResultInCorLibTypeSignature()
         {
             var module = new ModuleDefinition("Test");
-            var type = module.CorLibTypeFactory.Object.Resolve();
+            var type = module.CorLibTypeFactory.Object.Resolve()!;
             var signature = type.ToTypeSignature();
             var corlibType = Assert.IsAssignableFrom<CorLibTypeSignature>(signature);
             Assert.Equal(ElementType.Object, corlibType.ElementType);
@@ -615,13 +614,92 @@ namespace AsmResolver.DotNet.Tests
         public void ReadIsByRefLike()
         {
             var resolver = new DotNetCoreAssemblyResolver(new Version(5, 0));
-            var corLib = resolver.Resolve(KnownCorLibs.SystemPrivateCoreLib_v5_0_0_0);
+            var corLib = resolver.Resolve(KnownCorLibs.SystemPrivateCoreLib_v5_0_0_0)!;
 
-            var intType = corLib.ManifestModule.TopLevelTypes.First(t => t.Name == "Int32");
+            var intType = corLib.ManifestModule!.TopLevelTypes.First(t => t.Name == "Int32");
             var spanType = corLib.ManifestModule.TopLevelTypes.First(t => t.Name == "Span`1");
 
             Assert.False(intType.IsByRefLike);
             Assert.True(spanType.IsByRefLike);
+        }
+
+        [Fact]
+        public void GetStaticConstructor()
+        {
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+
+            var type1 = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
+            var cctor = type1.GetStaticConstructor();
+            Assert.NotNull(cctor);
+            Assert.True(cctor.IsStatic);
+            Assert.True(cctor.IsConstructor);
+
+            var type2 = module.LookupMember<TypeDefinition>(typeof(NoStaticConstructor).MetadataToken);
+            Assert.Null(type2.GetStaticConstructor());
+        }
+
+        [Fact]
+        public void GetOrCreateStaticConstructor()
+        {
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var type1 = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
+
+            // If cctor already exists, we expect this to be returned.
+            var cctor = type1.GetStaticConstructor();
+            Assert.NotNull(cctor);
+            Assert.Same(cctor, type1.GetOrCreateStaticConstructor());
+
+            var type2 = module.LookupMember<TypeDefinition>(typeof(NoStaticConstructor).MetadataToken);
+            Assert.Null(type2.GetStaticConstructor());
+
+            // If cctor doesn't exist yet, it should be added.
+            cctor = type2.GetOrCreateStaticConstructor();
+            Assert.NotNull(cctor);
+            Assert.Same(type2, cctor.DeclaringType);
+            Assert.Same(cctor, type2.GetOrCreateStaticConstructor());
+            Assert.True(cctor.IsStatic);
+            Assert.True(cctor.IsConstructor);
+        }
+
+        [Fact]
+        public void GetParameterlessConstructor()
+        {
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var type = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
+
+            var ctor = type.GetConstructor();
+            Assert.NotNull(ctor);
+            Assert.False(ctor.IsStatic);
+            Assert.True(ctor.IsConstructor);
+            Assert.Empty(ctor.Parameters);
+        }
+
+        [Theory]
+        [InlineData(new[] {ElementType.I4, ElementType.I4})]
+        [InlineData(new[] {ElementType.I4, ElementType.String})]
+        [InlineData(new[] {ElementType.I4, ElementType.String, ElementType.R8})]
+        public void GetParametersConstructor(ElementType[] types)
+        {
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var type = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
+
+            var signatures = types.Select(x => (TypeSignature) module.CorLibTypeFactory.FromElementType(x)).ToArray();
+            var ctor = type.GetConstructor(signatures);
+            Assert.NotNull(ctor);
+            Assert.False(ctor.IsStatic);
+            Assert.True(ctor.IsConstructor);
+            Assert.Equal(signatures, ctor.Signature!.ParameterTypes);
+        }
+
+        [Fact]
+        public void GetNonExistingConstructorShouldReturnNull()
+        {
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var type = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
+            var factory = module.CorLibTypeFactory;
+
+            Assert.Null(type.GetConstructor(factory.String));
+            Assert.Null(type.GetConstructor(factory.String, factory.String));
         }
     }
 }
