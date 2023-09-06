@@ -647,51 +647,91 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Determines whether the type inherits from a particular type
+        /// Determines whether the type inherits from a particular type.
         /// </summary>
         /// <param name="fullName">The full name of the type</param>
-        /// <returns>Whether the current <see cref="TypeDefinition"/> inherits the type</returns>
-        public bool InheritsFrom(string fullName)
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> inherits from the type,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool InheritsFrom(string fullName) => FindInTypeTree(x => x.FullName == fullName);
+
+        /// <summary>
+        /// Determines whether the type inherits from a particular type.
+        /// </summary>
+        /// <param name="ns">The namespace of the type.</param>
+        /// <param name="name">The name of the type.</param>
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> inherits from the type,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool InheritsFrom(string? ns, string name) => FindInTypeTree(x => x.IsTypeOf(ns, name));
+
+        /// <summary>
+        /// Determines whether the type inherits from a particular type.
+        /// </summary>
+        /// <param name="ns">The namespace of the type.</param>
+        /// <param name="name">The name of the type.</param>
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> inherits from the type,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool InheritsFrom(Utf8String? ns, Utf8String name) => FindInTypeTree(x => x.IsTypeOfUtf8(ns, name));
+
+        /// <summary>
+        /// Determines whether the type implements a particular interface.
+        /// </summary>
+        /// <param name="fullName">The full name of the interface</param>
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> implements the interface,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool Implements(string fullName)
         {
-            var type = this;
-            do
-            {
-                if (type.FullName == fullName)
-                    return true;
-
-                var current = type;
-                type = type.BaseType?.Resolve();
-
-                // This prevents an issue where the base type is the same as itself
-                // ... so basically a cyclic dependency
-                if (current == type)
-                    return false;
-            } while (type is {});
-
-            return false;
+            return FindInTypeTree(x => x.Interfaces.Any(@interface => @interface.Interface?.FullName == fullName));
         }
 
         /// <summary>
-        /// Determines whether the type implements a particular interface
+        /// Determines whether the type implements a particular interface.
         /// </summary>
-        /// <param name="fullName">The full name of the interface</param>
-        /// <returns>Whether the type implements the interface</returns>
-        public bool Implements(string fullName)
+        /// <param name="ns">The namespace of the type.</param>
+        /// <param name="name">The name of the type.</param>
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> implements the interface,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool Implements(string? ns, string name) => FindInTypeTree(
+            x => x.Interfaces.Any(@interface => @interface.Interface?.IsTypeOf(ns, name) ?? false));
+
+        /// <summary>
+        /// Determines whether the type implements a particular interface.
+        /// </summary>
+        /// <param name="ns">The namespace of the type.</param>
+        /// <param name="name">The name of the type.</param>
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> implements the interface,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool Implements(Utf8String? ns, Utf8String name) => FindInTypeTree(
+            x => x.Interfaces.Any(@interface => @interface.Interface?.IsTypeOfUtf8(ns, name) ?? false));
+
+        private bool FindInTypeTree(Predicate<TypeDefinition> condition)
         {
+            var visited = new List<TypeDefinition>();
+
             var type = this;
             do
             {
-                if (type.Interfaces.Any(@interface => @interface.Interface?.FullName == fullName))
+                // Protect against malicious cyclic dependency graphs.
+                if (visited.Contains(type))
+                    return false;
+
+                if (condition(type))
                     return true;
 
-                var current = type;
+                visited.Add(type);
                 type = type.BaseType?.Resolve();
-
-                // This prevents an issue where the base type is the same as itself
-                // ... so basically a cyclic dependency
-                if (current == type)
-                    return false;
-            } while (type is {});
+            } while (type is not null);
 
             return false;
         }

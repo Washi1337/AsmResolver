@@ -554,6 +554,16 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void InheritanceMultipleLevelsTypeOf()
+        {
+            var module = ModuleDefinition.FromFile(typeof(DerivedDerivedClass).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(DerivedDerivedClass));
+
+            Assert.True(type.InheritsFrom(typeof(AbstractClass).Namespace, nameof(AbstractClass)));
+            Assert.False(type.InheritsFrom(typeof(Class).Namespace, nameof(Class)));
+        }
+
+        [Fact]
         public void InterfaceImplementedFromInheritanceHierarchy()
         {
             var module = ModuleDefinition.FromFile(typeof(DerivedInterfaceImplementations).Assembly.Location);
@@ -563,6 +573,18 @@ namespace AsmResolver.DotNet.Tests
             Assert.True(type.Implements(typeof(IInterface2).FullName!));
             Assert.True(type.Implements(typeof(IInterface3).FullName!));
             Assert.False(type.Implements(typeof(IInterface4).FullName!));
+        }
+
+        [Fact]
+        public void InterfaceImplementedFromInheritanceHierarchyTypeOf()
+        {
+            var module = ModuleDefinition.FromFile(typeof(DerivedInterfaceImplementations).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(DerivedInterfaceImplementations));
+
+            Assert.True(type.Implements(typeof(IInterface1).Namespace, nameof(IInterface1)));
+            Assert.True(type.Implements(typeof(IInterface2).Namespace, nameof(IInterface2)));
+            Assert.True(type.Implements(typeof(IInterface3).Namespace, nameof(IInterface3)));
+            Assert.False(type.Implements(typeof(IInterface4).Namespace, nameof(IInterface4)));
         }
 
         [Fact]
