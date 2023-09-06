@@ -832,16 +832,7 @@ namespace AsmResolver.DotNet
                 if (module == null)
                     throw new ArgumentNullException(nameof(module));
 
-                cctor = new MethodDefinition(".cctor",
-                    MethodAttributes.Private
-                    | MethodAttributes.Static
-                    | MethodAttributes.SpecialName
-                    | MethodAttributes.RuntimeSpecialName,
-                    MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
-
-                cctor.CilMethodBody = new CilMethodBody(cctor);
-                cctor.CilMethodBody.Instructions.Add(new CilInstruction(0, CilOpCodes.Ret));
-
+                cctor = MethodDefinition.CreateStaticConstructor(module);
                 Methods.Insert(0, cctor);
             }
 
@@ -860,44 +851,44 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Finds the instance constructor with the provided parameter types this type defines.
         /// </summary>
-        /// <param name="arguments">An ordered list of types the parameters of the constructor should have.</param>
+        /// <param name="parameterTypes">An ordered list of types the parameters of the constructor should have.</param>
         /// <returns>The constructor, or <c>null</c> if none is present.</returns>
-        public MethodDefinition? GetConstructor(params TypeSignature[] arguments)
+        public MethodDefinition? GetConstructor(params TypeSignature[] parameterTypes)
         {
-            return GetConstructor(SignatureComparer.Default, arguments);
+            return GetConstructor(SignatureComparer.Default, parameterTypes);
         }
 
         /// <summary>
         /// Finds the instance constructor with the provided parameter types this type defines.
         /// </summary>
         /// <param name="comparer">The signature comparer to use when comparing the parameter types.</param>
-        /// <param name="arguments">An ordered list of types the parameters of the constructor should have.</param>
+        /// <param name="parameterTypes">An ordered list of types the parameters of the constructor should have.</param>
         /// <returns>The constructor, or <c>null</c> if none is present.</returns>
-        public MethodDefinition? GetConstructor(SignatureComparer comparer, params TypeSignature[] arguments)
+        public MethodDefinition? GetConstructor(SignatureComparer comparer, params TypeSignature[] parameterTypes)
         {
-            return GetConstructor(comparer, (IList<TypeSignature>) arguments);
+            return GetConstructor(comparer, (IList<TypeSignature>) parameterTypes);
         }
 
         /// <summary>
         /// Finds the instance constructor with the provided parameter types this type defines.
         /// </summary>
         /// <param name="comparer">The signature comparer to use when comparing the parameter types.</param>
-        /// <param name="arguments">An ordered list of types the parameters of the constructor should have.</param>
+        /// <param name="parameterTypes">An ordered list of types the parameters of the constructor should have.</param>
         /// <returns>The constructor, or <c>null</c> if none is present.</returns>
-        public MethodDefinition? GetConstructor(SignatureComparer comparer, IList<TypeSignature> arguments)
+        public MethodDefinition? GetConstructor(SignatureComparer comparer, IList<TypeSignature> parameterTypes)
         {
             for (int i = 0; i < Methods.Count; i++)
             {
                 if (Methods[i] is not {IsConstructor: true, IsStatic: false} method)
                     continue;
 
-                if (method.Parameters.Count != arguments.Count)
+                if (method.Parameters.Count != parameterTypes.Count)
                     continue;
 
                 bool fullMatch = true;
                 for (int j = 0; j < method.Parameters.Count && fullMatch; j++)
                 {
-                    if (!comparer.Equals(method.Parameters[j].ParameterType, arguments[j]))
+                    if (!comparer.Equals(method.Parameters[j].ParameterType, parameterTypes[j]))
                         fullMatch = false;
                 }
 

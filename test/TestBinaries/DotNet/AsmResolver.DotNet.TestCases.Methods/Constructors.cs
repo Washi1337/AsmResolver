@@ -23,4 +23,20 @@ public class Constructors
     public Constructors(int a, string b, double c)
     {
     }
+
+    public void NonConstructorMethod()
+    {
+    }
+
+    public void NonConstructorMethod(int a, int b)
+    {
+    }
+
+    public void NonConstructorMethod(int a, string b)
+    {
+    }
+
+    public void NonConstructorMethod(int a, string b, double c)
+    {
+    }
 }
