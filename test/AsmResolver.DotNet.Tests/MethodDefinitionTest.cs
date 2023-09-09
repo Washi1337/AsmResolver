@@ -566,5 +566,28 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal(expectedFullName, method.FullName);
         }
+
+        [Fact]
+        public void CreateParameterlessConstructor()
+        {
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var ctor = MethodDefinition.CreateConstructor(module);
+
+            Assert.True(ctor.IsConstructor);
+            Assert.Empty(ctor.Parameters);
+            Assert.NotNull(ctor.CilMethodBody);
+            Assert.Equal(CilOpCodes.Ret, Assert.Single(ctor.CilMethodBody.Instructions).OpCode);
+        }
+
+        [Fact]
+        public void CreateConstructor()
+        {
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var factory = module.CorLibTypeFactory;
+            var ctor = MethodDefinition.CreateConstructor(module, factory.Int32, factory.Double);
+
+            Assert.True(ctor.IsConstructor);
+            Assert.Equal(new[] {factory.Int32, factory.Double}, ctor.Parameters.Select(x => x.ParameterType));
+        }
     }
 }
