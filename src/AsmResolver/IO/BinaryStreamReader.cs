@@ -311,6 +311,20 @@ namespace AsmResolver.IO
             return new decimal(_buffer);
         }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        /// <summary>
+        /// Attempts to read the provided amount of bytes from the input stream.
+        /// </summary>
+        /// <param name="buffer">The buffer that receives the read bytes.</param>
+        /// <returns>The number of bytes that were read.</returns>
+        public int ReadBytes(Span<byte> buffer)
+        {
+            int actualLength = DataSource.ReadBytes(Offset, buffer);
+            Offset += (uint) actualLength;
+            return actualLength;
+        }
+#endif
+
         /// <summary>
         /// Attempts to read the provided amount of bytes from the input stream.
         /// </summary>
