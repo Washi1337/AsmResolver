@@ -50,7 +50,7 @@ namespace AsmResolver.IO
             var handle = _accessor.SafeMemoryMappedViewHandle;
             int actualLength = (int) Math.Min(handle.ByteLength, (uint) buffer.Length);
 #if NET6_0_OR_GREATER
-            handle.ReadSpan(address, buffer);
+            handle.ReadSpan(address, buffer[..actualLength]);
 #else
             byte* pointer = null;
 
