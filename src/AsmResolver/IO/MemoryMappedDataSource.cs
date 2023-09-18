@@ -53,9 +53,19 @@ namespace AsmResolver.IO
             handle.ReadSpan(address, buffer);
 #else
             byte* pointer = null;
-            handle.AcquirePointer(ref pointer);
-            new ReadOnlySpan<byte>(pointer, actualLength).CopyTo(buffer);
-            handle.ReleasePointer();
+
+            try
+            {
+                handle.AcquirePointer(ref pointer);
+                new ReadOnlySpan<byte>(pointer, actualLength).CopyTo(buffer);
+            }
+            finally
+            {
+                if (pointer != null)
+                {
+                    handle.ReleasePointer();
+                }
+            }
 #endif
             return actualLength;
         }
