@@ -47,8 +47,12 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public unsafe int ReadBytes(ulong address, Span<byte> buffer)
         {
+            if (!IsValidAddress(address))
+                return 0;
+
             var handle = _accessor.SafeMemoryMappedViewHandle;
-            int actualLength = (int) Math.Min(handle.ByteLength, (uint) buffer.Length);
+            int actualLength = (int) Math.Min(Length - address, (uint) buffer.Length);
+            
 #if NET6_0_OR_GREATER
             handle.ReadSpan(address, buffer[..actualLength]);
 #else
