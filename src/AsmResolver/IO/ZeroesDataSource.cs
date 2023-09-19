@@ -54,7 +54,7 @@ namespace AsmResolver.IO
         public int ReadBytes(ulong address, byte[] buffer, int index, int count)
         {
             int actualLength = (int) Math.Min(Length, (ulong) count);
-            Array.Clear(buffer, index, count);
+            Array.Clear(buffer, index, actualLength);
             return actualLength;
         }
 
@@ -63,7 +63,7 @@ namespace AsmResolver.IO
         public int ReadBytes(ulong address, Span<byte> buffer)
         {
             int actualLength = (int) Math.Min(Length, (uint) buffer.Length);
-            buffer.Clear();
+            buffer[..actualLength].Clear();
             return actualLength;
         }
 #endif
