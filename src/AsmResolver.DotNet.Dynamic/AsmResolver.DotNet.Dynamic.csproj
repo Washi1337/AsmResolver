@@ -6,7 +6,7 @@
         <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly dynamic</PackageTags>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
-        <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 

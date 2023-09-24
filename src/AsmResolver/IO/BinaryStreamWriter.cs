@@ -7,6 +7,9 @@ namespace AsmResolver.IO
     /// Provides a default implementation of a binary writer that writes the data to an output stream.
     /// </summary>
     public class BinaryStreamWriter : IBinaryStreamWriter
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        , ISpanBinaryStreamWriter
+#endif
     {
         /// <summary>
         /// Creates a new binary stream writer using the provided output stream.
@@ -46,6 +49,14 @@ namespace AsmResolver.IO
         {
             BaseStream.Write(buffer, startIndex, count);
         }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        /// <inheritdoc />
+        public void WriteBytes(ReadOnlySpan<byte> buffer)
+        {
+            BaseStream.Write(buffer);
+        }
+#endif
 
         /// <inheritdoc />
         public void WriteByte(byte value)
