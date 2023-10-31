@@ -408,5 +408,12 @@ namespace AsmResolver.DotNet.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] DupResource {
+            get {
+                object obj = ResourceManager.GetObject("DupResource", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
