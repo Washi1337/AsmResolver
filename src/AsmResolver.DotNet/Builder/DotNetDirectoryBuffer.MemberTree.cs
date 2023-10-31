@@ -74,31 +74,43 @@ namespace AsmResolver.DotNet.Builder
 
             AddFileReferencesInModule(module);
             AddExportedTypesInModule(module);
-            AddResourcesInModule(module);
             AddCustomAttributes(token, module);
         }
 
-        private void AddResourcesInModule(ModuleDefinition module)
+        /// <summary>
+        /// Adds a collection of manifest resources to the directory buffer.
+        /// </summary>
+        /// <param name="resources">The resources to add.</param>
+        /// <param name="deduplicateData">
+        /// <c>true</c> if resource data can be reused when identical, <c>false</c> when each embedded resource should
+        /// get its own data offset.
+        /// </param>
+        public void DefineManifestResources(IEnumerable<ManifestResource> resources, bool deduplicateData = true)
         {
-            for (int i = 0; i < module.Resources.Count; i++)
-                AddManifestResource(module.Resources[i]);
+            foreach (var resource in resources)
+                DefineManifestResource(resource, deduplicateData);
         }
 
         /// <summary>
         /// Adds a single manifest resource to the buffer.
         /// </summary>
         /// <param name="resource">The resource to add.</param>
+        /// <param name="deduplicateData">
+        /// <c>true</c> if resource data can be reused when identical, <c>false</c> when each embedded resource should
+        /// get its own data offset.
+        /// </param>
         /// <returns>The new metadata token of the resource.</returns>
-        public MetadataToken AddManifestResource(ManifestResource resource)
+        public MetadataToken DefineManifestResource(ManifestResource resource, bool deduplicateData = true)
         {
             uint offset = resource.Offset;
             if (resource.IsEmbedded)
             {
-                if (resource.EmbeddedDataSegment is {} segment)
+                if (resource.EmbeddedDataSegment is { } segment)
                 {
-                    using var stream = new MemoryStream();
-                    segment.Write(new BinaryStreamWriter(stream));
-                    offset = Resources.GetResourceDataOffset(stream.ToArray());
+                    byte[] data = segment.WriteIntoArray();
+                    offset = deduplicateData
+                        ? Resources.GetResourceDataOffset(data)
+                        : Resources.AppendLengthPrefixedData(data);
                 }
                 else
                 {
@@ -117,6 +129,7 @@ namespace AsmResolver.DotNet.Builder
             var token = table.Add(row);
             _tokenMapping.Register(resource, token);
             AddCustomAttributes(token, resource);
+
             return token;
         }
 
