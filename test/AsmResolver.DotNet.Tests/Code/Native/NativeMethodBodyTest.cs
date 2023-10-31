@@ -299,7 +299,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             // Verify.
             _fixture
                 .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(body.Owner.Module!, "StringPointer.exe", $"Hello, world!{Environment.NewLine}");
+                .RebuildAndRun(body.Owner.Module!, "StringPointer.exe", "Hello, world!\n");
         }
 
         [SkippableTheory]
@@ -341,7 +341,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             // Verify.
             _fixture
                 .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(file, "StringPointer.exe", $"Hello, world!{Environment.NewLine}");
+                .RebuildAndRun(file, "StringPointer.exe", "Hello, world!\n");
         }
 
         private static void InjectCallToNativeBody(NativeMethodBody body, ISymbol messageSymbol, uint fixupOffset, AddressFixupType fixupType)

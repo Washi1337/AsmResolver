@@ -126,7 +126,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
             targetModule.ManagedEntryPointMethod = (MethodDefinition) result.ClonedMembers.First(m => m.Name == "Main");
             _fixture
                 .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(targetModule, "HelloWorld.exe", "Hello World!" + Environment.NewLine);
+                .RebuildAndRun(targetModule, "HelloWorld.exe", "Hello World!\n");
         }
 
         [Fact]

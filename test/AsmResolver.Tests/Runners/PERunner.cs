@@ -31,7 +31,7 @@ namespace AsmResolver.Tests.Runners
         {
             string fullPath = Rebuild(peFile, fileName, testClass, testMethod);
             string actualOutput = RunAndCaptureOutput(fullPath, null, timeout);
-            Assert.Equal(expectedOutput, actualOutput);
+            Assert.Equal(expectedOutput.Replace("\r\n", "\n"), actualOutput);
         }
 
         public string GetTestDirectory(string testClass, string testName)
@@ -104,7 +104,7 @@ namespace AsmResolver.Tests.Runners
                 throw new RunnerException(process.ExitCode, errorString);
             }
 
-            return process.StandardOutput.ReadToEnd();
+            return process.StandardOutput.ReadToEnd().Replace("\r\n", "\n");
         }
 
         protected abstract ProcessStartInfo GetStartInfo(string filePath, string[]? arguments);
