@@ -1,3 +1,5 @@
+using System;
+
 namespace AsmResolver.DotNet.Cloning
 {
     /// <summary>
@@ -49,11 +51,16 @@ namespace AsmResolver.DotNet.Cloning
         /// <inheritdoc />
         protected override ITypeDefOrRef ImportType(TypeReference type)
         {
-            return type.Namespace == "System"
-                && type.Name == nameof(System.Object)
-                && (type.Scope?.GetAssembly()?.IsCorLib ?? false)
-                ? _context.Module.CorLibTypeFactory.Object.Type
-                : base.ImportType(type);
+            // Special case for System.Object.
+            if (type.IsTypeOf(nameof(System), nameof(Object)) && (type.Scope?.GetAssembly()?.IsCorLib ?? false))
+                return _context.Module.CorLibTypeFactory.Object.Type;
+
+            // Rare case where a type reference could point to one of the included type definitions
+            // (e.g., in custom attributes type arguments, see https://github.com/Washi1337/AsmResolver/issues/482).
+            if (_context.ClonedTypes.TryGetValue(type, out var clonedType))
+                return (ITypeDefOrRef) clonedType;
+
+            return base.ImportType(type);
         }
     }
 }
