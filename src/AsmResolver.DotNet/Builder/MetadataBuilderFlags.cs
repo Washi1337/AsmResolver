@@ -155,5 +155,18 @@ namespace AsmResolver.DotNet.Builder
         /// </para>
         /// </summary>
         NoStringsStreamOptimization = 0x20000,
+
+        /// <summary>
+        /// <para>
+        /// By default, when adding two embedded resources to a file with identical contents, AsmResolver will not
+        /// add the second copy of the data to the output file and instead reuse the first blob. This can drastically
+        /// reduce the size of the final output file.
+        /// </para>
+        /// <para>
+        /// While supported by the .NET runtime, some post-processors (e.g., obfuscators) may not work well with this
+        /// or depend on individual resource items to be present. Setting this flag will disable this optimization.
+        /// </para>
+        /// </summary>
+        NoResourceDataDeduplication = 0x40000
     }
 }

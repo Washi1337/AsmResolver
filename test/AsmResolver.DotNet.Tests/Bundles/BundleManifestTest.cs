@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
                  BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V1),
                 "3.1",
                 "HelloWorld.dll",
-                $"Hello, World!{Environment.NewLine}");
+                "Hello, World!\n");
         }
 
         [SkippableFact]
@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
                 BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V2),
                 "5.0",
                 "HelloWorld.dll",
-                $"Hello, World!{Environment.NewLine}");
+                "Hello, World!\n");
         }
 
         [SkippableFact]
@@ -91,7 +91,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
                 BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6),
                 "6.0",
                 "HelloWorld.dll",
-                $"Hello, World!{Environment.NewLine}");
+                "Hello, World!\n");
         }
 
         [SkippableFact]
@@ -153,7 +153,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
                 .GetRunner<NativePERunner>()
                 .RunAndCaptureOutput("HelloWorld.exe", stream.ToArray());
 
-            Assert.Equal($"Hello, World!{Environment.NewLine}", output);
+            Assert.Equal("Hello, World!\n", output);
 
             // Verify that resources were added properly.
             var newImage = PEImage.FromBytes(stream.ToArray());
@@ -267,7 +267,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
                     className,
                     methodName);
 
-            Assert.Equal($"Hello, Mars!{Environment.NewLine}", output);
+            Assert.Equal("Hello, Mars!\n", output);
         }
 
         private void AssertWriteManifestWindowsPreservesOutput(
@@ -297,7 +297,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
                     className,
                     methodName);
 
-            Assert.Equal(expectedOutput, output);
+            Assert.Equal(expectedOutput.Replace("\r\n", "\n"), output);
         }
         private static void DeleteTempExtractionDirectory(BundleManifest manifest, string fileName)
         {

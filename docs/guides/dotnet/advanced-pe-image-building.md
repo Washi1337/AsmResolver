@@ -7,73 +7,77 @@ The easiest way to write a .NET module to the disk is by using the
 module.Write(@"C:\Path\To\Output\Binary.exe");
 ```
 
-This method is essentially a shortcut for invoking the
-`ManagedPEImageBuilder` and `ManagedPEFileBuilder` classes, and will
-completely reconstruct the PE image, serialize it into a PE file and
-write the PE file to the disk.
+Behind the scenes, this creates and invokes a
+`ManagedPEImageBuilder` and a `ManagedPEFileBuilder` with their default
+settings, and will completely reconstruct the PE image, serialize it into
+a PE file and write the PE file to the disk.
 
-While this is easy, and would probably work for most .NET module
-processing, it does not provide much flexibility. To get more control
-over the construction of the new PE image, it is therefore not
-recommended to use a different overload of the `Write` method that takes
-instances of `IPEImageBuilder` instead:
+To get more control over the construction of the new PE image, we can use
+and configure our own instance of an `IPEImageBuilder` instead:
 
 ``` csharp
 var imageBuilder = new ManagedPEImageBuilder();
 
-/* Configuration of imageBuilder here... */
+/* ... Configuration of imageBuilder here... */
+```
 
+After configuring, the builder can then be passed onto the `ModuleDefinition::Write`
+method as a secondary parameter:
+
+``` csharp
 module.Write(@"C:\Path\To\Output\Binary.exe", imageBuilder);
 ```
 
-Alternatively, it is possible to call `ModuleDefinition::ToPEImage` to
-turn the module into a `PEImage` first, that can then later be
-post-processed and transformed into a `PEFile` to write it to the disk:
+It is also possible to call `ModuleDefinition::ToPEImage` to turn
+the module into a `PEImage` first. This image can then be post-processed
+and later transformed into a `PEFile` to write it to the disk:
 
 ``` csharp
-var imageBuilder = new ManagedPEImageBuilder();
-
-/* Configuration of imageBuilder here... */
-
-// Construct image.
+// Turn module into a new PE image.
 var image = module.ToPEImage(imageBuilder);
 
-// Write image to the disk.
+/* ... Post processing of the PE image here ... */
+
+// Construct a new PE file.
 var fileBuilder = new ManagedPEFileBuilder();
 var file = fileBuilder.CreateFile(image);
+
+/* ... Post processing of the PE file here ... */
+
+// Write PE file to disk.
 file.Write(@"C:\Path\To\Output\Binary.exe");
 ```
 
-To get even more control, it is possible to call the `CreateImage`
-method from the image builder directly. This allows for inspecting all
-build artifacts, as well as post-processing of the constructed PE image
-before it is written to the disk.
+To get access to additional build artifacts, such as new metadata tokens
+and builder diagnostics, it is possible to call the `CreateImage`
+method from the image builder directly, and inspect the resulting
+`PEImageBuildResult` object:
 
 ``` csharp
-var imageBuilder = new ManagedPEImageBuilder();
-
-/* Configuration of imageBuilder here... */
-
 // Construct image.
 var result = imageBuilder.CreateImage(module);
 
-/* Inspect build result ... */
+/* ... Inspect build result here ... */
 
 // Obtain constructed PE image.
 var image = result.ConstructedImage;
 
-/* Post processing of image happens here... */
+/* ... Post processing of the PE image here ... */
 
-// Write image to the disk.
+// Construct a new PE file.
 var fileBuilder = new ManagedPEFileBuilder();
 var file = fileBuilder.CreateFile(image);
+
+/* ... Post processing of the PE file here ... */
+
+// Write PE file to disk.
 file.Write(@"C:\Path\To\Output\Binary.exe");
 ```
 
 This article explores various features about the `ManagedPEImageBuilder`
 class.
 
-## Token mappings
+## Token Mappings
 
 Upon constructing a new PE image for a module, members defined in the
 module might be re-ordered. This can make post-processing of the PE
@@ -98,7 +102,7 @@ var mainMethodRow = result.ConstructedImage.DotNetDirectory.Metadata
     .GetByRid(newToken.Rid);
 ```
 
-## Preserving raw metadata structure
+## Preserving Raw Metadata Structure
 
 Some .NET modules are carefully crafted and rely on the raw structure of
 all metadata streams. These kinds of modules often rely on one of the
@@ -135,7 +139,7 @@ blob data and all metadata tokens to type references:
 
 ``` csharp
 var factory = new DotNetDirectoryFactory();
-factory.MetadataBuilderFlags = MetadataBuilderFlags.PreserveBlobIndices 
+factory.MetadataBuilderFlags = MetadataBuilderFlags.PreserveBlobIndices
                              | MetadataBuilderFlags.PreserveTypeReferenceIndices;
 imageBuilder.DotNetDirectoryFactory = factory;
 ```
@@ -159,7 +163,7 @@ imageBuilder.DotNetDirectoryFactory = factory;
 > `#~` to `#-`, and the file size might increase.
 
 
-## String folding in #Strings stream
+## String Folding in #Strings Stream
 
 Named metadata members (such as types, methods and fields) are assigned
 a name by referencing a string in the `#Strings` stream by its starting
@@ -194,7 +198,27 @@ factory.MetadataBuilderFlags |= MetadataBuilderFlags.NoStringsStreamOptimization
 > However, it will still try to reuse these original strings as much as
 > possible.
 
-## Preserving maximum stack depth
+## Deduplication of Embedded Resource Data
+
+By default, when adding two embedded resources to a file with identical
+contents, AsmResolver will not add the second copy of the data to the
+output file and instead reuse the first blob. This can drastically
+reduce the size of the final output file, especially for larger applications
+with many (small) identical resource files (e.g., many Windows Forms
+Applications).
+
+While supported by most implementations of the .NET runtime, some assembly
+post-processors (e.g., obfuscators) may not work well with this or depend
+on individual resource items to be present.
+
+To stop AsmResolver from performing this optimization, specify the
+`NoResourceDataDeduplication` metadata builder flag:
+
+``` csharp
+factory.MetadataBuilderFlags |= MetadataBuilderFlags.NoResourceDataDeduplication;
+```
+
+## Preserving Maximum Stack Depth
 
 CIL method bodies work with a stack, and the stack has a pre-defined
 size. This pre-defined size is defined by the `MaxStack` property of the
@@ -205,13 +229,16 @@ disk. However, this is not always desirable.
 To override this behaviour, set `ComputeMaxStackOnBuild` to `false` on
 all method bodies to exclude in the maximum stack depth calculation.
 
-Alternatively, if you want to force the maximum stack depths should be
-either preserved or recalculated, it is possible to provide a custom
-implemenmtation of the `IMethodBodySerializer`, or configure the
-`CilMethodBodySerializer`.
+``` csharp
+MethodDefinition method = ...
+method.CilMethodBody.ComputeMaxStackOnBuild = false;
+```
 
-Below an example on how to preserve maximum stack depths for all methods
-in the assembly:
+Alternatively, if you want to force the maximum stack depths should be
+either preserved or recalculated for **all** methods defined in the target
+assembly, it is possible to provide a custom implementation of the
+`IMethodBodySerializer`, or set up a new `CilMethodBodySerializer` with
+the `ComputeMaxStackOnBuildOverride` property set to any overriding value:
 
 ``` csharp
 DotNetDirectoryFactory factory = ...;
@@ -225,7 +252,7 @@ factory.MethodBodySerializer = new CilMethodBodySerializer
 > Disabling max stack computation may have unexpected side-effects (such
 > as rendering certain CIL method bodies invalid).
 
-## Strong name signing
+## Strong Name Signing
 
 Assemblies can be signed with a strong-name signature. Open a strong
 name private key from a file:
@@ -295,8 +322,8 @@ imageBuilder.ErrorListener = EmptyErrorListener.Instance;
 > [!NOTE]
 > Setting an instance of `IErrorListener` in the image builder will only
 > affect the building process. If the input module is initialized from a
-> file containing invalid metadata, you may still experience reader
-> errors, even if an `EmptyErrorListener` is specified. See
+> file containing invalid metadata, **you may still experience reader
+> errors, even if an `EmptyErrorListener` is specified to the builder**. See
 > [Advanced Module Reading](advanced-module-reading.md) for
 > handling reader diagnostics.
 

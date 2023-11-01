@@ -118,6 +118,11 @@ namespace AsmResolver.DotNet.Builder
             if (module.Assembly?.ManifestModule == module)
                 buffer.DefineAssembly(module.Assembly);
 
+            // Add resources (if any).
+            buffer.DefineManifestResources(
+                module.Resources,
+                (MetadataBuilderFlags & MetadataBuilderFlags.NoResourceDataDeduplication) == 0);
+
             // Finalize module.
             buffer.FinalizeModule(module);
 

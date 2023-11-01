@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Tests
             string path = runner.GetTestExecutablePath(testClass, testMethod, fileName);
             module.Write(path);
             string actualOutput = runner.RunAndCaptureOutput(path, null, timeout);
-            Assert.Equal(expectedOutput, actualOutput);
+            Assert.Equal(expectedOutput.Replace("\r\n", "\n"), actualOutput);
         }
 
         public static FieldDefinition FindInitializerField(this FieldDefinition field)

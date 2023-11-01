@@ -62,6 +62,13 @@ namespace AsmResolver.PE.DotNet.Resources
 
             reader = _reader.ForkRelative(offset);
             uint length = reader.ReadUInt32();
+
+            if (!reader.CanRead(length))
+            {
+                reader = default;
+                return false;
+            }
+
             reader = reader.ForkAbsolute(reader.Offset, length);
             return true;
         }

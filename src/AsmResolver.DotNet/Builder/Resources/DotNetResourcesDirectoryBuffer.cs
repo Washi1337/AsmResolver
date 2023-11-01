@@ -34,13 +34,32 @@ namespace AsmResolver.DotNet.Builder.Resources
         /// <param name="data">The data to append.</param>
         /// <returns>The index to the start of the data.</returns>
         /// <remarks>
-        /// This method does not index the resource data. Calling <see cref="AppendRawData"/> or <see cref="GetResourceDataOffset(byte[])"/>
-        /// on the same data will append the data a second time.
+        /// This method does not index the resource data. Calling <see cref="AppendRawData"/>,
+        /// <see cref="AppendLengthPrefixedData"/> or <see cref="GetResourceDataOffset(byte[])"/> on the same data will
+        /// append the data a second time.
         /// </remarks>
         public uint AppendRawData(byte[] data)
         {
             uint offset = (uint) _rawStream.Length;
             _writer.WriteBytes(data, 0, data.Length);
+            return offset;
+        }
+
+        /// <summary>
+        /// Appends raw data to the stream, prepending the data with a length.
+        /// </summary>
+        /// <param name="data">The data to append.</param>
+        /// <returns>The index to the start of the prefixed data.</returns>
+        /// <remarks>
+        /// This method does not index the resource data. Calling <see cref="AppendRawData"/>,
+        /// <see cref="AppendLengthPrefixedData"/> or <see cref="GetResourceDataOffset(byte[])"/> on the same data will
+        /// append the data a second time.
+        /// </remarks>
+        public uint AppendLengthPrefixedData(byte[] data)
+        {
+            uint offset = (uint) _rawStream.Length;
+            _writer.WriteUInt32((uint) data.Length);
+            AppendRawData(data);
             return offset;
         }
 
@@ -57,9 +76,7 @@ namespace AsmResolver.DotNet.Builder.Resources
 
             if (!_dataOffsets.TryGetValue(data, out uint offset))
             {
-                offset = (uint) _rawStream.Length;
-                _writer.WriteUInt32((uint) data.Length);
-                AppendRawData(data);
+                offset = AppendLengthPrefixedData(data);
                 _dataOffsets.Add(data, offset);
             }
 
