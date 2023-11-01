@@ -1,5 +1,6 @@
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
+using static AsmResolver.PE.DotNet.ReadyToRun.ReadyToRunSectionType;
 
 namespace AsmResolver.PE.DotNet.ReadyToRun
 {
@@ -13,9 +14,10 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         {
             return type switch
             {
-                ReadyToRunSectionType.CompilerIdentifier => new CompilerIdentifierSection(reader.ReadAsciiString()),
-                ReadyToRunSectionType.ImportSections => new SerializedImportSectionsSection(context, ref reader),
-                ReadyToRunSectionType.RuntimeFunctions when context.File.FileHeader.Machine == MachineType.Amd64 => new SerializedX64RuntimeFunctionsSection(context, ref reader),
+                CompilerIdentifier => new CompilerIdentifierSection(reader.ReadAsciiString()),
+                ImportSections => new SerializedImportSectionsSection(context, ref reader),
+                RuntimeFunctions when context.File.FileHeader.Machine == MachineType.Amd64 => new SerializedX64RuntimeFunctionsSection(context, ref reader),
+                MethodDefEntryPoints => new SerializedMethodEntryPointsSection(ref reader),
                 _ => new CustomReadyToRunSection(type, reader.ReadSegment(reader.Length))
             };
         }

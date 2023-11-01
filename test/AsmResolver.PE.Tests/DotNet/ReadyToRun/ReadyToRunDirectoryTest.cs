@@ -107,5 +107,31 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
                 (0x00009580u, 0x00009581u),
             }, section.GetFunctions().Select(x => (x.Begin.Rva, x.End.Rva)));
         }
+
+        [Fact]
+        public void ReadMethodDefEntryPoints()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
+            var section = header.GetSection<MethodEntryPointsSection>();
+
+            Assert.Equal(
+                new[] {0u, 1u},
+                section.EntryPoints.Select(x => x.RuntimeFunctionIndex)
+            );
+        }
+
+        [Fact]
+        public void ReadMethodDefEntryPointFixups()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
+            var section = header.GetSection<MethodEntryPointsSection>();
+            
+            Assert.Equal(new[]
+            {
+                (5u, 0u)
+            }, section.EntryPoints[0].Fixups.Select(x => (x.ImportIndex, x.SlotIndex)));
+        }
     }
 }
