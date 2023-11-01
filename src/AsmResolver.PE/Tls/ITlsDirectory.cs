@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AsmResolver.Collections;
 using AsmResolver.PE.Relocations;
 
 namespace AsmResolver.PE.Tls
@@ -30,7 +31,7 @@ namespace AsmResolver.PE.Tls
         /// <summary>
         /// Gets a table of function callbacks that need to be called upon every thread creation.
         /// </summary>
-        TlsCallbackCollection CallbackFunctions
+        ReferenceTable CallbackFunctions
         {
             get;
         }

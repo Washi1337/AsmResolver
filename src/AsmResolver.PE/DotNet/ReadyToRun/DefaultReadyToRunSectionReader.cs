@@ -13,6 +13,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             return type switch
             {
                 ReadyToRunSectionType.CompilerIdentifier => new CompilerIdentifierSection(reader.ReadAsciiString()),
+                ReadyToRunSectionType.ImportSections => new SerializedImportSectionsSection(context, ref reader),
                 _ => new CustomReadyToRunSection(type, reader.ReadSegment(reader.Length))
             };
         }

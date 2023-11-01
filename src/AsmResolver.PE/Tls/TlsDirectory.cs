@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.Relocations;
 
@@ -11,7 +12,7 @@ namespace AsmResolver.PE.Tls
     public class TlsDirectory : SegmentBase, ITlsDirectory
     {
         private readonly LazyVariable<TlsDirectory, IReadableSegment?> _templateData;
-        private TlsCallbackCollection? _callbackFunctions;
+        private ReferenceTable? _callbackFunctions;
         private ulong _imageBase = 0x00400000;
         private bool _is32Bit = true;
 
@@ -39,7 +40,7 @@ namespace AsmResolver.PE.Tls
         }
 
         /// <inheritdoc />
-        public TlsCallbackCollection CallbackFunctions
+        public ReferenceTable CallbackFunctions
         {
             get
             {
@@ -87,7 +88,7 @@ namespace AsmResolver.PE.Tls
         /// <remarks>
         /// This method is called upon initialization of the <see cref="CallbackFunctions"/> property.
         /// </remarks>
-        protected virtual TlsCallbackCollection GetCallbackFunctions() => new(this);
+        protected virtual ReferenceTable GetCallbackFunctions() => new(ReferenceTableAttributes.Va | ReferenceTableAttributes.Adaptive | ReferenceTableAttributes.ZeroTerminated);
 
         /// <inheritdoc />
         public IEnumerable<BaseRelocation> GetRequiredBaseRelocations()

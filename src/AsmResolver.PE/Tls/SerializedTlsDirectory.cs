@@ -1,3 +1,4 @@
+using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 
@@ -61,9 +62,9 @@ namespace AsmResolver.PE.Tls
         }
 
         /// <inheritdoc />
-        protected override TlsCallbackCollection GetCallbackFunctions()
+        protected override ReferenceTable GetCallbackFunctions()
         {
-            var result = new TlsCallbackCollection(this);
+            var result = base.GetCallbackFunctions();
 
             var file = _context.File;
             var optionalHeader = file.OptionalHeader;
