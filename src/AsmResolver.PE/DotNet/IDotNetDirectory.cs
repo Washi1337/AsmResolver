@@ -116,7 +116,7 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the managed native header of a mixed mode application (if available).
         /// </summary>
-        IReadableSegment? ManagedNativeHeader
+        IManagedNativeHeader? ManagedNativeHeader
         {
             get;
             set;

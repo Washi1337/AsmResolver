@@ -3,6 +3,7 @@ using AsmResolver.IO;
 using AsmResolver.PE.Certificates;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.ReadyToRun;
 
 namespace AsmResolver.PE
 {
@@ -28,6 +29,7 @@ namespace AsmResolver.PE
             MetadataStreamReader = new DefaultMetadataStreamReader();
             DebugDataReader = new DefaultDebugDataReader();
             CertificateReader = new DefaultCertificateReader();
+            ReadyToRunSectionReader = new DefaultReadyToRunSectionReader();
             ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
         }
 
@@ -76,5 +78,15 @@ namespace AsmResolver.PE
             get;
             set;
         } = UncachedFileService.Instance;
+
+        /// <summary>
+        /// Gets or sets the object to use for reading ReadyToRun metadata sections from the disk while reading the
+        /// portable executable.
+        /// </summary>
+        public IReadyToRunSectionReader ReadyToRunSectionReader
+        {
+            get;
+            set;
+        }
     }
 }
