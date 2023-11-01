@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.DotNet.ReadyToRun;
 using Xunit;
@@ -76,22 +77,36 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
 
             Assert.Equal(new[]
             {
-                (0x00000000u, 0x0000A0D4u),
-                (0x00000000u, 0x0000A0DBu),
-                (0x00000000u, 0x0000A0DDu),
-                (0x00000000u, 0x0000A0DFu),
-                (0x00000000u, 0x0000A0E2u),
-            }, section.Sections[1].Slots.Select((x,i) => (x.Rva, section.Sections[1].Signatures[i].Rva)));
+                (0x00000000u, 0x0000A0D4u, ReadyToRunFixupKind.CheckInstructionSetSupport),
+                (0x00000000u, 0x0000A0DBu, ReadyToRunFixupKind.Helper),
+                (0x00000000u, 0x0000A0DDu, ReadyToRunFixupKind.Helper),
+                (0x00000000u, 0x0000A0DFu, ReadyToRunFixupKind.Helper),
+                (0x00000000u, 0x0000A0E2u, ReadyToRunFixupKind.Helper),
+            }, ReadTestData(section.Sections[1]));
 
             Assert.Equal(new[]
             {
-                (0x0009594u, 0x0000A0D9u),
-            }, section.Sections[3].Slots.Select((x,i) => (x.Rva, section.Sections[3].Signatures[i].Rva)));
+                (0x0009594u, 0x0000A0D9u, ReadyToRunFixupKind.MethodEntryRefToken),
+            }, ReadTestData(section.Sections[3]));
 
             Assert.Equal(new[]
             {
-                (0x00000000u, 0x0000A0E5u),
-            }, section.Sections[5].Slots.Select((x,i) => (x.Rva, section.Sections[5].Signatures[i].Rva)));
+                (0x00000000u, 0x0000A0E5u, ReadyToRunFixupKind.StringHandle),
+            }, ReadTestData(section.Sections[5]));
+
+            return;
+
+            IEnumerable<(uint, uint, ReadyToRunFixupKind)> ReadTestData(ImportSection import)
+            {
+                for (int i = 0; i < import.Slots.Count; i++)
+                {
+                    yield return (
+                        import.Slots[i].Rva,
+                        import.Signatures[i].Rva,
+                        (ReadyToRunFixupKind) import.Signatures[i].CreateReader().ReadByte()
+                    );
+                }
+            }
         }
 
         [Fact]
@@ -127,7 +142,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
             var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
             var section = header.GetSection<MethodEntryPointsSection>();
-            
+
             Assert.Equal(new[]
             {
                 (5u, 0u)
