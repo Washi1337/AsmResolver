@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
@@ -63,6 +65,80 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         /// This method is called upon initialization of the <see cref="Sections"/> property.
         /// </remarks>
         protected virtual IList<IReadyToRunSection> GetSections() => new List<IReadyToRunSection>();
+
+        /// <summary>
+        /// Gets a section by its section type.
+        /// </summary>
+        /// <param name="type">The type of section.</param>
+        /// <returns>The section.</returns>
+        /// <exception cref="ArgumentException">
+        /// Occurs when there is no section of the provided type present in the directory.
+        /// </exception>
+        public IReadyToRunSection GetSection(ReadyToRunSectionType type)
+        {
+            return TryGetSection(type, out var section)
+                ? section
+                : throw new ArgumentException($"Directory does not contain a section of type {type}.");
+        }
+
+        /// <summary>
+        /// Gets a section by its section type.
+        /// </summary>
+        /// <typeparam name="TSection">The type of section.</typeparam>
+        /// <returns>The section.</returns>
+        /// <exception cref="ArgumentException">
+        /// Occurs when there is no section of the provided type present in the directory.
+        /// </exception>
+        public TSection GetSection<TSection>()
+            where TSection : class, IReadyToRunSection
+        {
+            return TryGetSection<TSection>(out var section)
+                ? section
+                : throw new ArgumentException($"Directory does not contain a section of type {typeof(TSection).Name}.");
+        }
+
+        /// <summary>
+        /// Attempts to get a section by its section type.
+        /// </summary>
+        /// <param name="type">The type of the section.</param>
+        /// <param name="section">The section, or <c>null</c> if none was found.</param>
+        /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
+        public bool TryGetSection(ReadyToRunSectionType type, [NotNullWhen(true)] out IReadyToRunSection? section)
+        {
+            for (int i = 0; i < Sections.Count; i++)
+            {
+                if (Sections[i].Type == type)
+                {
+                    section = Sections[i];
+                    return true;
+                }
+            }
+
+            section = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to get a section by its section type.
+        /// </summary>
+        /// <typeparam name="TSection">The type of section.</typeparam>
+        /// <param name="section">The section, or <c>null</c> if none was found.</param>
+        /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
+        public bool TryGetSection<TSection>([NotNullWhen(true)] out TSection? section)
+            where TSection : class, IReadyToRunSection
+        {
+            for (int i = 0; i < Sections.Count; i++)
+            {
+                if (Sections[i] is TSection s)
+                {
+                    section = s;
+                    return true;
+                }
+            }
+
+            section = null;
+            return false;
+        }
 
         /// <inheritdoc />
         public override uint GetPhysicalSize()
