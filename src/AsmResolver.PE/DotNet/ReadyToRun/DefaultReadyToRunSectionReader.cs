@@ -10,7 +10,11 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         /// <inheritdoc />
         public IReadyToRunSection ReadSection(PEReaderContext context, ReadyToRunSectionType type, ref BinaryStreamReader reader)
         {
-            return new CustomReadyToRunSection(type, reader.ReadSegment(reader.Length));
+            return type switch
+            {
+                ReadyToRunSectionType.CompilerIdentifier => new CompilerIdentifierSection(reader.ReadAsciiString()),
+                _ => new CustomReadyToRunSection(type, reader.ReadSegment(reader.Length))
+            };
         }
     }
 }

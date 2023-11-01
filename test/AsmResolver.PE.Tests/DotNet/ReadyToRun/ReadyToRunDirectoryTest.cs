@@ -38,5 +38,15 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
                 ReadyToRunSectionType.ManifestAssemblyMvids,
             }, header.Sections.Select(x => x.Type));
         }
+
+        [Fact]
+        public void ReadCompilerIdentifierSection()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
+            var section = header.GetSection<CompilerIdentifierSection>();
+
+            Assert.Equal("Crossgen2 6.0.2223.42425", section.Identifier);
+        }
     }
 }
