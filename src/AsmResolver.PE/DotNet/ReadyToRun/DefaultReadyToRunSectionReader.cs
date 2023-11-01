@@ -1,4 +1,5 @@
 using AsmResolver.IO;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.DotNet.ReadyToRun
 {
@@ -14,6 +15,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             {
                 ReadyToRunSectionType.CompilerIdentifier => new CompilerIdentifierSection(reader.ReadAsciiString()),
                 ReadyToRunSectionType.ImportSections => new SerializedImportSectionsSection(context, ref reader),
+                ReadyToRunSectionType.RuntimeFunctions when context.File.FileHeader.Machine == MachineType.Amd64 => new SerializedX64RuntimeFunctionsSection(context, ref reader),
                 _ => new CustomReadyToRunSection(type, reader.ReadSegment(reader.Length))
             };
         }

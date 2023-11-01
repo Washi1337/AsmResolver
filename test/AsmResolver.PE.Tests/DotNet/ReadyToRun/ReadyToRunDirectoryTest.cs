@@ -93,5 +93,19 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
                 (0x00000000u, 0x0000A0E5u),
             }, section.Sections[5].Slots.Select((x,i) => (x.Rva, section.Sections[5].Signatures[i].Rva)));
         }
+
+        [Fact]
+        public void ReadX64RuntimeFunctions()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
+            var section = header.GetSection<RuntimeFunctionsSection>();
+
+            Assert.Equal(new[]
+            {
+                (0x00009560u, 0x0000957au),
+                (0x00009580u, 0x00009581u),
+            }, section.GetFunctions().Select(x => (x.Begin.Rva, x.End.Rva)));
+        }
     }
 }
