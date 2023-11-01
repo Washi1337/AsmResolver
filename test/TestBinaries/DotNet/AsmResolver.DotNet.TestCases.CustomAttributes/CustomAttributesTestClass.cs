@@ -54,6 +54,11 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         {
         }
 
+        [TestCase(typeof(TestEnum))]
+        public void FIxedLocalTypeArgument()
+        {
+        }
+
         [TestCase(2, "Fixed arg", TestEnum.Value3)]
         public void FixedMultipleArguments()
         {
