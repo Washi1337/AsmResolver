@@ -3,7 +3,7 @@ using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.ReadyToRun
 {
-    internal class NativeArrayView
+    internal sealed class NativeArrayView
     {
         // TODO: Turn into a mutable NativeArray class so it can be measured in size and written to disk.
 
@@ -126,6 +126,5 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
 
             return value;
         }
-
     }
 }

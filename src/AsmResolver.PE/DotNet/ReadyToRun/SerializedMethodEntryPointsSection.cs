@@ -29,49 +29,10 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             for (int i = 0; i < array.Count; i++)
             {
                 if (array.TryGet(i, out var elementReader))
-                    result.Add(ReadMethodEntryPoint(elementReader));
+                    result.Add(MethodEntryPoint.FromReader(ref elementReader));
             }
 
             return result;
-        }
-
-        private static MethodEntryPoint ReadMethodEntryPoint(BinaryStreamReader elementReader)
-        {
-            uint header = NativeArrayView.DecodeUnsigned(ref elementReader);
-            bool hasFixups = (header & 1) != 0;
-            if (!hasFixups)
-                return new MethodEntryPoint(header >> 1);
-
-            var entryPoint = new MethodEntryPoint(header >> 2);
-            ReadFixups(entryPoint, elementReader);
-            return entryPoint;
-        }
-
-        private static void ReadFixups(MethodEntryPoint entryPoint, BinaryStreamReader fixupsReader)
-        {
-            var nibbleReader = new NibbleReader(fixupsReader);
-
-            uint importIndex = nibbleReader.Read3BitEncodedUInt();
-            while (true)
-            {
-                uint slotIndex = nibbleReader.Read3BitEncodedUInt();
-                while (true)
-                {
-                    entryPoint.Fixups.Add(new MethodFixup(importIndex, slotIndex));
-
-                    uint slotDelta = nibbleReader.Read3BitEncodedUInt();
-                    if (slotDelta == 0)
-                        break;
-
-                    slotIndex += slotDelta;
-                }
-
-                uint importDelta = nibbleReader.Read3BitEncodedUInt();
-                if (importDelta == 0)
-                    break;
-
-                importIndex += importDelta;
-            }
         }
     }
 }
