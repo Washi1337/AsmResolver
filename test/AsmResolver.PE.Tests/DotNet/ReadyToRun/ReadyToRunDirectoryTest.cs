@@ -112,26 +112,29 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [Fact]
         public void ReadX64RuntimeFunctions()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
             var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
             var section = header.GetSection<RuntimeFunctionsSection>();
 
             Assert.Equal(new[]
             {
-                (0x00009560u, 0x0000957au),
-                (0x00009580u, 0x00009581u),
+                (0x00001840u, 0x00001870u),
+                (0x00001870u, 0x0000188au),
+                (0x00001890u, 0x000018cdu),
+                (0x000018CDu, 0x000018f2u),
+                (0x00001900u, 0x0000191au),
             }, section.GetFunctions().Select(x => (x.Begin.Rva, x.End.Rva)));
         }
 
         [Fact]
         public void ReadMethodDefEntryPoints()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
             var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
             var section = header.GetSection<MethodEntryPointsSection>();
 
             Assert.Equal(
-                new[] {0u, 1u},
+                new[] {0u, 1u, 2u, 4u},
                 section.EntryPoints.Select(x => x.RuntimeFunctionIndex)
             );
         }
@@ -139,13 +142,14 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [Fact]
         public void ReadMethodDefEntryPointFixups()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
             var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
             var section = header.GetSection<MethodEntryPointsSection>();
 
             Assert.Equal(new[]
             {
-                (5u, 0u)
+                (5u, 0u),
+                (5u, 4u),
             }, section.EntryPoints[0].Fixups.Select(x => (x.ImportIndex, x.SlotIndex)));
         }
     }

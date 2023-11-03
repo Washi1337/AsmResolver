@@ -39,13 +39,11 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         {
             uint header = NativeArrayView.DecodeUnsigned(ref elementReader);
             bool hasFixups = (header & 1) != 0;
-            uint functionIndex = header >> 1;
+            if (!hasFixups)
+                return new MethodEntryPoint(header >> 1);
 
-            var entryPoint = new MethodEntryPoint(functionIndex);
-
-            if (hasFixups)
-                ReadFixups(entryPoint, elementReader);
-
+            var entryPoint = new MethodEntryPoint(header >> 2);
+            ReadFixups(entryPoint, elementReader);
             return entryPoint;
         }
 
