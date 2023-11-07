@@ -177,6 +177,13 @@ namespace AsmResolver.DotNet
                 switch (scope.MetadataToken.Table)
                 {
                     case TableIndex.AssemblyRef:
+                        if (reference.Module?.Assembly is { } assembly)
+                        {
+                            // Are we referencing the current assembly the reference was declared in?
+                            if (SignatureComparer.Default.Equals(scope.GetAssembly(), assembly))
+                                return FindTypeInModule(reference.Module, reference.Namespace, reference.Name);
+                        }
+
                         var assemblyDefScope = _assemblyResolver.Resolve((AssemblyReference) scope);
                         return assemblyDefScope is not null
                             ? FindTypeInAssembly(assemblyDefScope, reference.Namespace, reference.Name)
