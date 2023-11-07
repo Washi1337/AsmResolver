@@ -82,9 +82,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var assemblyRef = new AssemblyReference("MyAssembly", new Version(1, 2, 3, 4));
             var expected = new TypeReference(assemblyRef, ns, name).ToTypeSignature();
 
-
-            var actual = TypeNameParser.Parse(_module,
-                $"{ns}.{name}, {assemblyRef.FullName}");
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}, {assemblyRef.FullName}");
             Assert.Equal(expected, actual, _comparer);
         }
 
@@ -141,7 +139,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var elementType = new TypeReference(_module, ns, name);
             var argumentType = _module.CorLibTypeFactory.Object;
 
-            var expected = new GenericInstanceTypeSignature(elementType, false, argumentType);
+            var expected = elementType.MakeGenericInstanceType(false, argumentType);
 
             var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[{argumentType.Namespace}.{argumentType.Name}]");
             Assert.Equal(expected, actual, _comparer);
@@ -298,6 +296,18 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var type = TypeNameParser.Parse(_module,
                 "SomeNamespace.SomeType, SomeAssembly, Version=1.2.3.4, Culture=neutral, PublicKeyToken=0123456789abcdef");
             Assert.DoesNotContain(type.Scope!.GetAssembly(), _module.AssemblyReferences);
+        }
+
+        [Fact]
+        public void ReadTypeNameFromLocalModuleShouldResultInResolvableType()
+        {
+            var module = ModuleDefinition.FromFile(typeof(TypeNameParserTest).Assembly.Location);
+            var type = TypeNameParser
+                    .Parse(module, typeof(TypeNameParserTest).AssemblyQualifiedName!)
+                    .GetUnderlyingTypeDefOrRef()!;
+
+            Assert.NotNull(type.Resolve());
+            Assert.NotNull(type.ImportWith(module.DefaultImporter).Resolve());
         }
     }
 }

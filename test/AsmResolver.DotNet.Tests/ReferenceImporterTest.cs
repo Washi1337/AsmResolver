@@ -421,9 +421,10 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportFullyImportedCustomModifierTypeShouldResultInSameInstance()
         {
-            var signature = new TypeReference(_module, _dummyAssembly, "SomeNamespace", "SomeType")
+            var assembly = _importer.ImportScope(_dummyAssembly);
+            var signature = new TypeReference(_module, assembly, "SomeNamespace", "SomeType")
                 .ToTypeSignature()
-                .MakeModifierType(new TypeReference(_module, _dummyAssembly, "SomeNamespace", "SomeModifierType"), true);
+                .MakeModifierType(new TypeReference(_module, assembly, "SomeNamespace", "SomeModifierType"), true);
 
             var imported = _importer.ImportTypeSignature(signature);
 
@@ -470,10 +471,11 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportFullyImportedFunctionPointerTypeShouldResultInSameInstance()
         {
+            var assembly = _importer.ImportScope(_dummyAssembly);
             var signature = MethodSignature
                 .CreateStatic(
                     _module.CorLibTypeFactory.Void,
-                    new TypeReference(_module, _dummyAssembly, "SomeNamespace", "SomeType").ToTypeSignature())
+                    new TypeReference(_module, assembly, "SomeNamespace", "SomeType").ToTypeSignature())
                 .MakeFunctionPointerType();
 
             var imported = _importer.ImportTypeSignature(signature);
