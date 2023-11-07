@@ -140,7 +140,8 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public bool IsImportedInModule(ModuleDefinition module) => Module == module;
+        public bool IsImportedInModule(ModuleDefinition module) =>
+            Module == module && (Scope?.IsImportedInModule(module) ?? false);
 
         /// <summary>
         /// Imports the type reference using the provided reference importer object.
