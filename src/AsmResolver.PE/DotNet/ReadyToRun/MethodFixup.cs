@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 
 namespace AsmResolver.PE.DotNet.ReadyToRun
@@ -6,7 +7,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
     /// Describes a fixup that needs to be applied to a native method body before it can be executed.
     /// </summary>
     [DebuggerDisplay("ImportIndex = {ImportIndex}, SlotIndex = {SlotIndex}")]
-    public readonly struct MethodFixup
+    public readonly struct MethodFixup : IEquatable<MethodFixup>
     {
         /// <summary>
         /// Constructs a new method fixup.
@@ -34,5 +35,29 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         {
             get;
         }
+
+        /// <inheritdoc />
+        public bool Equals(MethodFixup other)
+        {
+            return ImportIndex == other.ImportIndex && SlotIndex == other.SlotIndex;
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            return obj is MethodFixup other && Equals(other);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((int) ImportIndex * 397) ^ (int) SlotIndex;
+            }
+        }
+
+        /// <inheritdoc />
+        public override string ToString() => $"ImportIndex = {ImportIndex}, SlotIndex = {SlotIndex}";
     }
 }

@@ -23,6 +23,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         {
             _context = context;
             _section = DataDirectory.FromReader(ref reader);
+
             Attributes = (ImportSectionAttributes) reader.ReadUInt16();
             Type = (ImportSectionType) reader.ReadByte();
             EntrySize = _originalEntrySize = reader.ReadByte();

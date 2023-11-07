@@ -18,6 +18,9 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         /// <param name="reader">The input stream.</param>
         public SerializedImportSectionsSection(PEReaderContext context, ref BinaryStreamReader reader)
         {
+            Offset = reader.Offset;
+            Rva = reader.Rva;
+
             _context = context;
             _reader = reader;
         }

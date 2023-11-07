@@ -21,7 +21,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
                 return (byte) (_buffer & 0xF);
             }
 
-            byte value = (byte) ((_buffer >> 8) & 0xF);
+            byte value = (byte) ((_buffer >> 4) & 0xF);
             _buffer = null;
             return value;
         }

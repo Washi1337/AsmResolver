@@ -24,6 +24,9 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             if (reader.ReadUInt32() != (uint) ManagedNativeHeaderSignature.Rtr)
                 throw new BadImageFormatException("Input stream does not point to a valid R2R header.");
 
+            Offset = reader.Offset;
+            Rva = reader.Rva;
+
             _context = context;
             MajorVersion = reader.ReadUInt16();
             MinorVersion = reader.ReadUInt16();

@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -8,6 +8,7 @@ namespace AsmResolver.IO
     /// <summary>
     /// Provides methods for reading binary data from a data source.
     /// </summary>
+    [DebuggerDisplay("[{StartOffset}..{EndOffset}) at {Offset} ({RelativeOffset})")]
     public struct BinaryStreamReader
     {
         [ThreadStatic]

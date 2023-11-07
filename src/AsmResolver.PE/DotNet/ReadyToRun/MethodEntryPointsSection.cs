@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.IO;
 
@@ -11,7 +10,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
     /// </summary>
     public class MethodEntryPointsSection : SegmentBase, IReadyToRunSection
     {
-        private IList<MethodEntryPoint>? _entryPoints;
+        private NativeArray<MethodEntryPoint>? _entryPoints;
 
         /// <inheritdoc />
         public ReadyToRunSectionType Type => ReadyToRunSectionType.MethodDefEntryPoints;
@@ -23,7 +22,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         /// Gets a collection of entry points stored in the section. The index of the element corresponds to the method
         /// as specified in the method definition table in the tables stream of the .NET module.
         /// </summary>
-        public IList<MethodEntryPoint> EntryPoints
+        public NativeArray<MethodEntryPoint> EntryPoints
         {
             get
             {
@@ -40,23 +39,22 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         /// <remarks>
         /// This method is called upon initialization of the <see cref="EntryPoints"/> property.
         /// </remarks>
-        protected virtual IList<MethodEntryPoint> GetEntryPoints() => new List<MethodEntryPoint>();
+        protected virtual NativeArray<MethodEntryPoint> GetEntryPoints() => new();
 
         /// <inheritdoc />
         public virtual BinaryStreamReader CreateReader() => throw new InvalidOperationException();
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize()
+        public override void UpdateOffsets(in RelocationParameters parameters)
         {
-            // TODO: nativearray needs to be made measurable.
-            throw new NotImplementedException();
+            base.UpdateOffsets(in parameters);
+            EntryPoints.UpdateOffsets(in parameters);
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
-        {
-            // TODO: nativearray needs to be made writeable.
-            throw new NotImplementedException();
-        }
+        public override uint GetPhysicalSize() => EntryPoints.GetPhysicalSize();
+
+        /// <inheritdoc />
+        public override void Write(IBinaryStreamWriter writer) => EntryPoints.Write(writer);
     }
 }

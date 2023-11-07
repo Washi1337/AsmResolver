@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.ReadyToRun;
 using Xunit;
 
@@ -7,6 +8,26 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
 {
     public class ReadyToRunDirectoryTest
     {
+        private static T GetSection<T>(IPEImage image, bool rebuild)
+            where T : class, IReadyToRunSection
+        {
+            var serializedImage = (SerializedPEImage) image;
+
+            var directory = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
+            var section = directory.GetSection<T>();
+
+            if (rebuild)
+            {
+                section.UpdateOffsets(new RelocationParameters(0, 0));
+
+                var reader = new BinaryStreamReader(section.WriteIntoArray());
+                var context = serializedImage.ReaderContext;
+                section = (T) context.Parameters.ReadyToRunSectionReader.ReadSection(context, section.Type, ref reader);
+            }
+
+            return section;
+        }
+
         [Fact]
         public void ReadBasicHeader()
         {
@@ -40,22 +61,24 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
             }, header.Sections.Select(x => x.Type));
         }
 
-        [Fact]
-        public void ReadCompilerIdentifierSection()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CompilerIdentifierSection(bool rebuild)
         {
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
-            var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
-            var section = header.GetSection<CompilerIdentifierSection>();
+            var section = GetSection<CompilerIdentifierSection>(image, rebuild);
 
             Assert.Equal("Crossgen2 6.0.2223.42425", section.Identifier);
         }
 
-        [Fact]
-        public void ReadImportSections()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ImportSections(bool rebuild)
         {
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
-            var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
-            var section = header.GetSection<ImportSectionsSection>();
+            var section = GetSection<ImportSectionsSection>(image, rebuild);
 
             Assert.Equal(new[]
             {
@@ -68,12 +91,13 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
             }, section.Sections.Select(x => x.Type));
         }
 
-        [Fact]
-        public void ReadImportSectionSlots()
+        [Theory]
+        [InlineData(false)]
+        // TODO: [InlineData(true)]
+        public void ImportSectionSlots(bool rebuild)
         {
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
-            var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
-            var section = header.GetSection<ImportSectionsSection>();
+            var section = GetSection<ImportSectionsSection>(image, rebuild);
 
             Assert.Equal(new[]
             {
@@ -110,7 +134,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         }
 
         [Fact]
-        public void ReadX64RuntimeFunctions()
+        public void X64RuntimeFunctions()
         {
             var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
             var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
@@ -126,31 +150,33 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
             }, section.GetFunctions().Select(x => (x.Begin.Rva, x.End.Rva)));
         }
 
-        [Fact]
-        public void ReadMethodDefEntryPoints()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MethodDefEntryPoints(bool rebuild)
         {
             var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
-            var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
-            var section = header.GetSection<MethodEntryPointsSection>();
+            var section = GetSection<MethodEntryPointsSection>(image, rebuild);
 
             Assert.Equal(
-                new[] {0u, 1u, 2u, 4u},
-                section.EntryPoints.Select(x => x.RuntimeFunctionIndex)
+                new uint?[] {0u, null, 1u, 2u, 4u},
+                section.EntryPoints.Select(x => x?.RuntimeFunctionIndex)
             );
         }
 
-        [Fact]
-        public void ReadMethodDefEntryPointFixups()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MethodDefEntryPointFixups(bool rebuild)
         {
             var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
-            var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
-            var section = header.GetSection<MethodEntryPointsSection>();
+            var section = GetSection<MethodEntryPointsSection>(image, rebuild);
 
             Assert.Equal(new[]
             {
                 (5u, 0u),
                 (5u, 4u),
-            }, section.EntryPoints[0].Fixups.Select(x => (x.ImportIndex, x.SlotIndex)));
+            }, section.EntryPoints[0]!.Fixups.Select(x => (x.ImportIndex, x.SlotIndex)));
         }
     }
 }

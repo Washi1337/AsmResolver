@@ -17,22 +17,19 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         /// <param name="reader">The input stream.</param>
         public SerializedMethodEntryPointsSection(ref BinaryStreamReader reader)
         {
+            Offset = reader.Offset;
+            Rva = reader.Rva;
+
             _reader = reader;
         }
 
         /// <inheritdoc />
-        protected override IList<MethodEntryPoint> GetEntryPoints()
+        protected override NativeArray<MethodEntryPoint> GetEntryPoints()
         {
-            var result = base.GetEntryPoints();
-
-            var array = new NativeArrayView(_reader);
-            for (int i = 0; i < array.Count; i++)
-            {
-                if (array.TryGet(i, out var elementReader))
-                    result.Add(MethodEntryPoint.FromReader(ref elementReader));
-            }
-
-            return result;
+            return NativeArray<MethodEntryPoint>.FromReader(
+                _reader,
+                reader => MethodEntryPoint.FromReader(ref reader)
+            );
         }
     }
 }
