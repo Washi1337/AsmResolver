@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.ReadyToRun
@@ -24,6 +23,12 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         }
 
         /// <inheritdoc />
+        public override bool CanRead => true;
+
+        /// <inheritdoc />
+        public override BinaryStreamReader CreateReader() => _reader.Fork();
+
+        /// <inheritdoc />
         protected override NativeArray<MethodEntryPoint> GetEntryPoints()
         {
             return NativeArray<MethodEntryPoint>.FromReader(
@@ -31,5 +36,6 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
                 reader => MethodEntryPoint.FromReader(ref reader)
             );
         }
+
     }
 }
