@@ -85,7 +85,7 @@ namespace AsmResolver.DotNet.Tests
                 attributeName += "`1";
 
             var attribute = method.CustomAttributes
-                .First(c => c.Constructor!.DeclaringType!.Name.Value.StartsWith(attributeName));
+                .First(c => c.Constructor!.DeclaringType!.Name!.Value.StartsWith(attributeName));
 
             if (access)
             {
@@ -197,10 +197,13 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature.FixedArguments[0];
             var factory = attribute.Constructor!.Module!.CorLibTypeFactory;
 
-            var listRef = new TypeReference(factory.CorLibScope, "System.Collections.Generic", "KeyValuePair`2");
-            var instance = new GenericInstanceTypeSignature(listRef, false,
-                new SzArrayTypeSignature(factory.String),
-                new SzArrayTypeSignature(factory.Int32));
+            var instance = factory.CorLibScope
+                .CreateTypeReference("System.Collections.Generic", "KeyValuePair`2")
+                .MakeGenericInstanceType(
+                    false,
+                    factory.String.MakeSzArrayType(),
+                    factory.Int32.MakeSzArrayType()
+                );
 
             Assert.Equal(instance, argument.Element as TypeSignature, _comparer);
         }
@@ -293,7 +296,7 @@ namespace AsmResolver.DotNet.Tests
 
             var module = attribute.Constructor!.Module!;
             var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
-            var expected = new GenericInstanceTypeSignature(nestedClass, false, module.CorLibTypeFactory.Object);
+            var expected = nestedClass.MakeGenericInstanceType(false, module.CorLibTypeFactory.Object);
 
             var element = Assert.IsAssignableFrom<TypeSignature>(argument.Element);
             Assert.Equal(expected, element, _comparer);
@@ -312,9 +315,9 @@ namespace AsmResolver.DotNet.Tests
 
             var module = attribute.Constructor!.Module!;
             var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
-            var expected = new SzArrayTypeSignature(
-                new GenericInstanceTypeSignature(nestedClass, false, module.CorLibTypeFactory.Object)
-            );
+            var expected = nestedClass
+                .MakeGenericInstanceType(false, module.CorLibTypeFactory.Object)
+                .MakeSzArrayType();
 
             var element = Assert.IsAssignableFrom<TypeSignature>(argument.Element);
             Assert.Equal(expected, element, _comparer);
@@ -413,7 +416,7 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayAsObjectEmptyArgument),rebuild, access);
             var argument = attribute.Signature!.FixedArguments[0];
 
-            var boxedArgument =Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
+            var boxedArgument = Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
             Assert.Equal(Array.Empty<object>(), boxedArgument.Value);
         }
 
