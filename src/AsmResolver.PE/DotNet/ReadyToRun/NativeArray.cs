@@ -42,9 +42,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         /// <param name="reader">The input stream.</param>
         /// <param name="readElement">The function to use for reading individual elements.</param>
         /// <returns>The read array.</returns>
-        public static NativeArray<T> FromReader(
-            BinaryStreamReader reader,
-            Func<BinaryStreamReader, T> readElement)
+        public static NativeArray<T> FromReader(BinaryStreamReader reader, Func<BinaryStreamReader, T> readElement)
         {
             var result = new NativeArray<T>();
 

@@ -127,6 +127,11 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
+        /// Gets the remaining number of bytes that can be read from the stream.
+        /// </summary>
+        public uint RemainingLength => Length - RelativeOffset;
+
+        /// <summary>
         /// Gets or sets the current virtual address (relative to the image base) to read from.
         /// </summary>
         public uint Rva
@@ -359,7 +364,7 @@ namespace AsmResolver.IO
         /// <returns>The remaining bytes.</returns>
         public byte[] ReadToEnd()
         {
-            byte[] buffer = new byte[Length - RelativeOffset];
+            byte[] buffer = new byte[RemainingLength];
             ReadBytes(buffer, 0, buffer.Length);
             return buffer;
         }

@@ -175,9 +175,8 @@ namespace AsmResolver.PE.DotNet
             var signature = (ManagedNativeHeaderSignature) directoryReader.Fork().ReadUInt32();
             return signature switch
             {
-                ManagedNativeHeaderSignature.NGen => null, // Do not crash even if we do not support it.
                 ManagedNativeHeaderSignature.Rtr => new SerializedReadyToRunDirectory(_context, ref directoryReader),
-                _ => _context.BadImageAndReturn<IManagedNativeHeader>("Invalid or unsupported managed native header signature.")
+                _ => new CustomManagedNativeHeader(signature, directoryReader.ReadSegment(directoryReader.RemainingLength))
             };
         }
     }
