@@ -154,7 +154,7 @@ TablesStream tablesStream = metadata.GetStream<TablesStream>();
 ```
 
 Metadata tables are represented by the `IMetadataTable` interface.
-Individal tables can be accessed using the `GetTable` method:  
+Individal tables can be accessed using the `GetTable` method:
 
 ```csharp
 IMetadataTable typeDefTable = tablesStream.GetTable(TableIndex.TypeDef);
@@ -162,13 +162,13 @@ IMetadataTable typeDefTable = tablesStream.GetTable(TableIndex.TypeDef);
 
 Tables can also be obtained by their row type:
 ```csharp
-MetadataTable<TypeDefinitionRow> typeDefTable = tablesStream.GetTable<TypeDefinitionRow>();  
+MetadataTable<TypeDefinitionRow> typeDefTable = tablesStream.GetTable<TypeDefinitionRow>();
 ```
 
-The latter option is the preferred option, as it allows for a more type-safe 
+The latter option is the preferred option, as it allows for a more type-safe
 interaction with the table as well and avoids boxing of each row in the table.
 Each metadata table is associated with its own row structure. Below a table of
-all row definitions: 
+all row definitions:
 
 
 | Table index | Name (as per specification) | AsmResolver row structure name |
@@ -220,8 +220,8 @@ all row definitions:
 | 44          | GenericParamConstraint      | `GenericParamConstraintRow`    }
 
 
-Metadata tables are similar to normal`ICollection\<T\>` instances. They provide 
-enumerators, indexers and methods to add or remove rows from the table.  
+Metadata tables are similar to normal`ICollection\<T\>` instances. They provide
+enumerators, indexers and methods to add or remove rows from the table.
 ``` csharp
 Console.WriteLine($"Number of types: {typeDefTable.Count}");
 
@@ -235,13 +235,13 @@ foreach (var typeRow in typeDefTable)
 }
 ```
 
-Members can also be accessed by their RID using the `GetByRid` or `TryGetByRid` helper functions:  
+Members can also be accessed by their RID using the `GetByRid` or `TryGetByRid` helper functions:
 
 ```csharp
 TypeDefinitionRow thirdTypeRow = typeDefTable.GetByRid(3);
 ```
 
-Using the other metadata streams, it is possible to resolve all columns. 
+Using the other metadata streams, it is possible to resolve all columns.
 Below an example that prints the name and namespace of each type row in the
 type definition table in a file.
 
@@ -260,7 +260,7 @@ foreach (var typeRow in typeDefTable)
     // Resolve name and namespace columns using the #Strings stream.
     string ns = stringsStream.GetStringByIndex(typeRow.Namespace);
     string name = stringsStream.GetStringByIndex(typeRow.Name);
-    
+
     // Print name and namespace:
     Console.WriteLine(string.IsNullOrEmpty(ns) ? name : $"{ns}.{name}");
 }
@@ -268,20 +268,20 @@ foreach (var typeRow in typeDefTable)
 ## Method and FieldRVA
 Every row structure defined in AsmResolver respects the specification described
 by the CLR itself. However, there are two exceptions to this rule, and those are
-the **Method** and **FieldRVA** rows. According to the specification, both of 
+the **Method** and **FieldRVA** rows. According to the specification, both of
 these rows have an **RVA** column that references a segment in the original PE
-file. Since this second layer of abstraction attempts to abstract away any file 
-offset or virtual address, these columns are replaced with properties called 
+file. Since this second layer of abstraction attempts to abstract away any file
+offset or virtual address, these columns are replaced with properties called
 `Body` and `Data` respectively, both of type`ISegmentReference`instead.
 
-`ISegmentReference`exposes a method`CreateReader()`, which automatically 
-resolves the RVA that was stored in the row, and creates a new input stream 
-that can be used to parse e.g. method bodies or field data.   
+`ISegmentReference`exposes a method`CreateReader()`, which automatically
+resolves the RVA that was stored in the row, and creates a new input stream
+that can be used to parse e.g. method bodies or field data.
 
 ### Reading method bodies:
 
-Reading a managed CIL method body can be done using 
-`CilRawMethodBody.FromReader` method:  
+Reading a managed CIL method body can be done using
+`CilRawMethodBody.FromReader` method:
 
 ```csharp
 var methodTable = tablesStream.GetTable<MethodDefinitionRow>();
@@ -289,20 +289,20 @@ var firstMethod = methodTable[0];
 var methodBody = CilRawMethodBody.FromReader(firstMethod.Body.CreateReader());
 ```
 
-It is important to note that the user is not bound to use `CilRawMethodBody`. 
-In the case that the `Native` (`0x0001`) flag is set in 
-`MethodDefinitionRow.ImplAttributes`, the implementation of the method body is 
+It is important to note that the user is not bound to use `CilRawMethodBody`.
+In the case that the `Native` (`0x0001`) flag is set in
+`MethodDefinitionRow.ImplAttributes`, the implementation of the method body is
 not written in CIL, but using native code that uses an instruction set dependent
-on the platform that this application is targeting. Since the bounds of such a 
-method body is not always well-defined, AsmResolver does not do any parsing on 
-its own. However, using the`CreateReader()`method, it is still possible to 
-decode instructions from this method body, using a custom instruction decoder. 
+on the platform that this application is targeting. Since the bounds of such a
+method body is not always well-defined, AsmResolver does not do any parsing on
+its own. However, using the`CreateReader()`method, it is still possible to
+decode instructions from this method body, using a custom instruction decoder.
 
 ### Reading field data
 
-Reading field data can be done in a similar fashion as reading method bodies. 
-Again use the `CreateReader()` method to gain access to the raw data of the 
-initial value of the field referenced by a **FieldRVA** row.  
+Reading field data can be done in a similar fashion as reading method bodies.
+Again use the `CreateReader()` method to gain access to the raw data of the
+initial value of the field referenced by a **FieldRVA** row.
 
 ```csharp
 var fieldRvaTable = tablesStream.GetTable<FieldRvaRow>();
@@ -312,22 +312,22 @@ var reader = firstRva.Data.CreateReader();
 
 ### Creating new segment references
 Creating new segment references not present in the current PE image yet can be
-done using the `ISegment.ToReference()` extension method:  
+done using the `ISegment.ToReference()` extension method:
 
 ```csharp
 var myData = new DataSegment(new byte[] {1, 2, 3, 4});
 var fieldRva = new FieldRvaRow(myData.ToReference(), 0);
 ```
 
-## TypeReference Hash (TRH) 
+## TypeReference Hash (TRH)
 
 Similar to the [Import Hash](imports.md#import-hash), the TypeReference Hash (TRH) can be used
-to help identify malware families written in a .NET language. However, unlike 
-the Import Hash, the TRH is based on the names of all imported type references 
+to help identify malware families written in a .NET language. However, unlike
+the Import Hash, the TRH is based on the names of all imported type references
 instead of the symbols specified in the imports directory of the PE. This is a
-more accurate representation for .NET images, as virtually every .NET image 
-only uses one native symbol (either `mscoree.dll!_CorExeMain` or 
-`mscoree.dll!_CorDllMain` ). AsmResolver includes a built-in implementation 
+more accurate representation for .NET images, as virtually every .NET image
+only uses one native symbol (either `mscoree.dll!_CorExeMain` or
+`mscoree.dll!_CorDllMain` ). AsmResolver includes a built-in implementation
 for this that is based on [the reference implementation provided by GData](https://www.gdatasoftware.com/blog/2020/06/36164-introducing-the-typerefhash-trh).
 The hash can be obtained using the `GetTypeReferenceHash` extension method on
 `IPEImage`or on `IMetadata`:

@@ -41,6 +41,8 @@
   href: peimage/tls.md
 - name: .NET Data Directories
   href: peimage/dotnet.md
+- name: .NET Ready To Run
+  href: peimage/ready-to-run.md
 - name: PE File Building
   href: peimage/pe-building.md
 
