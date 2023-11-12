@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet.Cloning
 {
@@ -49,5 +50,17 @@ namespace AsmResolver.DotNet.Cloning
         {
             get;
         } = new Dictionary<IMemberDescriptor, IMemberDescriptor>();
+
+        /// <summary>
+        /// Gets a mapping of original types to their cloned counterparts.
+        /// </summary>
+        /// <remarks>
+        /// This dictionary performs lookups based on value using a <see cref="SignatureComparer"/> instead of object
+        /// identity, and can thus be used to translate type references to included type definitions.
+        /// </remarks>
+        public IDictionary<ITypeDescriptor, ITypeDescriptor> ClonedTypes
+        {
+            get;
+        } = new Dictionary<ITypeDescriptor, ITypeDescriptor>(SignatureComparer.Default);
     }
 }

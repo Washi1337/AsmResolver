@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.DotNet.Signatures.Security;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Cloning
@@ -320,6 +321,7 @@ namespace AsmResolver.DotNet.Cloning
 
             var typeStub = new TypeDefinition(type.Namespace, type.Name, type.Attributes);
             context.ClonedMembers.Add(type, typeStub);
+            context.ClonedTypes.Add(type, typeStub);
         }
 
         private void DeepCopyMembers(MemberCloneContext context)
@@ -442,9 +444,17 @@ namespace AsmResolver.DotNet.Cloning
 
             // Copy all elements.
             for (int i = 0; i < argument.Elements.Count; i++)
-                clonedArgument.Elements.Add(argument.Elements[i]);
+                clonedArgument.Elements.Add(CloneElement(context, argument.Elements[i]));
 
             return clonedArgument;
+        }
+
+        private static object? CloneElement(MemberCloneContext context, object? element)
+        {
+            if (element is TypeSignature type)
+                return context.Importer.ImportTypeSignature(type);
+
+            return element;
         }
 
         private static ImplementationMap? CloneImplementationMap(MemberCloneContext context, ImplementationMap? map)

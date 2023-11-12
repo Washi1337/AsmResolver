@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet.Cloning;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Generics;
@@ -407,6 +409,32 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             Assert.All(result.ClonedTopLevelTypes, t => Assert.Contains(t, targetModule.TopLevelTypes));
             Assert.All(result.ClonedMembers, m => Assert.NotEqual(0u, ((IMetadataMember) m).MetadataToken.Rid));
+        }
+
+        [Fact]
+        public void CloneIncludedTypeArgument()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/482
+            
+            var sourceModule = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+            var targetModule = PrepareTempModule();
+
+            var type = sourceModule.LookupMember<TypeDefinition>(typeof(TestEnum).MetadataToken);
+            var method = sourceModule.LookupMember<MethodDefinition>(typeof(CustomAttributesTestClass)
+                .GetMethod(nameof(CustomAttributesTestClass.FIxedLocalTypeArgument))!
+                .MetadataToken);
+
+            var result = new MemberCloner(targetModule)
+                .Include(type)
+                .Include(method)
+                .AddListener(new InjectTypeClonerListener(targetModule))
+                .Clone();
+
+            var newType = result.GetClonedMember(type);
+            var newMethod = result.GetClonedMember(method);
+
+            var newArgument = Assert.IsAssignableFrom<ITypeDescriptor>(newMethod.CustomAttributes[0].Signature!.FixedArguments[0].Element);
+            Assert.Equal(newType, newArgument, _signatureComparer);
         }
     }
 }
