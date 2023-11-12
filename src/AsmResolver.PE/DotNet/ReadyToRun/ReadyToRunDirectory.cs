@@ -38,7 +38,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         /// <summary>
         /// Gets or sets the flags associated with the ReadyToRun module.
         /// </summary>
-        public ReadyToRunCoreHeaderAttributes Attributes
+        public ReadyToRunAttributes Attributes
         {
             get;
             set;
@@ -146,7 +146,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             return sizeof(ManagedNativeHeaderSignature) // Signature
                    + sizeof(ushort) // MajorVersion
                    + sizeof(ushort) // MinorVersion
-                   + sizeof(ReadyToRunCoreHeaderAttributes) // Flags
+                   + sizeof(ReadyToRunAttributes) // Flags
                    + sizeof(uint) // NumberOfSections
                    + (uint) Sections.Count * (sizeof(ReadyToRunSectionType) + DataDirectory.DataDirectorySize) //Sections
                 ;

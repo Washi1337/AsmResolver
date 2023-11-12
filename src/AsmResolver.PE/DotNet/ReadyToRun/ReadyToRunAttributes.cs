@@ -6,7 +6,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
     /// Provides members describing all possible flags that can be associated to a single ReadyToRun header.
     /// </summary>
     [Flags]
-    public enum ReadyToRunCoreHeaderAttributes
+    public enum ReadyToRunAttributes
     {
         /// <summary>
         /// Indicates the original IL image was platform neutral. The platform neutrality is part of assembly name.

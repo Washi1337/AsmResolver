@@ -30,7 +30,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             _context = context;
             MajorVersion = reader.ReadUInt16();
             MinorVersion = reader.ReadUInt16();
-            Attributes = (ReadyToRunCoreHeaderAttributes) reader.ReadUInt32();
+            Attributes = (ReadyToRunAttributes) reader.ReadUInt32();
             _numberOfSections = reader.ReadUInt32();
             _sectionReader = reader.Fork();
         }

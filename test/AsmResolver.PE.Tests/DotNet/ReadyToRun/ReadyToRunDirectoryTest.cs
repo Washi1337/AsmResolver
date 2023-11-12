@@ -36,7 +36,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
 
             Assert.Equal(5, header.MajorVersion);
             Assert.Equal(4, header.MinorVersion);
-            Assert.Equal(ReadyToRunCoreHeaderAttributes.NonSharedPInvokeStubs, header.Attributes);
+            Assert.Equal(ReadyToRunAttributes.NonSharedPInvokeStubs, header.Attributes);
         }
 
         [Fact]
