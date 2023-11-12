@@ -21,6 +21,7 @@ AsmResolver has a lot of features. Below is a non-exhaustive list of the highlig
   - [x] Easy metadata importing and cloning.
   - [x] Managed resource file serializers and deserializers.
   - [x] Support for AppHost / SingleFileHost bundles.
+  - [x] Support for ReadyToRun binaries.
 - [x] Read PDB symbols.
   - [x] Fully managed cross-platform API (No DIA or similar required).
 - [x] .NET Standard 2.0 compatible.
