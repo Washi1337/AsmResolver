@@ -178,5 +178,60 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
                 (5u, 4u),
             }, section.EntryPoints[0]!.Fixups.Select(x => (x.ImportIndex, x.SlotIndex)));
         }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DebugInfoBound(bool rebuild)
+        {
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
+            var section = GetSection<DebugInfoSection>(image, rebuild);
+
+            Assert.NotNull(section.Entries[0]);
+            Assert.Equal(new DebugInfoBounds[]
+            {
+                new(0x0, DebugInfoBounds.PrologOffset, DebugInfoAttributes.StackEmpty),
+                new(0x4, 0x0, DebugInfoAttributes.StackEmpty),
+                new(0x14, 0xA, DebugInfoAttributes.StackEmpty),
+                new(0x1A, 0xF, DebugInfoAttributes.StackEmpty),
+                new(0x2A, 0x14, DebugInfoAttributes.StackEmpty),
+                new(0x2A, DebugInfoBounds.EpilogOffset, DebugInfoAttributes.StackEmpty),
+            }, section.Entries[0]!.Bounds);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DebugInfoBoundLookBack(bool rebuild)
+        {
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
+            var section = GetSection<DebugInfoSection>(image, rebuild);
+
+            Assert.NotNull(section.Entries[4]);
+            Assert.Equal(new DebugInfoBounds[]
+            {
+                new(0x0, DebugInfoBounds.PrologOffset, DebugInfoAttributes.StackEmpty),
+                new(0x4, 0x0, DebugInfoAttributes.StackEmpty),
+                new(0x14, 0xA, DebugInfoAttributes.StackEmpty),
+                new(0x14, DebugInfoBounds.EpilogOffset, DebugInfoAttributes.StackEmpty),
+            }, section.Entries[4]!.Bounds);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DebugInfoVariables(bool rebuild)
+        {
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTestLoop);
+            var section = GetSection<DebugInfoSection>(image, rebuild);
+
+            Assert.NotNull(section.Entries[0]);
+            Assert.Equal(new DebugInfoVariable[]
+            {
+                new(0, 6, 0, new(DebugInfoVariableLocationType.Register, 1)),
+                new(0x17, 0x2B, 1, new(DebugInfoVariableLocationType.Register, 6)),
+                new(0x19, 0x2B, 2, new(DebugInfoVariableLocationType.Register, 7)),
+            }, section.Entries[0]!.Variables);
+        }
     }
 }

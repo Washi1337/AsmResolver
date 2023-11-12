@@ -289,5 +289,12 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] ReadyToRunTestLoop {
+            get {
+                object obj = ResourceManager.GetObject("ReadyToRunTestLoop", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

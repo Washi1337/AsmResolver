@@ -13,6 +13,8 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             _buffer = null;
         }
 
+        public BinaryStreamReader BaseReader => _reader;
+
         public byte ReadNibble()
         {
             if (!_buffer.HasValue)
