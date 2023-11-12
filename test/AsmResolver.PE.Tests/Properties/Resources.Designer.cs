@@ -164,6 +164,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_ReadyToRun {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_ReadyToRun", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] HelloWorldPortablePdb {
             get {
                 object obj = ResourceManager.GetObject("HelloWorldPortablePdb", resourceCulture);
@@ -272,6 +279,20 @@ namespace AsmResolver.PE.Tests.Properties {
         public static byte[] FieldRvaTest {
             get {
                 object obj = ResourceManager.GetObject("FieldRvaTest", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] ReadyToRunTest {
+            get {
+                object obj = ResourceManager.GetObject("ReadyToRunTest", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] ReadyToRunTestLoop {
+            get {
+                object obj = ResourceManager.GetObject("ReadyToRunTestLoop", resourceCulture);
                 return ((byte[])(obj));
             }
         }

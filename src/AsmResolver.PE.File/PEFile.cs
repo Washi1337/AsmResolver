@@ -186,7 +186,9 @@ namespace AsmResolver.PE.File
             new SerializedPEFile(reader, mode);
 
         /// <inheritdoc />
-        public ISegmentReference GetReferenceToRva(uint rva) => new PESegmentReference(this, rva);
+        public ISegmentReference GetReferenceToRva(uint rva) => rva != 0
+            ? new PESegmentReference(this, rva)
+            : SegmentReference.Null;
 
         /// <inheritdoc />
         public uint FileOffsetToRva(ulong fileOffset) =>
