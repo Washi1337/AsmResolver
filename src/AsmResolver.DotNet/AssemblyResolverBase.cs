@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using AsmResolver.DotNet.Signatures;
@@ -15,7 +16,7 @@ namespace AsmResolver.DotNet
         private static readonly string[] BinaryFileExtensions = {".dll", ".exe"};
         private static readonly SignatureComparer Comparer = new(SignatureComparisonFlags.AcceptNewerVersions);
 
-        private readonly Dictionary<AssemblyDescriptor, AssemblyDefinition> _cache = new(new SignatureComparer());
+        private readonly ConcurrentDictionary<AssemblyDescriptor, AssemblyDefinition> _cache = new(new SignatureComparer());
 
         /// <summary>
         /// Initializes the base of an assembly resolver.
@@ -46,14 +47,18 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public AssemblyDefinition? Resolve(AssemblyDescriptor assembly)
         {
-            if (_cache.TryGetValue(assembly, out var assemblyDef))
-                return assemblyDef;
+            AssemblyDefinition? result;
 
-            assemblyDef = ResolveImpl(assembly);
-            if (assemblyDef is not null)
-                _cache.Add(assembly, assemblyDef);
+            while (!_cache.TryGetValue(assembly, out result))
+            {
+                var candidate = ResolveImpl(assembly);
+                if (candidate is null)
+                    break;
 
-            return assemblyDef;
+                _cache.TryAdd(assembly, candidate);
+            }
+
+            return result;
         }
 
         /// <inheritdoc />
@@ -65,11 +70,11 @@ namespace AsmResolver.DotNet
             if (!Comparer.Equals(descriptor, definition))
                 throw new ArgumentException("Assembly descriptor and definition do not refer to the same assembly.");
 
-            _cache.Add(descriptor, definition);
+            _cache.TryAdd(descriptor, definition);
         }
 
         /// <inheritdoc />
-        public bool RemoveFromCache(AssemblyDescriptor descriptor) => _cache.Remove(descriptor);
+        public bool RemoveFromCache(AssemblyDescriptor descriptor) => _cache.TryRemove(descriptor, out _);
 
         /// <inheritdoc />
         public bool HasCached(AssemblyDescriptor descriptor) => _cache.ContainsKey(descriptor);
