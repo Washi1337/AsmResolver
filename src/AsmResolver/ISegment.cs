@@ -36,8 +36,6 @@ namespace AsmResolver
 
     public static partial class Extensions
     {
-        private const string ReservedStringCharacters = "\\\"\t\r\n\b";
-
         [ThreadStatic]
         private static StringBuilder? _buffer;
 
@@ -125,9 +123,22 @@ namespace AsmResolver
             _buffer.Append('"');
             foreach (char currentChar in literal)
             {
-                if (ReservedStringCharacters.Contains(currentChar))
-                    _buffer.Append('\\');
-                _buffer.Append(currentChar);
+                string? replacement = currentChar switch
+                {
+                    '\0' => "\\0",
+                    '\\' => "\\\\",
+                    '\"' => "\\\"",
+                    '\t' => "\\t",
+                    '\r' => "\\r",
+                    '\n' => "\\n",
+                    '\b' => "\\b",
+                    _ => null
+                };
+
+                if (replacement is not null)
+                    _buffer.Append(replacement);
+                else
+                    _buffer.Append(currentChar);
             }
             _buffer.Append('"');
 
