@@ -1,4 +1,6 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver.IO
 {
@@ -8,7 +10,7 @@ namespace AsmResolver.IO
     /// </summary>
     public class MemoryMappedFileService : IFileService
     {
-        private readonly Dictionary<string, MemoryMappedInputFile> _files = new();
+        private readonly ConcurrentDictionary<string, MemoryMappedInputFile> _files = new();
 
         /// <inheritdoc />
         public IEnumerable<string> GetOpenedFiles() => _files.Keys;
@@ -16,23 +18,14 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public IInputFile OpenFile(string filePath)
         {
-            if (!_files.TryGetValue(filePath, out var file))
-            {
-                file = new MemoryMappedInputFile(filePath);
-                _files.Add(filePath, file);
-            }
-
-            return file;
+            return _files.GetOrAdd(filePath, x => new MemoryMappedInputFile(x));
         }
 
         /// <inheritdoc />
         public void InvalidateFile(string filePath)
         {
-            if (_files.TryGetValue(filePath, out var file))
-            {
+            if (_files.TryRemove(filePath, out var file))
                 file.Dispose();
-                _files.Remove(filePath);
-            }
         }
 
         /// <inheritdoc />

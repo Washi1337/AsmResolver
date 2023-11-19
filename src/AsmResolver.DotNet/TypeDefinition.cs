@@ -647,51 +647,91 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Determines whether the type inherits from a particular type
+        /// Determines whether the type inherits from a particular type.
         /// </summary>
         /// <param name="fullName">The full name of the type</param>
-        /// <returns>Whether the current <see cref="TypeDefinition"/> inherits the type</returns>
-        public bool InheritsFrom(string fullName)
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> inherits from the type,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool InheritsFrom(string fullName) => FindInTypeTree(x => x.FullName == fullName);
+
+        /// <summary>
+        /// Determines whether the type inherits from a particular type.
+        /// </summary>
+        /// <param name="ns">The namespace of the type.</param>
+        /// <param name="name">The name of the type.</param>
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> inherits from the type,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool InheritsFrom(string? ns, string name) => FindInTypeTree(x => x.IsTypeOf(ns, name));
+
+        /// <summary>
+        /// Determines whether the type inherits from a particular type.
+        /// </summary>
+        /// <param name="ns">The namespace of the type.</param>
+        /// <param name="name">The name of the type.</param>
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> inherits from the type,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool InheritsFrom(Utf8String? ns, Utf8String name) => FindInTypeTree(x => x.IsTypeOfUtf8(ns, name));
+
+        /// <summary>
+        /// Determines whether the type implements a particular interface.
+        /// </summary>
+        /// <param name="fullName">The full name of the interface</param>
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> implements the interface,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool Implements(string fullName)
         {
-            var type = this;
-            do
-            {
-                if (type.FullName == fullName)
-                    return true;
-
-                var current = type;
-                type = type.BaseType?.Resolve();
-
-                // This prevents an issue where the base type is the same as itself
-                // ... so basically a cyclic dependency
-                if (current == type)
-                    return false;
-            } while (type is {});
-
-            return false;
+            return FindInTypeTree(x => x.Interfaces.Any(@interface => @interface.Interface?.FullName == fullName));
         }
 
         /// <summary>
-        /// Determines whether the type implements a particular interface
+        /// Determines whether the type implements a particular interface.
         /// </summary>
-        /// <param name="fullName">The full name of the interface</param>
-        /// <returns>Whether the type implements the interface</returns>
-        public bool Implements(string fullName)
+        /// <param name="ns">The namespace of the type.</param>
+        /// <param name="name">The name of the type.</param>
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> implements the interface,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool Implements(string? ns, string name) => FindInTypeTree(
+            x => x.Interfaces.Any(@interface => @interface.Interface?.IsTypeOf(ns, name) ?? false));
+
+        /// <summary>
+        /// Determines whether the type implements a particular interface.
+        /// </summary>
+        /// <param name="ns">The namespace of the type.</param>
+        /// <param name="name">The name of the type.</param>
+        /// <returns>
+        /// <c>true</c> whether the current <see cref="TypeDefinition"/> implements the interface,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool Implements(Utf8String? ns, Utf8String name) => FindInTypeTree(
+            x => x.Interfaces.Any(@interface => @interface.Interface?.IsTypeOfUtf8(ns, name) ?? false));
+
+        private bool FindInTypeTree(Predicate<TypeDefinition> condition)
         {
+            var visited = new List<TypeDefinition>();
+
             var type = this;
             do
             {
-                if (type.Interfaces.Any(@interface => @interface.Interface?.FullName == fullName))
+                // Protect against malicious cyclic dependency graphs.
+                if (visited.Contains(type))
+                    return false;
+
+                if (condition(type))
                     return true;
 
-                var current = type;
+                visited.Add(type);
                 type = type.BaseType?.Resolve();
-
-                // This prevents an issue where the base type is the same as itself
-                // ... so basically a cyclic dependency
-                if (current == type)
-                    return false;
-            } while (type is {});
+            } while (type is not null);
 
             return false;
         }
@@ -792,15 +832,18 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the static constructor that is executed when the CLR loads this type.
+        /// Finds the static constructor that is executed when the CLR loads this type.
         /// </summary>
         /// <returns>The static constructor, or <c>null</c> if none is present.</returns>
         public MethodDefinition? GetStaticConstructor()
         {
-            return Methods.FirstOrDefault(m =>
-                m.IsConstructor
-                && m.IsStatic
-                && m.Parameters.Count == 0);
+            for (int i = 0; i < Methods.Count; i++)
+            {
+                if (Methods[i] is {IsConstructor: true, IsStatic: true, Parameters.Count: 0} method)
+                    return method;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -829,20 +872,71 @@ namespace AsmResolver.DotNet
                 if (module == null)
                     throw new ArgumentNullException(nameof(module));
 
-                cctor = new MethodDefinition(".cctor",
-                    MethodAttributes.Private
-                    | MethodAttributes.Static
-                    | MethodAttributes.SpecialName
-                    | MethodAttributes.RuntimeSpecialName,
-                    MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
-
-                cctor.CilMethodBody = new CilMethodBody(cctor);
-                cctor.CilMethodBody.Instructions.Add(new CilInstruction(0, CilOpCodes.Ret));
-
+                cctor = MethodDefinition.CreateStaticConstructor(module);
                 Methods.Insert(0, cctor);
             }
 
             return cctor;
+        }
+
+        /// <summary>
+        /// Finds the instance parameterless constructor this type defines.
+        /// </summary>
+        /// <returns>The constructor, or <c>null</c> if none is present.</returns>
+        public MethodDefinition? GetConstructor()
+        {
+            return GetConstructor(SignatureComparer.Default, (IList<TypeSignature>) Array.Empty<TypeSignature>());
+        }
+
+        /// <summary>
+        /// Finds the instance constructor with the provided parameter types this type defines.
+        /// </summary>
+        /// <param name="parameterTypes">An ordered list of types the parameters of the constructor should have.</param>
+        /// <returns>The constructor, or <c>null</c> if none is present.</returns>
+        public MethodDefinition? GetConstructor(params TypeSignature[] parameterTypes)
+        {
+            return GetConstructor(SignatureComparer.Default, parameterTypes);
+        }
+
+        /// <summary>
+        /// Finds the instance constructor with the provided parameter types this type defines.
+        /// </summary>
+        /// <param name="comparer">The signature comparer to use when comparing the parameter types.</param>
+        /// <param name="parameterTypes">An ordered list of types the parameters of the constructor should have.</param>
+        /// <returns>The constructor, or <c>null</c> if none is present.</returns>
+        public MethodDefinition? GetConstructor(SignatureComparer comparer, params TypeSignature[] parameterTypes)
+        {
+            return GetConstructor(comparer, (IList<TypeSignature>) parameterTypes);
+        }
+
+        /// <summary>
+        /// Finds the instance constructor with the provided parameter types this type defines.
+        /// </summary>
+        /// <param name="comparer">The signature comparer to use when comparing the parameter types.</param>
+        /// <param name="parameterTypes">An ordered list of types the parameters of the constructor should have.</param>
+        /// <returns>The constructor, or <c>null</c> if none is present.</returns>
+        public MethodDefinition? GetConstructor(SignatureComparer comparer, IList<TypeSignature> parameterTypes)
+        {
+            for (int i = 0; i < Methods.Count; i++)
+            {
+                if (Methods[i] is not {IsConstructor: true, IsStatic: false} method)
+                    continue;
+
+                if (method.Parameters.Count != parameterTypes.Count)
+                    continue;
+
+                bool fullMatch = true;
+                for (int j = 0; j < method.Parameters.Count && fullMatch; j++)
+                {
+                    if (!comparer.Equals(method.Parameters[j].ParameterType, parameterTypes[j]))
+                        fullMatch = false;
+                }
+
+                if (fullMatch)
+                    return method;
+            }
+
+            return null;
         }
 
         /// <summary>

@@ -8,7 +8,7 @@
         <NoWarn>1701;1702;NU5105</NoWarn>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Nullable>enable</Nullable>
-        <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
         <IsTrimmable>true</IsTrimmable>
     </PropertyGroup>
 

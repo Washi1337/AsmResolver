@@ -53,7 +53,7 @@ namespace AsmResolver.PE.File.Tests
             var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
             _fixture
                 .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
+                .RebuildAndRun(peFile, "HelloWorld", "Hello World!\n");
         }
 
         [Fact]
@@ -74,7 +74,7 @@ namespace AsmResolver.PE.File.Tests
             // Rebuild and check if file is still runnable.
             _fixture
                 .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(peFile, fileName, "Hello World!" + Environment.NewLine);
+                .RebuildAndRun(peFile, fileName, "Hello World!\n");
 
             // Read the new file.
             var newPEFile = PEFile.FromFile(_fixture

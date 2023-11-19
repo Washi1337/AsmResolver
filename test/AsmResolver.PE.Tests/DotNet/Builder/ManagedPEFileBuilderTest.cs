@@ -36,7 +36,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             // Verify
             _fixture
                 .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
+                .RebuildAndRun(peFile, "HelloWorld", "Hello World!\n");
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             // Verify
             _fixture
                 .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
+                .RebuildAndRun(peFile, "HelloWorld", "Hello World!\n");
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             // Verify
             _fixture
                 .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
+                .RebuildAndRun(peFile, "HelloWorld", "Hello World!\n");
         }
 
         [Fact]
@@ -92,7 +92,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             // Verify
             _fixture
                 .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
+                .RebuildAndRun(peFile, "HelloWorld", "Hello World!\n");
         }
 
         [Fact]

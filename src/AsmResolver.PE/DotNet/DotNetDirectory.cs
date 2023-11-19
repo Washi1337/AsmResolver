@@ -17,7 +17,7 @@ namespace AsmResolver.PE.DotNet
         private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _codeManagerTable;
         private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _exportAddressTable;
         private readonly LazyVariable<DotNetDirectory, VTableFixupsDirectory?> _vtableFixups;
-        private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _managedNativeHeader;
+        private readonly LazyVariable<DotNetDirectory, IManagedNativeHeader?> _managedNativeHeader;
 
         /// <summary>
         /// Creates a new .NET data directory.
@@ -30,7 +30,7 @@ namespace AsmResolver.PE.DotNet
             _codeManagerTable = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetCodeManagerTable());
             _exportAddressTable = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetExportAddressTable());
             _vtableFixups = new LazyVariable<DotNetDirectory, VTableFixupsDirectory?>(x => x.GetVTableFixups());
-            _managedNativeHeader = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetManagedNativeHeader());
+            _managedNativeHeader = new LazyVariable<DotNetDirectory, IManagedNativeHeader?>(x => x.GetManagedNativeHeader());
         }
 
         /// <inheritdoc />
@@ -104,7 +104,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        public IReadableSegment? ManagedNativeHeader
+        public IManagedNativeHeader? ManagedNativeHeader
         {
             get => _managedNativeHeader.GetValue(this);
             set => _managedNativeHeader.SetValue(value);
@@ -202,6 +202,6 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ManagedNativeHeader"/> property
         /// </remarks>
-        protected virtual IReadableSegment? GetManagedNativeHeader() => null;
+        protected virtual IManagedNativeHeader? GetManagedNativeHeader() => null;
     }
 }

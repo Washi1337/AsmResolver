@@ -14,6 +14,8 @@ namespace AsmResolver
         } = new();
 
         /// <inheritdoc />
-        public ISegmentReference GetReferenceToRva(uint rva) => new VirtualAddress(rva);
+        public ISegmentReference GetReferenceToRva(uint rva) => rva != 0
+            ? new VirtualAddress(rva)
+            : SegmentReference.Null;
     }
 }

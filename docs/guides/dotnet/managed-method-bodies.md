@@ -1,5 +1,10 @@
 # CIL Method Bodies
 
+Most methods defined in a .NET module are implemented using the Common
+Intermediate Language (CIL), and AsmResolver provides high-level
+disassembler and assembler capabilities for creating, reading and writing
+method bodies written in this language.
+
 The relevant models in this document can be found in the following
 namespaces:
 
@@ -33,7 +38,9 @@ blocks:
 -   `ExceptionHandlers`: A collection of regions protected by an
     exception handler.
 
-## Basic structure of CIL instructions
+## Instructions
+
+### Basic structure of CIL instructions
 
 Instructions that are assembled into the method body are automatically
 disassembled and put in a mutable collection of `CilInstruction`,
@@ -53,27 +60,27 @@ The `CilInstruction` class defines three basic properties:
 By default, depending on the value of `OpCode.OperandType`, `Operand`
 contains (and always should contain) one of the following:
 
-|OpCode.OperandType                  |Type of Operand                         |                
-|------------------------------------|----------------------------------------|                                        
-|`CilOperandType.InlineNone`         |N/A (is always `null`)                  |                        
-|`CilOperandType.ShortInlineI`       |`sbyte`                                 |        
-|`CilOperandType.InlineI`            |`int`                                   |        
-|`CilOperandType.InlineI8`           |`long`                                  |        
-|`CilOperandType.ShortInlineR`       |`float`                                 |        
-|`CilOperandType.InlineR`            |`double`                                |            
-|`CilOperandType.InlineString`       |`string` or `MetadataToken`             |                            
-|`CilOperandType.InlineBrTarget`     |`ICilLabel` or `int`                    |                        
-|`CilOperandType.ShortInlineBrTarget`|`ICilLabel` or `sbyte`                  |                        
-|`CilOperandType.InlineSwitch`       |`IList<ICilLabel>`                      |                    
-|`CilOperandType.ShortInlineVar`     |`CilLocalVariable` or `byte`            |                                
-|`CilOperandType.InlineVar`          |`CilLocalVariable` or `ushort`          |                                
-|`CilOperandType.ShortInlineArgument`|`Parameter` or `byte`                   |                        
-|`CilOperandType.InlineArgument`     |`Parameter` or `ushort`                 |                        
-|`CilOperandType.InlineField`        |`IFieldDescriptor` or `MetadataToken`   |                                        
-|`CilOperandType.InlineMethod`       |`IMethodDescriptor` or `MetadataToken`  |                                        
-|`CilOperandType.InlineSig`          |`StandAloneSignature` or `MetadataToken`|                                            
-|`CilOperandType.InlineTok`          |`IMetadataMember` or `MetadataToken`    |                                        
-|`CilOperandType.InlineType`         |`ITypeDefOrRef` or `MetadataToken`      |                                        
+|OpCode.OperandType                  |Type of Operand                         |
+|------------------------------------|----------------------------------------|
+|`CilOperandType.InlineNone`         |N/A (is always `null`)                  |
+|`CilOperandType.ShortInlineI`       |`sbyte`                                 |
+|`CilOperandType.InlineI`            |`int`                                   |
+|`CilOperandType.InlineI8`           |`long`                                  |
+|`CilOperandType.ShortInlineR`       |`float`                                 |
+|`CilOperandType.InlineR`            |`double`                                |
+|`CilOperandType.InlineString`       |`string` or `MetadataToken`             |
+|`CilOperandType.InlineBrTarget`     |`ICilLabel` or `int`                    |
+|`CilOperandType.ShortInlineBrTarget`|`ICilLabel` or `sbyte`                  |
+|`CilOperandType.InlineSwitch`       |`IList<ICilLabel>`                      |
+|`CilOperandType.ShortInlineVar`     |`CilLocalVariable` or `byte`            |
+|`CilOperandType.InlineVar`          |`CilLocalVariable` or `ushort`          |
+|`CilOperandType.ShortInlineArgument`|`Parameter` or `byte`                   |
+|`CilOperandType.InlineArgument`     |`Parameter` or `ushort`                 |
+|`CilOperandType.InlineField`        |`IFieldDescriptor` or `MetadataToken`   |
+|`CilOperandType.InlineMethod`       |`IMethodDescriptor` or `MetadataToken`  |
+|`CilOperandType.InlineSig`          |`StandAloneSignature` or `MetadataToken`|
+|`CilOperandType.InlineTok`          |`IMetadataMember` or `MetadataToken`    |
+|`CilOperandType.InlineType`         |`ITypeDefOrRef` or `MetadataToken`      |
 
 
 > [!WARNING]
@@ -103,7 +110,7 @@ instructions.Add(CilOpCodes.Ldstr, "Hello, World!");
 instructions.Add(CilOpCodes.Ret);
 ```
 
-## Pushing 32-bit integer constants onto the stack
+### Pushing 32-bit integer constants onto the stack
 
 In CIL, pushing integer constants onto the stack is done using one of
 the `ldc.i4` instruction variants.
@@ -124,7 +131,7 @@ If we want to get the pushed value, we can use the
 the `ldc.i4` variants, including all the macro opcodes that do not
 explicitly define an operand such as `ldc.i4.1`.
 
-## Branching Instructions
+### Branching Instructions
 
 Branch instructions are instructions that (might) transfer control to
 another part of the method body. To reference the instruction to jump to
@@ -160,7 +167,7 @@ The `switch` operation uses a `IList<ICilLabel>` instead.
 > code stream. This can be disabled by setting `VerifyLabelsOnBuild` to
 > `false`.
 
-## Finding instructions by offset
+### Finding Instructions by Offset
 
 Instructions stored in a method body are indexed not by offset, but by
 order of occurrence. If it is required to find an instruction by offset,
@@ -187,7 +194,7 @@ int index = body.Instructions.GetIndexByOffset(0x0012);
 instruction1 = body.Instructions[index];
 ```
 
-## Referencing members
+### Referencing Members
 
 As specified by the table above, operations such as a `call` require a
 member as operand.
@@ -211,7 +218,7 @@ More information on the capabilities and limitations of the
 `ReferenceImporter` can be found in
 [Reference Importing](importing.md).
 
-## Expanding and optimising macros
+### Expanding and Optimizing Macros
 
 CIL defines a couple of macro operations that do the same as their full
 counterpart, but require less space to be encoded. For example, the
@@ -240,7 +247,7 @@ body.Instructions.ExpandMacros();
 // instruction is now expanded to "ldc.i4 1".
 ```
 
-## Pretty printing CIL instructions
+### Pretty printing CIL Instructions
 
 Instructions can be formatted using e.g. an instance of the
 `CilInstructionFormatter`:
@@ -251,7 +258,7 @@ foreach (CilInstruction instruction in body.Instructions)
     Console.WriteLine(formatter.FormatInstruction(instruction));
 ```
 
-## Patching CIL instructions
+### Patching CIL Instructions
 
 Instructions can be added or removed using the `Add`, `Insert`, `Remove`
 and `RemoveAt` methods:
@@ -297,7 +304,32 @@ helper function:
 body.Instructions[i].ReplaceWithNop();
 ```
 
-## Exception handlers
+## Local Variables
+
+Most methods will define local variables to temporarily store state
+throughout the execution of the method's code. Local variables are
+exposed through the `CilMethodBody.LocalVariables` property, and are
+represented using the `CilLocalVariable` class.
+
+```csharp
+CilMethodBody body = ...;
+foreach (var local in body.LocalVariables)
+    Console.WriteLine($"{local.Index}: {local.VariableType}");
+```
+
+New variables can be created by calling its constructor:
+
+```csharp
+ModuleDefinition module = ...;
+var local = new CilLocalVariable(module.CorLibTypeFactory.Int32);
+```
+
+New variables can be added to the method:
+```csharp
+body.LocalVariables.Add(local);
+```
+
+## Exception Handlers
 
 Exception handlers are regions in the method body that are protected
 from exceptions. In AsmResolver, they are represented by the
@@ -321,6 +353,45 @@ from exceptions. In AsmResolver, they are represented by the
 Depending on the value of `HandlerType`, either `FilterStart` or
 `ExceptionType`, or neither has a value.
 
+```csharp
+CilMethodBody body = ...;
+foreach (var handler in body.ExceptionHandlers)
+{
+    Console.WriteLine($"HandlerType:   {handler.HandlerType}");
+    Console.WriteLine($"TryStart:      {handler.TryStart}");
+    Console.WriteLine($"TryEnd:        {handler.TryEnd}");
+    Console.WriteLine($"HandlerStart:  {handler.HandlerStart}");
+    Console.WriteLine($"HandlerEnd:    {handler.HandlerEnd}");
+
+    if (handler.HandlerType == CilExceptionHandlerType.Exception)
+    {
+        // handler is a try-catch with an exception type.
+        Console.WriteLine($"ExceptionType: {handler.ExceptionType}");
+    }
+    else if if (handler.HandlerType == CilExceptionHandlerType.Filter)
+    {
+        // handler is a try-catch with a custom filter:
+        Console.WriteLine($"FilterStart:   {handler.FilterStart}");
+    }
+}
+```
+
+New handlers can be added to the method body:
+
+```csharp
+body.ExceptionHandlers.Add(new CilExceptionHandler
+{
+    HandlerType = CilExceptionHandlerType.Exception,
+    TryStart = body.Instructions[0].CreateLabel(),
+    TryEnd = body.Instructions[4].CreateLabel(),
+    HandlerStart = body.Instructions[4].CreateLabel(),
+    HandlerEnd = body.Instructions[8].CreateLabel(),
+    ExceptionType = module.CorLibTypeFactory.CorLibScope
+        .CreateTypeReference("System", "Exception")
+        .ImprotWith(module.DefaultImporter)
+});
+```
+
 > [!NOTE]
 > Similar to branch instructions, when an exception handler contains a
 > `null` label or a label that references an instruction that is not
@@ -328,7 +399,8 @@ Depending on the value of `HandlerType`, either `FilterStart` or
 > serializing the code stream. This can be disabled by setting
 > `VerifyLabelsOnBuild` to `false`.
 
-## Maximum stack depth
+
+## Maximum Stack Depth
 
 CIL method bodies work with a stack, and the stack has a pre-defined
 size. This pre-defined size is defined by the `MaxStack` property.

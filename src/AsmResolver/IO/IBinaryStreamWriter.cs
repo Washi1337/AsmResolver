@@ -1,5 +1,8 @@
 using System;
 using System.Text;
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP1_0_OR_GREATER
+using System.Buffers;
+#endif
 
 namespace AsmResolver.IO
 {
@@ -129,6 +132,27 @@ namespace AsmResolver.IO
         {
             writer.WriteBytes(buffer, 0, buffer.Length);
         }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        /// <summary>
+        /// Writes a buffer of data to the stream.
+        /// </summary>
+        /// <param name="writer">The writer to use.</param>
+        /// <param name="buffer">The data to write.</param>
+        public static void WriteBytes(this IBinaryStreamWriter writer, ReadOnlySpan<byte> buffer)
+        {
+            if (writer is ISpanBinaryStreamWriter spanWriter)
+            {
+                spanWriter.WriteBytes(buffer);
+                return;
+            }
+
+            byte[] array = ArrayPool<byte>.Shared.Rent(buffer.Length);
+            buffer.CopyTo(array);
+            writer.WriteBytes(array, 0, buffer.Length);
+            ArrayPool<byte>.Shared.Return(array);
+        }
+#endif
 
         /// <summary>
         /// Writes a specified amount of zero bytes to the stream.

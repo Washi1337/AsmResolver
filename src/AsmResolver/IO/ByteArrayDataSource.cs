@@ -6,6 +6,9 @@ namespace AsmResolver.IO
     /// Provides a <see cref="IDataSource"/> wrapper around a raw byte array.
     /// </summary>
     public sealed class ByteArrayDataSource : IDataSource
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        , ISpanDataSource
+#endif
     {
         private readonly byte[] _data;
 
@@ -60,5 +63,16 @@ namespace AsmResolver.IO
             Buffer.BlockCopy(_data, relativeIndex, buffer, index, actualLength);
             return actualLength;
         }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        /// <inheritdoc />
+        public int ReadBytes(ulong address, Span<byte> buffer)
+        {
+            int relativeIndex = (int) (address - BaseAddress);
+            int actualLength = Math.Min(buffer.Length, _data.Length - relativeIndex);
+            _data.AsSpan(relativeIndex, actualLength).CopyTo(buffer);
+            return actualLength;
+        }
+#endif
     }
 }

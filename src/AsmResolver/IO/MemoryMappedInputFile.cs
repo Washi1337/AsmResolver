@@ -40,8 +40,8 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public void Dispose()
         {
-            _file?.Dispose();
-            _dataSource?.Dispose();
+            _file.Dispose();
+            _dataSource.Dispose();
         }
     }
 }

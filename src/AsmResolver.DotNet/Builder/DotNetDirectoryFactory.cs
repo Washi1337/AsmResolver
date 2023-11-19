@@ -118,6 +118,11 @@ namespace AsmResolver.DotNet.Builder
             if (module.Assembly?.ManifestModule == module)
                 buffer.DefineAssembly(module.Assembly);
 
+            // Add resources (if any).
+            buffer.DefineManifestResources(
+                module.Resources,
+                (MetadataBuilderFlags & MetadataBuilderFlags.NoResourceDataDeduplication) == 0);
+
             // Finalize module.
             buffer.FinalizeModule(module);
 
@@ -215,9 +220,6 @@ namespace AsmResolver.DotNet.Builder
 
         private void ImportBasicTablesIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
-            if (module.DotNetDirectory is null)
-                return;
-
             // NOTE: The order of this table importing is crucial.
             //
             // Assembly refs should always be imported prior to importing type refs, which should be imported before
@@ -246,9 +248,6 @@ namespace AsmResolver.DotNet.Builder
 
         private void ImportTypeSpecsIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
-            if (module.DotNetDirectory is null)
-                return;
-
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeSpecificationIndices) != 0)
             {
                 ImportTables<TypeSpecification>(module, TableIndex.TypeSpec,
@@ -258,9 +257,6 @@ namespace AsmResolver.DotNet.Builder
 
         private void ImportMemberRefsIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
-            if (module.DotNetDirectory is null)
-                return;
-
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveMemberReferenceIndices) != 0)
             {
                 ImportTables<MemberReference>(module, TableIndex.MemberRef,
@@ -270,9 +266,6 @@ namespace AsmResolver.DotNet.Builder
 
         private void ImportRemainingTablesIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
-            if (module.DotNetDirectory is null)
-                return;
-
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStandAloneSignatureIndices) != 0)
             {
                 ImportTables<StandAloneSignature>(module, TableIndex.StandAloneSig,
@@ -289,10 +282,10 @@ namespace AsmResolver.DotNet.Builder
         private static void ImportTables<TMember>(ModuleDefinition module, TableIndex tableIndex,
             Func<TMember, MetadataToken> importAction)
         {
-            int count = module.DotNetDirectory!.Metadata
-                !.GetStream<TablesStream>()
+            int count = module.DotNetDirectory?.Metadata?
+                .GetStream<TablesStream>()
                 .GetTable(tableIndex)
-                .Count;
+                .Count ?? 0;
 
             for (uint rid = 1; rid <= count; rid++)
                 importAction((TMember) module.LookupMember(new MetadataToken(tableIndex, rid)));

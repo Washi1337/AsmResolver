@@ -19,7 +19,9 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="argumentType">The type of the argument to read.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The argument.</returns>
-        public static CustomAttributeArgument FromReader(in BlobReaderContext context, TypeSignature argumentType,
+        public static CustomAttributeArgument FromReader(
+            in BlobReaderContext context,
+            TypeSignature argumentType,
             ref BinaryStreamReader reader)
         {
             var elementReader = CustomAttributeArgumentReader.Create();

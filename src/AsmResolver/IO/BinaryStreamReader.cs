@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -8,6 +8,7 @@ namespace AsmResolver.IO
     /// <summary>
     /// Provides methods for reading binary data from a data source.
     /// </summary>
+    [DebuggerDisplay("[{StartOffset}..{EndOffset}) at {Offset} ({RelativeOffset})")]
     public struct BinaryStreamReader
     {
         [ThreadStatic]
@@ -124,6 +125,11 @@ namespace AsmResolver.IO
             get => (uint) (Offset - StartOffset);
             set => Offset = value + StartOffset;
         }
+
+        /// <summary>
+        /// Gets the remaining number of bytes that can be read from the stream.
+        /// </summary>
+        public uint RemainingLength => Length - RelativeOffset;
 
         /// <summary>
         /// Gets or sets the current virtual address (relative to the image base) to read from.
@@ -311,6 +317,20 @@ namespace AsmResolver.IO
             return new decimal(_buffer);
         }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        /// <summary>
+        /// Attempts to read the provided amount of bytes from the input stream.
+        /// </summary>
+        /// <param name="buffer">The buffer that receives the read bytes.</param>
+        /// <returns>The number of bytes that were read.</returns>
+        public int ReadBytes(Span<byte> buffer)
+        {
+            int actualLength = DataSource.ReadBytes(Offset, buffer);
+            Offset += (uint) actualLength;
+            return actualLength;
+        }
+#endif
+
         /// <summary>
         /// Attempts to read the provided amount of bytes from the input stream.
         /// </summary>
@@ -344,7 +364,7 @@ namespace AsmResolver.IO
         /// <returns>The remaining bytes.</returns>
         public byte[] ReadToEnd()
         {
-            byte[] buffer = new byte[Length - RelativeOffset];
+            byte[] buffer = new byte[RemainingLength];
             ReadBytes(buffer, 0, buffer.Length);
             return buffer;
         }

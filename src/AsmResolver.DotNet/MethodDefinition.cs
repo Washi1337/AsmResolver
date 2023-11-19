@@ -8,6 +8,8 @@ using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -687,6 +689,56 @@ namespace AsmResolver.DotNet
         {
             get => _exportInfo.GetValue(this);
             set => _exportInfo.SetValue(value);
+        }
+
+        /// <summary>
+        /// Creates a new private static constructor for a type that is executed when its declaring type is loaded by the CLR.
+        /// </summary>
+        /// <param name="module">The target module the method will be added to.</param>
+        /// <returns>The constructor.</returns>
+        /// <remarks>
+        /// The resulting method's body will consist of a single <c>ret</c> instruction.
+        /// </remarks>
+        public static MethodDefinition CreateStaticConstructor(ModuleDefinition module)
+        {
+            var cctor = new MethodDefinition(".cctor",
+                MethodAttributes.Private
+                | MethodAttributes.Static
+                | MethodAttributes.SpecialName
+                | MethodAttributes.RuntimeSpecialName,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
+
+            cctor.CilMethodBody = new CilMethodBody(cctor);
+            cctor.CilMethodBody.Instructions.Add(CilOpCodes.Ret);
+
+            return cctor;
+        }
+
+        /// <summary>
+        /// Creates a new public constructor for a type that is executed when its declaring type is loaded by the CLR.
+        /// </summary>
+        /// <param name="module">The target module the method will be added to.</param>
+        /// <param name="parameterTypes">An ordered list of types the parameters of the constructor should have.</param>
+        /// <returns>The constructor.</returns>
+        /// <remarks>
+        /// The resulting method's body will consist of a single <c>ret</c> instruction, and does not contain a call to
+        /// any of the declaring type's base classes. For an idiomatic .NET binary, this should be added.
+        /// </remarks>
+        public static MethodDefinition CreateConstructor(ModuleDefinition module, params TypeSignature[] parameterTypes)
+        {
+            var ctor = new MethodDefinition(".ctor",
+                MethodAttributes.Public
+                | MethodAttributes.SpecialName
+                | MethodAttributes.RuntimeSpecialName,
+                MethodSignature.CreateInstance(module.CorLibTypeFactory.Void, parameterTypes));
+
+            for (int i = 0; i < parameterTypes.Length; i++)
+                ctor.ParameterDefinitions.Add(new ParameterDefinition(null));
+
+            ctor.CilMethodBody = new CilMethodBody(ctor);
+            ctor.CilMethodBody.Instructions.Add(CilOpCodes.Ret);
+
+            return ctor;
         }
 
         MethodDefinition IMethodDescriptor.Resolve() => this;

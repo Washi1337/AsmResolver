@@ -35,6 +35,27 @@ namespace AsmResolver
         {
         }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        /// <summary>
+        /// Creates a new UTF-8 string from the provided raw data.
+        /// </summary>
+        /// <param name="data">The raw UTF-8 data.</param>
+        public Utf8String(ReadOnlySpan<byte> data)
+        {
+            _data = data.ToArray();
+        }
+
+        /// <summary>
+        /// Creates a new UTF-8 string from the provided <see cref="System.ReadOnlySpan{Char}"/>.
+        /// </summary>
+        /// <param name="value">The string value to encode as UTF-8.</param>
+        public Utf8String(ReadOnlySpan<char> value)
+        {
+            _data = new byte[Encoding.UTF8.GetByteCount(value)];
+            Encoding.UTF8.GetBytes(value, _data.AsSpan());
+        }
+#endif
+
         /// <summary>
         /// Creates a new UTF-8 string from the provided raw data.
         /// </summary>
@@ -81,6 +102,38 @@ namespace AsmResolver
         /// </summary>
         /// <param name="index">The character index.</param>
         public char this[int index] => Value[index];
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        /// <summary>
+        /// Creates a new read-only span over the string.
+        /// </summary>
+        /// <returns>The read-only span representation of the string.</returns>
+        public ReadOnlySpan<byte> AsSpan()
+        {
+            return _data.AsSpan();
+        }
+
+        /// <summary>
+        /// Creates a new read-only span over the string.
+        /// </summary>
+        /// <param name="start">The index at which to begin this slice.</param>
+        /// <returns>The read-only span representation of the string.</returns>
+        public ReadOnlySpan<byte> AsSpan(int start)
+        {
+            return _data.AsSpan(start);
+        }
+
+        /// <summary>
+        /// Creates a new read-only span over the string.
+        /// </summary>
+        /// <param name="start">The index at which to begin this slice.</param>
+        /// <param name="length">The desired length for the slice.</param>
+        /// <returns>The read-only span representation of the string.</returns>
+        public ReadOnlySpan<byte> AsSpan(int start, int length)
+        {
+            return _data.AsSpan(start, length);
+        }
+#endif
 
         /// <summary>
         /// Gets the raw UTF-8 bytes of the string.
@@ -336,6 +389,60 @@ namespace AsmResolver
 
             return new Utf8String(value);
         }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        /// <summary>
+        /// Converts a raw sequence of bytes into an <see cref="Utf8String"/>.
+        /// </summary>
+        /// <param name="data">The raw data to convert.</param>
+        /// <returns>The new UTF-8 encoded string.</returns>
+        public static implicit operator Utf8String(ReadOnlySpan<byte> data)
+        {
+            if (data.IsEmpty)
+                return Empty;
+
+            return new Utf8String(data);
+        }
+
+        /// <summary>
+        /// Converts a <see cref="System.ReadOnlySpan{Char}"/> into an <see cref="Utf8String"/>.
+        /// </summary>
+        /// <param name="data">The string value to convert.</param>
+        /// <returns>The new UTF-8 encoded string.</returns>
+        public static implicit operator Utf8String(ReadOnlySpan<char> data)
+        {
+            if (data.IsEmpty)
+                return Empty;
+
+            return new Utf8String(data);
+        }
+
+        /// <summary>
+        /// Converts a <see cref="Utf8String"/> into a <see cref="System.ReadOnlySpan{Byte}"/>.
+        /// </summary>
+        /// <param name="value">The UTF-8 string value to convert.</param>
+        /// <returns>The span.</returns>
+        public static implicit operator ReadOnlySpan<byte>(Utf8String? value)
+        {
+            if (value is null)
+                return ReadOnlySpan<byte>.Empty;
+
+            return value._data;
+        }
+
+        /// <summary>
+        /// Converts a <see cref="Utf8String"/> into a <see cref="System.ReadOnlySpan{Char}"/>.
+        /// </summary>
+        /// <param name="value">The UTF-8 string value to convert.</param>
+        /// <returns>The span.</returns>
+        public static implicit operator ReadOnlySpan<char>(Utf8String? value)
+        {
+            if (value is null)
+                return ReadOnlySpan<char>.Empty;
+
+            return value.Value;
+        }
+#endif
 
         /// <summary>
         /// Converts a raw sequence of bytes into an <see cref="Utf8String"/>.

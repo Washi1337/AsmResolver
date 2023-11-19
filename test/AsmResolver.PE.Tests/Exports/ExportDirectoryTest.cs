@@ -282,7 +282,7 @@ namespace AsmResolver.PE.Tests.Exports
                 stream.ToArray());
 
             string output = runner.RunAndCaptureOutput(exePath);
-            Assert.Equal("ActualDLL::Bar\r\nProxyDll::Baz\r\nHello World!\r\n", output);
+            Assert.Equal("ActualDLL::Bar\nProxyDll::Baz\nHello World!\n", output);
         }
     }
 }

@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(type.Name),
                 Metadata.StringsStream.GetStringIndex(type.Namespace));
 
-            var token = preserveRid
+            var token = preserveRid && type.MetadataToken.Rid != 0
                 ? table.Insert(type.MetadataToken.Rid, row, allowDuplicates)
                 : table.Add(row, allowDuplicates);
 
@@ -205,7 +205,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(assembly.Culture),
                 Metadata.BlobStream.GetBlobIndex(assembly.HashValue));
 
-            var token = preserveRid
+            var token = preserveRid && assembly.MetadataToken.Rid != 0
                 ? table.Insert(assembly.MetadataToken.Rid, row, allowDuplicates)
                 : table.Add(row, allowDuplicates);
 
@@ -243,7 +243,7 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetDistinctTable<ModuleReferenceRow>(TableIndex.ModuleRef);
 
             var row = new ModuleReferenceRow(Metadata.StringsStream.GetStringIndex(reference.Name));
-            var token = preserveRid
+            var token = preserveRid && reference.MetadataToken.Rid != 0
                 ? table.Insert(reference.MetadataToken.Rid, row, allowDuplicates)
                 : table.Add(row, allowDuplicates);
 
