@@ -87,8 +87,19 @@ if (section.CanRead)
 
 AsmResolver provides parsing for various sections out of the box. All
 supported section formats have a designated class that interpret and expose
-the data stored in these sections. Any other unsupported section is represented
-using `CustomReadyToRunSection` exposing the raw data as an `ISegment`.
+the data stored in these sections.
+Below is a table of currently supported section types.
+
+| Section Index | Section Type (as per specification) | AsmResolver Type                  |
+|---------------|:------------------------------------|:----------------------------------|
+| 100           | `CompilerIdentifier`                | `CompilerIdentifierSection`       |
+| 101           | `ImportSections`                    | `SerializedImportSectionsSection` |
+| 102           | `RuntimeFunctions`                  | `RuntimeFunctionsSection`         |
+| 103           | `MethodDefEntryPoints`              | `MethodEntryPointsSection`        |
+| 105           | `DebugInfo`                         | `DebugInfoSection`                |
+
+Any other unsupported section is represented using `CustomReadyToRunSection`
+exposing the raw data as an `ISegment`.
 
 
 ## Runtime Functions
@@ -103,7 +114,7 @@ foreach (var function in section.GetFunctions())
     Console.WriteLine($"Rva: {function.Begin.Rva:X8}");
 ```
 
-To start reading the native code of this function, use `CreateReader` on the
+To start reading the native code of such a function, use `CreateReader` on the
 exposed `ISegmentReference`s:
 
 ```csharp
@@ -145,7 +156,7 @@ pre-compiled managed method. In AsmResolver, entry points are exposed by the
 `MethodEntryPointsSection` class.
 
 ```csharp
-var section = GetSection<MethodEntryPointsSection>();
+var section = directory.GetSection<MethodEntryPointsSection>();
 ```
 
 The method entry points section is ordered in such a way that the `i`-th entry
@@ -218,6 +229,6 @@ foreach (var import in section.Sections)
 ```
 
 > [!NOTE]
-> AsmResolver does not provide any high-level parsing on this level of
-> abstraction. It is expected to be added to the `AsmResolver.DotNet` package
-> in the future.
+> AsmResolver does not provide any high-level parsing for signatures on
+> this level of abstraction. It is expected to be added to the
+> `AsmResolver.DotNet` package in the future.
