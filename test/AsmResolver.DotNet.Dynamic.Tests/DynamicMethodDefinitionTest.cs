@@ -197,9 +197,11 @@ namespace AsmResolver.DotNet.Dynamic.Tests
             Assert.Equal("WriteLine", reference.Name);
         }
 
-        [Fact]
+        [SkippableFact]
         public void ReadDynamicMethodInitializedByDynamicILInfoWithLocals()
         {
+            Skip.IfNot(DynamicTypeSignatureResolver.IsSupported, "Current platform does not support dynamic type resolution.");
+
             // Create new dynamic method.
             var method = new DynamicMethod("Test", typeof(void), Type.EmptyTypes);
             var info = method.GetDynamicILInfo();
