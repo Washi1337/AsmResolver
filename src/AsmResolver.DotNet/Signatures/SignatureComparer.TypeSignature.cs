@@ -233,7 +233,7 @@ namespace AsmResolver.DotNet.Signatures
             unchecked
             {
                 int hashCode = (int) obj.ElementType << ElementTypeOffset;
-                hashCode = (hashCode * 397) ^ obj.GenericType.GetHashCode();
+                hashCode = (hashCode * 397) ^ GetHashCode(obj.GenericType);
                 hashCode = (hashCode * 397) ^ GetHashCode(obj.TypeArguments);
                 return hashCode;
             }
