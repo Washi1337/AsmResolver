@@ -208,8 +208,8 @@ namespace AsmResolver.DotNet.Signatures
             unchecked
             {
                 int hashCode = (int) obj.ElementType << ElementTypeOffset;
-                hashCode = (hashCode * 397) ^ obj.ModifierType.GetHashCode();
-                hashCode = (hashCode * 397) ^ obj.BaseType.GetHashCode();
+                hashCode = (hashCode * 397) ^ GetHashCode(obj.ModifierType);
+                hashCode = (hashCode * 397) ^ GetHashCode(obj.BaseType);
                 return hashCode;
             }
         }
