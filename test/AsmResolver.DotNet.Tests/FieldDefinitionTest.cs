@@ -6,6 +6,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Types.Structs;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -198,6 +199,25 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(offset, newField.FieldOffset);
         }
 
+        [Fact]
+        public void AddSameFieldTwiceToTypeShouldThrow()
+        {
+            var module = new ModuleDefinition("SomeModule");
+            var field = new FieldDefinition("SomeField", FieldAttributes.Public, module.CorLibTypeFactory.Int32);
+            var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public);
+            type.Fields.Add(field);
+            Assert.Throws<ArgumentException>(() => type.Fields.Add(field));
+        }
 
+        [Fact]
+        public void AddSameFieldToDifferentTypesShouldThrow()
+        {
+            var module = new ModuleDefinition("SomeModule");
+            var field = new FieldDefinition("SomeField", FieldAttributes.Public, module.CorLibTypeFactory.Int32);
+            var type1 = new TypeDefinition("SomeNamespace", "SomeType1", TypeAttributes.Public);
+            var type2 = new TypeDefinition("SomeNamespace", "SomeType2", TypeAttributes.Public);
+            type1.Fields.Add(field);
+            Assert.Throws<ArgumentException>(() => type2.Fields.Add(field));
+        }
     }
 }
