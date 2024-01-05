@@ -302,7 +302,6 @@ namespace AsmResolver.DotNet
             Name = name;
 
             CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory(this);
-            AssemblyReferences.Add((AssemblyReference)CorLibTypeFactory.CorLibScope);
             MetadataResolver = new DefaultMetadataResolver(new DotNetFrameworkAssemblyResolver());
 
             TopLevelTypes.Add(new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0));

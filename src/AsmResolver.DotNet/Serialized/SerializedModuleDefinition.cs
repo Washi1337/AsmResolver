@@ -191,7 +191,7 @@ namespace AsmResolver.DotNet.Serialized
             var typeDefTable = ReaderContext.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
             int nestedTypeCount = ReaderContext.TablesStream.GetTable(TableIndex.NestedClass).Count;
 
-            var types = new OwnedCollection<ModuleDefinition, TypeDefinition>(this,
+            var types = new MemberCollection<ModuleDefinition, TypeDefinition>(this,
                 typeDefTable.Count - nestedTypeCount);
 
             for (int i = 0; i < typeDefTable.Count; i++)
@@ -200,7 +200,7 @@ namespace AsmResolver.DotNet.Serialized
                 if (_typeDefTree.GetKey(rid) == 0)
                 {
                     var token = new MetadataToken(TableIndex.TypeDef, rid);
-                    types.Add(_memberFactory.LookupTypeDefinition(token)!);
+                    types.AddNoOwnerCheck(_memberFactory.LookupTypeDefinition(token)!);
                 }
             }
 
@@ -212,13 +212,13 @@ namespace AsmResolver.DotNet.Serialized
         {
             var table = ReaderContext.TablesStream.GetTable<AssemblyReferenceRow>(TableIndex.AssemblyRef);
 
-            var result = new OwnedCollection<ModuleDefinition, AssemblyReference>(this, table.Count);
+            var result = new MemberCollection<ModuleDefinition, AssemblyReference>(this, table.Count);
 
             // Don't use the member factory here, this method may be called before the member factory is initialized.
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.AssemblyRef, (uint) i + 1);
-                result.Add(new SerializedAssemblyReference(ReaderContext, token, table[i]));
+                result.AddNoOwnerCheck(new SerializedAssemblyReference(ReaderContext, token, table[i]));
             }
 
             return result;
@@ -229,13 +229,13 @@ namespace AsmResolver.DotNet.Serialized
         {
             var table = ReaderContext.TablesStream.GetTable(TableIndex.ModuleRef);
 
-            var result = new OwnedCollection<ModuleDefinition, ModuleReference>(this, table.Count);
+            var result = new MemberCollection<ModuleDefinition, ModuleReference>(this, table.Count);
 
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.ModuleRef, (uint) i + 1);
                 if (_memberFactory.TryLookupMember(token, out var member) && member is ModuleReference module)
-                    result.Add(module);
+                    result.AddNoOwnerCheck(module);
             }
 
             return result;
@@ -246,13 +246,13 @@ namespace AsmResolver.DotNet.Serialized
         {
             var table = ReaderContext.TablesStream.GetTable(TableIndex.File);
 
-            var result = new OwnedCollection<ModuleDefinition, FileReference>(this, table.Count);
+            var result = new MemberCollection<ModuleDefinition, FileReference>(this, table.Count);
 
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.File, (uint) i + 1);
                 if (_memberFactory.TryLookupMember(token, out var member) && member is FileReference file)
-                    result.Add(file);
+                    result.AddNoOwnerCheck(file);
             }
 
             return result;
@@ -263,13 +263,13 @@ namespace AsmResolver.DotNet.Serialized
         {
             var table = ReaderContext.TablesStream.GetTable(TableIndex.ManifestResource);
 
-            var result = new OwnedCollection<ModuleDefinition, ManifestResource>(this, table.Count);
+            var result = new MemberCollection<ModuleDefinition, ManifestResource>(this, table.Count);
 
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.ManifestResource, (uint) i + 1);
                 if (_memberFactory.TryLookupMember(token, out var member) && member is ManifestResource resource)
-                    result.Add(resource);
+                    result.AddNoOwnerCheck(resource);
             }
 
             return result;
@@ -280,13 +280,13 @@ namespace AsmResolver.DotNet.Serialized
         {
             var table = ReaderContext.TablesStream.GetTable(TableIndex.ExportedType);
 
-            var result = new OwnedCollection<ModuleDefinition, ExportedType>(this, table.Count);
+            var result = new MemberCollection<ModuleDefinition, ExportedType>(this, table.Count);
 
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.ExportedType, (uint) i + 1);
                 if (_memberFactory.TryLookupMember(token, out var member) && member is ExportedType exportedType)
-                    result.Add(exportedType);
+                    result.AddNoOwnerCheck(exportedType);
             }
 
             return result;

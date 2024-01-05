@@ -55,7 +55,7 @@ namespace AsmResolver.Collections
         {
             if (item is null)
                 throw new ArgumentNullException(nameof(item));
-            if (item.Owner != null && item.Owner != Owner)
+            if (item.Owner is not null)
                 throw new ArgumentException("Item is already added to another collection.");
         }
 
