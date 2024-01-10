@@ -96,5 +96,11 @@ namespace AsmResolver.DotNet.Serialized
             get;
             set;
         } = new();
+
+        public RuntimeContext? RuntimeContextOverride
+        {
+            get;
+            set;
+        } = null;
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Types;
@@ -74,15 +75,37 @@ namespace AsmResolver.DotNet.Serialized
             OriginalTargetRuntime = DetectTargetRuntime();
 
             // Initialize metadata resolution engines.
-            var resolver = CreateAssemblyResolver(readerParameters.PEReaderParameters.FileService);
-            if (!string.IsNullOrEmpty(readerParameters.WorkingDirectory)
-                && resolver is AssemblyResolverBase resolverBase
-                && !resolverBase.SearchDirectories.Contains(readerParameters.WorkingDirectory!))
+            if (readerParameters.RuntimeContextOverride is { } runtimeContext)
             {
-                resolverBase.SearchDirectories.Add(readerParameters.WorkingDirectory!);
+                RuntimeContext = runtimeContext;
+            }
+            else
+            {
+                RuntimeContext = new RuntimeContext(
+                    OriginalTargetRuntime,
+                    readerParameters.PEReaderParameters.FileService
+                );
+
+                if (RuntimeContext.AssemblyResolver is AssemblyResolverBase resolver)
+                {
+                    // Add current file's directory as a search directory (if present).
+                    if (!string.IsNullOrEmpty(peImage.FilePath)
+                        && Path.GetDirectoryName(peImage.FilePath) is { } directory
+                        && !resolver.SearchDirectories.Contains(directory))
+                    {
+                        resolver.SearchDirectories.Add(directory);
+                    }
+
+                    // Add current working directory as a search directory (if present).
+                    if (!string.IsNullOrEmpty(readerParameters.WorkingDirectory)
+                        && !resolver.SearchDirectories.Contains(readerParameters.WorkingDirectory!))
+                    {
+                        resolver.SearchDirectories.Add(readerParameters.WorkingDirectory!);
+                    }
+                }
             }
 
-            MetadataResolver = new DefaultMetadataResolver(resolver);
+            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
 
             // Prepare lazy RID lists.
             _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.Field, TableIndex.TypeDef,

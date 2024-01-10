@@ -257,8 +257,9 @@ namespace AsmResolver.DotNet
         public static ModuleDefinition FromImage(IPEImage peImage, ModuleReaderParameters readerParameters) =>
             new SerializedModuleDefinition(peImage, readerParameters);
 
-        // Disable non-nullable property initialization warnings for the CorLibTypeFactory and MetadataResolver
-        // properties. These are expected to be initialized by constructors that use this base constructor.
+        // Disable non-nullable property initialization warnings for the CorLibTypeFactory, RuntimeContext and
+        // MetadataResolver properties. These are expected to be initialized by constructors that use this base
+        // constructor.
 #pragma warning disable 8618
 
         /// <summary>
@@ -302,8 +303,10 @@ namespace AsmResolver.DotNet
             Name = name;
 
             CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory(this);
-            AssemblyReferences.Add((AssemblyReference)CorLibTypeFactory.CorLibScope);
-            MetadataResolver = new DefaultMetadataResolver(new DotNetFrameworkAssemblyResolver());
+            OriginalTargetRuntime = DetectTargetRuntime();
+            RuntimeContext = new RuntimeContext(OriginalTargetRuntime);
+            AssemblyReferences.Add((AssemblyReference) CorLibTypeFactory.CorLibScope);
+            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
 
             TopLevelTypes.Add(new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0));
         }
@@ -318,13 +321,10 @@ namespace AsmResolver.DotNet
         {
             Name = name;
 
-            var importer = new ReferenceImporter(this);
-            corLib = (AssemblyReference) importer.ImportScope(corLib);
-
-            CorLibTypeFactory = new CorLibTypeFactory(corLib);
-
+            CorLibTypeFactory = new CorLibTypeFactory(corLib.ImportWith(DefaultImporter));
             OriginalTargetRuntime = DetectTargetRuntime();
-            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver(UncachedFileService.Instance));
+            RuntimeContext = new RuntimeContext(OriginalTargetRuntime);
+            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
 
             TopLevelTypes.Add(new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0));
         }
@@ -349,8 +349,14 @@ namespace AsmResolver.DotNet
             get;
         } = null;
 
+        public RuntimeContext RuntimeContext
+        {
+            get;
+            protected set;
+        }
+
         /// <summary>
-        /// Gets the runtime that this module targeted upon creation or reading.
+        /// Gets the runtime that this module was targeted for at compile-time.
         /// </summary>
         public DotNetRuntimeInfo OriginalTargetRuntime
         {
@@ -1173,48 +1179,6 @@ namespace AsmResolver.DotNet
             return Assembly is not null && Assembly.TryGetTargetFramework(out var targetRuntime)
                 ? targetRuntime
                 : CorLibTypeFactory.ExtractDotNetRuntimeInfo();
-        }
-
-        /// <summary>
-        /// Creates an assembly resolver based on the corlib reference.
-        /// </summary>
-        /// <returns>The resolver.</returns>
-        protected IAssemblyResolver CreateAssemblyResolver(IFileService fileService)
-        {
-            string? directory = !string.IsNullOrEmpty(FilePath)
-                ? Path.GetDirectoryName(FilePath)
-                : null;
-
-            var runtime = OriginalTargetRuntime;
-
-            AssemblyResolverBase resolver;
-            switch (runtime.Name)
-            {
-                case DotNetRuntimeInfo.NetFramework:
-                case DotNetRuntimeInfo.NetStandard
-                    when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
-                    resolver = new DotNetFrameworkAssemblyResolver(fileService);
-                    break;
-
-                case DotNetRuntimeInfo.NetStandard
-                    when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(
-                        runtime.Version, out var coreVersion):
-                    resolver = new DotNetCoreAssemblyResolver(fileService, coreVersion);
-                    break;
-
-                case DotNetRuntimeInfo.NetCoreApp:
-                    resolver = new DotNetCoreAssemblyResolver(fileService, runtime.Version);
-                    break;
-
-                default:
-                    resolver = new DotNetFrameworkAssemblyResolver(fileService);
-                    break;
-            }
-
-            if (!string.IsNullOrEmpty(directory))
-                resolver.SearchDirectories.Add(directory!);
-
-            return resolver;
         }
 
         /// <inheritdoc />
