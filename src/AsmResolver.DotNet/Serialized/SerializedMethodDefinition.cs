@@ -78,12 +78,12 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<ParameterDefinition> GetParameterDefinitions()
         {
             var parameterRange = _context.ParentModule.GetParameterRange(MetadataToken.Rid);
-            var result = new OwnedCollection<MethodDefinition, ParameterDefinition>(this, parameterRange.Count);
+            var result = new MemberCollection<MethodDefinition, ParameterDefinition>(this, parameterRange.Count);
 
             foreach (var token in parameterRange)
             {
                 if (_context.ParentModule.TryLookupMember(token, out var member) && member is ParameterDefinition parameter)
-                    result.Add(parameter);
+                    result.AddNoOwnerCheck(parameter);
             }
 
             return result;
@@ -106,14 +106,14 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<GenericParameter> GetGenericParameters()
         {
             var rids = _context.ParentModule.GetGenericParameters(MetadataToken);
-            var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this, rids.Count);
+            var result = new MemberCollection<IHasGenericParameters, GenericParameter>(this, rids.Count);
 
             foreach (uint rid in rids)
             {
                 if (_context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.GenericParam, rid), out var member)
                     && member is GenericParameter genericParameter)
                 {
-                    result.Add(genericParameter);
+                    result.AddNoOwnerCheck(genericParameter);
                 }
             }
 

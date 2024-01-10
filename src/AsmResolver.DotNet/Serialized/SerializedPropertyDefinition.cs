@@ -76,7 +76,7 @@ namespace AsmResolver.DotNet.Serialized
             foreach (uint rid in rids)
             {
                 var semanticsToken = new MetadataToken(TableIndex.MethodSemantics, rid);
-                result.Add((MethodSemantics) module.LookupMember(semanticsToken));
+                result.AddNoOwnerCheck((MethodSemantics) module.LookupMember(semanticsToken));
             }
 
             result.ValidateMembership = true;

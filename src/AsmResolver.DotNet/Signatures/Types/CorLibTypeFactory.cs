@@ -136,15 +136,14 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Gets the element type signature for <see cref="System.Object"/>.
         /// </summary>
         public CorLibTypeSignature Object => GetOrCreateCorLibTypeSignature(ref _object, ElementType.Object, nameof(Object));
-        
+
         /// <summary>
         /// Creates a new type factory that references mscorlib 4.0.0.0.
         /// </summary>
         /// <returns>The factory.</returns>
         public static CorLibTypeFactory CreateMscorlib40TypeFactory(ModuleDefinition module)
         {
-            var importer = new ReferenceImporter(module);
-            return new CorLibTypeFactory(importer.ImportScope(KnownCorLibs.MsCorLib_v4_0_0_0));
+            return new CorLibTypeFactory(KnownCorLibs.MsCorLib_v4_0_0_0.ImportWith(module.DefaultImporter));
         }
 
         /// <summary>
