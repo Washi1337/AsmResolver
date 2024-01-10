@@ -1,17 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Metadata.Guid;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using AsmResolver.PE.DotNet.Metadata.UserStrings;
 using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.DotNet.Serialized
