@@ -1,38 +1,67 @@
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.IO;
 
 namespace AsmResolver.DotNet
 {
+    /// <summary>
+    /// Describes a context in which a .NET runtime is active.
+    /// </summary>
     public class RuntimeContext
     {
+        /// <summary>
+        /// Creates a new runtime context.
+        /// </summary>
+        /// <param name="targetRuntime">The target runtime version.</param>
         public RuntimeContext(DotNetRuntimeInfo targetRuntime)
+            : this(targetRuntime, new ModuleReaderParameters
+            {
+                PEReaderParameters = {FileService = new ByteArrayFileService()}
+            })
         {
-            TargetRuntime = targetRuntime;
-            AssemblyResolver = CreateAssemblyResolver(targetRuntime, new ByteArrayFileService());
         }
 
-        public RuntimeContext(DotNetRuntimeInfo targetRuntime, IFileService fileService)
+        /// <summary>
+        /// Creates a new runtime context.
+        /// </summary>
+        /// <param name="targetRuntime">The target runtime version.</param>
+        /// <param name="readerParameters">The parameters to use when reading modules in this context.</param>
+        public RuntimeContext(DotNetRuntimeInfo targetRuntime, ModuleReaderParameters readerParameters)
         {
             TargetRuntime = targetRuntime;
-            AssemblyResolver = CreateAssemblyResolver(targetRuntime, fileService);
+            AssemblyResolver = CreateAssemblyResolver(targetRuntime, new ModuleReaderParameters(readerParameters)
+            {
+                RuntimeContext = this
+            });
         }
 
+        /// <summary>
+        /// Creates a new runtime context.
+        /// </summary>
+        /// <param name="targetRuntime">The target runtime version.</param>
+        /// <param name="assemblyResolver">The assembly resolver to use when resolving assemblies into this context.</param>
         public RuntimeContext(DotNetRuntimeInfo targetRuntime, IAssemblyResolver assemblyResolver)
         {
             TargetRuntime = targetRuntime;
             AssemblyResolver = assemblyResolver;
         }
 
+        /// <summary>
+        /// Gets the runtime version this context is targeting.
+        /// </summary>
         public DotNetRuntimeInfo TargetRuntime
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the assembly resolver that the context uses to resolve assemblies.
+        /// </summary>
         public IAssemblyResolver AssemblyResolver
         {
             get;
         }
 
-        private static IAssemblyResolver CreateAssemblyResolver(DotNetRuntimeInfo runtime, IFileService fileService)
+        private static IAssemblyResolver CreateAssemblyResolver(DotNetRuntimeInfo runtime, ModuleReaderParameters readerParameters)
         {
             AssemblyResolverBase resolver;
             switch (runtime.Name)
@@ -40,21 +69,23 @@ namespace AsmResolver.DotNet
                 case DotNetRuntimeInfo.NetFramework:
                 case DotNetRuntimeInfo.NetStandard
                     when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
-                    resolver = new DotNetFrameworkAssemblyResolver(fileService);
+
+                    resolver = new DotNetFrameworkAssemblyResolver(readerParameters);
                     break;
 
                 case DotNetRuntimeInfo.NetStandard
                     when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(
                         runtime.Version, out var coreVersion):
-                    resolver = new DotNetCoreAssemblyResolver(fileService, coreVersion);
+
+                    resolver = new DotNetCoreAssemblyResolver(readerParameters, coreVersion);
                     break;
 
                 case DotNetRuntimeInfo.NetCoreApp:
-                    resolver = new DotNetCoreAssemblyResolver(fileService, runtime.Version);
+                    resolver = new DotNetCoreAssemblyResolver(readerParameters, runtime.Version);
                     break;
 
                 default:
-                    resolver = new DotNetFrameworkAssemblyResolver(fileService);
+                    resolver = new DotNetFrameworkAssemblyResolver(readerParameters);
                     break;
             }
 

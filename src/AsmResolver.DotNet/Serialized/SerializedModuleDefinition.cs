@@ -75,16 +75,13 @@ namespace AsmResolver.DotNet.Serialized
             OriginalTargetRuntime = DetectTargetRuntime();
 
             // Initialize metadata resolution engines.
-            if (readerParameters.RuntimeContextOverride is { } runtimeContext)
+            if (readerParameters.RuntimeContext is { } runtimeContext)
             {
                 RuntimeContext = runtimeContext;
             }
             else
             {
-                RuntimeContext = new RuntimeContext(
-                    OriginalTargetRuntime,
-                    readerParameters.PEReaderParameters.FileService
-                );
+                RuntimeContext = new RuntimeContext(OriginalTargetRuntime, readerParameters);
 
                 if (RuntimeContext.AssemblyResolver is AssemblyResolverBase resolver)
                 {

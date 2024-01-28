@@ -64,7 +64,7 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromBytes(byte[] buffer) =>
-            FromImage(PEImage.FromBytes(buffer));
+            FromBytes(buffer, new ModuleReaderParameters());
 
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
@@ -101,7 +101,17 @@ namespace AsmResolver.DotNet
         /// <param name="file">The portable executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IInputFile file) => FromImage(PEImage.FromFile(file));
+        public static ModuleDefinition FromFile(IInputFile file) => FromFile(file, new ModuleReaderParameters());
+
+        /// <summary>
+        /// Reads a .NET module from the provided input file.
+        /// </summary>
+        /// <param name="file">The portable executable file to load.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromFile(IInputFile file, ModuleReaderParameters readerParameters) =>
+            FromImage(PEImage.FromFile(file, readerParameters.PEReaderParameters), readerParameters);
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -109,7 +119,7 @@ namespace AsmResolver.DotNet
         /// <param name="file">The portable executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IPEFile file) => FromImage(PEImage.FromFile(file));
+        public static ModuleDefinition FromFile(IPEFile file) => FromFile(file, new ModuleReaderParameters());
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -349,6 +359,9 @@ namespace AsmResolver.DotNet
             get;
         } = null;
 
+        /// <summary>
+        /// Gets the object describing the current active runtime context the module is loaded in.
+        /// </summary>
         public RuntimeContext RuntimeContext
         {
             get;

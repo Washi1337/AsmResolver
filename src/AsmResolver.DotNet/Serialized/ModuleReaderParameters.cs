@@ -1,4 +1,4 @@
-using System;
+using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
 
@@ -13,6 +13,18 @@ namespace AsmResolver.DotNet.Serialized
         /// Initializes the default module read parameters.
         /// </summary>
         public ModuleReaderParameters()
+        {
+            MethodBodyReader = new DefaultMethodBodyReader();
+            FieldRvaDataReader = new FieldRvaDataReader();
+            PEReaderParameters = new PEReaderParameters();
+        }
+
+        /// <summary>
+        /// Initializes the module read parameters with a file service.
+        /// </summary>
+        /// <param name="fileService">The file service to use when reading the file and dependencies.</param>
+        public ModuleReaderParameters(IFileService fileService)
+            : this(null, new PEReaderParameters {FileService = fileService})
         {
         }
 
@@ -40,6 +52,16 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="workingDirectory">The working directory of the modules to read.</param>
         /// <param name="errorListener">The object responsible for recording parser errors.</param>
         public ModuleReaderParameters(string? workingDirectory, IErrorListener errorListener)
+            : this(workingDirectory, new PEReaderParameters(errorListener))
+        {
+        }
+
+        /// <summary>
+        /// Initializes the module read parameters with a working directory.
+        /// </summary>
+        /// <param name="workingDirectory">The working directory of the modules to read.</param>
+        /// <param name="readerParameters">The parameters to use while reading the assembly and its dependencies.</param>
+        public ModuleReaderParameters(string? workingDirectory, PEReaderParameters readerParameters)
         {
             if (workingDirectory is not null)
             {
@@ -47,7 +69,23 @@ namespace AsmResolver.DotNet.Serialized
                 ModuleResolver = new DirectoryNetModuleResolver(workingDirectory, this);
             }
 
-            PEReaderParameters.ErrorListener = errorListener;
+            MethodBodyReader = new DefaultMethodBodyReader();
+            FieldRvaDataReader = new FieldRvaDataReader();
+            PEReaderParameters = readerParameters;
+        }
+
+        /// <summary>
+        /// Clones the provided module reader parameters.
+        /// </summary>
+        /// <param name="readerParameters">The parameters to clone.</param>
+        public ModuleReaderParameters(ModuleReaderParameters readerParameters)
+        {
+            WorkingDirectory = readerParameters.WorkingDirectory;
+            ModuleResolver = readerParameters.ModuleResolver;
+            MethodBodyReader = readerParameters.MethodBodyReader;
+            FieldRvaDataReader = readerParameters.FieldRvaDataReader;
+            PEReaderParameters = readerParameters.PEReaderParameters;
+            RuntimeContext = readerParameters.RuntimeContext;
         }
 
         /// <summary>
@@ -74,7 +112,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             get;
             set;
-        } = new DefaultMethodBodyReader();
+        }
 
         /// <summary>
         /// Gets or sets the field initial value reader.
@@ -83,7 +121,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             get;
             set;
-        } = new FieldRvaDataReader();
+        }
 
         /// <summary>
         /// Gets or sets the parameters used for parsing a PE file into a PE image.
@@ -95,12 +133,15 @@ namespace AsmResolver.DotNet.Serialized
         {
             get;
             set;
-        } = new();
+        }
 
-        public RuntimeContext? RuntimeContextOverride
+        /// <summary>
+        /// Gets or sets the runtime context to load the module in, or <c>null</c> if a new context is to be created.
+        /// </summary>
+        public RuntimeContext? RuntimeContext
         {
             get;
             set;
-        } = null;
+        }
     }
 }
