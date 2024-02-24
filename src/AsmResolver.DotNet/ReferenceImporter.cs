@@ -312,6 +312,41 @@ namespace AsmResolver.DotNet
                     type.DeclaringMethod != null ? GenericParameterType.Method : GenericParameterType.Type,
                     type.GenericParameterPosition);
 
+            if (FnPtrHelper.GetIsFunctionPointer(type))
+            {
+                var returnType = ImportTypeSignature(FnPtrHelper.GetFunctionPointerReturnType(type));
+                var callConvs = FnPtrHelper.GetFunctionPointerCallingConventions(type);
+                var callConv = CallingConventionAttributes.Default;
+                if (callConvs.Length == 1)
+                {
+                    var cc = callConvs[0];
+                    callConv = cc.FullName switch
+                    {
+                        "System.Runtime.CompilerServices.CallConvCdecl" => CallingConventionAttributes.C,
+                        "System.Runtime.CompilerServices.CallConvFastcall" => CallingConventionAttributes.FastCall,
+                        "System.Runtime.CompilerServices.CallConvStdcall" => CallingConventionAttributes.StdCall,
+                        "System.Runtime.CompilerServices.CallConvThiscall" => CallingConventionAttributes.ThisCall,
+                        _ => CallingConventionAttributes.Default
+                    };
+                    if (callConv == CallingConventionAttributes.Default)
+                        returnType = returnType.MakeModifierType(ImportType(cc), false);
+                }
+                else
+                {
+                    foreach (var cc in callConvs)
+                        returnType = returnType.MakeModifierType(ImportType(cc), false);
+                }
+
+                if (callConv == default && FnPtrHelper.GetUnmanagedIsFunctionPointer(type))
+                    callConv = CallingConventionAttributes.Unmanaged;
+
+                return new MethodSignature(
+                    callConv,
+                    returnType,
+                    FnPtrHelper.GetFunctionPointerParameterTypes(type).Select(ImportTypeSignature)
+                ).MakeFunctionPointerType();
+            }
+
             var corlibType = TargetModule.CorLibTypeFactory.FromName(type.Namespace, type.Name);
             if (corlibType != null)
                 return corlibType;
@@ -330,6 +365,71 @@ namespace AsmResolver.DotNet
             }
 
             return new TypeDefOrRefSignature(reference, type.IsValueType);
+        }
+
+        // separate class to prevent static cctor checks from leaking into the other ReferenceImporter methods on NAOT
+        private static class FnPtrHelper
+        {
+#if !NET8_0_OR_GREATER
+            private static readonly PropertyInfo? IsFunctionPointerProp = typeof(Type).GetProperty("IsFunctionPointer");
+            private static readonly PropertyInfo? IsUnmanagedFunctionPointerProp = typeof(Type).GetProperty("IsUnmanagedFunctionPointer");
+            private static readonly MethodInfo? GetFunctionPointerReturnTypeMethod = typeof(Type).GetMethod("GetFunctionPointerReturnType");
+            private static readonly MethodInfo? GetFunctionPointerCallingConventionsMethod = typeof(Type).GetMethod("GetFunctionPointerCallingConventions");
+            private static readonly MethodInfo? GetFunctionPointerParameterTypesMethod = typeof(Type).GetMethod("GetFunctionPointerParameterTypes");
+#endif
+
+            internal static bool GetIsFunctionPointer(Type t)
+            {
+#if NET8_0_OR_GREATER
+                return t.IsFunctionPointer;
+#else
+                return IsFunctionPointerProp != null && (bool)IsFunctionPointerProp.GetValue(t)!;
+#endif
+            }
+
+            internal static bool GetUnmanagedIsFunctionPointer(Type t)
+            {
+#if NET8_0_OR_GREATER
+                return t.IsUnmanagedFunctionPointer;
+#else
+                // can only be called if the type was already verified to be a function pointer
+                // therefore the PropertyInfo is not null
+                return (bool)IsUnmanagedFunctionPointerProp!.GetValue(t)!;
+#endif
+            }
+
+            internal static Type GetFunctionPointerReturnType(Type t)
+            {
+#if NET8_0_OR_GREATER
+                return t.GetFunctionPointerReturnType();
+#else
+                // can only be called if the type was already verified to be a function pointer
+                // therefore the MethodInfo is not null
+                return (Type)GetFunctionPointerReturnTypeMethod!.Invoke(t, null)!;
+#endif
+            }
+
+            internal static Type[] GetFunctionPointerCallingConventions(Type t)
+            {
+#if NET8_0_OR_GREATER
+                return t.GetFunctionPointerCallingConventions();
+#else
+                // can only be called if the type was already verified to be a function pointer
+                // therefore the MethodInfo is not null
+                return (Type[])GetFunctionPointerCallingConventionsMethod!.Invoke(t, null)!;
+#endif
+            }
+
+            internal static Type[] GetFunctionPointerParameterTypes(Type t)
+            {
+#if NET8_0_OR_GREATER
+                return t.GetFunctionPointerParameterTypes();
+#else
+                // can only be called if the type was already verified to be a function pointer
+                // therefore the MethodInfo is not null
+                return (Type[])GetFunctionPointerParameterTypesMethod!.Invoke(t, null)!;
+#endif
+            }
         }
 
         private TypeSignature ImportArrayType(Type type)
