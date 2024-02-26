@@ -550,15 +550,15 @@ namespace AsmResolver.DotNet.Tests
 #if NET8_0_OR_GREATER
         private static unsafe class DelegatePointerHolder
         {
-            public static delegate*unmanaged[Cdecl, SuppressGCTransition]<int, uint> Complex;
-            public static delegate*unmanaged[Stdcall]<int, uint> StdcallOnly;
-            public static delegate*unmanaged[SuppressGCTransition]<int, uint> GcOnly;
+            public static delegate*unmanaged[Cdecl, SuppressGCTransition]<int, uint> Complex = null;
+            public static delegate*unmanaged[Stdcall]<int, uint> StdcallOnly = null;
+            public static delegate*unmanaged[SuppressGCTransition]<int, uint> GcOnly = null;
         }
 
         [Fact]
         public void ImportComplexFunctionPointerFromReflectedFieldType()
         {
-            var fieldType = typeof(DelegatePointerHolder).GetField("Complex").GetModifiedFieldType();
+            var fieldType = typeof(DelegatePointerHolder).GetField("Complex")!.GetModifiedFieldType();
             var imported = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(_importer.ImportType(fieldType).ToTypeSignature());
             Assert.Equal(CallingConventionAttributes.Unmanaged, imported.Signature.CallingConvention);
             var firstModifier = Assert.IsAssignableFrom<CustomModifierTypeSignature>(imported.Signature.ReturnType);
@@ -578,7 +578,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportSimpleFunctionPointerFromReflectedFieldType()
         {
-            var fieldType = typeof(DelegatePointerHolder).GetField("StdcallOnly").GetModifiedFieldType();
+            var fieldType = typeof(DelegatePointerHolder).GetField("StdcallOnly")!.GetModifiedFieldType();
             var imported = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(_importer.ImportType(fieldType).ToTypeSignature());
             Assert.Equal(CallingConventionAttributes.StdCall, imported.Signature.CallingConvention);
         }
@@ -586,7 +586,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportModoptOnlyFunctionPointerFromReflectedFieldType()
         {
-            var fieldType = typeof(DelegatePointerHolder).GetField("GcOnly").GetModifiedFieldType();
+            var fieldType = typeof(DelegatePointerHolder).GetField("GcOnly")!.GetModifiedFieldType();
             var imported = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(_importer.ImportType(fieldType).ToTypeSignature());
             Assert.Equal(CallingConventionAttributes.Unmanaged, imported.Signature.CallingConvention);
             var firstModifier = Assert.IsAssignableFrom<CustomModifierTypeSignature>(imported.Signature.ReturnType);

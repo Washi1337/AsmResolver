@@ -4,10 +4,7 @@
         <Title>AsmResolver.DotNet</Title>
         <Description>High level .NET image models for the AsmResolver executable file inspection toolsuite.</Description>
         <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
-        <Nullable>enable</Nullable>
-        <TargetFrameworks>net8.0;net6.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
         <IsTrimmable>true</IsTrimmable>
     </PropertyGroup>
 
@@ -24,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
