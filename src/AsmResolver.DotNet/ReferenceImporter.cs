@@ -311,6 +311,8 @@ namespace AsmResolver.DotNet
                 return new GenericParameterSignature(
                     type.DeclaringMethod != null ? GenericParameterType.Method : GenericParameterType.Type,
                     type.GenericParameterPosition);
+            if (ReflectionHacks.GetIsFunctionPointer(type))
+                return ImportFunctionPointerType(type);
 
             var corlibType = TargetModule.CorLibTypeFactory.FromName(type.Namespace, type.Name);
             if (corlibType != null)
@@ -353,6 +355,41 @@ namespace AsmResolver.DotNet
             foreach (var argument in type.GetGenericArguments())
                 result.TypeArguments.Add(ImportTypeSignature(argument));
             return result;
+        }
+
+        private TypeSignature ImportFunctionPointerType(Type type)
+        {
+            var returnType = ImportTypeSignature(ReflectionHacks.GetFunctionPointerReturnType(type));
+            var callConvs = ReflectionHacks.GetFunctionPointerCallingConventions(type);
+            var callConv = CallingConventionAttributes.Default;
+            if (callConvs.Length == 1)
+            {
+                var cc = callConvs[0];
+                callConv = cc.FullName switch
+                {
+                    "System.Runtime.CompilerServices.CallConvCdecl" => CallingConventionAttributes.C,
+                    "System.Runtime.CompilerServices.CallConvFastcall" => CallingConventionAttributes.FastCall,
+                    "System.Runtime.CompilerServices.CallConvStdcall" => CallingConventionAttributes.StdCall,
+                    "System.Runtime.CompilerServices.CallConvThiscall" => CallingConventionAttributes.ThisCall,
+                    _ => CallingConventionAttributes.Default
+                };
+                if (callConv == CallingConventionAttributes.Default)
+                    returnType = returnType.MakeModifierType(ImportType(cc), false);
+            }
+            else
+            {
+                foreach (var cc in callConvs)
+                    returnType = returnType.MakeModifierType(ImportType(cc), false);
+            }
+
+            if (callConv == default && ReflectionHacks.GetIsUnmanagedFunctionPointer(type))
+                callConv = CallingConventionAttributes.Unmanaged;
+
+            return new MethodSignature(
+                callConv,
+                returnType,
+                ReflectionHacks.GetFunctionPointerParameterTypes(type).Select(ImportTypeSignature)
+            ).MakeFunctionPointerType();
         }
 
         /// <summary>

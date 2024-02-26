@@ -34,8 +34,6 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<AssemblyDefinition>
     {
-        private static MethodInfo? GetHINSTANCEMethod;
-
         private readonly LazyVariable<ModuleDefinition, Utf8String?> _name;
         private readonly LazyVariable<ModuleDefinition, Guid> _mvid;
         private readonly LazyVariable<ModuleDefinition, Guid> _encId;
@@ -166,14 +164,9 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         public static ModuleDefinition FromModule(Module module, ModuleReaderParameters readerParameters)
         {
-            // We get the base address using GetHINSTANCE, but this method is unfortunately not shipped with
-            // .NET Standard 2.0, so we need to resort to reflection for this.
-            GetHINSTANCEMethod ??= typeof(Marshal).GetMethod("GetHINSTANCE", new[] { typeof(Module) });
-
-            var handle = (IntPtr) GetHINSTANCEMethod?.Invoke(null, new object[] { module })!;
-            if (handle == IntPtr.Zero)
+            if (!ReflectionHacks.TryGetHINSTANCE(module, out var handle))
                 throw new NotSupportedException("The current platform does not support getting the base address of an instance of System.Reflection.Module.");
-            if (handle == (IntPtr) (-1))
+            if (handle == -1)
                 throw new NotSupportedException("Provided module does not have a module base address.");
 
             // Dynamically loaded modules are in their unmapped form, as opposed to modules loaded normally by the

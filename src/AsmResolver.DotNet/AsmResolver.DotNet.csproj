@@ -7,7 +7,7 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
         <Nullable>enable</Nullable>
-        <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net8.0;net6.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
         <IsTrimmable>true</IsTrimmable>
     </PropertyGroup>
 
