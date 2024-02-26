@@ -34,7 +34,17 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
-            var expectedNames = new[] {"#~", "#Strings", "#US", "#GUID", "#Blob"};
+            string[] expectedNames = new[] {"#~", "#Strings", "#US", "#GUID", "#Blob"};
+            Assert.Equal(expectedNames, metadata.Streams.Select(s => s.Name));
+        }
+
+        [Fact]
+        public void CorrectStreamHeadersUnalignedMetadataDirectory()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_UnalignedMetadata);
+            var metadata = peImage.DotNetDirectory!.Metadata!;
+
+            string[] expectedNames = new[] {"#~", "#Strings", "#US", "#GUID", "#Blob"};
             Assert.Equal(expectedNames, metadata.Streams.Select(s => s.Name));
         }
 
@@ -188,6 +198,5 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         {
             AssertCorrectStreamIsSelected<UserStringsStream>(Properties.Resources.HelloWorld_DoubleUserStringsStream_EnC, true);
         }
-
     }
 }
