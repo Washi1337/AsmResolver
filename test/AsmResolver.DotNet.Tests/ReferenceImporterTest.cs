@@ -547,6 +547,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(2, signature.Index);
         }
 
+#if NET8_0_OR_GREATER
         private static unsafe class DelegatePointerHolder
         {
             public static delegate*unmanaged[Cdecl, SuppressGCTransition]<int, uint> Complex;
@@ -554,12 +555,7 @@ namespace AsmResolver.DotNet.Tests
             public static delegate*unmanaged[SuppressGCTransition]<int, uint> GcOnly;
         }
 
-
-        [Fact(
-#if !NET8_0_OR_GREATER
-            Skip = "only works on net8"
-#endif
-        )]
+        [Fact]
         public void ImportComplexFunctionPointerFromReflectedFieldType()
         {
             var fieldType = typeof(DelegatePointerHolder).GetField("Complex").GetModifiedFieldType();
@@ -579,11 +575,7 @@ namespace AsmResolver.DotNet.Tests
             });
         }
 
-        [Fact(
-#if !NET8_0_OR_GREATER
-            Skip = "only works on net8"
-#endif
-        )]
+        [Fact]
         public void ImportSimpleFunctionPointerFromReflectedFieldType()
         {
             var fieldType = typeof(DelegatePointerHolder).GetField("StdcallOnly").GetModifiedFieldType();
@@ -591,34 +583,23 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(CallingConventionAttributes.StdCall, imported.Signature.CallingConvention);
         }
 
-        [Fact(
-#if !NET8_0_OR_GREATER
-            Skip = "only works on net8"
-#endif
-        )]
+        [Fact]
         public void ImportModoptOnlyFunctionPointerFromReflectedFieldType()
         {
             var fieldType = typeof(DelegatePointerHolder).GetField("GcOnly").GetModifiedFieldType();
             var imported = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(_importer.ImportType(fieldType).ToTypeSignature());
             Assert.Equal(CallingConventionAttributes.Unmanaged, imported.Signature.CallingConvention);
             var firstModifier = Assert.IsAssignableFrom<CustomModifierTypeSignature>(imported.Signature.ReturnType);
-            Assert.True(firstModifier.ModifierType is
-            {
-                Namespace.Value: "System.Runtime.CompilerServices",
-                Name.Value: "CallConvSuppressGCTransition"
-            });
+            Assert.Equal("System.Runtime.CompilerServices.CallConvSuppressGCTransition", firstModifier.ModifierType.FullName);
         }
 
-        [Fact(
-#if !NET8_0_OR_GREATER
-            Skip = "only works on net8"
-#endif
-        )]
+        [Fact]
         public void ImportFunctionPointerFromTypeof()
         {
             var imported = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(_importer.ImportType(typeof(delegate*<int, uint>)).ToTypeSignature());
             Assert.Collection(imported.Signature.ParameterTypes, t => Assert.Same(_module.CorLibTypeFactory.Int32, t));
             Assert.Same(imported.Signature.ReturnType, _module.CorLibTypeFactory.UInt32);
         }
+#endif
     }
 }

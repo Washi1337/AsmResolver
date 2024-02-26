@@ -106,7 +106,16 @@ imported through reflection include:
     is created).
 -   Generic parameters.
 -   Generic type instantiations.
--   Function pointer types (!!WARNING!! Function pointer `Type` instances lose their calling conventions unless attained with `GetModified(Field/Property/Parameter)Type`. This includes `typeof`! `typeof(delegate*unmanaged[Cdecl]<void>)` is the same as `typeof(delegate*managed<void>)`. `Import(Field/Method)` will also strip the calling conventions from function pointers that are the types of fields or in method signatures. If you need to handle this, manually set the types in the resulting IMethodDefOrRef or MemberReference to the appropriate type attained with `ImportType`.)
+-   Function pointer types (.NET 8.0+ only. TFM doesn't matter for this, the runtime used at runtime is all that matters.) (!!WARNING!! )
+
+> [!WARNING]
+> Function pointer `Type` instances lose their calling conventions unless attained with
+> `GetModified(Field/Property/Parameter)Type`. This includes `typeof`!
+> `typeof(delegate*unmanaged[Cdecl]<void>)` is the same as `typeof(delegate*managed<void>)`.
+> `Import(Field/Method)` will also strip the calling conventions from function pointers
+> that are the types of fields or in method signatures.
+> If you need to handle this, manually set the types in the resulting
+> `IMethodDefOrRef` or `MemberReference` to the appropriate type from `ImportType`.
 
 Instantiations of generic methods are also supported.
 
