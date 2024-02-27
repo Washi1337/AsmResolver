@@ -459,7 +459,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             var variable = instruction.GetLocalVariable(Owner.LocalVariables);
 
-            CilOpCode code = instruction.OpCode;
+            var code = instruction.OpCode;
             object? operand = instruction.Operand;
 
             if (instruction.IsLdloc())
@@ -470,7 +470,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     1 => (CilOpCodes.Ldloc_1, null),
                     2 => (CilOpCodes.Ldloc_2, null),
                     3 => (CilOpCodes.Ldloc_3, null),
-                    {} x when x >= byte.MinValue && x <= byte.MaxValue => (CilOpCodes.Ldloc_S, variable),
+                    <= byte.MaxValue and >= byte.MinValue => (CilOpCodes.Ldloc_S, variable),
                     _ => (CilOpCodes.Ldloc, variable),
                 };
             }
@@ -482,9 +482,14 @@ namespace AsmResolver.DotNet.Code.Cil
                     1 => (CilOpCodes.Stloc_1, null),
                     2 => (CilOpCodes.Stloc_2, null),
                     3 => (CilOpCodes.Stloc_3, null),
-                    {} x when x >= byte.MinValue && x <= byte.MaxValue => (CilOpCodes.Stloc_S, variable),
+                    <= byte.MaxValue and >= byte.MinValue => (CilOpCodes.Stloc_S, variable),
                     _ => (CilOpCodes.Stloc, variable),
                 };
+            }
+            else if (instruction.OpCode.Code == CilCode.Ldloca)
+            {
+                if (variable.Index is >= byte.MinValue and <= byte.MaxValue)
+                    code = CilOpCodes.Ldloca_S;
             }
 
             if (code != instruction.OpCode)
@@ -501,7 +506,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             var parameter = instruction.GetParameter(Owner.Owner.Parameters);
 
-            CilOpCode code = instruction.OpCode;
+            var code = instruction.OpCode;
             object? operand = instruction.Operand;
 
             if (instruction.IsLdarg())
@@ -512,15 +517,19 @@ namespace AsmResolver.DotNet.Code.Cil
                     1 => (CilOpCodes.Ldarg_1, null),
                     2 => (CilOpCodes.Ldarg_2, null),
                     3 => (CilOpCodes.Ldarg_3, null),
-                    {} x when x >= byte.MinValue && x <= byte.MaxValue => (CilOpCodes.Ldarg_S, parameter),
+                    >= byte.MinValue and <= byte.MaxValue => (CilOpCodes.Ldarg_S, parameter),
                     _ => (CilOpCodes.Ldarg, parameter),
                 };
             }
             else if (instruction.IsStarg())
             {
-                code = parameter.MethodSignatureIndex <= byte.MaxValue
-                    ? CilOpCodes.Starg_S
-                    : CilOpCodes.Starg;
+                if (parameter.MethodSignatureIndex <= byte.MaxValue)
+                    code = CilOpCodes.Starg_S;
+            }
+            else if (instruction.OpCode.Code == CilCode.Ldarga)
+            {
+                if (parameter.Index is >= byte.MinValue and <= byte.MaxValue)
+                    code = CilOpCodes.Ldarga_S;
             }
 
             if (code != instruction.OpCode)

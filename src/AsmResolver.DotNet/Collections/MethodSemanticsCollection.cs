@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using AsmResolver.Collections;
 
 namespace AsmResolver.DotNet.Collections
 {
     /// <summary>
     /// Provides an implementation of a list of method semantics that are associated to a property or event.
     /// </summary>
-    public class MethodSemanticsCollection : OwnedCollection< IHasSemantics, MethodSemantics>
+    public class MethodSemanticsCollection : MemberCollection<IHasSemantics, MethodSemantics>
     {
         /// <summary>
         /// Creates a new instance of the <see cref="MethodSemanticsCollection"/> class.
@@ -36,7 +34,7 @@ namespace AsmResolver.DotNet.Collections
             set;
         } = true;
 
-        private void AssertSemanticsValidity([NotNull] MethodSemantics item)
+        private void AssertSemanticsValidity(MethodSemantics item)
         {
             if (!ValidateMembership)
                 return;

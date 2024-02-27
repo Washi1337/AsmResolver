@@ -101,7 +101,9 @@ namespace AsmResolver.DotNet.Dynamic
 
             if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod")
             {
-                object? resolver = FieldReader.ReadField<object>(dynamicMethodObj, "m_resolver");
+                object? resolver =
+                    FieldReader.ReadField<object>(dynamicMethodObj, "m_resolver")
+                    ?? FieldReader.ReadField<object>(dynamicMethodObj, "_resolver");
                 if (resolver != null)
                     dynamicMethodObj = resolver;
             }
@@ -115,7 +117,7 @@ namespace AsmResolver.DotNet.Dynamic
                 object? ilGenerator = dynamicMethodObj
                     .GetType()
                     .GetRuntimeMethods()
-                    .First(q => q.Name == "GetILGenerator")
+                    .First(q => q.Name == "GetILGenerator" && q.GetParameters().Length == 0)
                     .Invoke(dynamicMethodObj, null);
 
                 //Create instance of dynamicResolver

@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Versioning;
 using AsmResolver.Collections;
-using AsmResolver.PE.DotNet.Metadata.Blob;
-using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using FileAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.FileAttributes;
@@ -58,11 +57,8 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<ModuleDefinition> GetModules()
         {
-            _manifestModule.Assembly = null;
-            var result = new OwnedCollection<AssemblyDefinition, ModuleDefinition>(this)
-            {
-                _manifestModule
-            };
+            var result = new MemberCollection<AssemblyDefinition, ModuleDefinition>(this);
+            result.AddNoOwnerCheck(_manifestModule);
 
             var moduleResolver = _context.Parameters.ModuleResolver;
             if (moduleResolver is not null)

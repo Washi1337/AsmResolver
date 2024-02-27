@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Dynamic
                 case TableIndex.TypeDef:
                     object? type = _tokens[(int)token.Rid];
                     if (type is RuntimeTypeHandle runtimeTypeHandle)
-                        return _importer.ImportType(Type.GetTypeFromHandle(runtimeTypeHandle));
+                        return _importer.ImportType(Type.GetTypeFromHandle(runtimeTypeHandle)!);
                     break;
 
                 case TableIndex.Field:

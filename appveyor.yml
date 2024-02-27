@@ -4,7 +4,7 @@
       - master
 
   image: Visual Studio 2022
-  version: 5.5.0-master-build.{build}
+  version: 5.5.1-master-build.{build}
   configuration: Release
 
   skip_commits:
@@ -18,7 +18,7 @@
     verbosity: minimal
 
   artifacts:
-    - path: '**\*.nupkg'
+    - path: 'artifacts\package\release\*.nupkg'
 
   deploy:
     provider: NuGet
@@ -33,7 +33,7 @@
       - development
 
   image: Visual Studio 2022
-  version: 5.5.0-dev-build.{build}
+  version: 5.5.1-dev-build.{build}
   configuration: Release
 
   skip_commits:
@@ -47,4 +47,4 @@
     verbosity: minimal
 
   artifacts:
-    - path: '**\*.nupkg'
+    - path: 'artifacts\package\release\*.nupkg'

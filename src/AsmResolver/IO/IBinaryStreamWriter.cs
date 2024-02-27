@@ -201,10 +201,18 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="writer">The writer to align.</param>
         /// <param name="align">The boundary to use.</param>
-        public static void Align(this IBinaryStreamWriter writer, uint align)
+        public static void Align(this IBinaryStreamWriter writer, uint align) => writer.AlignRelative(align, 0);
+
+        /// <summary>
+        /// Aligns the writer to a specified boundary, relative to the provided start offset..
+        /// </summary>
+        /// <param name="writer">The writer to align.</param>
+        /// <param name="align">The boundary to use.</param>
+        /// <param name="startOffset">The starting offset to consider the alignment boundaries from.</param>
+        public static void AlignRelative(this IBinaryStreamWriter writer, uint align, ulong startOffset)
         {
-            ulong currentPosition = writer.Offset;
-            writer.WriteZeroes((int) (currentPosition.Align(align) - writer.Offset));
+            ulong currentPosition = writer.Offset - startOffset;
+            writer.WriteZeroes((int) (currentPosition.Align(align) - currentPosition));
         }
 
         /// <summary>

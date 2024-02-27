@@ -84,7 +84,10 @@ namespace AsmResolver.DotNet.Dynamic
             // if the DynamicMethod code is not flushed yet into the resolver (e.g., it hasn't been invoked yet).
             object? dynamicILInfo = null;
             if (FieldReader.TryReadField<MethodBase>(resolver, "m_method", out var m) && m is not null)
-                FieldReader.TryReadField(m, "m_DynamicILInfo", out dynamicILInfo);
+            {
+                if (!FieldReader.TryReadField(m, "m_DynamicILInfo", out dynamicILInfo))
+                    FieldReader.TryReadField(m, "_dynamicILInfo", out dynamicILInfo);
+            }
 
             // Extract all required information to construct the body.
             byte[]? code;

@@ -229,12 +229,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureCustomAttributesInitialized();
             var rids = _customAttributes.GetValues(owner.MetadataToken);
-            var result = new OwnedCollection<IHasCustomAttribute, CustomAttribute>(owner, rids.Count);
+            var result = new MemberCollection<IHasCustomAttribute, CustomAttribute>(owner, rids.Count);
 
             foreach (uint rid in rids)
             {
                 var attribute = (CustomAttribute) LookupMember(new MetadataToken(TableIndex.CustomAttribute, rid));
-                result.Add(attribute);
+                result.AddNoOwnerCheck(attribute);
             }
 
             return result;
@@ -274,12 +274,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureSecurityDeclarationsInitialized();
             var rids = _securityDeclarations.GetValues(owner.MetadataToken);
-            var result = new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(owner, rids.Count);
+            var result = new MemberCollection<IHasSecurityDeclaration, SecurityDeclaration>(owner, rids.Count);
 
             foreach (uint rid in rids)
             {
                 var attribute = (SecurityDeclaration) LookupMember(new MetadataToken(TableIndex.DeclSecurity, rid));
-                result.Add(attribute);
+                result.AddNoOwnerCheck(attribute);
             }
 
             return result;

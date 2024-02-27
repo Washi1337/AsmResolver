@@ -62,7 +62,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void OptimizeHiddenThisToLdarg0()
         {
             var instructions = CreateDummyMethod(true, 0, 0);
-            instructions.Add(CilOpCodes.Ldarg, instructions.Owner.Owner.Parameters.ThisParameter);
+            instructions.Add(CilOpCodes.Ldarg, instructions.Owner.Owner.Parameters.ThisParameter!);
             instructions.Add(CilOpCodes.Ret);
 
             instructions.OptimizeMacros();
@@ -184,6 +184,23 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         }
 
         [Theory]
+        [InlineData(0, CilCode.Ldloca_S)]
+        [InlineData(1, CilCode.Ldloca_S)]
+        [InlineData(255, CilCode.Ldloca_S)]
+        [InlineData(256, CilCode.Ldloca)]
+        public void OptimizeLoadLocalAddressInstructions(int index, CilCode expected)
+        {
+            var instructions = CreateDummyMethod(false, 0, index + 1);
+
+            instructions.Add(CilOpCodes.Ldloca, instructions.Owner.LocalVariables[index]);
+            instructions.Add(CilOpCodes.Ret);
+
+            instructions.OptimizeMacros();
+
+            Assert.Equal(expected, instructions[0].OpCode.Code);
+        }
+
+        [Theory]
         [InlineData(0, CilCode.Stloc_0)]
         [InlineData(1, CilCode.Stloc_1)]
         [InlineData(2, CilCode.Stloc_2)]
@@ -218,6 +235,24 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var method = instructions.Owner.Owner;
 
             instructions.Add(CilOpCodes.Ldarg, method.Parameters[index]);
+            instructions.Add(CilOpCodes.Ret);
+
+            instructions.OptimizeMacros();
+
+            Assert.Equal(expected, instructions[0].OpCode.Code);
+        }
+
+        [Theory]
+        [InlineData(0, CilCode.Ldarga_S)]
+        [InlineData(1, CilCode.Ldarga_S)]
+        [InlineData(255, CilCode.Ldarga_S)]
+        [InlineData(256, CilCode.Ldarga)]
+        public void OptimizeLoadArgAddressInstructions(int index, CilCode expected)
+        {
+            var instructions = CreateDummyMethod(false, index + 1, 0);
+            var method = instructions.Owner.Owner;
+
+            instructions.Add(CilOpCodes.Ldarga, method.Parameters[index]);
             instructions.Add(CilOpCodes.Ret);
 
             instructions.OptimizeMacros();
@@ -374,7 +409,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             instructions.OptimizeMacros();
 
             int[] offsets = instructions.Select(i => i.Offset).ToArray();
-            Assert.NotEqual(offsets, instructions.Select(i => 0));
+            Assert.All(offsets.Skip(1), offset => Assert.NotEqual(0, offset));
             instructions.CalculateOffsets();
             Assert.Equal(offsets, instructions.Select(i => i.Offset));
         }
@@ -393,7 +428,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             instructions.ExpandMacros();
 
             int[] offsets = instructions.Select(i => i.Offset).ToArray();
-            Assert.NotEqual(offsets, instructions.Select(i => 0));
+            Assert.All(offsets.Skip(1), offset => Assert.NotEqual(0, offset));
             instructions.CalculateOffsets();
             Assert.Equal(offsets, instructions.Select(i => i.Offset));
         }

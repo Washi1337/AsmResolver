@@ -60,7 +60,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             uint offset = reader.ReadUInt32();
             uint size = reader.ReadUInt32();
             string name = reader.ReadAsciiString();
-            reader.Align(4);
+            reader.AlignRelative(4);
             return new MetadataStreamHeader(offset, size, name);
         }
 

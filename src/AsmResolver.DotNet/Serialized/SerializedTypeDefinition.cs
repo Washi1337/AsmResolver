@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
-using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -58,12 +55,12 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<TypeDefinition> GetNestedTypes()
         {
             var rids = _context.ParentModule.GetNestedTypeRids(MetadataToken.Rid);
-            var result = new OwnedCollection<TypeDefinition, TypeDefinition>(this, rids.Count);
+            var result = new MemberCollection<TypeDefinition, TypeDefinition>(this, rids.Count);
 
             foreach (uint rid in rids)
             {
                 var nestedType = (TypeDefinition) _context.ParentModule.LookupMember(new MetadataToken(TableIndex.TypeDef, rid));
-                result.Add(nestedType);
+                result.AddNoOwnerCheck(nestedType);
             }
 
             return result;
@@ -97,10 +94,10 @@ namespace AsmResolver.DotNet.Serialized
         private IList<TMember> CreateMemberCollection<TMember>(MetadataRange range)
             where TMember : class, IMetadataMember, IOwnedCollectionElement<TypeDefinition>
         {
-            var result = new OwnedCollection<TypeDefinition, TMember>(this, range.Count);
+            var result = new MemberCollection<TypeDefinition, TMember>(this, range.Count);
 
             foreach (var token in range)
-                result.Add((TMember) _context.ParentModule.LookupMember(token));
+                result.AddNoOwnerCheck((TMember) _context.ParentModule.LookupMember(token));
 
             return result;
         }
@@ -117,14 +114,14 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<GenericParameter> GetGenericParameters()
         {
             var rids = _context.ParentModule.GetGenericParameters(MetadataToken);
-            var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this, rids.Count);
+            var result = new MemberCollection<IHasGenericParameters, GenericParameter>(this, rids.Count);
 
             foreach (uint rid in rids)
             {
                 if (_context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.GenericParam, rid), out var member)
                     && member is GenericParameter genericParameter)
                 {
-                    result.Add(genericParameter);
+                    result.AddNoOwnerCheck(genericParameter);
                 }
             }
 
@@ -135,14 +132,14 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<InterfaceImplementation> GetInterfaces()
         {
             var rids = _context.ParentModule.GetInterfaceImplementationRids(MetadataToken);
-            var result = new OwnedCollection<TypeDefinition, InterfaceImplementation>(this, rids.Count);
+            var result = new MemberCollection<TypeDefinition, InterfaceImplementation>(this, rids.Count);
 
             foreach (uint rid in rids)
             {
                 if (_context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.InterfaceImpl, rid), out var member)
                     && member is InterfaceImplementation type)
                 {
-                    result.Add(type);
+                    result.AddNoOwnerCheck(type);
                 }
             }
 

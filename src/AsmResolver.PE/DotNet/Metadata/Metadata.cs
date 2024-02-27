@@ -188,9 +188,11 @@ namespace AsmResolver.PE.DotNet.Metadata
                 var header = headers[i];
                 writer.WriteUInt32(header.Offset);
                 writer.WriteUInt32(header.Size);
+
+                ulong nameOffset = writer.Offset;
                 writer.WriteAsciiString(header.Name);
                 writer.WriteByte(0);
-                writer.Align(4);
+                writer.AlignRelative(4, nameOffset);
             }
         }
 

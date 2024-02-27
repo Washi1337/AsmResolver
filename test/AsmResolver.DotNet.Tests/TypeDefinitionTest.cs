@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
@@ -13,6 +15,7 @@ using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.DotNet.TestCases.Types;
 using AsmResolver.DotNet.TestCases.Types.Structs;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -135,42 +138,42 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
 
             var class1 = module.TopLevelTypes.First(t => t.Name == nameof(TopLevelClass1));
-            Assert.Equal(new HashSet<Utf8String>
+            Assert.Equal(new Utf8String[]
             {
                 nameof(TopLevelClass1.Nested1),
                 nameof(TopLevelClass1.Nested2)
             }, class1.NestedTypes.Select(t => t.Name));
 
             var nested1 = class1.NestedTypes.First(t => t.Name == nameof(TopLevelClass1.Nested1));
-            Assert.Equal(new HashSet<Utf8String>
+            Assert.Equal(new Utf8String[]
             {
                 nameof(TopLevelClass1.Nested1.Nested1Nested1),
                 nameof(TopLevelClass1.Nested1.Nested1Nested2)
             }, nested1.NestedTypes.Select(t => t.Name));
 
             var nested2 = class1.NestedTypes.First(t => t.Name == nameof(TopLevelClass1.Nested2));
-            Assert.Equal(new HashSet<Utf8String>
+            Assert.Equal(new Utf8String[]
             {
                 nameof(TopLevelClass1.Nested2.Nested2Nested1),
                 nameof(TopLevelClass1.Nested2.Nested2Nested2)
             }, nested2.NestedTypes.Select(t => t.Name));
 
             var class2 = module.TopLevelTypes.First(t => t.Name == nameof(TopLevelClass2));
-            Assert.Equal(new HashSet<Utf8String>
+            Assert.Equal(new Utf8String[]
             {
                 nameof(TopLevelClass2.Nested3),
                 nameof(TopLevelClass2.Nested4)
             }, class2.NestedTypes.Select(t => t.Name));
 
             var nested3 = class2.NestedTypes.First(t => t.Name == nameof(TopLevelClass2.Nested3));
-            Assert.Equal(new HashSet<Utf8String>
+            Assert.Equal(new Utf8String[]
             {
                 nameof(TopLevelClass2.Nested3.Nested3Nested1),
                 nameof(TopLevelClass2.Nested3.Nested3Nested2)
             }, nested3.NestedTypes.Select(t => t.Name));
 
             var nested4 = class2.NestedTypes.First(t => t.Name == nameof(TopLevelClass2.Nested4));
-            Assert.Equal(new HashSet<Utf8String>
+            Assert.Equal(new Utf8String[]
             {
                 nameof(TopLevelClass2.Nested4.Nested4Nested1),
                 nameof(TopLevelClass2.Nested4.Nested4Nested2)
@@ -198,8 +201,10 @@ namespace AsmResolver.DotNet.Tests
         public void ReadNestedNestedFullName()
         {
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
-            var type = (TypeDefinition) module.LookupMember(typeof(TopLevelClass1.Nested1.Nested1Nested2).MetadataToken);
-            Assert.Equal("AsmResolver.DotNet.TestCases.NestedClasses.TopLevelClass1+Nested1+Nested1Nested2", type.FullName);
+            var type = (TypeDefinition) module.LookupMember(typeof(TopLevelClass1.Nested1.Nested1Nested2)
+                .MetadataToken);
+            Assert.Equal("AsmResolver.DotNet.TestCases.NestedClasses.TopLevelClass1+Nested1+Nested1Nested2",
+                type.FullName);
         }
 
         [Fact]
@@ -723,5 +728,55 @@ namespace AsmResolver.DotNet.Tests
             Assert.Null(type.GetConstructor(factory.String));
             Assert.Null(type.GetConstructor(factory.String, factory.String));
         }
+
+        [Fact]
+        public void AddTypeToModuleShouldSetOwner()
+        {
+            var module = new ModuleDefinition("Dummy");
+            var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public);
+            module.TopLevelTypes.Add(type);
+            Assert.Same(module, type.Module);
+        }
+
+        [Fact]
+        public void AddNestedTypeToModuleShouldSetOwner()
+        {
+            var module = new ModuleDefinition("Dummy");
+            var type1 = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public);
+            var type2 = new TypeDefinition(null, "NestedType", TypeAttributes.NestedPublic);
+            module.TopLevelTypes.Add(type1);
+            type1.NestedTypes.Add(type2);
+            Assert.Same(type1, type2.DeclaringType);
+            Assert.Same(module, type2.Module);
+        }
+
+        [Fact]
+        public void AddSameTypeTwiceToModuleShouldThrow()
+        {
+            var module = new ModuleDefinition("Dummy");
+            var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public);
+            module.TopLevelTypes.Add(type);
+            Assert.Throws<ArgumentException>(() => module.TopLevelTypes.Add(type));
+        }
+
+        [Fact]
+        public void AddSameTypeTwiceToNestedTypeShouldThrow()
+        {
+            var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public);
+            var nestedType = new TypeDefinition(null, "SomeType", TypeAttributes.NestedPublic);
+            type.NestedTypes.Add(nestedType);
+            Assert.Throws<ArgumentException>(() => type.NestedTypes.Add(nestedType));
+        }
+
+        [Fact]
+        public void AddSameNestedTypeToDifferentTypesShouldThrow()
+        {
+            var type1 = new TypeDefinition("SomeNamespace", "SomeType1", TypeAttributes.Public);
+            var type2 = new TypeDefinition("SomeNamespace", "SomeType2", TypeAttributes.Public);
+            var nestedType = new TypeDefinition(null, "SomeType", TypeAttributes.NestedPublic);
+            type1.NestedTypes.Add(nestedType);
+            Assert.Throws<ArgumentException>(() => type2.NestedTypes.Add(nestedType));
+        }
+
     }
 }
