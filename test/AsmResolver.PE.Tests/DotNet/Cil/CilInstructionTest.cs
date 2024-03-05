@@ -18,7 +18,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
         [InlineData(CilCode.Ldc_I4_7, null, 7)]
         [InlineData(CilCode.Ldc_I4_8, null, 8)]
         [InlineData(CilCode.Ldc_I4_S, (sbyte) -10, -10)]
-        public void GetLdcI4ConstantTest(CilCode code, object operand, int expectedValue)
+        public void GetLdcI4ConstantTest(CilCode code, object? operand, int expectedValue)
         {
             var instruction = new CilInstruction(code.ToOpCode(), operand);
             Assert.Equal(expectedValue, instruction.GetLdcI4Constant());

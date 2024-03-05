@@ -54,12 +54,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             var module = _context.ParentModule;
             var rids = module.GetGenericParameterConstraints(MetadataToken);
-            var result = new OwnedCollection<GenericParameter, GenericParameterConstraint>(this, rids.Count);
+            var result = new MemberCollection<GenericParameter, GenericParameterConstraint>(this, rids.Count);
 
             foreach (uint rid in rids)
             {
                 var constraintToken = new MetadataToken(TableIndex.GenericParamConstraint, rid);
-                result.Add((GenericParameterConstraint) module.LookupMember(constraintToken));
+                result.AddNoOwnerCheck((GenericParameterConstraint) module.LookupMember(constraintToken));
             }
 
             return result;

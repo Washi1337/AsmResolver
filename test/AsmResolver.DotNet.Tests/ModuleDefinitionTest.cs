@@ -167,7 +167,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadTypesNested()
         {
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
-            Assert.Equal(new HashSet<Utf8String>
+            Assert.Equal(new Utf8String[]
             {
                 "<Module>",
                 nameof(TopLevelClass1),

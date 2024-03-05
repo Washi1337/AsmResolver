@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet.Dynamic.Tests
             object rtDynamicMethod = generatedDynamicMethod
                 .GetType()
                 .GetField("m_dynMethod", (BindingFlags) (-1))?
-                .GetValue(generatedDynamicMethod);
+                .GetValue(generatedDynamicMethod) ?? generatedDynamicMethod;
             var dynamicMethod = new DynamicMethodDefinition(module, rtDynamicMethod!);
 
             Assert.NotNull(dynamicMethod);
