@@ -61,35 +61,25 @@ namespace AsmResolver.DotNet
             get;
         }
 
-        private static IAssemblyResolver CreateAssemblyResolver(DotNetRuntimeInfo runtime, ModuleReaderParameters readerParameters)
+        private static IAssemblyResolver CreateAssemblyResolver(
+            DotNetRuntimeInfo runtime,
+            ModuleReaderParameters readerParameters)
         {
-            AssemblyResolverBase resolver;
             switch (runtime.Name)
             {
                 case DotNetRuntimeInfo.NetFramework:
-                case DotNetRuntimeInfo.NetStandard
-                    when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
+                case DotNetRuntimeInfo.NetStandard when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
+                    return new DotNetFrameworkAssemblyResolver(readerParameters);
 
-                    resolver = new DotNetFrameworkAssemblyResolver(readerParameters);
-                    break;
-
-                case DotNetRuntimeInfo.NetStandard
-                    when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(
-                        runtime.Version, out var coreVersion):
-
-                    resolver = new DotNetCoreAssemblyResolver(readerParameters, coreVersion);
-                    break;
+                case DotNetRuntimeInfo.NetStandard when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(runtime.Version, out var coreVersion):
+                    return new DotNetCoreAssemblyResolver(readerParameters, coreVersion);
 
                 case DotNetRuntimeInfo.NetCoreApp:
-                    resolver = new DotNetCoreAssemblyResolver(readerParameters, runtime.Version);
-                    break;
+                    return new DotNetCoreAssemblyResolver(readerParameters, runtime.Version);
 
                 default:
-                    resolver = new DotNetFrameworkAssemblyResolver(readerParameters);
-                    break;
+                    return new DotNetFrameworkAssemblyResolver(readerParameters);
             }
-
-            return resolver;
         }
     }
 }
