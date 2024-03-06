@@ -138,32 +138,14 @@ namespace AsmResolver.DotNet.Serialized
             ReaderContext.TablesStream.GetIndexEncoder(codedIndex);
 
         /// <inheritdoc />
-        public override IEnumerable<TypeReference> GetImportedTypeReferences()
+        public override IEnumerable<IMetadataMember> EnumerateTableMembers(TableIndex tableIndex)
         {
-            var table = ReaderContext.TablesStream.GetTable(TableIndex.TypeRef);
+            var table = ReaderContext.TablesStream.GetTable(tableIndex);
 
             for (uint rid = 1; rid <= table.Count; rid++)
             {
-                if (TryLookupMember(new MetadataToken(TableIndex.TypeRef, rid), out var member)
-                    && member is TypeReference reference)
-                {
-                    yield return reference;
-                }
-            }
-        }
-
-        /// <inheritdoc />
-        public override IEnumerable<MemberReference> GetImportedMemberReferences()
-        {
-            var table = ReaderContext.TablesStream.GetTable(TableIndex.MemberRef);
-
-            for (uint rid = 1; rid <= table.Count; rid++)
-            {
-                if (TryLookupMember(new MetadataToken(TableIndex.MemberRef, rid), out var member)
-                    && member is MemberReference reference)
-                {
-                    yield return reference;
-                }
+                if (TryLookupMember(new MetadataToken(tableIndex, rid), out var member))
+                    yield return member;
             }
         }
 

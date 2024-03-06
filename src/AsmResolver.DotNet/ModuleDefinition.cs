@@ -915,7 +915,7 @@ namespace AsmResolver.DotNet
         /// import new type references into the module. This method only serves as a way to easily get all the type
         /// references that were imported during the last compilation or assembly process.
         /// </remarks>
-        public virtual IEnumerable<TypeReference> GetImportedTypeReferences() => Enumerable.Empty<TypeReference>();
+        public virtual IEnumerable<TypeReference> GetImportedTypeReferences() => EnumerateTableMembers<TypeReference>(TableIndex.TypeRef);
 
         /// <summary>
         /// Obtains a list of member references that were imported into the module.
@@ -926,7 +926,43 @@ namespace AsmResolver.DotNet
         /// import new member references into the module. This method only serves as a way to easily get all the member
         /// references that were imported during the last compilation or assembly process.
         /// </remarks>
-        public virtual IEnumerable<MemberReference> GetImportedMemberReferences() => Enumerable.Empty<MemberReference>();
+        public virtual IEnumerable<MemberReference> GetImportedMemberReferences() => EnumerateTableMembers<MemberReference>(TableIndex.MemberRef);
+
+        /// <summary>
+        /// Enumerates all metadata members stored in the module.
+        /// </summary>
+        /// <param name="tableIndex">The table to enumerate the members for.</param>
+        /// <returns>The members.</returns>
+        /// <remarks>
+        /// The return value of this method does not update when new members are added or imported into the module.
+        /// This method only serves as a way to easily get all the member references that were imported during the last
+        /// compilation or assembly process. This method can also only enumerate members in a table for which there is
+        /// an explicit <see cref="IMetadataMember" /> implementation available, and will return an empty collection
+        /// for tables that do not have one.
+        /// </remarks>
+        public virtual IEnumerable<IMetadataMember> EnumerateTableMembers(TableIndex tableIndex)
+        {
+            return Enumerable.Empty<IMetadataMember>();
+        }
+
+        /// <summary>
+        /// Enumerates all metadata members stored in the module.
+        /// </summary>
+        /// <param name="tableIndex">The table to enumerate the members for.</param>
+        /// <typeparam name="TMember">The type of members to return.</typeparam>
+        /// <returns>The members.</returns>
+        /// <remarks>
+        /// The return value of this method does not update when new members are added or imported into the module.
+        /// This method only serves as a way to easily get all the member references that were imported during the last
+        /// compilation or assembly process. This method can also only enumerate members in a table for which there is
+        /// an explicit <see cref="IMetadataMember" /> implementation available, and will return an empty collection
+        /// for tables that do not have one.
+        /// </remarks>
+        public virtual IEnumerable<TMember> EnumerateTableMembers<TMember>(TableIndex tableIndex)
+            where TMember : IMetadataMember
+        {
+            return EnumerateTableMembers(tableIndex).Cast<TMember>();
+        }
 
         /// <summary>
         /// Enumerates all types (including nested types) defined in the module.
