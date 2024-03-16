@@ -10,14 +10,14 @@ namespace AsmResolver.PE.File
     /// </summary>
     public class PESection : IReadableSegment, IOffsetConverter
     {
-        private string _name;
+        private Utf8String _name;
 
         /// <summary>
         /// Creates a new empty section.
         /// </summary>
         /// <param name="name">The name of the section.</param>
         /// <param name="characteristics">The section flags.</param>
-        public PESection(string name, SectionFlags characteristics)
+        public PESection(Utf8String name, SectionFlags characteristics)
         {
             SectionHeader.AssertIsValidName(name);
             _name = name;
@@ -30,7 +30,7 @@ namespace AsmResolver.PE.File
         /// <param name="name">The name of the section.</param>
         /// <param name="characteristics">The section flags.</param>
         /// <param name="contents">The contents of the section.</param>
-        public PESection(string name, SectionFlags characteristics, ISegment? contents)
+        public PESection(Utf8String name, SectionFlags characteristics, ISegment? contents)
         {
             SectionHeader.AssertIsValidName(name);
             _name = name;
@@ -74,7 +74,7 @@ namespace AsmResolver.PE.File
         /// <remarks>
         /// The name of the section is a UTF-8 string that can be no longer than 8 characters long.
         /// </remarks>
-        public string Name
+        public Utf8String Name
         {
             get => _name;
             set

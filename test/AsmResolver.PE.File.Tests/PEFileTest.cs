@@ -255,14 +255,14 @@ namespace AsmResolver.PE.File.Tests
         public void ReadSections()
         {
             var file = PEFile.FromBytes(Properties.Resources.HelloWorld);
-            Assert.Equal(new[] {".text", ".rsrc", ".reloc"}, file.Sections.Select(x => x.Name));
+            Assert.Equal(new[] {".text", ".rsrc", ".reloc"}, file.Sections.Select(x => x.Name.Value));
         }
 
         [Fact]
         public void ReadInvalidSectionName()
         {
             var file = PEFile.FromBytes(Properties.Resources.HelloWorld_InvalidSectionName);
-            Assert.Equal(new[] {".text", ".rsrc", ".reloc"}, file.Sections.Select(x => x.Name));
+            Assert.Equal(new[] {".text", ".rsrc", ".reloc"}, file.Sections.Select(x => x.Name.Value));
         }
 
         [Fact]

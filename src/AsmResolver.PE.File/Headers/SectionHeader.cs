@@ -17,14 +17,14 @@ namespace AsmResolver.PE.File.Headers
                                              2 * sizeof (ushort) +
                                              1 * sizeof (uint);
 
-        private string _name;
+        private Utf8String _name;
 
         /// <summary>
         /// Creates a new section header with the provided name.
         /// </summary>
         /// <param name="name">The name of the new section.</param>
         /// <param name="characteristics">The section flags to assign.</param>
-        public SectionHeader(string name, SectionFlags characteristics)
+        public SectionHeader(Utf8String name, SectionFlags characteristics)
         {
             AssertIsValidName(name);
             _name = name;
@@ -58,13 +58,12 @@ namespace AsmResolver.PE.File.Headers
         /// <remarks>
         /// The name of the section is a UTF-8 string that can be no longer than 8 characters long.
         /// </remarks>
-        public string Name
+        public Utf8String Name
         {
             get => _name;
             set
             {
-                if (Encoding.UTF8.GetByteCount(value) > 8)
-                    throw new ArgumentException("Name is too long.");
+                AssertIsValidName(value);
                 _name = value;
             }
         }
@@ -178,14 +177,10 @@ namespace AsmResolver.PE.File.Headers
             // Read name field.
             byte[] nameBytes = new byte[8];
             reader.ReadBytes(nameBytes, 0, nameBytes.Length);
+            var nameReader = new BinaryStreamReader(nameBytes);
 
-            // Interpret as UTF-8, discarding all invalid UTF-8 characters.
-            string name = Encoding.UTF8.GetString(nameBytes).Replace("\xfffd", "");
-
-            // Trim to last null-byte if it exists.
-            int index = name.IndexOf('\0');
-            if (index >= 0)
-                name = name.Remove(index);
+            // Interpret as UTF-8, discarding all invalid UTF-8 chgitaracters.
+            var name = nameReader.ReadUtf8String();
 
             return new SectionHeader(name, 0)
             {
@@ -247,9 +242,8 @@ namespace AsmResolver.PE.File.Headers
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            var nameBytes = Encoding.UTF8.GetBytes(Name);
-            writer.WriteBytes(nameBytes);
-            writer.WriteZeroes(8 - nameBytes.Length);
+            writer.WriteBytes(Name.GetBytesUnsafe());
+            writer.WriteZeroes(8 - Name.ByteCount);
 
             writer.WriteUInt32(VirtualSize);
             writer.WriteUInt32(VirtualAddress);
@@ -272,9 +266,9 @@ namespace AsmResolver.PE.File.Headers
                    $"{nameof(Characteristics)}: {Characteristics})";
         }
 
-        internal static void AssertIsValidName(string value)
+        internal static void AssertIsValidName(Utf8String value)
         {
-            if (Encoding.UTF8.GetByteCount(value) > 8)
+            if (value.ByteCount > 8)
                 throw new ArgumentException("Section name cannot be longer than 8 characters.");
         }
     }
