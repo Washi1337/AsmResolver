@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AsmResolver.DotNet.Memory
 {
@@ -80,6 +81,20 @@ namespace AsmResolver.DotNet.Memory
         /// Gets a value indicating whether the type layout is dependent on the bitness of the environment.
         /// </summary>
         public bool IsPlatformDependent => (Attributes & MemoryLayoutAttributes.IsPlatformDependent) != 0;
+
+        /// <summary>
+        /// Gets a value indicating whether the type is a managed reference or contains managed references that are
+        /// tracked by the garbage collector.
+        /// </summary>
+        /// <remarks>
+        /// This is an equivalent to <see cref="RuntimeHelpers.IsReferenceOrContainsReferences{T}"/>.
+        /// </remarks>
+        public bool IsReferenceOrContainsReferences => (Attributes & MemoryLayoutAttributes.IsReferenceOrContainsReferences) != 0;
+
+        /// <summary>
+        /// Gets all fields stored in the type.
+        /// </summary>
+        public IEnumerable<FieldDefinition> GetFields() => _fields.Keys;
 
         private IEnumerable<FieldMemoryLayout> GetOrderedFields()
         {

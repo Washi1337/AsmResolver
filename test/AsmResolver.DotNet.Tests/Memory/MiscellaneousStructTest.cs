@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Memory;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 // Ignore unused field warnings.
@@ -85,6 +86,42 @@ namespace AsmResolver.DotNet.Tests.Memory
             Assert.Equal(IntPtr.Size == 4, layout.Is32Bit);
             Assert.True(layout.IsPlatformDependent);
             Assert.Equal((uint) Unsafe.SizeOf<NestedPlatformDependentStruct>(), layout.Size);
+        }
+
+        private struct ManagedStruct
+        {
+            public string ManagedField;
+        }
+
+        [Theory]
+        [InlineData(typeof(SequentialTestStructs.EmptyStruct), false)]
+        [InlineData(typeof(Struct1), false)]
+        [InlineData(typeof(NestedPlatformDependentStruct), false)]
+        [InlineData(typeof(MiscellaneousStructTest), true)]
+        [InlineData(typeof(ManagedStruct), true)]
+        public void DetermineNonGenericIsReferenceOrContainsReferences(Type type, bool expected)
+        {
+            var module = ModuleDefinition.FromFile(type.Assembly.Location);
+            var t = module.LookupMember<TypeDefinition>(type.MetadataToken);
+
+            var layout = t.GetImpliedMemoryLayout(false);
+            Assert.Equal(expected, layout.IsReferenceOrContainsReferences);
+        }
+
+        [Theory]
+        [InlineData(ElementType.I4, false)]
+        [InlineData(ElementType.String, true)]
+        public void DetermineGenericIsReferenceOrContainsReferences(ElementType elementType, bool expected)
+        {
+            var type = typeof(SequentialTestStructs.GenericStruct<,>);
+            var module = ModuleDefinition.FromFile(type.Assembly.Location);
+
+            var paramType = module.CorLibTypeFactory.FromElementType(elementType)!;
+            var t = module.LookupMember<TypeDefinition>(type.MetadataToken)
+                .MakeGenericInstanceType(paramType, paramType);
+
+            var layout = t.GetImpliedMemoryLayout(false);
+            Assert.Equal(expected, layout.IsReferenceOrContainsReferences);
         }
     }
 }
