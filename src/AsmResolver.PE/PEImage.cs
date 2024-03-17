@@ -145,8 +145,17 @@ namespace AsmResolver.PE
         /// <param name="inputFile">The file representing the PE.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(IInputFile inputFile) =>
-            FromFile(PEFile.FromFile(inputFile), new PEReaderParameters());
+        public static IPEImage FromFile(IInputFile inputFile) => FromFile(inputFile, new PEReaderParameters());
+
+        /// <summary>
+        /// Opens a PE image from an input file object.
+        /// </summary>
+        /// <param name="inputFile">The file representing the PE.</param>
+        /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
+        /// <returns>The PE image that was opened.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static IPEImage FromFile(IInputFile inputFile, PEReaderParameters readerParameters) =>
+            FromFile(PEFile.FromFile(inputFile), readerParameters);
 
         /// <summary>
         /// Opens a PE image from a PE file object.

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 
@@ -16,7 +17,7 @@ namespace AsmResolver.DotNet
         private static readonly string[] BinaryFileExtensions = {".dll", ".exe"};
         private static readonly SignatureComparer Comparer = new(SignatureComparisonFlags.AcceptNewerVersions);
 
-        private readonly ConcurrentDictionary<AssemblyDescriptor, AssemblyDefinition> _cache = new(new SignatureComparer());
+        private readonly ConcurrentDictionary<AssemblyDescriptor, AssemblyDefinition> _cache = new(SignatureComparer.Default);
 
         /// <summary>
         /// Initializes the base of an assembly resolver.
@@ -24,13 +25,30 @@ namespace AsmResolver.DotNet
         /// <param name="fileService">The service to use for reading files from the disk.</param>
         protected AssemblyResolverBase(IFileService fileService)
         {
-            FileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
+            ReaderParameters = new ModuleReaderParameters
+            {
+                PEReaderParameters = {FileService = fileService}
+            };
+        }
+
+        /// <summary>
+        /// Initializes the base of an assembly resolver.
+        /// </summary>
+        /// <param name="readerParameters">The reader parameters used for reading new resolved assemblies.</param>
+        protected AssemblyResolverBase(ModuleReaderParameters readerParameters)
+        {
+            ReaderParameters = readerParameters;
         }
 
         /// <summary>
         /// Gets the file service that is used for reading files from the disk.
         /// </summary>
-        public IFileService FileService
+        public IFileService FileService => ReaderParameters.PEReaderParameters.FileService;
+
+        /// <summary>
+        /// Gets the reader parameters used for reading new resolved assemblies.
+        /// </summary>
+        public ModuleReaderParameters ReaderParameters
         {
             get;
         }
@@ -128,7 +146,7 @@ namespace AsmResolver.DotNet
         /// <returns>The assembly.</returns>
         protected virtual AssemblyDefinition LoadAssemblyFromFile(string path)
         {
-            return AssemblyDefinition.FromFile(FileService.OpenFile(path));
+            return AssemblyDefinition.FromFile(FileService.OpenFile(path), ReaderParameters);
         }
 
         /// <summary>
