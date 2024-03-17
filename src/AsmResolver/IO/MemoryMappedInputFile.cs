@@ -1,3 +1,5 @@
+#if NETSTANDARD2_0_OR_GREATER
+
 using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
@@ -45,3 +47,5 @@ namespace AsmResolver.IO
         }
     }
 }
+
+#endif

@@ -272,7 +272,7 @@ namespace AsmResolver.Collections
             Array.Resize(ref _items, newCapacity);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void IncrementVersion()
         {
             unchecked

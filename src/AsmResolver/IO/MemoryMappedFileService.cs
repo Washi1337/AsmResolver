@@ -1,3 +1,5 @@
+#if NETSTANDARD2_0_OR_GREATER
+
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,3 +39,5 @@ namespace AsmResolver.IO
         }
     }
 }
+
+#endif

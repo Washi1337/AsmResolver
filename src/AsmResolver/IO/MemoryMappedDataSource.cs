@@ -1,3 +1,5 @@
+#if NETSTANDARD2_0_OR_GREATER
+
 using System;
 using System.IO.MemoryMappedFiles;
 
@@ -52,7 +54,7 @@ namespace AsmResolver.IO
 
             var handle = _accessor.SafeMemoryMappedViewHandle;
             int actualLength = (int) Math.Min(Length - address, (uint) buffer.Length);
-            
+
 #if NET6_0_OR_GREATER
             handle.ReadSpan(address, buffer[..actualLength]);
 #else
@@ -79,3 +81,5 @@ namespace AsmResolver.IO
         public void Dispose() => _accessor?.Dispose();
     }
 }
+
+#endif
