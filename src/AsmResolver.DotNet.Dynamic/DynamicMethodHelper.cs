@@ -116,7 +116,7 @@ namespace AsmResolver.DotNet.Dynamic
 
                 object? ilGenerator = dynamicMethodObj
                     .GetType()
-                    .GetRuntimeMethods()
+                    .GetMethods((BindingFlags) (-1))
                     .First(q => q.Name == "GetILGenerator" && q.GetParameters().Length == 0)
                     .Invoke(dynamicMethodObj, null);
 
