@@ -4,6 +4,7 @@ using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -220,10 +221,10 @@ namespace AsmResolver.DotNet.Signatures
             string fullName = ReturnType.FullName;
 
             string genericsString = GenericParameterCount > 0
-                ? $"<{string.Join(", ", new string('?', GenericParameterCount))}>"
+                ? $"<{StringShim.Join(", ", new string('?', GenericParameterCount))}>"
                 : string.Empty;
 
-            string parameterTypesString = string.Join(", ", ParameterTypes);
+            string parameterTypesString = StringShim.Join(", ", ParameterTypes);
 
             string sentinelSuffix;
             if (CallingConvention == CallingConventionAttributes.VarArg)

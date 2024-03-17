@@ -4,6 +4,7 @@ using System.Text;
 using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {

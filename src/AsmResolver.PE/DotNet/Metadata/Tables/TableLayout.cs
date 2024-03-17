@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
@@ -39,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"({string.Join(", ", Columns.Select(c => c.Name).ToArray())})";
+            return $"({StringShim.Join(", ", Columns.Select(c => c.Name).ToArray())})";
         }
 
     }

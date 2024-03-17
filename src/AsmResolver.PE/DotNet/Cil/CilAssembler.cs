@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.Collections;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -294,7 +295,7 @@ namespace AsmResolver.PE.DotNet.Cil
                 .ToArray();
 
             string operandTypesString = expectedOperands.Length > 1
-                ? $"{string.Join(", ", names.Take(names.Length - 1).ToArray())} or {names[names.Length - 1]}"
+                ? $"{StringShim.Join(", ", names.Take(names.Length - 1))} or {names[names.Length - 1]}"
                 : names[0];
 
             string found = instruction.Operand?.GetType().Name ?? "null";

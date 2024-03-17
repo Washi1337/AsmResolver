@@ -253,7 +253,6 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <exception cref="InvalidCilInstructionException">Occurs when one branch instruction in the method body is invalid.</exception>
         /// <exception cref="AggregateException">Occurs when multiple branch instructions in the method body are invalid.</exception>
         /// <remarks>This method will force the offsets of each instruction to be calculated.</remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void VerifyLabels() => VerifyLabels(true);
 
         /// <summary>
@@ -274,7 +273,6 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         /// <exception cref="StackImbalanceException">Occurs when the method body will result in an unbalanced stack.</exception>
         /// <remarks>This method will force the offsets of each instruction to be calculated.</remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ComputeMaxStack() => ComputeMaxStack(true);
 
         /// <summary>

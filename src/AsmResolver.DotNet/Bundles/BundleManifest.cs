@@ -11,6 +11,7 @@ using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Win32Resources;
 using AsmResolver.PE.Win32Resources.Builder;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Bundles
 {
@@ -279,7 +280,7 @@ namespace AsmResolver.DotNet.Bundles
                 manifestHasher.TransformBlock(fileHash, 0, fileHash.Length, fileHash, 0);
             }
 
-            manifestHasher.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+            manifestHasher.TransformFinalBlock(ArrayShim.Empty<byte>(), 0, 0);
             byte[] manifestHash = manifestHasher.Hash!;
 
             return Convert.ToBase64String(manifestHash)

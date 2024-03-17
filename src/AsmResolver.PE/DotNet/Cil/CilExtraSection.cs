@@ -1,6 +1,7 @@
 using System;
 using AsmResolver.Collections;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Cil
 {

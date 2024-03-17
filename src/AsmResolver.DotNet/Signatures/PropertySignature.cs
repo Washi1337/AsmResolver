@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -123,7 +124,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             string prefix = HasThis ? "instance " : string.Empty;
             string parameterTypesString = ParameterTypes.Count > 0
-                ? $"[{string.Join(", ", ParameterTypes)}]"
+                ? $"[{StringShim.Join(", ", ParameterTypes)}]"
                 : string.Empty;
 
             return $"{prefix}{ReturnType.FullName} *{parameterTypesString}";

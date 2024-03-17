@@ -4,6 +4,7 @@ using System.IO;
 using System.Security.Cryptography;
 using AsmResolver.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.StrongName
 {

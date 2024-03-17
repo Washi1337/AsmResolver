@@ -2,6 +2,7 @@ using System;
 using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.Exceptions.X64
 {

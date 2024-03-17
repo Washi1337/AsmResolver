@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.Imports
 {
@@ -50,7 +51,7 @@ namespace AsmResolver.PE.Imports
             }
 
             using var md5 = MD5.Create();
-            return md5.ComputeHash(Encoding.ASCII.GetBytes(string.Join(",", elements.ToArray())));
+            return md5.ComputeHash(Encoding.ASCII.GetBytes(StringShim.Join(",", elements)));
         }
 
         private static string FormatModuleName(IImportedModule module)

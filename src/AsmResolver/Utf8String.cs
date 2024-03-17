@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using AsmResolver.Collections;
+using AsmResolver.Shims;
 
 namespace AsmResolver
 {

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -71,7 +73,7 @@ namespace AsmResolver.DotNet.Signatures
                     break;
 
                 case ElementType.SzArray:
-                    WriteArrayElement((SzArrayTypeSignature) argumentType, Array.Empty<object>(), true);
+                    WriteArrayElement((SzArrayTypeSignature) argumentType, ArrayShim.Empty<object>(), true);
                     break;
 
                 case ElementType.Class:
@@ -180,7 +182,7 @@ namespace AsmResolver.DotNet.Signatures
                 case ElementType.SzArray:
                     WriteArrayElement(
                         (SzArrayTypeSignature) argumentType,
-                        element as IList<object?> ?? Array.Empty<object?>(),
+                        element as IList<object?> ?? ArrayShim.Empty<object?>(),
                         false);
                     break;
 

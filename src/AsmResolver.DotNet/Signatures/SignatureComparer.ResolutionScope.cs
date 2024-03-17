@@ -6,7 +6,8 @@ namespace AsmResolver.DotNet.Signatures
 {
     public partial class SignatureComparer :
         IEqualityComparer<IResolutionScope>,
-        IEqualityComparer<AssemblyDescriptor>
+        IEqualityComparer<AssemblyDescriptor>,
+        IEqualityComparer<AssemblyReference>
     {
         private bool IgnoreAssemblyVersionNumbers
         {
@@ -101,5 +102,11 @@ namespace AsmResolver.DotNet.Signatures
                 return hashCode;
             }
         }
+
+        /// <inheritdoc />
+        public bool Equals(AssemblyReference x, AssemblyReference y) => Equals((AssemblyDescriptor)x, y);
+
+        /// <inheritdoc />
+        public int GetHashCode(AssemblyReference obj) => GetHashCode((AssemblyDescriptor)obj);
     }
 }

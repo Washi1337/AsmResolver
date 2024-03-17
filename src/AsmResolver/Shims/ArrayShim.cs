@@ -1,6 +1,6 @@
 using System;
 
-namespace AsmResolver.Collections;
+namespace AsmResolver.Shims;
 
 /// <summary>
 /// Provides compatibility shims for the <see cref="Array"/> class for builds that target older .NET framework versions.
@@ -12,7 +12,7 @@ public static class ArrayShim
     /// </summary>
     /// <typeparam name="T">The type to get the empty array for.</typeparam>
     /// <returns>The empty array.</returns>
-#if NETSTANDARD2_0_OR_GREATER
+#if !NET35
     public static T[] Empty<T>() => Array.Empty<T>();
 #else
     public static T[] Empty<T>() => ArrayHelper<T>.Empty;
@@ -22,4 +22,6 @@ public static class ArrayShim
         public static readonly T[] Empty = new T[0];
     }
 #endif
+
+    public static bool Contains<T>(this T[] self, T value) => Array.IndexOf(self, value) != -1;
 }

@@ -8,6 +8,7 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.Shims;
 using AssemblyHashAlgorithm = AsmResolver.PE.DotNet.Metadata.Tables.Rows.AssemblyHashAlgorithm;
 
 namespace AsmResolver.DotNet
@@ -60,7 +61,7 @@ namespace AsmResolver.DotNet
 
                 byte[]? publicKeyToken = GetPublicKeyToken();
                 string publicKeyTokenString = publicKeyToken is not null
-                    ? string.Join(string.Empty, publicKeyToken.Select(x => x.ToString("x2")))
+                    ? StringShim.Join(string.Empty, publicKeyToken.Select(x => x.ToString("x2")))
                     : "null";
 
                 return $"{Name}, Version={Version}, Culture={cultureString}, PublicKeyToken={publicKeyTokenString}";
