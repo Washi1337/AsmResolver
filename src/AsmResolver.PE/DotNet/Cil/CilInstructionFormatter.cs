@@ -147,8 +147,8 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The formatted string.</returns>
         protected virtual string FormatSwitch(object? operand) => operand switch
         {
-            IEnumerable<ICilLabel> target => $"({string.Join(", ", target.Select(FormatBranchTarget))})",
-            IEnumerable<int> offsets => $"({string.Join(", ", offsets.Select(x => FormatBranchTarget(x)))})",
+            IEnumerable<ICilLabel> target => $"({string.Join(", ", target.Select(FormatBranchTarget).ToArray())})",
+            IEnumerable<int> offsets => $"({string.Join(", ", offsets.Select(x => FormatBranchTarget(x)).ToArray())})",
             null => InvalidOperandString,
             _ => operand.ToString() ?? string.Empty
         };

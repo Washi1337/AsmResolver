@@ -50,7 +50,7 @@ namespace AsmResolver.PE.Imports
             }
 
             using var md5 = MD5.Create();
-            return md5.ComputeHash(Encoding.ASCII.GetBytes(string.Join(",", elements)));
+            return md5.ComputeHash(Encoding.ASCII.GetBytes(string.Join(",", elements.ToArray())));
         }
 
         private static string FormatModuleName(IImportedModule module)

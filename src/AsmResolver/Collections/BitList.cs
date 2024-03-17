@@ -63,7 +63,6 @@ namespace AsmResolver.Collections
             }
         }
 
-        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static (int wordIndex, int bitIndex) SplitWordBitIndex(int index)
         {
             int wordIndex = Math.DivRem(index, WordSize, out int offset);

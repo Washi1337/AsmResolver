@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 
@@ -19,7 +20,7 @@ namespace AsmResolver.PE.Exceptions.X64
         public X64UnwindInfo()
         {
             Version = 1;
-            UnwindCodes = Array.Empty<ushort>();
+            UnwindCodes = ArrayShim.Empty<ushort>();
             ExceptionHandler = SegmentReference.Null;
             ExceptionHandlerData = SegmentReference.Null;
         }
