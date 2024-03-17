@@ -1,5 +1,3 @@
-#if NETSTANDARD2_0_OR_GREATER
-
 using System.IO;
 using AsmResolver.IO;
 using AsmResolver.Tests.Runners;
@@ -41,5 +39,3 @@ namespace AsmResolver.Tests.IO
         }
     }
 }
-
-#endif

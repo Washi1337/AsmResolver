@@ -1,4 +1,4 @@
-#if NETSTANDARD2_0_OR_GREATER
+#if !NET35
 
 using System;
 using System.IO.MemoryMappedFiles;

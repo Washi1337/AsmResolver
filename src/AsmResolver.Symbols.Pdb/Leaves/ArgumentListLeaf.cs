@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Shims;
 
 namespace AsmResolver.Symbols.Pdb.Leaves;
 
@@ -62,5 +63,5 @@ public class ArgumentListLeaf : CodeViewLeaf, ITpiLeaf
     protected virtual IList<CodeViewTypeRecord> GetArgumentTypes() => new List<CodeViewTypeRecord>();
 
     /// <inheritdoc />
-    public override string ToString() => string.Join(", ", Types);
+    public override string ToString() => StringShim.Join(", ", Types);
 }
