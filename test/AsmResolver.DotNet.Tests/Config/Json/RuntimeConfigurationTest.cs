@@ -20,6 +20,7 @@ namespace AsmResolver.DotNet.Tests.Config.Json
     }
 }");
 
+            Assert.NotNull(config);
             Assert.NotNull(config.RuntimeOptions);
             Assert.Equal("netcoreapp3.1", config.RuntimeOptions.TargetFrameworkMoniker);
 
@@ -48,14 +49,14 @@ namespace AsmResolver.DotNet.Tests.Config.Json
     }
 }");
 
+            Assert.NotNull(config);
             Assert.NotNull(config.RuntimeOptions);
             Assert.Equal("net5.0", config.RuntimeOptions.TargetFrameworkMoniker);
 
             var frameworks = config.RuntimeOptions.IncludedFrameworks;
-            Assert.Contains(frameworks, framework => framework.Name == "Microsoft.NETCore.App"
-                                                     && framework.Version == "5.0.0");
-            Assert.Contains(frameworks, framework => framework.Name == "Microsoft.WindowsDesktop.App"
-                                                     && framework.Version == "5.0.0");
+            Assert.NotNull(frameworks);
+            Assert.Contains(frameworks, framework => framework is { Name: "Microsoft.NETCore.App", Version: "5.0.0" });
+            Assert.Contains(frameworks, framework => framework is { Name: "Microsoft.WindowsDesktop.App", Version: "5.0.0" });
         }
 
         [Fact]
@@ -75,12 +76,23 @@ namespace AsmResolver.DotNet.Tests.Config.Json
     }
 }");
 
-            var value = Assert.Contains("System.GC.Concurrent", (IDictionary<string, JsonElement>) config.RuntimeOptions.ConfigProperties);
+            Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions.ConfigProperties);
+
+#if NET5_0_OR_GREATER
+            var value = Assert.Contains("System.GC.Concurrent", config.RuntimeOptions.ConfigProperties);
             Assert.Equal(JsonValueKind.False, value.ValueKind);
 
-            value = Assert.Contains("System.Threading.ThreadPool.MinThreads", (IDictionary<string, JsonElement>) config.RuntimeOptions.ConfigProperties);
+            value = Assert.Contains("System.Threading.ThreadPool.MinThreads", config.RuntimeOptions.ConfigProperties);
             Assert.Equal(JsonValueKind.Number, value.ValueKind);
             Assert.Equal(4, value.GetInt32());
+#else
+            object value = Assert.Contains("System.GC.Concurrent", config.RuntimeOptions.ConfigProperties);
+            Assert.Equal(false, value);
+
+            value = Assert.Contains("System.Threading.ThreadPool.MinThreads", config.RuntimeOptions.ConfigProperties);
+            Assert.Equal(4, value);
+#endif
         }
     }
 }

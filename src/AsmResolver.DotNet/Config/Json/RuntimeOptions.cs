@@ -1,6 +1,10 @@
+using System;
 using System.Collections.Generic;
+
+#if NET5_0_OR_GREATER
 using System.Text.Json;
 using System.Text.Json.Serialization;
+#endif
 
 namespace AsmResolver.DotNet.Config.Json
 {
@@ -42,16 +46,21 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Indicates configuration properties to configure the runtime and the framework
         /// </summary>
+#if NET5_0_OR_GREATER
         public Dictionary<string, JsonElement>? ConfigProperties
+#else
+        public Dictionary<string, object?>? ConfigProperties
+#endif
         {
             get;
             set;
         }
-
         /// <summary>
         /// Gets or sets the optional string value which specifies the Target Framework Moniker.
         /// </summary>
+        #if NET5_0_OR_GREATER
         [JsonPropertyName("tfm")]
+        #endif
         public string? TargetFrameworkMoniker
         {
             get;
@@ -109,6 +118,57 @@ namespace AsmResolver.DotNet.Config.Json
             get;
             set;
         }
+
+#if !NET5_0_OR_GREATER
+        internal static RuntimeOptions FromJsonNode(JSONNode node)
+        {
+            var result = new RuntimeOptions();
+
+            if (node.HasKey("tfm"))
+                result.TargetFrameworkMoniker = node["tfm"].Value;
+
+            if (node.HasKey("framework"))
+                result.Framework = RuntimeFramework.FromJsonNode(node["framework"]);
+
+            if (node.HasKey("includedFrameworks"))
+            {
+                result.IncludedFrameworks = new List<RuntimeFramework>();
+                foreach (var item in node["includedFrameworks"].Values)
+                    result.IncludedFrameworks.Add(RuntimeFramework.FromJsonNode(item));
+            }
+
+            if (node.HasKey("applyPatches"))
+                result.ApplyPatches = node["ApplyPatches"].AsBool;
+
+            if (node.HasKey("rollForwardOnNoCandidateFx"))
+                result.RollForwardOnNoCandidateFx = node["rollForwardOnNoCandidateFx"].AsInt;
+
+            if (node.HasKey("additionalProbingPaths"))
+            {
+                result.AdditionalProbingPaths = new List<string>();
+                foreach (var item in node["additionalProbingPaths"].Values)
+                    result.AdditionalProbingPaths.Add(item.Value);
+            }
+
+            if (node.HasKey("configProperties"))
+            {
+                result.ConfigProperties = new Dictionary<string, object?>();
+                foreach (var item in node["configProperties"])
+                    result.ConfigProperties[item.Key] = InterpretValue(item.Value);
+            }
+
+            return result;
+        }
+
+        private static object? InterpretValue(JSONNode node) => node.Tag switch
+        {
+            JSONNodeType.String => node.Value,
+            JSONNodeType.Number => node.AsInt,
+            JSONNodeType.NullValue => null,
+            JSONNodeType.Boolean => node.AsBool,
+            _ => null
+        };
+#endif
 
         /// <summary>
         /// Gets a collection of all frameworks specified in the configuration.
