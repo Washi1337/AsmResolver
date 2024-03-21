@@ -1,8 +1,6 @@
-#if !NET35
-
 using System;
 using System.IO;
-using System.IO.MemoryMappedFiles;
+using AsmResolver.Shims;
 
 namespace AsmResolver.IO
 {
@@ -11,7 +9,7 @@ namespace AsmResolver.IO
     /// </summary>
     public sealed class MemoryMappedInputFile : IInputFile
     {
-        private readonly MemoryMappedFile _file;
+        private readonly MemoryMappedFileShim _file;
         private readonly MemoryMappedDataSource _dataSource;
 
         /// <summary>
@@ -21,9 +19,8 @@ namespace AsmResolver.IO
         public MemoryMappedInputFile(string filePath)
         {
             FilePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
-            _file = MemoryMappedFile.CreateFromFile(filePath);
-            long fileSize = new FileInfo(filePath).Length;
-            _dataSource = new MemoryMappedDataSource(_file.CreateViewAccessor(0, fileSize), (ulong) fileSize);
+            _file = new MemoryMappedFileShim(filePath);
+            _dataSource = new MemoryMappedDataSource(_file);
         }
 
         /// <inheritdoc />
@@ -47,5 +44,3 @@ namespace AsmResolver.IO
         }
     }
 }
-
-#endif

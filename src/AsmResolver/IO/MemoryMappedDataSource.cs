@@ -1,7 +1,5 @@
-#if !NET35
-
 using System;
-using System.IO.MemoryMappedFiles;
+using AsmResolver.Shims;
 
 namespace AsmResolver.IO
 {
@@ -13,37 +11,38 @@ namespace AsmResolver.IO
         , ISpanDataSource
 #endif
     {
-        private readonly MemoryMappedViewAccessor _accessor;
+        private readonly MemoryMappedFileShim _file;
 
         /// <summary>
         /// Creates a new instance of the <see cref="MemoryMappedDataSource"/> class.
         /// </summary>
-        /// <param name="accessor">The memory accessor to use.</param>
-        /// <param name="length">The length of the data.</param>
-        public MemoryMappedDataSource(MemoryMappedViewAccessor accessor, ulong length)
+        /// <param name="file">The memory mapped file to use.</param>
+        internal MemoryMappedDataSource(MemoryMappedFileShim file)
         {
-            Length = length;
-            _accessor = accessor ?? throw new ArgumentNullException(nameof(accessor));
+            _file = file ?? throw new ArgumentNullException(nameof(file));
         }
 
         /// <inheritdoc />
         public ulong BaseAddress => 0;
 
         /// <inheritdoc />
-        public byte this[ulong address] => _accessor.ReadByte((long) address);
+        public byte this[ulong address] => _file.ReadByte((long) address);
 
         /// <inheritdoc />
-        public ulong Length
-        {
-            get;
-        }
+        public ulong Length => (ulong)_file.Size;
 
         /// <inheritdoc />
         public bool IsValidAddress(ulong address) => address < Length;
 
         /// <inheritdoc />
-        public int ReadBytes(ulong address, byte[] buffer, int index, int count) =>
-            _accessor.ReadArray((long) address, buffer, index, count);
+        public int ReadBytes(ulong address, byte[] buffer, int index, int count)
+        {
+            if (address >= Length)
+                throw new ArgumentOutOfRangeException(nameof(address));
+            int actualLength = (int)Math.Min(Length - address, (ulong)count);
+            _file.GetSpan((long)address, actualLength).CopyTo(buffer.AsSpan(index));
+            return actualLength;
+        }
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <inheritdoc />
@@ -52,34 +51,15 @@ namespace AsmResolver.IO
             if (!IsValidAddress(address))
                 return 0;
 
-            var handle = _accessor.SafeMemoryMappedViewHandle;
-            int actualLength = (int) Math.Min(Length - address, (uint) buffer.Length);
+            int actualLength = (int) Math.Min(Length - address, (ulong)buffer.Length);
 
-#if NET6_0_OR_GREATER
-            handle.ReadSpan(address, buffer[..actualLength]);
-#else
-            byte* pointer = null;
+            _file.GetSpan((long)address, actualLength).CopyTo(buffer);
 
-            try
-            {
-                handle.AcquirePointer(ref pointer);
-                new ReadOnlySpan<byte>(pointer, actualLength).CopyTo(buffer);
-            }
-            finally
-            {
-                if (pointer != null)
-                {
-                    handle.ReleasePointer();
-                }
-            }
-#endif
             return actualLength;
         }
 #endif
 
         /// <inheritdoc />
-        public void Dispose() => _accessor?.Dispose();
+        public void Dispose() => _file.Dispose();
     }
 }
-
-#endif
