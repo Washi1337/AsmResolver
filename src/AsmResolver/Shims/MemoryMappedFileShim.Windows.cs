@@ -46,20 +46,29 @@ internal sealed unsafe partial class MemoryMappedFileShim
         {
             handle = CreateFileW(pathPointer, GENERIC_READ, FILE_SHARE_READ, null, OPEN_EXISTING, 0);
         }
-        if (handle == -1) throw new Win32Exception();
+        if (handle == -1)
+            throw new Win32Exception();
+
         _fileHandle = (void*)handle;
-        if (!GetFileSizeEx(_fileHandle, out _size)) throw new Win32Exception();
+        if (!GetFileSizeEx(_fileHandle, out _size))
+            throw new Win32Exception();
+
         handle = CreateFileMappingA(_fileHandle, null, PAGE_READONLY, 0, 0, null);
-        if (handle == -1) throw new Win32Exception();
+        if (handle == -1)
+            throw new Win32Exception();
         _mappingHandle = (void*)handle;
+
         _file = (byte*)MapViewOfFile(_mappingHandle, FILE_MAP_READ, 0, 0, 0);
-        if (_file == null) throw new Win32Exception();
+        if (_file == null)
+            throw new Win32Exception();
     }
 
     private void DisposeCoreWindows(void* filePointer)
     {
-        if (!UnmapViewOfFile(filePointer)) return;
-        if (!CloseHandle(_mappingHandle)) return;
+        if (!UnmapViewOfFile(filePointer))
+            return;
+        if (!CloseHandle(_mappingHandle))
+            return;
         CloseHandle(_fileHandle);
     }
 }

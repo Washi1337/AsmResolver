@@ -28,16 +28,20 @@ internal sealed unsafe partial class MemoryMappedFileShim
 
     private void AllocateFileUnix(string path)
     {
-        var fd = open(path, 0);
+        int fd = open(path, 0);
         if (fd == -1)
             throw new Win32Exception();
+
         _size = lseek(fd, 0, SEEK_END);
         if (_size == -1)
             throw new Win32Exception();
-        var mapping = mmap(null, (nuint)_size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+        nint mapping = mmap(null, (nuint)_size, PROT_READ, MAP_PRIVATE, fd, 0);
         if (mapping == -1)
             throw new Win32Exception();
         _file = (byte*)mapping;
+
+        // mmap explicitly documents that it is fine to close the fd after mapping
         close(fd);
     }
 
