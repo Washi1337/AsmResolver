@@ -22,6 +22,15 @@ internal sealed unsafe partial class MemoryMappedFileShim : IDisposable
 
     public long Size => _size;
 
+    public byte ReadByte(long address)
+    {
+        if (_file == null)
+            throw new ObjectDisposedException("disposed");
+        if ((ulong)address >= (ulong)_size)
+            throw new ArgumentOutOfRangeException(nameof(address));
+        return _file[address];
+    }
+
     public ReadOnlySpan<byte> GetSpan(long offset, int length)
     {
         if (_file == null) throw new ObjectDisposedException("disposed");
