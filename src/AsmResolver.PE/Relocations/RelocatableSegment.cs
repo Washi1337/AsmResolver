@@ -12,7 +12,7 @@ namespace AsmResolver.PE.Relocations
         /// </summary>
         /// <param name="segment">The segment.</param>
         /// <param name="relocations">The relocation information.</param>
-        public RelocatableSegment(ISegment segment, IReadOnlyList<BaseRelocation> relocations)
+        public RelocatableSegment(ISegment segment, IList<BaseRelocation> relocations)
         {
             Segment = segment;
             Relocations = relocations;
@@ -29,7 +29,7 @@ namespace AsmResolver.PE.Relocations
         /// <summary>
         /// Gets the relocation information required to relocate the segment.
         /// </summary>
-        public IReadOnlyList<BaseRelocation> Relocations
+        public IList<BaseRelocation> Relocations
         {
             get;
         }

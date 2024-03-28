@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet
 {
@@ -42,13 +43,13 @@ namespace AsmResolver.DotNet
             string fullPath = Path.Combine(_basePath, assembly.Name!);
             if (Directory.Exists(fullPath))
             {
-                string pubKeyTokenString = string.Join(string.Empty, token.Select(x => x.ToString("x2")));
+                string pubKeyTokenString = StringShim.Join(string.Empty, token.Select(x => x.ToString("x2")));
                 string directoryName = $"{assembly.Version}__{pubKeyTokenString}";
                 if (IsPrefixed)
                     directoryName = _prefix + directoryName;
 
                 string? filePath = AssemblyResolverBase.ProbeFileFromFilePathWithoutExtension(
-                    Path.Combine(fullPath, directoryName, assembly.Name!));
+                    PathShim.Combine(fullPath, directoryName, assembly.Name!));
                 if (!string.IsNullOrEmpty(filePath))
                     return filePath;
             }

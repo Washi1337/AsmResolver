@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
@@ -15,14 +17,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="columns">The column layouts.</param>
         public TableLayout(params ColumnLayout[] columns)
         {
-            Columns = columns;
+            Columns = new ReadOnlyCollection<ColumnLayout>(columns);
             RowSize = (uint) columns.Sum(c => c.Size);
         }
 
         /// <summary>
         /// Gets a collection of columns that this table defines.
         /// </summary>
-        public IReadOnlyList<ColumnLayout> Columns
+        public IList<ColumnLayout> Columns
         {
             get;
         }
@@ -38,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"({string.Join(", ", Columns.Select(c => c.Name))})";
+            return $"({StringShim.Join(", ", Columns.Select(c => c.Name).ToArray())})";
         }
 
     }

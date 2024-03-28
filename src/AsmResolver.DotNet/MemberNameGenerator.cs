@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet
 {
@@ -130,7 +132,7 @@ namespace AsmResolver.DotNet
             AppendMemberDeclaringType(state, specification.DeclaringType);
             state.Append(specification.Name);
 
-            AppendTypeParameters(state, specification.Signature?.TypeArguments ?? Array.Empty<TypeSignature>());
+            AppendTypeParameters(state, specification.Signature?.TypeArguments ?? ArrayShim.Empty<TypeSignature>());
 
             state.Append('(');
             AppendSignatureParameterTypes(state, signature);

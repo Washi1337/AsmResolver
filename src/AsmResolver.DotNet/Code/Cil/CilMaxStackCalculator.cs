@@ -197,14 +197,12 @@ namespace AsmResolver.DotNet.Code.Cil
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ScheduleLabel(int currentIndex, ICilLabel label, int nextStackSize)
         {
             int nextIndex = _body.Instructions.GetIndexByOffset(label.Offset);
             ScheduleIndex(currentIndex, nextIndex, label.Offset, nextStackSize);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ScheduleDelta(int currentIndex, int offsetDelta, int nextStackSize)
         {
             int nextOffset = _body.Instructions[currentIndex].Offset + offsetDelta;
@@ -212,7 +210,6 @@ namespace AsmResolver.DotNet.Code.Cil
             ScheduleIndex(currentIndex, nextIndex, nextOffset, nextStackSize);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ScheduleNext(int currentIndex, int nextStackSize)
         {
             var instruction = _body.Instructions[currentIndex];

@@ -4,6 +4,7 @@ using System.Linq;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -123,7 +124,7 @@ namespace AsmResolver.DotNet.Signatures
         private static string ElementToString(object? element) => element switch
         {
             null => "null",
-            IList<object?> list => $"{{{string.Join(", ", list.Select(ElementToString))}}}",
+            IList<object?> list => $"{{{StringShim.Join(", ", list.Select(ElementToString))}}}",
             string x => x.CreateEscapedString(),
             _ => element.ToString() ?? string.Empty
         };

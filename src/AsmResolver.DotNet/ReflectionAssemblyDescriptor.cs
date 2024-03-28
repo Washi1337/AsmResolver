@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet
         protected override Utf8String? GetName() => _assemblyName.Name;
 
         /// <inheritdoc />
-        protected override Utf8String? GetCulture() => _assemblyName.CultureName;
+        protected override Utf8String? GetCulture() => _assemblyName.CultureInfo.Name;
 
         /// <inheritdoc />
         public override bool IsImportedInModule(ModuleDefinition module) => false;

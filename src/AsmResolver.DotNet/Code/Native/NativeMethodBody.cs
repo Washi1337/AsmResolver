@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.Collections;
 using AsmResolver.PE.Code;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Code.Native
 {
@@ -17,7 +19,7 @@ namespace AsmResolver.DotNet.Code.Native
         public NativeMethodBody(MethodDefinition owner)
             : base(owner)
         {
-            Code = Array.Empty<byte>();
+            Code = ArrayShim.Empty<byte>();
         }
 
         /// <summary>

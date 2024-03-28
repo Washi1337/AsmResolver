@@ -25,7 +25,7 @@ public class MsfStreamDataSource : IDataSource
     /// <paramref name="length"/> * <paramref name="blockSize"/>.
     /// </exception>
     public MsfStreamDataSource(ulong length, uint blockSize, IEnumerable<byte[]> blocks)
-        : this(length, blockSize, blocks.Select(x => new ByteArrayDataSource(x)))
+        : this(length, blockSize, blocks.Select(x => (IDataSource) new ByteArrayDataSource(x)))
     {
     }
 
@@ -99,7 +99,6 @@ public class MsfStreamDataSource : IDataSource
         return totalReadCount;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private IDataSource GetBlockAndOffset(ulong address, out ulong offset)
     {
         var block = _blocks[Math.DivRem((long) address, _blockSize, out long x)];

@@ -398,7 +398,7 @@ namespace AsmResolver.PE.DotNet.Builder
         /// <param name="context">The working space of the builder.</param>
         /// <param name="relocations">The working space of the builder.</param>
         /// <returns>The base relocations section.</returns>
-        protected virtual PESection CreateRelocSection(ManagedPEBuilderContext context, IReadOnlyList<BaseRelocation> relocations)
+        protected virtual PESection CreateRelocSection(ManagedPEBuilderContext context, IList<BaseRelocation> relocations)
         {
             for (int i = 0; i < relocations.Count; i++)
                 context.RelocationsDirectory.Add(relocations[i]);

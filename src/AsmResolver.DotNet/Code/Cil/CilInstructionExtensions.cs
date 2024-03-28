@@ -172,7 +172,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <param name="variables">The local variables defined in the enclosing method body.</param>
         /// <returns>The variable.</returns>
         /// <exception cref="ArgumentException">Occurs when the instruction is not using a variant of the ldloc or stloc opcodes.</exception>
-        public static CilLocalVariable GetLocalVariable(this CilInstruction instruction, IReadOnlyList<CilLocalVariable> variables)
+        public static CilLocalVariable GetLocalVariable(this CilInstruction instruction, IList<CilLocalVariable> variables)
         {
             switch (instruction.OpCode.Code)
             {

@@ -192,7 +192,7 @@ namespace AsmResolver.DotNet.Bundles
             using var inputStream = new MemoryStream(GetData());
 
             using var outputStream = new MemoryStream();
-            using (var deflate = new DeflateStream(outputStream, CompressionLevel.Optimal))
+            using (var deflate = new DeflateStream(outputStream, CompressionMode.Compress))
             {
                 inputStream.CopyTo(deflate);
             }

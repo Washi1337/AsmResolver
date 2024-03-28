@@ -1,6 +1,8 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using AsmResolver.Collections;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet
 {
@@ -9,9 +11,9 @@ namespace AsmResolver.DotNet
 #if !NET8_0_OR_GREATER
         private static readonly PropertyInfo? IsFunctionPointerProp = typeof(Type).GetProperty("IsFunctionPointer");
         private static readonly PropertyInfo? IsUnmanagedFunctionPointerProp = typeof(Type).GetProperty("IsUnmanagedFunctionPointer");
-        private static readonly MethodInfo? GetFunctionPointerReturnTypeMethod = typeof(Type).GetMethod("GetFunctionPointerReturnType", Array.Empty<Type>());
-        private static readonly MethodInfo? GetFunctionPointerCallingConventionsMethod = typeof(Type).GetMethod("GetFunctionPointerCallingConventions", Array.Empty<Type>());
-        private static readonly MethodInfo? GetFunctionPointerParameterTypesMethod = typeof(Type).GetMethod("GetFunctionPointerParameterTypes", Array.Empty<Type>());
+        private static readonly MethodInfo? GetFunctionPointerReturnTypeMethod = typeof(Type).GetMethod("GetFunctionPointerReturnType", ArrayShim.Empty<Type>());
+        private static readonly MethodInfo? GetFunctionPointerCallingConventionsMethod = typeof(Type).GetMethod("GetFunctionPointerCallingConventions", ArrayShim.Empty<Type>());
+        private static readonly MethodInfo? GetFunctionPointerParameterTypesMethod = typeof(Type).GetMethod("GetFunctionPointerParameterTypes", ArrayShim.Empty<Type>());
 #endif
 #if NETSTANDARD2_0
         private static readonly MethodInfo? GetHINSTANCEMethod = typeof(Marshal).GetMethod("GetHINSTANCE", new[] { typeof(Module) });
@@ -22,7 +24,7 @@ namespace AsmResolver.DotNet
 #if NET8_0_OR_GREATER
             return t.IsFunctionPointer;
 #else
-            return IsFunctionPointerProp != null && (bool)IsFunctionPointerProp.GetValue(t)!;
+            return IsFunctionPointerProp != null && (bool)IsFunctionPointerProp.GetValue(t, ArrayShim.Empty<object>())!;
 #endif
         }
 
@@ -33,7 +35,7 @@ namespace AsmResolver.DotNet
 #else
             // can only be called if the type was already verified to be a function pointer
             // therefore the PropertyInfo is not null
-            return (bool)IsUnmanagedFunctionPointerProp!.GetValue(t)!;
+            return (bool)IsUnmanagedFunctionPointerProp!.GetValue(t, ArrayShim.Empty<object>())!;
 #endif
         }
 

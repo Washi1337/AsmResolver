@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Serialized
     public class SerializedAssemblyDefinition : AssemblyDefinition
     {
         private static readonly Utf8String SystemRuntimeVersioningNamespace = "System.Runtime.Versioning";
-        private static readonly Utf8String TargetFrameworkAttributeName = nameof(TargetFrameworkAttribute);
+        private static readonly Utf8String TargetFrameworkAttributeName = "TargetFrameworkAttribute";
 
         private readonly ModuleReaderContext _context;
         private readonly AssemblyDefinitionRow _row;

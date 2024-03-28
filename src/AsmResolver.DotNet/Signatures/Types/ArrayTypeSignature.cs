@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures.Types
 {
@@ -139,7 +140,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         private string GetDimensionsString()
         {
-            return "[" + string.Join(",", Dimensions.Select(x =>
+            return "[" + StringShim.Join(",", Dimensions.Select(x =>
             {
                 if (x.LowerBound.HasValue)
                 {

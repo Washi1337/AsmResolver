@@ -1,3 +1,5 @@
+#if !NET35
+
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,3 +39,5 @@ namespace AsmResolver.IO
         }
     }
 }
+
+#endif

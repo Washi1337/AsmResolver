@@ -244,7 +244,7 @@ namespace AsmResolver.DotNet
                 var ctor = CustomAttributes[i].Constructor;
 
                 if (ctor?.DeclaringType is not null
-                    && ctor.DeclaringType.IsTypeOf("System.Runtime.Versioning", nameof(TargetFrameworkAttribute))
+                    && ctor.DeclaringType.IsTypeOf("System.Runtime.Versioning", "TargetFrameworkAttribute")
                     && CustomAttributes[i].Signature?.FixedArguments[0].Element?.ToString() is { } name
                     && DotNetRuntimeInfo.TryParse(name, out info))
                 {

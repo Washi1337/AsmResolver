@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures.Types
 {
@@ -89,7 +90,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             get
             {
-                string genericArgString = string.Join(", ", TypeArguments);
+                string genericArgString = StringShim.Join(", ", TypeArguments);
                 return $"{GenericType.Name ?? NullTypeToString}<{genericArgString}>";
             }
         }

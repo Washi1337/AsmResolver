@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet
 {
@@ -71,12 +72,14 @@ namespace AsmResolver.DotNet
 
         private void DetectWindowsGacDirectories()
         {
-            string systemRoot = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            string? systemRoot = Environment.GetEnvironmentVariable("windir");
+            if (string.IsNullOrEmpty(systemRoot))
+                return;
 
-            string windowsGac = Path.Combine(systemRoot, "assembly");
+            string windowsGac = PathShim.Combine(systemRoot, "assembly");
             AddGacDirectories(windowsGac, null);
 
-            string frameworkGac = Path.Combine(systemRoot, "Microsoft.NET", "assembly");
+            string frameworkGac = PathShim.Combine(systemRoot, "Microsoft.NET", "assembly");
             AddGacDirectories(frameworkGac, "v4.0_");
         }
 
@@ -86,7 +89,7 @@ namespace AsmResolver.DotNet
                 GacMsilDirectories.Add(new GacDirectory("/usr/lib/mono/gac"));
 
             string? mostRecentMonoDirectory = Directory
-                .EnumerateDirectories("/usr/lib/mono")
+                .GetDirectories("/usr/lib/mono")
                 .Where(d => d.EndsWith("-api"))
                 .OrderByDescending(x => x)
                 .FirstOrDefault();
@@ -100,7 +103,7 @@ namespace AsmResolver.DotNet
             if (!Directory.Exists(windowsGac))
                 return;
 
-            foreach (string directory in Directory.EnumerateDirectories(windowsGac))
+            foreach (string directory in Directory.GetDirectories(windowsGac))
                 GetGacDirectoryCollection(directory).Add(new GacDirectory(directory, prefix));
 
             IList<GacDirectory> GetGacDirectoryCollection(string directory) => Path.GetFileName(directory) switch

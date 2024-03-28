@@ -46,11 +46,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
             var table = tablesStream.GetTable<TypeReferenceRow>(TableIndex.TypeRef);
 
-            var elements = table
+            string[] elements = table
                 .OrderBy(row => stringsStream.GetStringByIndex(row.Namespace))
                 .ThenBy(row => stringsStream.GetStringByIndex(row.Name))
                 .Select(row =>
-                    $"{stringsStream.GetStringByIndex(row.Namespace)}-{stringsStream.GetStringByIndex(row.Name)}");
+                    $"{stringsStream.GetStringByIndex(row.Namespace)}-{stringsStream.GetStringByIndex(row.Name)}")
+                .ToArray();
 
             string fullString = string.Join(",", elements);
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
@@ -284,7 +285,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             string? ns;
             if (names.Count > 1)
             {
-                ns = string.Join(".", names.Take(names.Count - 1));
+                ns = StringShim.Join(".", names.Take(names.Count - 1));
                 names.RemoveRange(0, names.Count - 1);
             }
             else
@@ -326,7 +327,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private AssemblyReference ParseAssemblyNameSpec()
         {
-            string assemblyName = string.Join(".", ParseDottedExpression(TypeNameTerminal.Identifier));
+            string assemblyName = StringShim.Join(".", ParseDottedExpression(TypeNameTerminal.Identifier));
             var newReference = new AssemblyReference(assemblyName, new Version());
 
             while (TryExpect(TypeNameTerminal.Comma).HasValue)
@@ -373,8 +374,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private Version ParseVersion()
         {
-            string versionString = string.Join(".", ParseDottedExpression(TypeNameTerminal.Number));
-            return Version.Parse(versionString);
+            string versionString = StringShim.Join(".", ParseDottedExpression(TypeNameTerminal.Number));
+            return VersionShim.Parse(versionString);
         }
 
         private byte[]? ParseHexBlob()
@@ -429,14 +430,15 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private TypeNameToken Expect(params TypeNameTerminal[] terminals)
         {
             return TryExpect(terminals)
-                   ?? throw new FormatException($"Expected one of {string.Join(", ", terminals)}.");
+                ?? throw new FormatException(
+                    $"Expected one of {StringShim.Join(", ", terminals.Select(x => x.ToString()))}.");
         }
 
         private TypeNameToken? TryExpect(params TypeNameTerminal[] terminals)
         {
             var token = _lexer.Peek();
 
-            if (!terminals.Contains(token.Terminal))
+            if (!Enumerable.Contains(terminals, token.Terminal))
                 return null;
 
             _lexer.Next();

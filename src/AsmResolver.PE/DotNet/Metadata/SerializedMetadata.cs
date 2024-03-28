@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -33,7 +35,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             Rva = directoryReader.Rva;
 
             _streamContentsReader = directoryReader.Fork();
-            _streamHeaders = Array.Empty<MetadataStreamHeader>();
+            _streamHeaders = ArrayShim.Empty<MetadataStreamHeader>();
 
             // Verify signature.
             var signature = (MetadataSignature) directoryReader.ReadUInt32();

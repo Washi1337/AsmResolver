@@ -1,4 +1,5 @@
 using System.Linq;
+using AsmResolver.Shims;
 
 namespace AsmResolver.Symbols.Pdb.Leaves;
 
@@ -148,7 +149,7 @@ public class MemberFunctionLeaf : CodeViewLeaf, ITpiLeaf
     /// <inheritdoc />
     public override string ToString()
     {
-        string args = string.Join(", ", Arguments?.Types ?? Enumerable.Empty<CodeViewTypeRecord>());
+        string args = StringShim.Join(", ", Arguments?.Types ?? Enumerable.Empty<CodeViewTypeRecord>());
         return $"{CallingConvention} {ReturnType} {DeclaringType}::*({args})";
     }
 }

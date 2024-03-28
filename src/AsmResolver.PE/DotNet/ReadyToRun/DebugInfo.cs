@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.ReadyToRun
 {
@@ -107,7 +109,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         private byte[] SerializeBounds()
         {
             if (Bounds.Count == 0)
-                return Array.Empty<byte>();
+                return ArrayShim.Empty<byte>();
 
             using var stream = new MemoryStream();
             var writer = new NibbleWriter(new BinaryStreamWriter(stream));
@@ -133,7 +135,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         private byte[] SerializeVariables()
         {
             if (Variables.Count == 0)
-                return Array.Empty<byte>();
+                return ArrayShim.Empty<byte>();
 
             using var stream = new MemoryStream();
             var writer = new NibbleWriter(new BinaryStreamWriter(stream));
