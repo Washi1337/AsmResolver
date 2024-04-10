@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides information about a target runtime.
     /// </summary>
-    public readonly struct DotNetRuntimeInfo
+    public readonly struct DotNetRuntimeInfo : IEquatable<DotNetRuntimeInfo>
     {
         /// <summary>
         /// The target framework name used by applications targeting .NET and .NET Core.
@@ -25,6 +25,14 @@ namespace AsmResolver.DotNet
         public const string NetFramework = ".NETFramework";
 
         private static readonly Regex FormatRegex = new(@"([a-zA-Z.]+)\s*,\s*Version=v(\d+\.\d+)");
+
+        private static readonly Regex NetFxMonikerRegex = new(@"net(\d)(\d)(\d?)");
+
+        private static readonly Regex NetCoreAppMonikerRegex = new(@"netcoreapp(\d)\.(\d)");
+
+        private static readonly Regex NetStandardMonikerRegex = new(@"netstandard(\d)\.(\d)");
+
+        private static readonly Regex NetMonikerRegex = new(@"net(\d+)\.(\d+)");
 
         /// <summary>
         /// Creates a new instance of the <see cref="DotNetRuntimeInfo"/> structure.
@@ -100,6 +108,45 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Parses the target framework moniker as provided in a <c>.runtimeconfig.json</c> file.
+        /// </summary>
+        /// <param name="moniker">The moniker</param>
+        /// <returns>The parsed version info.</returns>
+        public static DotNetRuntimeInfo ParseMoniker(string moniker)
+        {
+            return TryParseMoniker(moniker, out var info) ? info : throw new FormatException();
+        }
+
+        /// <summary>
+        /// Attempts to parse the target framework moniker as provided in a <c>.runtimeconfig.json</c> file.
+        /// </summary>
+        /// <param name="moniker">The moniker</param>
+        /// <param name="info">The parsed version info.</param>
+        /// <returns><c>true</c> if the provided name was in the correct format, <c>false</c> otherwise.</returns>
+        public static bool TryParseMoniker(string moniker, out DotNetRuntimeInfo info)
+        {
+            info = default;
+            string runtime;
+
+            Match match;
+            if ((match = NetMonikerRegex.Match(moniker)).Success)
+                runtime = NetCoreApp;
+            else if ((match = NetCoreAppMonikerRegex.Match(moniker)).Success)
+                runtime = NetCoreApp;
+            else if ((match = NetStandardMonikerRegex.Match(moniker)).Success)
+                runtime = NetStandard;
+            else if ((match = NetFxMonikerRegex.Match(moniker)).Success)
+                runtime = NetFramework;
+            else
+                return false;
+
+            var version = new Version(int.Parse(match.Groups[1].Value), int.Parse(match.Groups[2].Value));
+
+            info = new DotNetRuntimeInfo(runtime, version);
+            return true;
+        }
+
+        /// <summary>
         /// Obtains a reference to the default core lib reference of this runtime.
         /// </summary>
         /// <returns>The reference to the default core lib.</returns>
@@ -108,5 +155,26 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public override string ToString() => $"{Name},Version=v{Version}";
+
+        /// <inheritdoc />
+        public bool Equals(DotNetRuntimeInfo other)
+        {
+            return Name == other.Name && Version.Equals(other.Version);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            return obj is DotNetRuntimeInfo other && Equals(other);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Name.GetHashCode() * 397) ^ Version.GetHashCode();
+            }
+        }
     }
 }

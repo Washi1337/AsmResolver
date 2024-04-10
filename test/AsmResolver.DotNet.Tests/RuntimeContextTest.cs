@@ -55,10 +55,7 @@ namespace AsmResolver.DotNet.Tests
         public void ForceNetFXLoadAsNetCore()
         {
             var context = new RuntimeContext(new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(3, 1)));
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, new ModuleReaderParameters
-            {
-                RuntimeContext = context
-            });
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, new ModuleReaderParameters(context));
 
             Assert.Equal(context.TargetRuntime, module.RuntimeContext.TargetRuntime);
             Assert.IsAssignableFrom<DotNetCoreAssemblyResolver>(module.MetadataResolver.AssemblyResolver);
@@ -68,10 +65,7 @@ namespace AsmResolver.DotNet.Tests
         public void ForceNetStandardLoadAsNetFx()
         {
             var context = new RuntimeContext(new DotNetRuntimeInfo(DotNetRuntimeInfo.NetFramework, new Version(4, 8)));
-            var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location, new ModuleReaderParameters
-            {
-                RuntimeContext = context
-            });
+            var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location, new ModuleReaderParameters(context));
 
             Assert.Equal(context.TargetRuntime, module.RuntimeContext.TargetRuntime);
             Assert.Equal("mscorlib", module.CorLibTypeFactory.Object.Resolve()?.Module?.Assembly?.Name);
@@ -81,10 +75,7 @@ namespace AsmResolver.DotNet.Tests
         public void ForceNetStandardLoadAsNetCore()
         {
             var context = new RuntimeContext(new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(3, 1)));
-            var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location, new ModuleReaderParameters
-            {
-                RuntimeContext = context
-            });
+            var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location, new ModuleReaderParameters(context));
 
             Assert.Equal(context.TargetRuntime, module.RuntimeContext.TargetRuntime);
             Assert.Equal("System.Private.CoreLib", module.CorLibTypeFactory.Object.Resolve()?.Module?.Assembly?.Name);

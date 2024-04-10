@@ -164,6 +164,13 @@ namespace AsmResolver.DotNet.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_SingleFile_V6_WithDependency {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SingleFile_V6_WithDependency", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] HelloWorld_UnusualNestedTypeRefOrder {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_UnusualNestedTypeRefOrder", resourceCulture);

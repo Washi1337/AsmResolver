@@ -6,10 +6,10 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using AsmResolver.Collections;
+using AsmResolver.DotNet.Config.Json;
 using AsmResolver.IO;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
-using AsmResolver.PE.Win32Resources;
 using AsmResolver.PE.Win32Resources.Builder;
 
 namespace AsmResolver.DotNet.Bundles
@@ -285,6 +285,60 @@ namespace AsmResolver.DotNet.Bundles
             return Convert.ToBase64String(manifestHash)
                 .Substring(DefaultBundleIDLength)
                 .Replace('/', '_');
+        }
+
+        /// <summary>
+        /// Determines the runtime that the assemblies in the bundle are targeting.
+        /// </summary>
+        /// <returns>The runtime.</returns>
+        /// <exception cref="ArgumentException">Occurs when the runtime could not be determined.</exception>
+        public DotNetRuntimeInfo GetTargetRuntime()
+        {
+            return TryGetTargetRuntime(out var runtime)
+                ? runtime
+                : throw new ArgumentException("Could not determine the target runtime for the bundle");
+        }
+
+        /// <summary>
+        /// Attempts to determine the runtime that the assemblies in the bundle are targeting.
+        /// </summary>
+        /// <param name="targetRuntime">When the method returns <c>true</c>, contains the target runtime.</param>
+        /// <returns><c>true</c> if the runtime could be determined, <c>false</c> otherwise.</returns>
+        public bool TryGetTargetRuntime(out DotNetRuntimeInfo targetRuntime)
+        {
+            // Try find the runtimeconfig.json file.
+            for (int i = 0; i < Files.Count; i++)
+            {
+                var file = Files[i];
+                if (file.Type == BundleFileType.RuntimeConfigJson)
+                {
+                    var config = RuntimeConfiguration.FromJson(Encoding.UTF8.GetString(file.GetData()));
+                    if (config is not {RuntimeOptions.TargetFrameworkMoniker: { } tfm})
+                        continue;
+
+                    if (DotNetRuntimeInfo.TryParseMoniker(tfm, out targetRuntime))
+                        return true;
+                }
+            }
+
+            // If it is not present, make a best effort guess based on the bundle file format version.
+            switch (MajorVersion)
+            {
+                case 1:
+                    targetRuntime = new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(3, 1));
+                    return true;
+
+                case 2:
+                    targetRuntime = new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(5, 0));
+                    return true;
+
+                case 6:
+                    targetRuntime = new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(6, 0));
+                    return true;
+            }
+
+            targetRuntime = default;
+            return false;
         }
 
         /// <summary>

@@ -22,6 +22,16 @@ namespace AsmResolver.DotNet.Serialized
         /// <summary>
         /// Initializes the module read parameters with a file service.
         /// </summary>
+        /// <param name="context">The context the module should be read in.</param>
+        public ModuleReaderParameters(RuntimeContext context)
+            : this(context.DefaultReaderParameters)
+        {
+            RuntimeContext = context;
+        }
+
+        /// <summary>
+        /// Initializes the module read parameters with a file service.
+        /// </summary>
         /// <param name="fileService">The file service to use when reading the file and dependencies.</param>
         public ModuleReaderParameters(IFileService fileService)
             : this(null, new PEReaderParameters {FileService = fileService})

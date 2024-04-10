@@ -1,3 +1,6 @@
+using System;
+using System.Reflection;
+using AsmResolver.DotNet.Bundles;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.IO;
 
@@ -13,10 +16,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="targetRuntime">The target runtime version.</param>
         public RuntimeContext(DotNetRuntimeInfo targetRuntime)
-            : this(targetRuntime, new ModuleReaderParameters
-            {
-                PEReaderParameters = {FileService = new ByteArrayFileService()}
-            })
+            : this(targetRuntime, new ModuleReaderParameters(new ByteArrayFileService()))
         {
         }
 
@@ -28,10 +28,8 @@ namespace AsmResolver.DotNet
         public RuntimeContext(DotNetRuntimeInfo targetRuntime, ModuleReaderParameters readerParameters)
         {
             TargetRuntime = targetRuntime;
-            AssemblyResolver = CreateAssemblyResolver(targetRuntime, new ModuleReaderParameters(readerParameters)
-            {
-                RuntimeContext = this
-            });
+            DefaultReaderParameters = new ModuleReaderParameters(readerParameters) {RuntimeContext = this};
+            AssemblyResolver = CreateAssemblyResolver(targetRuntime, DefaultReaderParameters);
         }
 
         /// <summary>
@@ -42,13 +40,43 @@ namespace AsmResolver.DotNet
         public RuntimeContext(DotNetRuntimeInfo targetRuntime, IAssemblyResolver assemblyResolver)
         {
             TargetRuntime = targetRuntime;
+            DefaultReaderParameters = new ModuleReaderParameters(new ByteArrayFileService()) {RuntimeContext = this};
             AssemblyResolver = assemblyResolver;
+        }
+
+        /// <summary>
+        /// Creates a new runtime context for the provided bundled application.
+        /// </summary>
+        /// <param name="manifest">The bundle to create the runtime context for.</param>
+        public RuntimeContext(BundleManifest manifest)
+            : this(manifest, new ModuleReaderParameters(new ByteArrayFileService()))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new runtime context.
+        /// </summary>
+        /// <param name="manifest">The bundle to create the runtime context for.</param>
+        /// <param name="readerParameters">The parameters to use when reading modules in this context.</param>
+        public RuntimeContext(BundleManifest manifest, ModuleReaderParameters readerParameters)
+        {
+            TargetRuntime = manifest.GetTargetRuntime();
+            DefaultReaderParameters = new ModuleReaderParameters(readerParameters) {RuntimeContext = this};
+            AssemblyResolver = new BundleAssemblyResolver(manifest, readerParameters);
         }
 
         /// <summary>
         /// Gets the runtime version this context is targeting.
         /// </summary>
         public DotNetRuntimeInfo TargetRuntime
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the default parameters that are used for reading .NET modules in the context.
+        /// </summary>
+        public ModuleReaderParameters DefaultReaderParameters
         {
             get;
         }
