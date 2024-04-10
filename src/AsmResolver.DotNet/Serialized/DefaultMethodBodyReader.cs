@@ -12,6 +12,11 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class DefaultMethodBodyReader : IMethodBodyReader
     {
+        /// <summary>
+        /// Gets the singleton instance of the <see cref="DefaultMethodBodyReader"/> class.
+        /// </summary>
+        public static DefaultMethodBodyReader Instance { get; } = new();
+
         /// <inheritdoc />
         public virtual MethodBody? ReadMethodBody(ModuleReaderContext context, MethodDefinition owner, in MethodDefinitionRow row)
         {

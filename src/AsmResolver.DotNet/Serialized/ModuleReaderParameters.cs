@@ -14,8 +14,8 @@ namespace AsmResolver.DotNet.Serialized
         /// </summary>
         public ModuleReaderParameters()
         {
-            MethodBodyReader = new DefaultMethodBodyReader();
-            FieldRvaDataReader = new FieldRvaDataReader();
+            MethodBodyReader = DefaultMethodBodyReader.Instance;
+            FieldRvaDataReader = AsmResolver.PE.DotNet.Metadata.FieldRvaDataReader.Instance;
             PEReaderParameters = new PEReaderParameters();
         }
 
@@ -69,8 +69,8 @@ namespace AsmResolver.DotNet.Serialized
                 ModuleResolver = new DirectoryNetModuleResolver(workingDirectory, this);
             }
 
-            MethodBodyReader = new DefaultMethodBodyReader();
-            FieldRvaDataReader = new FieldRvaDataReader();
+            MethodBodyReader = DefaultMethodBodyReader.Instance;
+            FieldRvaDataReader = AsmResolver.PE.DotNet.Metadata.FieldRvaDataReader.Instance;
             PEReaderParameters = readerParameters;
         }
 

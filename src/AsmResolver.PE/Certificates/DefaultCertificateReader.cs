@@ -8,6 +8,11 @@ namespace AsmResolver.PE.Certificates
     /// </summary>
     public class DefaultCertificateReader : ICertificateReader
     {
+        /// <summary>
+        /// Gets the singleton instance of the <see cref="DefaultCertificateReader"/> class.
+        /// </summary>
+        public static DefaultCertificateReader Instance { get; } = new();
+
         /// <inheritdoc />
         public AttributeCertificate ReadCertificate(
             PEReaderContext context,

@@ -13,6 +13,11 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class FieldRvaDataReader : IFieldRvaDataReader
     {
+        /// <summary>
+        /// Gets the singleton instance of the <see cref="FieldRvaDataReader"/> class.
+        /// </summary>
+        public static FieldRvaDataReader Instance { get; } = new();
+
         /// <inheritdoc />
         public ISegment? ResolveFieldData(
             IErrorListener listener,

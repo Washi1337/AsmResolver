@@ -104,7 +104,12 @@ namespace AsmResolver.DotNet
                 .FirstOrDefault();
 
             if (mostRecentMonoDirectory is not null)
+            {
                 SearchDirectories.Add(mostRecentMonoDirectory);
+                string facadesDirectory = Path.Combine(mostRecentMonoDirectory, "Facades");
+                if (Directory.Exists(facadesDirectory))
+                    SearchDirectories.Add(facadesDirectory);
+            }
         }
 
         private void AddGacDirectories(string windowsGac, string? prefix)
