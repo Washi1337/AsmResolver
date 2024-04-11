@@ -17,6 +17,7 @@ internal sealed unsafe partial class MemoryMappedFileShim : IDisposable
     }
 
     public long Size => _size;
+    public byte* BasePointer => _file;
 
     public byte ReadByte(long address)
     {
@@ -25,16 +26,6 @@ internal sealed unsafe partial class MemoryMappedFileShim : IDisposable
         if ((ulong)address >= (ulong)_size)
             throw new ArgumentOutOfRangeException(nameof(address));
         return _file[address];
-    }
-
-    public ReadOnlySpan<byte> GetSpan(long offset, int length)
-    {
-        if (_file == null)
-            throw new ObjectDisposedException("disposed");
-        long newSize = _size - offset;
-        if (offset < 0 || newSize < 0 || length > newSize)
-            throw new ArgumentOutOfRangeException();
-        return new(_file + offset, length);
     }
 
     private void DisposeCore()

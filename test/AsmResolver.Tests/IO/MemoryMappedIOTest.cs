@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using AsmResolver.IO;
 using AsmResolver.Tests.Runners;

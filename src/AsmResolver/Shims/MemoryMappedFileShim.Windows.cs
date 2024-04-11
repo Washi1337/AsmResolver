@@ -11,7 +11,7 @@ internal sealed unsafe partial class MemoryMappedFileShim
     private const uint FILE_SHARE_READ = 0x2;
     private const uint OPEN_EXISTING = 3;
     private const uint PAGE_READONLY = 2;
-    // not on msdn, stole from terrafx
+    // not on msdn, taken from https://github.com/terrafx/terrafx.interop.windows/blob/e681ccb7239bf9f5629083cd1e396b2876c24aae/sources/Interop/Windows/Windows/um/memoryapi/FILE.cs#L14
     private const uint FILE_MAP_READ = 4;
 
     private void* _fileHandle;
