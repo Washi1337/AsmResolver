@@ -26,10 +26,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="fileService">The service to use for reading files from the disk.</param>
         public DotNetFrameworkAssemblyResolver(IFileService fileService)
-            : this(new ModuleReaderParameters
-            {
-                PEReaderParameters = {FileService = fileService}
-            })
+            : this(new ModuleReaderParameters(fileService))
         {
         }
 

@@ -93,12 +93,7 @@ namespace AsmResolver.DotNet
             RuntimeConfiguration? configuration,
             Version? fallbackVersion,
             DotNetCorePathProvider pathProvider)
-            : this(
-                new ModuleReaderParameters {PEReaderParameters = {FileService = fileService}},
-                configuration,
-                fallbackVersion,
-                pathProvider
-            )
+            : this(new ModuleReaderParameters(fileService), configuration, fallbackVersion, pathProvider)
         {
         }
 
