@@ -22,6 +22,17 @@ namespace AsmResolver.IO
             return _files.GetOrAdd(filePath, x => new ByteArrayInputFile(x));
         }
 
+        /// <summary>
+        /// Assigns a file path to a byte array and opens it.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="contents">The contents of the file.</param>
+        /// <returns>The opened file.</returns>
+        public IInputFile OpenBytesAsFile(string filePath, byte[] contents)
+        {
+            return _files.GetOrAdd(filePath, p => new ByteArrayInputFile(p, contents, 0));
+        }
+
         /// <inheritdoc />
         public void InvalidateFile(string filePath) => _files.TryRemove(filePath, out _);
 

@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             Image = image ?? throw new ArgumentNullException(nameof(image));
             ParentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
-            Parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
+            Parameters = new ModuleReaderParameters(parameters) ?? throw new ArgumentNullException(nameof(parameters));
 
             // Both CLR and CoreCLR implement a slightly different loading procedure for EnC metadata.
             // While the difference is very subtle, it has a slight effect on which streams are selected

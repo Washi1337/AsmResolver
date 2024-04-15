@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.IO;
 
 namespace AsmResolver.DotNet
@@ -25,7 +26,15 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="fileService">The service to use for reading files from the disk.</param>
         public DotNetFrameworkAssemblyResolver(IFileService fileService)
-            : base(fileService)
+            : this(new ModuleReaderParameters(fileService))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new default assembly resolver.
+        /// </summary>
+        public DotNetFrameworkAssemblyResolver(ModuleReaderParameters readerParameters)
+            : base(readerParameters)
         {
             DetectGacDirectories();
         }
@@ -92,7 +101,12 @@ namespace AsmResolver.DotNet
                 .FirstOrDefault();
 
             if (mostRecentMonoDirectory is not null)
+            {
                 SearchDirectories.Add(mostRecentMonoDirectory);
+                string facadesDirectory = Path.Combine(mostRecentMonoDirectory, "Facades");
+                if (Directory.Exists(facadesDirectory))
+                    SearchDirectories.Add(facadesDirectory);
+            }
         }
 
         private void AddGacDirectories(string windowsGac, string? prefix)

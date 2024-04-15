@@ -8,6 +8,11 @@ namespace AsmResolver.PE.Debug
     /// </summary>
     public class DefaultDebugDataReader : IDebugDataReader
     {
+        /// <summary>
+        /// Gets the singleton instance of the <see cref="DefaultDebugDataReader"/> class.
+        /// </summary>
+        public static DefaultDebugDataReader Instance { get; } = new();
+
         /// <inheritdoc />
         public IDebugDataSegment? ReadDebugData(PEReaderContext context, DebugDataType type,
             ref BinaryStreamReader reader)

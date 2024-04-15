@@ -26,10 +26,11 @@ namespace AsmResolver.PE
         /// <param name="errorListener">The object responsible for recording parser errors.</param>
         public PEReaderParameters(IErrorListener errorListener)
         {
-            MetadataStreamReader = new DefaultMetadataStreamReader();
-            DebugDataReader = new DefaultDebugDataReader();
-            CertificateReader = new DefaultCertificateReader();
-            ReadyToRunSectionReader = new DefaultReadyToRunSectionReader();
+            MetadataStreamReader = DefaultMetadataStreamReader.Instance;
+            DebugDataReader = DefaultDebugDataReader.Instance;
+            CertificateReader = DefaultCertificateReader.Instance;
+            FileService = UncachedFileService.Instance;
+            ReadyToRunSectionReader = DefaultReadyToRunSectionReader.Instance;
             ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
         }
 
@@ -77,7 +78,7 @@ namespace AsmResolver.PE
         {
             get;
             set;
-        } = UncachedFileService.Instance;
+        }
 
         /// <summary>
         /// Gets or sets the object to use for reading ReadyToRun metadata sections from the disk while reading the
