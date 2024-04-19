@@ -100,6 +100,7 @@ namespace AsmResolver.DotNet.Signatures
                 case ElementType.Boxed:
                     return GetHashCode((BoxedTypeSignature) obj);
                 case ElementType.FnPtr:
+                    return GetHashCode((FunctionPointerTypeSignature) obj);
                 case ElementType.Internal:
                 case ElementType.Modifier:
                     throw new NotSupportedException();
@@ -318,7 +319,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public int GetHashCode(FunctionPointerTypeSignature obj)
         {
-            return obj.Signature.GetHashCode();
+            return (int) obj.ElementType << ElementTypeOffset ^ GetHashCode(obj.Signature);
         }
 
         /// <inheritdoc />
