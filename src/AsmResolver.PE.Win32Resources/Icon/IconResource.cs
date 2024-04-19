@@ -81,13 +81,13 @@ namespace AsmResolver.PE.Win32Resources.Icon
         public IEnumerable<IconGroupDirectory> GetIconGroups() => _entries.Values;
 
         /// <inheritdoc />
-        public void WriteToDirectory(IResourceDirectory rootDirectory)
+        public void InsertIntoDirectory(IResourceDirectory rootDirectory)
         {
             // Construct new directory.
             var newGroupIconDirectory = new ResourceDirectory(ResourceType.GroupIcon);
             foreach (var entry in _entries)
             {
-                newGroupIconDirectory.Entries.Add(new ResourceDirectory(entry.Key)
+                newGroupIconDirectory.InsertOrReplaceEntry(new ResourceDirectory(entry.Key)
                     {Entries = {new ResourceData(0u, entry.Value)}});
             }
 
@@ -97,14 +97,14 @@ namespace AsmResolver.PE.Win32Resources.Icon
             {
                 foreach (var (groupEntry, iconEntry) in entry.Value.GetIconEntries())
                 {
-                    newIconDirectory.Entries.Add(new ResourceDirectory(groupEntry.Id)
+                    newIconDirectory.InsertOrReplaceEntry(new ResourceDirectory(groupEntry.Id)
                         {Entries = {new ResourceData(1033, iconEntry)}});
                 }
             }
 
             // Insert.
-            rootDirectory.AddOrReplaceEntry(newGroupIconDirectory);
-            rootDirectory.AddOrReplaceEntry(newIconDirectory);
+            rootDirectory.InsertOrReplaceEntry(newGroupIconDirectory);
+            rootDirectory.InsertOrReplaceEntry(newIconDirectory);
         }
     }
 }

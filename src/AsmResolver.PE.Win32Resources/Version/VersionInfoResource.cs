@@ -271,24 +271,24 @@ namespace AsmResolver.PE.Win32Resources.Version
         }
 
         /// <inheritdoc />
-        public void WriteToDirectory(IResourceDirectory rootDirectory)
+        public void InsertIntoDirectory(IResourceDirectory rootDirectory)
         {
             // Add version directory if it doesn't exist yet.
             if (!rootDirectory.TryGetDirectory(ResourceType.Version, out var versionDirectory))
             {
                 versionDirectory = new ResourceDirectory(ResourceType.Version);
-                rootDirectory.Entries.Add(versionDirectory);
+                rootDirectory.InsertOrReplaceEntry(versionDirectory);
             }
 
             // Add category directory if it doesn't exist yet.
             if (!versionDirectory.TryGetDirectory(1, out var categoryDirectory))
             {
                 categoryDirectory = new ResourceDirectory(1);
-                versionDirectory.Entries.Add(categoryDirectory);
+                versionDirectory.InsertOrReplaceEntry(categoryDirectory);
             }
 
             // Insert / replace data entry.
-            categoryDirectory.AddOrReplaceEntry(new ResourceData((uint) Lcid, this));
+            categoryDirectory.InsertOrReplaceEntry(new ResourceData((uint) Lcid, this));
         }
     }
 }

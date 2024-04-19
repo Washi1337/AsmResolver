@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.PE.Win32Resources;
 using Xunit;
 
@@ -217,7 +218,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             Assert.Empty(root.Entries);
 
             var directory = new ResourceDirectory(ResourceType.String);
-            root.AddOrReplaceEntry(directory);
+            root.InsertOrReplaceEntry(directory);
 
             Assert.Same(directory, Assert.Single(root.Entries));
         }
@@ -233,7 +234,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             Assert.Single(root.Entries);
 
             var directory = new ResourceDirectory(5678u);
-            root.AddOrReplaceEntry(directory);
+            root.InsertOrReplaceEntry(directory);
 
             Assert.Equal(2, root.Entries.Count);
         }
@@ -249,7 +250,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             var oldDirectory = root.GetDirectory(1234u);
 
             var newDirectory = new ResourceDirectory(1234u);
-            root.AddOrReplaceEntry(newDirectory);
+            root.InsertOrReplaceEntry(newDirectory);
 
             Assert.NotSame(oldDirectory, root.GetEntry(1234u));
             Assert.Same(newDirectory, Assert.Single(root.Entries));
@@ -266,7 +267,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             var oldDirectory = root.GetDirectory(1234u);
 
             var newEntry = new ResourceData(1234u, new DataSegment(new byte[] { 1, 2, 3, 4 }));
-            root.AddOrReplaceEntry(newEntry);
+            root.InsertOrReplaceEntry(newEntry);
 
             Assert.NotSame(oldDirectory, root.GetEntry(1234u));
             Assert.Same(newEntry, Assert.Single(root.Entries));
@@ -298,6 +299,23 @@ namespace AsmResolver.PE.Tests.Win32Resources
 
             Assert.True(root.RemoveEntry(1234u));
             Assert.Single(root.Entries);
+        }
+
+        [Theory]
+        [InlineData(ResourceType.Icon, new[] {ResourceType.Icon, ResourceType.String, ResourceType.Version})]
+        [InlineData(ResourceType.RcData, new[] {ResourceType.String, ResourceType.RcData, ResourceType.Version})]
+        [InlineData(ResourceType.Manifest, new[] {ResourceType.String, ResourceType.Version, ResourceType.Manifest})]
+        [InlineData(ResourceType.String, new[] {ResourceType.String, ResourceType.Version})]
+        public void InsertShouldPreserveOrder(ResourceType insertedEntry, ResourceType[] expected)
+        {
+            var image = new PEImage();
+
+            image.Resources = new ResourceDirectory(0u);
+            image.Resources.Entries.Add(new ResourceDirectory(ResourceType.String));
+            image.Resources.Entries.Add(new ResourceDirectory(ResourceType.Version));
+            image.Resources.InsertOrReplaceEntry(new ResourceDirectory(insertedEntry));
+
+            Assert.Equal(expected, image.Resources.Entries.Select(x => (ResourceType) x.Id));
         }
 
     }

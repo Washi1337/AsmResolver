@@ -40,7 +40,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Icon
                 iconGroup.RemoveEntry(4);
                 iconGroup.Count--;
             }
-            iconResource.WriteToDirectory(resources);
+            iconResource.InsertIntoDirectory(resources);
 
             // Rebuild.
             using var stream = new MemoryStream();

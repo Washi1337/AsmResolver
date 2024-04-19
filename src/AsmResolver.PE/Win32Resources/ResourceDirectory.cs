@@ -127,16 +127,26 @@ namespace AsmResolver.PE.Win32Resources
             }
         }
 
-        private int GetEntryIndex(uint id)
+        private bool TryGetEntryIndex(uint id, out int index)
         {
             for (int i = 0; i < Entries.Count; i++)
             {
                 var candidate = Entries[i];
                 if (candidate.Id == id)
-                    return i;
+                {
+                    index = i;
+                    return true;
+                }
+
+                if (candidate.Id > id)
+                {
+                    index = i;
+                    return false;
+                }
             }
 
-            return -1;
+            index = Entries.Count;
+            return false;
         }
 
         /// <inheritdoc />
@@ -174,15 +184,14 @@ namespace AsmResolver.PE.Win32Resources
         /// <inheritdoc />
         public bool TryGetEntry(uint id, [NotNullWhen(true)] out IResourceEntry? entry)
         {
-            int index = GetEntryIndex(id);
-            if (index != -1)
+            if (!TryGetEntryIndex(id, out int index))
             {
-                entry = Entries[index];
-                return true;
+                entry = null;
+                return false;
             }
 
-            entry = null;
-            return false;
+            entry = Entries[index];
+            return true;
         }
 
         /// <inheritdoc />
@@ -216,20 +225,18 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <inheritdoc />
-        public void AddOrReplaceEntry(IResourceEntry entry)
+        public void InsertOrReplaceEntry(IResourceEntry entry)
         {
-            int index = GetEntryIndex(entry.Id);
-            if (index == -1)
-                Entries.Add(entry);
-            else
+            if (TryGetEntryIndex(entry.Id, out int index))
                 Entries[index] = entry;
+            else
+                Entries.Insert(index, entry);
         }
 
         /// <inheritdoc />
         public bool RemoveEntry(uint id)
         {
-            int index = GetEntryIndex(id);
-            if (index == -1)
+            if (!TryGetEntryIndex(id, out int index))
                 return false;
 
             Entries.RemoveAt(index);

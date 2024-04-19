@@ -188,7 +188,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             Assert.NotNull(versionInfo);
 
             versionInfo.FixedVersionInfo.ProductVersion = new System.Version(1, 2, 3, 4);
-            versionInfo.WriteToDirectory(resources);
+            versionInfo.InsertIntoDirectory(resources);
 
             // Rebuild
             using var stream = new MemoryStream();
@@ -216,7 +216,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             var versionInfo = VersionInfoResource.FromDirectory(image.Resources!)!;
             var info = versionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);
             info.Tables[0][StringTable.FileDescriptionKey] = "This is a test application";
-            versionInfo.WriteToDirectory(image.Resources!);
+            versionInfo.InsertIntoDirectory(image.Resources!);
 
             // Replace section.
             var resourceBuffer = new ResourceDirectoryBuffer();
