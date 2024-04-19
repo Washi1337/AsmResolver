@@ -43,9 +43,10 @@ IResourceData stringDataEntry = image.Resources
 ```
 
 Adding or replacing entries can be by either modifying the `Entries`
-property directly, or by using the `AddOrReplace` method. The latter is
-recommended as it ensures that an existing entry with the same ID is
-replaced with the new one.
+property directly, or by using the `InsertOrReplaceEntry` method.
+The latter is recommended as it ensures that an existing entry with the
+same ID is replaced with the new one, and that the sorting requirements
+according to the PE file specification are presrved.
 
 ``` csharp
 IPEImage image = ...
@@ -56,7 +57,7 @@ image.Resources.Entries.Add(newDirectory);
 ``` csharp
 IPEImage image = ...
 var newDirectory = new ResourceDirectory(ResourceType.String);
-image.Resources.AddOrReplaceEntry(newDirectory);
+image.Resources.InsertOrReplaceEntry(newDirectory);
 ```
 
 Similarly, removing can be done by modifying the `Entries` directory, or
@@ -99,7 +100,7 @@ var data = new ResourceData(id: 1033, contents: new DataSegment(new byte[] { ...
 image.Resources
     .GetDirectory(ResourceType.String)
     .GetDirectory(251)
-    .AddOrReplaceEntry(data);
+    .InsertOrReplaceEntry(data);
 ```
 
 ## Example Traversal
