@@ -136,10 +136,10 @@ namespace AsmResolver.PE.Win32Resources
         bool TryGetData(uint id, [NotNullWhen(true)] out IResourceData? data);
 
         /// <summary>
-        /// Replaces an existing entry with the same ID with the provided entry, or adds the new entry to the directory.
+        /// Replaces an existing entry with the same ID with the provided entry, or inserts the new entry into the directory.
         /// </summary>
         /// <param name="entry">The entry to store in the directory.</param>
-        void AddOrReplaceEntry(IResourceEntry entry);
+        void InsertOrReplaceEntry(IResourceEntry entry);
 
         /// <summary>
         /// Removes an entry in the directory by its unique identifier.
