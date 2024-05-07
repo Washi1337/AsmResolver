@@ -57,6 +57,18 @@ namespace AsmResolver.PE.File.Headers
         /// </summary>
         public bool IsPresentInPE => VirtualAddress != 0 || Size != 0;
 
+        /// <summary>
+        /// Creates a data directory descriptor for the provided segment.
+        /// </summary>
+        /// <param name="segment">The segment to create a data directory descriptor for.</param>
+        /// <returns>The data directory.</returns>
+        public static DataDirectory CreateForSegment(ISegment? segment)
+        {
+            return segment is not null
+                ? new DataDirectory(segment.Rva, segment.GetPhysicalSize())
+                : default;
+        }
+
         /// <inheritdoc />
         public uint GetPhysicalSize() => DataDirectorySize;
 

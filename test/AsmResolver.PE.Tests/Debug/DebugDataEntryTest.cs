@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.Linq;
 using AsmResolver.IO;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.Debug.CodeView;
-using AsmResolver.PE.DotNet.Builder;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.Debug

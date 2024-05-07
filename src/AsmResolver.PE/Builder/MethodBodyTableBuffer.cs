@@ -1,7 +1,7 @@
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 
-namespace AsmResolver.PE.DotNet.Builder
+namespace AsmResolver.PE.Builder
 {
     /// <summary>
     /// Provides a mechanism for building up a method body table that can be stored in a PE file.

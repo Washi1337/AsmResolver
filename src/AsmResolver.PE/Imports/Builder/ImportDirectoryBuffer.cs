@@ -27,6 +27,11 @@ namespace AsmResolver.PE.Imports.Builder
             get;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether there is any data added to the buffer.
+        /// </summary>
+        public bool IsEmpty => _entriesLength == 0;
+
         /// <inheritdoc />
         public override void AddModule(IImportedModule module)
         {

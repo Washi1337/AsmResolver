@@ -406,7 +406,28 @@ namespace AsmResolver.PE.File.Headers
         /// <param name="directory">The new data directory entry.</param>
         public void SetDataDirectory(DataDirectoryIndex index, DataDirectory directory)
         {
+            EnsureDataDirectoryCount((int) (index + 1));
             DataDirectories[(int) index] = directory;
+        }
+
+        /// <summary>
+        /// Maps a segment to a data directory.
+        /// </summary>
+        /// <param name="index">The index.</param>
+        /// <param name="contents">The contents of the data directory.</param>
+        public void SetDataDirectory(DataDirectoryIndex index, ISegment contents)
+        {
+            SetDataDirectory(index, DataDirectory.CreateForSegment(contents));
+        }
+
+        /// <summary>
+        /// Ensures the provided number of data directories are present in <see cref="DataDirectories"/>.
+        /// </summary>
+        /// <param name="count">The number of data directories.</param>
+        public void EnsureDataDirectoryCount(int count)
+        {
+            while (count > DataDirectories.Count)
+                DataDirectories.Add(default);
         }
 
         /// <inheritdoc />

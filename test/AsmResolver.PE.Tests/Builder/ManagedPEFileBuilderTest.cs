@@ -1,18 +1,12 @@
-using System;
-using System.Diagnostics;
 using System.IO;
-using AsmResolver.PE.Code;
-using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Builder;
-using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File.Headers;
-using AsmResolver.Tests;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
-namespace AsmResolver.PE.Tests.DotNet.Builder
+namespace AsmResolver.PE.Tests.Builder
 {
     public class ManagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixture>
     {

@@ -1,6 +1,6 @@
 using System.IO;
 using AsmResolver.PE;
-using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.Builder;
 using BenchmarkDotNet.Attributes;
 using static AsmResolver.Benchmarks.Properties.Resources;
 

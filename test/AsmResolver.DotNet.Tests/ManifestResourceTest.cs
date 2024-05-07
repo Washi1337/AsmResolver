@@ -2,7 +2,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using AsmResolver.DotNet.Builder;
-using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.Tests.Runners;

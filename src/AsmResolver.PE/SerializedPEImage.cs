@@ -33,21 +33,19 @@ namespace AsmResolver.PE
             ReaderContext = new PEReaderContext(peFile, readerParameters);
 
             FilePath = peFile.FilePath;
-            MachineType = PEFile.FileHeader.Machine;
-            Characteristics = PEFile.FileHeader.Characteristics;
+            MachineType = peFile.FileHeader.Machine;
+            Characteristics = peFile.FileHeader.Characteristics;
             TimeDateStamp = new DateTime(1970, 1, 1) + TimeSpan.FromSeconds(peFile.FileHeader.TimeDateStamp);
-            PEKind = PEFile.OptionalHeader.Magic;
-            SubSystem = PEFile.OptionalHeader.SubSystem;
-            DllCharacteristics = PEFile.OptionalHeader.DllCharacteristics;
-            ImageBase = PEFile.OptionalHeader.ImageBase;
+            PEKind = peFile.OptionalHeader.Magic;
+            SubSystem = peFile.OptionalHeader.SubSystem;
+            DllCharacteristics = peFile.OptionalHeader.DllCharacteristics;
+            ImageBase = peFile.OptionalHeader.ImageBase;
 
             _originalArchitecture = MachineType;
         }
 
-        /// <summary>
-        /// Gets the underlying PE file.
-        /// </summary>
-        public IPEFile PEFile
+        /// <inheritdoc />
+        public override IPEFile PEFile
         {
             get;
         }

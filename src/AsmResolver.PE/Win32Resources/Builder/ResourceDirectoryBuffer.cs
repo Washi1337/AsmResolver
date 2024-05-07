@@ -71,9 +71,14 @@ namespace AsmResolver.PE.Win32Resources.Builder
         }
 
         /// <summary>
+        /// Gets a value indicating whether there is any data added to the buffer.
+        /// </summary>
+        public bool IsEmpty => DirectoryTable.IsEmpty;
+
+        /// <summary>
         /// Adds a resource directory and all its sub entries to the buffer.
         /// </summary>
-        /// <param name="directory">The directory to ad..</param>
+        /// <param name="directory">The directory to add.</param>
         public void AddDirectory(IResourceDirectory directory)
         {
             DirectoryTable.AddEntry(directory);
