@@ -7,6 +7,12 @@ namespace AsmResolver.Patching
     public interface IPatch
     {
         /// <summary>
+        /// Assigns a new file and virtual offset to the segment and all its sub-components.
+        /// </summary>
+        /// <param name="parameters">The parameters containing the new offset information for the segment.</param>
+        void UpdateOffsets(in RelocationParameters parameters);
+
+        /// <summary>
         /// Applies the patch.
         /// </summary>
         /// <param name="context">The context in which to</param>

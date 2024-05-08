@@ -13,6 +13,8 @@ namespace AsmResolver.PE.Builder
     /// </summary>
     public abstract class PEFileBuilder : PEFileBuilder<PEFileBuilderContext>
     {
+        /// <inheritdoc />
+        protected override PEFileBuilderContext CreateContext(IPEImage image) => new(image);
     }
 
     /// <summary>

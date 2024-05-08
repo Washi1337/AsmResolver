@@ -28,6 +28,11 @@ namespace AsmResolver.PE.Code
         }
 
         /// <inheritdoc />
+        public void UpdateOffsets(in RelocationParameters parameters)
+        {
+        }
+
+        /// <inheritdoc />
         public void Apply(in PatchContext context)
         {
             context.Writer.Offset = context.Segment.Offset + Fixup.Offset;

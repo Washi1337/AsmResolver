@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.IO;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.Certificates;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
@@ -325,6 +326,9 @@ namespace AsmResolver.PE
                 return _certificates;
             }
         }
+
+        /// <inheritdoc />
+        public IPEFile ToPEFile(IPEFileBuilder builder) => builder.CreateFile(this);
 
         /// <summary>
         /// Obtains the list of modules that were imported into the PE.

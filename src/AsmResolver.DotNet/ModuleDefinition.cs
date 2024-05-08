@@ -1304,9 +1304,7 @@ namespace AsmResolver.DotNet
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public void Write(IBinaryStreamWriter writer, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            fileBuilder
-                .CreateFile(ToPEImage(imageBuilder))
-                .Write(writer);
+            ToPEImage(imageBuilder).ToPEFile(fileBuilder).Write(writer);
         }
 
         /// <summary>

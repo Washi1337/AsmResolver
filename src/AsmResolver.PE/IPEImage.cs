@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.Certificates;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
@@ -207,5 +208,7 @@ namespace AsmResolver.PE
         {
             get;
         }
+
+        IPEFile ToPEFile(IPEFileBuilder builder);
     }
 }
