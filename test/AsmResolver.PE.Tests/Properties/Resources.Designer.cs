@@ -303,5 +303,12 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] MixedModeHelloWorld {
+            get {
+                object obj = ResourceManager.GetObject("MixedModeHelloWorld", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

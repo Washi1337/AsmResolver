@@ -328,7 +328,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        public IPEFile ToPEFile(IPEFileBuilder builder) => builder.CreateFile(this);
+        public PEFile ToPEFile(IPEFileBuilder builder) => builder.CreateFile(this);
 
         /// <summary>
         /// Obtains the list of modules that were imported into the PE.

@@ -34,6 +34,11 @@ namespace AsmResolver.PE.Builder
         public bool CanUpdateOffsets => _segments.CanUpdateOffsets;
 
         /// <summary>
+        /// Gets a value determining whether the buffer has any methods added to it.
+        /// </summary>
+        public bool IsEmpty => _tinyBodies.Count == 0 && _fatBodies.Count == 0 && _nativeBodies.Count == 0;
+
+        /// <summary>
         /// Adds a CIL method body to the buffer.
         /// </summary>
         /// <param name="body">The method body to add.</param>

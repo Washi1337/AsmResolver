@@ -174,12 +174,5 @@ namespace AsmResolver.PE.File
         /// <param name="reader">The reader that was created.</param>
         /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
         bool TryCreateReaderAtFileOffset(uint fileOffset, uint size, out BinaryStreamReader reader);
-
-        void Write(string path);
-
-        void Write(Stream stream);
-
-        void Write(IBinaryStreamWriter writer);
-
     }
 }

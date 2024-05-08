@@ -49,7 +49,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             }
 
             var field = table.GetByRid(fieldRvaRow.Field);
-            int valueSize = DetermineFieldSize(platform, directory, field);
+            int valueSize = DetermineFieldSize(listener, platform, directory, field);
 
             if (fieldRvaRow.Data.CanRead)
             {
@@ -69,7 +69,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             return null;
         }
 
-        private int DetermineFieldSize(Platform platform, IDotNetDirectory directory, in FieldDefinitionRow field)
+        private int DetermineFieldSize(IErrorListener listener, Platform platform, IDotNetDirectory directory, in FieldDefinitionRow field)
         {
             if (!directory.Metadata!.TryGetStream<BlobStream>(out var blobStream)
                 || !blobStream.TryGetBlobReaderByIndex(field.Signature, out var reader))
@@ -78,28 +78,63 @@ namespace AsmResolver.PE.DotNet.Metadata
             }
 
             reader.ReadByte(); // calling convention attributes.
-            var elementType = (ElementType) reader.ReadByte();
-            return elementType switch
+
+            while (true)
             {
-                ElementType.Boolean => sizeof(bool),
-                ElementType.Char => sizeof(char),
-                ElementType.I1 => sizeof(sbyte),
-                ElementType.U1 => sizeof(byte),
-                ElementType.I2 => sizeof(short),
-                ElementType.U2 => sizeof(ushort),
-                ElementType.I4 => sizeof(int),
-                ElementType.U4 => sizeof(uint),
-                ElementType.I8 => sizeof(long),
-                ElementType.U8 => sizeof(ulong),
-                ElementType.R4 => sizeof(float),
-                ElementType.R8 => sizeof(double),
-                ElementType.I or ElementType.U => directory.Flags.IsLoadedAs32Bit(platform)
-                    ? sizeof(uint)
-                    : sizeof(ulong),
-                ElementType.ValueType => GetCustomTypeSize(directory.Metadata, ref reader),
-                ElementType.Class => GetCustomTypeSize(directory.Metadata, ref reader),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                switch ((ElementType)reader.ReadByte())
+                {
+                    case ElementType.Boolean:
+                        return sizeof(bool);
+
+                    case ElementType.Char:
+                        return sizeof(char);
+
+                    case ElementType.I1:
+                        return sizeof(sbyte);
+
+                    case ElementType.U1:
+                        return sizeof(byte);
+
+                    case ElementType.I2:
+                        return sizeof(short);
+
+                    case ElementType.U2:
+                        return sizeof(ushort);
+
+                    case ElementType.I4:
+                        return sizeof(int);
+
+                    case ElementType.U4:
+                        return sizeof(uint);
+
+                    case ElementType.I8:
+                        return sizeof(long);
+
+                    case ElementType.U8:
+                        return sizeof(ulong);
+
+                    case ElementType.R4:
+                        return sizeof(float);
+
+                    case ElementType.R8:
+                        return sizeof(double);
+
+                    case ElementType.ValueType:
+                        return GetCustomTypeSize(directory.Metadata, ref reader);
+
+                    case ElementType.I:
+                    case ElementType.U:
+                    case ElementType.Ptr:
+                    case ElementType.FnPtr:
+                        return directory.Flags.IsLoadedAs32Bit(platform) ? sizeof(uint) : sizeof(ulong);
+
+                    case ElementType.CModReqD:
+                    case ElementType.CModOpt:
+                        if (!reader.TryReadCompressedUInt32(out _))
+                            return listener.BadImageAndReturn<int>("Invalid field signature.");
+                        break;
+                }
+            }
         }
 
         private int GetCustomTypeSize(IMetadata metadata, ref BinaryStreamReader reader)

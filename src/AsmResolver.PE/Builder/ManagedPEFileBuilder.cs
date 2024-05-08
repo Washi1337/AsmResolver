@@ -219,7 +219,7 @@ public class ManagedPEFileBuilder : PEFileBuilder
     {
         return new PESection(
             ".reloc",
-            SectionFlags.MemoryRead | SectionFlags.ContentInitializedData,
+            SectionFlags.MemoryRead | SectionFlags.ContentInitializedData | SectionFlags.MemoryDiscardable,
             context.RelocationsDirectory
         );
     }

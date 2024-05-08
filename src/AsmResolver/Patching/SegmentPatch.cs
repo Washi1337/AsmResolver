@@ -1,18 +1,35 @@
+using System.Diagnostics;
+
 namespace AsmResolver.Patching;
 
+/// <summary>
+/// Patches an instance of <see cref="ISegment"/> with the contents of a file segment.
+/// </summary>
+[DebuggerDisplay("Patch {RelativeOffset} with {Segment}")]
 public class SegmentPatch : IPatch
 {
-    public SegmentPatch(uint offset, ISegment segment)
+    /// <summary>
+    /// Creates a new segment patch.
+    /// </summary>
+    /// <param name="relativeOffset">The offset to start writing at.</param>
+    /// <param name="segment">The new segment.</param>
+    public SegmentPatch(uint relativeOffset, ISegment segment)
     {
-        Offset = offset;
+        RelativeOffset = relativeOffset;
         Segment = segment;
     }
 
-    public uint Offset
+    /// <summary>
+    /// Gets the offset relative to the start of the segment to start writing at.
+    /// </summary>
+    public uint RelativeOffset
     {
         get;
     }
 
+    /// <summary>
+    /// Gets the data to write.
+    /// </summary>
     public ISegment Segment
     {
         get;
@@ -22,13 +39,13 @@ public class SegmentPatch : IPatch
     public void UpdateOffsets(in RelocationParameters parameters)
     {
         if (Segment.CanUpdateOffsets)
-            Segment.UpdateOffsets(parameters.WithAdvance(Offset));
+            Segment.UpdateOffsets(parameters.WithAdvance(RelativeOffset));
     }
 
     /// <inheritdoc />
     public void Apply(in PatchContext context)
     {
-        context.Writer.Offset = Segment.Offset + Offset;
+        context.Writer.Offset = Segment.Offset;
         Segment.Write(context.Writer);
     }
 }

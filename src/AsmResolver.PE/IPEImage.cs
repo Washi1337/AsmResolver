@@ -209,6 +209,11 @@ namespace AsmResolver.PE
             get;
         }
 
-        IPEFile ToPEFile(IPEFileBuilder builder);
+        /// <summary>
+        /// Constructs a PE file from the image.
+        /// </summary>
+        /// <param name="builder">The builder to use for constructing the image.</param>
+        /// <returns>The constructed file.</returns>
+        PEFile ToPEFile(IPEFileBuilder builder);
     }
 }

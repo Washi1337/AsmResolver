@@ -89,7 +89,7 @@ namespace AsmResolver.PE.Builder
         /// the architecture.
         /// </returns>
         protected virtual uint GetSectionAlignment(TContext context, PEFile outputFile)
-            => context.Image.PEFile?.OptionalHeader.FileAlignment ?? 0x2000;
+            => context.Image.PEFile?.OptionalHeader.SectionAlignment ?? 0x2000;
 
         /// <summary>
         /// Gets the image base for the new PE file.
