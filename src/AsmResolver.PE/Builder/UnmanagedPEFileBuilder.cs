@@ -5,6 +5,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Imports;
 
 namespace AsmResolver.PE.Builder;
 
@@ -344,20 +345,46 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
     /// <inheritdoc />
     protected override void CreateImportDirectory(BuilderContext context)
     {
-        if (!TrampolineImports)
-            return;
-
-        // Add trampolines **before** adding them to the import directory buffer. This is because our current
-        // implementation of the import directory buffer eagerly updates the imported symbol's IAT entry.
-        // TODO: We may need to change this implementation to a non-eager update.
-        foreach (var module in context.Image.Imports)
+        if (!TrampolineImports
+            || context.BaseImage?.Imports is not { } baseDirectory
+            || context.Image.Imports is not { } newDirectory)
         {
-            foreach (var originalSymbol in module.Symbols)
-                context.ImportTrampolines.AddFunctionTableSlotTrampoline(originalSymbol);
+            return;
+        }
+
+        // Try to map all symbols stored in the original directory to symbols in the new directory.
+        foreach (var module in baseDirectory)
+        {
+            foreach (var original in module.Symbols)
+            {
+                if (FindNewImportedSymbol(original) is { } newSymbol)
+                    context.ImportTrampolines.AddFunctionTableSlotTrampoline(original, newSymbol);
+            }
         }
 
         // Rebuild import directory as normal.
         base.CreateImportDirectory(context);
+        return;
+
+        ISymbol? FindNewImportedSymbol(ImportedSymbol symbol)
+        {
+            // We consider a slot to be equal if the tokens match.
+            foreach (var newModule in newDirectory)
+            {
+                if (symbol.DeclaringModule!.Name != newModule.Name)
+                    continue;
+
+                foreach (var newSymbol in newModule.Symbols)
+                {
+                    if (symbol.IsImportByName && newSymbol.IsImportByName && newSymbol.Name == symbol.Name)
+                        return newSymbol;
+                    if (symbol.IsImportByOrdinal && newSymbol.IsImportByOrdinal && newSymbol.Ordinal == symbol.Ordinal)
+                        return newSymbol;
+                }
+            }
+
+            return null;
+        }
     }
 
     /// <inheritdoc />
@@ -365,6 +392,8 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
     {
         base.CreateRelocationsDirectory(context);
         foreach (var reloc in context.ImportTrampolines.GetRequiredBaseRelocations())
+            context.RelocationsDirectory.Add(reloc);
+        foreach (var reloc in context.VTableTrampolines.GetRequiredBaseRelocations())
             context.RelocationsDirectory.Add(reloc);
     }
 
@@ -458,16 +487,41 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
 
     private void AddVTableFixupTrampolines(BuilderContext context)
     {
-        if (!TrampolineVTableFixups || context.Image.DotNetDirectory?.VTableFixups is not { } directory)
-            return;
-
-        foreach (var fixup in directory)
+        if (!TrampolineVTableFixups
+            || context.BaseImage?.DotNetDirectory?.VTableFixups is not { } baseDirectory
+            || context.Image.DotNetDirectory?.VTableFixups is not { } newDirectory)
         {
-            for (int i = 0; i < fixup.Tokens.Count; i++)
+            return;
+        }
+
+        // Try to map all tokens stored in the original directory to slots in the new directory.
+        foreach (var originalFixup in baseDirectory)
+        {
+            for (int i = 0; i < originalFixup.Tokens.Count; i++)
             {
-                var slotSymbol = new Symbol(fixup.Tokens.GetReferenceToIndex(i));
-                context.VTableTrampolines.AddFunctionTableSlotTrampoline(slotSymbol);
+                if (FindNewTokenSlot(originalFixup.Tokens[i]) is not { } newSlot)
+                    continue;
+
+                var originalSlot = new Symbol(originalFixup.Tokens.GetReferenceToIndex(i));
+                context.VTableTrampolines.AddFunctionTableSlotTrampoline(originalSlot, newSlot);
             }
+        }
+
+        return;
+
+        ISymbol? FindNewTokenSlot(MetadataToken token)
+        {
+            // We consider a slot to be equal if the tokens match.
+            foreach (var fixup in newDirectory)
+            {
+                for (int j = 0; j < fixup.Tokens.Count; j++)
+                {
+                    if (fixup.Tokens[j] == token)
+                        return new Symbol(fixup.Tokens.GetReferenceToIndex(j));
+                }
+            }
+
+            return null;
         }
     }
 

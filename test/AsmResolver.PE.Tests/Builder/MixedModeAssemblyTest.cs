@@ -16,7 +16,6 @@ namespace AsmResolver.PE.Tests.Builder
 {
     public class MixedModeAssemblyTest : IClassFixture<TemporaryDirectoryFixture>
     {
-        private const string NonWindowsPlatform = "Test produces a mixed mode assembly which is not supported on non-Windows platforms.";
         private const string Non64BitPlatform = "Test produces a 64-bit assembly which is not supported on 32-bit operating systems.";
 
         private readonly TemporaryDirectoryFixture _fixture;
@@ -83,7 +82,6 @@ namespace AsmResolver.PE.Tests.Builder
         [SkippableFact]
         public void NativeBodyWithNoCalls()
         {
-            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
             Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
 
             // Read image
@@ -101,14 +99,13 @@ namespace AsmResolver.PE.Tests.Builder
 
             // Verify
             _fixture
-                .GetRunner<FrameworkPERunner>()
+                .GetRunner<NativePERunner>()
                 .RebuildAndRun(peFile, "TheAnswer", "The answer to life, universe and everything is 1337\r\n");
         }
 
         [SkippableFact]
         public void NativeBodyWithCall()
         {
-            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
             Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
 
             // Read image
@@ -149,15 +146,13 @@ namespace AsmResolver.PE.Tests.Builder
             // Verify
             string expectedOutput = "Hello from the unmanaged world!\r\nThe answer to life, universe and everything is 4919\r\n";
             _fixture
-                .GetRunner<FrameworkPERunner>()
+                .GetRunner<NativePERunner>()
                 .RebuildAndRun(peFile, "TheAnswer", expectedOutput);
         }
 
-        [SkippableFact]
+        [Fact]
         public void NativeBodyWithCallX86()
         {
-            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
-
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
 
@@ -196,7 +191,7 @@ namespace AsmResolver.PE.Tests.Builder
             // Verify
             string expectedOutput = "Hello\r\nThe answer to life, universe and everything is 4919\r\n";
             _fixture
-                .GetRunner<FrameworkPERunner>()
+                .GetRunner<NativePERunner>()
                 .RebuildAndRun(peFile, "TheAnswer", expectedOutput);
         }
     }

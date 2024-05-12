@@ -19,7 +19,6 @@ public class TrampolineTableBuffer : SegmentBase
 
     private readonly Platform _platform;
     private readonly List<FunctionTrampoline> _trampolines = new();
-
     private readonly SegmentBuilder _contents = new();
     private readonly SegmentBuilder _trampolineTable = new();
 
@@ -36,10 +35,11 @@ public class TrampolineTableBuffer : SegmentBase
     /// <summary>
     /// Creates a new trampoline for the provided function table slot symbol.
     /// </summary>
-    /// <param name="functionTableSlot">The symbol to redirect.</param>
-    public void AddFunctionTableSlotTrampoline(ISymbol functionTableSlot)
+    /// <param name="functionTableSlot">The function table slot to redirect.</param>
+    /// <param name="newSymbol">The function table slot to redirect to.</param>
+    public void AddFunctionTableSlotTrampoline(ISymbol functionTableSlot, ISymbol newSymbol)
     {
-        var trampoline = new FunctionTrampoline(_platform, functionTableSlot);
+        var trampoline = new FunctionTrampoline(_platform, functionTableSlot, newSymbol);
         _trampolines.Add(trampoline);
         _trampolineTable.Add(trampoline.TrampolineCode.Segment);
     }
@@ -58,7 +58,7 @@ public class TrampolineTableBuffer : SegmentBase
     {
         foreach (var trampoline in _trampolines)
         {
-            if (trampoline.OriginalSymbolReference is not { } originalSymbolAddress)
+            if (trampoline.OriginalSymbol.GetReference() is not { } originalSymbolAddress)
                 continue;
 
             if (!TryGetSectionContainingRva(sections, originalSymbolAddress.Rva, out var section))
@@ -119,24 +119,20 @@ public class TrampolineTableBuffer : SegmentBase
 
     private sealed class FunctionTrampoline
     {
-        public FunctionTrampoline(Platform platform, ISymbol originalSymbol)
+        public FunctionTrampoline(Platform platform, ISymbol originalSymbol, ISymbol newSymbol)
         {
             OriginalSymbol = originalSymbol;
-            OriginalSymbolReference = originalSymbol.GetReference()
-                ?? throw new ArgumentException($"Symbol {originalSymbol} does not have a reference assigned to it.");
 
             OriginalSymbolRelocation = new BaseRelocation(
                 platform.Is32Bit ? RelocationType.HighLow : RelocationType.Dir64,
-                OriginalSymbolReference
+                originalSymbol.GetReference() ?? throw new ArgumentException($"{originalSymbol} does not have an address assigned.")
             );
 
-            TrampolineCode = platform.CreateThunkStub(originalSymbol);
+            TrampolineCode = platform.CreateThunkStub(newSymbol);
             TrampolineSymbol = new Symbol(TrampolineCode.Segment.ToReference());
         }
 
         public ISymbol OriginalSymbol { get; }
-
-        public ISegmentReference OriginalSymbolReference { get; }
 
         public BaseRelocation OriginalSymbolRelocation { get; }
 
