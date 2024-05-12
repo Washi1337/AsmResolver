@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.IO;
 using AsmResolver.PE.Code;
 using AsmResolver.PE.File.Headers;

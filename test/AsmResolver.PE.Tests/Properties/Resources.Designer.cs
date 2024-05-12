@@ -310,5 +310,26 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] MixedModeCallIntoNative {
+            get {
+                object obj = ResourceManager.GetObject("MixedModeCallIntoNative", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] NativeHelloWorldC {
+            get {
+                object obj = ResourceManager.GetObject("NativeHelloWorldC", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] NativeHelloWorldCpp {
+            get {
+                object obj = ResourceManager.GetObject("NativeHelloWorldCpp", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

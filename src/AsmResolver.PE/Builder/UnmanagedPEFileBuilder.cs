@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.PE.DotNet.Cil;
@@ -11,29 +10,67 @@ namespace AsmResolver.PE.Builder;
 
 public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.BuilderContext>
 {
+    /// <summary>
+    /// Creates a new unmanaged PE file builder.
+    /// </summary>
     public UnmanagedPEFileBuilder()
         : this(ThrowErrorListener.Instance, null)
     {
     }
 
+    /// <summary>
+    /// Creates a new unmanaged PE file builder using the provided error listener.
+    /// </summary>
+    /// <param name="errorListener">The error listener to use.</param>
     public UnmanagedPEFileBuilder(IErrorListener errorListener)
         : this(errorListener, null)
     {
     }
 
+    /// <summary>
+    /// Creates a new unmanaged PE file builder using the provided error listener and base PE file.
+    /// </summary>
+    /// <param name="errorListener">The error listener to use.</param>
+    /// <param name="baseFile">The template file to base the resulting file on.</param>
     public UnmanagedPEFileBuilder(IErrorListener errorListener, IPEFile? baseFile)
     {
         ErrorListener = errorListener;
         BaseFile = baseFile;
     }
 
+    /// <summary>
+    /// Gets or sets the service used for registering exceptions that occur during the construction of the PE.
+    /// </summary>
     public IErrorListener ErrorListener
     {
         get;
         set;
     }
 
+    /// <summary>
+    /// Gets or sets the template file to base the resulting file on.
+    /// </summary>
     public IPEFile? BaseFile
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the imports directory of the new file is supposed to be reconstructed
+    /// and that the old, existing imports directory should be patched and rewired via trampolines.
+    /// </summary>
+    public bool TrampolineImports
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the VTable fixups directory of the new file is supposed to be
+    /// reconstructed and that the old, existing VTable fixups directory should be patched and rewired via trampolines.
+    /// </summary>
+    public bool TrampolineVTableFixups
     {
         get;
         set;
@@ -87,13 +124,6 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
     }
 
     /// <inheritdoc />
-    protected override void CreateImportDirectory(BuilderContext context)
-    {
-        // TODO: rewire import table.
-        // base.CreateImportDirectory(context);
-    }
-
-    /// <inheritdoc />
     protected override void AssignDataDirectories(BuilderContext context, PEFile outputFile)
     {
         var header = outputFile.OptionalHeader;
@@ -108,11 +138,11 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
 
         header.EnsureDataDirectoryCount(OptionalHeader.DefaultNumberOfRvasAndSizes);
 
-        //if (!context.ImportDirectory.IsEmpty)
-        //{
-        //    header.SetDataDirectory(DataDirectoryIndex.ImportDirectory, context.ImportDirectory);
-        //    header.SetDataDirectory(DataDirectoryIndex.IatDirectory, context.ImportDirectory.ImportAddressDirectory);
-        //}
+        if (!context.ImportDirectory.IsEmpty)
+        {
+            header.SetDataDirectory(DataDirectoryIndex.ImportDirectory, context.ImportDirectory);
+            header.SetDataDirectory(DataDirectoryIndex.IatDirectory, context.ImportDirectory.ImportAddressDirectory);
+        }
 
         if (!context.ExportDirectory.IsEmpty)
             header.SetDataDirectory(DataDirectoryIndex.ExportDirectory, context.ExportDirectory);
@@ -139,14 +169,14 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
     {
         var contents = new SegmentBuilder();
 
-        //if (!context.ImportDirectory.IsEmpty)
-        //    contents.Add(context.ImportDirectory.ImportAddressDirectory);
+        if (TrampolineImports && !context.ImportDirectory.IsEmpty)
+            contents.Add(context.ImportDirectory.ImportAddressDirectory);
 
         if (CreateAuxDotNetSegment(context) is { } auxSegment)
             contents.Add(auxSegment);
 
-        //if (!context.ImportDirectory.IsEmpty)
-        //    contents.Add(context.ImportDirectory);
+        if (TrampolineImports && !context.ImportDirectory.IsEmpty)
+            contents.Add(context.ImportDirectory);
 
         if (!context.ExportDirectory.IsEmpty)
             contents.Add(context.ExportDirectory);
@@ -161,6 +191,12 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
 
         if (context.ClrBootstrapper.HasValue)
             contents.Add(context.ClrBootstrapper.Value.Segment);
+
+        if (TrampolineImports)
+        {
+            contents.Add(context.ImportTrampolines);
+            context.ImportTrampolines.ApplyPatches(context.ClonedSections);
+        }
 
         if (context.Image.Exports is { Entries: { Count: > 0 } entries })
         {
@@ -184,7 +220,9 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
 
     private ISegment? CreateAuxDotNetSegment(BuilderContext context)
     {
-        var dotNetDirectory = context.Image.DotNetDirectory!;
+        var dotNetDirectory = context.Image.DotNetDirectory;
+        if (dotNetDirectory is null)
+            return null;
 
         var result = new SegmentBuilder();
 
@@ -195,13 +233,18 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
 
         if (!context.MethodBodyTable.IsEmpty)
             result.Add(context.MethodBodyTable);
-        
+
         AddOrPatch(dotNetDirectory.Metadata, context.BaseImage?.DotNetDirectory?.Metadata);
         AddOrPatch(dotNetDirectory.DotNetResources, context.BaseImage?.DotNetDirectory?.DotNetResources);
         AddOrPatch(dotNetDirectory.StrongName, context.BaseImage?.DotNetDirectory?.StrongName);
 
-        //if (dotNetDirectory.VTableFixups?.Count > 0)
-        //    result.Add(dotNetDirectory.VTableFixups);
+        if (TrampolineVTableFixups && dotNetDirectory.VTableFixups?.Count > 0)
+        {
+            // NOTE: We cannot safely patch the existing tables here as we need to trampoline the slots.
+            result.Add(dotNetDirectory.VTableFixups);
+            result.Add(context.VTableTrampolines);
+            context.VTableTrampolines.ApplyPatches(context.ClonedSections);
+        }
 
         AddOrPatch(dotNetDirectory.ExportAddressTable, context.BaseImage?.DotNetDirectory?.ExportAddressTable);
         AddOrPatch(dotNetDirectory.ManagedNativeHeader, context.BaseImage?.DotNetDirectory?.ManagedNativeHeader);
@@ -227,11 +270,11 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
         var image = context.Image;
         var contents = new SegmentBuilder();
 
-        //if (image.DotNetDirectory?.VTableFixups is { } fixups)
-        //{
-        //    for (int i = 0; i < fixups.Count; i++)
-        //        contents.Add(fixups[i].Tokens, (uint) context.Platform.PointerSize);
-        //}
+        if (TrampolineVTableFixups && image.DotNetDirectory?.VTableFixups is { } fixups)
+        {
+            for (int i = 0; i < fixups.Count; i++)
+                contents.Add(fixups[i].Tokens, (uint) context.Platform.PointerSize);
+        }
 
         if (image.Exports is { Entries.Count: > 0 })
             contents.Add(context.ExportDirectory, (uint) context.Platform.PointerSize);
@@ -298,7 +341,38 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
         base.CreateDataDirectoryBuffers(context);
     }
 
-    private void CreateDotNetDirectories(BuilderContext context) => ProcessRvasInMetadataTables(context);
+    /// <inheritdoc />
+    protected override void CreateImportDirectory(BuilderContext context)
+    {
+        if (!TrampolineImports)
+            return;
+
+        // Add trampolines **before** adding them to the import directory buffer. This is because our current
+        // implementation of the import directory buffer eagerly updates the imported symbol's IAT entry.
+        // TODO: We may need to change this implementation to a non-eager update.
+        foreach (var module in context.Image.Imports)
+        {
+            foreach (var originalSymbol in module.Symbols)
+                context.ImportTrampolines.AddFunctionTableSlotTrampoline(originalSymbol);
+        }
+
+        // Rebuild import directory as normal.
+        base.CreateImportDirectory(context);
+    }
+
+    /// <inheritdoc />
+    protected override void CreateRelocationsDirectory(BuilderContext context)
+    {
+        base.CreateRelocationsDirectory(context);
+        foreach (var reloc in context.ImportTrampolines.GetRequiredBaseRelocations())
+            context.RelocationsDirectory.Add(reloc);
+    }
+
+    private void CreateDotNetDirectories(BuilderContext context)
+    {
+        ProcessRvasInMetadataTables(context);
+        AddVTableFixupTrampolines(context);
+    }
 
     private void ProcessRvasInMetadataTables(BuilderContext context)
     {
@@ -382,6 +456,21 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
         }
     }
 
+    private void AddVTableFixupTrampolines(BuilderContext context)
+    {
+        if (!TrampolineVTableFixups || context.Image.DotNetDirectory?.VTableFixups is not { } directory)
+            return;
+
+        foreach (var fixup in directory)
+        {
+            for (int i = 0; i < fixup.Tokens.Count; i++)
+            {
+                var slotSymbol = new Symbol(fixup.Tokens.GetReferenceToIndex(i));
+                context.VTableTrampolines.AddFunctionTableSlotTrampoline(slotSymbol);
+            }
+        }
+    }
+
     private bool TryPatchDataDirectory(BuilderContext context, ISegment? segment, DataDirectoryIndex directoryIndex)
     {
         if (segment is null || context.BaseImage?.PEFile is not { } peFile)
@@ -425,8 +514,16 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
         return false;
     }
 
+    /// <summary>
+    /// Provides a workspace for <see cref="UnmanagedPEFileBuilder"/>.
+    /// </summary>
     public class BuilderContext : PEFileBuilderContext
     {
+        /// <summary>
+        /// Creates a new builder context.
+        /// </summary>
+        /// <param name="image">The image to build a PE file for.</param>
+        /// <param name="baseImage">The template image to base the file on.</param>
         public BuilderContext(IPEImage image, IPEImage? baseImage)
             : base(image)
         {
@@ -437,12 +534,37 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
                 foreach (var section in baseImage.PEFile.Sections)
                     ClonedSections.Add(new PESection(section));
             }
+
+            ImportTrampolines = new TrampolineTableBuffer(Platform);
+            VTableTrampolines = new TrampolineTableBuffer(Platform);
         }
 
+        /// <summary>
+        /// Gets a collection of sections that were cloned from the template file.
+        /// </summary>
         public List<PESection> ClonedSections { get; } = new();
 
+        /// <summary>
+        /// Gets the template image to base the file on.
+        /// </summary>
         public IPEImage? BaseImage { get; }
 
+        /// <summary>
+        /// Gets the trampolines table for all imported symbols.
+        /// </summary>
+        public TrampolineTableBuffer ImportTrampolines { get; }
+
+        /// <summary>
+        /// Gets the trampolines table for all fixed up managed method addresses.
+        /// </summary>
+        public TrampolineTableBuffer VTableTrampolines { get; }
+
+        /// <summary>
+        /// Searches for a cloned section containing the provided RVA.
+        /// </summary>
+        /// <param name="rva">The RVA.</param>
+        /// <param name="section">The section.</param>
+        /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
         public bool TryGetSectionContainingRva(uint rva, [NotNullWhen(true)] out PESection? section)
         {
             foreach (var candidate in ClonedSections)
@@ -451,7 +573,7 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
                 {
                     section = candidate;
                     return true;
-                }    
+                }
             }
 
             section = null;

@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
 
 namespace AsmResolver.PE.Builder;
@@ -229,6 +231,83 @@ public class ManagedPEFileBuilder : PEFileBuilder
     {
         CreateDotNetDirectories(context);
         base.CreateDataDirectoryBuffers(context);
+    }
+
+    /// <inheritdoc />
+    protected override void CreateImportDirectory(PEFileBuilderContext context)
+    {
+        var image = context.Image;
+
+        bool includeClrBootstrapper = image.DotNetDirectory is not null
+            && (
+                context.Platform.IsClrBootstrapperRequired
+                || (image.DotNetDirectory?.Flags & DotNetDirectoryFlags.ILOnly) == 0
+            );
+
+        string clrEntryPointName = (image.Characteristics & Characteristics.Dll) != 0
+            ? "_CorDllMain"
+            : "_CorExeMain";
+
+        var modules = CollectImportedModules(
+            image,
+            includeClrBootstrapper,
+            clrEntryPointName,
+            out var entryPointSymbol
+        );
+
+        foreach (var module in modules)
+            context.ImportDirectory.AddModule(module);
+
+        if (includeClrBootstrapper)
+        {
+            if (entryPointSymbol is null)
+                throw new InvalidOperationException("Entry point symbol was required but not imported.");
+
+            context.ClrBootstrapper = context.Platform.CreateThunkStub(entryPointSymbol);
+        }
+    }
+
+    private static IList<IImportedModule> CollectImportedModules(
+        IPEImage image,
+        bool requireClrEntryPoint,
+        string clrEntryPointName,
+        out ImportedSymbol? clrEntryPoint)
+    {
+        clrEntryPoint = null;
+
+        var modules = image.Imports.ToList();
+
+        if (requireClrEntryPoint)
+        {
+            // Add mscoree.dll if it wasn't imported yet.
+            if (modules.FirstOrDefault(x => x.Name == "mscoree.dll") is not { } mscoreeModule)
+            {
+                mscoreeModule = new ImportedModule("mscoree.dll");
+                modules.Add(mscoreeModule);
+            }
+
+            // Add entry point sumbol if it wasn't imported yet.
+            clrEntryPoint = mscoreeModule.Symbols.FirstOrDefault(x => x.Name == clrEntryPointName);
+            if (clrEntryPoint is null)
+            {
+                clrEntryPoint = new ImportedSymbol(0, clrEntryPointName);
+                mscoreeModule.Symbols.Add(clrEntryPoint);
+            }
+        }
+        else
+        {
+            // Remove mscoree.dll!_CorXXXMain and entry of mscoree.dll.
+            if (modules.FirstOrDefault(x => x.Name == "mscoree.dll") is { } mscoreeModule)
+            {
+                if (mscoreeModule.Symbols.FirstOrDefault(x => x.Name == clrEntryPointName) is { } entry)
+                    mscoreeModule.Symbols.Remove(entry);
+
+                if (mscoreeModule.Symbols.Count == 0)
+                    modules.Remove(mscoreeModule);
+            }
+        }
+
+        return modules;
     }
 
     /// <inheritdoc />

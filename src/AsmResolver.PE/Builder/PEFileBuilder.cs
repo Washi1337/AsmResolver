@@ -229,74 +229,8 @@ namespace AsmResolver.PE.Builder
         /// <param name="context">The builder context.</param>
         protected virtual void CreateImportDirectory(TContext context)
         {
-            var image = context.Image;
-
-            bool includeClrBootstrapper = image.DotNetDirectory is not null
-                && (
-                    context.Platform.IsClrBootstrapperRequired
-                    || (image.DotNetDirectory?.Flags & DotNetDirectoryFlags.ILOnly) == 0
-                );
-
-            string clrEntryPointName = (image.Characteristics & Characteristics.Dll) != 0
-                ? "_CorDllMain"
-                : "_CorExeMain";
-
-            var modules = CollectImportedModules(
-                image,
-                includeClrBootstrapper,
-                clrEntryPointName,
-                out var entryPointSymbol
-            );
-
-            foreach (var module in modules)
+            foreach (var module in context.Image.Imports)
                 context.ImportDirectory.AddModule(module);
-
-            if (includeClrBootstrapper)
-            {
-                if (entryPointSymbol is null)
-                    throw new InvalidOperationException("Entry point symbol was required but not imported.");
-
-                context.ClrBootstrapper = context.Platform.CreateThunkStub(entryPointSymbol);
-            }
-        }
-
-        /// <summary>
-        /// Collects all imported modules in an input image, and adds any CLR entry points when required.
-        /// </summary>
-        /// <param name="image">The image to pull the data from.</param>
-        /// <param name="requireClrEntryPoint"><c>true</c> if the CLR entry point should be included.</param>
-        /// <param name="clrEntryPointName">The name of the CLR entry point.</param>
-        /// <param name="clrEntryPoint">The imported symbol of the CLR entry point.</param>
-        /// <returns>The modules.</returns>
-        protected static IList<IImportedModule> CollectImportedModules(
-            IPEImage image,
-            bool requireClrEntryPoint,
-            string clrEntryPointName,
-            out ImportedSymbol? clrEntryPoint)
-        {
-            clrEntryPoint = null;
-
-            var modules = image.Imports.ToList();
-
-            if (requireClrEntryPoint)
-            {
-                // Add mscoree.dll if it wasn't imported yet.
-                if (modules.FirstOrDefault(x => x.Name == "mscoree.dll") is not { } mscoreeModule)
-                {
-                    mscoreeModule = new ImportedModule("mscoree.dll");
-                    modules.Add(mscoreeModule);
-                }
-
-                // Add entry point sumbol if it wasn't imported yet.
-                clrEntryPoint = mscoreeModule.Symbols.FirstOrDefault(x => x.Name == clrEntryPointName);
-                if (clrEntryPoint is null)
-                {
-                    clrEntryPoint = new ImportedSymbol(0, clrEntryPointName);
-                    mscoreeModule.Symbols.Add(clrEntryPoint);
-                }
-            }
-
-            return modules;
         }
 
         /// <summary>
