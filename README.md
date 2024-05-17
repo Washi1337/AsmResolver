@@ -24,7 +24,7 @@ AsmResolver has a lot of features. Below is a non-exhaustive list of the highlig
   - [x] Support for ReadyToRun binaries.
 - [x] Read PDB symbols.
   - [x] Fully managed cross-platform API (No DIA or similar required).
-- [x] .NET Standard 2.0 compatible.
+- [x] .NET 3.5 compatible.
 - [x] Documented.
 - [x] Unit tested.
 
@@ -54,7 +54,7 @@ Nightly Builds:
 
 ## Compiling
 
-The solution can be built using the .NET SDK or an IDE that works with it (e.g., Visual Studio and JetBrains Rider). The main packages target LTS versions of various .NET runtimes (.NET Standard 2.0, .NET Core 3.1 and .NET 6.0).
+The solution can be built using the .NET SDK or an IDE that works with it (e.g., Visual Studio and JetBrains Rider). The main packages target LTS versions of various .NET runtimes (.NET 3.5, .NET Standard 2.0, .NET Standard 2.1, .NET Core 3.1 and .NET 6.0).
 
 To build the project from the command line, use:
 ```bash
