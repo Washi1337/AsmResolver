@@ -29,4 +29,8 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net35'">
+        <PackageReference Include="MonoMod.Backports" Version="1.1.0" />
+    </ItemGroup>
+
 </Project>

@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet
 {
@@ -157,7 +158,7 @@ namespace AsmResolver.DotNet
             if (!Directory.Exists(installationDirectory))
                 return;
 
-            foreach (string directory in Directory.EnumerateDirectories(installationDirectory))
+            foreach (string directory in Directory.GetDirectories(installationDirectory))
                 _installedRuntimes.Add(new DotNetInstallationInfo(directory));
 
             _installedRuntimes.Sort();
@@ -169,7 +170,7 @@ namespace AsmResolver.DotNet
         /// <returns>The path to the runtime, or <c>null</c> if none was found.</returns>
         private static string? FindDotNetPath()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformationShim.IsRunningOnWindows)
             {
                 // Probe PATH for installation folder of dotnet.
                 string[] paths = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator);
@@ -179,7 +180,7 @@ namespace AsmResolver.DotNet
                         return path;
                 }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            else if (RuntimeInformationShim.IsRunningOnUnix)
             {
                 // Probe default locations for installation folder of dotnet.
                 foreach (string path in DefaultDotNetUnixPaths)
@@ -189,7 +190,7 @@ namespace AsmResolver.DotNet
                 }
             }
 
-            if (NetCoreRuntimePattern.Match(RuntimeInformation.FrameworkDescription).Success)
+            if (NetCoreRuntimePattern.Match(RuntimeInformationShim.FrameworkDescription).Success)
             {
                 // Fallback: if we are currently running .NET Core or newer, we can infer the installation directory
                 // with the help of System.Reflection. The assembly of System.Object is either System.Runtime
@@ -243,7 +244,7 @@ namespace AsmResolver.DotNet
             /// <summary>
             /// Gets a list of installed versions in the directory.
             /// </summary>
-            public IReadOnlyList<DotNetRuntimeVersionInfo> InstalledVersions
+            public IList<DotNetRuntimeVersionInfo> InstalledVersions
             {
                 get;
             }
@@ -294,7 +295,7 @@ namespace AsmResolver.DotNet
             private static List<DotNetRuntimeVersionInfo> DetectInstalledVersionsInDirectory(string name, string path)
             {
                 var versions = new List<DotNetRuntimeVersionInfo>();
-                foreach (string versionDirectory in Directory.EnumerateDirectories(path))
+                foreach (string versionDirectory in Directory.GetDirectories(path))
                 {
                     string versionString = Path.GetFileName(versionDirectory);
 
@@ -303,7 +304,7 @@ namespace AsmResolver.DotNet
                     if (suffixIndex >= 0)
                         versionString = versionString.Remove(suffixIndex);
 
-                    if (!Version.TryParse(versionString, out var version))
+                    if (!VersionShim.TryParse(versionString, out var version))
                         continue;
 
                     versions.Add(new DotNetRuntimeVersionInfo(name, version, versionDirectory));

@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -14,7 +15,7 @@ namespace AsmResolver.PE.DotNet.Cil
     {
         private CilExtraSection()
         {
-            Data = Array.Empty<byte>();
+            Data = ArrayShim.Empty<byte>();
         }
 
         /// <summary>

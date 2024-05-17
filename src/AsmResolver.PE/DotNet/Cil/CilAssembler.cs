@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -160,7 +161,7 @@ namespace AsmResolver.PE.DotNet.Cil
                     break;
 
                 case CilOperandType.InlineSwitch:
-                    var labels = instruction.Operand as IList<ICilLabel> ?? Array.Empty<ICilLabel>();
+                    var labels = instruction.Operand as IList<ICilLabel> ?? ArrayShim.Empty<ICilLabel>();
                     _writer.WriteInt32(labels.Count);
 
                     int baseOffset = (int) _writer.Offset + labels.Count * sizeof(int);
@@ -293,7 +294,7 @@ namespace AsmResolver.PE.DotNet.Cil
                 .ToArray();
 
             string operandTypesString = expectedOperands.Length > 1
-                ? $"{string.Join(", ", names.Take(names.Length - 1))} or {names[names.Length - 1]}"
+                ? $"{StringShim.Join(", ", names.Take(names.Length - 1))} or {names[names.Length - 1]}"
                 : names[0];
 
             string found = instruction.Operand?.GetType().Name ?? "null";

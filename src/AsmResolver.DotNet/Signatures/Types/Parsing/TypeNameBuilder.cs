@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {

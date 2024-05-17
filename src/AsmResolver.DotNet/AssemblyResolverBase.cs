@@ -5,6 +5,7 @@ using System.IO;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet
 {
@@ -186,7 +187,7 @@ namespace AsmResolver.DotNet
             // If culture is set, prefer the subdirectory with the culture.
             if (!string.IsNullOrEmpty(assembly.Culture))
             {
-                path = Path.Combine(directory, assembly.Culture!, assembly.Name);
+                path = PathShim.Combine(directory, assembly.Culture!, assembly.Name);
                 string? result = ProbeFileFromFilePathWithoutExtension(path)
                                  ?? ProbeFileFromFilePathWithoutExtension(Path.Combine(path, assembly.Name));
                 if (result is null)

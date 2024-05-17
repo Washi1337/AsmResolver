@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Config.Json;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet
 {
@@ -163,7 +165,7 @@ namespace AsmResolver.DotNet
                 return pathProvider.GetRuntimePathCandidates(framework.Name!, version).ToArray();
             }
 
-            return Array.Empty<string>();
+            return ArrayShim.Empty<string>();
         }
 
         /// <inheritdoc />
@@ -192,7 +194,7 @@ namespace AsmResolver.DotNet
             if (suffixIndex >= 0)
                 versionString = versionString.Remove(suffixIndex);
 
-            return Version.TryParse(versionString, out version);
+            return VersionShim.TryParse(versionString, out version);
         }
 
         private sealed class RuntimeNameComparer : IComparer<string>

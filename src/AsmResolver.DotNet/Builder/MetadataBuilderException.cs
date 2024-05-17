@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Builder
             : base(message)
         {
         }
-        
+
         /// <summary>
         /// Creates a new instance of the <see cref="MetadataBuilderException"/> class with the provided message.
         /// </summary>
@@ -33,14 +33,6 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="inner">The inner exception causing the exception.</param>
         public MetadataBuilderException(string message, Exception inner)
             : base(message, inner)
-        {
-        }
-
-        /// <inheritdoc />
-        protected MetadataBuilderException(
-            SerializationInfo info,
-            StreamingContext context)
-            : base(info, context)
         {
         }
     }

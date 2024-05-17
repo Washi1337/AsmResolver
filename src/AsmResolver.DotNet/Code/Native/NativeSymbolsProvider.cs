@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using AsmResolver.Collections;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Code.Native
 {
@@ -150,7 +152,7 @@ namespace AsmResolver.DotNet.Code.Native
         {
             baseOrdinal = 1;
             if (_fixedExportedSymbols.Count == 0 && _floatingExportedSymbols.Count == 0)
-                return Array.Empty<ExportedSymbol>();
+                return ArrayShim.Empty<ExportedSymbol>();
 
             // Check if no fixed symbols at all, then just return the floating exports.
             if (_fixedExportedSymbols.Count == 0)

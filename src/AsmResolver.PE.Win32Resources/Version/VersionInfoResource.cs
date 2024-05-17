@@ -77,7 +77,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public static IEnumerable<VersionInfoResource?> FindAllFromDirectory(IResourceDirectory rootDirectory)
         {
             if (!rootDirectory.TryGetDirectory(ResourceType.Version, out var versionDirectory))
-                return Enumerable.Empty<VersionInfoResource>();
+                return Enumerable.Empty<VersionInfoResource?>();
 
             var categoryDirectory = versionDirectory
                 .Entries
@@ -85,11 +85,11 @@ namespace AsmResolver.PE.Win32Resources.Version
                 .FirstOrDefault();
 
             if (categoryDirectory is null)
-                return Enumerable.Empty<VersionInfoResource>();
+                return Enumerable.Empty<VersionInfoResource?>();
 
             return categoryDirectory.Entries
                 .OfType<IResourceData>()
-                .Select(FromResourceData);
+                .Select(FromResourceData)!;
         }
 
         /// <summary>
