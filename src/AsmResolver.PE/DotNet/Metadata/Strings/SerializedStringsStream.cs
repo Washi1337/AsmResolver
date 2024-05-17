@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using System.Text;
+using System.Collections.Concurrent;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Strings
@@ -9,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
     /// </summary>
     public class SerializedStringsStream : StringsStream
     {
-        private readonly Dictionary<uint, Utf8String> _cachedStrings = new();
+        private readonly ConcurrentDictionary<uint, Utf8String> _cachedStrings = new();
         private readonly BinaryStreamReader _reader;
 
         /// <summary>
@@ -66,7 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
             {
                 var stringsReader = _reader.ForkRelative(index);
                 value = stringsReader.ReadUtf8String();
-                _cachedStrings[index] = value;
+                _cachedStrings.TryAdd(index, value);
             }
 
             return value;
