@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using AsmResolver.IO;
 
 namespace AsmResolver.Symbols.Pdb.Msf;

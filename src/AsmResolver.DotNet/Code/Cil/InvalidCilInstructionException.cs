@@ -47,13 +47,5 @@ namespace AsmResolver.DotNet.Code.Cil
             : base(message, inner)
         {
         }
-
-        /// <inheritdoc />
-        protected InvalidCilInstructionException(
-            SerializationInfo info,
-            StreamingContext context)
-            : base(info, context)
-        {
-        }
     }
 }

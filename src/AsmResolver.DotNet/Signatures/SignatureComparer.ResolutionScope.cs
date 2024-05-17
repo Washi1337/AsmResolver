@@ -104,7 +104,15 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(AssemblyReference x, AssemblyReference y) => Equals((AssemblyDescriptor)x, y);
+        public bool Equals(AssemblyReference? x, AssemblyReference? y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (x is null || y is null)
+                return false;
+
+            return Equals((AssemblyDescriptor) x, y);
+        }
 
         /// <inheritdoc />
         public int GetHashCode(AssemblyReference obj) => GetHashCode((AssemblyDescriptor)obj);

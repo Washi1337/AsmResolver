@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet
         public bool IsNetStandard => Name == NetStandard;
 
         /// <summary>
-        /// Parses the framework name as provided in <see cref="TargetFrameworkAttribute"/>.
+        /// Parses the framework name as provided in a <c>System.Runtime.Versioning.TargetFrameworkAttribute</c> attribute.
         /// </summary>
         /// <param name="frameworkName">The full runtime name.</param>
         /// <returns>The parsed version info.</returns>
@@ -79,7 +79,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Attempts to parse the framework name as provided in <see cref="TargetFrameworkAttribute"/>.
+        /// Attempts to parse the framework name as provided in a <c>System.Runtime.Versioning.TargetFrameworkAttribute</c> attribute.
         /// </summary>
         /// <param name="frameworkName">The full runtime name.</param>
         /// <param name="info">The parsed version info.</param>

@@ -23,5 +23,12 @@ public static class ArrayShim
     }
 #endif
 
+    /// <summary>
+    /// Determines whether the provided element exists in the array.
+    /// </summary>
+    /// <param name="self">The array to search in.</param>
+    /// <param name="value">The value to search.</param>
+    /// <typeparam name="T">The type of elements stored in the array.</typeparam>
+    /// <returns><c>true</c> if the element exists, <c>false</c> otherwise.</returns>
     public static bool Contains<T>(this T[] self, T value) => Array.IndexOf(self, value) != -1;
 }

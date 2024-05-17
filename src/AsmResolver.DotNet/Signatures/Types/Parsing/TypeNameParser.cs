@@ -438,7 +438,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         {
             var token = _lexer.Peek();
 
-            if (!Enumerable.Contains(terminals, token.Terminal))
+            if (!terminals.Contains(token.Terminal))
                 return null;
 
             _lexer.Next();

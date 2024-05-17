@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Runtime.Versioning;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
