@@ -33,8 +33,11 @@ namespace AsmResolver.IO
         public uint Length => (uint) _dataSource.Length;
 
         /// <inheritdoc />
-        public unsafe BinaryStreamReader CreateReader(ulong address, uint rva, uint length) =>
-            new(_dataSource, address != 0 ? address : (ulong)_file.BasePointer, rva, length);
+        public unsafe ulong BaseAddress => (ulong)_file.BasePointer;
+
+        /// <inheritdoc />
+        public BinaryStreamReader CreateReader(ulong address, uint rva, uint length) =>
+            new(_dataSource, address, rva, length);
 
         /// <inheritdoc />
         public void Dispose()
