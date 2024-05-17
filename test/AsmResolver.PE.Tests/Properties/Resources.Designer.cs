@@ -318,16 +318,30 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
 
-        public static byte[] NativeHelloWorldC {
+        public static byte[] NativeHelloWorldC_X86 {
             get {
-                object obj = ResourceManager.GetObject("NativeHelloWorldC", resourceCulture);
+                object obj = ResourceManager.GetObject("NativeHelloWorldC_X86", resourceCulture);
                 return ((byte[])(obj));
             }
         }
 
-        public static byte[] NativeHelloWorldCpp {
+        public static byte[] NativeHelloWorldC_X64 {
             get {
-                object obj = ResourceManager.GetObject("NativeHelloWorldCpp", resourceCulture);
+                object obj = ResourceManager.GetObject("NativeHelloWorldC_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] NativeHelloWorldCpp_X86 {
+            get {
+                object obj = ResourceManager.GetObject("NativeHelloWorldCpp_X86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] NativeHelloWorldCpp_X64 {
+            get {
+                object obj = ResourceManager.GetObject("NativeHelloWorldCpp_X64", resourceCulture);
                 return ((byte[])(obj));
             }
         }

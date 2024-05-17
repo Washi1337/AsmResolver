@@ -1,7 +1,10 @@
+using System;
 using System.IO;
 using System.Linq;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Imports;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -16,23 +19,39 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
         _fixture = fixture;
     }
 
-    [Fact]
-    public void RoundTripNativePE()
+    [Theory]
+    [InlineData(MachineType.I386)]
+    [InlineData(MachineType.Amd64)]
+    public void RoundTripNativePE(MachineType machineType)
     {
-        var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldC);
+        var image = PEImage.FromBytes(machineType switch
+        {
+            MachineType.I386 => Properties.Resources.NativeHelloWorldC_X86,
+            MachineType.Amd64 => Properties.Resources.NativeHelloWorldC_X64,
+            _ => throw new ArgumentOutOfRangeException(nameof(machineType))
+        });
+
         var file = image.ToPEFile(new UnmanagedPEFileBuilder());
 
         _fixture.GetRunner<NativePERunner>().RebuildAndRun(
             file,
-            "NativeHelloWorldC.exe",
+            $"NativeHelloWorldC.{machineType}.exe",
             "hello world!\n"
         );
     }
 
-    [Fact]
-    public void TrampolineImportsInCPE()
+    [Theory]
+    [InlineData(MachineType.I386)]
+    [InlineData(MachineType.Amd64)]
+    public void TrampolineImportsInCPE(MachineType machineType)
     {
-        var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldC);
+        var image = PEImage.FromBytes(machineType switch
+        {
+            MachineType.I386 => Properties.Resources.NativeHelloWorldC_X86,
+            MachineType.Amd64 => Properties.Resources.NativeHelloWorldC_X64,
+            _ => throw new ArgumentOutOfRangeException(nameof(machineType))
+        });
+
         var file = image.ToPEFile(new UnmanagedPEFileBuilder
         {
             TrampolineImports = true
@@ -40,32 +59,52 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
 
         _fixture.GetRunner<NativePERunner>().RebuildAndRun(
             file,
-            "NativeHelloWorldC.exe",
+            $"NativeHelloWorldC.{machineType}.exe",
             "hello world!\n"
         );
     }
 
-    [Fact]
-    public void TrampolineImportsInCppPE()
+    [Theory]
+    [InlineData(MachineType.I386)]
+    [InlineData(MachineType.Amd64)]
+    public void TrampolineImportsInCppPE(MachineType machineType)
     {
-        var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldCpp);
+        var image = PEImage.FromBytes(machineType switch
+        {
+            MachineType.I386 => Properties.Resources.NativeHelloWorldCpp_X86,
+            MachineType.Amd64 => Properties.Resources.NativeHelloWorldCpp_X64,
+            _ => throw new ArgumentOutOfRangeException(nameof(machineType))
+        });
+
         var file = image.ToPEFile(new UnmanagedPEFileBuilder
         {
-            TrampolineImports = true
+            TrampolineImports = true,
+            ImportedSymbolClassifier = new DelegatedSymbolClassifier(
+                x => x.Name == "?cout@std@@3V?$basic_ostream@DU?$char_traits@D@std@@@1@A"
+                    ? ImportedSymbolType.Data
+                    : ImportedSymbolType.Function
+            )
         });
 
         _fixture.GetRunner<NativePERunner>().RebuildAndRun(
             file,
-            "NativeHelloWorldCpp.exe",
-            "hello world!\n"
+            $"NativeHelloWorldCpp.{machineType}.exe",
+            "Hello, world!\n"
         );
     }
 
-    [Fact]
-    public void ScrambleImportsNativePE()
+    [Theory]
+    [InlineData(MachineType.I386)]
+    [InlineData(MachineType.Amd64)]
+    public void ScrambleImportsNativePE(MachineType machineType)
     {
         // Load image.
-        var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldC);
+        var image = PEImage.FromBytes(machineType switch
+        {
+            MachineType.I386 => Properties.Resources.NativeHelloWorldC_X86,
+            MachineType.Amd64 => Properties.Resources.NativeHelloWorldC_X64,
+            _ => throw new ArgumentOutOfRangeException(nameof(machineType))
+        });
 
         // Reverse order of all imports
         foreach (var module in image.Imports)
@@ -84,7 +123,7 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
 
         _fixture.GetRunner<NativePERunner>().RebuildAndRun(
             file,
-            "NativeHelloWorldC.exe",
+            $"NativeHelloWorldC.{machineType}.exe",
             "hello world!\n"
         );
     }

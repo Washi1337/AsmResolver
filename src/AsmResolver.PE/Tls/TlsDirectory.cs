@@ -97,8 +97,19 @@ namespace AsmResolver.PE.Tls
             var type = _is32Bit ? RelocationType.HighLow : RelocationType.Dir64;
 
             var result = new List<BaseRelocation>(4 + CallbackFunctions.Count);
-            for (int i = 0; i < 4; i++)
-                result.Add(new BaseRelocation(type, this.ToReference(i * pointerSize)));
+
+            // TLS directory does not have to define template data. We then don't have to define relocs for it either.
+            if (TemplateData is not null)
+            {
+                result.Add(new BaseRelocation(type, this.ToReference(0 * pointerSize)));
+                result.Add(new BaseRelocation(type, this.ToReference(1 * pointerSize)));
+            }
+
+            // TLS index and callback table addresses.
+            result.Add(new BaseRelocation(type, this.ToReference(2 * pointerSize)));
+            result.Add(new BaseRelocation(type, this.ToReference(3 * pointerSize)));
+
+            // All callbacks are also VAs, so we need relocations for them as well.
             for (int i = 0; i < CallbackFunctions.Count; i++)
                 result.Add(new BaseRelocation(type, CallbackFunctions.ToReference(i * pointerSize)));
 
