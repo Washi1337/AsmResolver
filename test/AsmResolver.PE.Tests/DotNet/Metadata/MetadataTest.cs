@@ -139,7 +139,12 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         private void AssertCorrectStreamIsSelected<TStream>(byte[] assembly, bool isEnC)
             where TStream : class, IMetadataStream
         {
-            var peImage = PEImage.FromBytes(assembly);
+            AssertCorrectStreamIsSelected<TStream>(PEImage.FromBytes(assembly), isEnC);
+        }
+
+        private void AssertCorrectStreamIsSelected<TStream>(IPEImage peImage, bool isEnC)
+            where TStream : class, IMetadataStream
+        {
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var allStreams = metadata.Streams
@@ -197,6 +202,16 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         public void SelectFirstUserStringsStreamInEnCMetadata()
         {
             AssertCorrectStreamIsSelected<UserStringsStream>(Properties.Resources.HelloWorld_DoubleUserStringsStream_EnC, true);
+        }
+
+        [Fact]
+        public void SchemaStreamShouldForceEnCMetadata()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_SchemaStream);
+            AssertCorrectStreamIsSelected<BlobStream>(peImage, true);
+            AssertCorrectStreamIsSelected<GuidStream>(peImage, true);
+            AssertCorrectStreamIsSelected<StringsStream>(peImage, true);
+            AssertCorrectStreamIsSelected<UserStringsStream>(peImage, true);
         }
     }
 }

@@ -303,5 +303,12 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] HelloWorld_SchemaStream {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SchemaStream", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

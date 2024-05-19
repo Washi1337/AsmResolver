@@ -75,12 +75,24 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             // Eagerly read stream headers to determine if we are EnC metadata.
             _streamHeaders = new MetadataStreamHeader[numberOfStreams];
+
+            bool? isEncMetadata = null;
             for (int i = 0; i < numberOfStreams; i++)
             {
                 _streamHeaders[i] = MetadataStreamHeader.FromReader(ref directoryReader);
-                if (_streamHeaders[i].Name == TablesStream.EncStreamName)
-                    IsEncMetadata = true;
+                string name = _streamHeaders[i].Name;
+                if (isEncMetadata is null)
+                {
+                    if (name == TablesStream.CompressedStreamName)
+                        isEncMetadata = false;
+                    else if (name == TablesStream.EncStreamName)
+                        isEncMetadata = true;
+                }
+                if (name == TablesStream.UncompressedStreamName)
+                    isEncMetadata = true;
             }
+
+            IsEncMetadata = isEncMetadata ?? false;
         }
 
         /// <inheritdoc />
