@@ -101,8 +101,13 @@ namespace AsmResolver.PE.DotNet.Metadata
             if (_streamHeaders.Length == 0)
                 return base.GetStreams();
 
+            var flags = MetadataStreamReaderFlags.None;
+            if (IsEncMetadata)
+                flags |= MetadataStreamReaderFlags.IsEnc;
+
             return new MetadataStreamList(this,
                 _context,
+                flags,
                 _streamHeaders,
                 _streamContentsReader);
         }

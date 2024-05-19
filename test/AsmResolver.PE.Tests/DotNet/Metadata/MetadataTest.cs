@@ -213,5 +213,17 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             AssertCorrectStreamIsSelected<StringsStream>(peImage, true);
             AssertCorrectStreamIsSelected<UserStringsStream>(peImage, true);
         }
+
+        [Fact]
+        public void UseCaseInsensitiveComparisonForHeapNamesInEnCMetadata()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_LowerCaseHeapsWithEnC);
+            var metadata = peImage.DotNetDirectory!.Metadata!;
+
+            Assert.True(metadata.TryGetStream(out BlobStream _));
+            Assert.True(metadata.TryGetStream(out GuidStream _));
+            Assert.True(metadata.TryGetStream(out StringsStream _));
+            Assert.True(metadata.TryGetStream(out UserStringsStream _));
+        }
     }
 }

@@ -310,5 +310,12 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] HelloWorld_LowerCaseHeapsWithEnC {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_LowerCaseHeapsWithEnC", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
