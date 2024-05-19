@@ -13,6 +13,7 @@ csharp_preferred_modifier_order = public, private, protected, internal, new, abs
 csharp_style_var_elsewhere = true:suggestion
 csharp_style_var_for_built_in_types = false:suggestion
 csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_new_line_before_open_brace = all
 dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary:none
 dotnet_style_parentheses_in_other_binary_operators = never_if_unnecessary:none
 dotnet_style_parentheses_in_relational_binary_operators = never_if_unnecessary:none

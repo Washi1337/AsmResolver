@@ -37,7 +37,12 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             if (string.Equals(header.Name, TablesStream.CompressedStreamName, comparisonKind) ||
                 string.Equals(header.Name, TablesStream.EncStreamName, comparisonKind))
-                return new SerializedTableStream(context, header.Name, reader);
+            {
+                bool forceLargeColumns = (flags & MetadataStreamReaderFlags.IsEnc) != 0 &&
+                                         (flags & MetadataStreamReaderFlags.HasJtdStream) != 0;
+                return new SerializedTableStream(context, header.Name, reader)
+                    { ForceLargeColumns = forceLargeColumns };
+            }
             if (string.Equals(header.Name, StringsStream.DefaultName, comparisonKind))
                 return new SerializedStringsStream(header.Name, reader);
             if (string.Equals(header.Name, UserStringsStream.DefaultName, comparisonKind))

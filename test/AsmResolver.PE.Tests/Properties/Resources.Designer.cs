@@ -317,5 +317,12 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] HelloWorld_JTDStream {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_JTDStream", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

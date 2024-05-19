@@ -16,5 +16,12 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// EnC metadata is being used.
         /// </summary>
         IsEnc = 1,
+        /// <summary>
+        /// A #JTD stream is present.
+        /// </summary>
+        /// <remarks>
+        /// If the #JTD stream is present and EnC metadata is being used, all indices in the tables stream are 4 bytes.
+        /// </remarks>
+        HasJtdStream = 2,
     }
 }

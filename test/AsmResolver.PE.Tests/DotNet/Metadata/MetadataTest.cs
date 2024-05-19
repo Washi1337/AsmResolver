@@ -225,5 +225,29 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             Assert.True(metadata.TryGetStream(out StringsStream _));
             Assert.True(metadata.TryGetStream(out UserStringsStream _));
         }
+
+        [Fact]
+        public void UseLargeTableIndicesWhenJTDStreamIsPresentInEnCMetadata()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_JTDStream);
+            var metadata = peImage.DotNetDirectory!.Metadata!;
+
+            var tablesStream = metadata.GetStream<TablesStream>();
+
+            Assert.True(tablesStream.ForceLargeColumns);
+
+            for (var i = TableIndex.Module; i <= TableIndex.GenericParamConstraint; i++)
+                Assert.Equal(IndexSize.Long, tablesStream.GetTableIndexSize(i));
+
+            for (var i = TableIndex.Document; i <= TableIndex.CustomDebugInformation; i++)
+                Assert.Equal(IndexSize.Long, tablesStream.GetTableIndexSize(i));
+
+            for (var i = CodedIndex.TypeDefOrRef; i <= CodedIndex.HasCustomDebugInformation; i++)
+                Assert.Equal(IndexSize.Long, tablesStream.GetIndexEncoder(i).IndexSize);
+
+            Assert.Equal(IndexSize.Long, tablesStream.StringIndexSize);
+            Assert.Equal(IndexSize.Long, tablesStream.GuidIndexSize);
+            Assert.Equal(IndexSize.Long, tablesStream.BlobIndexSize);
+        }
     }
 }
