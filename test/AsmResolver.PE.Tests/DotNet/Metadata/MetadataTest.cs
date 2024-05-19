@@ -220,10 +220,10 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_LowerCaseHeapsWithEnC);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
-            Assert.True(metadata.TryGetStream(out BlobStream _));
-            Assert.True(metadata.TryGetStream(out GuidStream _));
-            Assert.True(metadata.TryGetStream(out StringsStream _));
-            Assert.True(metadata.TryGetStream(out UserStringsStream _));
+            Assert.True(metadata.TryGetStream(out BlobStream? _));
+            Assert.True(metadata.TryGetStream(out GuidStream? _));
+            Assert.True(metadata.TryGetStream(out StringsStream? _));
+            Assert.True(metadata.TryGetStream(out UserStringsStream? _));
         }
 
         [Fact]
