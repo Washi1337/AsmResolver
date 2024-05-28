@@ -182,7 +182,10 @@ namespace AsmResolver.DotNet.Builder
         {
             var metadataBuffer = new MetadataBuffer(module.RuntimeVersion)
             {
-                OptimizeStringIndices = (MetadataBuilderFlags & MetadataBuilderFlags.NoStringsStreamOptimization) == 0
+                OptimizeStringIndices = (MetadataBuilderFlags & MetadataBuilderFlags.NoStringsStreamOptimization) == 0,
+                TablesStream = {
+                    ForceEnCMetadata = (MetadataBuilderFlags & MetadataBuilderFlags.ForceEnCMetadata) != 0
+                }
             };
 
             // Check if there exists a .NET directory to base off the metadata buffer on.
