@@ -318,6 +318,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_LowerCaseHeapsNormalMetadata {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_LowerCaseHeapsNormalMetadata", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] HelloWorld_JTDStream {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_JTDStream", resourceCulture);

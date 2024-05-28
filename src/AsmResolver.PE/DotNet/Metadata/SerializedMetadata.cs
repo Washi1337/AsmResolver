@@ -16,6 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         private readonly BinaryStreamReader _streamContentsReader;
         private readonly MetadataStreamHeader[] _streamHeaders;
         private readonly bool _hasJtdStream;
+        private readonly bool _isEncMetadata;
 
         /// <summary>
         /// Reads a metadata directory from an input stream.
@@ -95,7 +96,7 @@ namespace AsmResolver.PE.DotNet.Metadata
                     _hasJtdStream = true;
             }
 
-            IsEncMetadata = isEncMetadata ?? false;
+            IsEncMetadata = _isEncMetadata = isEncMetadata ?? false;
         }
 
         /// <inheritdoc />
@@ -105,7 +106,7 @@ namespace AsmResolver.PE.DotNet.Metadata
                 return base.GetStreams();
 
             var flags = MetadataStreamReaderFlags.None;
-            if (IsEncMetadata)
+            if (_isEncMetadata)
                 flags |= MetadataStreamReaderFlags.IsEnc;
             if (_hasJtdStream)
                 flags |= MetadataStreamReaderFlags.HasJtdStream;

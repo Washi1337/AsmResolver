@@ -143,8 +143,11 @@ namespace AsmResolver.DotNet.Builder
                 ReorderMetadataStreams(serializedModule, result.Directory.Metadata!);
             }
 
-            if (result.Directory.Metadata is { IsEncMetadata: true } metadata && metadata.TryGetStream("#JTD", out _))
+            if (result.Directory.Metadata is { IsEncMetadata: true } metadata
+                && metadata.TryGetStream(TablesStream.MinimalStreamName, out _))
+            {
                 result.Directory.Metadata.GetStream<TablesStream>().ForceLargeColumns = true;
+            }
 
             return result;
         }

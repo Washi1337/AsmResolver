@@ -5,6 +5,7 @@ using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
@@ -174,5 +175,21 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.Contains(bag.Exceptions, x => x is MemberNotImportedException);
         }
 
+        [Fact]
+        public void BuildingImageShouldConsiderJTDStreamAndUseLargeColumns()
+        {
+            var moduleDefinition = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_JTDStream);
+            var metadata = moduleDefinition.DotNetDirectory!.Metadata!;
+
+            Assert.True(metadata.IsEncMetadata);
+            Assert.True(metadata.GetStream<TablesStream>().ForceLargeColumns);
+
+            var builder = new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll | MetadataBuilderFlags.ForceEnCMetadata);
+            var rebuiltImage = moduleDefinition.ToPEImage(builder);
+            var rebuiltMetadata = rebuiltImage.DotNetDirectory!.Metadata!;
+
+            Assert.True(rebuiltMetadata.IsEncMetadata);
+            Assert.True(rebuiltMetadata.GetStream<TablesStream>().ForceLargeColumns);
+        }
     }
 }
