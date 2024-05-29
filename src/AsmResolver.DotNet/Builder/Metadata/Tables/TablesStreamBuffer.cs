@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         {
             get
             {
-                if (ForceEnCMetadata)
+                if (ForceEncMetadata)
                     return true;
 
                 for (int i = 0; i < EncTables.Length; i++)
@@ -114,7 +114,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// <summary>
         /// Gets a value indicating whether the buffer should always use edit-and-continue metadata.
         /// </summary>
-        public bool ForceEnCMetadata
+        public bool ForceEncMetadata
         {
             get;
             set;

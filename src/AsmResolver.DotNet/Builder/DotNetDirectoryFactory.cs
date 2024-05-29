@@ -187,7 +187,7 @@ namespace AsmResolver.DotNet.Builder
             {
                 OptimizeStringIndices = (MetadataBuilderFlags & MetadataBuilderFlags.NoStringsStreamOptimization) == 0,
                 TablesStream = {
-                    ForceEnCMetadata = (MetadataBuilderFlags & MetadataBuilderFlags.ForceEnCMetadata) != 0
+                    ForceEncMetadata = (MetadataBuilderFlags & MetadataBuilderFlags.ForceEncMetadata) != 0
                 }
             };
 

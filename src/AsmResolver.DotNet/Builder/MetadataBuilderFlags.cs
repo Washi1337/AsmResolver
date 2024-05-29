@@ -170,8 +170,8 @@ namespace AsmResolver.DotNet.Builder
         NoResourceDataDeduplication = 0x40000,
 
         /// <summary>
-        /// Setting this flag will force the builder to emit EnC metadata, even if it is not required.
+        /// Setting this flag will force the builder to emit edit-and-continue metadata, even if it is not required.
         /// </summary>
-        ForceEnCMetadata = 0x80000
+        ForceEncMetadata = 0x80000
     }
 }

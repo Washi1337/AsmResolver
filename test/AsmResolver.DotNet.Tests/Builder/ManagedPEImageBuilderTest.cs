@@ -184,7 +184,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.True(metadata.IsEncMetadata);
             Assert.True(metadata.GetStream<TablesStream>().ForceLargeColumns);
 
-            var builder = new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll | MetadataBuilderFlags.ForceEnCMetadata);
+            var builder = new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll | MetadataBuilderFlags.ForceEncMetadata);
             var rebuiltImage = moduleDefinition.ToPEImage(builder);
             var rebuiltMetadata = rebuiltImage.DotNetDirectory!.Metadata!;
 
