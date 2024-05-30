@@ -89,7 +89,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
 
                 return true;
             }
-    }
+        }
 
         /// <summary>
         /// Gets a value indicating whether the buffer contains edit-and-continue metadata tables.
@@ -98,6 +98,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         {
             get
             {
+                if (ForceEncMetadata)
+                    return true;
+
                 for (int i = 0; i < EncTables.Length; i++)
                 {
                     if (_tableBuffers[(int) EncTables[i]].Count > 0)
@@ -106,6 +109,15 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
 
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the buffer should always use edit-and-continue metadata.
+        /// </summary>
+        public bool ForceEncMetadata
+        {
+            get;
+            set;
         }
 
         /// <summary>

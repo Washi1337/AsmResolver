@@ -303,5 +303,33 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        public static byte[] HelloWorld_SchemaStream {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_SchemaStream", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_LowerCaseHeapsWithEnC {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_LowerCaseHeapsWithEnC", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_LowerCaseHeapsNormalMetadata {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_LowerCaseHeapsNormalMetadata", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_JTDStream {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_JTDStream", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

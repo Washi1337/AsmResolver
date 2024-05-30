@@ -57,9 +57,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             private set;
         }
 
-        /// <inheritdoc />
-        public IndexSize IndexSize => Count > 0xFFFF ? IndexSize.Long : IndexSize.Short;
-
         /// <inheritdoc cref="IMetadataTable" />
         public TRow this[int index]
         {
