@@ -46,7 +46,7 @@ namespace AsmResolver.PE.Builder;
 public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.BuilderContext>
 {
     private static readonly IImportedSymbolClassifier DefaultSymbolClassifier =
-        new DelegatedSymbolClassifier(x => ImportedSymbolType.Function);
+        new DelegatedSymbolClassifier(_ => ImportedSymbolType.Function);
 
     /// <summary>
     /// Creates a new unmanaged PE file builder.
@@ -141,8 +141,7 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
         var sections = new List<PESection>();
 
         // Import all existing sections.
-        foreach (var section in context.ClonedSections)
-            sections.Add(section);
+        sections.AddRange(context.ClonedSections);
 
         // Add .auxtext section when necessary.
         if (CreateAuxTextSection(context) is { } auxTextSection)

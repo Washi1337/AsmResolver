@@ -267,7 +267,7 @@ public class ManagedPEFileBuilder : PEFileBuilder
         }
     }
 
-    private static IList<IImportedModule> CollectImportedModules(
+    private static List<IImportedModule> CollectImportedModules(
         IPEImage image,
         bool requireClrEntryPoint,
         string clrEntryPointName,
@@ -411,7 +411,7 @@ public class ManagedPEFileBuilder : PEFileBuilder
                 return CilRawMethodBody.FromReader(ThrowErrorListener.Instance, ref reader);
             }
 
-            ErrorListener.NotSupported("Native unbounded method bodies cannot be reassembled yet.");
+            ErrorListener.NotSupported("Native unbounded method bodies are not supported.");
         }
 
         return null;

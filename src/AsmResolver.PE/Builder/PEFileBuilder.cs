@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AsmResolver.PE.DotNet;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
-using AsmResolver.PE.Imports;
 
 namespace AsmResolver.PE.Builder
 {
