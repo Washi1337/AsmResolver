@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.NestedClasses;

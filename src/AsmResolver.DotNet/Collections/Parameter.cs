@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 
 namespace AsmResolver.DotNet.Collections

@@ -1,4 +1,4 @@
-using AsmResolver.DotNet.Signatures.Types.Parsing;
+using AsmResolver.DotNet.Signatures.Parsing;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Signatures

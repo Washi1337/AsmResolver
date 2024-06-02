@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Collections;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Serialized

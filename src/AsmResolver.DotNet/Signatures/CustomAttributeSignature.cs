@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using AsmResolver.Collections;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
 using AsmResolver.Shims;
 

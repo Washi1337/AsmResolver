@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Builder.Discovery

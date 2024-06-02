@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet

@@ -1,5 +1,5 @@
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Signatures.Security;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet

@@ -3,7 +3,6 @@ using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;

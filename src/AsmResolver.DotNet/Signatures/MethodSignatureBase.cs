@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 

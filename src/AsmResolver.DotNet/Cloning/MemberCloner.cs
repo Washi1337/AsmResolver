@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Marshal;
-using AsmResolver.DotNet.Signatures.Security;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Cloning

@@ -1,8 +1,6 @@
 using System.Linq;
 using System.Text;
 using AsmResolver.DotNet.Bundles;
-using AsmResolver.PE.DotNet.Metadata.Strings;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Bundles

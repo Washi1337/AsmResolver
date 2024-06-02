@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures.Parsing;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.Shims;

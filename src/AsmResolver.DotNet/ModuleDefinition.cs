@@ -8,7 +8,7 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Serialized;
-using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.Builder;

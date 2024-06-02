@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using AsmResolver.DotNet.Collections;
-using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;

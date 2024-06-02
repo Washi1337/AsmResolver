@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet.Cloning;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Fields;

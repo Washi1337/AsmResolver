@@ -1,14 +1,8 @@
 using System;
 using System.Collections.Generic;
-using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Code;
-using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
-using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Blob;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Serialized
