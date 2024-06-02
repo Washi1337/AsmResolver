@@ -2,7 +2,7 @@ using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Resources;
 using AsmResolver.PE.DotNet.VTableFixups;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.DotNet
 {

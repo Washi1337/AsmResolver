@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using AsmResolver.PE.Relocations;
 
 namespace AsmResolver.PE.Platforms

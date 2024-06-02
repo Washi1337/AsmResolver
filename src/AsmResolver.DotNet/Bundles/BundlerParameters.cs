@@ -4,7 +4,6 @@ using System.Text;
 using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.DotNet.Bundles

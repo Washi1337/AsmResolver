@@ -1,4 +1,4 @@
-namespace AsmResolver.PE.File.Headers
+namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Provides members describing all supported subsystems that a portable executable can run in.

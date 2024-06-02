@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
 {

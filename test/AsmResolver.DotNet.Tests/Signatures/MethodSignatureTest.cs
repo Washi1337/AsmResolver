@@ -6,7 +6,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Signatures

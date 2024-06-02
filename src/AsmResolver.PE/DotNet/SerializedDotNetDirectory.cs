@@ -5,7 +5,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.ReadyToRun;
 using AsmResolver.PE.DotNet.Resources;
 using AsmResolver.PE.DotNet.VTableFixups;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.DotNet
 {

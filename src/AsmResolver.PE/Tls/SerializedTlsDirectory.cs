@@ -1,6 +1,6 @@
 using AsmResolver.Collections;
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Tls
 {

@@ -1,4 +1,4 @@
-namespace AsmResolver.PE.File.Headers
+namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Provides valid values for the optional header magic.

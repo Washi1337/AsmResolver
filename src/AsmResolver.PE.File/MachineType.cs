@@ -1,4 +1,4 @@
-namespace AsmResolver.PE.File.Headers
+namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Provides members for each processor architecture that a portable executable (PE) file can encode for.

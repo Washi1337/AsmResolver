@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using AsmResolver.Collections;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Imports
 {

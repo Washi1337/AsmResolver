@@ -1,6 +1,6 @@
 using AsmResolver.IO;
 
-namespace AsmResolver.PE.File.Headers
+namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Represents the COFF file header of a portable executable file.

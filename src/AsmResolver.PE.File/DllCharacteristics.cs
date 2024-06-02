@@ -1,6 +1,6 @@
 using System;
 
-namespace AsmResolver.PE.File.Headers
+namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Provides members describing all possible flags that can be set in the <see cref="OptionalHeader.DllCharacteristics"/>

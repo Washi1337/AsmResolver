@@ -14,7 +14,7 @@ using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.DotNet.VTableFixups;
 using AsmResolver.PE.Exports;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using AsmResolver.Tests.Runners;
 using Xunit;
 

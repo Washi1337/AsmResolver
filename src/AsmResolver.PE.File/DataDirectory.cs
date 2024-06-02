@@ -1,6 +1,6 @@
 using AsmResolver.IO;
 
-namespace AsmResolver.PE.File.Headers
+namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Represents a data directory header, consisting of the starting address, and the size.

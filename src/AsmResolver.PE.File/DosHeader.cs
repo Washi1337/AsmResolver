@@ -1,7 +1,7 @@
 using System;
 using AsmResolver.IO;
 
-namespace AsmResolver.PE.File.Headers
+namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Represents the DOS header (also known as the MZ header) in the portable executable (PE) file format.

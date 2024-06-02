@@ -7,7 +7,6 @@ using AsmResolver.PE.Exceptions;
 using AsmResolver.PE.Exceptions.X64;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
 using AsmResolver.PE.Tls;

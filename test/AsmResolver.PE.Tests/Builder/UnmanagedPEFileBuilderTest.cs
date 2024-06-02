@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;
 using AsmResolver.Tests.Runners;
 using Xunit;

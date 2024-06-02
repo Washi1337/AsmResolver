@@ -1,8 +1,7 @@
 using System;
-using System.Text;
 using AsmResolver.IO;
 
-namespace AsmResolver.PE.File.Headers
+namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Represents a single section header in the portable executable (PE) file format.

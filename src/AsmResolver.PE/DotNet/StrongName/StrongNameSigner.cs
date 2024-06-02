@@ -3,7 +3,6 @@ using System.IO;
 using System.Security.Cryptography;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.DotNet.StrongName
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
 
-namespace AsmResolver.PE.File.Headers
+namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Represents a 32-bit or 64-bit optional header in a portable executable (PE) file.

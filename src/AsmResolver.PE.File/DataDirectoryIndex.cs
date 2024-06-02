@@ -1,4 +1,4 @@
-namespace AsmResolver.PE.File.Headers
+namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Provides members describing the semantics of each data directory entry in an optional header.
