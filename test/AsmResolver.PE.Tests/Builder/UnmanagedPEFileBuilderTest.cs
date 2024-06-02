@@ -79,11 +79,11 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
         var file = image.ToPEFile(new UnmanagedPEFileBuilder
         {
             TrampolineImports = true,
-            ImportedSymbolClassifier = new DelegatedSymbolClassifier(
-                x => x.Name == "?cout@std@@3V?$basic_ostream@DU?$char_traits@D@std@@@1@A"
-                    ? ImportedSymbolType.Data
-                    : ImportedSymbolType.Function
-            )
+            ImportedSymbolClassifier = new DelegatedSymbolClassifier(x => x.Name switch
+            {
+                "?cout@std@@3V?$basic_ostream@DU?$char_traits@D@std@@@1@A" => ImportedSymbolType.Data,
+                _ => ImportedSymbolType.Function
+            })
         });
 
         _fixture.GetRunner<NativePERunner>().RebuildAndRun(
