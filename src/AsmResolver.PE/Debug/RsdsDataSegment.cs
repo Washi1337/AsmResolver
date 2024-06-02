@@ -2,7 +2,7 @@
 using System.Text;
 using AsmResolver.IO;
 
-namespace AsmResolver.PE.Debug.CodeView
+namespace AsmResolver.PE.Debug
 {
     /// <summary>
     /// Represents the CodeView data in RSDS format

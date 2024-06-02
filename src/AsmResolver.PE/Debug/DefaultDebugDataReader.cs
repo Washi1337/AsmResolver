@@ -1,5 +1,4 @@
 using AsmResolver.IO;
-using AsmResolver.PE.Debug.CodeView;
 
 namespace AsmResolver.PE.Debug
 {

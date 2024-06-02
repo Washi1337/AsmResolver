@@ -1,6 +1,6 @@
 ﻿using AsmResolver.IO;
 
-namespace AsmResolver.PE.Debug.CodeView
+namespace AsmResolver.PE.Debug
 {
     /// <summary>
     /// Represents a debug data stream using the CodeView format

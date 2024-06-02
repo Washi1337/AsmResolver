@@ -8,7 +8,6 @@ using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.VTableFixups;
 using AsmResolver.PE.Platforms;
 
 namespace AsmResolver.DotNet.Builder

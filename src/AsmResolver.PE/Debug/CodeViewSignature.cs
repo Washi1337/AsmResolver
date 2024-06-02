@@ -1,4 +1,4 @@
-﻿namespace AsmResolver.PE.Debug.CodeView
+﻿namespace AsmResolver.PE.Debug
 {
     /// <summary>
     /// Enum of the different CodeView Signatures
