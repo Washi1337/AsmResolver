@@ -8,7 +8,6 @@ using AsmResolver.PE;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.DotNet.Serialized

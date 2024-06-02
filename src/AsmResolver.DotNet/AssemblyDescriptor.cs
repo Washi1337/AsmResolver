@@ -7,9 +7,8 @@ using System.Security.Cryptography;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.Shims;
-using AssemblyHashAlgorithm = AsmResolver.PE.DotNet.Metadata.Tables.Rows.AssemblyHashAlgorithm;
+using AssemblyHashAlgorithm = AsmResolver.PE.DotNet.Metadata.Tables.AssemblyHashAlgorithm;
 
 namespace AsmResolver.DotNet
 {

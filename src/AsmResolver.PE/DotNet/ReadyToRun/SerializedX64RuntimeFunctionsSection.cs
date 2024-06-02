@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using AsmResolver.IO;
-using AsmResolver.PE.Exceptions.X64;
+using AsmResolver.PE.Exceptions;
 
 namespace AsmResolver.PE.DotNet.ReadyToRun
 {

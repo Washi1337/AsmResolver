@@ -5,7 +5,6 @@ using System.Reflection;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
 {

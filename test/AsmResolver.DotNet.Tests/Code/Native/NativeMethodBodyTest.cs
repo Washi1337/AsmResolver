@@ -10,7 +10,6 @@ using AsmResolver.PE.Builder;
 using AsmResolver.PE.Code;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;
 using AsmResolver.Tests.Runners;

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Builder.Metadata.Tables
 {
@@ -26,7 +25,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         IEnumerable<TKey> GetMembers();
 
         /// <summary>
-        /// Gets the new metadata token that was assigned to the member. 
+        /// Gets the new metadata token that was assigned to the member.
         /// </summary>
         /// <param name="member">The member.</param>
         /// <returns>The new metadata token.</returns>

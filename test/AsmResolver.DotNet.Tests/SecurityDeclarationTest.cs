@@ -2,7 +2,7 @@ using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests

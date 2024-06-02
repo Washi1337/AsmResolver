@@ -3,7 +3,6 @@ using System.Text;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 using TestCaseResources = AsmResolver.DotNet.TestCases.Resources.Resources;
 

@@ -6,7 +6,6 @@ using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder

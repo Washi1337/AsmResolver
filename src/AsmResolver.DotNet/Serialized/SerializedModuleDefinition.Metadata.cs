@@ -6,7 +6,6 @@ using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.DotNet.VTableFixups;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.Platforms;

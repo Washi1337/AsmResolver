@@ -1,6 +1,6 @@
 using System;
 using System.Threading;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Signatures.Types
 {

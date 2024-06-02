@@ -5,7 +5,6 @@ using AsmResolver.PE.Code;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;

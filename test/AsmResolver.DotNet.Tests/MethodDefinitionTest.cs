@@ -11,7 +11,7 @@ using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.VTableFixups;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
