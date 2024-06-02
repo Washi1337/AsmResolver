@@ -50,6 +50,9 @@ namespace AsmResolver.IO
         public uint Length => (uint) _dataSource.Length;
 
         /// <inheritdoc />
+        public ulong BaseAddress => 0;
+
+        /// <inheritdoc />
         public BinaryStreamReader CreateReader(ulong address, uint rva, uint length) =>
             new(_dataSource, address, rva, length);
 

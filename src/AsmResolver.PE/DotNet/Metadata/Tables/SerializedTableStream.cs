@@ -142,7 +142,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
             // Add index sizes for each table:
             foreach (uint t in _rowCounts)
-                result.Add(t > 0xFFFF ? IndexSize.Long : IndexSize.Short);
+                result.Add(ForceLargeColumns || t > 0xFFFF ? IndexSize.Long : IndexSize.Short);
 
             // Add index sizes for each coded index:
             result.AddRange(new[]
@@ -211,6 +211,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             if (_combinedRowCounts is null)
                 throw new InvalidOperationException("Serialized tables stream is not fully initialized yet.");
+
+            if (ForceLargeColumns)
+                return IndexSize.Long;
 
             int tableIndexBitCount = (int) Math.Ceiling(Math.Log(tables.Length, 2));
             int maxSmallTableMemberCount = ushort.MaxValue >> tableIndexBitCount;

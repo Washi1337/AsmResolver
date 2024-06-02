@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -14,6 +15,8 @@ namespace AsmResolver.PE.DotNet.Metadata
         private readonly MetadataReaderContext _context;
         private readonly BinaryStreamReader _streamContentsReader;
         private readonly MetadataStreamHeader[] _streamHeaders;
+        private readonly bool _hasJtdStream;
+        private readonly bool _isEncMetadata;
 
         /// <summary>
         /// Reads a metadata directory from an input stream.
@@ -33,7 +36,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             Rva = directoryReader.Rva;
 
             _streamContentsReader = directoryReader.Fork();
-            _streamHeaders = Array.Empty<MetadataStreamHeader>();
+            _streamHeaders = ArrayShim.Empty<MetadataStreamHeader>();
 
             // Verify signature.
             var signature = (MetadataSignature) directoryReader.ReadUInt32();
@@ -74,12 +77,26 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             // Eagerly read stream headers to determine if we are EnC metadata.
             _streamHeaders = new MetadataStreamHeader[numberOfStreams];
+
+            bool? isEncMetadata = null;
             for (int i = 0; i < numberOfStreams; i++)
             {
                 _streamHeaders[i] = MetadataStreamHeader.FromReader(ref directoryReader);
-                if (_streamHeaders[i].Name == TablesStream.EncStreamName)
-                    IsEncMetadata = true;
+                string name = _streamHeaders[i].Name;
+                if (isEncMetadata is null)
+                {
+                    if (name == TablesStream.CompressedStreamName)
+                        isEncMetadata = false;
+                    else if (name == TablesStream.EncStreamName)
+                        isEncMetadata = true;
+                }
+                if (name == TablesStream.UncompressedStreamName)
+                    isEncMetadata = true;
+                else if (name == TablesStream.MinimalStreamName)
+                    _hasJtdStream = true;
             }
+
+            IsEncMetadata = _isEncMetadata = isEncMetadata ?? false;
         }
 
         /// <inheritdoc />
@@ -88,8 +105,15 @@ namespace AsmResolver.PE.DotNet.Metadata
             if (_streamHeaders.Length == 0)
                 return base.GetStreams();
 
+            var flags = MetadataStreamReaderFlags.None;
+            if (_isEncMetadata)
+                flags |= MetadataStreamReaderFlags.IsEnc;
+            if (_hasJtdStream)
+                flags |= MetadataStreamReaderFlags.HasJtdStream;
+
             return new MetadataStreamList(this,
                 _context,
+                flags,
                 _streamHeaders,
                 _streamContentsReader);
         }

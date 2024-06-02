@@ -37,6 +37,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             get
             {
+                if (_tableStream.ForceLargeColumns)
+                    return IndexSize.Long;
+
                 uint maxCount = 0;
                 foreach (var table in _tables)
                     maxCount = Math.Max(maxCount, _tableStream.GetTableRowCount(table));

@@ -96,5 +96,38 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal("System.Int32 AsmResolver.DotNet.TestCases.Properties.MultipleProperties::Item[System.Int32]", property.FullName);
         }
+
+        [Fact]
+        public void GetMethodSetMethodProperties()
+        {
+            var module = new ModuleDefinition("TestModule");
+            var type = new TypeDefinition("Namespace", "Name", TypeAttributes.Public);
+            module.TopLevelTypes.Add(type);
+
+            var get1 = new MethodDefinition("get_Property1", default, MethodSignature.CreateInstance(module.CorLibTypeFactory.Int32));
+            var get2 = new MethodDefinition("get_Property2", default, MethodSignature.CreateInstance(module.CorLibTypeFactory.Int32));
+            var set = new MethodDefinition("set_Property", default, MethodSignature.CreateInstance(module.CorLibTypeFactory.Void, module.CorLibTypeFactory.Int32));
+            type.Methods.Add(get1);
+            type.Methods.Add(get2);
+            type.Methods.Add(set);
+
+            Assert.False(get1.IsGetMethod || get1.IsSetMethod);
+            Assert.False(get2.IsGetMethod || get2.IsSetMethod);
+            Assert.False(set.IsGetMethod || set.IsSetMethod);
+
+            var property = new PropertyDefinition("Property", PropertyAttributes.None, PropertySignature.CreateInstance(module.CorLibTypeFactory.Int32));
+            type.Properties.Add(property);
+            property.SetSemanticMethods(get1, set);
+
+            Assert.True(get1.IsGetMethod);
+            Assert.False(get2.IsGetMethod);
+            Assert.True(set.IsSetMethod);
+
+            property.GetMethod = get2;
+
+            Assert.False(get1.IsGetMethod);
+            Assert.True(get2.IsGetMethod);
+            Assert.True(set.IsSetMethod);
+        }
     }
 }

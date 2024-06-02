@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using AsmResolver.Collections;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.Symbols.Pdb.Msf;
 
@@ -27,7 +29,7 @@ public class MsfStream : IOwnedCollectionElement<MsfFile>
     public MsfStream(IDataSource contents)
     {
         Contents = contents;
-        OriginalBlockIndices = Array.Empty<int>();
+        OriginalBlockIndices = ArrayShim.Empty<int>();
     }
 
     /// <summary>
@@ -38,7 +40,7 @@ public class MsfStream : IOwnedCollectionElement<MsfFile>
     public MsfStream(IDataSource contents, IEnumerable<int> originalBlockIndices)
     {
         Contents = contents;
-        OriginalBlockIndices = originalBlockIndices.ToArray();
+        OriginalBlockIndices = new ReadOnlyCollection<int>(originalBlockIndices.ToArray());
     }
 
     /// <summary>
@@ -68,7 +70,7 @@ public class MsfStream : IOwnedCollectionElement<MsfFile>
     /// <summary>
     /// Gets a collection of block indices that this stream was based of (if available).
     /// </summary>
-    public IReadOnlyList<int> OriginalBlockIndices
+    public IList<int> OriginalBlockIndices
     {
         get;
     }

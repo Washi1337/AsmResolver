@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -91,7 +93,7 @@ namespace AsmResolver.DotNet.Signatures
             in BinaryStreamReader reader)
         {
             var genericContext = GenericContext.FromMethod(ctor);
-            var argumentTypes = ctor.Signature?.ParameterTypes ?? Array.Empty<TypeSignature>();
+            var argumentTypes = ctor.Signature?.ParameterTypes ?? ArrayShim.Empty<TypeSignature>();
             return new SerializedCustomAttributeSignature(context, argumentTypes, genericContext, reader);
         }
 
@@ -141,7 +143,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"(Fixed: {{{string.Join(", ", FixedArguments)}}}, Named: {{{string.Join(", ", NamedArguments)}}})";
+            return $"(Fixed: {{{StringShim.Join(", ", FixedArguments)}}}, Named: {{{StringShim.Join(", ", NamedArguments)}}})";
         }
 
         /// <inheritdoc />

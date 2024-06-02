@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Runtime.Versioning;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
@@ -282,7 +281,7 @@ namespace AsmResolver.DotNet
                 var ctor = CustomAttributes[i].Constructor;
 
                 if (ctor?.DeclaringType is not null
-                    && ctor.DeclaringType.IsTypeOf("System.Runtime.Versioning", nameof(TargetFrameworkAttribute))
+                    && ctor.DeclaringType.IsTypeOf("System.Runtime.Versioning", "TargetFrameworkAttribute")
                     && CustomAttributes[i].Signature?.FixedArguments[0].Element?.ToString() is { } name
                     && DotNetRuntimeInfo.TryParse(name, out info))
                 {

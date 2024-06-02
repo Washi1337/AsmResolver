@@ -217,7 +217,7 @@ public class ManagedPEFileBuilder : PEFileBuilder
     /// </summary>
     /// <param name="context">The working space of the builder.</param>
     /// <returns>The base relocations section.</returns>
-    protected virtual PESection CreateRelocSection(PEFileBuilderContext context)
+        protected virtual PESection CreateRelocSection(PEFileBuilderContext context)
     {
         return new PESection(
             ".reloc",

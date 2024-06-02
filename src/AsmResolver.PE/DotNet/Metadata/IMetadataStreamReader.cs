@@ -11,9 +11,10 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// Reads the contents of a metadata stream.
         /// </summary>
         /// <param name="context">The reader context.</param>
+        /// <param name="flags">Flags describing the currently read metadata.</param>
         /// <param name="header">The header of the metadata stream.</param>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns>The read metadata stream.</returns>
-        IMetadataStream ReadStream(MetadataReaderContext context, MetadataStreamHeader header, ref BinaryStreamReader reader);
+        IMetadataStream ReadStream(MetadataReaderContext context, MetadataStreamReaderFlags flags, MetadataStreamHeader header, ref BinaryStreamReader reader);
     }
 }

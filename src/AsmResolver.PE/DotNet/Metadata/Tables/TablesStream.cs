@@ -217,6 +217,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
+        /// Gets or sets a value whether to force large columns in the tables stream.
+        /// </summary>
+        /// <remarks>
+        /// This value is typically <c>false</c>, it is intended to be <c>true</c> for cases when
+        /// EnC metadata is used and a stream with the <see cref="MinimalStreamName"/> name is present.
+        /// </remarks>
+        public bool ForceLargeColumns
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets a collection of all tables in the tables stream.
         /// </summary>
         /// <remarks>
@@ -258,6 +271,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </remarks>
         public IndexSize GetTableIndexSize(TableIndex table)
         {
+            if (ForceLargeColumns)
+                return IndexSize.Long;
+
             return GetTableRowCount(table) > 0xFFFF
                 ? IndexSize.Long
                 : IndexSize.Short;
@@ -496,7 +512,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return (MetadataTable<TRow>) (Tables[(int) index] ?? throw new ArgumentOutOfRangeException(nameof(index)));
         }
 
-        private IndexSize GetStreamIndexSize(int bitIndex) => (IndexSize) (((((int) Flags >> bitIndex) & 1) + 1) * 2);
+        private IndexSize GetStreamIndexSize(int bitIndex)
+        {
+            if (ForceLargeColumns)
+                return IndexSize.Long;
+            return (IndexSize)(((((int)Flags >> bitIndex) & 1) + 1) * 2);
+        }
 
         private void SetStreamIndexSize(int bitIndex, IndexSize newSize)
         {

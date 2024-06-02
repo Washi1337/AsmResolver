@@ -19,14 +19,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
-        /// Gets the size of an index into this table.
-        /// </summary>
-        IndexSize IndexSize
-        {
-            get;
-        }
-
-        /// <summary>
         /// Gets or sets the row at the provided index.
         /// </summary>
         /// <param name="index">The index of the row to get.</param>

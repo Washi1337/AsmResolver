@@ -3,6 +3,7 @@ using System.IO;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures.Security
 {
@@ -104,6 +105,6 @@ namespace AsmResolver.DotNet.Signatures.Security
 
 
         /// <inheritdoc />
-        public override string ToString() => $"{AttributeType}({string.Join(", ", NamedArguments)})";
+        public override string ToString() => $"{AttributeType}({StringShim.Join(", ", NamedArguments)})";
     }
 }

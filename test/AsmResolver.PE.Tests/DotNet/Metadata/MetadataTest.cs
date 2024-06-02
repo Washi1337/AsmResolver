@@ -139,7 +139,12 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         private void AssertCorrectStreamIsSelected<TStream>(byte[] assembly, bool isEnC)
             where TStream : class, IMetadataStream
         {
-            var peImage = PEImage.FromBytes(assembly);
+            AssertCorrectStreamIsSelected<TStream>(PEImage.FromBytes(assembly), isEnC);
+        }
+
+        private void AssertCorrectStreamIsSelected<TStream>(IPEImage peImage, bool isEnC)
+            where TStream : class, IMetadataStream
+        {
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var allStreams = metadata.Streams
@@ -197,6 +202,72 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         public void SelectFirstUserStringsStreamInEnCMetadata()
         {
             AssertCorrectStreamIsSelected<UserStringsStream>(Properties.Resources.HelloWorld_DoubleUserStringsStream_EnC, true);
+        }
+
+        [Fact]
+        public void SchemaStreamShouldForceEnCMetadata()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_SchemaStream);
+            AssertCorrectStreamIsSelected<BlobStream>(peImage, true);
+            AssertCorrectStreamIsSelected<GuidStream>(peImage, true);
+            AssertCorrectStreamIsSelected<StringsStream>(peImage, true);
+            AssertCorrectStreamIsSelected<UserStringsStream>(peImage, true);
+        }
+
+        [Fact]
+        public void UseCaseInsensitiveComparisonForHeapNamesInEnCMetadata()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_LowerCaseHeapsWithEnC);
+            var metadata = peImage.DotNetDirectory!.Metadata!;
+
+            Assert.True(metadata.TryGetStream(out BlobStream? blobStream));
+            Assert.Equal("#blob", blobStream.Name);
+            Assert.True(metadata.TryGetStream(out GuidStream? guidStream));
+            Assert.Equal("#guid", guidStream.Name);
+            Assert.True(metadata.TryGetStream(out StringsStream? stringsStream));
+            Assert.Equal("#strings", stringsStream.Name);
+            Assert.True(metadata.TryGetStream(out UserStringsStream? userStringsStream));
+            Assert.Equal("#us", userStringsStream.Name);
+        }
+
+        [Fact]
+        public void UseCaseSensitiveComparisonForHeapNamesInNormalMetadata()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_LowerCaseHeapsNormalMetadata);
+            var metadata = peImage.DotNetDirectory!.Metadata!;
+
+            Assert.True(metadata.TryGetStream(out BlobStream? blobStream));
+            Assert.Equal("#Blob", blobStream.Name);
+            Assert.True(metadata.TryGetStream(out GuidStream? guidStream));
+            Assert.Equal("#GUID", guidStream.Name);
+            Assert.True(metadata.TryGetStream(out StringsStream? stringsStream));
+            Assert.Equal("#Strings", stringsStream.Name);
+            Assert.True(metadata.TryGetStream(out UserStringsStream? userStringsStream));
+            Assert.Equal("#US", userStringsStream.Name);
+        }
+
+        [Fact]
+        public void UseLargeTableIndicesWhenJTDStreamIsPresentInEnCMetadata()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_JTDStream);
+            var metadata = peImage.DotNetDirectory!.Metadata!;
+
+            var tablesStream = metadata.GetStream<TablesStream>();
+
+            Assert.True(tablesStream.ForceLargeColumns);
+
+            var tableIndices = Enumerable.Range((int)TableIndex.Module, (int)TableIndex.Max).Select(x => (TableIndex)x)
+                .Where(x => x.IsValidTableIndex());
+            Assert.All(tableIndices, index => Assert.Equal(IndexSize.Long, tablesStream.GetTableIndexSize(index)));
+
+            var codedIndices = Enumerable
+                .Range((int)CodedIndex.TypeDefOrRef, CodedIndex.HasCustomDebugInformation - CodedIndex.TypeDefOrRef + 1)
+                .Select(x => (CodedIndex)x);
+            Assert.All(codedIndices, index => Assert.Equal(IndexSize.Long, tablesStream.GetIndexEncoder(index).IndexSize));
+
+            Assert.Equal(IndexSize.Long, tablesStream.StringIndexSize);
+            Assert.Equal(IndexSize.Long, tablesStream.GuidIndexSize);
+            Assert.Equal(IndexSize.Long, tablesStream.BlobIndexSize);
         }
     }
 }

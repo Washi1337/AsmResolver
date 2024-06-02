@@ -1,11 +1,10 @@
 using System;
-using System.Runtime.Serialization;
 
 namespace AsmResolver.DotNet.Memory
 {
     /// <summary>
     /// Represents the exception that occurs when a structure contains cyclic dependencies. That is, it defines at
-    /// least one field of which the field type constructs a dependency cycle. 
+    /// least one field of which the field type constructs a dependency cycle.
     /// </summary>
     [Serializable]
     public class CyclicStructureException : Exception
@@ -34,14 +33,6 @@ namespace AsmResolver.DotNet.Memory
         /// <param name="inner">The inner cause of the exception.</param>
         public CyclicStructureException(string message, Exception inner)
             : base(message, inner)
-        {
-        }
-
-        /// <inheritdoc />
-        protected CyclicStructureException(
-            SerializationInfo info,
-            StreamingContext context)
-            : base(info, context)
         {
         }
     }
