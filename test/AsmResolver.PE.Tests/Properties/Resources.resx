@@ -129,6 +129,24 @@
     <data name="ReadyToRunTestLoop" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\ReadyToRunTestLoop.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="MixedModeHelloWorld" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\MixedModeHelloWorld.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="MixedModeCallIntoNative" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\MixedModeCallIntoNative.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="NativeHelloWorldC_X86" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\NativeHelloWorldC.x86.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="NativeHelloWorldC_X64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\NativeHelloWorldC.x64.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="NativeHelloWorldCpp_X86" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\NativeHelloWorldCpp.x86.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="NativeHelloWorldCpp_X64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\NativeHelloWorldCpp.x64.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
     <data name="HelloWorld_SchemaStream" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.SchemaStream.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>

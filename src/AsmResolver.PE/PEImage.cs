@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.IO;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.Certificates;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
@@ -37,7 +38,7 @@ namespace AsmResolver.PE
         /// <param name="filePath">The </param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(string filePath) => FromFile(PEFile.FromFile(filePath));
+        public static IPEImage FromFile(string filePath) => FromFile(File.PEFile.FromFile(filePath));
 
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
@@ -47,7 +48,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromFile(string filePath, PEReaderParameters readerParameters) =>
-            FromFile(PEFile.FromFile(readerParameters.FileService.OpenFile(filePath)), readerParameters);
+            FromFile(File.PEFile.FromFile(readerParameters.FileService.OpenFile(filePath)), readerParameters);
 
         /// <summary>
         /// Opens a PE image from a buffer.
@@ -55,7 +56,7 @@ namespace AsmResolver.PE
         /// <param name="bytes">The bytes to interpret.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromBytes(byte[] bytes) => FromFile(PEFile.FromBytes(bytes));
+        public static IPEImage FromBytes(byte[] bytes) => FromFile(File.PEFile.FromBytes(bytes));
 
         /// <summary>
         /// Opens a PE image from a buffer.
@@ -65,7 +66,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromBytes(byte[] bytes, PEReaderParameters readerParameters) =>
-            FromFile(PEFile.FromBytes(bytes), readerParameters);
+            FromFile(File.PEFile.FromBytes(bytes), readerParameters);
 
         /// <summary>
         /// Reads a mapped PE image starting at the provided module base address (HINSTANCE).
@@ -84,7 +85,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromModuleBaseAddress(IntPtr hInstance, PEReaderParameters readerParameters) =>
-            FromFile(PEFile.FromModuleBaseAddress(hInstance), readerParameters);
+            FromFile(File.PEFile.FromModuleBaseAddress(hInstance), readerParameters);
 
         /// <summary>
         /// Reads a PE image starting at the provided module base address (HINSTANCE).
@@ -95,7 +96,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromModuleBaseAddress(IntPtr hInstance, PEMappingMode mode, PEReaderParameters readerParameters) =>
-            FromFile(PEFile.FromModuleBaseAddress(hInstance, mode), readerParameters);
+            FromFile(File.PEFile.FromModuleBaseAddress(hInstance, mode), readerParameters);
 
         /// <summary>
         /// Reads a PE image from the provided data source.
@@ -126,7 +127,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromReader(in BinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
-            FromFile(PEFile.FromReader(reader, mode));
+            FromFile(File.PEFile.FromReader(reader, mode));
 
         /// <summary>
         /// Opens a PE image from an input stream.
@@ -137,7 +138,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromReader(in BinaryStreamReader reader, PEMappingMode mode, PEReaderParameters readerParameters) =>
-            FromFile(PEFile.FromReader(reader, mode), readerParameters);
+            FromFile(File.PEFile.FromReader(reader, mode), readerParameters);
 
         /// <summary>
         /// Opens a PE image from an input file object.
@@ -155,7 +156,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromFile(IInputFile inputFile, PEReaderParameters readerParameters) =>
-            FromFile(PEFile.FromFile(inputFile), readerParameters);
+            FromFile(File.PEFile.FromFile(inputFile), readerParameters);
 
         /// <summary>
         /// Opens a PE image from a PE file object.
@@ -186,6 +187,9 @@ namespace AsmResolver.PE
             _dotNetDirectory = new LazyVariable<PEImage, IDotNetDirectory?>(x => x.GetDotNetDirectory());
             _tlsDirectory = new LazyVariable<PEImage, ITlsDirectory?>(x => x.GetTlsDirectory());
         }
+
+        /// <inheritdoc />
+        public virtual IPEFile? PEFile => null;
 
         /// <inheritdoc />
         public string? FilePath
@@ -322,6 +326,9 @@ namespace AsmResolver.PE
                 return _certificates;
             }
         }
+
+        /// <inheritdoc />
+        public PEFile ToPEFile(IPEFileBuilder builder) => builder.CreateFile(this);
 
         /// <summary>
         /// Obtains the list of modules that were imported into the PE.

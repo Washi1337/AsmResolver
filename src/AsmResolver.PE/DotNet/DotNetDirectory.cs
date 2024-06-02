@@ -125,21 +125,16 @@ namespace AsmResolver.PE.DotNet
             writer.WriteUInt32(GetPhysicalSize());
             writer.WriteUInt16(MajorRuntimeVersion);
             writer.WriteUInt16(MinorRuntimeVersion);
-            CreateDataDirectoryHeader(Metadata).Write(writer);
+            DataDirectory.CreateForSegment(Metadata).Write(writer);
             writer.WriteUInt32((uint) Flags);
             writer.WriteUInt32(EntryPoint.GetRawValue());
-            CreateDataDirectoryHeader(DotNetResources).Write(writer);
-            CreateDataDirectoryHeader(StrongName).Write(writer);
-            CreateDataDirectoryHeader(CodeManagerTable).Write(writer);
-            CreateDataDirectoryHeader(VTableFixups).Write(writer);
-            CreateDataDirectoryHeader(ExportAddressTable).Write(writer);
-            CreateDataDirectoryHeader(ManagedNativeHeader).Write(writer);
+            DataDirectory.CreateForSegment(DotNetResources).Write(writer);
+            DataDirectory.CreateForSegment(StrongName).Write(writer);
+            DataDirectory.CreateForSegment(CodeManagerTable).Write(writer);
+            DataDirectory.CreateForSegment(VTableFixups).Write(writer);
+            DataDirectory.CreateForSegment(ExportAddressTable).Write(writer);
+            DataDirectory.CreateForSegment(ManagedNativeHeader).Write(writer);
         }
-
-        private static DataDirectory CreateDataDirectoryHeader(ISegment? directoryContents) =>
-            directoryContents is not null
-                ? new DataDirectory(directoryContents.Rva, directoryContents.GetPhysicalSize())
-                : new DataDirectory(0, 0);
 
         /// <summary>
         /// Obtains the data directory containing the metadata of the .NET binary.

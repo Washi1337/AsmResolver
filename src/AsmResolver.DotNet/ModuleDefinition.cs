@@ -14,7 +14,6 @@ using AsmResolver.PE;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
@@ -1305,9 +1304,7 @@ namespace AsmResolver.DotNet
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public void Write(IBinaryStreamWriter writer, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            fileBuilder
-                .CreateFile(ToPEImage(imageBuilder))
-                .Write(writer);
+            ToPEImage(imageBuilder).ToPEFile(fileBuilder).Write(writer);
         }
 
         /// <summary>

@@ -304,6 +304,48 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
 
+        public static byte[] MixedModeHelloWorld {
+            get {
+                object obj = ResourceManager.GetObject("MixedModeHelloWorld", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] MixedModeCallIntoNative {
+            get {
+                object obj = ResourceManager.GetObject("MixedModeCallIntoNative", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] NativeHelloWorldC_X86 {
+            get {
+                object obj = ResourceManager.GetObject("NativeHelloWorldC_X86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] NativeHelloWorldC_X64 {
+            get {
+                object obj = ResourceManager.GetObject("NativeHelloWorldC_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] NativeHelloWorldCpp_X86 {
+            get {
+                object obj = ResourceManager.GetObject("NativeHelloWorldCpp_X86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] NativeHelloWorldCpp_X64 {
+            get {
+                object obj = ResourceManager.GetObject("NativeHelloWorldCpp_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] HelloWorld_SchemaStream {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_SchemaStream", resourceCulture);

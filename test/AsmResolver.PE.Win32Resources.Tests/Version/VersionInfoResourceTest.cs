@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Win32Resources.Builder;

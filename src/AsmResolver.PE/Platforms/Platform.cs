@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
@@ -99,5 +98,15 @@ namespace AsmResolver.PE.Platforms
         /// <param name="rva">The extracted RVA.</param>
         /// <returns><c>true</c> if the RVA was extracted successfully from the code, <c>false</c> otherwise.</returns>
         public abstract bool TryExtractThunkAddress(IPEImage image, BinaryStreamReader reader, out uint rva);
+
+        /// <summary>
+        /// Creates a new address table initializer stub.
+        /// </summary>
+        /// <param name="virtualProtect">
+        /// The symbol to <c>kernel32.dll!VirtualProtect</c> to use for temporarily adjusting the memory protection
+        /// bits while initializing the address table.
+        /// </param>
+        /// <returns>The initializer stub.</returns>
+        public abstract AddressTableInitializerStub CreateAddressTableInitializer(ISymbol virtualProtect);
     }
 }

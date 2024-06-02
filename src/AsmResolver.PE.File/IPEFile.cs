@@ -155,7 +155,7 @@ namespace AsmResolver.PE.File
         /// <param name="fileOffset">The file offset to start reading at.</param>
         /// <param name="reader">The reader that was created.</param>
         /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
-        public bool TryCreateReaderAtFileOffset(uint fileOffset, out BinaryStreamReader reader);
+        bool TryCreateReaderAtFileOffset(uint fileOffset, out BinaryStreamReader reader);
 
         /// <summary>
         /// Creates a new reader of a chunk of data at the provided file offset.
@@ -163,7 +163,7 @@ namespace AsmResolver.PE.File
         /// <param name="fileOffset">The file offset to start reading at.</param>
         /// <param name="size">The number of bytes in the chunk.</param>
         /// <returns>The reader.</returns>
-        public BinaryStreamReader CreateReaderAtFileOffset(uint fileOffset, uint size);
+        BinaryStreamReader CreateReaderAtFileOffset(uint fileOffset, uint size);
 
         /// <summary>
         /// Attempts to create a new reader of a chunk of data at the provided file offset.
@@ -172,6 +172,6 @@ namespace AsmResolver.PE.File
         /// <param name="size">The number of bytes in the chunk.</param>
         /// <param name="reader">The reader that was created.</param>
         /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
-        public bool TryCreateReaderAtFileOffset(uint fileOffset, uint size, out BinaryStreamReader reader);
+        bool TryCreateReaderAtFileOffset(uint fileOffset, uint size, out BinaryStreamReader reader);
     }
 }

@@ -1,7 +1,7 @@
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 
-namespace AsmResolver.PE.DotNet.Builder
+namespace AsmResolver.PE.Builder
 {
     /// <summary>
     /// Provides a mechanism for building up a method body table that can be stored in a PE file.
@@ -32,6 +32,11 @@ namespace AsmResolver.PE.DotNet.Builder
 
         /// <inheritdoc />
         public bool CanUpdateOffsets => _segments.CanUpdateOffsets;
+
+        /// <summary>
+        /// Gets a value determining whether the buffer has any methods added to it.
+        /// </summary>
+        public bool IsEmpty => _tinyBodies.Count == 0 && _fatBodies.Count == 0 && _nativeBodies.Count == 0;
 
         /// <summary>
         /// Adds a CIL method body to the buffer.

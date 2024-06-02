@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.Exports.Builder;
 using AsmResolver.PE.File;

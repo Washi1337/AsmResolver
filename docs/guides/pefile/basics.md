@@ -70,10 +70,8 @@ var peFile = PEFile.FromModuleBaseAddress(hInstance);
 Writing PE files can be done through the `PEFile.Write` method:
 
 ``` csharp
-using (var fs = File.Create(@"C:\patched.exe"))
-{
-    peFile.Write(new BinaryStreamWriter(fs));
-}
+using var fs = File.Create(@"C:\mynewfile.exe");
+peFile.Write(new BinaryStreamWriter(fs));
 ```
 
 AsmResolver will then reassemble the file with all the changes you made.

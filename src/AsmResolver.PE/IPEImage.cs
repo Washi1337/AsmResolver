@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.Certificates;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exceptions;
 using AsmResolver.PE.Exports;
+using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
@@ -18,6 +20,21 @@ namespace AsmResolver.PE
     /// </summary>
     public interface IPEImage
     {
+        /// <summary>
+        /// Gets the underlying PE file (when available).
+        /// </summary>
+        /// <remarks>
+        /// <para>When this property is <c>null</c>, the image is a new image that is not yet assembled.</para>
+        /// <para>
+        /// Accessing and using this object file is considered an unsafe operation. Making any changes to this object
+        /// while also using the PE image object can have unwanted side effects.
+        /// </para>
+        /// </remarks>
+        IPEFile? PEFile
+        {
+            get;
+        }
+
         /// <summary>
         /// When this PE image was read from the disk, gets the file path to the PE image.
         /// </summary>
@@ -191,5 +208,12 @@ namespace AsmResolver.PE
         {
             get;
         }
+
+        /// <summary>
+        /// Constructs a PE file from the image.
+        /// </summary>
+        /// <param name="builder">The builder to use for constructing the image.</param>
+        /// <returns>The constructed file.</returns>
+        PEFile ToPEFile(IPEFileBuilder builder);
     }
 }

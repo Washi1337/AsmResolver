@@ -40,6 +40,11 @@ namespace AsmResolver.PE.Win32Resources.Builder
         } = new List<TEntry>();
 
         /// <summary>
+        /// Gets a value indicating whether there is any data added to the buffer.
+        /// </summary>
+        public bool IsEmpty => Entries.Count == 0;
+
+        /// <summary>
         /// Adds a single entry to the table.
         /// </summary>
         /// <param name="entry">The entry to add.</param>

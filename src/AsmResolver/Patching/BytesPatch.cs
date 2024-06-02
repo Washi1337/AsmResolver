@@ -37,6 +37,11 @@ namespace AsmResolver.Patching
         }
 
         /// <inheritdoc />
+        public void UpdateOffsets(in RelocationParameters parameters)
+        {
+        }
+
+        /// <inheritdoc />
         public void Apply(in PatchContext context)
         {
             context.Writer.Offset = context.Segment.Offset + RelativeOffset;
