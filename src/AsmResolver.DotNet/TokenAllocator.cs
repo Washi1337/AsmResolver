@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet

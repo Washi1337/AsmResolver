@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;

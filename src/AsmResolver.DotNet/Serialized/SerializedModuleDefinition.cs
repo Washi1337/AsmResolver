@@ -7,6 +7,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.Win32Resources;
 
