@@ -1,7 +1,7 @@
 using System.Text;
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Builder.Metadata.UserStrings;
-using AsmResolver.PE.DotNet.Metadata.UserStrings;
+using AsmResolver.DotNet.Builder.Metadata;
+using AsmResolver.PE.DotNet.Metadata;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder

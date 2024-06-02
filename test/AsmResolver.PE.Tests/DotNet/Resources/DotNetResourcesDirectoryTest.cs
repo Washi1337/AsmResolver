@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Text;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 using TestCaseResources = AsmResolver.DotNet.TestCases.Resources.Resources;

@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Security.Cryptography;
-using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.DotNet.Metadata;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
@@ -40,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <exception cref="ArgumentException">Occurs when the provided image does not contain .NET metadata.</exception>
         public static byte[] GetTypeReferenceHash(this IMetadata metadata)
         {
-            var tablesStream = metadata.GetStream<TablesStream>();
+            var tablesStream = metadata.GetStream<DotNet.Metadata.TablesStream>();
             var stringsStream = metadata.GetStream<StringsStream>();
 
             var table = tablesStream.GetTable<TypeReferenceRow>(TableIndex.TypeRef);

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using FileAttributes = AsmResolver.PE.DotNet.Metadata.Tables.FileAttributes;
 
 namespace AsmResolver.DotNet.Serialized
 {

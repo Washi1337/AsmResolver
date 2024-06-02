@@ -1,5 +1,6 @@
 using System.IO;
 using AsmResolver.PE.Builder;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 using AsmResolver.Tests.Runners;

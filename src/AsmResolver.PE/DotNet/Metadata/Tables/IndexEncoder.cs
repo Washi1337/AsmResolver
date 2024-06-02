@@ -7,7 +7,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// </summary>
     public class IndexEncoder
     {
-        private readonly TablesStream _tableStream;
+        private readonly DotNet.Metadata.TablesStream _tableStream;
         private readonly TableIndex[] _tables;
         private readonly int _tableIndexBitCount;
         private readonly int _tableIndexBitMask;
@@ -18,7 +18,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         /// <param name="tableStream">The tables stream containing the tables the encoder targets.</param>
         /// <param name="tables">The table indices to encode for.</param>
-        public IndexEncoder(TablesStream tableStream, params TableIndex[] tables)
+        public IndexEncoder(DotNet.Metadata.TablesStream tableStream, params TableIndex[] tables)
         {
             _tableStream = tableStream ?? throw new ArgumentNullException(nameof(tableStream));
             _tables = tables ?? throw new ArgumentNullException(nameof(tables));

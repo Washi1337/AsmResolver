@@ -1,6 +1,6 @@
 using System.Linq;
 using AsmResolver.DotNet.TestCases.Generics;
-using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.DotNet.Metadata;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests

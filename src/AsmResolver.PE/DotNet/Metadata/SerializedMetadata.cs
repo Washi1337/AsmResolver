@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Metadata

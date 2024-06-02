@@ -1,6 +1,6 @@
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Builder.Metadata.Blob;
-using AsmResolver.PE.DotNet.Metadata.Blob;
+using AsmResolver.DotNet.Builder.Metadata;
+using AsmResolver.PE.DotNet.Metadata;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder

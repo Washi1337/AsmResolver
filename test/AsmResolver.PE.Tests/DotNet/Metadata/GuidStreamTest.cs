@@ -1,5 +1,5 @@
 using System;
-using AsmResolver.PE.DotNet.Metadata.Guid;
+using AsmResolver.PE.DotNet.Metadata;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.DotNet.Metadata
