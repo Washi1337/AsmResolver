@@ -299,7 +299,7 @@ namespace AsmResolver.DotNet.Builder
                 importAction((TMember) member);
         }
 
-        private void ReorderMetadataStreams(SerializedModuleDefinition serializedModule, IMetadata newMetadata)
+        private void ReorderMetadataStreams(SerializedModuleDefinition serializedModule, MetadataDirectory newMetadata)
         {
             IMetadataStream? GetStreamOrNull<TStream>()
                 where TStream : class, IMetadataStream

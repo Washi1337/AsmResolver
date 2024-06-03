@@ -19,7 +19,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         public ISegment? ResolveFieldData(
             IErrorListener listener,
             Platform platform,
-            IDotNetDirectory directory,
+            DotNetDirectory directory,
             in FieldRvaRow fieldRvaRow)
         {
             if (fieldRvaRow.Data.IsBounded)
@@ -66,7 +66,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             return null;
         }
 
-        private int DetermineFieldSize(IErrorListener listener, Platform platform, IDotNetDirectory directory, in FieldDefinitionRow field)
+        private int DetermineFieldSize(IErrorListener listener, Platform platform, DotNetDirectory directory, in FieldDefinitionRow field)
         {
             if (!directory.Metadata!.TryGetStream<BlobStream>(out var blobStream)
                 || !blobStream.TryGetBlobReaderByIndex(field.Signature, out var reader))
@@ -134,10 +134,10 @@ namespace AsmResolver.PE.DotNet.Metadata
             }
         }
 
-        private int GetCustomTypeSize(IMetadata metadata, ref BinaryStreamReader reader)
+        private int GetCustomTypeSize(MetadataDirectory metadataDirectory, ref BinaryStreamReader reader)
         {
             if (!reader.TryReadCompressedUInt32(out uint codedIndex)
-                || !metadata.TryGetStream<TablesStream>(out var tablesStream))
+                || !metadataDirectory.TryGetStream<TablesStream>(out var tablesStream))
             {
                 return 0;
             }

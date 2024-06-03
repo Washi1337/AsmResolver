@@ -109,7 +109,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IDotNetDirectory? GetDotNetDirectory()
+        protected override DotNetDirectory? GetDotNetDirectory()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ClrDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))

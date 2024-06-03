@@ -55,7 +55,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override IMetadata? GetMetadata()
+        protected override MetadataDirectory? GetMetadata()
         {
             if (!_metadataDirectory.IsPresentInPE)
                 return null;
@@ -66,7 +66,7 @@ namespace AsmResolver.PE.DotNet
                 return null;
             }
 
-            return DotNet.Metadata.Metadata.FromReader(directoryReader, MetadataReaderContext.FromReaderContext(_context));
+            return MetadataDirectory.FromReader(directoryReader, MetadataReaderContext.FromReaderContext(_context));
         }
 
         /// <inheritdoc />

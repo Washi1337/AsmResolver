@@ -343,7 +343,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// When this property is <c>null</c>, the module is a new module that is not yet assembled.
         /// </remarks>
-        public virtual IDotNetDirectory? DotNetDirectory
+        public virtual DotNetDirectory? DotNetDirectory
         {
             get;
         } = null;

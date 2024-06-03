@@ -37,7 +37,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="metadata">The metadata directory to get the TRH from.</param>
         /// <returns>The hash.</returns>
         /// <exception cref="ArgumentException">Occurs when the provided image does not contain .NET metadata.</exception>
-        public static byte[] GetTypeReferenceHash(this IMetadata metadata)
+        public static byte[] GetTypeReferenceHash(this MetadataDirectory metadata)
         {
             var tablesStream = metadata.GetStream<TablesStream>();
             var stringsStream = metadata.GetStream<StringsStream>();

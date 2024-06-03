@@ -86,7 +86,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <summary>
         /// Gets the original metadata directory.
         /// </summary>
-        public IMetadata Metadata => Image.DotNetDirectory!.Metadata!;
+        public MetadataDirectory Metadata => Image.DotNetDirectory!.Metadata!;
 
         /// <summary>
         /// Gets the main tables stream in the metadata directory.

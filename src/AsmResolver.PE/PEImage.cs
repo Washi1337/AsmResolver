@@ -26,7 +26,7 @@ namespace AsmResolver.PE
         private readonly LazyVariable<PEImage, IResourceDirectory?> _resources;
         private readonly LazyVariable<PEImage, IExceptionDirectory?> _exceptions;
         private IList<BaseRelocation>? _relocations;
-        private readonly LazyVariable<PEImage, IDotNetDirectory?> _dotNetDirectory;
+        private readonly LazyVariable<PEImage, DotNetDirectory?> _dotNetDirectory;
         private IList<DebugDataEntry>? _debugData;
         private readonly LazyVariable<PEImage, ITlsDirectory?> _tlsDirectory;
         private CertificateCollection? _certificates;
@@ -183,7 +183,7 @@ namespace AsmResolver.PE
             _exports = new LazyVariable<PEImage, IExportDirectory?>(x => x.GetExports());
             _resources = new LazyVariable<PEImage, IResourceDirectory?>(x => x.GetResources());
             _exceptions = new LazyVariable<PEImage, IExceptionDirectory?>(x => x.GetExceptions());
-            _dotNetDirectory = new LazyVariable<PEImage, IDotNetDirectory?>(x => x.GetDotNetDirectory());
+            _dotNetDirectory = new LazyVariable<PEImage, DotNetDirectory?>(x => x.GetDotNetDirectory());
             _tlsDirectory = new LazyVariable<PEImage, ITlsDirectory?>(x => x.GetTlsDirectory());
         }
 
@@ -354,7 +354,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets or sets the data directory containing the CLR 2.0 header of a .NET binary (if available).
         /// </summary>
-        public IDotNetDirectory? DotNetDirectory
+        public DotNetDirectory? DotNetDirectory
         {
             get => _dotNetDirectory.GetValue(this);
             set => _dotNetDirectory.SetValue(value);
@@ -454,7 +454,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="DotNetDirectory"/> property.
         /// </remarks>
-        protected virtual IDotNetDirectory? GetDotNetDirectory() => null;
+        protected virtual DotNetDirectory? GetDotNetDirectory() => null;
 
         /// <summary>
         /// Obtains the debug data entries in the PE.

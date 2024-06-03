@@ -5,7 +5,7 @@ using AsmResolver.PE;
 namespace AsmResolver.DotNet.Builder
 {
     /// <summary>
-    /// Describes the result of the construction of a <see cref="IPEImage"/> from a <see cref="ModuleDefinition"/>.
+    /// Describes the result of the construction of a <see cref="PEImage"/> from a <see cref="ModuleDefinition"/>.
     /// </summary>
     public class PEImageBuildResult
     {

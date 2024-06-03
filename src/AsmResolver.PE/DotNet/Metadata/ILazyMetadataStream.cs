@@ -9,6 +9,6 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// Finalizes the initialization process of the metadata stream.
         /// </summary>
         /// <param name="parentMetadata">The metadata directory that defines the stream.</param>
-        void Initialize(IMetadata parentMetadata);
+        void Initialize(MetadataDirectory parentMetadata);
     }
 }

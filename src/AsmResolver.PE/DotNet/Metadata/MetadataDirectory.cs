@@ -10,55 +10,76 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 namespace AsmResolver.PE.DotNet.Metadata
 {
     /// <summary>
-    /// Provides a basic implementation of a metadata directory in a managed PE.
+    /// Represents a data directory containing metadata for a managed executable, including fields from the metadata
+    /// header, as well as the streams containing metadata tables and blob signatures.
     /// </summary>
-    public class Metadata : SegmentBase, IMetadata
+    public class MetadataDirectory : SegmentBase
     {
         private IList<IMetadataStream>? _streams;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the major version of the metadata directory format.
+        /// </summary>
+        /// <remarks>
+        /// This field is usually set to 1.
+        /// </remarks>
         public ushort MajorVersion
         {
             get;
             set;
         } = 1;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the minor version of the metadata directory format.
+        /// </summary>
+        /// <remarks>
+        /// This field is usually set to 1.
+        /// </remarks>
         public ushort MinorVersion
         {
             get;
             set;
         } = 1;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Reserved for future use.
+        /// </summary>
         public uint Reserved
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the string containing the runtime version that the .NET binary was built for.
+        /// </summary>
         public string VersionString
         {
             get;
             set;
         } = "v4.0.30319";
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Reserved for future use.
+        /// </summary>
         public ushort Flags
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a value indicating whether the metadata directory is loaded as Edit-and-Continue metadata.
+        /// </summary>
         public bool IsEncMetadata
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a collection of metadata streams that are defined in the metadata header.
+        /// </summary>
         public IList<IMetadataStream> Streams
         {
             get
@@ -74,28 +95,28 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="path">The path to the file.</param>
         /// <returns>The read metadata.</returns>
-        public static Metadata FromFile(string path) => FromBytes(System.IO.File.ReadAllBytes(path));
+        public static MetadataDirectory FromFile(string path) => FromBytes(System.IO.File.ReadAllBytes(path));
 
         /// <summary>
         /// Interprets the provided binary data as a .NET metadata directory.
         /// </summary>
         /// <param name="data">The raw data.</param>
         /// <returns>The read metadata.</returns>
-        public static Metadata FromBytes(byte[] data) => FromReader(new BinaryStreamReader(data));
+        public static MetadataDirectory FromBytes(byte[] data) => FromReader(new BinaryStreamReader(data));
 
         /// <summary>
         /// Reads a .NET metadata directory from a file.
         /// </summary>
         /// <param name="file">The file to read.</param>
         /// <returns>The read metadata.</returns>
-        public static Metadata FromFile(IInputFile file) => FromReader(file.CreateReader());
+        public static MetadataDirectory FromFile(IInputFile file) => FromReader(file.CreateReader());
 
         /// <summary>
         /// Interprets the provided binary stream as a .NET metadata directory.
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The read metadata.</returns>
-        public static Metadata FromReader(BinaryStreamReader reader)
+        public static MetadataDirectory FromReader(BinaryStreamReader reader)
         {
             return FromReader(reader, new MetadataReaderContext(VirtualAddressFactory.Instance));
         }
@@ -106,9 +127,9 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="reader">The input stream.</param>
         /// <param name="context">The context in which the reader is situated in.</param>
         /// <returns>The read metadata.</returns>
-        public static Metadata FromReader(BinaryStreamReader reader, MetadataReaderContext context)
+        public static MetadataDirectory FromReader(BinaryStreamReader reader, MetadataReaderContext context)
         {
-            return new SerializedMetadata(context, ref reader);
+            return new SerializedMetadataDirectory(context, ref reader);
         }
 
         /// <inheritdoc />
@@ -206,7 +227,12 @@ namespace AsmResolver.PE.DotNet.Metadata
                 Streams[i].Write(writer);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a stream by its name.
+        /// </summary>
+        /// <param name="name">The name of the stream to search.</param>
+        /// <returns>The stream</returns>
+        /// <exception cref="KeyNotFoundException">Occurs when the stream is not present in the metadata directory.</exception>
         public virtual IMetadataStream GetStream(string name)
         {
             return TryGetStream(name, out var stream)
@@ -214,7 +240,12 @@ namespace AsmResolver.PE.DotNet.Metadata
                 : throw new KeyNotFoundException($"Metadata directory does not contain a stream called {name}.");
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a stream by its type.
+        /// </summary>
+        /// <typeparam name="TStream">The type of the stream.</typeparam>
+        /// <returns>The stream</returns>
+        /// <exception cref="KeyNotFoundException">Occurs when the stream is not present in the metadata directory.</exception>
         public TStream GetStream<TStream>()
             where TStream : class, IMetadataStream
         {
@@ -224,7 +255,12 @@ namespace AsmResolver.PE.DotNet.Metadata
                     $"Metadata directory does not contain a stream of type {typeof(TStream).FullName}.");
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a stream by its name.
+        /// </summary>
+        /// <param name="name">The name of the stream to search.</param>
+        /// <param name="stream">The found stream, or <c>null</c> if no match was found.</param>
+        /// <returns><c>true</c> if a match was found, <c>false</c> otherwise.</returns>
         public bool TryGetStream(string name, [NotNullWhen(true)] out IMetadataStream? stream)
         {
             bool heapRequested = name is not (TablesStream.CompressedStreamName
@@ -234,7 +270,12 @@ namespace AsmResolver.PE.DotNet.Metadata
             return TryFindStream((c, s) => c.Name == s as string, name, heapRequested, out stream);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a stream by its name.
+        /// </summary>
+        /// <typeparam name="TStream">The type of the stream.</typeparam>
+        /// <param name="stream">The found stream, or <c>null</c> if no match was found.</param>
+        /// <returns><c>true</c> if a match was found, <c>false</c> otherwise.</returns>
         public bool TryGetStream<TStream>([NotNullWhen(true)] out TStream? stream)
             where TStream : class, IMetadataStream
         {

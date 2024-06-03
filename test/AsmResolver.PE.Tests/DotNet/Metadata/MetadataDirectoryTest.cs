@@ -8,7 +8,7 @@ using Xunit;
 
 namespace AsmResolver.PE.Tests.DotNet.Metadata
 {
-    public class MetadataTest
+    public class MetadataDirectoryTest
     {
         [Fact]
         public void CorrectHeader()
@@ -111,7 +111,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
 
             var reader = new BinaryStreamReader(tempStream.ToArray());
             var context = MetadataReaderContext.FromReaderContext(new PEReaderContext(peFile));
-            var newMetadata = new SerializedMetadata(context, ref reader);
+            var newMetadata = new SerializedMetadataDirectory(context, ref reader);
 
             Assert.Equal(metadata.MajorVersion, newMetadata.MajorVersion);
             Assert.Equal(metadata.MinorVersion, newMetadata.MinorVersion);

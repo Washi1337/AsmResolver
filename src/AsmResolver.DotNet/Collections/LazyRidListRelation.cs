@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Collections
         public delegate uint GetOwnerRidDelegate(uint rid, TAssociationRow row);
         public delegate MetadataRange GetMemberListDelegate(uint rid);
 
-        private readonly IMetadata _metadata;
+        private readonly MetadataDirectory _metadata;
         private readonly TableIndex _associationTable;
         private readonly TableIndex _memberTable;
         private readonly GetOwnerRidDelegate _getOwnerRid;
@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet.Collections
         private uint[]? _memberOwnerRids;
 
         public LazyRidListRelation(
-            IMetadata metadata,
+            MetadataDirectory metadata,
             TableIndex memberTable,
             TableIndex associationTable,
             GetOwnerRidDelegate getOwnerRid,

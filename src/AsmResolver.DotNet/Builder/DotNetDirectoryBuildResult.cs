@@ -4,7 +4,7 @@ using AsmResolver.PE.DotNet;
 namespace AsmResolver.DotNet.Builder
 {
     /// <summary>
-    /// Describes the result of a construction of a <see cref="IDotNetDirectory"/>. from a <see cref="ModuleDefinition"/>.
+    /// Describes the result of a construction of a <see cref="DotNetDirectory"/>. from a <see cref="ModuleDefinition"/>.
     /// </summary>
     public class DotNetDirectoryBuildResult
     {
@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="directory">The constructed directory.</param>
         /// <param name="mapping">An object defining a mapping between members and their new metadata tokens.</param>
-        public DotNetDirectoryBuildResult(IDotNetDirectory directory, ITokenMapping mapping)
+        public DotNetDirectoryBuildResult(DotNetDirectory directory, ITokenMapping mapping)
         {
             Directory = directory ?? throw new ArgumentNullException(nameof(directory));
             TokenMapping = mapping ?? throw new ArgumentNullException(nameof(mapping));
@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Builder
         /// <summary>
         /// Gets the constructed .NET data directory.
         /// </summary>
-        public IDotNetDirectory Directory
+        public DotNetDirectory Directory
         {
             get;
         }

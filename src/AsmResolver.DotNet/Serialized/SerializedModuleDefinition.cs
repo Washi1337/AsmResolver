@@ -114,7 +114,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        public override IDotNetDirectory DotNetDirectory => ReaderContext.Image.DotNetDirectory!;
+        public override DotNetDirectory DotNetDirectory => ReaderContext.Image.DotNetDirectory!;
 
         /// <summary>
         /// Gets the reading context that is used for reading the contents of the module.
