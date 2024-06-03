@@ -28,7 +28,7 @@ namespace AsmResolver.PE
         private IList<BaseRelocation>? _relocations;
         private readonly LazyVariable<PEImage, DotNetDirectory?> _dotNetDirectory;
         private IList<DebugDataEntry>? _debugData;
-        private readonly LazyVariable<PEImage, ITlsDirectory?> _tlsDirectory;
+        private readonly LazyVariable<PEImage, TlsDirectory?> _tlsDirectory;
         private CertificateCollection? _certificates;
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace AsmResolver.PE
             _resources = new LazyVariable<PEImage, IResourceDirectory?>(x => x.GetResources());
             _exceptions = new LazyVariable<PEImage, IExceptionDirectory?>(x => x.GetExceptions());
             _dotNetDirectory = new LazyVariable<PEImage, DotNetDirectory?>(x => x.GetDotNetDirectory());
-            _tlsDirectory = new LazyVariable<PEImage, ITlsDirectory?>(x => x.GetTlsDirectory());
+            _tlsDirectory = new LazyVariable<PEImage, TlsDirectory?>(x => x.GetTlsDirectory());
         }
 
         /// <summary>
@@ -376,7 +376,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets or sets the data directory containing the Thread-Local Storage (TLS) data.
         /// </summary>
-        public ITlsDirectory? TlsDirectory
+        public TlsDirectory? TlsDirectory
         {
             get => _tlsDirectory.GetValue(this);
             set => _tlsDirectory.SetValue(value);
@@ -472,7 +472,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="TlsDirectory"/> property.
         /// </remarks>
-        protected virtual ITlsDirectory? GetTlsDirectory() => null;
+        protected virtual TlsDirectory? GetTlsDirectory() => null;
 
         /// <summary>
         /// Obtains the data directory containing the attribute certificates table of the executable.

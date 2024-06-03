@@ -135,7 +135,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override ITlsDirectory? GetTlsDirectory()
+        protected override TlsDirectory? GetTlsDirectory()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.TlsDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
