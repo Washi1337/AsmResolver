@@ -42,12 +42,12 @@ namespace AsmResolver.PE.Tests.Win32Resources
 
                 if (expected.IsData)
                 {
-                    Assert.IsAssignableFrom<IResourceData>(current);
+                    Assert.IsAssignableFrom<ResourceData>(current);
                 }
                 else
                 {
-                    Assert.IsAssignableFrom<IResourceDirectory>(current);
-                    var subEntries = ((IResourceDirectory) current).Entries;
+                    Assert.IsAssignableFrom<ResourceDirectory>(current);
+                    var subEntries = ((ResourceDirectory) current).Entries;
                     Assert.Equal(expected.Entries.Count, subEntries.Count);
 
                     for (int i = 0; i < subEntries.Count; i++)
@@ -120,7 +120,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
                     Assert.True(dirCount < maxDirCount, "Traversal reached limit of resource directories.");
 
                     dirCount++;
-                    foreach (var entry in ((IResourceDirectory) current).Entries)
+                    foreach (var entry in ((ResourceDirectory) current).Entries)
                         stack.Push(entry);
                 }
             }
@@ -144,7 +144,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             Assert.Equal(16u, entry.Id);
             Assert.True(entry.IsDirectory);
 
-            var directory = (IResourceDirectory) entry;
+            var directory = (ResourceDirectory) entry;
             Assert.Empty(directory.Entries);
         }
 
@@ -154,9 +154,9 @@ namespace AsmResolver.PE.Tests.Win32Resources
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDataOffset,
                 new PEReaderParameters(EmptyErrorListener.Instance));
 
-            var directory = (IResourceDirectory) peImage.Resources!.Entries[0];
-            directory = (IResourceDirectory) directory.Entries[0];
-            var data = (IResourceData) directory.Entries[0];
+            var directory = (ResourceDirectory) peImage.Resources!.Entries[0];
+            directory = (ResourceDirectory) directory.Entries[0];
+            var data = (ResourceData) directory.Entries[0];
 
             Assert.Null(data.Contents);
         }

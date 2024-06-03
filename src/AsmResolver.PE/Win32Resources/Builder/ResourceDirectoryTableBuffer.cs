@@ -7,10 +7,10 @@ namespace AsmResolver.PE.Win32Resources.Builder
     /// <summary>
     /// Provides a mechanism for building a table of directory entries in a resource directory.
     /// </summary>
-    public class ResourceDirectoryTableBuffer : ResourceTableBuffer<IResourceDirectory>
+    public class ResourceDirectoryTableBuffer : ResourceTableBuffer<ResourceDirectory>
     {
         private readonly ResourceTableBuffer<string> _nameTable;
-        private readonly ResourceTableBuffer<IResourceData> _dataEntryTable;
+        private readonly ResourceTableBuffer<ResourceData> _dataEntryTable;
 
         /// <summary>
         /// Creates a new resource directory table buffer.
@@ -21,7 +21,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         public ResourceDirectoryTableBuffer(
             ISegment parentBuffer,
             ResourceTableBuffer<string> nameTable,
-            ResourceTableBuffer<IResourceData> dataEntryTable)
+            ResourceTableBuffer<ResourceData> dataEntryTable)
             : base(parentBuffer)
         {
             _nameTable = nameTable ?? throw new ArgumentNullException(nameof(nameTable));
@@ -29,7 +29,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         }
 
         /// <inheritdoc />
-        public override uint GetEntrySize(IResourceDirectory entry) =>
+        public override uint GetEntrySize(ResourceDirectory entry) =>
             SerializedResourceDirectory.ResourceDirectorySize
             + (uint) entry.Entries.Count * ResourceDirectoryEntry.EntrySize;
 
@@ -37,15 +37,10 @@ namespace AsmResolver.PE.Win32Resources.Builder
         public override void Write(IBinaryStreamWriter writer)
         {
             foreach (var entry in Entries)
-            {
-                if (entry.IsDirectory)
-                    WriteDirectory(writer, (IResourceDirectory) entry);
-                else
-                    throw new ArgumentException("Directory table contains a data entry.");
-            }
+                WriteDirectory(writer, entry);
         }
 
-        private void WriteDirectory(IBinaryStreamWriter writer, IResourceDirectory directory)
+        private void WriteDirectory(IBinaryStreamWriter writer, ResourceDirectory directory)
         {
             ushort namedEntries = (ushort) directory.Entries.Count(e => e.Name != null);
             ushort idEntries = (ushort) (directory.Entries.Count - namedEntries);
@@ -68,8 +63,8 @@ namespace AsmResolver.PE.Win32Resources.Builder
                 : entry.Id);
 
             writer.WriteUInt32(entry.IsDirectory
-                ? (GetEntryOffset((IResourceDirectory) entry) | 0x8000_0000)
-                : _dataEntryTable.GetEntryOffset((IResourceData) entry));
+                ? (GetEntryOffset((ResourceDirectory) entry) | 0x8000_0000)
+                : _dataEntryTable.GetEntryOffset((ResourceData) entry));
         }
 
     }

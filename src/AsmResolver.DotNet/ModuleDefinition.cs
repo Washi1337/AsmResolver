@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet
         private TokenAllocator? _tokenAllocator;
 
         private readonly LazyVariable<ModuleDefinition, string> _runtimeVersion;
-        private readonly LazyVariable<ModuleDefinition, IResourceDirectory?> _nativeResources;
+        private readonly LazyVariable<ModuleDefinition, ResourceDirectory?> _nativeResources;
         private IList<DebugDataEntry>? _debugData;
         private ReferenceImporter? _defaultImporter;
 
@@ -275,7 +275,7 @@ namespace AsmResolver.DotNet
             _encBaseId = new LazyVariable<ModuleDefinition, Guid>(x => x.GetEncBaseId());
             _managedEntryPoint = new LazyVariable<ModuleDefinition, IManagedEntryPoint?>(x => x.GetManagedEntryPoint());
             _runtimeVersion = new LazyVariable<ModuleDefinition, string>(x => x.GetRuntimeVersion());
-            _nativeResources = new LazyVariable<ModuleDefinition, IResourceDirectory?>(x => x.GetNativeResources());
+            _nativeResources = new LazyVariable<ModuleDefinition, ResourceDirectory?>(x => x.GetNativeResources());
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
 
@@ -652,7 +652,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the contents of the native Win32 resources data directory of the underlying
         /// portable executable (PE) file.
         /// </summary>
-        public IResourceDirectory? NativeResourceDirectory
+        public ResourceDirectory? NativeResourceDirectory
         {
             get => _nativeResources.GetValue(this);
             set => _nativeResources.SetValue(value);
@@ -1185,7 +1185,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="NativeResourceDirectory"/> property.
         /// </remarks>
-        protected virtual IResourceDirectory? GetNativeResources() => null;
+        protected virtual ResourceDirectory? GetNativeResources() => null;
 
         /// <summary>
         /// Obtains the native debug data directory of the underlying PE image (if available).

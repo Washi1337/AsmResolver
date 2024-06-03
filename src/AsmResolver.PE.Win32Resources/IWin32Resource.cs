@@ -10,6 +10,6 @@ namespace AsmResolver.PE.Win32Resources
         /// Serializes the win32 resource to the provided root win32 resource data directory.
         /// </summary>
         /// <param name="rootDirectory">The root directory to submit the changes to.</param>
-        void InsertIntoDirectory(IResourceDirectory rootDirectory);
+        void InsertIntoDirectory(ResourceDirectory rootDirectory);
     }
 }

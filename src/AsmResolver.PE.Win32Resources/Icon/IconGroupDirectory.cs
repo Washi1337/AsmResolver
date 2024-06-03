@@ -21,7 +21,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// <param name="reader">The reader.</param>
         /// <param name="iconResourceDirectory">The icon resource directory used to extract associated icon entries from.</param>
         /// <returns>The icon group directory.</returns>
-        public static IconGroupDirectory FromReader(ref BinaryStreamReader reader, IResourceDirectory iconResourceDirectory)
+        public static IconGroupDirectory FromReader(ref BinaryStreamReader reader, ResourceDirectory iconResourceDirectory)
         {
             var result = new IconGroupDirectory
             {
@@ -41,19 +41,19 @@ namespace AsmResolver.PE.Win32Resources.Icon
             return result;
         }
 
-        private static (IconGroupDirectoryEntry, IconEntry) ReadNextEntry(ref BinaryStreamReader reader, IResourceDirectory iconResourceDirectory)
+        private static (IconGroupDirectoryEntry, IconEntry) ReadNextEntry(ref BinaryStreamReader reader, ResourceDirectory iconResourceDirectory)
         {
             var entry = IconGroupDirectoryEntry.FromReader(ref reader);
 
             // search for icon reference in icon resource directory
             var iconDirectory = iconResourceDirectory
                 .Entries
-                .OfType<IResourceDirectory>()
+                .OfType<ResourceDirectory>()
                 .FirstOrDefault(d => d.Id == entry.Id);
 
-            var iconDataEntry = iconDirectory
-                ?.Entries
-                .OfType<IResourceData>()
+            var iconDataEntry = iconDirectory?
+                .Entries
+                .OfType<ResourceData>()
                 .FirstOrDefault();
 
             if (iconDataEntry is null)

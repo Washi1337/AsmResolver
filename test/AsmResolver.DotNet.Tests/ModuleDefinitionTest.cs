@@ -386,7 +386,7 @@ namespace AsmResolver.DotNet.Tests
                     }
                 }
             };
-            module.NativeResourceDirectory.Entries.Add(directory);
+            module.NativeResourceDirectory!.Entries.Add(directory);
 
             // Write and rebuild.
             using var stream = new MemoryStream();
@@ -394,12 +394,12 @@ namespace AsmResolver.DotNet.Tests
             var newModule = ModuleDefinition.FromReader(new BinaryStreamReader(stream.ToArray()));
 
             // Assert contents.
-            var newDirectory = (IResourceDirectory)newModule.NativeResourceDirectory.Entries
+            var newDirectory = (ResourceDirectory) newModule.NativeResourceDirectory!.Entries
                 .First(entry => entry.Name == directoryName);
-            newDirectory = (IResourceDirectory)newDirectory.Entries[0];
+            newDirectory = (ResourceDirectory)newDirectory.Entries[0];
 
-            var newData = (IResourceData)newDirectory.Entries[0];
-            var newContents = (IReadableSegment)newData.Contents;
+            var newData = (ResourceData)newDirectory.Entries[0];
+            var newContents = (IReadableSegment)newData.Contents!;
             Assert.Equal(entryData, newContents.ToArray());
         }
 

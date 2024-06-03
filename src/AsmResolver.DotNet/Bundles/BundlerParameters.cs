@@ -159,7 +159,7 @@ namespace AsmResolver.DotNet.Bundles
             byte[] appHostTemplate,
             string appBinaryPath,
             SubSystem subSystem,
-            IResourceDirectory? resources)
+            ResourceDirectory? resources)
         {
             ApplicationHostTemplate = appHostTemplate;
             ApplicationBinaryPath = appBinaryPath;
@@ -222,7 +222,7 @@ namespace AsmResolver.DotNet.Bundles
         /// This field is ignored if <see cref="IsArm64Linux"/> is set to <c>true</c>, or <see cref="ApplicationHostTemplate"/>
         /// does not contain a proper PE image.
         /// </remarks>
-        public IResourceDirectory? Resources
+        public ResourceDirectory? Resources
         {
             get;
             set;

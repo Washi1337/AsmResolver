@@ -12,7 +12,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// <summary>
         /// Used to keep track of icon groups.
         /// </summary>
-        private readonly Dictionary<uint, IconGroupDirectory> _entries = new Dictionary<uint, IconGroupDirectory>();
+        private readonly Dictionary<uint, IconGroupDirectory> _entries = new();
 
         /// <summary>
         /// Obtains the icon group resources from the provided root win32 resources directory.
@@ -20,7 +20,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// <param name="rootDirectory">The root resources directory to extract the icon group from.</param>
         /// <returns>The icon group resources, or <c>null</c> if none was found.</returns>
         /// <exception cref="ArgumentException">Occurs when the resource data is not readable.</exception>
-        public static IconResource? FromDirectory(IResourceDirectory rootDirectory)
+        public static IconResource? FromDirectory(ResourceDirectory rootDirectory)
         {
             if (!rootDirectory.TryGetDirectory(ResourceType.GroupIcon, out var groupIconDirectory)
                 || !rootDirectory.TryGetDirectory(ResourceType.Icon, out var iconDirectory))
@@ -30,11 +30,11 @@ namespace AsmResolver.PE.Win32Resources.Icon
 
             var result = new IconResource();
 
-            foreach (var iconGroupResource in groupIconDirectory.Entries.OfType<IResourceDirectory>())
+            foreach (var iconGroupResource in groupIconDirectory.Entries.OfType<ResourceDirectory>())
             {
                 var dataEntry = iconGroupResource
                     .Entries
-                    .OfType<IResourceData>()
+                    .OfType<ResourceData>()
                     .FirstOrDefault();
 
                 if (dataEntry is null)
@@ -81,7 +81,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         public IEnumerable<IconGroupDirectory> GetIconGroups() => _entries.Values;
 
         /// <inheritdoc />
-        public void InsertIntoDirectory(IResourceDirectory rootDirectory)
+        public void InsertIntoDirectory(ResourceDirectory rootDirectory)
         {
             // Construct new directory.
             var newGroupIconDirectory = new ResourceDirectory(ResourceType.GroupIcon);

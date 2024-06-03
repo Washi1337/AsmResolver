@@ -5,7 +5,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
     /// <summary>
     /// Provides a mechanism for building a table of data entries in a resource directory.
     /// </summary>
-    public class ResourceDataTableBuffer : ResourceTableBuffer<IResourceData>
+    public class ResourceDataTableBuffer : ResourceTableBuffer<ResourceData>
     {
         /// <summary>
         /// Creates a new data table buffer.
@@ -17,7 +17,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         }
 
         /// <inheritdoc />
-        public override uint GetEntrySize(IResourceData entry) => SerializedResourceData.ResourceDataEntrySize;
+        public override uint GetEntrySize(ResourceData entry) => SerializedResourceData.ResourceDataEntrySize;
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
@@ -26,7 +26,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
                 WriteDataEntry(writer, Entries[i]);
         }
 
-        private static void WriteDataEntry(IBinaryStreamWriter writer, IResourceData entry)
+        private static void WriteDataEntry(IBinaryStreamWriter writer, ResourceData entry)
         {
             if (entry.Contents is null)
             {

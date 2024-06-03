@@ -23,7 +23,7 @@ namespace AsmResolver.PE
     {
         private IList<ImportedModule>? _imports;
         private readonly LazyVariable<PEImage, ExportDirectory?> _exports;
-        private readonly LazyVariable<PEImage, IResourceDirectory?> _resources;
+        private readonly LazyVariable<PEImage, ResourceDirectory?> _resources;
         private readonly LazyVariable<PEImage, IExceptionDirectory?> _exceptions;
         private IList<BaseRelocation>? _relocations;
         private readonly LazyVariable<PEImage, DotNetDirectory?> _dotNetDirectory;
@@ -181,7 +181,7 @@ namespace AsmResolver.PE
         public PEImage()
         {
             _exports = new LazyVariable<PEImage, ExportDirectory?>(x => x.GetExports());
-            _resources = new LazyVariable<PEImage, IResourceDirectory?>(x => x.GetResources());
+            _resources = new LazyVariable<PEImage, ResourceDirectory?>(x => x.GetResources());
             _exceptions = new LazyVariable<PEImage, IExceptionDirectory?>(x => x.GetExceptions());
             _dotNetDirectory = new LazyVariable<PEImage, DotNetDirectory?>(x => x.GetDotNetDirectory());
             _tlsDirectory = new LazyVariable<PEImage, TlsDirectory?>(x => x.GetTlsDirectory());
@@ -323,7 +323,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets or sets the root resource directory in the PE, if available.
         /// </summary>
-        public IResourceDirectory? Resources
+        public ResourceDirectory? Resources
         {
             get => _resources.GetValue(this);
             set => _resources.SetValue(value);
@@ -427,7 +427,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Resources"/> property.
         /// </remarks>
-        protected virtual IResourceDirectory? GetResources() => null;
+        protected virtual ResourceDirectory? GetResources() => null;
 
         /// <summary>
         /// Obtains the contents of the exceptions data directory in the PE.

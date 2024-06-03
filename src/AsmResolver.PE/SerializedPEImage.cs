@@ -76,7 +76,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IResourceDirectory? GetResources()
+        protected override ResourceDirectory? GetResources()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ResourceDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))

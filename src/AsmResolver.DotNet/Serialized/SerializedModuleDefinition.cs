@@ -314,7 +314,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IResourceDirectory? GetNativeResources() => ReaderContext.Image.Resources;
+        protected override ResourceDirectory? GetNativeResources() => ReaderContext.Image.Resources;
 
         /// <inheritdoc />
         protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReaderContext.Image.DebugData);
