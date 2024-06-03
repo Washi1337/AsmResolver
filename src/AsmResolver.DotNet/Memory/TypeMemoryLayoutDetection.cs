@@ -1,5 +1,5 @@
 using System;
-using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet.Memory
 {

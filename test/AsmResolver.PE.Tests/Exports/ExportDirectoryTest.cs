@@ -6,7 +6,6 @@ using AsmResolver.PE.Builder;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.Exports.Builder;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using AsmResolver.Tests.Runners;
 using Xunit;
 

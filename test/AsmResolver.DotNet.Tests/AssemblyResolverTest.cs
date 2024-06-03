@@ -5,7 +5,7 @@ using AsmResolver.DotNet.Config.Json;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests

@@ -1,5 +1,3 @@
-using AsmResolver.DotNet.Signatures.Types;
-
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>

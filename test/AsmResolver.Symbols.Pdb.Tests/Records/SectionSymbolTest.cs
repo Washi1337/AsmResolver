@@ -1,5 +1,5 @@
 using System.Linq;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using AsmResolver.Symbols.Pdb.Records;
 using Xunit;
 

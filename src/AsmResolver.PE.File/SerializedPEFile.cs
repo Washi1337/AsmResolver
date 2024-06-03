@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
 {

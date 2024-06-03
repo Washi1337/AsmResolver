@@ -9,11 +9,11 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using AsmResolver.PE.Win32Resources;
 using Xunit;
-using FileAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.FileAttributes;
-using TypeAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.TypeAttributes;
+using FileAttributes = AsmResolver.PE.DotNet.Metadata.Tables.FileAttributes;
+using TypeAttributes = AsmResolver.PE.DotNet.Metadata.Tables.TypeAttributes;
 
 namespace AsmResolver.DotNet.Tests
 {

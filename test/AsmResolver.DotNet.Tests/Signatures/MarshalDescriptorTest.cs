@@ -1,6 +1,6 @@
 using System.Linq;
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Signatures.Marshal;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Methods;
 using Xunit;

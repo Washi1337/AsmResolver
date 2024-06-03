@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using AsmResolver.DotNet.Code.Cil;
-using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.IO;

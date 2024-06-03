@@ -1,5 +1,5 @@
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using static AsmResolver.PE.DotNet.ReadyToRun.ReadyToRunSectionType;
 
 namespace AsmResolver.PE.DotNet.ReadyToRun

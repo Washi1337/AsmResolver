@@ -10,7 +10,6 @@ using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
 
 namespace AsmResolver.DotNet

@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using AsmResolver.Symbols.Pdb.Leaves;
 using AsmResolver.Symbols.Pdb.Metadata.Dbi;
 using AsmResolver.Symbols.Pdb.Metadata.Info;

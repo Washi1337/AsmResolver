@@ -9,7 +9,6 @@ using AsmResolver.Collections;
 using AsmResolver.DotNet.Config.Json;
 using AsmResolver.IO;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Win32Resources.Builder;
 using AsmResolver.Shims;
 

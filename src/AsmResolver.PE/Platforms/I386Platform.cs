@@ -1,6 +1,6 @@
 using AsmResolver.IO;
 using AsmResolver.PE.Code;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using AsmResolver.PE.Relocations;
 
 namespace AsmResolver.PE.Platforms

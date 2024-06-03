@@ -1,8 +1,7 @@
 using System;
-// using System.Buffers.Binary;
 using System.Text;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Signatures
 {

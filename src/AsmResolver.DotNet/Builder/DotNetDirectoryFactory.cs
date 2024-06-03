@@ -8,11 +8,7 @@ using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Blob;
-using AsmResolver.PE.DotNet.Metadata.Guid;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.UserStrings;
 using AsmResolver.PE.DotNet.StrongName;
 
 namespace AsmResolver.DotNet.Builder

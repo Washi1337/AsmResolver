@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE
 {

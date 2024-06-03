@@ -1,11 +1,5 @@
 using System;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Metadata.Blob;
-using AsmResolver.PE.DotNet.Metadata.Guid;
-using AsmResolver.PE.DotNet.Metadata.Pdb;
-using AsmResolver.PE.DotNet.Metadata.Strings;
-using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {

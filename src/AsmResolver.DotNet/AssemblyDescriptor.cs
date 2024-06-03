@@ -2,14 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.Shims;
-using AssemblyHashAlgorithm = AsmResolver.PE.DotNet.Metadata.Tables.Rows.AssemblyHashAlgorithm;
 
 namespace AsmResolver.DotNet
 {

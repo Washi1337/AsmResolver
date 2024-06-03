@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet
 {

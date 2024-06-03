@@ -3,9 +3,8 @@ using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation

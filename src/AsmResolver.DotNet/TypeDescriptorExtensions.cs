@@ -1,6 +1,5 @@
 using System;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet
 {

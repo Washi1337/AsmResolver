@@ -1,4 +1,4 @@
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.Platforms;
 
 namespace AsmResolver.PE.DotNet.Metadata

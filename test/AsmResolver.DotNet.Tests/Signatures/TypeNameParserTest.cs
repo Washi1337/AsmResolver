@@ -1,8 +1,7 @@
 using System;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.DotNet.Signatures.Types.Parsing;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.DotNet.Signatures.Parsing;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Signatures

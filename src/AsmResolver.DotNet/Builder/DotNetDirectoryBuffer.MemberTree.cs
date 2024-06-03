@@ -3,7 +3,6 @@ using System.IO;
 using AsmResolver.DotNet.Code;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Builder
 {

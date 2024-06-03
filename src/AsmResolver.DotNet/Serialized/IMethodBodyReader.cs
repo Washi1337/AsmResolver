@@ -1,5 +1,5 @@
 using AsmResolver.DotNet.Code;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Serialized
 {

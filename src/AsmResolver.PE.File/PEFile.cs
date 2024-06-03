@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
 {

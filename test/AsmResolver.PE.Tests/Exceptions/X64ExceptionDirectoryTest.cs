@@ -1,5 +1,4 @@
 using AsmResolver.PE.Exceptions;
-using AsmResolver.PE.Exceptions.X64;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.Exceptions

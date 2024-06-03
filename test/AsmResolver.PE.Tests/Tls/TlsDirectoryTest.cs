@@ -1,6 +1,5 @@
 using System.IO;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Tls;
 using Xunit;
 

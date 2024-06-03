@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Builder
 {

@@ -10,7 +10,6 @@ using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Win32Resources.Version;
 using AsmResolver.Tests.Runners;
 using Xunit;
