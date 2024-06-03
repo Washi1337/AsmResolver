@@ -54,7 +54,7 @@ namespace AsmResolver.PE.Imports
             return md5.ComputeHash(Encoding.ASCII.GetBytes(StringShim.Join(",", elements)));
         }
 
-        private static string FormatModuleName(IImportedModule module)
+        private static string FormatModuleName(ImportedModule module)
         {
             string name = module.Name!;
             if (string.IsNullOrEmpty(name))

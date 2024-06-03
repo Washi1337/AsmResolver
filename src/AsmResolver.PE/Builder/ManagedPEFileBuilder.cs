@@ -266,7 +266,7 @@ public class ManagedPEFileBuilder : PEFileBuilder
         }
     }
 
-    private static List<IImportedModule> CollectImportedModules(
+    private static List<ImportedModule> CollectImportedModules(
         PEImage image,
         bool requireClrEntryPoint,
         string clrEntryPointName,

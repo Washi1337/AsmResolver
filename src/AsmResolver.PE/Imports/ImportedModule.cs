@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.IO;
@@ -8,10 +7,10 @@ using AsmResolver.IO;
 namespace AsmResolver.PE.Imports
 {
     /// <summary>
-    /// Provides an implementation of the <see cref="IImportedModule"/> class, which can be instantiated and added
-    /// to an existing portable executable image.
+    /// Represents a single module that was imported into a portable executable as part of the imports data directory.
+    /// Each instance represents one entry in the imports directory.
     /// </summary>
-    public class ImportedModule : IImportedModule
+    public class ImportedModule
     {
         private IList<ImportedSymbol>? _members;
 
@@ -31,28 +30,39 @@ namespace AsmResolver.PE.Imports
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the name of the module that was imported.
+        /// </summary>
         public string? Name
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the time stamp that the module was loaded into memory.
+        /// </summary>
+        /// <remarks>
+        /// This field is always 0 if the PE was read from the disk.
+        /// </remarks>
         public uint TimeDateStamp
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the index of the first member that is a forwarder.
+        /// </summary>
         public uint ForwarderChain
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a collection of members from the module that were imported.
+        /// </summary>
         public IList<ImportedSymbol> Symbols
         {
             get
@@ -68,7 +78,7 @@ namespace AsmResolver.PE.Imports
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
-        public static IImportedModule? FromReader(PEReaderContext context, ref BinaryStreamReader reader)
+        public static ImportedModule? FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             var entry = new SerializedImportedModule(context, ref reader);
             return entry.IsEmpty
@@ -84,7 +94,7 @@ namespace AsmResolver.PE.Imports
         /// </remarks>
         /// <returns>The members list.</returns>
         protected virtual IList<ImportedSymbol> GetSymbols() =>
-            new OwnedCollection<IImportedModule, ImportedSymbol>(this);
+            new OwnedCollection<ImportedModule, ImportedSymbol>(this);
 
         /// <inheritdoc />
         public override string ToString() => $"{Name} ({Symbols.Count.ToString()} symbols)";

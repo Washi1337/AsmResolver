@@ -33,7 +33,7 @@ namespace AsmResolver.PE.Imports.Builder
         public bool IsEmpty => _entriesLength == 0;
 
         /// <inheritdoc />
-        public override void AddModule(IImportedModule module)
+        public override void AddModule(ImportedModule module)
         {
             if (_entriesLength == 0)
                 _entriesLength = SerializedImportedModule.ModuleImportSize;
@@ -83,7 +83,7 @@ namespace AsmResolver.PE.Imports.Builder
             WriteModuleImportEntry(writer, 0, 0, 0, 0, 0);
         }
 
-        private void WriteModuleImportEntry(IBinaryStreamWriter writer, IImportedModule module)
+        private void WriteModuleImportEntry(IBinaryStreamWriter writer, ImportedModule module)
         {
             WriteModuleImportEntry(writer,
                 GetModuleThunkTable(module).Rva,

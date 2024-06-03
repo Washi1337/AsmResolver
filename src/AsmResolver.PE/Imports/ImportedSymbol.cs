@@ -7,7 +7,7 @@ namespace AsmResolver.PE.Imports
     /// <summary>
     /// Represents one member of an external module that was imported into a PE image.
     /// </summary>
-    public class ImportedSymbol : IOwnedCollectionElement<IImportedModule>, ISymbol
+    public class ImportedSymbol : IOwnedCollectionElement<ImportedModule>, ISymbol
     {
         private ushort _ordinalOrHint;
 
@@ -34,14 +34,14 @@ namespace AsmResolver.PE.Imports
         /// <summary>
         /// Gets the module that defines the symbol.
         /// </summary>
-        public IImportedModule? DeclaringModule
+        public ImportedModule? DeclaringModule
         {
             get;
             private set;
         }
 
         /// <inheritdoc />
-        IImportedModule? IOwnedCollectionElement<IImportedModule>.Owner
+        ImportedModule? IOwnedCollectionElement<ImportedModule>.Owner
         {
             get => DeclaringModule;
             set => DeclaringModule = value;

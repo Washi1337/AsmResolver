@@ -21,7 +21,7 @@ namespace AsmResolver.PE
     /// </summary>
     public class PEImage
     {
-        private IList<IImportedModule>? _imports;
+        private IList<ImportedModule>? _imports;
         private readonly LazyVariable<PEImage, ExportDirectory?> _exports;
         private readonly LazyVariable<PEImage, IResourceDirectory?> _resources;
         private readonly LazyVariable<PEImage, IExceptionDirectory?> _exceptions;
@@ -301,7 +301,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets a collection of modules that were imported into the PE, according to the import data directory.
         /// </summary>
-        public IList<IImportedModule> Imports
+        public IList<ImportedModule> Imports
         {
             get
             {
@@ -409,7 +409,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Imports"/> property.
         /// </remarks>
-        protected virtual IList<IImportedModule> GetImports() => new List<IImportedModule>();
+        protected virtual IList<ImportedModule> GetImports() => new List<ImportedModule>();
 
         /// <summary>
         /// Obtains the list of symbols that were exported from the PE.

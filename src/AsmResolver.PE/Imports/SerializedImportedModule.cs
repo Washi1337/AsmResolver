@@ -62,7 +62,7 @@ namespace AsmResolver.PE.Imports
         /// <inheritdoc />
         protected override IList<ImportedSymbol> GetSymbols()
         {
-            var result = new OwnedCollection<IImportedModule, ImportedSymbol>(this);
+            var result = new OwnedCollection<ImportedModule, ImportedSymbol>(this);
 
             if (IsEmpty)
                 return result;

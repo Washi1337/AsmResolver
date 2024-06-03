@@ -9,8 +9,8 @@ namespace AsmResolver.PE.Imports.Builder
     /// </summary>
     public class HintNameTableBuffer : SegmentBase
     {
-        private readonly List<IImportedModule> _modules = new();
-        private readonly Dictionary<IImportedModule, uint> _moduleNameOffsets = new();
+        private readonly List<ImportedModule> _modules = new();
+        private readonly Dictionary<ImportedModule, uint> _moduleNameOffsets = new();
         private readonly Dictionary<ImportedSymbol, uint> _hintNameOffsets = new();
         private uint _length;
 
@@ -46,7 +46,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// Adds the name of the module and the names of all named entries to the hint-name table.
         /// </summary>
         /// <param name="module">The module to add.</param>
-        public void AddModule(IImportedModule module)
+        public void AddModule(ImportedModule module)
         {
             _modules.Add(module);
         }
@@ -60,7 +60,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// This method should only be used after the hint-name table has been relocated to the right location in the
         /// PE file.
         /// </remarks>
-        public uint GetModuleNameRva(IImportedModule module) => Rva + _moduleNameOffsets[module];
+        public uint GetModuleNameRva(ImportedModule module) => Rva + _moduleNameOffsets[module];
 
         /// <summary>
         /// Gets the virtual address to the beginning of the hint-name pair associated to an imported member.
@@ -99,7 +99,7 @@ namespace AsmResolver.PE.Imports.Builder
             writer.Align(2);
         }
 
-        private static void WriteModuleName(IBinaryStreamWriter writer, IImportedModule module)
+        private static void WriteModuleName(IBinaryStreamWriter writer, ImportedModule module)
         {
             writer.WriteAsciiString(module.Name ?? string.Empty);
             writer.WriteByte(0);
