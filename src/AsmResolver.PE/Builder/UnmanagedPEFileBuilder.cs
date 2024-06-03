@@ -69,7 +69,7 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
     /// </summary>
     /// <param name="errorListener">The error listener to use.</param>
     /// <param name="baseFile">The template file to base the resulting file on.</param>
-    public UnmanagedPEFileBuilder(IErrorListener errorListener, IPEFile? baseFile)
+    public UnmanagedPEFileBuilder(IErrorListener errorListener, PEFile? baseFile)
     {
         ErrorListener = errorListener;
         BaseFile = baseFile;
@@ -87,7 +87,7 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
     /// <summary>
     /// Gets or sets the template file to base the resulting file on.
     /// </summary>
-    public IPEFile? BaseFile
+    public PEFile? BaseFile
     {
         get;
         set;

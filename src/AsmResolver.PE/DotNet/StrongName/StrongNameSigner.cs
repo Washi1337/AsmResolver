@@ -73,7 +73,7 @@ namespace AsmResolver.PE.DotNet.StrongName
 
         private byte[] GetHashToSign(
             Stream imageStream,
-            IPEFile file,
+            PEFile file,
             IPEImage image,
             AssemblyHashAlgorithm hashAlgorithm)
         {

@@ -29,7 +29,7 @@ namespace AsmResolver.PE
         /// while also using the PE image object can have unwanted side effects.
         /// </para>
         /// </remarks>
-        IPEFile? PEFile
+        PEFile? PEFile
         {
             get;
         }

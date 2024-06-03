@@ -37,7 +37,7 @@ namespace AsmResolver.PE
         /// <param name="filePath">The </param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(string filePath) => FromFile(File.PEFile.FromFile(filePath));
+        public static IPEImage FromFile(string filePath) => FromFile(PEFile.FromFile(filePath));
 
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
@@ -47,7 +47,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromFile(string filePath, PEReaderParameters readerParameters) =>
-            FromFile(File.PEFile.FromFile(readerParameters.FileService.OpenFile(filePath)), readerParameters);
+            FromFile(PEFile.FromFile(readerParameters.FileService.OpenFile(filePath)), readerParameters);
 
         /// <summary>
         /// Opens a PE image from a buffer.
@@ -55,7 +55,7 @@ namespace AsmResolver.PE
         /// <param name="bytes">The bytes to interpret.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromBytes(byte[] bytes) => FromFile(File.PEFile.FromBytes(bytes));
+        public static IPEImage FromBytes(byte[] bytes) => FromFile(PEFile.FromBytes(bytes));
 
         /// <summary>
         /// Opens a PE image from a buffer.
@@ -65,7 +65,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromBytes(byte[] bytes, PEReaderParameters readerParameters) =>
-            FromFile(File.PEFile.FromBytes(bytes), readerParameters);
+            FromFile(PEFile.FromBytes(bytes), readerParameters);
 
         /// <summary>
         /// Reads a mapped PE image starting at the provided module base address (HINSTANCE).
@@ -84,7 +84,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromModuleBaseAddress(IntPtr hInstance, PEReaderParameters readerParameters) =>
-            FromFile(File.PEFile.FromModuleBaseAddress(hInstance), readerParameters);
+            FromFile(PEFile.FromModuleBaseAddress(hInstance), readerParameters);
 
         /// <summary>
         /// Reads a PE image starting at the provided module base address (HINSTANCE).
@@ -95,7 +95,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromModuleBaseAddress(IntPtr hInstance, PEMappingMode mode, PEReaderParameters readerParameters) =>
-            FromFile(File.PEFile.FromModuleBaseAddress(hInstance, mode), readerParameters);
+            FromFile(PEFile.FromModuleBaseAddress(hInstance, mode), readerParameters);
 
         /// <summary>
         /// Reads a PE image from the provided data source.
@@ -126,7 +126,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromReader(in BinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
-            FromFile(File.PEFile.FromReader(reader, mode));
+            FromFile(PEFile.FromReader(reader, mode));
 
         /// <summary>
         /// Opens a PE image from an input stream.
@@ -137,7 +137,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromReader(in BinaryStreamReader reader, PEMappingMode mode, PEReaderParameters readerParameters) =>
-            FromFile(File.PEFile.FromReader(reader, mode), readerParameters);
+            FromFile(PEFile.FromReader(reader, mode), readerParameters);
 
         /// <summary>
         /// Opens a PE image from an input file object.
@@ -155,7 +155,7 @@ namespace AsmResolver.PE
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromFile(IInputFile inputFile, PEReaderParameters readerParameters) =>
-            FromFile(File.PEFile.FromFile(inputFile), readerParameters);
+            FromFile(PEFile.FromFile(inputFile), readerParameters);
 
         /// <summary>
         /// Opens a PE image from a PE file object.
@@ -163,7 +163,7 @@ namespace AsmResolver.PE
         /// <param name="peFile">The PE file object.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(IPEFile peFile) => FromFile(peFile, new PEReaderParameters());
+        public static IPEImage FromFile(PEFile peFile) => FromFile(peFile, new PEReaderParameters());
 
         /// <summary>
         /// Opens a PE image from a PE file object.
@@ -172,7 +172,7 @@ namespace AsmResolver.PE
         /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(IPEFile peFile, PEReaderParameters readerParameters) =>
+        public static IPEImage FromFile(PEFile peFile, PEReaderParameters readerParameters) =>
             new SerializedPEImage(peFile, readerParameters);
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        public virtual IPEFile? PEFile => null;
+        public virtual PEFile? PEFile => null;
 
         /// <inheritdoc />
         public string? FilePath

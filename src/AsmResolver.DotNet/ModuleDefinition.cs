@@ -114,7 +114,7 @@ namespace AsmResolver.DotNet
         /// <param name="file">The portable executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IPEFile file) => FromFile(file, new ModuleReaderParameters());
+        public static ModuleDefinition FromFile(PEFile file) => FromFile(file, new ModuleReaderParameters());
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -123,7 +123,7 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IPEFile file, ModuleReaderParameters readerParameters) =>
+        public static ModuleDefinition FromFile(PEFile file, ModuleReaderParameters readerParameters) =>
             FromImage(PEImage.FromFile(file, readerParameters.PEReaderParameters), readerParameters);
 
         /// <summary>

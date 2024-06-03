@@ -25,7 +25,7 @@ namespace AsmResolver.PE
         /// </summary>
         /// <param name="peFile">The file to base the image from.</param>
         /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
-        public SerializedPEImage(IPEFile peFile, PEReaderParameters readerParameters)
+        public SerializedPEImage(PEFile peFile, PEReaderParameters readerParameters)
         {
             PEFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
             ReaderContext = new PEReaderContext(peFile, readerParameters);
@@ -43,7 +43,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        public override IPEFile PEFile
+        public override PEFile PEFile
         {
             get;
         }
