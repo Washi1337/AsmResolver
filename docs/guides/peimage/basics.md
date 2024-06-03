@@ -30,7 +30,7 @@ var peImage = PEImage.FromFile(@"C:\myfile.exe");
 ```
 
 ``` csharp
-IPEFile peFile = ...
+PEFile peFile = ...
 var peImage = PEImage.FromFile(peFile);
 ```
 

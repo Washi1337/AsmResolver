@@ -154,7 +154,7 @@ public class CustomFieldRvaDataReader : FieldRvaDataReader
     public override ISegment ResolveFieldData(
         IErrorListener listener,
         Platform platform,
-        IDotNetDirectory directory,
+        DotNetDirectory directory,
         in FieldRvaRow fieldRvaRow)
     {
         // ...

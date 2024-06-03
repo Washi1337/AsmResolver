@@ -10,7 +10,7 @@ using AsmResolver.PE.Win32Resources;
 
 ## Directories
 
-Resources are exposed by the `IPEImage.Resources` property, which
+Resources are exposed by the `PEImage::Resources` property, which
 represents the root directory of all resources stored in the image.
 Every directory (including the root directory) is represented by
 instances of `IResourceDirectory`. This type contains the `Entries`
@@ -19,7 +19,7 @@ containing more entries, or a data entry (an instance of
 `IResourceData`) with the raw contents of the resource.
 
 ``` csharp
-IPEImage image = ...
+PEImage image = ...
 IResourceDirectory root = image.Resources;
 
 foreach (var entry in root.Entries)
@@ -35,7 +35,7 @@ Alternatively, you can access specific resources very easily by using
 the `GetDirectory` and `GetData`:
 
 ``` csharp
-IPEImage image = ...
+PEImage image = ...
 IResourceData stringDataEntry = image.Resources
     .GetDirectory(ResourceType.String)  // Get string tables directory.
     .GetDirectory(251)                  // Get string block with ID 251
@@ -49,13 +49,13 @@ same ID is replaced with the new one, and that the sorting requirements
 according to the PE file specification are presrved.
 
 ``` csharp
-IPEImage image = ...
+PEImage image = ...
 var newDirectory = new ResourceDirectory(ResourceType.String);
 image.Resources.Entries.Add(newDirectory);
 ```
 
 ``` csharp
-IPEImage image = ...
+PEImage image = ...
 var newDirectory = new ResourceDirectory(ResourceType.String);
 image.Resources.InsertOrReplaceEntry(newDirectory);
 ```
@@ -64,7 +64,7 @@ Similarly, removing can be done by modifying the `Entries` directory, or
 by using the `RemoveEntry` method:
 
 ``` csharp
-IPEImage image = ...
+PEImage image = ...
 image.Resources.RemoveEntry(ResourceType.String);
 ```
 
@@ -77,7 +77,7 @@ can check if this is a `IReadableSegment`, or use the shortcuts
 the entry.
 
 ``` csharp
-IPEImage image = ...
+PEImage image = ...
 IResourceData dataEntry = image.Resources
     .GetDirectory(ResourceType.String)  // Get string tables directory.
     .GetDirectory(251)                  // Get string block with ID 251
@@ -94,7 +94,7 @@ Adding new data entries can be done by using the `ResourceData`
 constructor:
 
 ``` csharp
-IPEImage image = ...
+PEImage image = ...
 
 var data = new ResourceData(id: 1033, contents: new DataSegment(new byte[] { ... }));
 image.Resources

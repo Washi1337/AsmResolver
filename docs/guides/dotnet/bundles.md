@@ -153,7 +153,7 @@ manifest.WriteUsingTemplate(
 > [!NOTE]
 > `BundleManifest` and `BundlerParameters` also define overloads of the
 > `WriteUsingTemplate` and `FromTemplate` / `FromExistingBundle`
-> respectively, taking `byte[]`, `IDataSource` or `IPEImage` instances
+> respectively, taking `byte[]`, `IDataSource` or `PEImage` instances
 > instead of file paths.
 
 

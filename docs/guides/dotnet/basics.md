@@ -61,7 +61,7 @@ var module = ModuleDefinition.FromReader(reader);
 ```
 
 ``` csharp
-IPEImage peImage = ...
+PEImage peImage = ...
 var module = ModuleDefinition.FromImage(peImage);
 ```
 
@@ -131,7 +131,7 @@ var assembly = AssemblyDefinition.FromFile(@"C:\myfile.exe");
 ```
 
 ``` csharp
-IPEFile peFile = ...
+PEFile peFile = ...
 var assembly = AssemblyDefinition.FromFile(peFile);
 ```
 
@@ -141,7 +141,7 @@ var assembly = AssemblyDefinition.FromReader(reader);
 ```
 
 ``` csharp
-IPEImage peImage = ...
+PEImage peImage = ...
 var assembly = AssemblyDefinition.FromImage(peImage);
 ```
 
