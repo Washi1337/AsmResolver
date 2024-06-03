@@ -66,7 +66,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IExportDirectory? GetExports()
+        protected override ExportDirectory? GetExports()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ExportDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
