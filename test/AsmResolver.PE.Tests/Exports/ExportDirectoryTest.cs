@@ -97,7 +97,7 @@ namespace AsmResolver.PE.Tests.Exports
             }, image.Exports.Entries.Select(e => e.Ordinal));
         }
 
-        private static IPEImage RebuildAndReloadManagedPE(IPEImage image)
+        private static PEImage RebuildAndReloadManagedPE(PEImage image)
         {
             // Build.
             using var tempStream = new MemoryStream();

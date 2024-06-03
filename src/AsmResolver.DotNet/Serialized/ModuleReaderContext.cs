@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="image">The original PE image to read from.</param>
         /// <param name="parentModule">The root module object.</param>
         /// <param name="parameters">The module reader parameters.</param>
-        public ModuleReaderContext(IPEImage image, SerializedModuleDefinition parentModule, ModuleReaderParameters parameters)
+        public ModuleReaderContext(PEImage image, SerializedModuleDefinition parentModule, ModuleReaderParameters parameters)
         {
             Image = image ?? throw new ArgumentNullException(nameof(image));
             ParentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
@@ -70,7 +70,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <summary>
         /// Gets the original PE image to read from.
         /// </summary>
-        public IPEImage Image
+        public PEImage Image
         {
             get;
         }

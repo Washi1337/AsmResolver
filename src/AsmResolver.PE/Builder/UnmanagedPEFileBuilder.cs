@@ -22,8 +22,8 @@ namespace AsmResolver.PE.Builder;
 /// directories or sometimes entire PE sections that are no longer in use.
 /// </para>
 /// <para>
-/// This class might modify the final imports directory (exposed by the <see cref="IPEImage.Imports"/> property),
-/// as well as the base relocations directory (exposed by the <see cref="IPEImage.Relocations"/> property). In
+/// This class might modify the final imports directory (exposed by the <see cref="PEImage.Imports"/> property),
+/// as well as the base relocations directory (exposed by the <see cref="PEImage.Relocations"/> property). In
 /// particular, it might add or remove the entry to <c>mscoree.dll!_CorExeMain</c> or <c>mscoree.dll!_CorDllMain</c>,
 /// and it may also add a reference to <c>kernel32.dll!VirtualProtect</c> in case dynamic initializers need to be
 /// injected to initialize reconstructed some parts of the original import address tables (IATs).
@@ -124,7 +124,7 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
     } = DefaultSymbolClassifier;
 
     /// <inheritdoc />
-    protected override BuilderContext CreateContext(IPEImage image)
+    protected override BuilderContext CreateContext(PEImage image)
     {
         var baseFile = BaseFile ?? image.PEFile;
         var baseImage = baseFile is not null
@@ -768,7 +768,7 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
         /// </summary>
         /// <param name="image">The image to build a PE file for.</param>
         /// <param name="baseImage">The template image to base the file on.</param>
-        public BuilderContext(IPEImage image, IPEImage? baseImage)
+        public BuilderContext(PEImage image, PEImage? baseImage)
             : base(image)
         {
             BaseImage = baseImage;
@@ -791,7 +791,7 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
         /// <summary>
         /// Gets the template image to base the file on.
         /// </summary>
-        public IPEImage? BaseImage { get; }
+        public PEImage? BaseImage { get; }
 
         /// <summary>
         /// Gets the trampolines table for all imported symbols.

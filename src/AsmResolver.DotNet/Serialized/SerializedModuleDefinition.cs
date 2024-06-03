@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Serialized
         /// </summary>
         /// <param name="peImage">The image to interpret as a .NET module.</param>
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
-        public SerializedModuleDefinition(IPEImage peImage, ModuleReaderParameters readerParameters)
+        public SerializedModuleDefinition(PEImage peImage, ModuleReaderParameters readerParameters)
             : base(new MetadataToken(TableIndex.Module, 1))
         {
             if (peImage is null)

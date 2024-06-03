@@ -138,7 +138,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             AssertCorrectStreamIsSelected<TStream>(PEImage.FromBytes(assembly), isEnC);
         }
 
-        private void AssertCorrectStreamIsSelected<TStream>(IPEImage peImage, bool isEnC)
+        private void AssertCorrectStreamIsSelected<TStream>(PEImage peImage, bool isEnC)
             where TStream : class, IMetadataStream
         {
             var metadata = peImage.DotNetDirectory!.Metadata!;

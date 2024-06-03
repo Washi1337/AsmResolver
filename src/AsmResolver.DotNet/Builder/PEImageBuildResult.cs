@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="diagnosticBag">The diagnostics that were collected during the construction of the image.</param>
         /// <param name="tokenMapping">An object that maps metadata members to their newly assigned tokens.</param>
         [Obsolete]
-        public PEImageBuildResult(IPEImage? image, DiagnosticBag diagnosticBag, ITokenMapping tokenMapping)
+        public PEImageBuildResult(PEImage? image, DiagnosticBag diagnosticBag, ITokenMapping tokenMapping)
         {
             ConstructedImage = image;
             ErrorListener = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="image">The constructed image, or <c>null</c> if the construction failed.</param>
         /// <param name="errorListener">The diagnostics that were collected during the construction of the image.</param>
         /// <param name="tokenMapping">An object that maps metadata members to their newly assigned tokens.</param>
-        public PEImageBuildResult(IPEImage? image, IErrorListener errorListener, ITokenMapping tokenMapping)
+        public PEImageBuildResult(PEImage? image, IErrorListener errorListener, ITokenMapping tokenMapping)
         {
             ConstructedImage = image;
             ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Builder
         /// <summary>
         /// Gets the constructed image, or <c>null</c> if the construction failed.
         /// </summary>
-        public IPEImage? ConstructedImage
+        public PEImage? ConstructedImage
         {
             get;
         }

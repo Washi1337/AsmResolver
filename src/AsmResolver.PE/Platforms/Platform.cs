@@ -97,7 +97,7 @@ namespace AsmResolver.PE.Platforms
         /// <param name="reader">The thunk reader.</param>
         /// <param name="rva">The extracted RVA.</param>
         /// <returns><c>true</c> if the RVA was extracted successfully from the code, <c>false</c> otherwise.</returns>
-        public abstract bool TryExtractThunkAddress(IPEImage image, BinaryStreamReader reader, out uint rva);
+        public abstract bool TryExtractThunkAddress(PEImage image, BinaryStreamReader reader, out uint rva);
 
         /// <summary>
         /// Creates a new address table initializer stub.

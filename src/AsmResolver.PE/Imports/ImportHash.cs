@@ -25,7 +25,7 @@ namespace AsmResolver.PE.Imports
         /// This is the ImpHash as introduced by Mandiant.
         /// Reference: https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html
         /// </remarks>
-        public static byte[] GetImportHash(this IPEImage image) => image.GetImportHash(DefaultSymbolResolver.Instance);
+        public static byte[] GetImportHash(this PEImage image) => image.GetImportHash(DefaultSymbolResolver.Instance);
 
         /// <summary>
         /// Computes the hash of all imported symbols.
@@ -37,7 +37,7 @@ namespace AsmResolver.PE.Imports
         /// This is the ImpHash as introduced by Mandiant.
         /// Reference: https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html
         /// </remarks>
-        public static byte[] GetImportHash(this IPEImage image, ISymbolResolver symbolResolver)
+        public static byte[] GetImportHash(this PEImage image, ISymbolResolver symbolResolver)
         {
             var elements = new List<string>();
 

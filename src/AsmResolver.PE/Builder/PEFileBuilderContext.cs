@@ -18,7 +18,7 @@ public class PEFileBuilderContext
     /// Creates a new PE file builder context.
     /// </summary>
     /// <param name="image">The image to build.</param>
-    public PEFileBuilderContext(IPEImage image)
+    public PEFileBuilderContext(PEImage image)
     {
         Image = image;
         Platform = Platform.Get(image.MachineType);
@@ -38,7 +38,7 @@ public class PEFileBuilderContext
     /// <summary>
     /// Gets the input PE image to construct a file for.
     /// </summary>
-    public IPEImage Image
+    public PEImage Image
     {
         get;
     }

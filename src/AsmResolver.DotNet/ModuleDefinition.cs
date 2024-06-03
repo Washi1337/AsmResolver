@@ -235,7 +235,7 @@ namespace AsmResolver.DotNet
         /// <param name="peImage">The image containing the .NET metadata.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage)
+        public static ModuleDefinition FromImage(PEImage peImage)
         {
             var moduleParameters = new ModuleReaderParameters(Path.GetDirectoryName(peImage.FilePath))
             {
@@ -254,7 +254,7 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET data directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReaderParameters readerParameters) =>
+        public static ModuleDefinition FromImage(PEImage peImage, ModuleReaderParameters readerParameters) =>
             new SerializedModuleDefinition(peImage, readerParameters);
 
         // Disable non-nullable property initialization warnings for the CorLibTypeFactory, RuntimeContext and
@@ -1311,7 +1311,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <returns>IPEImage built using <see cref="ManagedPEImageBuilder"/> by default</returns>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
-        public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder(), true);
+        public PEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder(), true);
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
@@ -1325,7 +1325,7 @@ namespace AsmResolver.DotNet
         /// <exception cref="MetadataBuilderException">
         /// Occurs when the construction of the PE image failed completely.
         /// </exception>
-        public IPEImage ToPEImage(IPEImageBuilder imageBuilder) => ToPEImage(imageBuilder, true);
+        public PEImage ToPEImage(IPEImageBuilder imageBuilder) => ToPEImage(imageBuilder, true);
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
@@ -1342,7 +1342,7 @@ namespace AsmResolver.DotNet
         /// <exception cref="MetadataBuilderException">
         /// Occurs when the construction of the PE image failed completely.
         /// </exception>
-        public IPEImage ToPEImage(IPEImageBuilder imageBuilder, bool throwOnNonFatalError)
+        public PEImage ToPEImage(IPEImageBuilder imageBuilder, bool throwOnNonFatalError)
         {
             var result = imageBuilder.CreateImage(this);
 

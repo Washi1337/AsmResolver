@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.InteropServices;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.Code;
 using AsmResolver.PE.DotNet;
@@ -24,7 +23,7 @@ namespace AsmResolver.PE.Tests.Builder
             _fixture = fixture;
         }
 
-        private static void ReplaceBodyWithNativeCode(IPEImage image, ISegment body, bool is32bit)
+        private static void ReplaceBodyWithNativeCode(PEImage image, ISegment body, bool is32bit)
         {
             // Adjust image flags appropriately.
             image.DotNetDirectory!.Flags &= ~DotNetDirectoryFlags.ILOnly;

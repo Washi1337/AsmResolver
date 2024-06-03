@@ -25,17 +25,17 @@ namespace AsmResolver.PE.Builder;
 /// is written as-is without any change or verification.
 /// </para>
 /// <para>
-/// This class might modify the final imports directory (exposed by the <see cref="IPEImage.Imports"/> property),
-/// as well as the base relocations directory (exposed by the <see cref="IPEImage.Relocations"/> property). In
+/// This class might modify the final imports directory (exposed by the <see cref="PEImage.Imports"/> property),
+/// as well as the base relocations directory (exposed by the <see cref="PEImage.Relocations"/> property). In
 /// particular, it might add or remove the entry to <c>mscoree.dll!_CorExeMain</c> or <c>mscoree.dll!_CorDllMain</c>,
-/// depending on the machine type specified by the <see cref="IPEImage.MachineType"/> property.
+/// depending on the machine type specified by the <see cref="PEImage.MachineType"/> property.
 /// </para>
 /// <para>
 /// This class builds up at most four PE sections; <c>.text</c>, <c>.sdata</c>, <c>.rsrc</c> and <c>.reloc</c>,
 /// similar to what a normal .NET language compiler would emit. Almost everything is put into the .text section,
 /// including the import and debug directories. The win32 resources are put into <c>.rsrc</c> section, and this
 /// section will only be added if there is at least one entry in the root resource directory of the
-/// <see cref="IPEImage.Resources"/> property. Similarly, the <c>.sdata</c> section is only added if at least
+/// <see cref="PEImage.Resources"/> property. Similarly, the <c>.sdata</c> section is only added if at least
 /// one unmanaged export is added to the PE image. Finally, the <c>.reloc</c> section is only added if at least
 /// one base relocation was put into the directory, or when the CLR bootstrapper requires one.
 /// </para>
@@ -267,7 +267,7 @@ public class ManagedPEFileBuilder : PEFileBuilder
     }
 
     private static List<IImportedModule> CollectImportedModules(
-        IPEImage image,
+        PEImage image,
         bool requireClrEntryPoint,
         string clrEntryPointName,
         out ImportedSymbol? clrEntryPoint)
