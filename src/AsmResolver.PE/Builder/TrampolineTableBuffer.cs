@@ -104,7 +104,7 @@ public class TrampolineTableBuffer : SegmentBase
     /// Applies the trampoline address patches to the provided PE file.
     /// </summary>
     /// <param name="file">The file to patch.</param>
-    public void ApplyPatches(IPEFile file) => ApplyPatches(file.Sections);
+    public void ApplyPatches(PEFile file) => ApplyPatches(file.Sections);
 
     /// <summary>
     /// Applies the trampoline address patches to the provided PE file sections.

@@ -14,10 +14,10 @@ using AsmResolver.PE.Imports;
 
 ## Imported Modules and Symbols
 
-The `IPEImage` interface exposes the `Imports` property, which contains
+The `PEImage` class exposes the `Imports` property, which contains
 all members that are resolved at runtime, grouped by the defining
 module. Below an example of a program that lists all members imported by
-a given `IPEImage` instance:
+a given `PEImage` instance:
 
 ``` csharp
 foreach (var module in peImage.Imports)
@@ -48,10 +48,10 @@ set of dependencies.
 
 AsmResolver provides a built-in implementation for calculating the
 Import Hash. The hash can be obtained by using the `GetImportHash`
-extension method on `IPEImage`:
+extension method on `PEImage`:
 
 ``` csharp
-IPEImage image = ...
+PEImage image = ...
 byte[] hash = image.GetImportHash();
 ```
 
@@ -70,7 +70,7 @@ public class MySymbolResolver : ISymbolResolver
     }
 }
 
-IPEImage image = ...
+PEImage image = ...
 byte[] hash = image.GetImportHash(new MySymbolResolver());
 ```
 

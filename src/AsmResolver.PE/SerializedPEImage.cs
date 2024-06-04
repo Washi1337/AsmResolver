@@ -25,7 +25,7 @@ namespace AsmResolver.PE
         /// </summary>
         /// <param name="peFile">The file to base the image from.</param>
         /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
-        public SerializedPEImage(IPEFile peFile, PEReaderParameters readerParameters)
+        public SerializedPEImage(PEFile peFile, PEReaderParameters readerParameters)
         {
             PEFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
             ReaderContext = new PEReaderContext(peFile, readerParameters);
@@ -43,7 +43,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        public override IPEFile PEFile
+        public override PEFile PEFile
         {
             get;
         }
@@ -57,16 +57,16 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IList<IImportedModule> GetImports()
+        protected override IList<ImportedModule> GetImports()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ImportDirectory);
             return dataDirectory.IsPresentInPE
                 ? new SerializedImportedModuleList(ReaderContext, dataDirectory)
-                : new List<IImportedModule>();
+                : new List<ImportedModule>();
         }
 
         /// <inheritdoc />
-        protected override IExportDirectory? GetExports()
+        protected override ExportDirectory? GetExports()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ExportDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
@@ -76,7 +76,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IResourceDirectory? GetResources()
+        protected override ResourceDirectory? GetResources()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ResourceDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
@@ -109,7 +109,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IDotNetDirectory? GetDotNetDirectory()
+        protected override DotNetDirectory? GetDotNetDirectory()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ClrDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
@@ -135,7 +135,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override ITlsDirectory? GetTlsDirectory()
+        protected override TlsDirectory? GetTlsDirectory()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.TlsDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))

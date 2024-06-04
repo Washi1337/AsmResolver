@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet
         private TokenAllocator? _tokenAllocator;
 
         private readonly LazyVariable<ModuleDefinition, string> _runtimeVersion;
-        private readonly LazyVariable<ModuleDefinition, IResourceDirectory?> _nativeResources;
+        private readonly LazyVariable<ModuleDefinition, ResourceDirectory?> _nativeResources;
         private IList<DebugDataEntry>? _debugData;
         private ReferenceImporter? _defaultImporter;
 
@@ -114,7 +114,7 @@ namespace AsmResolver.DotNet
         /// <param name="file">The portable executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IPEFile file) => FromFile(file, new ModuleReaderParameters());
+        public static ModuleDefinition FromFile(PEFile file) => FromFile(file, new ModuleReaderParameters());
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -123,7 +123,7 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IPEFile file, ModuleReaderParameters readerParameters) =>
+        public static ModuleDefinition FromFile(PEFile file, ModuleReaderParameters readerParameters) =>
             FromImage(PEImage.FromFile(file, readerParameters.PEReaderParameters), readerParameters);
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace AsmResolver.DotNet
         /// <param name="peImage">The image containing the .NET metadata.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage)
+        public static ModuleDefinition FromImage(PEImage peImage)
         {
             var moduleParameters = new ModuleReaderParameters(Path.GetDirectoryName(peImage.FilePath))
             {
@@ -254,7 +254,7 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET data directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReaderParameters readerParameters) =>
+        public static ModuleDefinition FromImage(PEImage peImage, ModuleReaderParameters readerParameters) =>
             new SerializedModuleDefinition(peImage, readerParameters);
 
         // Disable non-nullable property initialization warnings for the CorLibTypeFactory, RuntimeContext and
@@ -275,7 +275,7 @@ namespace AsmResolver.DotNet
             _encBaseId = new LazyVariable<ModuleDefinition, Guid>(x => x.GetEncBaseId());
             _managedEntryPoint = new LazyVariable<ModuleDefinition, IManagedEntryPoint?>(x => x.GetManagedEntryPoint());
             _runtimeVersion = new LazyVariable<ModuleDefinition, string>(x => x.GetRuntimeVersion());
-            _nativeResources = new LazyVariable<ModuleDefinition, IResourceDirectory?>(x => x.GetNativeResources());
+            _nativeResources = new LazyVariable<ModuleDefinition, ResourceDirectory?>(x => x.GetNativeResources());
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
 
@@ -343,7 +343,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// When this property is <c>null</c>, the module is a new module that is not yet assembled.
         /// </remarks>
-        public virtual IDotNetDirectory? DotNetDirectory
+        public virtual DotNetDirectory? DotNetDirectory
         {
             get;
         } = null;
@@ -652,7 +652,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the contents of the native Win32 resources data directory of the underlying
         /// portable executable (PE) file.
         /// </summary>
-        public IResourceDirectory? NativeResourceDirectory
+        public ResourceDirectory? NativeResourceDirectory
         {
             get => _nativeResources.GetValue(this);
             set => _nativeResources.SetValue(value);
@@ -1185,7 +1185,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="NativeResourceDirectory"/> property.
         /// </remarks>
-        protected virtual IResourceDirectory? GetNativeResources() => null;
+        protected virtual ResourceDirectory? GetNativeResources() => null;
 
         /// <summary>
         /// Obtains the native debug data directory of the underlying PE image (if available).
@@ -1311,7 +1311,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <returns>IPEImage built using <see cref="ManagedPEImageBuilder"/> by default</returns>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
-        public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder(), true);
+        public PEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder(), true);
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
@@ -1325,7 +1325,7 @@ namespace AsmResolver.DotNet
         /// <exception cref="MetadataBuilderException">
         /// Occurs when the construction of the PE image failed completely.
         /// </exception>
-        public IPEImage ToPEImage(IPEImageBuilder imageBuilder) => ToPEImage(imageBuilder, true);
+        public PEImage ToPEImage(IPEImageBuilder imageBuilder) => ToPEImage(imageBuilder, true);
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
@@ -1342,7 +1342,7 @@ namespace AsmResolver.DotNet
         /// <exception cref="MetadataBuilderException">
         /// Occurs when the construction of the PE image failed completely.
         /// </exception>
-        public IPEImage ToPEImage(IPEImageBuilder imageBuilder, bool throwOnNonFatalError)
+        public PEImage ToPEImage(IPEImageBuilder imageBuilder, bool throwOnNonFatalError)
         {
             var result = imageBuilder.CreateImage(this);
 

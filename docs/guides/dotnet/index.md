@@ -17,6 +17,6 @@ In short, this means the following:
 
 The third layer of abstraction is the highest level of abstraction for a
 .NET assembly that AsmResolver provides. All objects exposed by this
-layer are completely mutable and can be serialized back to a `IPEImage`
+layer are completely mutable and can be serialized back to a `PEImage`
 from the second layer, to a `PEFile` from the first layer, or to the
 disk.

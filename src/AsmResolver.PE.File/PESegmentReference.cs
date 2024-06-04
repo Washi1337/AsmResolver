@@ -8,14 +8,14 @@ namespace AsmResolver.PE.File
     /// </summary>
     public sealed class PESegmentReference : ISegmentReference
     {
-        private readonly IPEFile _peFile;
+        private readonly PEFile _peFile;
 
         /// <summary>
         /// Creates a new PE reference.
         /// </summary>
         /// <param name="peFile">The underlying PE file.</param>
         /// <param name="rva">The virtual address of the segment.</param>
-        internal PESegmentReference(IPEFile peFile, uint rva)
+        internal PESegmentReference(PEFile peFile, uint rva)
         {
             _peFile = peFile;
             Rva = rva;

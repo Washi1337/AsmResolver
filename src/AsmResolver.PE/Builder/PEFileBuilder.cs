@@ -11,7 +11,7 @@ namespace AsmResolver.PE.Builder
     public abstract class PEFileBuilder : PEFileBuilder<PEFileBuilderContext>
     {
         /// <inheritdoc />
-        protected override PEFileBuilderContext CreateContext(IPEImage image) => new(image);
+        protected override PEFileBuilderContext CreateContext(PEImage image) => new(image);
     }
 
     /// <summary>
@@ -22,7 +22,7 @@ namespace AsmResolver.PE.Builder
         where TContext : PEFileBuilderContext
     {
         /// <inheritdoc />
-        public virtual PEFile CreateFile(IPEImage image)
+        public virtual PEFile CreateFile(PEImage image)
         {
             var peFile = new PEFile();
             var context = CreateContext(image);
@@ -42,7 +42,7 @@ namespace AsmResolver.PE.Builder
         /// </summary>
         /// <param name="image">The image to build.</param>
         /// <returns>The context.</returns>
-        protected abstract TContext CreateContext(IPEImage image);
+        protected abstract TContext CreateContext(PEImage image);
 
         /// <summary>
         /// Creates the sections of the PE image.

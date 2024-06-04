@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     {
         private readonly MetadataReaderContext _context;
         private readonly MetadataStreamHeader[] _streamHeaders;
-        private readonly IMetadata _owner;
+        private readonly MetadataDirectory _owner;
         private readonly BinaryStreamReader _directoryReader;
         private readonly MetadataStreamReaderFlags _streamReaderFlags;
 
@@ -24,7 +24,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="streamHeaders">The stream headers.</param>
         /// <param name="directoryReader">The input stream containing the metadata directory.</param>
         public MetadataStreamList(
-            IMetadata owner,
+            MetadataDirectory owner,
             MetadataReaderContext context,
             MetadataStreamReaderFlags streamReaderFlags,
             MetadataStreamHeader[] streamHeaders,

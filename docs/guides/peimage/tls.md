@@ -75,7 +75,7 @@ base relocation directory of the PE image:
 ``` csharp
 using AsmResolver.PE.Relocations;
 
-IPEImage image = ...;
+PEImage image = ...;
 
 foreach (var relocation in tlsDirectory.GetRequiredBaseRelocations())
     image.Relocations.Add(relocation);

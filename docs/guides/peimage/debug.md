@@ -13,7 +13,7 @@ using AsmResolver.PE.Debug;
 
 ## The Debug Data Entries
 
-The `IPEImage` exposes all debug information through the `DebugData`
+The `PEImage` class exposes all debug information through the `DebugData`
 property. This is a list of `DebugDataEntry`, providing access to the
 type of debug data, as well as the version and raw contents of the data
 that is stored.

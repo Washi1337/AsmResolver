@@ -8,7 +8,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
 {
     public class ReadyToRunDirectoryTest
     {
-        private static T GetSection<T>(IPEImage image, bool rebuild)
+        private static T GetSection<T>(PEImage image, bool rebuild)
             where T : class, IReadyToRunSection
         {
             var serializedImage = (SerializedPEImage) image;

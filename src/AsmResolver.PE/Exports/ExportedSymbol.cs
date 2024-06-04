@@ -8,7 +8,7 @@ namespace AsmResolver.PE.Exports
     /// <summary>
     /// Represents a single symbol that is exported by a dynamically linked library.
     /// </summary>
-    public class ExportedSymbol : IOwnedCollectionElement<IExportDirectory>, ISymbol
+    public class ExportedSymbol : IOwnedCollectionElement<ExportDirectory>, ISymbol
     {
         /// <summary>
         /// Creates a new symbol that is exported by ordinal.
@@ -47,13 +47,13 @@ namespace AsmResolver.PE.Exports
         /// <summary>
         /// Gets the export directory this symbol was added to (if available).
         /// </summary>
-        public IExportDirectory? ParentDirectory
+        public ExportDirectory? ParentDirectory
         {
             get;
             private set;
         }
 
-        IExportDirectory? IOwnedCollectionElement<IExportDirectory>.Owner
+        ExportDirectory? IOwnedCollectionElement<ExportDirectory>.Owner
         {
             get => ParentDirectory;
             set => ParentDirectory = value;

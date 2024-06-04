@@ -7,13 +7,13 @@ namespace AsmResolver.PE.Exports
     /// <summary>
     /// Represents a collection of exported symbols within an export data directory.
     /// </summary>
-    public class ExportedSymbolCollection : OwnedCollection<IExportDirectory, ExportedSymbol>
+    public class ExportedSymbolCollection : OwnedCollection<ExportDirectory, ExportedSymbol>
     {
         /// <summary>
         /// Creates a new instance of the exported symbol collection.
         /// </summary>
         /// <param name="owner"></param>
-        public ExportedSymbolCollection(IExportDirectory owner)
+        public ExportedSymbolCollection(ExportDirectory owner)
             : base(owner)
         {
         }

@@ -41,7 +41,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// <summary>
         /// Gets the segment containing the table with all directory entries.
         /// </summary>
-        public ResourceTableBuffer<IResourceDirectory> DirectoryTable
+        public ResourceTableBuffer<ResourceDirectory> DirectoryTable
         {
             get;
         }
@@ -49,7 +49,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// <summary>
         /// Gets the segment containing the table with all data entries.
         /// </summary>
-        public ResourceTableBuffer<IResourceData> DataEntryTable
+        public ResourceTableBuffer<ResourceData> DataEntryTable
         {
             get;
         }
@@ -79,7 +79,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// Adds a resource directory and all its sub entries to the buffer.
         /// </summary>
         /// <param name="directory">The directory to add.</param>
-        public void AddDirectory(IResourceDirectory directory)
+        public void AddDirectory(ResourceDirectory directory)
         {
             DirectoryTable.AddEntry(directory);
             if (directory.Name != null)
@@ -92,7 +92,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         private void AddEntry(IResourceEntry entry)
         {
             if (entry.IsDirectory)
-                AddDirectory((IResourceDirectory) entry);
+                AddDirectory((ResourceDirectory) entry);
             else if (entry.IsData)
                 AddDataEntry(entry);
             else
@@ -101,7 +101,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
 
         private void AddDataEntry(IResourceEntry entry)
         {
-            var data = (IResourceData) entry;
+            var data = (ResourceData) entry;
             DataEntryTable.AddEntry(data);
 
             if (data.Contents is not null)

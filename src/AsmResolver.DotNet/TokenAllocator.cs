@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet
             Initialize(module.DotNetDirectory);
         }
 
-        private void Initialize(IDotNetDirectory? netDirectory)
+        private void Initialize(DotNetDirectory? netDirectory)
         {
             if (netDirectory is null)
                 InitializeDefault();
@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet
                 _buckets[(int) index] = new TokenBucket(new MetadataToken(index, 1));
         }
 
-        private void InitializeTable(IDotNetDirectory netDirectory)
+        private void InitializeTable(DotNetDirectory netDirectory)
         {
             var tableStream = netDirectory.Metadata!.GetStream<TablesStream>();
             for (TableIndex index = 0; index < TableIndex.Max; index++)

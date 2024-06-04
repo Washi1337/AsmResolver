@@ -93,7 +93,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public void Initialize(IMetadata parentMetadata)
+        public void Initialize(MetadataDirectory parentMetadata)
         {
             if (parentMetadata.TryGetStream(out PdbStream? pdbStream))
             {

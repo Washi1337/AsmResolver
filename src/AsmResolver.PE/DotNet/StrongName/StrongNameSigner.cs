@@ -73,8 +73,8 @@ namespace AsmResolver.PE.DotNet.StrongName
 
         private byte[] GetHashToSign(
             Stream imageStream,
-            IPEFile file,
-            IPEImage image,
+            PEFile file,
+            PEImage image,
             AssemblyHashAlgorithm hashAlgorithm)
         {
             var hashBuilder = new StrongNameDataHashBuilder(imageStream, hashAlgorithm);

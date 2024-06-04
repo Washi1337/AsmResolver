@@ -16,7 +16,11 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="directory">The .NET directory to read from.</param>
         /// <param name="fieldRvaRow">The row referencing the data.</param>
         /// <returns>The data segment, or <c>null</c> if no data was referenced.</returns>
-        ISegment? ResolveFieldData(IErrorListener listener, Platform platform, IDotNetDirectory directory,
-            in FieldRvaRow fieldRvaRow);
+        ISegment? ResolveFieldData(
+            IErrorListener listener,
+            Platform platform,
+            DotNetDirectory directory,
+            in FieldRvaRow fieldRvaRow
+        );
     }
 }

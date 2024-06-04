@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Tests.DotNet.Resources
 {
     public class DotNetResourcesDirectoryTest
     {
-        private static ManifestResourceRow FindResourceRow(IMetadata metadata, string name)
+        private static ManifestResourceRow FindResourceRow(MetadataDirectory metadata, string name)
         {
             var stringsStream = metadata.GetStream<StringsStream>();
             var tablesStream = metadata.GetStream<TablesStream>();

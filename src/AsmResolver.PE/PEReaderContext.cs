@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
 using AsmResolver.PE.File;
 
 namespace AsmResolver.PE
@@ -14,7 +13,7 @@ namespace AsmResolver.PE
         /// Creates a new instance of the <see cref="PEReaderContext"/> class.
         /// </summary>
         /// <param name="file">The original PE file.</param>
-        public PEReaderContext(IPEFile file)
+        public PEReaderContext(PEFile file)
             : this(file, new PEReaderParameters())
         {
         }
@@ -24,7 +23,7 @@ namespace AsmResolver.PE
         /// </summary>
         /// <param name="file">The original PE file.</param>
         /// <param name="parameters">The reader parameters.</param>
-        public PEReaderContext(IPEFile file, PEReaderParameters parameters)
+        public PEReaderContext(PEFile file, PEReaderParameters parameters)
         {
             File = file;
             Parameters = parameters;
@@ -33,7 +32,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets the original PE file that is being parsed.
         /// </summary>
-        public IPEFile File
+        public PEFile File
         {
             get;
         }

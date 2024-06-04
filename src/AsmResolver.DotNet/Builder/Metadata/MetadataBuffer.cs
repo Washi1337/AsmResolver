@@ -72,10 +72,10 @@ namespace AsmResolver.DotNet.Builder.Metadata
         } = true;
 
         /// <inheritdoc />
-        public IMetadata CreateMetadata()
+        public MetadataDirectory CreateMetadata()
         {
             // Create metadata directory.
-            var result = new PE.DotNet.Metadata.Metadata
+            var result = new MetadataDirectory
             {
                 VersionString = _versionString,
                 IsEncMetadata = TablesStream.IsEncMetadata
@@ -101,7 +101,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             return result;
         }
 
-        private static TStream? AddIfNotEmpty<TStream>(IMetadata metadata, IMetadataStreamBuffer streamBuffer)
+        private static TStream? AddIfNotEmpty<TStream>(MetadataDirectory metadata, IMetadataStreamBuffer streamBuffer)
             where TStream : class, IMetadataStream
         {
             return !streamBuffer.IsEmpty
@@ -109,7 +109,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
                 : null;
         }
 
-        private static TStream Add<TStream>(IMetadata metadata, IMetadataStreamBuffer streamBuffer)
+        private static TStream Add<TStream>(MetadataDirectory metadata, IMetadataStreamBuffer streamBuffer)
             where TStream : class, IMetadataStream
         {
             var stream = streamBuffer.CreateStream();

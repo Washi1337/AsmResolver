@@ -52,6 +52,6 @@ namespace AsmResolver.DotNet.Builder.Metadata
         /// Flushes all metadata stream buffers and builds up a new metadata directory.
         /// </summary>
         /// <returns>The constructed metadata directory.</returns>
-        IMetadata CreateMetadata();
+        MetadataDirectory CreateMetadata();
     }
 }

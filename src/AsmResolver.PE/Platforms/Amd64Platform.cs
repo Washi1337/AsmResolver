@@ -45,7 +45,7 @@ namespace AsmResolver.PE.Platforms
         }
 
         /// <inheritdoc />
-        public override bool TryExtractThunkAddress(IPEImage image, BinaryStreamReader reader, out uint rva)
+        public override bool TryExtractThunkAddress(PEImage image, BinaryStreamReader reader, out uint rva)
         {
             if (reader.ReadUInt16() != 0xA148)
             {

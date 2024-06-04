@@ -135,7 +135,7 @@ namespace AsmResolver.DotNet.Bundles
         /// file that hosts the CLR, or the original AppHost file the bundle was extracted from.
         /// </param>
         [Obsolete("Use BundlerParameters::FromTemplate instead.")]
-        public BundlerParameters(byte[] appHostTemplate, string appBinaryPath, IPEImage? imageToCopyHeadersFrom)
+        public BundlerParameters(byte[] appHostTemplate, string appBinaryPath, PEImage? imageToCopyHeadersFrom)
             : this(
                 appHostTemplate,
                 appBinaryPath,
@@ -159,7 +159,7 @@ namespace AsmResolver.DotNet.Bundles
             byte[] appHostTemplate,
             string appBinaryPath,
             SubSystem subSystem,
-            IResourceDirectory? resources)
+            ResourceDirectory? resources)
         {
             ApplicationHostTemplate = appHostTemplate;
             ApplicationBinaryPath = appBinaryPath;
@@ -222,7 +222,7 @@ namespace AsmResolver.DotNet.Bundles
         /// This field is ignored if <see cref="IsArm64Linux"/> is set to <c>true</c>, or <see cref="ApplicationHostTemplate"/>
         /// does not contain a proper PE image.
         /// </remarks>
-        public IResourceDirectory? Resources
+        public ResourceDirectory? Resources
         {
             get;
             set;
@@ -325,7 +325,7 @@ namespace AsmResolver.DotNet.Bundles
         /// The image to copy the PE headers and Win32 resources from. This is typically the original native executable
         /// file that hosts the CLR, or the original AppHost file the bundle was extracted from.
         /// </param>
-        public static BundlerParameters FromTemplate(byte[] appHostTemplate, string appBinaryPath, IPEImage? imageToCopyHeadersFrom)
+        public static BundlerParameters FromTemplate(byte[] appHostTemplate, string appBinaryPath, PEImage? imageToCopyHeadersFrom)
         {
             return new BundlerParameters
             {

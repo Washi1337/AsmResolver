@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Imports.Builder
     /// </summary>
     public abstract class ImportDirectoryBufferBase : SegmentBase, IImportAddressProvider
     {
-        private readonly Dictionary<IImportedModule, ThunkTableBuffer> _lookupTables = new();
+        private readonly Dictionary<ImportedModule, ThunkTableBuffer> _lookupTables = new();
         private uint _lookupTablesLength;
 
         /// <summary>
@@ -40,10 +40,10 @@ namespace AsmResolver.PE.Imports.Builder
         /// <summary>
         /// Gets an ordered list of modules that were added to the buffer.
         /// </summary>
-        protected IList<IImportedModule> Modules
+        protected IList<ImportedModule> Modules
         {
             get;
-        } = new List<IImportedModule>();
+        } = new List<ImportedModule>();
 
         /// <summary>
         /// Gets the hint-name table that is used to reference names of modules or members.
@@ -57,7 +57,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// Creates a thunk table for a module and its imported members, and adds it to the buffer.
         /// </summary>
         /// <param name="module">The module to add.</param>
-        public virtual void AddModule(IImportedModule module)
+        public virtual void AddModule(ImportedModule module)
         {
             Modules.Add(module);
             AddLookupTable(module);
@@ -68,7 +68,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// </summary>
         /// <param name="module">The module to get the associated thunk table for.</param>
         /// <returns>The thunk table.</returns>
-        public ThunkTableBuffer GetModuleThunkTable(IImportedModule module) => _lookupTables[module];
+        public ThunkTableBuffer GetModuleThunkTable(ImportedModule module) => _lookupTables[module];
 
         /// <inheritdoc />
         public uint GetThunkRva(string moduleName, string memberName)
@@ -84,7 +84,7 @@ namespace AsmResolver.PE.Imports.Builder
             return GetModuleThunkTable(module).GetMemberThunkRva(member);
         }
 
-        private void AddLookupTable(IImportedModule module)
+        private void AddLookupTable(ImportedModule module)
         {
             var lookupTable = CreateThunkTable();
             foreach (var member in module.Symbols)

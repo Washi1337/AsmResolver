@@ -4,7 +4,7 @@ using AsmResolver.PE;
 namespace AsmResolver.DotNet.Builder
 {
     /// <summary>
-    /// Provides members for constructing a .NET data directory that can be inserted into a <see cref="IPEImage"/>.
+    /// Provides members for constructing a .NET data directory that can be inserted into a <see cref="PEImage"/>.
     /// </summary>
     public interface IDotNetDirectoryFactory
     {

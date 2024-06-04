@@ -6,9 +6,9 @@ using AsmResolver.Collections;
 namespace AsmResolver.PE.Exports
 {
     /// <summary>
-    /// Provides a basic implementation of the <see cref="IExportDirectory"/> interface.
+    /// Represents the data directory containing exported symbols that other images can access through dynamic linking.
     /// </summary>
-    public class ExportDirectory : IExportDirectory
+    public class ExportDirectory
     {
         private readonly LazyVariable<ExportDirectory, string?> _name;
         private IList<ExportedSymbol>? _exports;
@@ -30,49 +30,66 @@ namespace AsmResolver.PE.Exports
             _name = new LazyVariable<ExportDirectory, string?>(name ?? throw new ArgumentNullException(nameof(name)));
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the flags associated to the export directory.
+        /// </summary>
+        /// <remarks>
+        /// This field is reserved and should be zero.
+        /// </remarks>
         public uint ExportFlags
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the time and date that the exports data was created.
+        /// </summary>
         public uint TimeDateStamp
         {
             get;
             set;
         } = 0xFFFFFFFF;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the user major version number.
+        /// </summary>
         public ushort MajorVersion
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the user minor version number.
+        /// </summary>
         public ushort MinorVersion
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the name of the exports directory.
+        /// </summary>
         public string? Name
         {
             get => _name.GetValue(this);
             set => _name.SetValue(value);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the base ordinal of the exports directory.
+        /// </summary>
         public uint BaseOrdinal
         {
             get;
             set;
         } = 1;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets an ordered list of symbols that are exported by the portable executable (PE) image.
+        /// </summary>
         public IList<ExportedSymbol> Entries
         {
             get

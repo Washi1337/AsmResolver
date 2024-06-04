@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             return method.NativeMethodBody = new NativeMethodBody(method);
         }
 
-        private static IReadableSegment GetNewCodeSegment(IPEImage image)
+        private static IReadableSegment GetNewCodeSegment(PEImage image)
         {
             var methodTable = image.DotNetDirectory!.Metadata!
                 .GetStream<TablesStream>()

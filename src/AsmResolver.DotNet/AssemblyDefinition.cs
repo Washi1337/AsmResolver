@@ -113,7 +113,7 @@ namespace AsmResolver.DotNet
         /// <param name="peImage">The image containing the .NET metadata.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static AssemblyDefinition FromImage(IPEImage peImage) =>
+        public static AssemblyDefinition FromImage(PEImage peImage) =>
             FromImage(peImage, new ModuleReaderParameters(Path.GetDirectoryName(peImage.FilePath)));
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the assembly.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static AssemblyDefinition FromImage(IPEImage peImage, ModuleReaderParameters readerParameters) =>
+        public static AssemblyDefinition FromImage(PEImage peImage, ModuleReaderParameters readerParameters) =>
             ModuleDefinition.FromImage(peImage, readerParameters).Assembly
             ?? throw new BadImageFormatException("The provided PE image does not contain an assembly manifest.");
 

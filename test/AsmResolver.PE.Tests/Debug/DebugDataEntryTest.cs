@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Tests.Debug
 {
     public class DebugDataEntryTest
     {
-        private static IPEImage RebuildAndReloadManagedPE(IPEImage image)
+        private static PEImage RebuildAndReloadManagedPE(PEImage image)
         {
             // Build.
             using var tempStream = new MemoryStream();

@@ -7,9 +7,9 @@ using AsmResolver.PE.Relocations;
 namespace AsmResolver.PE.Tls
 {
     /// <summary>
-    /// Provides a basic implementation of the <see cref="ITlsDirectory"/> interface.
+    /// Represents the data directory containing Thread-Local Storage (TLS) data.
     /// </summary>
-    public class TlsDirectory : SegmentBase, ITlsDirectory
+    public class TlsDirectory : SegmentBase
     {
         private readonly LazyVariable<TlsDirectory, IReadableSegment?> _templateData;
         private ReferenceTable? _callbackFunctions;
@@ -25,21 +25,28 @@ namespace AsmResolver.PE.Tls
             Index = SegmentReference.Null;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the block of data that is used as a template to initialize TLS data.  The system copies all
+        /// of this data each time a thread is created.
+        /// </summary>
         public IReadableSegment? TemplateData
         {
             get => _templateData.GetValue(this);
             set => _templateData.SetValue(value);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The location to receive the TLS index, which the loader assigns
+        /// </summary>
         public ISegmentReference Index
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a table of function callbacks that need to be called upon every thread creation.
+        /// </summary>
         public ReferenceTable CallbackFunctions
         {
             get
@@ -50,14 +57,19 @@ namespace AsmResolver.PE.Tls
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the number of zero bytes that need to be appended after the template data referenced by
+        /// <see cref="TemplateData"/>.
+        /// </summary>
         public uint SizeOfZeroFill
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the characteristics that are assigned to this directory.
+        /// </summary>
         public TlsCharacteristics Characteristics
         {
             get;
@@ -90,7 +102,11 @@ namespace AsmResolver.PE.Tls
         /// </remarks>
         protected virtual ReferenceTable GetCallbackFunctions() => new(ReferenceTableAttributes.Va | ReferenceTableAttributes.Adaptive | ReferenceTableAttributes.ZeroTerminated);
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Obtains a collection of base address relocations that need to be applied to the TLS data directory
+        /// after the image was loaded into memory.
+        /// </summary>
+        /// <returns>The required base relocations.</returns>
         public IEnumerable<BaseRelocation> GetRequiredBaseRelocations()
         {
             int pointerSize = _is32Bit ? sizeof(uint) : sizeof(ulong);

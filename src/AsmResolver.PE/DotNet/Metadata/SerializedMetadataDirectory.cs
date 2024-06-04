@@ -9,7 +9,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// <summary>
     /// Provides an implementation of a metadata directory that is stored in a PE file.
     /// </summary>
-    public class SerializedMetadata : Metadata
+    public class SerializedMetadataDirectory : MetadataDirectory
     {
         private readonly MetadataReaderContext _context;
         private readonly BinaryStreamReader _streamContentsReader;
@@ -25,7 +25,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
         /// <exception cref="NotSupportedException">Occurs when an unsupported metadata directory format was encountered.</exception>
         /// <exception cref="BadImageFormatException">Occurs when the metadata directory header is invalid.</exception>
-        public SerializedMetadata(MetadataReaderContext context, ref BinaryStreamReader directoryReader)
+        public SerializedMetadataDirectory(MetadataReaderContext context, ref BinaryStreamReader directoryReader)
         {
             if (!directoryReader.IsValid)
                 throw new ArgumentNullException(nameof(directoryReader));

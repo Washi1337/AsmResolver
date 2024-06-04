@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Serialized
         /// </summary>
         /// <param name="peImage">The image to interpret as a .NET module.</param>
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
-        public SerializedModuleDefinition(IPEImage peImage, ModuleReaderParameters readerParameters)
+        public SerializedModuleDefinition(PEImage peImage, ModuleReaderParameters readerParameters)
             : base(new MetadataToken(TableIndex.Module, 1))
         {
             if (peImage is null)
@@ -114,7 +114,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        public override IDotNetDirectory DotNetDirectory => ReaderContext.Image.DotNetDirectory!;
+        public override DotNetDirectory DotNetDirectory => ReaderContext.Image.DotNetDirectory!;
 
         /// <summary>
         /// Gets the reading context that is used for reading the contents of the module.
@@ -314,7 +314,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IResourceDirectory? GetNativeResources() => ReaderContext.Image.Resources;
+        protected override ResourceDirectory? GetNativeResources() => ReaderContext.Image.Resources;
 
         /// <inheritdoc />
         protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReaderContext.Image.DebugData);

@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Imports
     /// Provides a lazy-initialized list of module import entries that is stored in a PE file.
     /// </summary>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class SerializedImportedModuleList : LazyList<IImportedModule>
+    public class SerializedImportedModuleList : LazyList<ImportedModule>
     {
         private readonly PEReaderContext _context;
         private readonly DataDirectory _dataDirectory;

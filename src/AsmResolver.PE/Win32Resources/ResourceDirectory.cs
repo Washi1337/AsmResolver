@@ -7,10 +7,9 @@ using AsmResolver.Collections;
 namespace AsmResolver.PE.Win32Resources
 {
     /// <summary>
-    /// Provides a basic implementation of a resource directory that can be initialized and added to another resource
-    /// directory or used as a root resource directory of a PE image.
+    /// Represents a single directory containing Win32 resources of a PE image.
     /// </summary>
-    public class ResourceDirectory : IResourceDirectory
+    public class ResourceDirectory : IResourceEntry
     {
         private IList<IResourceEntry>? _entries;
 
@@ -49,13 +48,13 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <inheritdoc />
-        public IResourceDirectory? ParentDirectory
+        public ResourceDirectory? ParentDirectory
         {
             get;
             private set;
         }
 
-        IResourceDirectory? IOwnedCollectionElement<IResourceDirectory>.Owner
+        ResourceDirectory? IOwnedCollectionElement<ResourceDirectory>.Owner
         {
             get => ParentDirectory;
             set => ParentDirectory = value;
@@ -81,42 +80,57 @@ namespace AsmResolver.PE.Win32Resources
         /// <inheritdoc />
         bool IResourceEntry.IsData => false;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the type of resources stored in the directory.
+        /// </summary>
         public ResourceType Type
         {
             get => (ResourceType) Id;
             set => Id = (uint) value;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the flags of the directory.
+        /// </summary>
+        /// <remarks>
+        /// This field is reserved and is usually set to zero.
+        /// </remarks>
         public uint Characteristics
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the time that the resource data was created by the compiler.
+        /// </summary>
         public uint TimeDateStamp
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the major version number of the directory.
+        /// </summary>
         public ushort MajorVersion
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the minor version number of the directory.
+        /// </summary>
         public ushort MinorVersion
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a collection of entries that are stored in the directory.
+        /// </summary>
         public IList<IResourceEntry> Entries
         {
             get
@@ -149,7 +163,14 @@ namespace AsmResolver.PE.Win32Resources
             return false;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Looks up an entry in the directory by its unique identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the entry to lookup.</param>
+        /// <returns>The entry.</returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Occurs when no entry with the provided identifier was found.
+        /// </exception>
         public IResourceEntry GetEntry(uint id)
         {
             if (!TryGetEntry(id, out var entry))
@@ -157,31 +178,57 @@ namespace AsmResolver.PE.Win32Resources
             return entry;
         }
 
-        /// <inheritdoc />
-        public IResourceDirectory GetDirectory(uint id)
+        /// <summary>
+        /// Looks up an directory by its unique identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the directory to lookup.</param>
+        /// <returns>The directory.</returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Occurs when no directory with the provided identifier was found.
+        /// </exception>
+        public ResourceDirectory GetDirectory(uint id)
         {
             if (!TryGetDirectory(id, out var directory))
                 throw new KeyNotFoundException($"Directory does not contain a directory with id {id}.");
             return directory;
         }
 
-        /// <inheritdoc />
-        public IResourceDirectory GetDirectory(ResourceType type)
+        /// <summary>
+        /// Looks up an directory by its resource type.
+        /// </summary>
+        /// <param name="type">The type of resources to lookup.</param>
+        /// <returns>The directory.</returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Occurs when no directory with the provided identifier was found.
+        /// </exception>
+        public ResourceDirectory GetDirectory(ResourceType type)
         {
             if (!TryGetDirectory(type, out var directory))
                 throw new KeyNotFoundException($"Directory does not contain a directory of type {type}.");
             return directory;
         }
 
-        /// <inheritdoc />
-        public IResourceData GetData(uint id)
+        /// <summary>
+        /// Looks up a data entry in the directory by its unique identifier.
+        /// </summary>
+        /// <param name="id">The id of the data entry to lookup.</param>
+        /// <returns>The data entry.</returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Occurs when no data entry with the provided identifier was found.
+        /// </exception>
+        public ResourceData GetData(uint id)
         {
             if (!TryGetData(id, out var data))
                 throw new KeyNotFoundException($"Directory does not contain a data entry with id {id}.");
             return data;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Attempts to looks up an entry in the directory by its unique identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the entry to lookup.</param>
+        /// <param name="entry">The found entry, or <c>null</c> if none was found.</param>
+        /// <returns><c>true</c> if the entry was found, <c>false</c> otherwise.</returns>
         public bool TryGetEntry(uint id, [NotNullWhen(true)] out IResourceEntry? entry)
         {
             if (!TryGetEntryIndex(id, out int index))
@@ -194,12 +241,17 @@ namespace AsmResolver.PE.Win32Resources
             return true;
         }
 
-        /// <inheritdoc />
-        public bool TryGetDirectory(uint id, [NotNullWhen(true)] out IResourceDirectory? directory)
+        /// <summary>
+        /// Attempts to looks up a directory by its unique identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the directory to lookup.</param>
+        /// <param name="directory">The found directory, or <c>null</c> if none was found.</param>
+        /// <returns><c>true</c> if the directory was found, <c>false</c> otherwise.</returns>
+        public bool TryGetDirectory(uint id, [NotNullWhen(true)] out ResourceDirectory? directory)
         {
             if (TryGetEntry(id, out var entry) && entry.IsDirectory)
             {
-                directory = (IResourceDirectory) entry;
+                directory = (ResourceDirectory) entry;
                 return true;
             }
 
@@ -207,16 +259,26 @@ namespace AsmResolver.PE.Win32Resources
             return false;
         }
 
-        /// <inheritdoc />
-        public bool TryGetDirectory(ResourceType type, [NotNullWhen(true)] out IResourceDirectory? directory) =>
+        /// <summary>
+        /// Attempts to looks up a directory by its resource type.
+        /// </summary>
+        /// <param name="type">The type of resources to lookup.</param>
+        /// <param name="directory">The found directory, or <c>null</c> if none was found.</param>
+        /// <returns><c>true</c> if the directory was found, <c>false</c> otherwise.</returns>
+        public bool TryGetDirectory(ResourceType type, [NotNullWhen(true)] out ResourceDirectory? directory) =>
             TryGetDirectory((uint) type, out directory);
 
-        /// <inheritdoc />
-        public bool TryGetData(uint id, [NotNullWhen(true)] out IResourceData? data)
+        /// <summary>
+        /// Attempts to looks up a data entry in the directory by its unique identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the data entry to lookup.</param>
+        /// <param name="data">The found data entry, or <c>null</c> if none was found.</param>
+        /// <returns><c>true</c> if the data entry was found, <c>false</c> otherwise.</returns>
+        public bool TryGetData(uint id, [NotNullWhen(true)] out ResourceData? data)
         {
             if (TryGetEntry(id, out var entry) && entry.IsData)
             {
-                data = (IResourceData) entry;
+                data = (ResourceData) entry;
                 return true;
             }
 
@@ -224,7 +286,10 @@ namespace AsmResolver.PE.Win32Resources
             return false;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Replaces an existing entry with the same ID with the provided entry, or inserts the new entry into the directory.
+        /// </summary>
+        /// <param name="entry">The entry to store in the directory.</param>
         public void InsertOrReplaceEntry(IResourceEntry entry)
         {
             if (TryGetEntryIndex(entry.Id, out int index))
@@ -233,7 +298,11 @@ namespace AsmResolver.PE.Win32Resources
                 Entries.Insert(index, entry);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Removes an entry in the directory by its unique identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the entry to remove.</param>
+        /// <returns><c>true</c> if the data entry was found and removed, <c>false</c> otherwise.</returns>
         public bool RemoveEntry(uint id)
         {
             if (!TryGetEntryIndex(id, out int index))
@@ -243,7 +312,11 @@ namespace AsmResolver.PE.Win32Resources
             return true;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Removes a directory in the directory by its resource type.
+        /// </summary>
+        /// <param name="type">The type of resources to remove.</param>
+        /// <returns><c>true</c> if the directory was found and removed, <c>false</c> otherwise.</returns>
         public bool RemoveEntry(ResourceType type) => RemoveEntry((uint) type);
 
         /// <summary>
@@ -254,7 +327,7 @@ namespace AsmResolver.PE.Win32Resources
         /// This method is called upon initialization of the <see cref="Entries"/> property.
         /// </remarks>
         protected virtual IList<IResourceEntry> GetEntries() =>
-            new OwnedCollection<IResourceDirectory, IResourceEntry>(this);
+            new OwnedCollection<ResourceDirectory, IResourceEntry>(this);
 
         /// <inheritdoc />
         public override string ToString() => $"Directory ({Name ?? Id.ToString()})";

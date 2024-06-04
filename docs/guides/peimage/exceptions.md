@@ -15,7 +15,7 @@ using AsmResolver.PE.Exceptions;
 
 ## Runtime Functions
 
-The `IPEImage` interface exposes these tables through the `Exceptions`
+The `PEImage` class exposes these tables through the `Exceptions`
 property. This is of type `IExceptionsDirectory`, which allows for read
 access to instances of `IRuntimeFunction` through the `GetEntries`
 method. This interface models all the runtime functions through the
