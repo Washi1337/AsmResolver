@@ -97,7 +97,7 @@ namespace AsmResolver.DotNet.Resources
         /// <inheritdoc />
         public override string ToString() => $"{Name} : {Type.FullName}";
 
-        internal void Write(IBinaryStreamWriter writer, int formatVersion, int typeCode, IResourceDataSerializer serializer)
+        internal void Write(BinaryStreamWriter writer, int formatVersion, int typeCode, IResourceDataSerializer serializer)
         {
             writer.Write7BitEncodedInt32(typeCode);
 
@@ -116,7 +116,7 @@ namespace AsmResolver.DotNet.Resources
             }
         }
 
-        private void WriteV1(IBinaryStreamWriter writer, IResourceDataSerializer serializer)
+        private void WriteV1(BinaryStreamWriter writer, IResourceDataSerializer serializer)
         {
             if (Data is null)
                 return;
@@ -182,7 +182,7 @@ namespace AsmResolver.DotNet.Resources
             }
         }
 
-        private void WriteV2(IBinaryStreamWriter writer, IResourceDataSerializer serializer)
+        private void WriteV2(BinaryStreamWriter writer, IResourceDataSerializer serializer)
         {
             if (Data is null)
                 return;

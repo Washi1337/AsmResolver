@@ -75,6 +75,6 @@ namespace AsmResolver.PE.Certificates
         protected override uint GetContentsSize() => Contents?.GetPhysicalSize() ?? 0;
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer) => Contents?.Write(writer);
+        protected override void WriteContents(BinaryStreamWriter writer) => Contents?.Write(writer);
     }
 }

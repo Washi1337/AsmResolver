@@ -81,6 +81,36 @@ namespace AsmResolver.Tests.IO
         }
 
         [Theory]
+        [InlineData(new byte[] {0x03}, 3)]
+        [InlineData(new byte[] {0x7f}, 0x7f)]
+        [InlineData(new byte[] {0x80, 0x80}, 0x80)]
+        [InlineData(new byte[] {0xAE, 0x57}, 0x2E57)]
+        [InlineData(new byte[] {0xBF, 0xFF}, 0x3FFF)]
+        [InlineData(new byte[] {0xC0, 0x00, 0x40, 0x00}, 0x4000)]
+        [InlineData(new byte[] {0xDF, 0x12, 0x34, 0x56}, 0x1F123456)]
+        [InlineData(new byte[] {0xDF, 0xFF, 0xFF, 0xFF}, 0x1FFFFFFF)]
+        public void ReadCompressedUInt32(byte[] data, uint expected)
+        {
+            var reader = new BinaryStreamReader(data);
+            Assert.Equal(expected, reader.ReadCompressedUInt32());
+        }
+
+        [Theory]
+        [InlineData(new byte[] {0x06}, 3)]
+        [InlineData(new byte[] {0x7B}, -3)]
+        [InlineData(new byte[] {0x80, 0x80}, 64)]
+        [InlineData(new byte[] {0x01}, -64)]
+        [InlineData(new byte[] {0xC0, 0x00, 0x40, 0x00}, 8192)]
+        [InlineData(new byte[] {0x80, 0x01}, -8192)]
+        [InlineData(new byte[] {0xDF, 0xFF, 0xFF, 0xFE}, 0xFFFFFFF)]
+        [InlineData(new byte[] {0xC0, 0x00, 0x00, 0x01}, -0x10000000)]
+        public void ReadCompressedInt32(byte[] data, int value)
+        {
+            var reader = new BinaryStreamReader(data);
+            Assert.Equal(value, reader.ReadCompressedInt32());
+        }
+
+        [Theory]
         [InlineData("")]
         [InlineData("Hello, world!")]
         [InlineData("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789")]

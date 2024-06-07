@@ -113,7 +113,7 @@ public class SectionContribution : IWritable
     public uint GetPhysicalSize() => EntrySize;
 
     /// <inheritdoc />
-    public void Write(IBinaryStreamWriter writer)
+    public void Write(BinaryStreamWriter writer)
     {
         writer.WriteUInt16(Section);
         writer.WriteUInt16(0);

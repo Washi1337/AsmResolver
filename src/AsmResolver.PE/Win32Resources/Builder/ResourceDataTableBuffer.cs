@@ -20,13 +20,13 @@ namespace AsmResolver.PE.Win32Resources.Builder
         public override uint GetEntrySize(ResourceData entry) => SerializedResourceData.ResourceDataEntrySize;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Entries.Count; i++)
                 WriteDataEntry(writer, Entries[i]);
         }
 
-        private static void WriteDataEntry(IBinaryStreamWriter writer, ResourceData entry)
+        private static void WriteDataEntry(BinaryStreamWriter writer, ResourceData entry)
         {
             if (entry.Contents is null)
             {

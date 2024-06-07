@@ -66,7 +66,7 @@ public class RelocatableSegmentBuilder : ISegment, IEnumerable<ISegment>
     public uint GetPhysicalSize() => _contents.GetPhysicalSize();
 
     /// <inheritdoc />
-    public void Write(IBinaryStreamWriter writer) => _contents.Write(writer);
+    public void Write(BinaryStreamWriter writer) => _contents.Write(writer);
 
     /// <inheritdoc />
     public uint GetVirtualSize() => _contents.GetVirtualSize();

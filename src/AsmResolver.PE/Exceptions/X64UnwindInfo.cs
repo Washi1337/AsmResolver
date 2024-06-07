@@ -202,7 +202,7 @@ namespace AsmResolver.PE.Exceptions
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteByte(_firstByte);
             writer.WriteByte(SizeOfProlog);

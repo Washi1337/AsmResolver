@@ -117,7 +117,7 @@ public class SectionMap : IWritable
     public uint GetPhysicalSize() => EntrySize;
 
     /// <inheritdoc />
-    public void Write(IBinaryStreamWriter writer)
+    public void Write(BinaryStreamWriter writer)
     {
         writer.WriteUInt16((ushort) Attributes);
         writer.WriteUInt16(LogicalOverlayNumber);

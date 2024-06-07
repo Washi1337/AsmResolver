@@ -38,7 +38,7 @@ namespace AsmResolver.PE.DotNet.Resources
         public override uint GetPhysicalSize() => _reader.Length;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
+        public override void Write(BinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
 
         /// <inheritdoc />
         public override byte[]? GetManifestResourceData(uint offset)

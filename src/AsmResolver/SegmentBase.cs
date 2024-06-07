@@ -38,6 +38,6 @@ namespace AsmResolver
         public uint GetVirtualSize() => GetPhysicalSize();
 
         /// <inheritdoc />
-        public abstract void Write(IBinaryStreamWriter writer);
+        public abstract void Write(BinaryStreamWriter writer);
     }
 }

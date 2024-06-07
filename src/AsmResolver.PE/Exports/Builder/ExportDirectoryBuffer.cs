@@ -97,13 +97,13 @@ namespace AsmResolver.PE.Exports.Builder
         public override uint GetPhysicalSize() => ExportDirectoryHeaderSize + _contentsBuilder.GetPhysicalSize();
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             WriteExportDirectoryHeader(writer);
             _contentsBuilder.Write(writer);
         }
 
-        private void WriteExportDirectoryHeader(IBinaryStreamWriter writer)
+        private void WriteExportDirectoryHeader(BinaryStreamWriter writer)
         {
             _exportDirectory ??= new ExportDirectory(string.Empty);
             writer.WriteUInt32(_exportDirectory.ExportFlags);

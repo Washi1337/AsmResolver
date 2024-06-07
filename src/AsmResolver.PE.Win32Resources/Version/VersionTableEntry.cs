@@ -37,7 +37,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         protected abstract uint GetValueLength();
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             var header = CreateHeader();
             header.Write(writer);
@@ -49,6 +49,6 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// Writes the value field of the version structure.
         /// </summary>
         /// <param name="writer">The output stream.</param>
-        protected abstract void WriteValue(IBinaryStreamWriter writer);
+        protected abstract void WriteValue(BinaryStreamWriter writer);
     }
 }

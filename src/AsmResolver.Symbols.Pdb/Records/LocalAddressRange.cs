@@ -38,7 +38,7 @@ public record struct LocalAddressRange(uint Start, ushort SectionStart, ushort L
     public uint GetPhysicalSize() => EntrySize;
 
     /// <inheritdoc />
-    public void Write(IBinaryStreamWriter writer)
+    public void Write(BinaryStreamWriter writer)
     {
         writer.WriteUInt32(Start);
         writer.WriteUInt16(SectionStart);

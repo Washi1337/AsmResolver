@@ -21,7 +21,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         public override uint GetEntrySize(string entry) => sizeof(ushort) + (uint) Encoding.Unicode.GetByteCount(entry);
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             foreach (string name in Entries)
             {;

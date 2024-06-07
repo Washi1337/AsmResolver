@@ -70,13 +70,13 @@ namespace AsmResolver.Patching
             : throw new InvalidOperationException("Segment is not readable.");
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             Contents.Write(writer);
             ApplyPatches(writer);
         }
 
-        private void ApplyPatches(IBinaryStreamWriter writer)
+        private void ApplyPatches(BinaryStreamWriter writer)
         {
             ulong offset = writer.Offset;
 

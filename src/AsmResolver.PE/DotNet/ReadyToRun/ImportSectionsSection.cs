@@ -47,7 +47,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         public override uint GetPhysicalSize() => (uint) Sections.Count * ImportSection.ImportSectionSize;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Sections.Count; i++)
                 Sections[i].Write(writer);

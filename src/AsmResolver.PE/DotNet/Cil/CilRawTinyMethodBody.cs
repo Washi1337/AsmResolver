@@ -73,7 +73,7 @@ namespace AsmResolver.PE.DotNet.Cil
         public override uint GetPhysicalSize() => sizeof(byte) + Code.GetPhysicalSize();
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             uint codeSize = Code.GetPhysicalSize();
             if (codeSize > 0x3F)

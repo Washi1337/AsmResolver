@@ -110,10 +110,10 @@ namespace AsmResolver.DotNet.Signatures
                 return signature;
             }
 
-            var loBounds = new List<uint>((int) numLoBounds);
+            var loBounds = new List<int>((int) numLoBounds);
             for (int i = 0; i < numLoBounds; i++)
             {
-                if (!reader.TryReadCompressedUInt32(out uint bound))
+                if (!reader.TryReadCompressedInt32(out int bound))
                 {
                     context.ReaderContext.BadImage($"Lower bound {i.ToString()} of array type signature is invalid.");
                     return signature;
@@ -130,7 +130,7 @@ namespace AsmResolver.DotNet.Signatures
                 if (i < numSizes)
                     size = (int) sizes[i];
                 if (i < numLoBounds)
-                    lowerBound = (int) loBounds[i];
+                    lowerBound = loBounds[i];
 
                 signature.Dimensions.Add(new ArrayDimension(size, lowerBound));
             }
@@ -237,7 +237,7 @@ namespace AsmResolver.DotNet.Signatures
                 .ToArray();
             writer.WriteCompressedUInt32((uint) boundedDimensions.Length);
             foreach (var boundedDimension in boundedDimensions)
-                writer.WriteCompressedUInt32((uint) boundedDimension.LowerBound!.Value);
+                writer.WriteCompressedInt32(boundedDimension.LowerBound!.Value);
         }
     }
 }

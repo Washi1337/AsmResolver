@@ -51,6 +51,6 @@ namespace AsmResolver.PE.Relocations.Builder
         public uint GetPhysicalSize() => sizeof(ushort);
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer) => writer.WriteUInt16(_value);
+        public void Write(BinaryStreamWriter writer) => writer.WriteUInt16(_value);
     }
 }

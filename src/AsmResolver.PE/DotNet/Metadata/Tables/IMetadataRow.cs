@@ -47,6 +47,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         /// <param name="writer">The output stream writer.</param>
         /// <param name="layout">The new layout of the table.</param>
-        void Write(IBinaryStreamWriter writer, TableLayout layout);
+        void Write(BinaryStreamWriter writer, TableLayout layout);
     }
 }

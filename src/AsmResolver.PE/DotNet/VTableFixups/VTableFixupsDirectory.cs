@@ -37,7 +37,7 @@ namespace AsmResolver.PE.DotNet.VTableFixups
         public uint GetPhysicalSize() => (uint) this.Sum(v => v.GetPhysicalSize());
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Count; i++)
                 this[i].Write(writer);

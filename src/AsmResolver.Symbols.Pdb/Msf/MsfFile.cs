@@ -126,12 +126,12 @@ public class MsfFile
     /// Reconstructs and writes the MSF file to an output stream.
     /// </summary>
     /// <param name="writer">The output stream.</param>
-    public void Write(IBinaryStreamWriter writer) => Write(writer, SequentialMsfFileBuilder.Instance);
+    public void Write(BinaryStreamWriter writer) => Write(writer, SequentialMsfFileBuilder.Instance);
 
     /// <summary>
     /// Reconstructs and writes the MSF file to an output stream.
     /// </summary>
     /// <param name="writer">The output stream.</param>
     /// <param name="builder">The builder to use for reconstructing the MSF file.</param>
-    public void Write(IBinaryStreamWriter writer, IMsfFileBuilder builder) => builder.CreateFile(this).Write(writer);
+    public void Write(BinaryStreamWriter writer, IMsfFileBuilder builder) => builder.CreateFile(this).Write(writer);
 }

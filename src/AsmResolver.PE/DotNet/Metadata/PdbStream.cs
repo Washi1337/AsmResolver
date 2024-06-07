@@ -111,7 +111,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteBytes(Id);
             writer.WriteUInt32(EntryPoint.ToUInt32());

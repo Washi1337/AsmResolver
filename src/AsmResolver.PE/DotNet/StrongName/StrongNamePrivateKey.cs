@@ -213,7 +213,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             base.Write(writer);
             writer.WriteBytes(P);

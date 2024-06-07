@@ -291,7 +291,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Rows.Count; i++)
                 Rows[i].Write(writer, Layout);

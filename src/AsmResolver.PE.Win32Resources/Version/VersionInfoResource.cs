@@ -259,7 +259,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         protected override uint GetValueLength() => FixedVersionInfo.GetPhysicalSize();
 
         /// <inheritdoc />
-        protected override void WriteValue(IBinaryStreamWriter writer)
+        protected override void WriteValue(BinaryStreamWriter writer)
         {
             FixedVersionInfo.Write(writer);
             foreach (var entry in _entries.Values)

@@ -32,7 +32,7 @@ namespace AsmResolver
         public override uint GetPhysicalSize() => Size;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer) => writer.WriteZeroes((int) Size);
+        public override void Write(BinaryStreamWriter writer) => writer.WriteZeroes((int) Size);
 
         /// <inheritdoc />
         public BinaryStreamReader CreateReader(ulong fileOffset, uint size)

@@ -15,7 +15,7 @@ public class NativeArrayTest
 
         public IntValue(int value) => Value = value;
         public uint GetPhysicalSize() => sizeof(uint);
-        public void Write(IBinaryStreamWriter writer) => writer.WriteInt32(Value);
+        public void Write(BinaryStreamWriter writer) => writer.WriteInt32(Value);
         public static implicit operator IntValue(int value) => new(value);
         public static implicit operator int(IntValue value) => value.Value;
     }

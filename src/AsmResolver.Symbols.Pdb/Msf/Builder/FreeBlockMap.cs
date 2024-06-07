@@ -29,7 +29,7 @@ public class FreeBlockMap : SegmentBase
     public override uint GetPhysicalSize() => (uint) (BitField.Count / 8);
 
     /// <inheritdoc />
-    public override void Write(IBinaryStreamWriter writer)
+    public override void Write(BinaryStreamWriter writer)
     {
         byte[] data = new byte[BitField.Count / 8];
         BitField.CopyTo(data, 0);

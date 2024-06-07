@@ -187,7 +187,7 @@ public class MsfFileBuffer : SegmentBase
     public override uint GetPhysicalSize() => SuperBlock.BlockCount * SuperBlock.BlockSize;
 
     /// <inheritdoc />
-    public override void Write(IBinaryStreamWriter writer)
+    public override void Write(BinaryStreamWriter writer)
     {
         foreach (var block in _blocks)
         {

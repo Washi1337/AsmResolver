@@ -116,7 +116,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteByte(Width);
             writer.WriteByte((Height));

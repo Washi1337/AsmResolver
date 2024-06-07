@@ -39,7 +39,7 @@ namespace AsmResolver
         public override uint GetPhysicalSize() => _originalSize;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer) =>
+        public override void Write(BinaryStreamWriter writer) =>
             CreateReader(Offset, _originalSize).WriteToOutput(writer);
 
         /// <inheritdoc />

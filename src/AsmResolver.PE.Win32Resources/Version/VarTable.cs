@@ -67,7 +67,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         protected override uint GetValueLength() => (uint) (Values.Count * sizeof(uint));
 
         /// <inheritdoc />
-        protected override void WriteValue(IBinaryStreamWriter writer)
+        protected override void WriteValue(BinaryStreamWriter writer)
         {
             foreach (uint value in Values)
                 writer.WriteUInt32(value);

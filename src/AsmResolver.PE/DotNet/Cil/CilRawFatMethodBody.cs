@@ -212,7 +212,7 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt16((ushort) ((ushort) _attributes | 0x3000));
             writer.WriteUInt16(MaxStack);

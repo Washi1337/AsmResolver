@@ -86,7 +86,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        public void Write(BinaryStreamWriter writer, TableLayout layout)
         {
             writer.WriteIndex(Parent, (IndexSize) layout.Columns[0].Size);
             writer.WriteIndex(Kind, (IndexSize) layout.Columns[1].Size);

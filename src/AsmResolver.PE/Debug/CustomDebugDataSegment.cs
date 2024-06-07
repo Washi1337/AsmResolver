@@ -60,6 +60,6 @@ namespace AsmResolver.PE.Debug
         public uint GetVirtualSize() => Contents?.GetPhysicalSize() ?? 0;
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer) => Contents?.Write(writer);
+        public void Write(BinaryStreamWriter writer) => Contents?.Write(writer);
     }
 }

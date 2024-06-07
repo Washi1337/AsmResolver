@@ -71,6 +71,6 @@ namespace AsmResolver.PE.Builder
         public uint GetVirtualSize() => _segments.GetVirtualSize();
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer) => _segments.Write(writer);
+        public void Write(BinaryStreamWriter writer) => _segments.Write(writer);
     }
 }

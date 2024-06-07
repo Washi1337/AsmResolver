@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Resources
         public uint GetPhysicalSize() => Name.GetBinaryFormatterSize(Encoding.Unicode) + sizeof(uint);
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             writer.WriteBinaryFormatterString(Name, Encoding.Unicode);
             writer.WriteUInt32(Offset);

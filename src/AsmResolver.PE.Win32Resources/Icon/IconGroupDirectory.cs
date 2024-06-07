@@ -140,7 +140,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt16(Reserved);
             writer.WriteUInt16(Type);

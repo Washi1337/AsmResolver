@@ -36,7 +36,7 @@ public record struct LocalAddressGap(ushort Start, ushort Length) : IWritable
     public uint GetPhysicalSize() => Size;
 
     /// <inheritdoc />
-    public void Write(IBinaryStreamWriter writer)
+    public void Write(BinaryStreamWriter writer)
     {
         writer.WriteUInt16(Start);
         writer.WriteUInt16(Length);

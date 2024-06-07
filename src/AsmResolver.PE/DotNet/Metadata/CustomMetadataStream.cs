@@ -77,6 +77,6 @@ namespace AsmResolver.PE.DotNet.Metadata
         public uint GetVirtualSize() => GetPhysicalSize();
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer) => Contents.Write(writer);
+        public void Write(BinaryStreamWriter writer) => Contents.Write(writer);
     }
 }

@@ -44,7 +44,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         public override uint GetPhysicalSize() => Contents.GetPhysicalSize();
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer) => Contents.Write(writer);
+        public override void Write(BinaryStreamWriter writer) => Contents.Write(writer);
 
         /// <inheritdoc />
         public BinaryStreamReader CreateReader()

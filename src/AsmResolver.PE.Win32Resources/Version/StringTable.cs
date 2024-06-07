@@ -215,7 +215,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         protected override uint GetValueLength() => 0u;
 
         /// <inheritdoc />
-        protected override void WriteValue(IBinaryStreamWriter writer)
+        protected override void WriteValue(BinaryStreamWriter writer)
         {
             foreach (var entry in _entries)
             {
@@ -224,7 +224,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             }
         }
 
-        private static void WriteEntry(IBinaryStreamWriter writer, KeyValuePair<string, string> entry)
+        private static void WriteEntry(BinaryStreamWriter writer, KeyValuePair<string, string> entry)
         {
             var header = new VersionTableEntryHeader(entry.Key)
             {

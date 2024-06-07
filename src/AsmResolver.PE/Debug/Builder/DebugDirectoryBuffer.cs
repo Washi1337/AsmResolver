@@ -47,7 +47,7 @@ namespace AsmResolver.PE.Debug.Builder
         public uint GetPhysicalSize() => _headers.GetPhysicalSize();
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer) => _headers.Write(writer);
+        public void Write(BinaryStreamWriter writer) => _headers.Write(writer);
 
         /// <inheritdoc />
         public uint GetVirtualSize() => _headers.GetVirtualSize();

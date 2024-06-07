@@ -604,7 +604,7 @@ namespace AsmResolver.PE.File
         /// Writes the PE file to the provided output stream.
         /// </summary>
         /// <param name="writer">The output stream to write to.</param>
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             UpdateHeaders();
 

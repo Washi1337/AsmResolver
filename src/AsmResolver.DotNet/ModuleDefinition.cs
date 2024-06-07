@@ -1301,7 +1301,7 @@ namespace AsmResolver.DotNet
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
-        public void Write(IBinaryStreamWriter writer, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
+        public void Write(BinaryStreamWriter writer, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
             ToPEImage(imageBuilder).ToPEFile(fileBuilder).Write(writer);
         }

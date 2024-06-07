@@ -4,10 +4,10 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
 {
     internal struct NibbleWriter
     {
-        private readonly IBinaryStreamWriter _writer;
+        private readonly BinaryStreamWriter _writer;
         private byte? _buffer;
 
-        public NibbleWriter(IBinaryStreamWriter writer)
+        public NibbleWriter(BinaryStreamWriter writer)
         {
             _writer = writer;
             _buffer = null;

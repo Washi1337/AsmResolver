@@ -156,7 +156,7 @@ namespace AsmResolver.PE.DotNet
             + 6 * DataDirectory.DataDirectorySize;  // data directories.
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(GetPhysicalSize());
             writer.WriteUInt16(MajorRuntimeVersion);

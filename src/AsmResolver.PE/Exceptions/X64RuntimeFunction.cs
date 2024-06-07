@@ -75,7 +75,7 @@ namespace AsmResolver.PE.Exceptions
         public uint GetPhysicalSize() => EntrySize;
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(Begin.Rva);
             writer.WriteUInt32(End.Rva);

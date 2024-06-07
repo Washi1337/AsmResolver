@@ -140,7 +140,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         public uint GetVirtualSize() => GetPhysicalSize();
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             uint header = Header;
             uint headerSize = NativeFormat.GetEncodedUnsignedSize(header);
@@ -153,7 +153,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
                 root.Write(writer);
         }
 
-        private void WriteRootNodeHeader(IBinaryStreamWriter writer, Node root, uint headerSize)
+        private void WriteRootNodeHeader(BinaryStreamWriter writer, Node root, uint headerSize)
         {
             uint offset = (uint) (root.Offset - headerSize - Offset);
             switch (_entryIndexSize)
@@ -256,7 +256,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
 
             public override uint GetPhysicalSize() => _size;
 
-            public override void Write(IBinaryStreamWriter writer)
+            public override void Write(BinaryStreamWriter writer)
             {
                 System.Diagnostics.Debug.Assert(writer.Offset == Offset);
 

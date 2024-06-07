@@ -114,7 +114,7 @@ namespace AsmResolver.Collections
         public uint GetVirtualSize() => GetPhysicalSize();
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Items.Count; i++)
             {

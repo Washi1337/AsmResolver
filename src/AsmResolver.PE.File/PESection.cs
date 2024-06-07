@@ -292,6 +292,6 @@ namespace AsmResolver.PE.File
         public override string ToString() => Name;
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer) => Contents?.Write(writer);
+        public void Write(BinaryStreamWriter writer) => Contents?.Write(writer);
     }
 }
