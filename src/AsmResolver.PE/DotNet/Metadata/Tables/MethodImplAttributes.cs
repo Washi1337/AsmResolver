@@ -77,5 +77,27 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Method may not be inlined.
         /// </summary>
         NoInlining = 0x0008,
+
+        /// <summary>
+        /// Method should be inlined if possible.
+        /// </summary>
+        AggressiveInlining = 0x0100,
+
+        /// <summary>
+        /// Method may contain hot code and should be aggressively optimized.
+        /// </summary>
+        AggressiveOptimization = 0x0200,
+
+        /// <summary>
+        /// Specifies that the JIT compiler should look for security mitigation attributes, such as the user-defined
+        /// <c>System.Runtime.CompilerServices.SecurityMitigationsAttribute</c>. If found, the JIT compiler applies
+        /// any related security mitigations. Available starting with .NET Framework 4.8.
+        /// </summary>
+        /// <remarks>
+        /// This is an undocumented flag and is currently not used:
+        /// Original addition: https://github.com/dotnet/dotnet-api-docs/pull/2253
+        /// Documentation removal: https://github.com/dotnet/dotnet-api-docs/pull/4652
+        /// </remarks>
+        SecurityMitigations,
     }
 }
