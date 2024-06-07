@@ -2,6 +2,10 @@ using System;
 using System.IO;
 using System.Text;
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+using System.Buffers.Binary;
+#endif
+
 namespace AsmResolver.IO
 {
     /// <summary>
@@ -90,8 +94,12 @@ namespace AsmResolver.IO
         /// <param name="value">The unsigned 16-bit integer to write.</param>
         public void WriteUInt16(ushort value)
         {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            BinaryPrimitives.WriteUInt16LittleEndian(_buffer, value);
+#else
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
+#endif
             BaseStream.Write(_buffer, 0, 2);
         }
 
@@ -101,10 +109,14 @@ namespace AsmResolver.IO
         /// <param name="value">The unsigned 32-bit integer to write.</param>
         public void WriteUInt32(uint value)
         {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            BinaryPrimitives.WriteUInt32LittleEndian(_buffer, value);
+#else
             _buffer[3] = (byte) ((value >> 24) & 0xFF);
             _buffer[2] = (byte) ((value >> 16) & 0xFF);
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
+#endif
             BaseStream.Write(_buffer, 0, 4);
         }
 
@@ -114,6 +126,9 @@ namespace AsmResolver.IO
         /// <param name="value">The unsigned 64-bit integer to write.</param>
         public void WriteUInt64(ulong value)
         {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            BinaryPrimitives.WriteUInt64LittleEndian(_buffer, value);
+#else
             _buffer[7] = (byte) ((value >> 56) & 0xFF);
             _buffer[6] = (byte) ((value >> 48) & 0xFF);
             _buffer[5] = (byte) ((value >> 40) & 0xFF);
@@ -122,6 +137,7 @@ namespace AsmResolver.IO
             _buffer[2] = (byte) ((value >> 16) & 0xFF);
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
+#endif
             BaseStream.Write(_buffer, 0, 8);
         }
 
@@ -140,8 +156,12 @@ namespace AsmResolver.IO
         /// <param name="value">The signed 16-bit integer to write.</param>
         public void WriteInt16(short value)
         {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            BinaryPrimitives.WriteInt16LittleEndian(_buffer, value);
+#else
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
+#endif
             BaseStream.Write(_buffer, 0, 2);
         }
 
@@ -151,10 +171,14 @@ namespace AsmResolver.IO
         /// <param name="value">The signed 32-bit integer to write.</param>
         public void WriteInt32(int value)
         {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            BinaryPrimitives.WriteInt32LittleEndian(_buffer, value);
+#else
             _buffer[3] = (byte) ((value >> 24) & 0xFF);
             _buffer[2] = (byte) ((value >> 16) & 0xFF);
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
+#endif
             BaseStream.Write(_buffer, 0, 4);
         }
 
@@ -164,6 +188,9 @@ namespace AsmResolver.IO
         /// <param name="value">The signed 64-bit integer to write.</param>
         public void WriteInt64(long value)
         {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            BinaryPrimitives.WriteInt64LittleEndian(_buffer, value);
+#else
             _buffer[7] = (byte) ((value >> 56) & 0xFF);
             _buffer[6] = (byte) ((value >> 48) & 0xFF);
             _buffer[5] = (byte) ((value >> 40) & 0xFF);
@@ -172,6 +199,7 @@ namespace AsmResolver.IO
             _buffer[2] = (byte) ((value >> 16) & 0xFF);
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
+#endif
             BaseStream.Write(_buffer, 0, 8);
         }
 
@@ -284,9 +312,11 @@ namespace AsmResolver.IO
                 case IndexSize.Short:
                     WriteUInt16((ushort) value);
                     break;
+
                 case IndexSize.Long:
                     WriteUInt32(value);
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(size), size, null);
             }
@@ -298,23 +328,25 @@ namespace AsmResolver.IO
         /// <param name="value">The value to write.</param>
         public void WriteCompressedUInt32(uint value)
         {
-            if (value < 0x80)
+            switch (value)
             {
-                WriteByte((byte) value);
-            }
-            else if (value < 0x4000)
-            {
-                _buffer[1] = (byte) value;
-                _buffer[0] = (byte) (0x80 | value >> 8);
-                BaseStream.Write(_buffer, 0, 2);
-            }
-            else
-            {
-                _buffer[3] = (byte) value;
-                _buffer[2] = (byte) (value >> 0x08);
-                _buffer[1] = (byte) (value >> 0x10);
-                _buffer[0] = (byte) (0x80 | 0x40 | value >> 0x18);
-                BaseStream.Write(_buffer, 0, 4);
+                case < 0x80:
+                    WriteByte((byte) value);
+                    break;
+
+                case < 0x4000:
+                    _buffer[1] = (byte) value;
+                    _buffer[0] = (byte) (0x80 | value >> 8);
+                    BaseStream.Write(_buffer, 0, 2);
+                    break;
+
+                default:
+                    _buffer[3] = (byte) value;
+                    _buffer[2] = (byte) (value >> 0x08);
+                    _buffer[1] = (byte) (value >> 0x10);
+                    _buffer[0] = (byte) (0x80 | 0x40 | value >> 0x18);
+                    BaseStream.Write(_buffer, 0, 4);
+                    break;
             }
         }
 
@@ -325,26 +357,30 @@ namespace AsmResolver.IO
         public void WriteCompressedInt32(int value)
         {
             uint sign = (uint) value >> 31;
-            if (value is >= -0x40 and < 0x40)
+            uint rotated;
+
+            switch (value)
             {
-                uint rotated = ((uint) (value & 0x3F) << 1) | sign;
-                WriteByte((byte) rotated);
-            }
-            else if (value is >= -0x2000 and < 0x2000)
-            {
-                uint rotated = ((uint) (value & 0x1FFF) << 1) | sign;
-                _buffer[1] = (byte) rotated;
-                _buffer[0] = (byte) (0x80 | rotated >> 8);
-                BaseStream.Write(_buffer, 0, 2);
-            }
-            else
-            {
-                uint rotated = ((uint) (value & 0x0FFF_FFFF) << 1) | sign;
-                _buffer[3] = (byte) rotated;
-                _buffer[2] = (byte) (rotated >> 0x08);
-                _buffer[1] = (byte) (rotated >> 0x10);
-                _buffer[0] = (byte)(0x80 | 0x40 | rotated >> 0x18);
-                BaseStream.Write(_buffer, 0, 4);
+                case >= -0x40 and < 0x40:
+                    rotated = ((uint) (value & 0x3F) << 1) | sign;
+                    WriteByte((byte) rotated);
+                    break;
+
+                case >= -0x2000 and < 0x2000:
+                    rotated = ((uint) (value & 0x1FFF) << 1) | sign;
+                    _buffer[1] = (byte) rotated;
+                    _buffer[0] = (byte) (0x80 | rotated >> 8);
+                    BaseStream.Write(_buffer, 0, 2);
+                    break;
+
+                default:
+                    rotated = ((uint) (value & 0x0FFF_FFFF) << 1) | sign;
+                    _buffer[3] = (byte) rotated;
+                    _buffer[2] = (byte) (rotated >> 0x08);
+                    _buffer[1] = (byte) (rotated >> 0x10);
+                    _buffer[0] = (byte)(0x80 | 0x40 | rotated >> 0x18);
+                    BaseStream.Write(_buffer, 0, 4);
+                    break;
             }
         }
 
