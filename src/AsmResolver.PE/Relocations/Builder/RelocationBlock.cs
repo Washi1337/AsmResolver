@@ -39,7 +39,7 @@ namespace AsmResolver.PE.Relocations.Builder
         public override uint GetPhysicalSize() => (uint) (Entries.Count + 1) * sizeof(ushort) + 2 * sizeof(uint);
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(PageRva);
             writer.WriteUInt32(GetPhysicalSize());

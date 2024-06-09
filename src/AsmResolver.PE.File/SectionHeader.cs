@@ -239,7 +239,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteBytes(Name.GetBytesUnsafe());
             writer.WriteZeroes(8 - Name.ByteCount);

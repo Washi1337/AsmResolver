@@ -142,7 +142,7 @@ public class InfoStream : SegmentBase
     }
 
     /// <inheritdoc />
-    public override void Write(IBinaryStreamWriter writer)
+    public override void Write(BinaryStreamWriter writer)
     {
         // Write basic info stream header.
         writer.WriteUInt32((uint) Version);

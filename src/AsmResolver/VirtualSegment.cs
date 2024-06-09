@@ -77,6 +77,6 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer) => PhysicalContents?.Write(writer);
+        public void Write(BinaryStreamWriter writer) => PhysicalContents?.Write(writer);
     }
 }

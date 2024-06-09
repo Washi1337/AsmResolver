@@ -147,7 +147,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             ulong start = writer.Offset;
 
@@ -202,7 +202,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="writer">The output stream to write to.</param>
         /// <param name="headers">The headers to write.</param>
-        protected virtual void WriteStreamHeaders(IBinaryStreamWriter writer, MetadataStreamHeader[] headers)
+        protected virtual void WriteStreamHeaders(BinaryStreamWriter writer, MetadataStreamHeader[] headers)
         {
             for (int i = 0; i < headers.Length; i++)
             {
@@ -221,7 +221,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// Writes the contents of all streams to an output stream.
         /// </summary>
         /// <param name="writer">The output stream to write to.</param>
-        protected virtual void WriteStreams(IBinaryStreamWriter writer)
+        protected virtual void WriteStreams(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Streams.Count; i++)
                 Streams[i].Write(writer);

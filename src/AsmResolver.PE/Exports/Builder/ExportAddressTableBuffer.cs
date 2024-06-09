@@ -31,7 +31,7 @@ namespace AsmResolver.PE.Exports.Builder
         public override uint GetPhysicalSize() => (uint) (_entries.Count * sizeof(uint));
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             foreach (var entry in _entries)
             {

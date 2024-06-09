@@ -170,7 +170,7 @@ namespace AsmResolver.DotNet.Code.Cil
             return rentedWriter.GetData();
         }
 
-        private void WriteExceptionHandler(MethodBodySerializationContext context, IBinaryStreamWriter writer, CilExceptionHandler handler, bool useFatFormat)
+        private void WriteExceptionHandler(MethodBodySerializationContext context, BinaryStreamWriter writer, CilExceptionHandler handler, bool useFatFormat)
         {
             if (handler.IsFat && !useFatFormat)
                 throw new InvalidOperationException("Can only serialize fat exception handlers in fat format.");

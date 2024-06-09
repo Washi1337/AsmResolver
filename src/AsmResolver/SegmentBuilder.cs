@@ -88,7 +88,7 @@ namespace AsmResolver
         public uint GetVirtualSize() => _virtualSize;
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             for (int i = 0; i < _items.Count; i++)
             {

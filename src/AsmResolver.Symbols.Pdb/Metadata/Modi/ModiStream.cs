@@ -133,7 +133,7 @@ public class ModiStream : SegmentBase
     }
 
     /// <inheritdoc />
-    public override void Write(IBinaryStreamWriter writer)
+    public override void Write(BinaryStreamWriter writer)
     {
         writer.WriteUInt32(Signature);
         Symbols?.Write(writer);

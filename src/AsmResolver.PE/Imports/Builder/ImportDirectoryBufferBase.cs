@@ -104,7 +104,7 @@ namespace AsmResolver.PE.Imports.Builder
         public override uint GetPhysicalSize() => _lookupTablesLength;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             foreach (var module in Modules)
                 _lookupTables[module].Write(writer);

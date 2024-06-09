@@ -159,7 +159,7 @@ public class TrampolineTableBuffer : SegmentBase
     public override uint GetPhysicalSize() => _contents.GetPhysicalSize();
 
     /// <inheritdoc />
-    public override void Write(IBinaryStreamWriter writer) => _contents.Write(writer);
+    public override void Write(BinaryStreamWriter writer) => _contents.Write(writer);
 
     private static bool TryGetSectionContainingRva(
         IList<PESection> sections,

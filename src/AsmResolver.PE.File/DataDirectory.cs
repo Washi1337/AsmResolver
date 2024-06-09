@@ -73,7 +73,7 @@ namespace AsmResolver.PE.File
         public uint GetPhysicalSize() => DataDirectorySize;
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(VirtualAddress);
             writer.WriteUInt32(Size);

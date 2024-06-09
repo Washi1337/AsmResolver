@@ -112,7 +112,7 @@ namespace AsmResolver.DotNet.Resources
         }
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(Magic);
             writer.WriteUInt32(1);

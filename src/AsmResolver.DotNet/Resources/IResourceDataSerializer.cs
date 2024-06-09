@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Resources
         /// <param name="writer">The output stream to write to.</param>
         /// <param name="type">The type of the resource.</param>
         /// <param name="value">The object to serialize.</param>
-        void Serialize(IBinaryStreamWriter writer, ResourceType type, object? value);
+        void Serialize(BinaryStreamWriter writer, ResourceType type, object? value);
 
         /// <summary>
         /// Reads a resource object from the input stream.

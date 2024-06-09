@@ -99,5 +99,5 @@ public abstract class AddressTableInitializerStub : ISegment
     public uint GetVirtualSize() => _contents.GetVirtualSize();
 
     /// <inheritdoc />
-    public void Write(IBinaryStreamWriter writer) => _contents.Write(writer);
+    public void Write(BinaryStreamWriter writer) => _contents.Write(writer);
 }

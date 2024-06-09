@@ -43,7 +43,7 @@ namespace AsmResolver.PE.DotNet
         public override uint GetPhysicalSize() => sizeof(ManagedNativeHeaderSignature) + Contents.GetPhysicalSize();
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32((uint) Signature);
             Contents.Write(writer);

@@ -111,7 +111,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         public uint GetPhysicalSize() => ImportSectionSize;
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(Slots.Rva);
             writer.WriteUInt32(Slots.GetPhysicalSize());

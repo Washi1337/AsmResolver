@@ -77,7 +77,7 @@ namespace AsmResolver.PE.Relocations.Builder
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             EnsureBlocksCreated();
             for (int i = 0; i < _blocks!.Count; i++)

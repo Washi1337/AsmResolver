@@ -101,7 +101,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public override uint GetPhysicalSize() => GetHeaderSize(Key);
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt16(Length);
             writer.WriteUInt16(ValueLength);

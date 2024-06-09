@@ -58,7 +58,7 @@ namespace AsmResolver.PE.Certificates
         protected abstract uint GetContentsSize();
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(GetPhysicalSize());
             writer.WriteUInt16((ushort) Revision);
@@ -70,6 +70,6 @@ namespace AsmResolver.PE.Certificates
         /// Writes the contents of the certificate to the provided output stream.
         /// </summary>
         /// <param name="writer">The output stream.</param>
-        protected abstract void WriteContents(IBinaryStreamWriter writer);
+        protected abstract void WriteContents(BinaryStreamWriter writer);
     }
 }

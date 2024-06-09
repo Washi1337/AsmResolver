@@ -53,6 +53,6 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         public override uint GetPhysicalSize() => Entries.GetPhysicalSize();
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer) => Entries.Write(writer);
+        public override void Write(BinaryStreamWriter writer) => Entries.Write(writer);
     }
 }

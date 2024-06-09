@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
         public uint GetPhysicalSize() => (uint) (Blob.ByteCount + (IsZeroTerminated ? 1 : 0));
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             writer.WriteBytes(Blob.GetBytesUnsafe());
             if (IsZeroTerminated)

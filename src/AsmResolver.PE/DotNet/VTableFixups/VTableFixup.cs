@@ -61,7 +61,7 @@ namespace AsmResolver.PE.DotNet.VTableFixups
              + sizeof(ushort);   // Type
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(Tokens.Rva);
             writer.WriteUInt16((ushort) Tokens.Count);

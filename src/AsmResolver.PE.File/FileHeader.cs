@@ -102,7 +102,7 @@ namespace AsmResolver.PE.File
         public override uint GetPhysicalSize() => FileHeaderSize;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt16((ushort)Machine);
             writer.WriteUInt16(NumberOfSections);

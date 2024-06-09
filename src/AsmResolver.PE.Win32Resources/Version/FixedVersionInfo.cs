@@ -141,7 +141,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             + sizeof(ulong); // FileDate
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(Signature);
             writer.WriteUInt32(DefaultStructVersion);
@@ -155,7 +155,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             writer.WriteUInt64(FileDate);
         }
 
-        private static void WriteVersion(IBinaryStreamWriter writer, System.Version version)
+        private static void WriteVersion(BinaryStreamWriter writer, System.Version version)
         {
             writer.WriteUInt16((ushort) version.Minor);
             writer.WriteUInt16((ushort) version.Major);

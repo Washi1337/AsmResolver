@@ -55,6 +55,6 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         public override uint GetPhysicalSize() => EntryPoints.GetPhysicalSize();
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer) => EntryPoints.Write(writer);
+        public override void Write(BinaryStreamWriter writer) => EntryPoints.Write(writer);
     }
 }

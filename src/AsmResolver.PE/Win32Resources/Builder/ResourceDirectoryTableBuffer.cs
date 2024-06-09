@@ -34,13 +34,13 @@ namespace AsmResolver.PE.Win32Resources.Builder
             + (uint) entry.Entries.Count * ResourceDirectoryEntry.EntrySize;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             foreach (var entry in Entries)
                 WriteDirectory(writer, entry);
         }
 
-        private void WriteDirectory(IBinaryStreamWriter writer, ResourceDirectory directory)
+        private void WriteDirectory(BinaryStreamWriter writer, ResourceDirectory directory)
         {
             ushort namedEntries = (ushort) directory.Entries.Count(e => e.Name != null);
             ushort idEntries = (ushort) (directory.Entries.Count - namedEntries);
@@ -56,7 +56,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
                 WriteEntry(writer, entry);
         }
 
-        private void WriteEntry(IBinaryStreamWriter writer, IResourceEntry entry)
+        private void WriteEntry(BinaryStreamWriter writer, IResourceEntry entry)
         {
             writer.WriteUInt32(entry.Name != null
                 ? _nameTable.GetEntryOffset(entry.Name) | 0x8000_0000

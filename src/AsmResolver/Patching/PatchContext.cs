@@ -13,7 +13,7 @@ namespace AsmResolver.Patching
         /// <param name="segment">The segment to be patched.</param>
         /// <param name="imageBase">The image base to assume while patching.</param>
         /// <param name="writer">The object responsible for writing the patches.</param>
-        public PatchContext(ISegment segment, ulong imageBase, IBinaryStreamWriter writer)
+        public PatchContext(ISegment segment, ulong imageBase, BinaryStreamWriter writer)
         {
             Segment = segment;
             ImageBase = imageBase;
@@ -39,7 +39,7 @@ namespace AsmResolver.Patching
         /// <summary>
         /// Gets the object responsible for writing the patches.
         /// </summary>
-        public IBinaryStreamWriter Writer
+        public BinaryStreamWriter Writer
         {
             get;
         }

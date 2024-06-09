@@ -69,7 +69,7 @@ namespace AsmResolver.PE.Code
         public override uint GetPhysicalSize() => (uint) Code.Length;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteBytes(Code);
 

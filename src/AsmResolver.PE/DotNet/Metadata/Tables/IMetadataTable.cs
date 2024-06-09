@@ -92,6 +92,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Serializes the table to an output stream, according to the table layout provided in <see cref="Layout" />.
         /// </summary>
         /// <param name="writer">The output stream to write to.</param>
-        void Write(IBinaryStreamWriter writer);
+        void Write(BinaryStreamWriter writer);
     }
 }

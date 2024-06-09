@@ -87,7 +87,7 @@ public class SerializedTpiStream : TpiStream
     }
 
     /// <inheritdoc />
-    protected override void WriteTypeRecords(IBinaryStreamWriter writer)
+    protected override void WriteTypeRecords(BinaryStreamWriter writer)
     {
         _recordsReader.Fork().WriteToOutput(writer);
     }

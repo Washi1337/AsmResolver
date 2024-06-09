@@ -132,7 +132,7 @@ namespace AsmResolver.PE.DotNet.Cil
         public override uint GetPhysicalSize() => (uint) Data.Length + 4;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteByte((byte) Attributes);
 

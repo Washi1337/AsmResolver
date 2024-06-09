@@ -153,7 +153,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32((uint) Signature);
             writer.WriteUInt16(MajorVersion);

@@ -179,7 +179,7 @@ public class ModuleDescriptor : IWritable
     }
 
     /// <inheritdoc />
-    public void Write(IBinaryStreamWriter writer)
+    public void Write(BinaryStreamWriter writer)
     {
         writer.WriteUInt32(0);
         SectionContribution.Write(writer);

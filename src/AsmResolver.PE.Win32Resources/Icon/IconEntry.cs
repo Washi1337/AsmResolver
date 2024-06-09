@@ -40,7 +40,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         public override uint GetPhysicalSize() => (uint)RawIcon.Length;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteBytes(RawIcon, 0, RawIcon.Length);
         }

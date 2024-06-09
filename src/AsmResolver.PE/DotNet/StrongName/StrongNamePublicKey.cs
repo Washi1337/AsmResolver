@@ -173,7 +173,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             base.Write(writer);
             writer.WriteUInt32((uint) Magic);

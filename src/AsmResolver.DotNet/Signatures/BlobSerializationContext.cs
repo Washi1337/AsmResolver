@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="writer">The output stream to write the raw data to.</param>
         /// <param name="indexProvider">The object responsible for obtaining coded indices to types.</param>
         /// <param name="errorListener">The object responsible for collecting diagnostic information during the serialization process.</param>
-        public BlobSerializationContext(IBinaryStreamWriter writer, ITypeCodedIndexProvider indexProvider, IErrorListener errorListener)
+        public BlobSerializationContext(BinaryStreamWriter writer, ITypeCodedIndexProvider indexProvider, IErrorListener errorListener)
         {
             Writer = writer ?? throw new ArgumentNullException(nameof(writer));
             IndexProvider = indexProvider ?? throw new ArgumentNullException(nameof(indexProvider));
@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Gets the output stream to write the raw data to.
         /// </summary>
-        public IBinaryStreamWriter Writer
+        public BinaryStreamWriter Writer
         {
             get;
         }

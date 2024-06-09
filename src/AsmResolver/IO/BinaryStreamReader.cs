@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -489,9 +490,43 @@ namespace AsmResolver.IO
                 return (uint)(((firstByte & 0x7F) << 8) | ReadByte());
 
             return (uint) (((firstByte & 0x3F) << 0x18) |
-                           (ReadByte() << 0x10) |
-                           (ReadByte() << 0x08) |
-                           ReadByte());
+                (ReadByte() << 0x10) |
+                (ReadByte() << 0x08) |
+                ReadByte());
+        }
+
+        /// <summary>
+        /// Reads a compressed unsigned integer from the stream.
+        /// </summary>
+        /// <returns>The signed integer that was read from the stream.</returns>
+        public int ReadCompressedInt32()
+        {
+            byte firstByte = ReadByte();
+            uint rotated;
+            int mask;
+
+            if ((firstByte & 0x80) == 0)
+            {
+                rotated = firstByte;
+                mask = (rotated & 1) != 0 ? -0x40 : 0;
+            }
+            else if ((firstByte & 0x40) == 0)
+            {
+                rotated = (uint) ((firstByte & 0x3F) << 8 | ReadByte());
+                mask = (rotated & 1) != 0 ? -0x2000 : 0;
+            }
+            else
+            {
+                rotated = (uint) (
+                    (firstByte & 0x1F) << 0x18
+                    | ReadByte() << 0x10
+                    | ReadByte() << 0x08
+                    | ReadByte()
+                );
+                mask = (rotated & 1) != 0 ? -0x1000_0000 : 0;
+            }
+
+            return (int) (rotated >> 1) | mask;
         }
 
         /// <summary>
@@ -508,15 +543,41 @@ namespace AsmResolver.IO
             byte firstByte = ReadByte();
             Offset--;
 
-            if ((firstByte & 0x80) == 0 && CanRead(sizeof(byte)) ||
-                (firstByte & 0x40) == 0 && CanRead(sizeof(ushort)) ||
-                CanRead(sizeof(uint)))
+            if ((firstByte & 0x80) == 0 && CanRead(sizeof(byte))
+                || (firstByte & 0x40) == 0 && CanRead(sizeof(ushort))
+                || CanRead(sizeof(uint)))
             {
                 value = ReadCompressedUInt32();
                 return true;
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Tries to reads a compressed signed integer from the stream.
+        /// </summary>
+        /// <param name="value">The signed integer that was read from the stream.</param>
+        /// <returns><c>True</c> if the method succeeded, false otherwise.</returns>
+        public bool TryReadCompressedInt32(out int value)
+        {
+            value = 0;
+
+            if (!CanRead(sizeof(byte)))
+                return false;
+
+            byte firstByte = ReadByte();
+            Offset--;
+
+            if ((firstByte & 0x80) == 0 && CanRead(sizeof(byte))
+                || (firstByte & 0x40) == 0 && CanRead(sizeof(ushort))
+                || CanRead(sizeof(uint)))
+            {
+                value = ReadCompressedInt32();
+                return true;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -702,7 +763,7 @@ namespace AsmResolver.IO
         /// Consumes and copies the remainder of the contents to the provided output stream.
         /// </summary>
         /// <param name="writer">The output stream.</param>
-        public void WriteToOutput(IBinaryStreamWriter writer)
+        public void WriteToOutput(BinaryStreamWriter writer)
         {
             byte[] buffer = new byte[4096];
             while (RelativeOffset < Length)

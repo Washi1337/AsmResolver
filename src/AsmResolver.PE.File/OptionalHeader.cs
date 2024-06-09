@@ -438,7 +438,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             ulong start = writer.Offset;
 

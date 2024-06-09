@@ -309,7 +309,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             SynchronizeTableLayoutsWithFlags();
 
@@ -436,7 +436,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="writer">The output stream to write to.</param>
         /// <param name="validBitmask">The valid bitmask, indicating all present tables in the stream.</param>
-        protected virtual void WriteRowCounts(IBinaryStreamWriter writer, ulong validBitmask)
+        protected virtual void WriteRowCounts(BinaryStreamWriter writer, ulong validBitmask)
         {
             for (TableIndex i = 0; i <= TableIndex.Max; i++)
             {
@@ -450,7 +450,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="writer">The output stream to write to.</param>
         /// <param name="validBitmask">The valid bitmask, indicating all present tables in the stream.</param>
-        protected virtual void WriteTables(IBinaryStreamWriter writer, ulong validBitmask)
+        protected virtual void WriteTables(BinaryStreamWriter writer, ulong validBitmask)
         {
             for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)
             {

@@ -98,7 +98,7 @@ namespace AsmResolver.PE.Debug
         public override uint GetPhysicalSize() => DebugDataEntryHeaderSize;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(Characteristics);
             writer.WriteUInt32(TimeDateStamp);

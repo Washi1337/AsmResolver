@@ -118,7 +118,7 @@ public sealed class MsfSuperBlock : SegmentBase
     public override uint GetPhysicalSize() => (uint) BigMsfSignature.Length + sizeof(uint) * 6;
 
     /// <inheritdoc />
-    public override void Write(IBinaryStreamWriter writer)
+    public override void Write(BinaryStreamWriter writer)
     {
         writer.WriteBytes(Signature);
         writer.WriteUInt32(BlockSize);

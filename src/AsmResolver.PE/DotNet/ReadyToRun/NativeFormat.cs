@@ -56,7 +56,7 @@ internal static class NativeFormat
         return value;
     }
 
-    public static void EncodeUnsigned(IBinaryStreamWriter writer, uint value)
+    public static void EncodeUnsigned(BinaryStreamWriter writer, uint value)
     {
         switch (GetEncodedUnsignedSize(value))
         {

@@ -77,7 +77,7 @@ namespace AsmResolver.PE.Imports.Builder
         public override uint GetPhysicalSize() => _length;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             foreach (var module in _modules)
             {
@@ -91,7 +91,7 @@ namespace AsmResolver.PE.Imports.Builder
             }
         }
 
-        private static void WriteHintName(IBinaryStreamWriter writer, ushort hint, string name)
+        private static void WriteHintName(BinaryStreamWriter writer, ushort hint, string name)
         {
             writer.WriteUInt16(hint);
             writer.WriteAsciiString(name);
@@ -99,7 +99,7 @@ namespace AsmResolver.PE.Imports.Builder
             writer.Align(2);
         }
 
-        private static void WriteModuleName(IBinaryStreamWriter writer, ImportedModule module)
+        private static void WriteModuleName(BinaryStreamWriter writer, ImportedModule module)
         {
             writer.WriteAsciiString(module.Name ?? string.Empty);
             writer.WriteByte(0);

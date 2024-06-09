@@ -111,7 +111,7 @@ namespace AsmResolver.PE.File
         public override uint GetPhysicalSize() => (uint) _stub.Length;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteBytes(_stub, 0, NextHeaderFieldOffset);
             writer.WriteUInt32(NextHeaderOffset);

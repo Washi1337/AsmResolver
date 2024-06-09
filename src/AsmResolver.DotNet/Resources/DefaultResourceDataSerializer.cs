@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Resources
         } = new();
 
         /// <inheritdoc />
-        public virtual void Serialize(IBinaryStreamWriter writer, ResourceType type, object? value)
+        public virtual void Serialize(BinaryStreamWriter writer, ResourceType type, object? value)
         {
             switch (value)
             {

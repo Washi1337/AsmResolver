@@ -205,13 +205,13 @@ public abstract class TpiStream : SegmentBase
     public override uint GetPhysicalSize() => TpiStreamHeaderSize + TypeRecordsByteCount;
 
     /// <inheritdoc />
-    public override void Write(IBinaryStreamWriter writer)
+    public override void Write(BinaryStreamWriter writer)
     {
         WriteHeader(writer);
         WriteTypeRecords(writer);
     }
 
-    private void WriteHeader(IBinaryStreamWriter writer)
+    private void WriteHeader(BinaryStreamWriter writer)
     {
         writer.WriteUInt32((uint) Version);
         writer.WriteUInt32(TpiStreamHeaderSize);
@@ -234,5 +234,5 @@ public abstract class TpiStream : SegmentBase
     /// Writes all type records stored in the TPI stream to the provided output stream.
     /// </summary>
     /// <param name="writer">The output stream.</param>
-    protected abstract void WriteTypeRecords(IBinaryStreamWriter writer);
+    protected abstract void WriteTypeRecords(BinaryStreamWriter writer);
 }

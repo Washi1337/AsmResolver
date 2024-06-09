@@ -140,7 +140,7 @@ namespace AsmResolver.PE.Tls
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             ulong imageBase = _imageBase;
             bool is32Bit = _is32Bit;

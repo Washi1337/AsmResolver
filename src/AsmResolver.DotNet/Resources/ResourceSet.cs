@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet.Resources
         /// </summary>
         /// <param name="writer">The output stream.</param>
         /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported version is specified in <see cref="FormatVersion"/>.</exception>
-        public void Write(IBinaryStreamWriter writer) => Write(writer, DefaultResourceDataSerializer.Instance);
+        public void Write(BinaryStreamWriter writer) => Write(writer, DefaultResourceDataSerializer.Instance);
 
         /// <summary>
         /// Serializes the resource set and writes it to the provided output stream.
@@ -95,7 +95,7 @@ namespace AsmResolver.DotNet.Resources
         /// <param name="writer">The output stream.</param>
         /// <param name="serializer">The object responsible for serializing user-defined types.</param>
         /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported version is specified in <see cref="FormatVersion"/>.</exception>
-        public void Write(IBinaryStreamWriter writer, IResourceDataSerializer serializer)
+        public void Write(BinaryStreamWriter writer, IResourceDataSerializer serializer)
         {
             if (FormatVersion is not 1 and not 2)
                 throw new NotSupportedException($"Invalid or unsupported format version {FormatVersion}.");

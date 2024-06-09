@@ -42,7 +42,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         public override uint GetPhysicalSize() => (uint) Encoding.ASCII.GetByteCount(Identifier) + sizeof(byte);
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteAsciiString(Identifier);
             writer.WriteByte(0);

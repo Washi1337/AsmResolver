@@ -87,7 +87,7 @@ namespace AsmResolver.PE.Debug
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32((uint) Signature);
             writer.WriteBytes(Guid.ToByteArray());
