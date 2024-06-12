@@ -20,8 +20,8 @@ var image = PEImage.FromFile(@"C:\Path\To\File.exe", parameters);
 
 ## Custom error handling 
 
-By default, AsmResolver throws exceptions upon encountering invalid data
-in the input file. To provide a custom method for handling parser
+By default, AsmResolver tries to ignore and recover from encountering invalid 
+data in the input file. To provide a custom method for handling parser
 errors, set the `ErrorListener` property. There are a couple of default
 implementations that AsmResolver provides.
 
