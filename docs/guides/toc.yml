@@ -78,6 +78,15 @@
 - name: Advanced PE Image Building
   href: dotnet/advanced-pe-image-building.md
 
+- name: Win32 Resources
+- name: Overview
+  href: win32res/index.md
+- name: Version Info
+  href: win32res/version.md
+- name: Icons and Cursors
+  href: win32res/icons.md
+
+
 - name: PDB Symbols
 - name: Overview
   href: pdb/index.md

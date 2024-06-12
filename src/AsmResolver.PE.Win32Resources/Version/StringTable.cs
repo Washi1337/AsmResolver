@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 using AsmResolver.IO;
@@ -11,7 +12,7 @@ namespace AsmResolver.PE.Win32Resources.Version
     /// Represents the organization of data in a file-version resource. It contains language and code page formatting
     /// information for the strings specified by the Children member. A code page is an ordered character set.
     /// </summary>
-    public class StringTable : VersionTableEntry, IEnumerable<KeyValuePair<string, string>>
+    public class StringTable : VersionTableEntry, IDictionary<string, string>
     {
         /// <summary>
         /// The name of the string describing the comments assigned to the executable file.
@@ -73,7 +74,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         public const string SpecialBuildKey = "SpecialBuild";
 
-        private readonly Dictionary<string, string> _entries = new();
+        private readonly IDictionary<string, string> _entries = new Dictionary<string, string>();
 
         /// <summary>
         /// Creates a new string table.
@@ -110,15 +111,23 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <inheritdoc />
         protected override VersionTableValueType ValueType => VersionTableValueType.Binary;
 
-        /// <summary>
-        /// Gets or sets the value of a single field in the string table.
-        /// </summary>
-        /// <param name="key">The name of the field in the string table.</param>
+        /// <inheritdoc />
         public string this[string key]
         {
             get => _entries[key];
             set => _entries[key] = value;
         }
+
+        /// <inheritdoc />
+        public int Count => _entries.Count;
+
+        bool ICollection<KeyValuePair<string, string>>.IsReadOnly => false;
+
+        /// <inheritdoc />
+        public ICollection<string> Keys => _entries.Keys;
+
+        /// <inheritdoc />
+        public ICollection<string> Values => _entries.Values;
 
         /// <summary>
         /// Reads a single StringTable structure from the provided input stream.
@@ -169,20 +178,37 @@ namespace AsmResolver.PE.Win32Resources.Version
             return new KeyValuePair<string, string>(header.Key, value);
         }
 
-        /// <summary>
-        /// Adds (or overrides) a field to the string table.
-        /// </summary>
-        /// <param name="key">The name of the field.</param>
-        /// <param name="value">The value of the field.</param>
-        public void Add(string key, string value) =>
-            _entries[key] = value ?? throw new ArgumentNullException(nameof(value));
+        /// <inheritdoc />
+        public void Add(string key, string value) => _entries.Add(key, value);
 
-        /// <summary>
-        /// Removes a single field from the string table by its name.
-        /// </summary>
-        /// <param name="key">The name of the field.</param>
-        /// <returns><c>true</c> if the field existed and was removed successfully, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
+        public bool ContainsKey(string key) => _entries.ContainsKey(key);
+
+        /// <inheritdoc />
+        public bool TryGetValue(string key, [NotNullWhen(true)] out string? value) => _entries.TryGetValue(key, out value);
+
+        /// <inheritdoc />
+        public void Add(KeyValuePair<string, string> item) => _entries.Add(item);
+
+        /// <inheritdoc />
         public bool Remove(string key) => _entries.Remove(key);
+
+        /// <inheritdoc />
+        public bool Remove(KeyValuePair<string, string> item) => _entries.Remove(item);
+
+        /// <inheritdoc />
+        public void Clear() => _entries.Clear();
+
+        /// <inheritdoc />
+        public bool Contains(KeyValuePair<string, string> item) => _entries.Contains(item);
+
+        /// <inheritdoc />
+        public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex) => _entries.CopyTo(array, arrayIndex);
+
+        /// <inheritdoc />
+        public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => _entries.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <inheritdoc />
         public override uint GetPhysicalSize()
@@ -229,7 +255,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             var header = new VersionTableEntryHeader(entry.Key)
             {
                 Length = (ushort) (VersionTableEntryHeader.GetHeaderSize(entry.Key).Align(4)
-                                   + CalculateEntryValueSize(entry.Value)),
+                    + CalculateEntryValueSize(entry.Value)),
                 ValueLength = (ushort) (entry.Value.Length + 1),
                 Type = VersionTableValueType.String
             };
@@ -239,10 +265,5 @@ namespace AsmResolver.PE.Win32Resources.Version
             writer.WriteBytes(Encoding.Unicode.GetBytes(entry.Value));
             writer.WriteUInt16(0);
         }
-
-        /// <inheritdoc />
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => _entries.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

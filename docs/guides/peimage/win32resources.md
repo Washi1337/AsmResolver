@@ -90,6 +90,10 @@ if (dataEntry.CanRead)
 }
 ```
 
+The data read using `CreateReader` is raw data as it appears in the file.
+AsmResolver provides rich interpretations for some of the resource types.
+See the [AsmResolver.PE.Win32Resources](../win32res/index.md) extension package for all supported resource types.
+
 Adding new data entries can be done by using the `ResourceData`
 constructor:
 
