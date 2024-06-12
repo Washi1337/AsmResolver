@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Events;
@@ -14,7 +12,6 @@ using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.DotNet.TestCases.Types;
 using AsmResolver.DotNet.TestCases.Types.Structs;
-using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
@@ -29,7 +26,7 @@ namespace AsmResolver.DotNet.Tests
             var stream = new MemoryStream();
             type.Module!.Write(stream);
 
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             return newModule.TopLevelTypes.FirstOrDefault(t => t.FullName == type.FullName);
         }
 
@@ -41,7 +38,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void LinkedToModule()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             foreach (var type in module.TopLevelTypes)
                 Assert.Same(module, type.Module);
         }
@@ -49,7 +46,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadName()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Equal("<Module>", module.TopLevelTypes[0].Name);
             Assert.Equal("Program", module.TopLevelTypes[1].Name);
         }
@@ -57,14 +54,14 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNameFromNormalMetadata()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleStringsStream);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleStringsStream, TestReaderParameters);
             Assert.Equal("Class_2", module.TopLevelTypes[1].Name);
         }
 
         [Fact]
         public void ReadNameFromEnCMetadata()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleStringsStream_EnC);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleStringsStream_EnC, TestReaderParameters);
             Assert.Equal("Class_1", module.TopLevelTypes[1].Name);
         }
 
@@ -73,7 +70,7 @@ namespace AsmResolver.DotNet.Tests
         {
             const string newName = "SomeType";
 
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == "Program");
             type.Name = newName;
 
@@ -84,7 +81,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNamespace()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Null(module.TopLevelTypes[0].Namespace);
             Assert.Equal("HelloWorld", module.TopLevelTypes[1].Namespace);
         }
@@ -92,7 +89,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadTopLevelTypeFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location, TestReaderParameters);
             var type = (TypeDefinition) module.LookupMember(typeof(Class).MetadataToken);
             Assert.Equal("AsmResolver.DotNet.TestCases.Types.Class", type.FullName);
         }
@@ -102,7 +99,7 @@ namespace AsmResolver.DotNet.Tests
         {
             const string newNameSpace = "SomeNamespace";
 
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == "Program");
             type.Namespace = newNameSpace;
 
@@ -113,7 +110,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void NullNamespaceIsPersistentAfterRebuild()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == "Program");
             type.Namespace = null;
 
@@ -124,7 +121,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadBaseType()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Null(module.TopLevelTypes[0].BaseType);
             Assert.NotNull(module.TopLevelTypes[1].BaseType);
             Assert.Equal("System.Object", module.TopLevelTypes[1].BaseType.FullName);
@@ -133,7 +130,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNestedTypes()
         {
-            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
 
             var class1 = module.TopLevelTypes.First(t => t.Name == nameof(TopLevelClass1));
             Assert.Equal(new Utf8String[]
@@ -190,7 +187,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNestedFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
             var type = (TypeDefinition) module.LookupMember(typeof(TopLevelClass1.Nested1).MetadataToken);
             Assert.Equal("AsmResolver.DotNet.TestCases.NestedClasses.TopLevelClass1+Nested1", type.FullName);
         }
@@ -198,7 +195,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNestedNestedFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
             var type = (TypeDefinition) module.LookupMember(typeof(TopLevelClass1.Nested1.Nested1Nested2)
                 .MetadataToken);
             Assert.Equal("AsmResolver.DotNet.TestCases.NestedClasses.TopLevelClass1+Nested1+Nested1Nested2",
@@ -208,7 +205,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveNestedType()
         {
-            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
             var member = (TypeDefinition) module.LookupMember(new MetadataToken(TableIndex.TypeDef, 4));
             Assert.NotNull(member.DeclaringType);
             Assert.Equal(nameof(TopLevelClass1), member.DeclaringType.Name);
@@ -217,7 +214,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadEmptyFields()
         {
-            var module = ModuleDefinition.FromFile(typeof(NoFields).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(NoFields).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(NoFields));
             Assert.Empty(type.Fields);
         }
@@ -225,7 +222,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentEmptyFields()
         {
-            var module = ModuleDefinition.FromFile(typeof(NoFields).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(NoFields).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(NoFields));
             var newType = RebuildAndLookup(type);
             AssertNamesEqual(type.Fields, newType.Fields);
@@ -234,7 +231,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSingleField()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleField));
             Assert.Equal(new Utf8String[]
             {
@@ -245,7 +242,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentSingleField()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleField));
             var newType = RebuildAndLookup(type);
             AssertNamesEqual(type.Fields, newType.Fields);
@@ -254,7 +251,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMultipleFields()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleFields).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleFields).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleFields));
             Assert.Equal(new Utf8String[]
             {
@@ -267,7 +264,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentMultipleFields()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleFields).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleFields).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleFields));
             var newType = RebuildAndLookup(type);
             AssertNamesEqual(type.Fields, newType.Fields);
@@ -276,7 +273,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadEmptyMethods()
         {
-            var module = ModuleDefinition.FromFile(typeof(NoMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(NoMethods).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(NoMethods));
             Assert.Empty(type.Methods);
         }
@@ -284,7 +281,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentEmptyMethods()
         {
-            var module = ModuleDefinition.FromFile(typeof(NoMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(NoMethods).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(NoMethods));
             var newType = RebuildAndLookup(type);
             Assert.Empty(newType.Methods);
@@ -293,7 +290,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSingleMethod()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleMethod));
             Assert.Equal(new Utf8String[]
             {
@@ -304,7 +301,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentSingleMethod()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleMethod));
             var newType = RebuildAndLookup(type);
             AssertNamesEqual(type.Methods, newType.Methods);
@@ -313,7 +310,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMultipleMethods()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
             Assert.Equal(new Utf8String[]
             {
@@ -329,7 +326,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentMultipleMethods()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
             var newType = RebuildAndLookup(type);
             AssertNamesEqual(type.Methods, newType.Methods);
@@ -338,7 +335,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadEmptyProperties()
         {
-            var module = ModuleDefinition.FromFile(typeof(NoProperties).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(NoProperties).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(NoProperties));
             Assert.Empty(type.Properties);
         }
@@ -346,7 +343,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentEmptyProperties()
         {
-            var module = ModuleDefinition.FromFile(typeof(NoProperties).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(NoProperties).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(NoProperties));
             var newType = RebuildAndLookup(type);
             Assert.Empty(newType.Properties);
@@ -355,7 +352,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSingleProperty()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
             Assert.Equal(new Utf8String[]
             {
@@ -366,7 +363,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentSingleProperty()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
             var newType = RebuildAndLookup(type);
             Assert.Equal(new Utf8String[]
@@ -378,7 +375,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMultipleProperties()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
             Assert.Equal(new Utf8String[]
             {
@@ -390,7 +387,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentMultipleProperties()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
             var newType = RebuildAndLookup(type);
             Assert.Equal(new Utf8String[]
@@ -403,7 +400,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadEmptyEvents()
         {
-            var module = ModuleDefinition.FromFile(typeof(NoEvents).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(NoEvents).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(NoEvents));
             Assert.Empty(type.Events);
         }
@@ -411,7 +408,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentEmptyEvent()
         {
-            var module = ModuleDefinition.FromFile(typeof(NoEvents).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(NoEvents).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(NoEvents));
             var newType = RebuildAndLookup(type);
             Assert.Empty(newType.Events);
@@ -420,7 +417,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSingleEvent()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleEvent));
             Assert.Equal(new Utf8String[]
             {
@@ -431,7 +428,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentSingleEvent()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleEvent));
             var newType = RebuildAndLookup(type);
             Assert.Equal(new Utf8String[]
@@ -443,7 +440,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMultipleEvents()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleEvents));
             Assert.Equal(new Utf8String[]
             {
@@ -456,7 +453,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentMultipleEvents()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleEvents));
             var newType = RebuildAndLookup(type);
             Assert.Equal(new Utf8String[]
@@ -470,7 +467,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadCustomAttributes()
         {
-            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
             Assert.Single(type.CustomAttributes);
         }
@@ -478,7 +475,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadGenericParameters()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == typeof(GenericType<,,>).Name);
             Assert.Equal(3, type.GenericParameters.Count);
         }
@@ -486,7 +483,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadInterfaces()
         {
-            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementations));
             Assert.Equal(new HashSet<Utf8String>(new Utf8String[]
             {
@@ -497,7 +494,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentInterfaces()
         {
-            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementations));
             var newType = RebuildAndLookup(type);
             Assert.Equal(new HashSet<Utf8String>(new Utf8String[]
@@ -509,7 +506,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMethodImplementations()
         {
-            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementations));
 
             Assert.Contains(type.MethodImplementations, i => i.Declaration!.Name == "Interface2Method");
@@ -518,7 +515,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentMethodImplementations()
         {
-            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementations));
             var newType = RebuildAndLookup(type);
 
@@ -528,7 +525,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadClassLayout()
         {
-            var module = ModuleDefinition.FromFile(typeof(ExplicitSizeStruct).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(ExplicitSizeStruct).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(ExplicitSizeStruct));
 
             Assert.NotNull(type.ClassLayout);
@@ -538,7 +535,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentClassLayout()
         {
-            var module = ModuleDefinition.FromFile(typeof(ExplicitSizeStruct).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(ExplicitSizeStruct).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(ExplicitSizeStruct));
             var newType = RebuildAndLookup(type);
 
@@ -549,7 +546,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void InheritanceMultipleLevels()
         {
-            var module = ModuleDefinition.FromFile(typeof(DerivedDerivedClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(DerivedDerivedClass).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(DerivedDerivedClass));
 
             Assert.True(type.InheritsFrom(typeof(AbstractClass).FullName!));
@@ -559,7 +556,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void InheritanceMultipleLevelsTypeOf()
         {
-            var module = ModuleDefinition.FromFile(typeof(DerivedDerivedClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(DerivedDerivedClass).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(DerivedDerivedClass));
 
             Assert.True(type.InheritsFrom(typeof(AbstractClass).Namespace, nameof(AbstractClass)));
@@ -569,7 +566,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void InterfaceImplementedFromInheritanceHierarchy()
         {
-            var module = ModuleDefinition.FromFile(typeof(DerivedInterfaceImplementations).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(DerivedInterfaceImplementations).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(DerivedInterfaceImplementations));
 
             Assert.True(type.Implements(typeof(IInterface1).FullName!));
@@ -581,7 +578,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void InterfaceImplementedFromInheritanceHierarchyTypeOf()
         {
-            var module = ModuleDefinition.FromFile(typeof(DerivedInterfaceImplementations).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(DerivedInterfaceImplementations).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(DerivedInterfaceImplementations));
 
             Assert.True(type.Implements(typeof(IInterface1).Namespace, nameof(IInterface1)));
@@ -619,7 +616,7 @@ namespace AsmResolver.DotNet.Tests
         {
             // https://github.com/Washi1337/AsmResolver/issues/263
 
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_WithAttribute);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_WithAttribute, TestReaderParameters);
             var corlib = module.CorLibTypeFactory;
 
             var type = new TypeDefinition(null, "Test", TypeAttributes.Class, corlib.Object.Type);
@@ -651,7 +648,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void GetStaticConstructor()
         {
-            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location, TestReaderParameters);
 
             var type1 = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
             var cctor = type1.GetStaticConstructor();
@@ -666,7 +663,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void GetOrCreateStaticConstructor()
         {
-            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location, TestReaderParameters);
             var type1 = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
 
             // If cctor already exists, we expect this to be returned.
@@ -689,7 +686,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void GetParameterlessConstructor()
         {
-            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location, TestReaderParameters);
             var type = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
 
             var ctor = type.GetConstructor();
@@ -705,7 +702,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(new[] {ElementType.I4, ElementType.String, ElementType.R8})]
         public void GetParametersConstructor(ElementType[] types)
         {
-            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location, TestReaderParameters);
             var type = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
 
             var signatures = types.Select(x => (TypeSignature) module.CorLibTypeFactory.FromElementType(x)).ToArray();
@@ -719,7 +716,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void GetNonExistingConstructorShouldReturnNull()
         {
-            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location, TestReaderParameters);
             var type = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
             var factory = module.CorLibTypeFactory;
 

@@ -62,7 +62,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
         [Fact]
         public void DotNetHelloWorld()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             var expected = new ResourceEntryInfo(0)
             {

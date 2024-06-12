@@ -58,7 +58,7 @@ namespace AsmResolver.DotNet.Tests
             var resolver = new DotNetCoreAssemblyResolver(new Version(3, 1, 0));
             resolver.SearchDirectories.Add(Path.GetDirectoryName(typeof(AssemblyResolverTest).Assembly.Location));
 
-            var assemblyDef = AssemblyDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var assemblyDef = AssemblyDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
             var assemblyRef = new AssemblyReference(assemblyDef);
 
             Assert.Equal(assemblyDef, resolver.Resolve(assemblyRef), _comparer);

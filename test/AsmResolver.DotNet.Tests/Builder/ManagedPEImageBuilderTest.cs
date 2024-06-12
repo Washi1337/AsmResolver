@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         public void ExecutableImportDirectoryShouldContainMsCoreeCorExeMain()
         {
             using var stream = new MemoryStream();
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             module.Write(stream);
 
             var image = PEImage.FromBytes(stream.ToArray());
@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         public void ExecutableImportDirectoryShouldContainMsCoreeCorDllMain()
         {
             using var stream = new MemoryStream();
-            var module = ModuleDefinition.FromBytes(Properties.Resources.ForwarderLibrary);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ForwarderLibrary, TestReaderParameters);
             module.Write(stream);
 
             var image = PEImage.FromBytes(stream.ToArray());
@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         {
             var module = new ModuleDefinition("Module");
             var result = module.ToPEImage();
-            var newModule = ModuleDefinition.FromImage(result);
+            var newModule = ModuleDefinition.FromImage(result, TestReaderParameters);
             Assert.Equal(module.Name, newModule.Name);
         }
 
@@ -62,25 +62,25 @@ namespace AsmResolver.DotNet.Tests.Builder
         {
             var module = new ModuleDefinition("Module");
             var result = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
-            var newModule = ModuleDefinition.FromImage(result);
+            var newModule = ModuleDefinition.FromImage(result, TestReaderParameters);
             Assert.Equal(module.Name, newModule.Name);
         }
 
         [Fact]
         public void ConstructPEImageFromExistingModuleWithNoPreservation()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var result = module.ToPEImage();
-            var newModule = ModuleDefinition.FromImage(result);
+            var newModule = ModuleDefinition.FromImage(result, TestReaderParameters);
             Assert.Equal(module.Name, newModule.Name);
         }
 
         [Fact]
         public void ConstructPEImageFromExistingModuleWithPreservation()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var result = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
-            var newModule = ModuleDefinition.FromImage(result);
+            var newModule = ModuleDefinition.FromImage(result, TestReaderParameters);
             Assert.Equal(module.Name, newModule.Name);
         }
 
@@ -88,12 +88,12 @@ namespace AsmResolver.DotNet.Tests.Builder
         public void PreserveUnknownStreams()
         {
             // Prepare a PE image with an extra unconventional stream.
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters.PEReaderParameters);
             byte[] data = { 1, 2, 3, 4 };
             image.DotNetDirectory!.Metadata!.Streams.Add(new CustomMetadataStream("#Custom", data));
 
             // Load and rebuild.
-            var module = ModuleDefinition.FromImage(image);
+            var module = ModuleDefinition.FromImage(image, TestReaderParameters);
             var newImage = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveUnknownStreams));
 
             // Verify unconventional stream is still present.
@@ -106,13 +106,13 @@ namespace AsmResolver.DotNet.Tests.Builder
         public void PreserveStreamOrder()
         {
             // Prepare a PE image with an unconventional stream order.
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters.PEReaderParameters);
             var streams = image.DotNetDirectory!.Metadata!.Streams;
             for (int i = 0; i < streams.Count / 2; i++)
                 (streams[i], streams[streams.Count - i - 1]) = (streams[streams.Count - i - 1], streams[i]);
 
             // Load and rebuild.
-            var module = ModuleDefinition.FromImage(image);
+            var module = ModuleDefinition.FromImage(image, TestReaderParameters);
             var newImage = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveStreamOrder));
 
             // Verify order is still the same.
@@ -125,7 +125,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         public void PreserveUnknownStreamsAndStreamOrder()
         {
             // Prepare a PE image with an unconventional stream order and custom stream.
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters.PEReaderParameters);
             var streams = image.DotNetDirectory!.Metadata!.Streams;
 
             for (int i = 0; i < streams.Count / 2; i++)
@@ -136,7 +136,7 @@ namespace AsmResolver.DotNet.Tests.Builder
                 new CustomMetadataStream("#Custom", data));
 
             // Load and rebuild.
-            var module = ModuleDefinition.FromImage(image);
+            var module = ModuleDefinition.FromImage(image, TestReaderParameters);
             var newImage = module.ToPEImage(new ManagedPEImageBuilder(
                 MetadataBuilderFlags.PreserveStreamOrder | MetadataBuilderFlags.PreserveUnknownStreams));
 
@@ -177,7 +177,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         [Fact]
         public void BuildingImageShouldConsiderJTDStreamAndUseLargeColumns()
         {
-            var moduleDefinition = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_JTDStream);
+            var moduleDefinition = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_JTDStream, TestReaderParameters);
             var metadata = moduleDefinition.DotNetDirectory!.Metadata!;
 
             Assert.True(metadata.IsEncMetadata);

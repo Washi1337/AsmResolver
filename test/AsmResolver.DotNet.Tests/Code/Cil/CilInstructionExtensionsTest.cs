@@ -142,7 +142,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [Fact]
         public void ModreqReturnTypeShouldNotAffectPopCount()
         {
-            var module = ModuleDefinition.FromFile(typeof(TestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TestClass).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.Single(t => t.MetadataToken == typeof(TestClass).MetadataToken);
             var property = type.Properties[0];
             var setter = property.SetMethod;

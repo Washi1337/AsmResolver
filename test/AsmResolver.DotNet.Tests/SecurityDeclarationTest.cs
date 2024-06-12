@@ -11,12 +11,12 @@ namespace AsmResolver.DotNet.Tests
     {
         private static MethodDefinition LookupMethod(string methodName, bool rebuild)
         {
-            var module = ModuleDefinition.FromFile(typeof(SecurityAttributes).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SecurityAttributes).Assembly.Location, TestReaderParameters);
             if (rebuild)
             {
                 var stream = new MemoryStream();
                 module.Write(stream);
-                module = ModuleDefinition.FromReader(new BinaryStreamReader(stream.ToArray()));
+                module = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             }
 
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SecurityAttributes));

@@ -83,7 +83,7 @@ namespace AsmResolver.PE.Tests.Builder
             Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
 
             // Read image
-            var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
+            var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx, TestReaderParameters);
 
             ReplaceBodyWithNativeCode(image, new DataSegment(new byte[]
             {
@@ -107,7 +107,7 @@ namespace AsmResolver.PE.Tests.Builder
             Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
 
             // Read image
-            var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
+            var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx, TestReaderParameters);
 
             var module = new ImportedModule("api-ms-win-crt-stdio-l1-1-0.dll");
             image.Imports.Add(module);
@@ -152,7 +152,7 @@ namespace AsmResolver.PE.Tests.Builder
         public void NativeBodyWithCallX86()
         {
             // Read image
-            var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
+            var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx, TestReaderParameters);
 
             var module = new ImportedModule("api-ms-win-crt-stdio-l1-1-0.dll");
             image.Imports.Add(module);

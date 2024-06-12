@@ -23,14 +23,14 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void MatchCorLibTypeSignatures()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Equal(module.CorLibTypeFactory.Boolean, module.CorLibTypeFactory.Boolean, _comparer);
         }
 
         [Fact]
         public void MatchDifferentCorLibTypeSignatures()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.NotEqual(module.CorLibTypeFactory.Byte, module.CorLibTypeFactory.Boolean, _comparer);
         }
 
@@ -120,7 +120,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void NestedTypesWithSameNameButDifferentDeclaringTypeShouldNotMatch()
         {
-            var nestedTypes = ModuleDefinition.FromFile(typeof(SignatureComparerTest).Assembly.Location)
+            var nestedTypes = ModuleDefinition.FromFile(typeof(SignatureComparerTest).Assembly.Location, TestReaderParameters)
                 .GetAllTypes().First(t => t.Name == nameof(SignatureComparerTest))
                 .NestedTypes.First(t => t.Name == nameof(NestedTypes));
 
@@ -137,9 +137,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void MatchForwardedNestedTypes()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.ForwarderRefTest);
-            var forwarder = ModuleDefinition.FromBytes(Properties.Resources.ForwarderLibrary).Assembly!;
-            var library = ModuleDefinition.FromBytes(Properties.Resources.ActualLibrary).Assembly!;
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ForwarderRefTest, TestReaderParameters);
+            var forwarder = ModuleDefinition.FromBytes(Properties.Resources.ForwarderLibrary, TestReaderParameters).Assembly!;
+            var library = ModuleDefinition.FromBytes(Properties.Resources.ActualLibrary, TestReaderParameters).Assembly!;
 
             module.MetadataResolver.AssemblyResolver.AddToCache(forwarder, forwarder);
             module.MetadataResolver.AssemblyResolver.AddToCache(library, library);

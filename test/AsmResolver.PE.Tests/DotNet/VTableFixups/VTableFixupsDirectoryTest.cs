@@ -17,7 +17,7 @@ namespace AsmResolver.PE.Tests.DotNet.VTableFixups
             newPeFile.Write(new BinaryStreamWriter(tempStream));
 
             // Reload.
-            var newImage = PEImage.FromBytes(tempStream.ToArray());
+            var newImage = PEImage.FromBytes(tempStream.ToArray(), TestReaderParameters);
             return newImage;
         }
 
@@ -28,9 +28,13 @@ namespace AsmResolver.PE.Tests.DotNet.VTableFixups
         [InlineData(false, false)]
         public void ReadVTableTokens(bool is32Bit, bool rebuild)
         {
-            var peImage = PEImage.FromBytes(is32Bit
-                ? Properties.Resources.UnmanagedExports_x32
-                : Properties.Resources.UnmanagedExports_x64);
+            var peImage = PEImage.FromBytes(
+                is32Bit
+                    ? Properties.Resources.UnmanagedExports_x32
+                    : Properties.Resources.UnmanagedExports_x64,
+                TestReaderParameters
+            );
+
             if (rebuild)
                 peImage = RebuildAndReloadManagedPE(peImage);
 
@@ -52,9 +56,13 @@ namespace AsmResolver.PE.Tests.DotNet.VTableFixups
         [InlineData(false, false)]
         public void ReadVTableFixupsDirectory(bool is32Bit, bool rebuild)
         {
-            var peImage = PEImage.FromBytes(is32Bit
-                ? Properties.Resources.UnmanagedExports_x32
-                : Properties.Resources.UnmanagedExports_x64);
+            var peImage = PEImage.FromBytes(
+                is32Bit
+                    ? Properties.Resources.UnmanagedExports_x32
+                    : Properties.Resources.UnmanagedExports_x64,
+                TestReaderParameters
+            );
+
             if (rebuild)
                 peImage = RebuildAndReloadManagedPE(peImage);
 

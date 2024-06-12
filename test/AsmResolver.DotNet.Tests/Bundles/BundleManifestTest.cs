@@ -178,7 +178,11 @@ namespace AsmResolver.DotNet.Tests.Bundles
             string appHostTemplatePath = FindAppHostTemplate("6.0");
 
             // Obtain expected version info.
-            var oldImage = PEImage.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6_WithResources);
+            var oldImage = PEImage.FromBytes(
+                Properties.Resources.HelloWorld_SingleFile_V6_WithResources,
+                TestReaderParameters.PEReaderParameters
+            );
+
             var versionInfo = VersionInfoResource.FromDirectory(oldImage.Resources!)!;
 
             // Bundle with PE image as template for PE headers and resources.
@@ -276,7 +280,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             var mainFile = manifest.Files.First(f => f.RelativePath.Contains("HelloWorld.dll"));
 
             // Patch entry point file.
-            var module = ModuleDefinition.FromBytes(mainFile.GetData());
+            var module = ModuleDefinition.FromBytes(mainFile.GetData(), TestReaderParameters);
             module.ManagedEntryPointMethod!.CilMethodBody!
                 .Instructions.First(i => i.OpCode.Code == CilCode.Ldstr)
                 .Operand = "Hello, Mars!";

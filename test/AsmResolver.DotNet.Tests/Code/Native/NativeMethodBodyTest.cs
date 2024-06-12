@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
 
         private static NativeMethodBody CreateDummyBody(bool isVoid, bool is32Bit)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.TheAnswer_NetFx);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TheAnswer_NetFx, TestReaderParameters);
 
             module.IsILOnly = false;
             if (is32Bit)
@@ -244,7 +244,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             module.Write(stream);
 
             // Reload and look up native method.
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             var method = newModule.GetAllTypes().SelectMany(t => t.Methods).First(m => m.IsNative);
 
             // Verify if code behind the entry address is consistent.

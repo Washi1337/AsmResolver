@@ -18,14 +18,14 @@ namespace AsmResolver.PE.Tests.Debug
             newPeFile.Write(new BinaryStreamWriter(tempStream));
 
             // Reload.
-            var newImage = PEImage.FromBytes(tempStream.ToArray());
+            var newImage = PEImage.FromBytes(tempStream.ToArray(), TestReaderParameters);
             return newImage;
         }
 
         [Fact]
         public void ReadEntries()
         {
-            var image = PEImage.FromBytes(Properties.Resources.SimpleDll);
+            var image = PEImage.FromBytes(Properties.Resources.SimpleDll, TestReaderParameters);
 
             Assert.Equal(new[]
             {
@@ -37,7 +37,7 @@ namespace AsmResolver.PE.Tests.Debug
         [Fact]
         public void PersistentEntries()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var newImage = RebuildAndReloadManagedPE(image);
 
             Assert.Equal(

@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Tests
         {
             using var stream = new MemoryStream();
             module.Write(stream);
-            return ModuleDefinition.FromReader(new BinaryStreamReader(stream.ToArray()));
+            return ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
         }
 
         [SkippableFact]
@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet.Tests
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
 
             var reflectionModule = typeof(ModuleDefinition).Assembly.ManifestModule;
-            var module = ModuleDefinition.FromModule(reflectionModule);
+            var module = ModuleDefinition.FromModule(reflectionModule, TestReaderParameters);
             Assert.Equal(reflectionModule.Name, module.Name);
         }
 
@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Tests
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
 
             var reflectionModule = Assembly.Load(Properties.Resources.ActualLibrary).ManifestModule;
-            var module = ModuleDefinition.FromModule(reflectionModule);
+            var module = ModuleDefinition.FromModule(reflectionModule, TestReaderParameters);
             Assert.Equal("ActualLibrary.dll", module.Name);
         }
 
@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Tests
         public void LoadFromFileShouldPopulateResolverSearchDirectories()
         {
             string path = typeof(ModuleDefinitionTest).Assembly.Location;
-            var module = ModuleDefinition.FromFile(path);
+            var module = ModuleDefinition.FromFile(path, TestReaderParameters);
 
             Assert.Contains(
                 Path.GetDirectoryName(path),
@@ -64,7 +64,7 @@ namespace AsmResolver.DotNet.Tests
         public void LoadFromBytesShouldLeaveSearchDirectoriesEmpty()
         {
             string path = typeof(ModuleDefinitionTest).Assembly.Location;
-            var module = ModuleDefinition.FromBytes(File.ReadAllBytes(path));
+            var module = ModuleDefinition.FromBytes(File.ReadAllBytes(path), TestReaderParameters);
 
             Assert.DoesNotContain(
                 Path.GetDirectoryName(path),
@@ -110,14 +110,14 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNameTest()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Equal("HelloWorld.exe", module.Name);
         }
 
         [Fact]
         public void ReadMvidFromNormalMetadata()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleGuidStream);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleGuidStream, TestReaderParameters);
             Assert.Equal(
                 new Guid(new byte[]
                 {
@@ -128,7 +128,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMvidFromEnCMetadata()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleGuidStream_EnC);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleGuidStream_EnC, TestReaderParameters);
             Assert.Equal(
                 new Guid(new byte[]
                 {
@@ -141,7 +141,7 @@ namespace AsmResolver.DotNet.Tests
         {
             const string newName = "HelloMars.exe";
 
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             module.Name = newName;
 
             var newModule = Rebuild(module);
@@ -151,7 +151,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadManifestModule()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.NotNull(module.Assembly);
             Assert.Same(module, module.Assembly.ManifestModule);
         }
@@ -159,14 +159,14 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadTypesNoNested()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Equal(new Utf8String[] { "<Module>", "Program" }, module.TopLevelTypes.Select(t => t.Name));
         }
 
         [Fact]
         public void ReadTypesNested()
         {
-            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
             Assert.Equal(new Utf8String[]
             {
                 "<Module>",
@@ -178,14 +178,14 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMaliciousNestedClassLoop()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousNestedClassLoop);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousNestedClassLoop, TestReaderParameters);
             Assert.Equal(new Utf8String[] { "<Module>", "Program" }, module.TopLevelTypes.Select(t => t.Name));
         }
 
         [Fact]
         public void ReadMaliciousNestedClassLoop2()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousNestedClassLoop2);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousNestedClassLoop2, TestReaderParameters);
             Assert.Equal(
                 new HashSet<Utf8String> { "<Module>", "Program", "MaliciousEnclosingClass" },
                 new HashSet<Utf8String>(module.TopLevelTypes.Select(t => t.Name)));
@@ -199,7 +199,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void HelloWorldReadAssemblyReferences()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Single(module.AssemblyReferences);
             Assert.Equal("mscorlib", module.AssemblyReferences[0].Name);
         }
@@ -207,7 +207,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void LookupTypeReference()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var member = module.LookupMember(new MetadataToken(TableIndex.TypeRef, 12));
 
             var reference = Assert.IsAssignableFrom<TypeReference>(member);
@@ -218,7 +218,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void LookupTypeReferenceStronglyTyped()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var reference = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 12));
 
             Assert.Equal("System", reference.Namespace);
@@ -228,7 +228,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void TryLookupTypeReferenceStronglyTyped()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             Assert.True(module.TryLookupMember(new MetadataToken(TableIndex.TypeRef, 12), out TypeReference reference));
             Assert.Equal("System", reference.Namespace);
@@ -238,7 +238,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void LookupTypeDefinition()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var member = module.LookupMember(new MetadataToken(TableIndex.TypeDef, 2));
 
             var definition = Assert.IsAssignableFrom<TypeDefinition>(member);
@@ -249,7 +249,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void LookupTypeDefinitionStronglyTyped()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var definition = module.LookupMember<TypeDefinition>(new MetadataToken(TableIndex.TypeDef, 2));
 
             Assert.Equal("HelloWorld", definition.Namespace);
@@ -259,7 +259,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void LookupAssemblyReference()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var member = module.LookupMember(new MetadataToken(TableIndex.AssemblyRef, 1));
 
             var reference = Assert.IsAssignableFrom<AssemblyReference>(member);
@@ -270,7 +270,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void LookupAssemblyReferenceStronglyTyped()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var reference = module.LookupMember<AssemblyReference>(new MetadataToken(TableIndex.AssemblyRef, 1));
 
             Assert.Equal("mscorlib", reference.Name);
@@ -280,7 +280,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void LookupModuleReference()
         {
-            var module = ModuleDefinition.FromFile(Path.Combine("Resources", "Manifest.exe"));
+            var module = ModuleDefinition.FromFile(Path.Combine("Resources", "Manifest.exe"), TestReaderParameters);
             var member = module.LookupMember(new MetadataToken(TableIndex.ModuleRef, 1));
 
             var reference =Assert.IsAssignableFrom<ModuleReference>(member);
@@ -291,7 +291,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void LookupModuleReferenceStronglyTyped()
         {
-            var module = ModuleDefinition.FromFile(Path.Combine("Resources", "Manifest.exe"));
+            var module = ModuleDefinition.FromFile(Path.Combine("Resources", "Manifest.exe"), TestReaderParameters);
             var reference = module.LookupMember<ModuleReference>(new MetadataToken(TableIndex.ModuleRef, 1));
 
             Assert.Equal("MyModel.netmodule", reference.Name);
@@ -309,7 +309,7 @@ namespace AsmResolver.DotNet.Tests
             using var stream = new MemoryStream();
             module.Write(stream);
 
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             var comparer = new SignatureComparer();
             Assert.Contains(newModule.AssemblyReferences, reference => comparer.Equals(corLib, reference));
         }
@@ -326,7 +326,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void AddingTypeIsPersistentAfterRebuild()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             var newType = new TypeDefinition("SomeNamespace", "SomeType",
                 TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed);
@@ -371,7 +371,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentResources()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Add new directory.
             const string directoryName = "Test";
@@ -391,7 +391,7 @@ namespace AsmResolver.DotNet.Tests
             // Write and rebuild.
             using var stream = new MemoryStream();
             module.Write(stream);
-            var newModule = ModuleDefinition.FromReader(new BinaryStreamReader(stream.ToArray()));
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
 
             // Assert contents.
             var newDirectory = (ResourceDirectory) newModule.NativeResourceDirectory!.Entries
@@ -408,7 +408,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var time = new DateTime(2020, 1, 2, 18, 30, 34);
 
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             module.TimeDateStamp = time;
 
             var image = module.ToPEImage();
@@ -449,7 +449,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void DetectTargetNetFramework40()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.True(module.OriginalTargetRuntime.IsNetFramework);
             Assert.Contains(DotNetRuntimeInfo.NetFramework, module.OriginalTargetRuntime.Name);
             Assert.Equal(4, module.OriginalTargetRuntime.Version.Major);
@@ -459,7 +459,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void DetectTargetNetCore()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
             Assert.True(module.OriginalTargetRuntime.IsNetCoreApp);
             Assert.Contains(DotNetRuntimeInfo.NetCoreApp, module.OriginalTargetRuntime.Name);
             Assert.Equal(2, module.OriginalTargetRuntime.Version.Major);
@@ -469,7 +469,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void DetectTargetStandard()
         {
-            var module = ModuleDefinition.FromFile(typeof(TestCases.Types.Class).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TestCases.Types.Class).Assembly.Location, TestReaderParameters);
             Assert.True(module.OriginalTargetRuntime.IsNetStandard);
             Assert.Contains(DotNetRuntimeInfo.NetStandard, module.OriginalTargetRuntime.Name);
             Assert.Equal(2, module.OriginalTargetRuntime.Version.Major);
@@ -489,7 +489,7 @@ namespace AsmResolver.DotNet.Tests
             string runtimePath = DotNetCorePathProvider.Default
                 .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
                 .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
-            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Private.CoreLib.dll"));
+            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Private.CoreLib.dll"), TestReaderParameters);
 
             using var stream = new MemoryStream();
             module.Write(stream);
@@ -501,7 +501,7 @@ namespace AsmResolver.DotNet.Tests
             string runtimePath = DotNetCorePathProvider.Default
                 .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
                 .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
-            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Runtime.dll"));
+            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Runtime.dll"), TestReaderParameters);
 
             using var stream = new MemoryStream();
             module.Write(stream);
@@ -513,7 +513,7 @@ namespace AsmResolver.DotNet.Tests
             string runtimePath = DotNetCorePathProvider.Default
                 .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
                 .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
-            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Private.Xml.dll"));
+            var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Private.Xml.dll"), TestReaderParameters);
 
             using var stream = new MemoryStream();
             module.Write(stream);
@@ -522,7 +522,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void GetModuleTypeNetFramework()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorNetFramework);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorNetFramework, TestReaderParameters);
 
             // Module type should exist.
             var type = module.GetModuleType();
@@ -536,7 +536,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void GetModuleTypeNet6()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorNet6);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorNet6, TestReaderParameters);
 
             // Module type should exist.
             var type = module.GetModuleType();
@@ -550,7 +550,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void GetModuleTypeAbsentNet6()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorAbsentNet6);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorAbsentNet6, TestReaderParameters);
 
             // Module type should not exist.
             var type = module.GetModuleType();
@@ -565,7 +565,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void GetModuleTypeLookalikeNet6()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorLookalikeNet6);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ModuleCctorLookalikeNet6, TestReaderParameters);
 
             // Module type should not exist.
             var type = module.GetModuleType();
@@ -584,7 +584,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true, true)]
         public void IsLoadedAs32BitAnyCPUModule(bool assume32Bit, bool canLoadAs32Bit, bool expected)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Equal(expected, module.IsLoadedAs32Bit(assume32Bit, canLoadAs32Bit));
         }
 
@@ -595,7 +595,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true, true)]
         public void IsLoadedAs32BitAnyCPUModulePrefer32Bit(bool assume32Bit, bool canLoadAs32Bit, bool expected)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             module.IsBit32Preferred = true;
             Assert.Equal(expected, module.IsLoadedAs32Bit(assume32Bit, canLoadAs32Bit));
         }
@@ -607,7 +607,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void IsLoadedAs32Bit64BitModule(bool assume32Bit, bool canLoadAs32Bit)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             module.MachineType = MachineType.Amd64;
             Assert.False(module.IsLoadedAs32Bit(assume32Bit, canLoadAs32Bit));
         }
@@ -619,7 +619,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true, true)]
         public void IsLoadedAs32Bit32BitModule(bool assume32Bit, bool canLoadAs32Bit)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             module.MachineType = MachineType.I386;
             module.IsBit32Required = true;
             Assert.True(module.IsLoadedAs32Bit(assume32Bit, canLoadAs32Bit));

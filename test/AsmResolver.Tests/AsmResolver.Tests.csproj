@@ -23,7 +23,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Resources\DpesFileTemplate.txt" />
       <EmbeddedResource Include="Resources\RuntimeConfigTemplate.txt" />
     </ItemGroup>
 

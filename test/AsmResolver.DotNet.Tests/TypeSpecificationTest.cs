@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadGenericTypeInstantiation()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location, TestReaderParameters);
             var fieldType = module
                 .TopLevelTypes.First(t => t.Name == nameof(GenericsTestClass))
                 .Fields.First(f => f.Name == nameof(GenericsTestClass.GenericField))
@@ -33,12 +33,12 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentGenericTypeInstantiation()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location, TestReaderParameters);
 
             using var tempStream = new MemoryStream();
             module.Write(tempStream);
 
-            module = ModuleDefinition.FromBytes(tempStream.ToArray());
+            module = ModuleDefinition.FromBytes(tempStream.ToArray(), TestReaderParameters);
             var fieldType = module
                 .TopLevelTypes.First(t => t.Name == nameof(GenericsTestClass))!
                 .Fields.First(f => f.Name == nameof(GenericsTestClass.GenericField))!
@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void IllegalTypeSpecInTypeDefOrRef()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_IllegalTypeSpecInTypeDefOrRefSig);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_IllegalTypeSpecInTypeDefOrRefSig, TestReaderParameters);
             var typeSpec =  (TypeSpecification) module.LookupMember(new MetadataToken(TableIndex.TypeSpec, 1));
             Assert.NotNull(typeSpec);
         }

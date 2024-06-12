@@ -169,7 +169,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(ElementType.Char, ElementType.Char)]
         public void GetReducedTypeOfPrimitive(ElementType type, ElementType expected)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Equal(expected, module.CorLibTypeFactory.FromElementType(type)!.GetReducedType().ElementType);
         }
 
@@ -178,7 +178,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(typeof(Int64Enum), ElementType.I8)]
         public void GetReducedTypeOfEnum(Type type, ElementType expected)
         {
-            var module = ModuleDefinition.FromFile(type.Assembly.Location);
+            var module = ModuleDefinition.FromFile(type.Assembly.Location, TestReaderParameters);
             var signature = module.LookupMember<TypeDefinition>(type.MetadataToken).ToTypeSignature();
             Assert.Equal(expected, signature.GetReducedType().ElementType);
         }
@@ -186,7 +186,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetReducedTypeOfNonPrimitive()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == "Program").ToTypeSignature(false);
             Assert.Equal(type, type.GetReducedType());
         }
@@ -207,7 +207,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(ElementType.Char, ElementType.I2)]
         public void GetVerificationTypeOfPrimitive(ElementType type, ElementType expected)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Equal(expected, module.CorLibTypeFactory.FromElementType(type)!.GetVerificationType().ElementType);
         }
 
@@ -227,7 +227,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(ElementType.Char, ElementType.I2)]
         public void GetVerificationTypeOfManagedPrimitivePointer(ElementType type, ElementType expected)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var pointerType = module.CorLibTypeFactory.FromElementType(type)!.MakeByReferenceType();
             var actualType = Assert.IsAssignableFrom<ByReferenceTypeSignature>(pointerType.GetVerificationType());
             Assert.Equal(expected, actualType.BaseType.ElementType);
@@ -236,7 +236,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetVerificationTypeOfNonPrimitive()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == "Program").ToTypeSignature(false);
             Assert.Equal(type, type.GetVerificationType());
         }
@@ -259,14 +259,14 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(ElementType.R8, ElementType.R8)]
         public void GetIntermediateTypeOfPrimitive(ElementType type, ElementType expected)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Equal(expected, module.CorLibTypeFactory.FromElementType(type)!.GetIntermediateType().ElementType);
         }
 
         [Fact]
         public void GetIntermediateTypeOfNonPrimitive()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == "Program").ToTypeSignature(false);
             Assert.Equal(type, type.GetIntermediateType());
         }
@@ -274,7 +274,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetDirectBaseClassOfArrayType()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var signature = module.CorLibTypeFactory.Object.MakeArrayType(3);
             Assert.Equal("System.Array", signature.GetDirectBaseClass()!.FullName);
         }
@@ -282,7 +282,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetDirectBaseClassOfSzArrayType()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var signature = module.CorLibTypeFactory.Object.MakeSzArrayType();
             Assert.Equal("System.Array", signature.GetDirectBaseClass()!.FullName);
         }
@@ -290,7 +290,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetDirectBaseClassOfInterfaceType()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var interfaceDefinition = new TypeDefinition("Namespace", "IName", TypeAttributes.Interface);
             module.TopLevelTypes.Add(interfaceDefinition);
 
@@ -302,7 +302,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetDirectBaseClassOfNormalType()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == "Program").ToTypeSignature();
             Assert.Equal("System.Object", type.GetDirectBaseClass()!.FullName);
         }
@@ -310,7 +310,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetDirectBaseClassOfNormalTypeWithBaseType()
         {
-            var module = ModuleDefinition.FromFile(typeof(DerivedClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(DerivedClass).Assembly.Location, TestReaderParameters);
             var type = module.LookupMember<TypeDefinition>(typeof(DerivedClass).MetadataToken);
             Assert.Equal(type.BaseType!.FullName, type.ToTypeSignature().GetDirectBaseClass()!.FullName);
         }
@@ -318,7 +318,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetDirectBaseClassOfGenericTypeInstance()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
             var genericInstanceType = module.LookupMember<TypeDefinition>(typeof(GenericType<,,>).MetadataToken)
                 .MakeGenericInstanceType(
                     module.CorLibTypeFactory.Int32,
@@ -331,7 +331,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetDirectBaseClassOfGenericTypeInstanceWithGenericBaseClass()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericDerivedType<,>).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericDerivedType<,>).Assembly.Location, TestReaderParameters);
             var genericInstanceType = module.LookupMember<TypeDefinition>(typeof(GenericDerivedType<,>).MetadataToken)
                 .MakeGenericInstanceType(
                     module.CorLibTypeFactory.Int32,
@@ -368,7 +368,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(ElementType.Char)]
         public void IsCompatibleWithIdenticalPrimitiveTypes(ElementType elementType)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var type = module.CorLibTypeFactory.FromElementType(elementType)!;
             Assert.True(type.IsCompatibleWith(type));
         }
@@ -378,7 +378,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(typeof(DerivedClass))]
         public void IsCompatibleWithIdenticalUserTypes(Type type)
         {
-            var module = ModuleDefinition.FromFile(type.Assembly.Location);
+            var module = ModuleDefinition.FromFile(type.Assembly.Location, TestReaderParameters);
             var signature = module.LookupMember<TypeDefinition>(type.MetadataToken).ToTypeSignature();
             Assert.True(signature.IsCompatibleWith(signature));
         }
@@ -391,7 +391,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(typeof(AbstractClass), typeof(DerivedDerivedClass), false)]
         public void IsCompatibleWithBaseClass(Type derivedType, Type baseType, bool expected)
         {
-            var module = ModuleDefinition.FromFile(derivedType.Assembly.Location);
+            var module = ModuleDefinition.FromFile(derivedType.Assembly.Location, TestReaderParameters);
             var derivedSignature = module.LookupMember<TypeDefinition>(derivedType.MetadataToken).ToTypeSignature();
             var abstractSignature = module.LookupMember<TypeDefinition>(baseType.MetadataToken).ToTypeSignature();
             Assert.Equal(expected, derivedSignature.IsCompatibleWith(abstractSignature));
@@ -412,7 +412,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(typeof(IInterface4), typeof(DerivedInterfaceImplementations), false)]
         public void IsCompatibleWithInterface(Type derivedType, Type interfaceType, bool expected)
         {
-            var module = ModuleDefinition.FromFile(typeof(DerivedClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(DerivedClass).Assembly.Location, TestReaderParameters);
             var derivedSignature = module.LookupMember<TypeDefinition>(derivedType.MetadataToken).ToTypeSignature();
             var interfaceSignature = module.LookupMember<TypeDefinition>(interfaceType.MetadataToken).ToTypeSignature();
             Assert.Equal(expected, derivedSignature.IsCompatibleWith(interfaceSignature));
@@ -425,7 +425,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(new[] { ElementType.I4, ElementType.I4 }, new[] { ElementType.I4, ElementType.I4, ElementType.Boolean }, false)]
         public void IsCompatibleWithGenericInterface(ElementType[] typeArguments1, ElementType[] typeArguments2, bool expected)
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericInterfaceImplementation<,>).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericInterfaceImplementation<,>).Assembly.Location, TestReaderParameters);
 
             var type1 = module.LookupMember<TypeDefinition>(typeof(GenericInterfaceImplementation<,>).MetadataToken)
                 .ToTypeSignature(false)
@@ -454,7 +454,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(ElementType.U4, ElementType.I4, true)]
         public void IsCompatibleWithArray(ElementType elementType1, ElementType elementType2, bool expected)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var type1 = module.CorLibTypeFactory.FromElementType(elementType1)!.MakeSzArrayType();
             var type2 = module.CorLibTypeFactory.FromElementType(elementType2)!.MakeSzArrayType();
             Assert.Equal(expected, type1.IsCompatibleWith(type2));
@@ -472,7 +472,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(ElementType.U4, ElementType.I4, true)]
         public void IsCompatibleWithArrayAndIList(ElementType elementType1, ElementType elementType2, bool expected)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             var type1 = module.CorLibTypeFactory.FromElementType(elementType1)!.MakeSzArrayType();
             var type2 = module.CorLibTypeFactory.CorLibScope
@@ -486,7 +486,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void IsCompatibleWithGenericInstanceAndObject()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
 
             var type1 = module
                 .LookupMember<TypeDefinition>(typeof(GenericType<,,>).MetadataToken)
@@ -503,7 +503,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void IsCompatibleWithGenericInstance()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericDerivedType<,>).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericDerivedType<,>).Assembly.Location, TestReaderParameters);
 
             var type1 = module
                 .LookupMember<TypeDefinition>(typeof(GenericDerivedType<,>).MetadataToken)
@@ -542,7 +542,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(ElementType.I1, ElementType.U2, false)]
         public void IsCompatibleWithPointers(ElementType elementType1, ElementType elementType2, bool expected)
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericDerivedType<,>).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericDerivedType<,>).Assembly.Location, TestReaderParameters);
 
             var type1 = module.CorLibTypeFactory.FromElementType(elementType1)!.MakePointerType();
             var type2 = module.CorLibTypeFactory.FromElementType(elementType2)!.MakePointerType();
@@ -562,7 +562,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(ElementType.I4, ElementType.I, true)]
         public void IsAssignablePrimitives(ElementType elementType1, ElementType elementType2, bool expected)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             var type1 = module.CorLibTypeFactory.FromElementType(elementType1)!;
             var type2 = module.CorLibTypeFactory.FromElementType(elementType2)!;
@@ -573,7 +573,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void IgnoreCustomModifiers()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             var type1 = module.CorLibTypeFactory.Int32;
             var type2 = module.CorLibTypeFactory.Int32.MakeModifierType(module.CorLibTypeFactory.CorLibScope
@@ -588,7 +588,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void IgnoreNestedCustomModifiers()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             var type1 = module.CorLibTypeFactory.Int32;
             var type2 = module.CorLibTypeFactory.Int32.MakeModifierType(module.CorLibTypeFactory.CorLibScope
@@ -610,7 +610,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void IgnorePinnedModifiers()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             var type1 = module.CorLibTypeFactory.Int32;
             var type2 = module.CorLibTypeFactory.Int32.MakePinnedType();
@@ -622,7 +622,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetModuleOfTypeDefOrRef()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var signature = module.GetOrCreateModuleType().ToTypeSignature();
             Assert.Same(module, signature.Module);
         }
@@ -630,7 +630,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetModuleOfTypeDefOrRefWithNullScope()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_CurrentModule);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_CurrentModule, TestReaderParameters);
             var signature = module
                 .LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 2))
                 .ToTypeSignature();
@@ -642,7 +642,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void GetModuleOfSpecificationTypeWithNullScope()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_CurrentModule);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_CurrentModule, TestReaderParameters);
             var signature = module
                 .LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 2))
                 .ToTypeSignature()

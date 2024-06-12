@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             var module = new ModuleDefinition("SomeModule", KnownCorLibs.SystemPrivateCoreLib_v4_0_0_0);
             var main = new MethodDefinition(
-                "Main", 
+                "Main",
                 MethodAttributes.Public | MethodAttributes.Static,
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
 
@@ -33,10 +33,10 @@ namespace AsmResolver.DotNet.Tests.Builder
                 Instructions = {new CilInstruction(CilOpCodes.Ret)},
                 LocalVariables = {new CilLocalVariable(module.CorLibTypeFactory.Int32)} // Force fat method body.
             };
-            
+
             module.GetOrCreateModuleType().Methods.Add(main);
             module.ManagedEntryPoint = main;
-            
+
             var builder = new ManagedPEImageBuilder(new DotNetDirectoryFactory
             {
                 MethodBodySerializer = new CilMethodBodySerializer
@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             });
 
             var newImage = builder.CreateImage(module).ConstructedImage;
-            var newModule = ModuleDefinition.FromImage(newImage);
+            var newModule = ModuleDefinition.FromImage(newImage, TestReaderParameters);
 
             Assert.Equal(expectedMaxStack, newModule.ManagedEntryPointMethod.CilMethodBody.MaxStack);
         }

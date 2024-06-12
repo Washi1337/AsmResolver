@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveMemberRefsNoChangeShouldAtLeastHaveOriginalMemberRefs()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
             var originalMemberRefs = GetMembers<MemberReference>(module, TableIndex.MemberRef);
 
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveMemberReferenceIndices);
@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveMemberRefsWithTypeRefRemovedShouldAtLeastHaveOriginalMemberRefs()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
             var originalMemberRefs = GetMembers<MemberReference>(module, TableIndex.MemberRef);
 
             var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveMemberRefsWithExtraImportShouldAtLeastHaveOriginalMemberRefs()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
             var originalMemberRefs = GetMembers<MemberReference>(module, TableIndex.MemberRef);
 
             var importer = new ReferenceImporter(module);
@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveDuplicatedTypeRefs()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters.PEReaderParameters);
             var metadata = image.DotNetDirectory!.Metadata!;
             var strings = metadata.GetStream<StringsStream>();
             var table = metadata
@@ -75,7 +75,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             table.Add(writeLineRow);
 
             // Open module from modified image.
-            var module = ModuleDefinition.FromImage(image);
+            var module = ModuleDefinition.FromImage(image, TestReaderParameters);
 
             // Obtain references to Object.
             var references = module
@@ -101,7 +101,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveMethodDefinitionParents()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.ArgListTest);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ArgListTest, TestReaderParameters);
             var reference = (MemberReference) module.ManagedEntryPointMethod!.CilMethodBody!
                 .Instructions.First(i => i.OpCode.Code == CilCode.Call)
                 .Operand!;

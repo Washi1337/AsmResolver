@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadConstructor()
         {
-            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
 
             Assert.All(type.CustomAttributes, a =>
@@ -29,11 +29,11 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentConstructor()
         {
-            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location, TestReaderParameters);
             using var stream = new MemoryStream();
             module.Write(stream);
 
-            module = ModuleDefinition.FromReader(new BinaryStreamReader(stream.ToArray()));
+            module = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
 
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
             Assert.All(type.CustomAttributes, a =>
@@ -62,7 +62,7 @@ namespace AsmResolver.DotNet.Tests
             }
 
             // Resolve by token and verify parent (forcing parent to execute the lazy initialization ).
-            var module = ModuleDefinition.FromFile(filePath);
+            var module = ModuleDefinition.FromFile(filePath, TestReaderParameters);
             var attribute = (CustomAttribute) module.LookupMember(attributeToken);
             Assert.NotNull(attribute.Parent);
             Assert.IsAssignableFrom<TypeDefinition>(attribute.Parent);
@@ -75,7 +75,7 @@ namespace AsmResolver.DotNet.Tests
             bool access = false,
             bool generic = false)
         {
-            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
             var method = type.Methods.First(m => m.Name == methodName);
 
@@ -102,7 +102,7 @@ namespace AsmResolver.DotNet.Tests
             var stream = new MemoryStream();
             var method = (MethodDefinition) attribute.Parent!;
             method.Module!.Write(stream);
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
 
             return newModule
                 .TopLevelTypes.First(t => t.FullName == method.DeclaringType!.FullName)
@@ -274,7 +274,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void IsCompilerGeneratedMember()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
             var property = type.Properties.First();
             var setMethod = property.SetMethod!;

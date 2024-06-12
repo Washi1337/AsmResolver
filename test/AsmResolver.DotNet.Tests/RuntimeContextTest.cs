@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveDependencyShouldUseSameRuntimeContext()
         {
-            var main = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var main = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var dependency = main.CorLibTypeFactory.CorLibScope.GetAssembly()!.Resolve()!.ManifestModule!;
 
             Assert.Same(main.RuntimeContext, dependency.RuntimeContext);
@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void DetectNetFrameworkContext()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Equal(
                 new DotNetRuntimeInfo(DotNetRuntimeInfo.NetFramework, new Version(4, 0)),
                 module.RuntimeContext.TargetRuntime
@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void DetectNetCoreAppContext()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
             Assert.Equal(
                 new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(2, 2)),
                 module.RuntimeContext.TargetRuntime
@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveSameDependencyInSameContextShouldResultInSameAssembly()
         {
-            var module1 = ModuleDefinition.FromFile(typeof(Class).Assembly.Location);
+            var module1 = ModuleDefinition.FromFile(typeof(Class).Assembly.Location, TestReaderParameters);
             var module2 = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, new ModuleReaderParameters
             {
                 RuntimeContext = module1.RuntimeContext

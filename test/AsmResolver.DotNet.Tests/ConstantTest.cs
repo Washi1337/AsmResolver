@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Tests
     {
         private Constant GetFieldConstant(string name)
         {
-            var module = ModuleDefinition.FromFile(typeof(Constants).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(Constants).Assembly.Location, TestReaderParameters);
             return GetFieldConstantInModule(module, name);
         }
 
@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Tests
             var stream = new MemoryStream();
             module.Write(stream);
 
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             return GetFieldConstantInModule(newModule, name);
         }
 
@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadInvalidConstantValueShouldNotThrow()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.ConstantZeroValueColumn);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ConstantZeroValueColumn, TestReaderParameters);
             var constantValue = module
                 .TopLevelTypes.First(t => t.Name == "MyClass")
                 .Fields.First(f => f.Name == "MyIntegerConstant")
@@ -84,12 +84,12 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void WriteNullConstantValueShouldNotThrow()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.ConstantZeroValueColumn);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ConstantZeroValueColumn, TestReaderParameters);
 
             var stream = new MemoryStream();
             module.Write(stream);
 
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
 
             var constantValue = newModule
                 .TopLevelTypes.First(t => t.Name == "MyClass")

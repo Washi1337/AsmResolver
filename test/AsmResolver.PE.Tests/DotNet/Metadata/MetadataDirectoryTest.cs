@@ -13,7 +13,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void CorrectHeader()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             Assert.Equal(1, metadata.MajorVersion);
@@ -27,7 +27,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void CorrectStreamHeaders()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             string[] expectedNames = new[] {"#~", "#Strings", "#US", "#GUID", "#Blob"};
@@ -37,7 +37,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void CorrectStreamHeadersUnalignedMetadataDirectory()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_UnalignedMetadata);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_UnalignedMetadata, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             string[] expectedNames = new[] {"#~", "#Strings", "#US", "#GUID", "#Blob"};
@@ -47,7 +47,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void DetectStringsStream()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var stream = metadata.GetStream(StringsStream.DefaultName);
@@ -58,7 +58,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void DetectUserStringsStream()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var stream = metadata.GetStream(UserStringsStream.DefaultName);
@@ -69,7 +69,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void DetectBlobStream()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var stream = metadata.GetStream(BlobStream.DefaultName);
@@ -80,7 +80,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void DetectGuidStream()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var stream = metadata.GetStream(GuidStream.DefaultName);
@@ -91,7 +91,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void DetectCompressedTableStream()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var stream = metadata.GetStream(TablesStream.CompressedStreamName);
@@ -103,7 +103,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         public void PreserveMetadataNoChange()
         {
             var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
-            var peImage = PEImage.FromFile(peFile);
+            var peImage = PEImage.FromFile(peFile, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             using var tempStream = new MemoryStream();
@@ -135,7 +135,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         private void AssertCorrectStreamIsSelected<TStream>(byte[] assembly, bool isEnC)
             where TStream : class, IMetadataStream
         {
-            AssertCorrectStreamIsSelected<TStream>(PEImage.FromBytes(assembly), isEnC);
+            AssertCorrectStreamIsSelected<TStream>(PEImage.FromBytes(assembly, TestReaderParameters), isEnC);
         }
 
         private void AssertCorrectStreamIsSelected<TStream>(PEImage peImage, bool isEnC)
@@ -203,7 +203,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void SchemaStreamShouldForceEnCMetadata()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_SchemaStream);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_SchemaStream, TestReaderParameters);
             AssertCorrectStreamIsSelected<BlobStream>(peImage, true);
             AssertCorrectStreamIsSelected<GuidStream>(peImage, true);
             AssertCorrectStreamIsSelected<StringsStream>(peImage, true);
@@ -213,7 +213,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void UseCaseInsensitiveComparisonForHeapNamesInEnCMetadata()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_LowerCaseHeapsWithEnC);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_LowerCaseHeapsWithEnC, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             Assert.True(metadata.TryGetStream(out BlobStream? blobStream));
@@ -229,7 +229,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void UseCaseSensitiveComparisonForHeapNamesInNormalMetadata()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_LowerCaseHeapsNormalMetadata);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_LowerCaseHeapsNormalMetadata, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             Assert.True(metadata.TryGetStream(out BlobStream? blobStream));
@@ -245,7 +245,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void UseLargeTableIndicesWhenJTDStreamIsPresentInEnCMetadata()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_JTDStream);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_JTDStream, TestReaderParameters);
             var metadata = peImage.DotNetDirectory!.Metadata!;
 
             var tablesStream = metadata.GetStream<TablesStream>();

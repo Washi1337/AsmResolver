@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         [Fact]
         public void NewTypeDefinition()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Create new type.
             var type = new TypeDefinition("Namespace", "Name", TypeAttributes.Interface); ;
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.NotEqual(0u, newToken.Rid);
 
             // Assert token resolves to the new type.
-            var newModule = ModuleDefinition.FromImage(result.ConstructedImage);
+            var newModule = ModuleDefinition.FromImage(result.ConstructedImage, TestReaderParameters);
             var newType = (TypeDefinition) newModule.LookupMember(newToken);
             Assert.Equal(type.Namespace, newType.Namespace);
             Assert.Equal(type.Name, newType.Name);
@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         [Fact]
         public void NewFieldDefinition()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Create new field.
             var field = new FieldDefinition(
@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.NotEqual(0u, newToken.Rid);
 
             // Assert token resolves to the new field.
-            var newModule = ModuleDefinition.FromImage(result.ConstructedImage);
+            var newModule = ModuleDefinition.FromImage(result.ConstructedImage, TestReaderParameters);
             var newField = (FieldDefinition) newModule.LookupMember(newToken);
             Assert.Equal(field.Name, newField.Name);
         }
@@ -64,7 +64,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         [Fact]
         public void NewMethodDefinition()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Create new method.
             var method = new MethodDefinition(
@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.NotEqual(0u, mainMethodToken.Rid);
 
             // Assert tokens resolve to the same methods.
-            var newModule = ModuleDefinition.FromImage(result.ConstructedImage);
+            var newModule = ModuleDefinition.FromImage(result.ConstructedImage, TestReaderParameters);
             var newMethod = (MethodDefinition) newModule.LookupMember(methodToken);
             Assert.Equal(method.Name, newMethod.Name);
             var newMain = (MethodDefinition) newModule.LookupMember(mainMethodToken);
@@ -97,7 +97,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         [Fact]
         public void NewTypeReference()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Import arbitrary type as reference.
             var importer = new ReferenceImporter(module);
@@ -118,7 +118,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.NotEqual(0u, newToken.Rid);
 
             // Assert token resolves to the same type reference.
-            var newModule = ModuleDefinition.FromImage(result.ConstructedImage);
+            var newModule = ModuleDefinition.FromImage(result.ConstructedImage, TestReaderParameters);
             var newReference = (TypeReference) newModule.LookupMember(newToken);
             Assert.Equal(reference.Namespace, newReference.Namespace);
             Assert.Equal(reference.Name, newReference.Name);
@@ -127,7 +127,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         [Fact]
         public void NewMemberReference()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Import arbitrary method.
             var importer = new ReferenceImporter(module);
@@ -147,7 +147,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.NotEqual(0u, newToken.Rid);
 
             // Assert token resolves to the same method reference.
-            var newModule = ModuleDefinition.FromImage(result.ConstructedImage);
+            var newModule = ModuleDefinition.FromImage(result.ConstructedImage, TestReaderParameters);
             var newReference = (MemberReference) newModule.LookupMember(newToken);
             Assert.Equal(reference.Name, newReference.Name);
         }
@@ -155,7 +155,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         [Fact]
         public void NewTypeSpecification()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Import arbitrary generic method.
             var importer = new ReferenceImporter(module);
@@ -175,7 +175,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.NotEqual(0u, newToken.Rid);
 
             // Assert token resolves to the same method reference.
-            var newModule = ModuleDefinition.FromImage(result.ConstructedImage);
+            var newModule = ModuleDefinition.FromImage(result.ConstructedImage, TestReaderParameters);
             var newReference = (TypeSpecification) newModule.LookupMember(newToken);
             Assert.Equal(specification.Name, newReference.Name);
         }
@@ -183,7 +183,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         [Fact]
         public void NewMethodSpecification()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Import arbitrary generic method.
             var importer = new ReferenceImporter(module);
@@ -203,7 +203,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.NotEqual(0u, newToken.Rid);
 
             // Assert token resolves to the same method reference.
-            var newModule = ModuleDefinition.FromImage(result.ConstructedImage);
+            var newModule = ModuleDefinition.FromImage(result.ConstructedImage, TestReaderParameters);
             var newReference = (MethodSpecification) newModule.LookupMember(newToken);
             Assert.Equal(reference.Name, newReference.Name);
         }
@@ -211,7 +211,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         [Fact]
         public void NewStandaloneSignature()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Import arbitrary method signature.
             var importer = new ReferenceImporter(module);
@@ -232,7 +232,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.NotEqual(0u, newToken.Rid);
 
             // Assert token resolves to the same method reference.
-            var newModule = ModuleDefinition.FromImage(result.ConstructedImage);
+            var newModule = ModuleDefinition.FromImage(result.ConstructedImage, TestReaderParameters);
             var newSignature = (StandAloneSignature) newModule.LookupMember(newToken);
             Assert.Equal((CallingConventionSignature) signature.Signature,
                 newSignature.Signature as CallingConventionSignature, new SignatureComparer());

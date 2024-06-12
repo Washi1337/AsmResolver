@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
         [Fact]
         public void DetectTinyMethodBody()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var methodTable = peImage.DotNetDirectory!.Metadata!
                 .GetStream<TablesStream>()
                 .GetTable<MethodDefinitionRow>();

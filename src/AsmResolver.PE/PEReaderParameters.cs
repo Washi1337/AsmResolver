@@ -16,7 +16,7 @@ namespace AsmResolver.PE
         /// Initializes the PE reader parameters.
         /// </summary>
         public PEReaderParameters()
-            : this(ThrowErrorListener.Instance)
+            : this(EmptyErrorListener.Instance)
         {
         }
 

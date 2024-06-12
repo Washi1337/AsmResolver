@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
         public MethodSignatureTest()
         {
-            _module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            _module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
         }
 
         [Fact]
@@ -52,12 +52,12 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [InlineData(true)]
         public void SentinelParameterTypes(bool rebuild)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.ArgListTest);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ArgListTest, TestReaderParameters);
             if (rebuild)
             {
                 using var stream = new MemoryStream();
                 module.Write(stream);
-                module = ModuleDefinition.FromBytes(stream.ToArray());
+                module = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             }
 
             var reference = (MemberReference) module.ManagedEntryPointMethod!.CilMethodBody!

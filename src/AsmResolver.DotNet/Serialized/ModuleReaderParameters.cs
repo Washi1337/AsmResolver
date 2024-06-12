@@ -52,7 +52,7 @@ namespace AsmResolver.DotNet.Serialized
         /// </summary>
         /// <param name="workingDirectory">The working directory of the modules to read.</param>
         public ModuleReaderParameters(string? workingDirectory)
-            : this(workingDirectory, ThrowErrorListener.Instance)
+            : this(workingDirectory, EmptyErrorListener.Instance)
         {
         }
 

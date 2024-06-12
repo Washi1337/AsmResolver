@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadAssemblyRefScope()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var typeRef = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 13));
 
             var scope = Assert.IsAssignableFrom<AssemblyReference>(typeRef.Scope);
@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Tests
 
             var image = module.ToPEImage();
 
-            var newModule = ModuleDefinition.FromImage(image);
+            var newModule = ModuleDefinition.FromImage(image, TestReaderParameters);
             var typeRef = newModule.GetOrCreateModuleType().Fields.First().Signature!.FieldType.GetUnderlyingTypeDefOrRef()!;
 
             var scope = Assert.IsAssignableFrom<AssemblyReference>(typeRef.Scope);
@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadTypeRefScope()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var typeRef = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 4));
 
             var scope = Assert.IsAssignableFrom<TypeReference>(typeRef.Scope);
@@ -72,7 +72,7 @@ namespace AsmResolver.DotNet.Tests
 
             var image = module.ToPEImage();
 
-            var newModule = ModuleDefinition.FromImage(image);
+            var newModule = ModuleDefinition.FromImage(image, TestReaderParameters);
             var typeRef = newModule.GetOrCreateModuleType().Fields.First().Signature!.FieldType.GetUnderlyingTypeDefOrRef()!;
 
             var scope = Assert.IsAssignableFrom<TypeReference>(typeRef.Scope);
@@ -82,7 +82,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadModuleScope()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefModuleScope);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefModuleScope, TestReaderParameters);
             var typeRef = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 2));
 
             var scope = Assert.IsAssignableFrom<ModuleDefinition>(typeRef.Scope);
@@ -105,7 +105,7 @@ namespace AsmResolver.DotNet.Tests
 
             var image = module.ToPEImage();
 
-            var newModule = ModuleDefinition.FromImage(image);
+            var newModule = ModuleDefinition.FromImage(image, TestReaderParameters);
             var typeRef = newModule.GetOrCreateModuleType().Fields.First().Signature!.FieldType.GetUnderlyingTypeDefOrRef()!;
 
             var scope = Assert.IsAssignableFrom<ModuleDefinition>(typeRef.Scope);
@@ -128,7 +128,7 @@ namespace AsmResolver.DotNet.Tests
 
             var image = module.ToPEImage();
 
-            var newModule = ModuleDefinition.FromImage(image);
+            var newModule = ModuleDefinition.FromImage(image, TestReaderParameters);
             var typeRef = newModule.GetOrCreateModuleType().Fields.First().Signature!.FieldType.GetUnderlyingTypeDefOrRef()!;
 
             Assert.Null(typeRef.Scope);
@@ -137,7 +137,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNullScopeCurrentModule()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_CurrentModule);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_CurrentModule, TestReaderParameters);
             var typeRef = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 2));
 
             Assert.Null(typeRef.Scope);
@@ -146,7 +146,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNullScopeExportedType()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_ExportedType);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_ExportedType, TestReaderParameters);
             var typeRef = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 1));
 
             Assert.Null(typeRef.Scope);
@@ -155,7 +155,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadName()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var typeRef = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 13));
 
             Assert.Equal("Console", typeRef.Name);
@@ -164,7 +164,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNamespace()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var typeRef = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 13));
 
             Assert.Equal("System", typeRef.Namespace);
