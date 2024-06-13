@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
     {
         private static ModuleDefinition CreateSampleFieldDefsModule(int typeCount, int fieldsPerType)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
 
             for (int i = 0; i < typeCount; i++)
             {

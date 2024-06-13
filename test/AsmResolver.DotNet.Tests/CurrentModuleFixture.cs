@@ -4,9 +4,9 @@ namespace AsmResolver.DotNet.Tests
     {
         public CurrentModuleFixture()
         {
-            Module = ModuleDefinition.FromFile(typeof(CurrentModuleFixture).Assembly.Location);
+            Module = ModuleDefinition.FromFile(typeof(CurrentModuleFixture).Assembly.Location, TestReaderParameters);
         }
-        
+
         public ModuleDefinition Module
         {
             get;

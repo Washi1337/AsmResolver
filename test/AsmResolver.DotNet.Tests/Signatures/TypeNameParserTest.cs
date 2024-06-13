@@ -300,7 +300,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void ReadTypeNameFromLocalModuleShouldResultInResolvableType()
         {
-            var module = ModuleDefinition.FromFile(typeof(TypeNameParserTest).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TypeNameParserTest).Assembly.Location, TestReaderParameters);
             var type = TypeNameParser
                     .Parse(module, typeof(TypeNameParserTest).AssemblyQualifiedName!)
                     .GetUnderlyingTypeDefOrRef()!;

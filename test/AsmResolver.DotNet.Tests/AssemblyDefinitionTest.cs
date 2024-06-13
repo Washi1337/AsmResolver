@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.StrongName;
 using Xunit;
@@ -12,14 +13,14 @@ namespace AsmResolver.DotNet.Tests
         private static AssemblyDefinition Rebuild(AssemblyDefinition assembly)
         {
             using var stream = new MemoryStream();
-            assembly.ManifestModule.Write(stream);
-            return AssemblyDefinition.FromReader(new BinaryStreamReader(stream.ToArray()));
+            assembly.ManifestModule!.Write(stream);
+            return AssemblyDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
         }
 
         [Fact]
         public void ReadNameTest()
         {
-            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Equal("HelloWorld", assemblyDef.Name);
         }
 
@@ -28,7 +29,7 @@ namespace AsmResolver.DotNet.Tests
         {
             const string newName = "OtherAssembly";
 
-            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             assemblyDef.Name = newName;
 
             var rebuilt = Rebuild(assemblyDef);
@@ -38,7 +39,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadVersion()
         {
-            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Equal(new Version(1,0,0,0), assemblyDef.Version);
         }
 
@@ -47,7 +48,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var newVersion = new Version(1,2,3,4);
 
-            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             assemblyDef.Version = newVersion;
 
             var rebuilt = Rebuild(assemblyDef);
@@ -57,7 +58,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSingleModuleAssembly()
         {
-            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Single(assemblyDef.Modules);
             Assert.NotNull(assemblyDef.ManifestModule);
             Assert.Equal(new[] {assemblyDef.ManifestModule}, assemblyDef.Modules);
@@ -67,7 +68,11 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMultiModuleAssembly()
         {
-            var assemblyDef = AssemblyDefinition.FromFile(Path.Combine("Resources", "Manifest.exe"));
+            var assemblyDef = AssemblyDefinition.FromFile(
+                Path.Combine("Resources", "Manifest.exe"),
+                new ModuleReaderParameters("Resources", ThrowErrorListener.Instance)
+            );
+
             Assert.Equal(2, assemblyDef.Modules.Count);
             Assert.Equal("Manifest.exe", assemblyDef.ManifestModule.Name);
             Assert.Equal("MyModel.netmodule", assemblyDef.Modules[1].Name);
@@ -77,7 +82,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadSecondaryModuleAsAssemblyShouldThrow()
         {
             Assert.Throws<BadImageFormatException>(() =>
-                AssemblyDefinition.FromFile(Path.Combine("Resources", "MyModel.netmodule")));
+                AssemblyDefinition.FromFile(Path.Combine("Resources", "MyModel.netmodule"), TestReaderParameters));
         }
 
         [Fact]
@@ -85,7 +90,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var corlibAssembly = typeof(object).Assembly;
             var corlibName = corlibAssembly.GetName();
-            var corlibAssemblyDef = AssemblyDefinition.FromFile(corlibAssembly.Location);
+            var corlibAssemblyDef = AssemblyDefinition.FromFile(corlibAssembly.Location, TestReaderParameters);
 
             Assert.Equal(corlibName.GetPublicKey(), corlibAssemblyDef.PublicKey);
             Assert.Equal(corlibName.GetPublicKeyToken(), corlibAssemblyDef.GetPublicKeyToken());
@@ -98,7 +103,7 @@ namespace AsmResolver.DotNet.Tests
             var rsaParameters = rsa.ExportParameters(true);
             var snk = new StrongNamePrivateKey(rsaParameters);
 
-            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             assemblyDef.PublicKey = snk.CreatePublicKeyBlob(assemblyDef.HashAlgorithm);
 
             var rebuilt = Rebuild(assemblyDef);

@@ -141,7 +141,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportNestedTypeViaReflectionShouldImportParentType()
         {
-            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
             var declaringType = module.TopLevelTypes.First(t => t.Name == nameof(TopLevelClass1));
             var nested = declaringType.NestedTypes.First(t => t.Name == nameof(TopLevelClass1.Nested1));
 
@@ -488,7 +488,7 @@ namespace AsmResolver.DotNet.Tests
         {
             // https://github.com/Washi1337/AsmResolver/issues/307
 
-            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
             var field = module.GetAllTypes()
                 .First(t => t.Name == nameof(SingleField))
                 .Fields

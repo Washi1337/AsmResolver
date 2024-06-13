@@ -8,7 +8,7 @@ namespace AsmResolver.PE.Tests.Imports
         [Fact]
         public void SimpleDllImportHash()
         {
-            var image = PEImage.FromBytes(Properties.Resources.SimpleDll);
+            var image = PEImage.FromBytes(Properties.Resources.SimpleDll, TestReaderParameters);
             byte[] hash = image.GetImportHash();
 
             Assert.Equal(new byte[]

@@ -9,23 +9,23 @@
 
 namespace AsmResolver.PE.Tests.Properties {
     using System;
-
-
+    
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Resources {
-
+    internal class Resources {
+        
         private static System.Resources.ResourceManager resourceMan;
-
+        
         private static System.Globalization.CultureInfo resourceCulture;
-
+        
         [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
-
+        
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static System.Resources.ResourceManager ResourceManager {
+        internal static System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.Equals(null, resourceMan)) {
                     System.Resources.ResourceManager temp = new System.Resources.ResourceManager("AsmResolver.PE.Tests.Properties.Resources", typeof(Resources).Assembly);
@@ -34,9 +34,9 @@ namespace AsmResolver.PE.Tests.Properties {
                 return resourceMan;
             }
         }
-
+        
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static System.Globalization.CultureInfo Culture {
+        internal static System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -44,330 +44,330 @@ namespace AsmResolver.PE.Tests.Properties {
                 resourceCulture = value;
             }
         }
-
-        public static byte[] HelloWorld {
+        
+        internal static byte[] HelloWorld {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_X64 {
+        
+        internal static byte[] HelloWorld_X64 {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_X64", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_MaliciousWin32ResLoop {
+        
+        internal static byte[] HelloWorld_MaliciousWin32ResLoop {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_MaliciousWin32ResLoop", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_MaliciousWin32ResDirName {
+        
+        internal static byte[] HelloWorld_MaliciousWin32ResDirName {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_MaliciousWin32ResDirName", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_MaliciousWin32ResDirOffset {
+        
+        internal static byte[] HelloWorld_MaliciousWin32ResDirOffset {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_MaliciousWin32ResDirOffset", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_MaliciousWin32ResDataOffset {
+        
+        internal static byte[] HelloWorld_MaliciousWin32ResDataOffset {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_MaliciousWin32ResDataOffset", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_TablesStream_ExtraData {
+        
+        internal static byte[] HelloWorld_TablesStream_ExtraData {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_TablesStream_ExtraData", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_DoubleBlobStream {
+        
+        internal static byte[] HelloWorld_DoubleBlobStream {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_DoubleBlobStream", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_DoubleBlobStream_EnC {
+        
+        internal static byte[] HelloWorld_DoubleBlobStream_EnC {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_DoubleBlobStream_EnC", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_DoubleGuidStream {
+        
+        internal static byte[] HelloWorld_DoubleGuidStream {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_DoubleGuidStream", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_DoubleGuidStream_EnC {
+        
+        internal static byte[] HelloWorld_DoubleGuidStream_EnC {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_DoubleGuidStream_EnC", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_DoubleStringsStream {
+        
+        internal static byte[] HelloWorld_DoubleStringsStream {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_DoubleStringsStream", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_DoubleStringsStream_EnC {
+        
+        internal static byte[] HelloWorld_DoubleStringsStream_EnC {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_DoubleStringsStream_EnC", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_DoubleUserStringsStream {
+        
+        internal static byte[] HelloWorld_DoubleUserStringsStream {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_DoubleUserStringsStream", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_DoubleUserStringsStream_EnC {
+        
+        internal static byte[] HelloWorld_DoubleUserStringsStream_EnC {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_DoubleUserStringsStream_EnC", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_UPX {
+        
+        internal static byte[] HelloWorld_UPX {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_UPX", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_Signed {
+        
+        internal static byte[] HelloWorld_Signed {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_Signed", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_ReadyToRun {
+        
+        internal static byte[] HelloWorld_ReadyToRun {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_ReadyToRun", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_UnalignedMetadata {
+        
+        internal static byte[] HelloWorld_UnalignedMetadata {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_UnalignedMetadata", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorldPortablePdb {
+        
+        internal static byte[] HelloWorldPortablePdb {
             get {
                 object obj = ResourceManager.GetObject("HelloWorldPortablePdb", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] SimpleDll {
+        
+        internal static byte[] SimpleDll {
             get {
                 object obj = ResourceManager.GetObject("SimpleDll", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] SimpleDll_Exports {
+        
+        internal static byte[] SimpleDll_Exports {
             get {
                 object obj = ResourceManager.GetObject("SimpleDll_Exports", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] TheAnswer_NetFx {
+        
+        internal static byte[] TheAnswer_NetFx {
             get {
                 object obj = ResourceManager.GetObject("TheAnswer_NetFx", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] TheAnswer_NetCore {
+        
+        internal static byte[] TheAnswer_NetCore {
             get {
                 object obj = ResourceManager.GetObject("TheAnswer_NetCore", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] TheAnswerPortablePdb {
+        
+        internal static byte[] TheAnswerPortablePdb {
             get {
                 object obj = ResourceManager.GetObject("TheAnswerPortablePdb", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] SEHSamples {
+        
+        internal static byte[] SEHSamples {
             get {
                 object obj = ResourceManager.GetObject("SEHSamples", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] UnmanagedExports_x64 {
-            get {
-                object obj = ResourceManager.GetObject("UnmanagedExports_x64", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-
-        public static byte[] UnmanagedExports_x32 {
+        
+        internal static byte[] UnmanagedExports_x32 {
             get {
                 object obj = ResourceManager.GetObject("UnmanagedExports_x32", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] TlsTest_x86 {
+        
+        internal static byte[] UnmanagedExports_x64 {
+            get {
+                object obj = ResourceManager.GetObject("UnmanagedExports_x64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        internal static byte[] TlsTest_x86 {
             get {
                 object obj = ResourceManager.GetObject("TlsTest_x86", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] TlsTest_x64 {
+        
+        internal static byte[] TlsTest_x64 {
             get {
                 object obj = ResourceManager.GetObject("TlsTest_x64", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] LargeIndicesPdb {
+        
+        internal static byte[] LargeIndicesPdb {
             get {
                 object obj = ResourceManager.GetObject("LargeIndicesPdb", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] ForwarderDlls_ActualDll {
+        
+        internal static byte[] ForwarderDlls_ActualDll {
             get {
                 object obj = ResourceManager.GetObject("ForwarderDlls_ActualDll", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] ForwarderDlls_ProxyDll {
+        
+        internal static byte[] ForwarderDlls_ProxyDll {
             get {
                 object obj = ResourceManager.GetObject("ForwarderDlls_ProxyDll", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] ForwarderDlls_ForwarderTest {
+        
+        internal static byte[] ForwarderDlls_ForwarderTest {
             get {
                 object obj = ResourceManager.GetObject("ForwarderDlls_ForwarderTest", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] FieldRvaTest {
+        
+        internal static byte[] FieldRvaTest {
             get {
                 object obj = ResourceManager.GetObject("FieldRvaTest", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] ReadyToRunTest {
+        
+        internal static byte[] ReadyToRunTest {
             get {
                 object obj = ResourceManager.GetObject("ReadyToRunTest", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] ReadyToRunTestLoop {
+        
+        internal static byte[] ReadyToRunTestLoop {
             get {
                 object obj = ResourceManager.GetObject("ReadyToRunTestLoop", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] MixedModeHelloWorld {
+        
+        internal static byte[] MixedModeHelloWorld {
             get {
                 object obj = ResourceManager.GetObject("MixedModeHelloWorld", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] MixedModeCallIntoNative {
+        
+        internal static byte[] MixedModeCallIntoNative {
             get {
                 object obj = ResourceManager.GetObject("MixedModeCallIntoNative", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] NativeHelloWorldC_X86 {
+        
+        internal static byte[] NativeHelloWorldC_X86 {
             get {
                 object obj = ResourceManager.GetObject("NativeHelloWorldC_X86", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] NativeHelloWorldC_X64 {
+        
+        internal static byte[] NativeHelloWorldC_X64 {
             get {
                 object obj = ResourceManager.GetObject("NativeHelloWorldC_X64", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] NativeHelloWorldCpp_X86 {
+        
+        internal static byte[] NativeHelloWorldCpp_X86 {
             get {
                 object obj = ResourceManager.GetObject("NativeHelloWorldCpp_X86", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] NativeHelloWorldCpp_X64 {
+        
+        internal static byte[] NativeHelloWorldCpp_X64 {
             get {
                 object obj = ResourceManager.GetObject("NativeHelloWorldCpp_X64", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_SchemaStream {
+        
+        internal static byte[] HelloWorld_SchemaStream {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_SchemaStream", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_LowerCaseHeapsWithEnC {
+        
+        internal static byte[] HelloWorld_LowerCaseHeapsWithEnC {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_LowerCaseHeapsWithEnC", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_LowerCaseHeapsNormalMetadata {
+        
+        internal static byte[] HelloWorld_LowerCaseHeapsNormalMetadata {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_LowerCaseHeapsNormalMetadata", resourceCulture);
                 return ((byte[])(obj));
             }
         }
-
-        public static byte[] HelloWorld_JTDStream {
+        
+        internal static byte[] HelloWorld_JTDStream {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_JTDStream", resourceCulture);
                 return ((byte[])(obj));

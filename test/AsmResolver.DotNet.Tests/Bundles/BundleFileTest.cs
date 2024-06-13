@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6);
             var bundleFile = manifest.Files.First(f => f.RelativePath == "HelloWorld.dll");
 
-            var embeddedImage = ModuleDefinition.FromBytes(bundleFile.GetData());
+            var embeddedImage = ModuleDefinition.FromBytes(bundleFile.GetData(), TestReaderParameters);
             Assert.Equal("HelloWorld.dll", embeddedImage.Name);
         }
     }

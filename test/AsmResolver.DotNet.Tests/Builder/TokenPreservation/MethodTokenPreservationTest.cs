@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
     {
         private static ModuleDefinition CreateSampleMethodDefsModule(int typeCount, int methodsPerType, int parametersPerMethod = 0)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
 
             for (int i = 0; i < typeCount; i++)
             {

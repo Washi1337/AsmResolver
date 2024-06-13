@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
     {
         private static MethodDefinition LookupMethod(string methodName)
         {
-            var module = ModuleDefinition.FromFile(typeof(PlatformInvoke).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(PlatformInvoke).Assembly.Location, TestReaderParameters);
             return LookupMethodInModule(module, methodName);
         }
 
@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
         private static FieldDefinition LookupField(string fieldName)
         {
-            var module = ModuleDefinition.FromFile(typeof(Marshalling).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(Marshalling).Assembly.Location, TestReaderParameters);
             return LookupFieldInModule(module, fieldName);
         }
 
@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var builder = new ManagedPEImageBuilder();
             var newImage = builder.CreateImage(method.Module).ConstructedImage;
-            var newModule = ModuleDefinition.FromImage(newImage);
+            var newModule = ModuleDefinition.FromImage(newImage, TestReaderParameters);
             return LookupMethodInModule(newModule, method.Name);
         }
 
@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var builder = new ManagedPEImageBuilder();
             var newImage = builder.CreateImage(field.Module).ConstructedImage;
-            var newModule = ModuleDefinition.FromImage(newImage);
+            var newModule = ModuleDefinition.FromImage(newImage, TestReaderParameters);
             return LookupFieldInModule(newModule, field.Name);
         }
 

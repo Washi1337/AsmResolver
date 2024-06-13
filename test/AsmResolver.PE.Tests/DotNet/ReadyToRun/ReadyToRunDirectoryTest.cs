@@ -31,7 +31,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [Fact]
         public void ReadBasicHeader()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun, TestReaderParameters);
             var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
 
             Assert.Equal(5, header.MajorVersion);
@@ -42,7 +42,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [Fact]
         public void ReadSections()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun, TestReaderParameters);
             var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
 
             Assert.Equal(new[]
@@ -66,7 +66,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [InlineData(true)]
         public void CompilerIdentifierSection(bool rebuild)
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun, TestReaderParameters);
             var section = GetSection<CompilerIdentifierSection>(image, rebuild);
 
             Assert.Equal("Crossgen2 6.0.2223.42425", section.Identifier);
@@ -77,7 +77,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [InlineData(true)]
         public void ImportSections(bool rebuild)
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun, TestReaderParameters);
             var section = GetSection<ImportSectionsSection>(image, rebuild);
 
             Assert.Equal(new[]
@@ -96,7 +96,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         // TODO: [InlineData(true)]
         public void ImportSectionSlots(bool rebuild)
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_ReadyToRun, TestReaderParameters);
             var section = GetSection<ImportSectionsSection>(image, rebuild);
 
             Assert.Equal(new[]
@@ -136,7 +136,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [Fact]
         public void X64RuntimeFunctions()
         {
-            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest, TestReaderParameters);
             var header = Assert.IsAssignableFrom<ReadyToRunDirectory>(image.DotNetDirectory!.ManagedNativeHeader);
             var section = header.GetSection<RuntimeFunctionsSection>();
 
@@ -155,7 +155,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [InlineData(true)]
         public void MethodDefEntryPoints(bool rebuild)
         {
-            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest, TestReaderParameters);
             var section = GetSection<MethodEntryPointsSection>(image, rebuild);
 
             Assert.Equal(
@@ -169,7 +169,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [InlineData(true)]
         public void MethodDefEntryPointFixups(bool rebuild)
         {
-            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest, TestReaderParameters);
             var section = GetSection<MethodEntryPointsSection>(image, rebuild);
 
             Assert.Equal(new[]
@@ -184,7 +184,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [InlineData(true)]
         public void DebugInfoBound(bool rebuild)
         {
-            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest, TestReaderParameters);
             var section = GetSection<DebugInfoSection>(image, rebuild);
 
             Assert.NotNull(section.Entries[0]);
@@ -204,7 +204,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [InlineData(true)]
         public void DebugInfoBoundLookBack(bool rebuild)
         {
-            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest);
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTest, TestReaderParameters);
             var section = GetSection<DebugInfoSection>(image, rebuild);
 
             Assert.NotNull(section.Entries[4]);
@@ -222,7 +222,7 @@ namespace AsmResolver.PE.Tests.DotNet.ReadyToRun
         [InlineData(true)]
         public void DebugInfoVariables(bool rebuild)
         {
-            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTestLoop);
+            var image = PEImage.FromBytes(Properties.Resources.ReadyToRunTestLoop, TestReaderParameters);
             var section = GetSection<DebugInfoSection>(image, rebuild);
 
             Assert.NotNull(section.Entries[0]);

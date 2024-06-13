@@ -24,12 +24,15 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
     [InlineData(MachineType.Amd64)]
     public void RoundTripNativePE(MachineType machineType)
     {
-        var image = PEImage.FromBytes(machineType switch
-        {
-            MachineType.I386 => Properties.Resources.NativeHelloWorldC_X86,
-            MachineType.Amd64 => Properties.Resources.NativeHelloWorldC_X64,
-            _ => throw new ArgumentOutOfRangeException(nameof(machineType))
-        });
+        var image = PEImage.FromBytes(
+            machineType switch
+            {
+                MachineType.I386 => Properties.Resources.NativeHelloWorldC_X86,
+                MachineType.Amd64 => Properties.Resources.NativeHelloWorldC_X64,
+                _ => throw new ArgumentOutOfRangeException(nameof(machineType))
+            },
+            TestReaderParameters
+        );
 
         var file = image.ToPEFile(new UnmanagedPEFileBuilder());
 
@@ -45,12 +48,15 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
     [InlineData(MachineType.Amd64)]
     public void TrampolineImportsInCPE(MachineType machineType)
     {
-        var image = PEImage.FromBytes(machineType switch
-        {
-            MachineType.I386 => Properties.Resources.NativeHelloWorldC_X86,
-            MachineType.Amd64 => Properties.Resources.NativeHelloWorldC_X64,
-            _ => throw new ArgumentOutOfRangeException(nameof(machineType))
-        });
+        var image = PEImage.FromBytes(
+            machineType switch
+            {
+                MachineType.I386 => Properties.Resources.NativeHelloWorldC_X86,
+                MachineType.Amd64 => Properties.Resources.NativeHelloWorldC_X64,
+                _ => throw new ArgumentOutOfRangeException(nameof(machineType))
+            },
+            TestReaderParameters
+        );
 
         var file = image.ToPEFile(new UnmanagedPEFileBuilder
         {
@@ -69,12 +75,15 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
     [InlineData(MachineType.Amd64)]
     public void TrampolineImportsInCppPE(MachineType machineType)
     {
-        var image = PEImage.FromBytes(machineType switch
-        {
-            MachineType.I386 => Properties.Resources.NativeHelloWorldCpp_X86,
-            MachineType.Amd64 => Properties.Resources.NativeHelloWorldCpp_X64,
-            _ => throw new ArgumentOutOfRangeException(nameof(machineType))
-        });
+        var image = PEImage.FromBytes(
+            machineType switch
+            {
+                MachineType.I386 => Properties.Resources.NativeHelloWorldCpp_X86,
+                MachineType.Amd64 => Properties.Resources.NativeHelloWorldCpp_X64,
+                _ => throw new ArgumentOutOfRangeException(nameof(machineType))
+            },
+            TestReaderParameters
+        );
 
         var file = image.ToPEFile(new UnmanagedPEFileBuilder
         {
@@ -99,12 +108,15 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
     public void ScrambleImportsNativePE(MachineType machineType)
     {
         // Load image.
-        var image = PEImage.FromBytes(machineType switch
-        {
-            MachineType.I386 => Properties.Resources.NativeHelloWorldC_X86,
-            MachineType.Amd64 => Properties.Resources.NativeHelloWorldC_X64,
-            _ => throw new ArgumentOutOfRangeException(nameof(machineType))
-        });
+        var image = PEImage.FromBytes(
+            machineType switch
+            {
+                MachineType.I386 => Properties.Resources.NativeHelloWorldC_X86,
+                MachineType.Amd64 => Properties.Resources.NativeHelloWorldC_X64,
+                _ => throw new ArgumentOutOfRangeException(nameof(machineType))
+            },
+            TestReaderParameters
+        );
 
         // Reverse order of all imports
         foreach (var module in image.Imports)
@@ -131,7 +143,7 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
     [Fact]
     public void RoundTripMixedModeAssembly()
     {
-        var image = PEImage.FromBytes(Properties.Resources.MixedModeHelloWorld);
+        var image = PEImage.FromBytes(Properties.Resources.MixedModeHelloWorld, TestReaderParameters);
         var file = image.ToPEFile(new UnmanagedPEFileBuilder());
 
         _fixture.GetRunner<NativePERunner>().RebuildAndRun(
@@ -145,7 +157,7 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
     public void TrampolineVTableFixupsInMixedModeAssembly()
     {
         // Load image.
-        var image = PEImage.FromBytes(Properties.Resources.MixedModeCallIntoNative);
+        var image = PEImage.FromBytes(Properties.Resources.MixedModeCallIntoNative, TestReaderParameters);
 
         // Rebuild
         var file = image.ToPEFile(new UnmanagedPEFileBuilder
@@ -164,7 +176,7 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
     public void ScrambleVTableFixupsInMixedModeAssembly()
     {
         // Load image.
-        var image = PEImage.FromBytes(Properties.Resources.MixedModeCallIntoNative);
+        var image = PEImage.FromBytes(Properties.Resources.MixedModeCallIntoNative, TestReaderParameters);
 
         // Reverse all vtable tokens.
         foreach (var fixup in image.DotNetDirectory!.VTableFixups!)
@@ -194,7 +206,7 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
         const string name = "#Test";
         byte[] data = [1, 2, 3, 4];
 
-        var image = PEImage.FromBytes(Properties.Resources.MixedModeHelloWorld);
+        var image = PEImage.FromBytes(Properties.Resources.MixedModeHelloWorld, TestReaderParameters);
         image.DotNetDirectory!.Metadata!.Streams.Add(new CustomMetadataStream(
             name, new DataSegment(data)
         ));
@@ -203,7 +215,7 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
         using var stream = new MemoryStream();
         file.Write(stream);
 
-        var newImage = PEImage.FromBytes(stream.ToArray());
+        var newImage = PEImage.FromBytes(stream.ToArray(), TestReaderParameters);
         var metadataStream = Assert.IsAssignableFrom<CustomMetadataStream>(
             newImage.DotNetDirectory!.Metadata!.Streams.First(x => x.Name == name)
         );

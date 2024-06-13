@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void AssigningAvailableTokenShouldSetMetadataToken()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var typeRef = new TypeReference(module, "", "");
             var nextToken = module.TokenAllocator.GetNextAvailableToken(TableIndex.TypeRef);
             module.TokenAllocator.AssignNextAvailableToken(typeRef);
@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(TableIndex.AssemblyRef)]
         public void GetNextAvailableTokenShouldReturnTableSize(TableIndex index)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var tableStream = module.DotNetDirectory.Metadata.GetStream<TablesStream>();
             var table = tableStream.GetTable(index);
             var count = (uint)table.Count;
@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void NextAvailableTokenShouldChangeAfterAssigning()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var typeRef = new TypeReference(module, "", "");
             var nextToken = module.TokenAllocator.GetNextAvailableToken(TableIndex.TypeRef);
             module.TokenAllocator.AssignNextAvailableToken(typeRef);
@@ -59,12 +59,12 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void AssignTokenToNewUnusedTypeReferenceShouldPreserveAfterBuild()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var reference = new TypeReference(module, module, "SomeNamespace", "SomeType");
             module.TokenAllocator.AssignNextAvailableToken(reference);
 
             var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveTypeReferenceIndices));
-            var newModule = ModuleDefinition.FromImage(image);
+            var newModule = ModuleDefinition.FromImage(image, TestReaderParameters);
 
             var newReference = (TypeReference) newModule.LookupMember(reference.MetadataToken);
             Assert.Equal(reference.Namespace, newReference.Namespace);
@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void AssignTokenToNewUnusedMemberReferenceShouldPreserveAfterBuild()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var reference = new MemberReference(
                 new TypeReference(module, module, "SomeNamespace", "SomeType"),
                 "SomeMethod",
@@ -83,7 +83,7 @@ namespace AsmResolver.DotNet.Tests
             module.TokenAllocator.AssignNextAvailableToken(reference);
 
             var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveMemberReferenceIndices));
-            var newModule = ModuleDefinition.FromImage(image);
+            var newModule = ModuleDefinition.FromImage(image, TestReaderParameters);
 
             var newReference = (MemberReference) newModule.LookupMember(reference.MetadataToken);
             Assert.Equal(reference.Name, newReference.Name);
@@ -92,7 +92,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void AssignTokenOfNextMemberShouldPreserve()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Create two dummy fields.
             var fieldType = module.CorLibTypeFactory.Object;
@@ -109,7 +109,7 @@ namespace AsmResolver.DotNet.Tests
 
             // Rebuild.
             var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
-            var newModule = ModuleDefinition.FromImage(image);
+            var newModule = ModuleDefinition.FromImage(image, TestReaderParameters);
 
             // Verify.
             Assert.Equal(field2.Name, ((FieldDefinition) newModule.LookupMember(field2.MetadataToken)).Name);
@@ -120,7 +120,7 @@ namespace AsmResolver.DotNet.Tests
         {
             // https://github.com/Washi1337/AsmResolver/issues/187
 
-            var targetModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var targetModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             var method = new MethodDefinition("test",
                 MethodAttributes.Public | MethodAttributes.Static,
@@ -145,7 +145,7 @@ namespace AsmResolver.DotNet.Tests
         {
             // https://github.com/Washi1337/AsmResolver/issues/252
 
-            var module = ModuleDefinition.FromFile(typeof(TokenAllocatorTest).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TokenAllocatorTest).Assembly.Location, TestReaderParameters);
             var asmResRef = module.AssemblyReferences.First(a => a.Name == "AsmResolver.DotNet");
 
             var reference  = new TypeReference(module, asmResRef, "AsmResolver.DotNet", "MethodDefinition");
@@ -155,7 +155,7 @@ namespace AsmResolver.DotNet.Tests
             module.TokenAllocator.AssignNextAvailableToken(reference2);
 
             var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
-            var newModule = ModuleDefinition.FromImage(image);
+            var newModule = ModuleDefinition.FromImage(image, TestReaderParameters);
 
             var newReference = (TypeReference) newModule.LookupMember(reference.MetadataToken);
             var newReference2 = (TypeReference) newModule.LookupMember(reference2.MetadataToken);

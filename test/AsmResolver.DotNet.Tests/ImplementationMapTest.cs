@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Tests
 
         private static MethodDefinition LookupMethod(string methodName)
         {
-            var module = ModuleDefinition.FromFile(typeof(PlatformInvoke).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(PlatformInvoke).Assembly.Location, TestReaderParameters);
             var t = module.TopLevelTypes.First(t => t.Name == nameof(PlatformInvoke));
             var method = t.Methods.First(m => m.Name == methodName);
             return method;
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Tests
             using var stream = new MemoryStream();
             implementationMap.MemberForwarded.Module.Write(stream);
 
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             var t = newModule.TopLevelTypes.First(t => t.Name == nameof(PlatformInvoke));
             return t.Methods.First(m => m.Name == implementationMap.MemberForwarded.Name).ImplementationMap;
         }

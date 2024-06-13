@@ -21,7 +21,7 @@ namespace AsmResolver.PE.Tests.Builder
         public void HelloWorldRebuild32BitNoChange()
         {
             // Read image
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Rebuild
             var builder = new ManagedPEFileBuilder();
@@ -37,7 +37,7 @@ namespace AsmResolver.PE.Tests.Builder
         public void HelloWorldRebuild64BitNoChange()
         {
             // Read image
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_X64);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_X64, TestReaderParameters);
 
             // Rebuild
             var builder = new ManagedPEFileBuilder();
@@ -53,7 +53,7 @@ namespace AsmResolver.PE.Tests.Builder
         public void HelloWorld32BitTo64Bit()
         {
             // Read image
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Change machine type and pe kind to 64-bit
             image.MachineType = MachineType.Amd64;
@@ -73,7 +73,7 @@ namespace AsmResolver.PE.Tests.Builder
         public void HelloWorld64BitTo32Bit()
         {
             // Read image
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_X64);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_X64, TestReaderParameters);
 
             // Change machine type and pe kind to 32-bit
             image.MachineType = MachineType.I386;
@@ -92,13 +92,13 @@ namespace AsmResolver.PE.Tests.Builder
         [Fact]
         public void UpdateFieldRvaRowsUnchanged()
         {
-            var image = PEImage.FromBytes(Properties.Resources.FieldRvaTest);
+            var image = PEImage.FromBytes(Properties.Resources.FieldRvaTest, TestReaderParameters);
 
             using var stream = new MemoryStream();
             var file = new ManagedPEFileBuilder(EmptyErrorListener.Instance).CreateFile(image);
             file.Write(stream);
 
-            var newImage = PEImage.FromBytes(stream.ToArray());
+            var newImage = PEImage.FromBytes(stream.ToArray(), TestReaderParameters);
             var table = newImage.DotNetDirectory!.Metadata!
                 .GetStream<TablesStream>()
                 .GetTable<FieldRvaRow>();

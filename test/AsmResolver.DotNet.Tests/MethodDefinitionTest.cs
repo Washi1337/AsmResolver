@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadName()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleMethod));
             var method = type.Methods.FirstOrDefault(m => m.Name == nameof(SingleMethod.VoidParameterlessMethod));
             Assert.NotNull(method);
@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(nameof(MultipleMethods.TypeDefOrRefParameterlessMethod), "AsmResolver.DotNet.TestCases.Methods.MultipleMethods")]
         public void ReadReturnType(string methodName, string expectedReturnType)
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
             var method = type.Methods.First(m => m.Name == methodName);
             Assert.Equal(expectedReturnType, method.Signature.ReturnType.FullName);
@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadDeclaringType()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod)).MetadataToken);
             Assert.NotNull(method.DeclaringType);
@@ -66,7 +66,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadEmptyParameterDefinitions()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod)).MetadataToken);
             Assert.Empty(method.ParameterDefinitions);
@@ -75,7 +75,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSingleParameterDefinition()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.SingleParameterMethod)).MetadataToken);
             Assert.Single(method.ParameterDefinitions);
@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMultipleParameterDefinitions()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod)).MetadataToken);
             Assert.Equal(3, method.ParameterDefinitions.Count);
@@ -93,7 +93,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadEmptyParametersStatic()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod)).MetadataToken);
             Assert.Empty(method.Parameters);
@@ -102,7 +102,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSingleParameterStatic()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.SingleParameterMethod)).MetadataToken);
             Assert.Single(method.Parameters);
@@ -113,7 +113,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMultipleParameterStatic()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod)).MetadataToken);
             Assert.Equal(3, method.Parameters.Count);
@@ -134,7 +134,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadParameterlessInt32MethodFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.IntParameterlessMethod)).MetadataToken);
 
@@ -146,7 +146,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadParameterlessMethodFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod)).MetadataToken);
 
@@ -158,7 +158,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSingleParameterMethodFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.SingleParameterMethod)).MetadataToken);
 
@@ -170,7 +170,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMultipleParametersMethodFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod)).MetadataToken);
 
@@ -182,7 +182,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNormalMethod()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod)).MetadataToken);
 
@@ -196,7 +196,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadIsGetMethod()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(SingleProperty).GetMethod("get_" + nameof(SingleProperty.IntProperty)).MetadataToken);
 
@@ -206,7 +206,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadIsSetMethod()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(SingleProperty).GetMethod("set_" + nameof(SingleProperty.IntProperty)).MetadataToken);
 
@@ -216,7 +216,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadIsAddMethod()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(SingleEvent).GetMethod("add_" + nameof(SingleEvent.SimpleEvent)).MetadataToken);
 
@@ -226,7 +226,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadIsRemoveMethod()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
                 typeof(SingleEvent).GetMethod("remove_" + nameof(SingleEvent.SimpleEvent)).MetadataToken);
 
@@ -236,7 +236,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSignatureIsReturnsValue()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = module.TopLevelTypes
                 .First(t => t.Name == nameof(MultipleMethods)).Methods
                 .First(m => m.Name == nameof(MultipleMethods.IntParameterlessMethod));
@@ -246,7 +246,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSignatureNotReturnsValue()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = module.TopLevelTypes
                 .First(t => t.Name == nameof(MultipleMethods)).Methods
                 .First(m => m.Name == nameof(MultipleMethods.VoidParameterlessMethod));
@@ -318,9 +318,11 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(true)]
         public void ReadExportMethodByName(bool is32Bit)
         {
-            var module = ModuleDefinition.FromBytes(is32Bit
+            byte[] binary = is32Bit
                 ? Properties.Resources.MyLibrary_X86
-                : Properties.Resources.MyLibrary_X64);
+                : Properties.Resources.MyLibrary_X64;
+
+            var module = ModuleDefinition.FromBytes(binary, TestReaderParameters);
 
             const int methodCount = 3;
 
@@ -559,7 +561,7 @@ namespace AsmResolver.DotNet.Tests
             "System.Void AsmResolver.DotNet.TestCases.Generics.NonGenericType::GenericMethodWithConstraints<T1, T2>()")]
         public void MethodFullNameTests(string methodName, string expectedFullName)
         {
-            var module = ModuleDefinition.FromFile(typeof(NonGenericType).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(NonGenericType).Assembly.Location, TestReaderParameters);
             var method = module
                 .TopLevelTypes.First(t => t.Name == nameof(NonGenericType))
                 .Methods.First(m => m.Name == methodName);
@@ -570,7 +572,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void CreateParameterlessConstructor()
         {
-            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location, TestReaderParameters);
             var ctor = MethodDefinition.CreateConstructor(module);
 
             Assert.True(ctor.IsConstructor);
@@ -582,7 +584,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void CreateConstructor()
         {
-            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location, TestReaderParameters);
             var factory = module.CorLibTypeFactory;
             var ctor = MethodDefinition.CreateConstructor(module, factory.Int32, factory.Double);
 

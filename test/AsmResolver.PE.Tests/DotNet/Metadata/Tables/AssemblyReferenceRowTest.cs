@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void ReadRow_SmallBlob_SmallString()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             var assemblyTable = tablesStream.GetTable<AssemblyReferenceRow>();

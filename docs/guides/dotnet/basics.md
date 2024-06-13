@@ -90,6 +90,9 @@ IntPtr hInstance = Marshal.GetHINSTANCE(module);
 var module = ModuleDefinition.FromModuleBaseAddress(hInstance);
 ```
 
+For more information on customizing the reading process, see [Advanced Module Reading](advanced-module-reading.md).
+
+
 ## Writing a .NET module
 
 Writing a .NET module can be done through one of the `Write` method
@@ -153,6 +156,9 @@ using var service = new MemoryMappedFileService();
 var assembly = AssemblyDefinition.FromFile(service.OpenFile(@"C:\myfile.exe"));
 ```
 
+For more information on customizing the reading process, see [Advanced Module Reading](advanced-module-reading.md).
+
+    
 ## Writing a .NET assembly
 
 Writing a .NET assembly can be done through one of the `Write` method

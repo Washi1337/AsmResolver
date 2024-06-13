@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
             var newImage = result.ConstructedImage;
 
-            return ModuleDefinition.FromImage(newImage);
+            return ModuleDefinition.FromImage(newImage, TestReaderParameters);
         }
 
         protected static void AssertSameTokens<TMember>(ModuleDefinition module, ModuleDefinition newModule,

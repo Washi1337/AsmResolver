@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Tests.Tls
         [Fact]
         public void ReadTemplateDataX86()
         {
-            var image = PEImage.FromBytes(Properties.Resources.TlsTest_x86);
+            var image = PEImage.FromBytes(Properties.Resources.TlsTest_x86, TestReaderParameters);
             Assert.Equal(new byte[]
             {
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -53,7 +53,7 @@ namespace AsmResolver.PE.Tests.Tls
         [Fact]
         public void ReadTemplateDataX64()
         {
-            var image = PEImage.FromBytes(Properties.Resources.TlsTest_x64);
+            var image = PEImage.FromBytes(Properties.Resources.TlsTest_x64, TestReaderParameters);
             Assert.Equal(new byte[]
             {
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -97,14 +97,14 @@ namespace AsmResolver.PE.Tests.Tls
         [Fact]
         public void ReadCallbacksTableX86()
         {
-            var image = PEImage.FromBytes(Properties.Resources.TlsTest_x86);
+            var image = PEImage.FromBytes(Properties.Resources.TlsTest_x86, TestReaderParameters);
             Assert.Single(image.TlsDirectory!.CallbackFunctions);
         }
 
         [Fact]
         public void ReadCallbacksTableX64()
         {
-            var image = PEImage.FromBytes(Properties.Resources.TlsTest_x64);
+            var image = PEImage.FromBytes(Properties.Resources.TlsTest_x64, TestReaderParameters);
             Assert.Single(image.TlsDirectory!.CallbackFunctions);
         }
 
@@ -189,7 +189,7 @@ namespace AsmResolver.PE.Tests.Tls
             file.Write(s);
 
             // Read.
-            var image = PEImage.FromBytes(s.ToArray());
+            var image = PEImage.FromBytes(s.ToArray(), TestReaderParameters);
             var newDirectory = image.TlsDirectory!;
             Assert.NotNull(newDirectory);
 

@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Tests.Resources
 
         static ResourceSetTest()
         {
-            var module = ModuleDefinition.FromFile(typeof(TestCases.Resources.Resources).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TestCases.Resources.Resources).Assembly.Location, TestReaderParameters);
             Resource = module.Resources.First(r =>
                 r.Name == "AsmResolver.DotNet.TestCases.Resources.Properties.Resources.resources");
         }

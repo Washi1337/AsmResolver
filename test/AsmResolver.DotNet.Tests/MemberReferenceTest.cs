@@ -8,9 +8,9 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveForwardedMethod()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.ForwarderRefTest);
-            var forwarder = ModuleDefinition.FromBytes(Properties.Resources.ForwarderLibrary).Assembly!;
-            var library = ModuleDefinition.FromBytes(Properties.Resources.ActualLibrary).Assembly!;
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ForwarderRefTest, TestReaderParameters);
+            var forwarder = ModuleDefinition.FromBytes(Properties.Resources.ForwarderLibrary, TestReaderParameters).Assembly!;
+            var library = ModuleDefinition.FromBytes(Properties.Resources.ActualLibrary, TestReaderParameters).Assembly!;
 
             module.MetadataResolver.AssemblyResolver.AddToCache(forwarder, forwarder);
             module.MetadataResolver.AssemblyResolver.AddToCache(library, library);

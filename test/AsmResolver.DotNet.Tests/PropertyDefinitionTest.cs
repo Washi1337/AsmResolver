@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadName()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
             var property = type.Properties.FirstOrDefault(m => m.Name == nameof(SingleProperty.IntProperty));
             Assert.NotNull(property);
@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData("Item", "System.Int32")]
         public void ReadReturnType(string propertyName, string expectedReturnType)
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
             var property = type.Properties.First(m => m.Name == propertyName);
             Assert.Equal(expectedReturnType, property.Signature.ReturnType.FullName);
@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadDeclaringType()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location, TestReaderParameters);
             var property = (PropertyDefinition) module.LookupMember(
                 typeof(SingleProperty).GetProperty(nameof(SingleProperty.IntProperty)).MetadataToken);
             Assert.NotNull(property.DeclaringType);
@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadReadOnlyPropertySemantics()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
             var property = type.Properties.First(m => m.Name == nameof(MultipleProperties.ReadOnlyProperty));
             Assert.Single(property.Semantics);
@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadWriteOnlyPropertySemantics()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
             var property = type.Properties.First(m => m.Name == nameof(MultipleProperties.WriteOnlyProperty));
             Assert.Single(property.Semantics);
@@ -71,7 +71,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadReadWritePropertySemantics()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
             var property = type.Properties.First(m => m.Name == nameof(MultipleProperties.ReadWriteProperty));
             Assert.Equal(2, property.Semantics.Count);
@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadParameterlessPropertyFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location, TestReaderParameters);
             var property = (PropertyDefinition) module.LookupMember(
                 typeof(MultipleProperties).GetProperty(nameof(MultipleProperties.ReadOnlyProperty)).MetadataToken);
 
@@ -90,7 +90,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadParameterPropertyFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location, TestReaderParameters);
             var property = (PropertyDefinition) module.LookupMember(
                 typeof(MultipleProperties).GetProperty("Item").MetadataToken);
 

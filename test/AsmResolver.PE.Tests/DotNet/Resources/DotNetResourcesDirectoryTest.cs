@@ -22,7 +22,7 @@ namespace AsmResolver.PE.Tests.DotNet.Resources
         [Fact]
         public void ReadEmbeddedResource1Data()
         {
-            var image = PEImage.FromFile(typeof(TestCaseResources).Assembly.Location);
+            var image = PEImage.FromFile(typeof(TestCaseResources).Assembly.Location, TestReaderParameters);
             var metadata = image.DotNetDirectory!.Metadata!;
             var resource = FindResourceRow(metadata, "AsmResolver.DotNet.TestCases.Resources.Resources.EmbeddedResource1");
 
@@ -34,7 +34,7 @@ namespace AsmResolver.PE.Tests.DotNet.Resources
         [Fact]
         public void ReadEmbeddedResource2Data()
         {
-            var image = PEImage.FromFile(typeof(TestCaseResources).Assembly.Location);
+            var image = PEImage.FromFile(typeof(TestCaseResources).Assembly.Location, TestReaderParameters);
             var metadata = image.DotNetDirectory!.Metadata!;
             var resource = FindResourceRow(metadata, "AsmResolver.DotNet.TestCases.Resources.Resources.EmbeddedResource2");
 

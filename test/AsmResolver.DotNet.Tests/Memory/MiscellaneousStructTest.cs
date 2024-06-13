@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         [Fact]
         public void CyclicDependencyTest()
         {
-            var module = ModuleDefinition.FromFile(typeof(MiscellaneousStructTest).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MiscellaneousStructTest).Assembly.Location, TestReaderParameters);
             var struct1 = (TypeDefinition) module.LookupMember(typeof(Struct1).MetadataToken);
             var struct2 = (TypeDefinition) module.LookupMember(typeof(Struct2).MetadataToken);
 
@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         [Fact]
         public void DetermineLayoutOfStructWithStaticFieldsShouldIgnoreStaticFields()
         {
-            var module = ModuleDefinition.FromFile(typeof(MiscellaneousStructTest).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MiscellaneousStructTest).Assembly.Location, TestReaderParameters);
             var type = (TypeDefinition) module.LookupMember(typeof(StructWithStaticField).MetadataToken);
 
             var layout = type.GetImpliedMemoryLayout(IntPtr.Size == 4);
@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         [Fact]
         public void DeterminePlatformDependentSize()
         {
-            var module = ModuleDefinition.FromFile(typeof(MiscellaneousStructTest).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MiscellaneousStructTest).Assembly.Location, TestReaderParameters);
             var type = (TypeDefinition) module.LookupMember(typeof(PlatformDependentStruct).MetadataToken);
 
             var layout = type.GetImpliedMemoryLayout(IntPtr.Size == 4);
@@ -79,7 +79,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         [Fact]
         public void DetermineNestedPlatformDependentSize()
         {
-            var module = ModuleDefinition.FromFile(typeof(MiscellaneousStructTest).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MiscellaneousStructTest).Assembly.Location, TestReaderParameters);
             var type = (TypeDefinition) module.LookupMember(typeof(NestedPlatformDependentStruct).MetadataToken);
 
             var layout = type.GetImpliedMemoryLayout(IntPtr.Size == 4);
@@ -101,7 +101,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         [InlineData(typeof(ManagedStruct), true)]
         public void DetermineNonGenericIsReferenceOrContainsReferences(Type type, bool expected)
         {
-            var module = ModuleDefinition.FromFile(type.Assembly.Location);
+            var module = ModuleDefinition.FromFile(type.Assembly.Location, TestReaderParameters);
             var t = module.LookupMember<TypeDefinition>(type.MetadataToken);
 
             var layout = t.GetImpliedMemoryLayout(false);
@@ -114,7 +114,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         public void DetermineGenericIsReferenceOrContainsReferences(ElementType elementType, bool expected)
         {
             var type = typeof(SequentialTestStructs.GenericStruct<,>);
-            var module = ModuleDefinition.FromFile(type.Assembly.Location);
+            var module = ModuleDefinition.FromFile(type.Assembly.Location, TestReaderParameters);
 
             var paramType = module.CorLibTypeFactory.FromElementType(elementType)!;
             var t = module.LookupMember<TypeDefinition>(type.MetadataToken)

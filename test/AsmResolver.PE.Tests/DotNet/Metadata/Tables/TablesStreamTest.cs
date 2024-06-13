@@ -13,7 +13,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void DetectNoExtraData()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             Assert.False(tablesStream.HasExtraData);
@@ -22,7 +22,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void DetectExtraData()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_TablesStream_ExtraData);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_TablesStream_ExtraData, TestReaderParameters);
             var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             Assert.True(tablesStream.HasExtraData);
@@ -72,7 +72,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void GetImpliedTableRowCountFromNonPdbMetadataShouldGetLocalRowCount()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var stream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
             Assert.Equal((uint) stream.GetTable(TableIndex.TypeDef).Count, stream.GetTableRowCount(TableIndex.TypeDef));
         }

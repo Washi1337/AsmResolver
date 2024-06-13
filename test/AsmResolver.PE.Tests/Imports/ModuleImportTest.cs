@@ -8,7 +8,7 @@ namespace AsmResolver.PE.Tests.Imports
         [Fact]
         public void ReadDotNetHelloWorld()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             Assert.Single(peImage.Imports);
             Assert.Equal("mscoree.dll", peImage.Imports[0].Name);
@@ -19,7 +19,7 @@ namespace AsmResolver.PE.Tests.Imports
         [Fact]
         public void ReadSimpleDll()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.SimpleDll);
+            var peImage = PEImage.FromBytes(Properties.Resources.SimpleDll, TestReaderParameters);
 
             var module = peImage.Imports.First(m => m.Name == "ucrtbased.dll");
             Assert.NotNull(module);
@@ -31,7 +31,7 @@ namespace AsmResolver.PE.Tests.Imports
         {
             // https://github.com/Washi1337/AsmResolver/issues/431
 
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_UPX);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_UPX, TestReaderParameters);
 
             var module = peImage.Imports.First(m => m.Name == "KERNEL32.DLL");
             Assert.NotNull(module);
