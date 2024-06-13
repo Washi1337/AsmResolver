@@ -5,7 +5,7 @@
  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
  [![Discord](https://img.shields.io/discord/961647807591243796.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/Y7DTBkbhJJ)
 
-AsmResolver is a Portable Executable (PE) inspection library that is able to read, modify and write executable files. This includes .NET modules as well as native images. The library exposes high-level representations of the PE, while still allowing the user to access low-level structures.
+AsmResolver is a library for reading, modifying and reconstructing Portable Executable (PE) files. It supports PE images running natively on Windows, as well as images containing managed (.NET) metadata.
 
 AsmResolver is released under the MIT license.
 
@@ -16,15 +16,19 @@ AsmResolver has a lot of features. Below is a non-exhaustive list of the highlig
 
 - [x] Create, read, modify, write and patch PE files.
   - [x] Full access to sections, data directories and their interpretations.
-- [x] Rich support for .NET modules with an intuitive API similar to `System.Reflection`.
+  - [x] Import Address Table (IAT) reconstruction and trampolining.
+  - [x] Full control over the layout of the final PE file output.
+- [x] Rich support for various Win32 resource types.
+- [x] Rich support for .NET metadata with an intuitive API similar to `System.Reflection`.
   - [x] Managed, native and dynamic method body support.
   - [x] Easy metadata importing and cloning.
   - [x] Managed resource file serializers and deserializers.
   - [x] Support for AppHost / SingleFileHost bundles.
-  - [x] Support for ReadyToRun binaries.
-- [x] Read PDB symbols.
+  - [x] Support for ReadyToRun (R2R) binaries.
+- [x] Rich read support for PDB and PortablePdb symbols.
   - [x] Fully managed cross-platform API (No DIA or similar required).
 - [x] .NET 3.5 compatible.
+- [x] Cross-platform (Windows and *nix, .NET standard 2.0 and Mono compatible).
 - [x] Documented.
 - [x] Unit tested.
 
@@ -34,6 +38,12 @@ AsmResolver has a lot of features. Below is a non-exhaustive list of the highlig
 - [Guides](https://docs.washi.dev/asmresolver)
 - [API Reference](https://docs.washi.dev/asmresolver/api/core/AsmResolver.html)
 
+
+## Support
+
+- [Issue Tracker](https://github.com/Washi1337/AsmResolver/issues)
+- [Discussion Board](https://github.com/washi1337/asmresolver/discussions)
+- [Discord](https://discord.gg/Y7DTBkbhJJ)
 
 ## Binaries
 
@@ -54,7 +64,7 @@ Nightly Builds:
 
 ## Compiling
 
-The solution can be built using the .NET SDK or an IDE that works with it (e.g., Visual Studio and JetBrains Rider). The main packages target LTS versions of various .NET runtimes (.NET 3.5, .NET Standard 2.0, .NET Standard 2.1, .NET Core 3.1 and .NET 6.0).
+The solution can be built using the .NET SDK or an IDE that works with it (e.g., Visual Studio and JetBrains Rider). The main packages target LTS versions of various .NET runtimes (.NET 3.5, .NET Standard 2.0, .NET Standard 2.1, .NET Core 3.1, .NET 6.0, .NET 8.0).
 
 To build the project from the command line, use:
 ```bash
@@ -65,7 +75,8 @@ To run all tests, use:
 ```bash
 $ dotnet test
 ```
-For running the tests successfully, you will need to have various versions of .NET installed (ranging from .NET Framework to .NET Core 3.1 and .NET 5+), as the unit tests verify reading binaries targeting various .NET runtimes.
+For running the tests successfully, you will need to have additional versions of .NET installed (including STS versions or versions declared EOL), as the unit tests verify reading binaries targeting various .NET runtimes.
+To run the tests successfully on MacOS and Linux, `mono` and `wine` are expected to be installed as well.
 
 
 ## Contributing
@@ -73,18 +84,13 @@ For running the tests successfully, you will need to have various versions of .N
 - See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 
-## Support
-
-- [Issue Tracker](https://github.com/Washi1337/AsmResolver/issues)
-- [Discussion Board](github.com/washi1337/asmresolver/discussions)
-- [Discord](https://discord.gg/Y7DTBkbhJJ)
-
-
 ## Acknowledgments
 
 AsmResolver started as a hobby project but has grown into a community project with various contributors. Without these people, AsmResolver would not have been where it is today!
 
-- Special thanks to all the people who contributed [directly with code commits](https://github.com/Washi1337/AsmResolver/graphs/contributors).
+- Special thanks to all the people who contributed [directly with code commits](https://github.com/Washi1337/AsmResolver/graphs/contributors) or monetarily via [GitHub sponsors](https://github.com/sponsors/Washi1337).
+
+- Special thanks to the people at [@MonoMod](https://github.com/MonoMod) for helping with .NET 3.5 compatibility.
 
 - Another big thank you to all the people that suggested new features, provided feedback on the API design, have done extensive testing, and/or reported bugs on the [issue board](https://github.com/Washi1337/AsmResolver/issues), by e-mail, or through DMs.
 

@@ -7,7 +7,7 @@
         <RepositoryUrl>https://github.com/Washi1337/AsmResolver</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <LangVersion>10</LangVersion>
-        <Version>6.0.0-alpha.1</Version>
+        <Version>6.0.0-beta.1</Version>
         <Deterministic>true</Deterministic>
         <UseArtifactsOutput>true</UseArtifactsOutput>
     </PropertyGroup>
