@@ -112,7 +112,7 @@ builder.BaseFile = PEFile.FromFile(@"C:\path\to\file.exe");
 Many unmanaged or mixed-mode binaries that use an Import Address Table (IAT) or .NET's VTable Fixups directory, reference individual entries within these tables by hardcoded virtual addresses.
 Therefore, when modifying these tables, the original entries in these tables need to be trampolined such that code referencing the original tables remains functioning.
 
-By default, for performance and file-size reasons, the `UnmanagedPEFileBuilder` does not rebuild the IAT or VTable Fixups directories.
+By default, for performance and file-size reasons, the `UnmanagedPEFileBuilder` does not rebuild the IAT directory.
 AsmResolver can be instructed to rebuild and trampoline these tables by setting the appropriate flag:
 
 ```csharp
@@ -233,7 +233,7 @@ protected override void CreateImportDirectory(PEFileBuilderContext context)
 }
 ```
 
-If other data directories are supposed to be reconstructed, it is also possible to extend the general `CreateDataDirectoryBuffers` method:
+If other data directories are supposed to be reconstructed (such as a .NET data directory), it is also possible to extend the general `CreateDataDirectoryBuffers` method:
 
 ```csharp
 protected override void CreateDataDirectoryBuffers(PEFileBuilderContext context)
@@ -247,7 +247,9 @@ protected override void CreateDataDirectoryBuffers(PEFileBuilderContext context)
 ### Creating Sections
 
 Creating the final sections is supposed to be done in the `CreateSections` method.
-Individual sections can be composed by concatenating individual segments or any of the data directory buffers.
+Individual sections can be composed by concatenating individual segments and data directory buffers into one single `SegmentBuilder`. 
+
+Below is an example of constructing a `.text` section with an export directory followed by some additional data.
 
 ```csharp
 protected override IEnumerable<PESection> CreateSections(PEFileBuilderContext context)

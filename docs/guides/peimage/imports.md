@@ -36,6 +36,11 @@ foreach (var module in peImage.Imports)
 }
 ```
 
+> [!NOTE]
+> When trying to modify import to an native/unmanaged PE image, the import directory may need to be trampolined.
+> Refer to [Rebuilding Import and VTable Fixup Directories](pe-building.md#rebuilding-import-and-vtable-fixup-directories) for details on how to do this.
+
+
 ## Import Hash
 
 An Import Hash (ImpHash) of a PE image is a hash code that is calculated

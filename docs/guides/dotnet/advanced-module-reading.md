@@ -33,8 +33,8 @@ parameters.PEReaderParameters = new PEReaderParameters
 };
 ```
 
-For example, this can be in particular useful if you want to let
-AsmResolver ignore and recover from invalid data in the input file:
+For example, this can be in particular useful if you want to customize the
+way AsmResolver deals with invalid data.
 
 ``` csharp
 parameters.PEReaderParameters.ErrorListener = ThrowErrorListener.Instance;
@@ -49,6 +49,7 @@ var parameters = new ModuleReaderParameters(ThrowErrorListener.Instance);
 
 For more information on customizing the underlying PE image reading
 process, see [Advanced PE Image Reading](../peimage/advanced-pe-reading.md).
+
 
 ## Changing working directory
 
