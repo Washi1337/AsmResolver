@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Exports
 {

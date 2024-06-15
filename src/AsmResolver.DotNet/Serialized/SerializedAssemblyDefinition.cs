@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.Versioning;
-using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using FileAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.FileAttributes;
 
 namespace AsmResolver.DotNet.Serialized
 {
@@ -16,7 +12,7 @@ namespace AsmResolver.DotNet.Serialized
     public class SerializedAssemblyDefinition : AssemblyDefinition
     {
         private static readonly Utf8String SystemRuntimeVersioningNamespace = "System.Runtime.Versioning";
-        private static readonly Utf8String TargetFrameworkAttributeName = nameof(TargetFrameworkAttribute);
+        private static readonly Utf8String TargetFrameworkAttributeName = "TargetFrameworkAttribute";
 
         private readonly ModuleReaderContext _context;
         private readonly AssemblyDefinitionRow _row;

@@ -1,110 +1,261 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
+using AsmResolver.IO;
 
-namespace AsmResolver.PE.Win32Resources.Icon
+namespace AsmResolver.PE.Win32Resources.Icon;
+
+/// <summary>
+/// Provides a high level view on icon and cursor resources stored in a PE image.
+/// </summary>
+public class IconResource : IWin32Resource
 {
     /// <summary>
-    /// Represents a view on win32 icon group resource directories and includes access to their icon entries.
+    /// Creates a new icon resource of the provided icon type.
     /// </summary>
-    public class IconResource : IWin32Resource
+    /// <param name="type">The icon type.</param>
+    public IconResource(IconType type)
     {
-        /// <summary>
-        /// Used to keep track of icon groups.
-        /// </summary>
-        private readonly Dictionary<uint, IconGroupDirectory> _entries = new Dictionary<uint, IconGroupDirectory>();
+        Type = type;
+    }
 
-        /// <summary>
-        /// Obtains the icon group resources from the provided root win32 resources directory.
-        /// </summary>
-        /// <param name="rootDirectory">The root resources directory to extract the icon group from.</param>
-        /// <returns>The icon group resources, or <c>null</c> if none was found.</returns>
-        /// <exception cref="ArgumentException">Occurs when the resource data is not readable.</exception>
-        public static IconResource? FromDirectory(IResourceDirectory rootDirectory)
+    /// <summary>
+    /// Gets the icon type the resource is storing.
+    /// </summary>
+    public IconType Type
+    {
+        get;
+    }
+
+    /// <summary>
+    /// Gets the icon groups stored in the resource.
+    /// </summary>
+    public IList<IconGroup> Groups
+    {
+        get;
+    } = new List<IconGroup>();
+
+    /// <summary>
+    /// Reads icons from the provided root resource directory of a PE image.
+    /// </summary>
+    /// <param name="rootDirectory">The root resource directory.</param>
+    /// <param name="type">The icon type.</param>
+    /// <returns>The resource, or <c>null</c> if no resource of the provided type was present.</returns>
+    public static IconResource? FromDirectory(ResourceDirectory rootDirectory, IconType type)
+    {
+        var (groupType, entryType) = GetResourceDirectoryTypes(type);
+
+        if (!rootDirectory.TryGetDirectory(groupType, out var groupDirectory))
+            return null;
+
+        if (!rootDirectory.TryGetDirectory(entryType, out var iconsDirectory))
+            return null;
+
+        var result = new IconResource(type);
+
+        foreach (var group in groupDirectory.Entries.OfType<ResourceDirectory>())
         {
-            if (!rootDirectory.TryGetDirectory(ResourceType.GroupIcon, out var groupIconDirectory)
-                || !rootDirectory.TryGetDirectory(ResourceType.Icon, out var iconDirectory))
+            foreach (var language in group.Entries.OfType<ResourceData>())
             {
-                return null;
+                result.Groups.Add(new SerializedIconGroup(
+                    group.Id,
+                    language.Id,
+                    iconsDirectory,
+                    language.CreateReader()
+                ));
             }
-
-            var result = new IconResource();
-
-            foreach (var iconGroupResource in groupIconDirectory.Entries.OfType<IResourceDirectory>())
-            {
-                var dataEntry = iconGroupResource
-                    .Entries
-                    .OfType<IResourceData>()
-                    .FirstOrDefault();
-
-                if (dataEntry is null)
-                    return null;
-
-                if (!dataEntry.CanRead)
-                    throw new ArgumentException("Icon group data is not readable.");
-
-                var groupReader = dataEntry.CreateReader();
-                result.AddEntry(iconGroupResource.Id, IconGroupDirectory.FromReader(ref groupReader, iconDirectory));
-            }
-
-            return result;
         }
 
-        /// <summary>
-        /// Gets or sets an icon group by its id.
-        /// </summary>
-        /// <param name="id">The id of the icon group.</param>
-        public IconGroupDirectory this[uint id]
+        return result;
+    }
+
+    private static (ResourceType Group, ResourceType Entry) GetResourceDirectoryTypes(IconType type)
+    {
+        return type switch
         {
-            get => _entries[id];
-            set => _entries[id] = value;
+            IconType.Icon => (ResourceType.GroupIcon, ResourceType.Icon),
+            IconType.Cursor => (ResourceType.GroupCursor, ResourceType.Cursor),
+            _ => throw new ArgumentOutOfRangeException(nameof(type)),
+        };
+    }
+
+    /// <summary>
+    /// Gets an icon group by its numeric identifier.
+    /// </summary>
+    /// <param name="id">The identifier.</param>
+    /// <returns>The group.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Occurs when the group was not present.</exception>
+    public IconGroup GetGroup(uint id)
+    {
+        return TryGetGroup(id, out var group)
+            ? group
+            : throw new ArgumentOutOfRangeException($"Icon group {id} does not exist.");
+    }
+
+    /// <summary>
+    /// Gets an icon group by its string identifier.
+    /// </summary>
+    /// <param name="name">The identifier.</param>
+    /// <returns>The group.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Occurs when the group was not present.</exception>
+    public IconGroup GetGroup(string name)
+    {
+        return TryGetGroup(name, out var group)
+            ? group
+            : throw new ArgumentOutOfRangeException($"Icon group '{name}' does not exist.");
+    }
+
+    /// <summary>
+    /// Gets an icon group by its numeric identifier.
+    /// </summary>
+    /// <param name="id">The identifier.</param>
+    /// <param name="lcid">The language identifier.</param>
+    /// <returns>The group.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Occurs when the group was not present.</exception>
+    public IconGroup GetGroup(uint id, uint lcid)
+    {
+        return TryGetGroup(id, lcid, out var group)
+            ? group
+            : throw new ArgumentOutOfRangeException($"Icon group {id} (language: {lcid}) does not exist.");
+    }
+
+    /// <summary>
+    /// Gets an icon group by its string identifier.
+    /// </summary>
+    /// <param name="name">The identifier.</param>
+    /// <param name="lcid">The language identifier.</param>
+    /// <returns>The group.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Occurs when the group was not present.</exception>
+    public IconGroup GetGroup(string name, uint lcid)
+    {
+        return TryGetGroup(name, lcid, out var group)
+            ? group
+            : throw new ArgumentOutOfRangeException($"Icon group {name} (language: {lcid}) does not exist.");
+    }
+
+    /// <summary>
+    /// Attempts to get an icon group by its numeric identifier.
+    /// </summary>
+    /// <param name="id">The identifier.</param>
+    /// <param name="group">The group, or <c>null</c> if none was found.</param>
+    /// <returns><c>true</c> if the group was found, <c>false</c> otherwise.</returns>
+    public bool TryGetGroup(uint id, [NotNullWhen(true)] out IconGroup? group)
+    {
+        foreach (var g in Groups)
+        {
+            if (g.Id == id)
+            {
+                group = g;
+                return true;
+            }
         }
 
-        /// <summary>
-        /// Adds or overrides the existing entry with the same id to the icon group resource.
-        /// </summary>
-        /// <param name="id">The id to use for the entry.</param>
-        /// <param name="entry">The entry to add.</param>
-        public void AddEntry(uint id, IconGroupDirectory entry) => _entries[id] = entry;
+        group = null;
+        return false;
+    }
 
-        /// <summary>
-        /// Removes an existing entry with a specified id from the icon group resource.
-        /// </summary>
-        /// <param name="id">The icon group id.</param>
-        /// <returns><c>True</c> if the icon entry was successfully removed, otherwise <c>false</c>.</returns>
-        public bool RemoveEntry(uint id) => _entries.Remove(id);
-
-        /// <summary>
-        /// Gets a collection of entries stored in the icon group directory.
-        /// </summary>
-        /// <returns>The collection of icon group entries.</returns>
-        public IEnumerable<IconGroupDirectory> GetIconGroups() => _entries.Values;
-
-        /// <inheritdoc />
-        public void WriteToDirectory(IResourceDirectory rootDirectory)
+    /// <summary>
+    /// Attempts to get an icon group by its numeric identifier and language specifier.
+    /// </summary>
+    /// <param name="id">The identifier.</param>
+    /// <param name="lcid">The language identifier.</param>
+    /// <param name="group">The group, or <c>null</c> if none was found.</param>
+    /// <returns><c>true</c> if the group was found, <c>false</c> otherwise.</returns>
+    public bool TryGetGroup(uint id, uint lcid, [NotNullWhen(true)] out IconGroup? group)
+    {
+        foreach (var g in Groups)
         {
-            // Construct new directory.
-            var newGroupIconDirectory = new ResourceDirectory(ResourceType.GroupIcon);
-            foreach (var entry in _entries)
+            if (g.Id == id && g.Lcid == lcid)
             {
-                newGroupIconDirectory.Entries.Add(new ResourceDirectory(entry.Key)
-                    {Entries = {new ResourceData(0u, entry.Value)}});
+                group = g;
+                return true;
             }
-
-            // Construct new directory.
-            var newIconDirectory = new ResourceDirectory(ResourceType.Icon);
-            foreach (var entry in _entries)
-            {
-                foreach (var (groupEntry, iconEntry) in entry.Value.GetIconEntries())
-                {
-                    newIconDirectory.Entries.Add(new ResourceDirectory(groupEntry.Id)
-                        {Entries = {new ResourceData(1033, iconEntry)}});
-                }
-            }
-
-            // Insert.
-            rootDirectory.AddOrReplaceEntry(newGroupIconDirectory);
-            rootDirectory.AddOrReplaceEntry(newIconDirectory);
         }
+
+        group = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Attempts to get an icon group by its string identifier.
+    /// </summary>
+    /// <param name="name">The identifier.</param>
+    /// <param name="group">The group, or <c>null</c> if none was found.</param>
+    /// <returns><c>true</c> if the group was found, <c>false</c> otherwise.</returns>
+    public bool TryGetGroup(string name, [NotNullWhen(true)] out IconGroup? group)
+    {
+        foreach (var g in Groups)
+        {
+            if (g.Name == name)
+            {
+                group = g;
+                return true;
+            }
+        }
+
+        group = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Attempts to get an icon group by its string identifier and language specifier.
+    /// </summary>
+    /// <param name="name">The identifier.</param>
+    /// <param name="lcid">The language identifier.</param>
+    /// <param name="group">The group, or <c>null</c> if none was found.</param>
+    /// <returns><c>true</c> if the group was found, <c>false</c> otherwise.</returns>
+    public bool TryGetGroup(string name, uint lcid, [NotNullWhen(true)] out IconGroup? group)
+    {
+        foreach (var g in Groups)
+        {
+            if (g.Name == name && g.Lcid == lcid)
+            {
+                group = g;
+                return true;
+            }
+        }
+
+        group = null;
+        return false;
+    }
+
+    /// <inheritdoc />
+    public void InsertIntoDirectory(ResourceDirectory rootDirectory)
+    {
+        var (groupType, entryType) = GetResourceDirectoryTypes(Type);
+
+        // We're always replacing the existing directories with new ones.
+        var groupDirectory = new ResourceDirectory(groupType);
+        var entryDirectory = new ResourceDirectory(entryType);
+
+        var groupDirectories = new Dictionary<object, ResourceDirectory>();
+        foreach (var group in Groups)
+        {
+            // Create the group dir if it doesn't exist.
+            object groupId = (object?) group.Name ?? group.Id;
+            if (!groupDirectories.TryGetValue(groupId, out var directory))
+            {
+                directory = group.Name is not null
+                    ? new ResourceDirectory(group.Name)
+                    : new ResourceDirectory(group.Id);
+
+                groupDirectories.Add(groupId, directory);
+                groupDirectory.Entries.Add(directory);
+            }
+
+            // Serialize the group.
+            using var stream = new MemoryStream();
+            var writer = new BinaryStreamWriter(stream);
+            group.Write(entryDirectory, writer);
+
+            // Add the group.
+            directory.Entries.Add(new ResourceData(group.Lcid, new DataSegment(stream.ToArray())));
+        }
+
+        // Insert into the root win32 dir of the PE image.
+        rootDirectory.InsertOrReplaceEntry(groupDirectory);
+        rootDirectory.InsertOrReplaceEntry(entryDirectory);
     }
 }

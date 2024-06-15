@@ -1,6 +1,6 @@
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.DotNet.Cil
@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
         [Fact]
         public void DetectTinyMethodBody()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var methodTable = peImage.DotNetDirectory!.Metadata!
                 .GetStream<TablesStream>()
                 .GetTable<MethodDefinitionRow>();

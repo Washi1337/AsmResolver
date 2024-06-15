@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Tests.Certificates
         [Fact]
         public void ReadHeader()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_Signed);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_Signed, TestReaderParameters);
             var certificate = Assert.Single(image.Certificates);
             Assert.Equal(CertificateRevision.Revision_v2_0, certificate.Revision);
             Assert.Equal(CertificateType.PkcsSignedData, certificate.Type);
@@ -22,14 +22,14 @@ namespace AsmResolver.PE.Tests.Certificates
         {
             var file = PEFile.FromBytes(Properties.Resources.HelloWorld_Signed);
 
-            var image = PEImage.FromFile(file);
+            var image = PEImage.FromFile(file, TestReaderParameters);
             var certificate = Assert.Single(image.Certificates);
             file.EofData = image.Certificates;
 
             using var stream = new MemoryStream();
             file.Write(stream);
 
-            var newImage = PEImage.FromBytes(stream.ToArray());
+            var newImage = PEImage.FromBytes(stream.ToArray(), TestReaderParameters);
             var newCertificate = Assert.Single(newImage.Certificates);
             Assert.Equal(certificate.Revision, newCertificate.Revision);
             Assert.Equal(certificate.Type, newCertificate.Type);

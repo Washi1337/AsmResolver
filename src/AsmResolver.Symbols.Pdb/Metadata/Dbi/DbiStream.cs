@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 
 namespace AsmResolver.Symbols.Pdb.Metadata.Dbi;
 
@@ -452,7 +452,7 @@ public class DbiStream : SegmentBase
     }
 
     /// <inheritdoc />
-    public override void Write(IBinaryStreamWriter writer)
+    public override void Write(BinaryStreamWriter writer)
     {
         WriteHeader(writer);
         WriteModuleStream(writer);
@@ -464,7 +464,7 @@ public class DbiStream : SegmentBase
         WriteOptionalDebugStream(writer);
     }
 
-    private void WriteHeader(IBinaryStreamWriter writer)
+    private void WriteHeader(BinaryStreamWriter writer)
     {
         writer.WriteInt32(VersionSignature);
         writer.WriteUInt32((uint) VersionHeader);
@@ -493,7 +493,7 @@ public class DbiStream : SegmentBase
         writer.WriteUInt32(0);
     }
 
-    private void WriteModuleStream(IBinaryStreamWriter writer)
+    private void WriteModuleStream(BinaryStreamWriter writer)
     {
         var modules = Modules;
         for (int i = 0; i < modules.Count; i++)
@@ -502,7 +502,7 @@ public class DbiStream : SegmentBase
         writer.Align(sizeof(uint));
     }
 
-    private void WriteSectionContributionStream(IBinaryStreamWriter writer)
+    private void WriteSectionContributionStream(BinaryStreamWriter writer)
     {
         // TODO: make customizable
         writer.WriteUInt32((uint) SectionContributionStreamVersion.Ver60);
@@ -514,7 +514,7 @@ public class DbiStream : SegmentBase
         writer.Align(sizeof(uint));
     }
 
-    private void WriteSectionMapStream(IBinaryStreamWriter writer)
+    private void WriteSectionMapStream(BinaryStreamWriter writer)
     {
         var maps = SectionMaps;
 
@@ -529,7 +529,7 @@ public class DbiStream : SegmentBase
         writer.Align(sizeof(uint));
     }
 
-    private void WriteSourceInfoStream(IBinaryStreamWriter writer)
+    private void WriteSourceInfoStream(BinaryStreamWriter writer)
     {
         var sourceFiles = SourceFiles;
         int totalFileCount = sourceFiles.Sum(x => x.Count);
@@ -577,13 +577,13 @@ public class DbiStream : SegmentBase
         writer.Align(sizeof(uint));
     }
 
-    private void WriteTypeServerMapStream(IBinaryStreamWriter writer)
+    private void WriteTypeServerMapStream(BinaryStreamWriter writer)
     {
         TypeServerMapStream?.Write(writer);
         writer.Align(sizeof(uint));
     }
 
-    private void WriteOptionalDebugStream(IBinaryStreamWriter writer)
+    private void WriteOptionalDebugStream(BinaryStreamWriter writer)
     {
         var extraIndices = ExtraStreamIndices;
 
@@ -591,5 +591,5 @@ public class DbiStream : SegmentBase
             writer.WriteUInt16(extraIndices[i]);
     }
 
-    private void WriteECStream(IBinaryStreamWriter writer) => ECStream?.Write(writer);
+    private void WriteECStream(BinaryStreamWriter writer) => ECStream?.Write(writer);
 }

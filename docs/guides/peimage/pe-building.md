@@ -1,194 +1,304 @@
 # PE File Building
 
-An `IPEImage` is a higher-level abstraction of an actual PE file, and
-hides many of the actual implementation details such as raw section
-layout and contents of data directories. While this makes reading and
-interpreting a PE very easy, it makes writing a more involved process.
+To write a PE image to a file or output stream. it needs to be serialized into `PEFile` first. This can be done through the `ToPEFile` method, accompanied with an instance of `IPEFileBuilder`.
 
-Unfortunately, the PE file format is not well-structured. Compilers and
-linkers have a lot of freedom when it comes to the actual design and
-layout of the final PE file. For example, one compiler might place the
-Import Address Table (IAT) in a separate section (such as the MSVC),
-while others will put it next to the code in the text section (such as
-the C# compiler). This degree of freedom makes it virtually impossible
-to make a completely generic PE file builder, and as such AsmResolver
-does not come with one out of the box.
-
-It is still possible to build PE files from instances of `IPEImage`, it
-might just take more manual labor than you might expect at first. This
-article will discuss certain strategies that can be adopted when
-constructing new PE files from PE images.
-
-## Building Sections
-
-As discussed in [PE Sections](../pefile/sections.md), the `PESection` class
-represents a single section in the PE file. This class exposes a property 
-called `Contents` which is of type `ISegment`. A lot of models in AsmResolver
-implement this interface, and as such, these models can directly be used
-as the contents of a new section.
-
-``` csharp
-var peFile = new PEFile();
-
-var text = new PESection(".text",
-    SectionFlags.ContentCode | SectionFlags.MemoryRead | SectionFlags.MemoryExecute);
-text.Content = new DataSegment(new byte[] { ... } );
-peFile.Sections.Add(text);
+```csharp
+IPEFileBuilder builder = ...;
+var newPEFile = peImage.ToPEFile(builder);
 ```
 
-In a lot of cases, however, sections do not consist of a single data
-structure, but often comprise many segments concatenated together,
-potentially with some padding in between. To compose new segments from a
-collection of smaller sub-segments structures, the `SegmentBuilder`
-class can be used. This is a class that combines a collection of
-`ISegment` instances into one, allowing you to concatenate segments that
-belong together easily. Below an example that builds up a `.text`
-section that consists of a .NET data directory as well as some native
-code. In the example, the native code is aligned to a 4-byte boundary:
+Once a `PEFile` instance has been constructed from the image, it can be written to an output stream (as described in [Writing PE files](../pefile/basics.md#writing-pe-files)):
 
 ``` csharp
-var peFile = new PEFile();
-
-var textBuilder = new SegmentBuilder();
-textBuilder.Add(new DotNetDirectory { ... });
-textBuilder.Add(new DataSegment(new byte[] { ... } ), alignment: 4);
-
-var text = new PESection(".text",
-    SectionFlags.ContentCode | SectionFlags.MemoryRead | SectionFlags.MemoryExecute);
-text.Content = sectionBuilder;
-
-peFile.Sections.Add(text);
+using var stream = File.Create(@"C:\mynewfile.exe");
+newPEFile.Write(new BinaryStreamWriter(stream));
 ```
 
-PE files can also be patched using the `PatchedSegment` API. Below is an
-example of patching some data in the `.text` section of a PE File with
-some literal data `{1, 2, 3, 4}`, as well as writing an address to a
-symbol in the imports table:
+Depending on the type of PE image and use-case, you will need a different type of PE builder.
+In the remainder of this article, the different types of built-in PE file builders are discussed, as well how you can create your own PE file builder.
 
-``` csharp
-var peFile = PEFile.FromFile("input.exe");
-var section = peFile.Sections.First(s => s.Name == ".text");
 
-var someSymbol = peImage
-   .Imports.First(m => m.Name == "ucrtbased.dll")
-   .Symbols.First(s => s.Name == "puts");
+## Built-in PE File Builders
 
-section.Contents = section.Contents.AsPatchedSegment()                      // Create patched segment.
-   .Patch(offset: 0x10, data: new byte[] {1, 2, 3, 4})                      // Apply literal bytes patch
-   .Patch(offset: 0x20, AddressFixupType.Absolute64BitAddress, someSymbol); // Apply address fixup patch.
+Currently, AsmResolver provides two default implementations:
+
+| Builder                  | Main Purpose                                                                      |
+|--------------------------|-----------------------------------------------------------------------------------|
+| `ManagedPEFileBuilder`   | Construct new fully managed .NET PE files from scratch.                           |
+| `UnmanagedPEFileBuilder` | Construct PE files based on an existing unmanaged or mixed-mode PE file template. |
+
+
+In the remainder of this section, the different features and limitations of the PE file builders are explained.
+
+
+### Managed (.NET) PE Files
+
+The easiest way to PE files targeting the .NET platform is to use the `ManagedPEFileBuilder`.
+
+```csharp
+var builder = new ManagedPEFileBuilder();
 ```
 
-More detailed information on how to use segments can be found in
-[Segments](../core/segments.md).
+No further configuration is required.
+The builder figures out everything on its own.
 
-## Using complex PE models
 
-The PE file format defines many complex data structures. While some of
-these models are represented in AsmResolver using classes that derive
-from `ISegment`, a lot of the classes that represent these data
-structures do not implement this interface, and as such cannot be used
-as a value for the `Contents` property of a `PESection` directly. This
-is due to the fact that most of these models are not required to be one
-single entity or chunk of continuous memory within the PE file. Instead,
-they are often scattered around the PE file by a compiler. For example,
-the Import Directory has a second component the Import Address Table
-which is often put in a completely different PE section (usually `.text`
-or `.data`) than the Import Directory itself (in `.idata` or `.rdata`).
-To make reading and interpreting these data structures more convenient
-for the end-user, the `AsmResolver.PE` package adopted some design
-choices to abstract these details away to make things more natural to
-work with. The downside of this is that writing these structures
-requires you to specify where AsmResolver should place these models in
-the final PE file.
+#### When to Use
 
-In `AsmResolver.PE`, most models for which is the case reside in their
-own namespace, and have their own set of classes dedicated to
-constructing new segments defined in a `Builder` sub-namespace. For
-example, the Win32 resources directory models reside in
-`AsmResolver.PE.Win32Resources`, but the actual builder classes are put
-in a sub namespace called `AsmResolver.PE.Win32Resources.Builder`.
+When building .NET PE files, it is recommended to use `ManagedPEFileBuilder` when possible, as it aims to produce files that closely resemble files produced by a typical C# compiler, and also optimizes for file size.
 
-``` csharp
-IPEImage image = ...
+In short, use the `ManagedPEFileBuilder` when you are dealing with the following situation:
+- Your input binary is a typical .NET binary targeting .NET Framework, .NET Core or .NET 5+.
+- Your input binary only has methods implemented in CIL or single contiguous blocks of (native) code.
+- You do not care about raw offsets of headers and data directories.
+- You want a file optimized for size.
 
-// Construct a resources directory.
-var resources = new ResourceDirectoryBuffer();
-resources.AddDirectory(image.Resources);
 
-var file = new PEFile();
+#### Final PE File Layout
 
-// Place in a read-only section.
-var rsrc = new PESection(".rsrc", SectionFlags.MemoryRead | SectionFlags.ContentInitializedData);
-rsrc.Contents = resources;
-file.Sections.Add(rsrc);
+The `ManagedPEFileBuilder` creates files with at most four PE sections, depending on what is present in the image:
+- `.text`: 
+  Almost everything is put into this section, including method bodies and data directories containing .NET metadata, imports and debug data.
+- `.rsrc`:
+  Win32 resources are put into this section, and this section will only be added if there is at least one entry in the root resource directory of the PE image.
+- `.sdata`:
+  This section will be added when unmanaged PE exports and/or .NET VTable fixups are present.
+- `.reloc`:
+  Base relocations are put in this section, and they are only added if at least
+  one base relocation was put into the directory, or when the CLR bootstrapper stub requires one.
+
+
+> [!NOTE]
+> This builder might add or remove the entry to `mscoree.dll!_CorExeMain` or `mscoree.dll!_CorDllMain` to the imports and base relocations directory, depending on the platform architecture the PE targets.
+
+> [!WARNING] 
+> As files are always constructed from scratch, offsets and sizes of various segments and data directories may change when rebuilding an existing file.
+
+> [!WARNING]
+> Files will only include what is absolutely necessary according to its headers. 
+  Any code or data segment not explicitly defined in a header or for which their size could not be determined is stripped from the binary.
+
+
+### Unmanaged or Mixed Mode PE Files
+
+To build fully native/unmanaged PE files or mixed-mode PE files containing both managed and unmanaged code, it is possible to use the `UnmanagedPEFileBuilder` class:
+
+```csharp
+var builder = new UnmanagedPEFileBuilder();
 ```
 
-A more complicated structure such as the Imports Directory can be build
-like the following:
+#### When to use
 
-``` csharp
-IPEImage image = ...
+This builder bases its final PE layout on a template PE file, and aims to preserve as much of the original structure of this file.
 
-// Construct an imports directory.
-var buffer = new ImportDirectoryBuffer();
-foreach (var module in image.Imports)
-    buffer.AddModule(module);
+In short, use the `UnmanagedPEFileBuilder` when you are dealing with the following situation:
+- The input binary is fully unmanaged or contains unmanaged code or sections that needs to be preserved.
+- You care about raw offsets of headers and data directories.
+- You do not mind a file that may get larger in size.
 
-var file = new PEFile();
 
-// Place import directory in a read-only section.
-var rdata = new PESection(".rdata", SectionFlags.MemoryRead | SectionFlags.ContentInitializedData);
-rdata.Contents = buffer;
-file.Sections.Add(rdata);
+#### Specifying a Base File
 
-// Place the IAT in a writable section.
-var data = new PESection(".data", SectionFlags.MemoryRead | SectionFlags.MemoryWrite | SectionFlags.ContentInitializedData);
-data.Contents = buffer.ImportAddressDirectory;
-file.Sections.Add(ddata);
+By default, the `UnmanagedPEFileBuilder` uses `PEImage::PEFile` as base template, which is set for images read from the disk or input stream.
+To override this behavior, it is possible to manually set the template PE file.
+
+```csharp
+builder.BaseFile = PEFile.FromFile(@"C:\path\to\file.exe");
 ```
 
-## Using PEFileBuilders
 
-As a lot of the PE file-building process will be similar for many types
-of PE file layouts (such as the construction of the file and optional
-headers), AsmResolver comes with a base class called `PEFileBuilderBase`
-that abstracts many of these similarities away. Rather than defining and
-building up everything yourself, the `PEFileBuilderBase` allows you to
-override a couple of methods:
+#### Rebuilding Import and VTable Fixup Directories
 
-``` csharp
-public class MyPEFileBuidler : PEFileBuilderBase<MyBuilderContext>
+Many unmanaged or mixed-mode binaries that use an Import Address Table (IAT) or .NET's VTable Fixups directory, reference individual entries within these tables by hardcoded virtual addresses.
+Therefore, when modifying these tables, the original entries in these tables need to be trampolined such that code referencing the original tables remains functioning.
+
+By default, for performance and file-size reasons, the `UnmanagedPEFileBuilder` does not rebuild the IAT directory.
+AsmResolver can be instructed to rebuild and trampoline these tables by setting the appropriate flag:
+
+```csharp
+builder.TrampolineImports = true;
+```
+
+Similarly, the original VTable fixups also need to be trampolined if a new VTable Fixup directory is to be constructed:
+
+```csharp
+builder.TrampolineVTableFixups = true;
+```
+
+Trampolining is efficient at runtime, but only works if the imported symbol is a reference to an external function.
+If the symbol is instead referencing a global data field (such as `std::cout` in a C++ binary), its corresponding IAT slot needs to be dynamically adjusted at runtime.
+
+By default, AsmResolver assumes every imported symbol is a function reference.
+To customize this behavior, the `ImportedSymbolClassifier` can be set to a custom implementation of `IImportedSymbolClassifier`:
+
+```csharp
+// Classify `std::cout` as a data ref, and everything else as a function ref.
+builder.ImportedSymbolClassifier = new DelegatedSymbolClassifier(x => x.Name switch
 {
-    protected override MyBuilderContext CreateContext(IPEImage image) => new();
+    "?cout@std@@3V?$basic_ostream@DU?$char_traits@D@std@@@1@A" => ImportedSymbolType.Data,
+    _ => ImportedSymbolType.Function
+});
+```
 
-    protected override uint GetFileAlignment(PEFile peFile, IPEImage image, MyBuilderContext context) => 0x200;
 
-    protected override uint GetSectionAlignment(PEFile peFile, IPEImage image, MyBuilderContext context) => 0x2000;
+#### Final PE File Layout
 
-    protected override uint GetImageBase(PEFile peFile, IPEImage image, MyBuilderContext context) => 0x00400000;
+The `UnmanagedPEFileBuilder` will clone all original sections of the template PE file, and try to byte-patch the changes that were made.
+If a particular segment or data directory does not longer fit in its original place, the builder will add auxiliary PE sections and put the segments in there. 
 
-    protected override IEnumerable<PESection> CreateSections(IPEImage image, MyBuilderContext context)
+At most five auxiliary sections will be added:
+
+- `.auxtext`:
+  This section may contain new code segments, reconstructed import lookup and address tables, .NET metadata, debug data, as well as any code required to initialize or trampoline these tables.
+- `.rdata`:
+  This section may contain a reconstructed TLS data directory when required.
+- `.auxdata`:
+  This may contain a reconstructed exports tables as well as VTable fixup tables.
+  It may also contain the new TLS index variable if required.
+- `.auxrsrc`:
+  This section may contain the new Win32 resource data directory.
+- `.reloc`:
+  This section may contain the reconstructed base relocation tables.
+
+
+> [!NOTE]
+> When the input binary is a .NET file, this builder might add or remove the entry to `mscoree.dll!_CorExeMain` or `mscoree.dll!_CorDllMain` to the imports and base relocations directory, depending on the platform architecture the PE targets.
+
+> [!NOTE]
+> When trampolining IAT entries (specifically for data field imports), a TLS callback may be added to the PE file to dynamically initialize the original IAT.
+
+> [!WARNING] 
+> If an auxiliary section is added, the original section is not removed.
+> This means a file produced by this builder may contain multiple sections with the same name, and thus may also significantly increase the total file size.
+
+
+## Creating your own PE Builder
+
+For more specific use-cases where more control on the final PE file layout is required, it is possible to create a custom PE file builder, by extending from the `PEFileBuilder` class:
+
+```csharp
+public class MyPEFileBuilder : PEFileBuilder
+{
+    protected override IEnumerable<PESection> CreateSections(PEFileBuilderContext context)
     {
-        /* Create sections here */
+        /* ... Create and return all sections for the final PE file ... */
     }
 
-    protected override IEnumerable<DataDirectory> CreateDataDirectories(PEFile peFile, IPEImage image, MyBuilderContext context)
+    protected override void AssignDataDirectories(PEFileBuilderContext context, PEFile outputFile)
     {
-        /* Create data directories here */
+        /* ... Assign data directories in the optional header of `outputFile` ... */
     }
-}
 
-public class MyBuilderContext
-{
-    /* Define here additional state data to be used in your builder. */
+    protected override uint GetEntryPointAddress(PEFileBuilderContext context, PEFile outputFile)
+    {
+        /* ... Determine and return the new address of the entry point ... */
+    }
 }
 ```
 
-This can then be used like the following:
+The `PEFileBuilder` implements a skeleton for a pipeline involving three steps:
+- Constructing the new data directories.
+- Composing the final sections of the new file.
+- Updating the PE file headers to reflect the changes.
 
-``` csharp
-IPEImage image = ...
+In the remainder of this section, we will discuss these in more details.
 
-var builder = new MyPEFileBuilder();
-PEFile file = builder.CreateFile(image);
+
+### Populating Data Directory Buffers
+
+The first step in building a PE file is to reconstruct all data directories.
+By default, the `PEFileBuilder` base class automatically populates buffers for the following data directories based on the contents of the input PE image:
+- Exports
+- Imports Lookup and Address Tables
+- Debug Data
+- Win32 Resources
+- Base Relocations
+
+These buffers can be found in the `PEFileBuilderContext` that is accompanied with the current build of the PE image.
+
+If the construction of these data directories is to be customized, the appropriate methods can be overridden. 
+Below is an example of adding an additional entry to the imports directory of a PE:
+
+```csharp
+protected override void CreateImportDirectory(PEFileBuilderContext context)
+{
+    base.CreateImportDirectory(context);
+
+    // Add an extra module to the import tables:
+    var kernel32 = new ImportedModule("KERNEL32.dll");
+    var virtualProtect = new ImportedSymbol(0, "VirtualProtect");
+    kernel32.Symbols.Add(virtualProtect);
+
+    context.ImportDirectory.AddModule(kernel32);
+}
+```
+
+If other data directories are supposed to be reconstructed (such as a .NET data directory), it is also possible to extend the general `CreateDataDirectoryBuffers` method:
+
+```csharp
+protected override void CreateDataDirectoryBuffers(PEFileBuilderContext context)
+{
+    base.CreateDataDirectoryBuffers(context);
+
+    /* ... Populate other directories here ... */
+}
+```
+
+### Creating Sections
+
+Creating the final sections is supposed to be done in the `CreateSections` method.
+Individual sections can be composed by concatenating individual segments and data directory buffers into one single `SegmentBuilder`. 
+
+Below is an example of constructing a `.text` section with an export directory followed by some additional data.
+
+```csharp
+protected override IEnumerable<PESection> CreateSections(PEFileBuilderContext context)
+{
+    var result = new List<PESection>();
+    
+    result.Add(CreateTextSection(context));
+
+    /* ... Create remainder of the sections ... */
+
+    return result;
+}
+
+private PESection CreateTextSection(PEFileBuilderContext context)
+{
+    var textBuilder = new SegmentBuilder();
+
+    // Add the exports data directory buffer to the section contents.
+    contents.Add(context.ExportDirectory);
+    
+    // Add some data to the section.
+    contents.Add(new DataSegment(new byte[] {1, 2, 3, 4}))
+
+    /* ... */
+
+    return new PESection(
+        ".text",
+        SectionFlags.ContentCode | SectionFlags.MemoryExecute | SectionFlags.MemoryRead,
+        contents
+    );
+}
+```
+
+See [PE Sections](../pefile/sections.md) and [Reading and Writing File Segments](../core/segments.md) for more details on how to create and compose section contents.
+
+
+### Assigning New Data Directories
+
+When all sections have been created, the optional header of the final PE file needs to be updated such that it references all the right data that was added to the sections.
+This happens in the `AssignDataDirectories` method:
+
+```csharp
+protected override void AssignDataDirectories(PEFileBuilderContext context, PEFile outputFile)
+{
+    var header = outputFile.OptionalHeader;
+
+    // Update the RVA and size of the export directory.
+    header.SetDataDirectory(DataDirectoryIndex.ExportDirectory, context.ExportDirectory);
+
+    /* ... Update other directories ... */
+}
 ```

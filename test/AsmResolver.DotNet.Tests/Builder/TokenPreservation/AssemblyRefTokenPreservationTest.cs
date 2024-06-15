@@ -3,9 +3,8 @@ using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
@@ -15,7 +14,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveAssemblyRefsNoChangeShouldAtLeastHaveOriginalAssemblyRefs()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
             var originalAssemblyRefs = GetMembers<AssemblyReference>(module, TableIndex.AssemblyRef);
 
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveAssemblyReferenceIndices);
@@ -27,7 +26,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveAssemblyRefsWithTypeRefRemovedShouldAtLeastHaveOriginalAssemblyRefs()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
             var originalAssemblyRefs = GetMembers<AssemblyReference>(module, TableIndex.AssemblyRef);
 
             var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
@@ -43,7 +42,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveAssemblyRefsWithExtraImportShouldAtLeastHaveOriginalAssemblyRefs()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
             var originalAssemblyRefs = GetMembers<AssemblyReference>(module, TableIndex.AssemblyRef);
 
             var importer = new ReferenceImporter(module);
@@ -65,7 +64,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveDuplicatedAssemblyRefs()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters.PEReaderParameters);
             var metadata = image.DotNetDirectory!.Metadata!;
             var strings = metadata.GetStream<StringsStream>();
             var table = metadata
@@ -77,7 +76,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             table.Add(corlibRow);
 
             // Open module from modified image.
-            var module = ModuleDefinition.FromImage(image);
+            var module = ModuleDefinition.FromImage(image, TestReaderParameters);
 
             // Obtain references to mscorlib.
             var references = module.AssemblyReferences

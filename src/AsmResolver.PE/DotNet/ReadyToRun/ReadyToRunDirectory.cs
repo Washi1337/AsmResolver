@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.DotNet.ReadyToRun
 {
@@ -153,7 +153,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32((uint) Signature);
             writer.WriteUInt16(MajorVersion);

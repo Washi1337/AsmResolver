@@ -5,12 +5,12 @@ namespace AsmResolver.PE.Win32Resources
     /// <summary>
     /// Represents one entry in a win32 resource directory.
     /// </summary>
-    public interface IResourceEntry : IOwnedCollectionElement<IResourceDirectory>
+    public interface IResourceEntry : IOwnedCollectionElement<ResourceDirectory>
     {
         /// <summary>
         /// Gets the parent directory the entry is stored in.
         /// </summary>
-        IResourceDirectory? ParentDirectory
+        ResourceDirectory? ParentDirectory
         {
             get;
         }

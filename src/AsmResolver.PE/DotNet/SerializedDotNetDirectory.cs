@@ -5,7 +5,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.ReadyToRun;
 using AsmResolver.PE.DotNet.Resources;
 using AsmResolver.PE.DotNet.VTableFixups;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.DotNet
 {
@@ -55,7 +55,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override IMetadata? GetMetadata()
+        protected override MetadataDirectory? GetMetadata()
         {
             if (!_metadataDirectory.IsPresentInPE)
                 return null;
@@ -66,7 +66,7 @@ namespace AsmResolver.PE.DotNet
                 return null;
             }
 
-            return DotNet.Metadata.Metadata.FromReader(directoryReader, MetadataReaderContext.FromReaderContext(_context));
+            return MetadataDirectory.FromReader(directoryReader, MetadataReaderContext.FromReaderContext(_context));
         }
 
         /// <inheritdoc />

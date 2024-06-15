@@ -1,13 +1,14 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using AsmResolver.Collections;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources
 {
     /// <summary>
-    /// Provides an implementation for a single data entry in a Win32 resource directory.
+    /// Represents a single data entry in a Win32 resource directory.
     /// </summary>
-    public class ResourceData : IResourceData
+    public class ResourceData : IResourceEntry
     {
         private readonly LazyVariable<ResourceData, ISegment?> _contents;
 
@@ -44,13 +45,13 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <inheritdoc />
-        public IResourceDirectory? ParentDirectory
+        public ResourceDirectory? ParentDirectory
         {
             get;
             private set;
         }
 
-        IResourceDirectory? IOwnedCollectionElement<IResourceDirectory>.Owner
+        ResourceDirectory? IOwnedCollectionElement<ResourceDirectory>.Owner
         {
             get => ParentDirectory;
             set => ParentDirectory = value;
@@ -76,24 +77,37 @@ namespace AsmResolver.PE.Win32Resources
         /// <inheritdoc />
         bool IResourceEntry.IsData => true;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the raw contents of the data entry.
+        /// </summary>
         public ISegment? Contents
         {
             get => _contents.GetValue(this);
             set => _contents.SetValue(value);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the code page that is used to decode code point values within the resource data.
+        /// </summary>
+        /// <remarks>
+        /// Typically, the code page would be the Unicode code page.
+        /// </remarks>
         public uint CodePage
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="Contents"/> is readable using a binary stream reader.
+        /// </summary>
+        [MemberNotNullWhen(true, nameof(Contents))]
         public bool CanRead => Contents is IReadableSegment;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Creates a new binary stream reader that reads the raw contents of the resource file.
+        /// </summary>
+        /// <returns>The reader.</returns>
         public BinaryStreamReader CreateReader()
         {
             return Contents is IReadableSegment readableSegment

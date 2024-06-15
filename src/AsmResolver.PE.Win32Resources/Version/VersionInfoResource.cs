@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using AsmResolver.IO;
 
@@ -74,22 +73,22 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         /// <param name="rootDirectory">The root resources directory to extract the version info from.</param>
         /// <returns>The version info resource, or <c>null</c> if none was found.</returns>
-        public static IEnumerable<VersionInfoResource?> FindAllFromDirectory(IResourceDirectory rootDirectory)
+        public static IEnumerable<VersionInfoResource?> FindAllFromDirectory(ResourceDirectory rootDirectory)
         {
             if (!rootDirectory.TryGetDirectory(ResourceType.Version, out var versionDirectory))
-                return Enumerable.Empty<VersionInfoResource>();
+                return Enumerable.Empty<VersionInfoResource?>();
 
             var categoryDirectory = versionDirectory
                 .Entries
-                .OfType<IResourceDirectory>()
+                .OfType<ResourceDirectory>()
                 .FirstOrDefault();
 
             if (categoryDirectory is null)
-                return Enumerable.Empty<VersionInfoResource>();
+                return Enumerable.Empty<VersionInfoResource?>();
 
             return categoryDirectory.Entries
-                .OfType<IResourceData>()
-                .Select(FromResourceData);
+                .OfType<ResourceData>()
+                .Select(FromResourceData)!;
         }
 
         /// <summary>
@@ -97,7 +96,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         /// <param name="rootDirectory">The root resources directory to extract the version info from.</param>
         /// <returns>The version info resource, or <c>null</c> if none was found.</returns>
-        public static VersionInfoResource? FromDirectory(IResourceDirectory rootDirectory)
+        public static VersionInfoResource? FromDirectory(ResourceDirectory rootDirectory)
         {
             return FindAllFromDirectory(rootDirectory).FirstOrDefault();
         }
@@ -108,19 +107,19 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <param name="rootDirectory">The root resources directory to extract the version info from.</param>
         /// <param name="lcid">The language identifier to get the version info from.</param>
         /// <returns>The version info resource, or <c>null</c> if none was found.</returns>
-        public static VersionInfoResource? FromDirectory(IResourceDirectory rootDirectory, int lcid)
+        public static VersionInfoResource? FromDirectory(ResourceDirectory rootDirectory, int lcid)
         {
             if (!rootDirectory.TryGetDirectory(ResourceType.Version, out var versionDirectory))
                 return null;
 
             var categoryDirectory = versionDirectory
                 .Entries
-                .OfType<IResourceDirectory>()
+                .OfType<ResourceDirectory>()
                 .FirstOrDefault();
 
             var dataEntry = categoryDirectory
                 ?.Entries
-                .OfType<IResourceData>()
+                .OfType<ResourceData>()
                 .FirstOrDefault(x => x.Id == lcid);
 
             if (dataEntry is null)
@@ -134,7 +133,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         /// <param name="dataEntry">The data entry to extract the version info from.</param>
         /// <returns>The extracted version info resource.</returns>
-        public static VersionInfoResource FromResourceData(IResourceData dataEntry)
+        public static VersionInfoResource FromResourceData(ResourceData dataEntry)
         {
             if (dataEntry.CanRead)
             {
@@ -260,7 +259,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         protected override uint GetValueLength() => FixedVersionInfo.GetPhysicalSize();
 
         /// <inheritdoc />
-        protected override void WriteValue(IBinaryStreamWriter writer)
+        protected override void WriteValue(BinaryStreamWriter writer)
         {
             FixedVersionInfo.Write(writer);
             foreach (var entry in _entries.Values)
@@ -271,24 +270,24 @@ namespace AsmResolver.PE.Win32Resources.Version
         }
 
         /// <inheritdoc />
-        public void WriteToDirectory(IResourceDirectory rootDirectory)
+        public void InsertIntoDirectory(ResourceDirectory rootDirectory)
         {
             // Add version directory if it doesn't exist yet.
             if (!rootDirectory.TryGetDirectory(ResourceType.Version, out var versionDirectory))
             {
                 versionDirectory = new ResourceDirectory(ResourceType.Version);
-                rootDirectory.Entries.Add(versionDirectory);
+                rootDirectory.InsertOrReplaceEntry(versionDirectory);
             }
 
             // Add category directory if it doesn't exist yet.
             if (!versionDirectory.TryGetDirectory(1, out var categoryDirectory))
             {
                 categoryDirectory = new ResourceDirectory(1);
-                versionDirectory.Entries.Add(categoryDirectory);
+                versionDirectory.InsertOrReplaceEntry(categoryDirectory);
             }
 
             // Insert / replace data entry.
-            categoryDirectory.AddOrReplaceEntry(new ResourceData((uint) Lcid, this));
+            categoryDirectory.InsertOrReplaceEntry(new ResourceData((uint) Lcid, this));
         }
     }
 }

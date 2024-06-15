@@ -5,7 +5,6 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet
 {
@@ -139,20 +138,29 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the method definition representing the first add accessor of this event definition.
         /// </summary>
-        public MethodDefinition? AddMethod =>
-            Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.AddOn)?.Method;
+        public MethodDefinition? AddMethod
+        {
+            get => Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.AddOn)?.Method;
+            set => SetSemanticMethods(value, RemoveMethod, FireMethod);
+        }
 
         /// <summary>
         /// Gets the method definition representing the first remove accessor of this event definition.
         /// </summary>
-        public MethodDefinition? RemoveMethod =>
-            Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.RemoveOn)?.Method;
+        public MethodDefinition? RemoveMethod
+        {
+            get => Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.RemoveOn)?.Method;
+            set => SetSemanticMethods(AddMethod, value, FireMethod);
+        }
 
         /// <summary>
         /// Gets the method definition representing the first fire accessor of this event definition.
         /// </summary>
-        public MethodDefinition? FireMethod =>
-            Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Fire)?.Method;
+        public MethodDefinition? FireMethod
+        {
+            get => Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Fire)?.Method;
+            set => SetSemanticMethods(AddMethod, RemoveMethod, value);
+        }
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes

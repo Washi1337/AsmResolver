@@ -1,5 +1,5 @@
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using static AsmResolver.PE.DotNet.ReadyToRun.ReadyToRunSectionType;
 
 namespace AsmResolver.PE.DotNet.ReadyToRun
@@ -9,6 +9,11 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
     /// </summary>
     public class DefaultReadyToRunSectionReader : IReadyToRunSectionReader
     {
+        /// <summary>
+        /// Gets the singleton instance of the <see cref="DefaultReadyToRunSectionReader"/> class.
+        /// </summary>
+        public static DefaultReadyToRunSectionReader Instance { get; } = new();
+
         /// <inheritdoc />
         public IReadyToRunSection ReadSection(PEReaderContext context, ReadyToRunSectionType type, ref BinaryStreamReader reader)
         {

@@ -4,10 +4,8 @@ using AsmResolver.PE.Certificates;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exceptions;
-using AsmResolver.PE.Exceptions.X64;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
 using AsmResolver.PE.Tls;
@@ -27,27 +25,25 @@ namespace AsmResolver.PE
         /// </summary>
         /// <param name="peFile">The file to base the image from.</param>
         /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
-        public SerializedPEImage(IPEFile peFile, PEReaderParameters readerParameters)
+        public SerializedPEImage(PEFile peFile, PEReaderParameters readerParameters)
         {
             PEFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
             ReaderContext = new PEReaderContext(peFile, readerParameters);
 
             FilePath = peFile.FilePath;
-            MachineType = PEFile.FileHeader.Machine;
-            Characteristics = PEFile.FileHeader.Characteristics;
+            MachineType = peFile.FileHeader.Machine;
+            Characteristics = peFile.FileHeader.Characteristics;
             TimeDateStamp = new DateTime(1970, 1, 1) + TimeSpan.FromSeconds(peFile.FileHeader.TimeDateStamp);
-            PEKind = PEFile.OptionalHeader.Magic;
-            SubSystem = PEFile.OptionalHeader.SubSystem;
-            DllCharacteristics = PEFile.OptionalHeader.DllCharacteristics;
-            ImageBase = PEFile.OptionalHeader.ImageBase;
+            PEKind = peFile.OptionalHeader.Magic;
+            SubSystem = peFile.OptionalHeader.SubSystem;
+            DllCharacteristics = peFile.OptionalHeader.DllCharacteristics;
+            ImageBase = peFile.OptionalHeader.ImageBase;
 
             _originalArchitecture = MachineType;
         }
 
-        /// <summary>
-        /// Gets the underlying PE file.
-        /// </summary>
-        public IPEFile PEFile
+        /// <inheritdoc />
+        public override PEFile PEFile
         {
             get;
         }
@@ -61,16 +57,16 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IList<IImportedModule> GetImports()
+        protected override IList<ImportedModule> GetImports()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ImportDirectory);
             return dataDirectory.IsPresentInPE
                 ? new SerializedImportedModuleList(ReaderContext, dataDirectory)
-                : new List<IImportedModule>();
+                : new List<ImportedModule>();
         }
 
         /// <inheritdoc />
-        protected override IExportDirectory? GetExports()
+        protected override ExportDirectory? GetExports()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ExportDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
@@ -80,7 +76,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IResourceDirectory? GetResources()
+        protected override ResourceDirectory? GetResources()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ResourceDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
@@ -113,7 +109,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IDotNetDirectory? GetDotNetDirectory()
+        protected override DotNetDirectory? GetDotNetDirectory()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ClrDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
@@ -139,7 +135,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override ITlsDirectory? GetTlsDirectory()
+        protected override TlsDirectory? GetTlsDirectory()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.TlsDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))

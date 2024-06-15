@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadName()
         {
-            var module = ModuleDefinition.FromFile(Path.Combine("Resources", "Manifest.exe"));
+            var module = ModuleDefinition.FromFile(Path.Combine("Resources", "Manifest.exe"), TestReaderParameters);
             var moduleRef = module.ModuleReferences[0];
             Assert.Equal("MyModel.netmodule", moduleRef.Name);
         }

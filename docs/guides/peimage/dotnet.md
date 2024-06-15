@@ -11,10 +11,10 @@ applications.
 ## .NET directory / CLR 2.0 header
 
 The .NET data directory can be accessed by the
-`IPEImage.DotNetDirectory` property.
+`PEImage.DotNetDirectory` property.
 
 ``` csharp
-IPEImage peImage = ...
+PEImage peImage = ...
 
 Console.WriteLine($"Managed entry point: {peImage.DotNetDirectory.EntryPoint}");
 ```
@@ -26,9 +26,9 @@ that is referenced by the .NET directory. It contains the metadata
 streams, such as the table and the blob stream, which play a key role in
 the execution of a .NET binary.
 
-To access the metadata directory, access the `IDotNetDirectory.Metadata`
-property, which will provide you an instance of the `IMetadata`
-interface:
+To access the metadata directory, access the `DotNetDirectory.Metadata`
+property, which will provide you an instance of the `MetadataDirectory`
+class:
 
 ``` csharp
 var metadata = peImage.DotNetDirectory.Metadata;
@@ -39,7 +39,7 @@ Console.WriteLine($"Target .NET runtime version: {metadata.VersionString}");
 
 ## Metadata streams
 
-The `IMetadata` interface also exposes the `Streams` property, a list of
+The `MetadataDirectory` class also exposes the `Streams` property, a list of
 `IMetadataStream` instances.
 
 ``` csharp
@@ -330,14 +330,14 @@ only uses one native symbol (either `mscoree.dll!_CorExeMain` or
 `mscoree.dll!_CorDllMain` ). AsmResolver includes a built-in implementation
 for this that is based on [the reference implementation provided by GData](https://www.gdatasoftware.com/blog/2020/06/36164-introducing-the-typerefhash-trh).
 The hash can be obtained using the `GetTypeReferenceHash` extension method on
-`IPEImage`or on `IMetadata`:
+`PEImage`or on `MetadataDirectory`:
 
 ``` csharp
-IPEImage image = ...
+PEImage image = ...
 byte[] hash = image.GetTypeReferenceHash();
 ```
 
 ``` csharp
-IMetadata metadata = ...
+MetadataDirectory metadata = ...
 byte[] hash = metadata.GetTypeReferenceHash();
 ```

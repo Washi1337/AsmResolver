@@ -7,11 +7,9 @@ using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Methods;
-using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Code.Cil
@@ -20,7 +18,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
     {
         private CilMethodBody ReadMethodBody(string name)
         {
-            var module = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location, TestReaderParameters);
             return GetMethodBodyInModule(module, name);
         }
 
@@ -37,7 +35,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var stream = new MemoryStream();
             module.Write(stream);
 
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             return GetMethodBodyInModule(newModule, methodBody.Owner.Name);
         }
 
@@ -329,13 +327,13 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             // https://github.com/Washi1337/AsmResolver/issues/97
 
-            var module = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(new MetadataToken(TableIndex.Method, 1));
             var body = method.CilMethodBody;
             method.DeclaringType.Methods.Remove(method);
             Assert.NotNull(body);
 
-            var module2 = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location);
+            var module2 = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location, TestReaderParameters);
             var method2 = (MethodDefinition) module2.LookupMember(new MetadataToken(TableIndex.Method, 1));
             method2.DeclaringType.Methods.Remove(method2);
             var body2 = method2.CilMethodBody;
@@ -397,7 +395,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [Fact]
         public void ExceptionHandlerWithHandlerEndOutsideOfMethodShouldResultInEndLabel()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HandlerEndAtEndOfMethodBody);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HandlerEndAtEndOfMethodBody, TestReaderParameters);
             var body = module.ManagedEntryPointMethod.CilMethodBody;
             Assert.Same(body.Instructions.EndLabel, body.ExceptionHandlers[0].HandlerEnd);
             body.VerifyLabels();
@@ -598,7 +596,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [Fact]
         public void ReadUserStringFromNormalMetadata()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleUserStringsStream);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleUserStringsStream, TestReaderParameters);
             var instruction = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions
                 .First(i => i.OpCode.Code == CilCode.Ldstr);
 
@@ -608,7 +606,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [Fact]
         public void ReadUserStringFromEnCMetadata()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleUserStringsStream_EnC);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_DoubleUserStringsStream_EnC, TestReaderParameters);
             var instruction = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions
                 .First(i => i.OpCode.Code == CilCode.Ldstr);
 
@@ -617,7 +615,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
         private CilMethodBody CreateAndReadPatchedBody(IErrorListener listener, Action<CilRawFatMethodBody> patch)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Add new dummy method to type.
             var method = new MethodDefinition("Dummy", MethodAttributes.Static,

@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
     {
         public delegate void IndexBlobAction(uint originalIndex, uint newIndex);
 
-        public static void CloneBlobHeap(IMetadataStream stream, IBinaryStreamWriter writer,
+        public static void CloneBlobHeap(IMetadataStream stream, BinaryStreamWriter writer,
             IndexBlobAction indexAction)
         {
             if (!stream.CanRead)

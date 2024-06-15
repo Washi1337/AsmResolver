@@ -2,9 +2,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using AsmResolver.DotNet.Builder;
-using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.Builder;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.Tests.Runners;
 using Xunit;
 using TestCaseResources = AsmResolver.DotNet.TestCases.Resources.Resources;
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadEmbeddedResource1Data()
         {
-            var module = ModuleDefinition.FromFile(typeof(TestCaseResources).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TestCaseResources).Assembly.Location, TestReaderParameters);
             var resource = module.Resources.First(r =>
                 r.Name == "AsmResolver.DotNet.TestCases.Resources.Resources.EmbeddedResource1");
 
@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadEmbeddedResource2Data()
         {
-            var module = ModuleDefinition.FromFile(typeof(TestCaseResources).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TestCaseResources).Assembly.Location, TestReaderParameters);
             var resource = module.Resources.First(r =>
                 r.Name == "AsmResolver.DotNet.TestCases.Resources.Resources.EmbeddedResource2");
 
@@ -49,13 +49,13 @@ namespace AsmResolver.DotNet.Tests
                 0,1,2,3,4
             };
 
-            var module = ModuleDefinition.FromFile(typeof(TestCaseResources).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TestCaseResources).Assembly.Location, TestReaderParameters);
             module.Resources.Add(new ManifestResource(resourceName, ManifestResourceAttributes.Public, new DataSegment(contents)));
 
             using var stream = new MemoryStream();
             module.Write(stream);
 
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             Assert.Equal(contents, newModule.Resources.First(r => r.Name == resourceName).GetData());
         }
 
@@ -68,13 +68,13 @@ namespace AsmResolver.DotNet.Tests
                 0,1,2,3,4
             };
 
-            var module = ModuleDefinition.FromFile(typeof(TestCaseResources).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TestCaseResources).Assembly.Location, TestReaderParameters);
             module.Resources.Add(new ManifestResource(resourceName, ManifestResourceAttributes.Public, new DataSegment(contents)));
 
             using var stream = new MemoryStream();
             module.Write(stream);
 
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             var resource = newModule.Resources.First(r => r.Name == resourceName);
 
             Assert.True(resource.TryGetReader(out var reader));
@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentUniqueResourceData()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.DupResource);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.DupResource, TestReaderParameters);
 
             // Create three unique resources.
             module.Resources.Add(new ManifestResource(
@@ -120,7 +120,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(MetadataBuilderFlags.NoResourceDataDeduplication)]
         public void PersistentIdenticalResourceData(MetadataBuilderFlags flags)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.DupResource);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.DupResource, TestReaderParameters);
 
             // Create two identical resources and one unique resource.
             module.Resources.Add(new ManifestResource(

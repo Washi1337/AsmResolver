@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.Imports
 {
@@ -24,7 +25,7 @@ namespace AsmResolver.PE.Imports
         /// This is the ImpHash as introduced by Mandiant.
         /// Reference: https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html
         /// </remarks>
-        public static byte[] GetImportHash(this IPEImage image) => image.GetImportHash(DefaultSymbolResolver.Instance);
+        public static byte[] GetImportHash(this PEImage image) => image.GetImportHash(DefaultSymbolResolver.Instance);
 
         /// <summary>
         /// Computes the hash of all imported symbols.
@@ -36,7 +37,7 @@ namespace AsmResolver.PE.Imports
         /// This is the ImpHash as introduced by Mandiant.
         /// Reference: https://www.fireeye.com/blog/threat-research/2014/01/tracking-malware-import-hashing.html
         /// </remarks>
-        public static byte[] GetImportHash(this IPEImage image, ISymbolResolver symbolResolver)
+        public static byte[] GetImportHash(this PEImage image, ISymbolResolver symbolResolver)
         {
             var elements = new List<string>();
 
@@ -50,10 +51,10 @@ namespace AsmResolver.PE.Imports
             }
 
             using var md5 = MD5.Create();
-            return md5.ComputeHash(Encoding.ASCII.GetBytes(string.Join(",", elements)));
+            return md5.ComputeHash(Encoding.ASCII.GetBytes(StringShim.Join(",", elements)));
         }
 
-        private static string FormatModuleName(IImportedModule module)
+        private static string FormatModuleName(ImportedModule module)
         {
             string name = module.Name!;
             if (string.IsNullOrEmpty(name))

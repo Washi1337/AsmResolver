@@ -167,6 +167,11 @@ namespace AsmResolver.DotNet.Builder
         /// or depend on individual resource items to be present. Setting this flag will disable this optimization.
         /// </para>
         /// </summary>
-        NoResourceDataDeduplication = 0x40000
+        NoResourceDataDeduplication = 0x40000,
+
+        /// <summary>
+        /// Setting this flag will force the builder to emit edit-and-continue metadata, even if it is not required.
+        /// </summary>
+        ForceEncMetadata = 0x80000
     }
 }

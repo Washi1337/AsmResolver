@@ -39,6 +39,13 @@ namespace AsmResolver.DotNet.Config.Json
             set;
         }
 
+#if !NET5_0_OR_GREATER
+        internal static RuntimeFramework FromJsonNode(JSONNode node)
+        {
+            return new RuntimeFramework(node["name"].Value, node["version"].Value);
+        }
+#endif
+
         /// <inheritdoc />
         public override string ToString() => $"Name: {Name}, Version: {Version}";
     }

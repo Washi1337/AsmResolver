@@ -69,7 +69,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             : 0;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Functions.Count; i++)
                 Functions[i].Write(writer);

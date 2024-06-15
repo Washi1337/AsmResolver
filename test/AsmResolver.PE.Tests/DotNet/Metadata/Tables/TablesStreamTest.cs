@@ -2,7 +2,6 @@ using System.IO;
 using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Pdb;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 using Xunit;
@@ -14,7 +13,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void DetectNoExtraData()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             Assert.False(tablesStream.HasExtraData);
@@ -23,7 +22,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void DetectExtraData()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_TablesStream_ExtraData);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_TablesStream_ExtraData, TestReaderParameters);
             var tablesStream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
 
             Assert.True(tablesStream.HasExtraData);
@@ -43,7 +42,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void SmallExternalIndicesShouldHaveSmallIndicesInTablesStream()
         {
-            var pdbMetadata = PE.DotNet.Metadata.Metadata.FromBytes(Properties.Resources.TheAnswerPortablePdb);
+            var pdbMetadata = PE.DotNet.Metadata.MetadataDirectory.FromBytes(Properties.Resources.TheAnswerPortablePdb);
             var stream = pdbMetadata.GetStream<TablesStream>();
             Assert.Equal(IndexSize.Short, stream.GetIndexEncoder(CodedIndex.HasCustomAttribute).IndexSize);
         }
@@ -51,7 +50,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void LargeExternalIndicesShouldHaveLargeIndicesInTablesStream()
         {
-            var pdbMetadata = PE.DotNet.Metadata.Metadata.FromBytes(Properties.Resources.LargeIndicesPdb);
+            var pdbMetadata = PE.DotNet.Metadata.MetadataDirectory.FromBytes(Properties.Resources.LargeIndicesPdb);
             var stream = pdbMetadata.GetStream<TablesStream>();
             Assert.Equal(IndexSize.Long, stream.GetIndexEncoder(CodedIndex.HasCustomAttribute).IndexSize);
         }
@@ -59,21 +58,21 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void PreservePdbTableStreamWithSmallExternalIndicesNoChange()
         {
-            var pdbMetadata = PE.DotNet.Metadata.Metadata.FromBytes(Properties.Resources.TheAnswerPortablePdb);
+            var pdbMetadata = PE.DotNet.Metadata.MetadataDirectory.FromBytes(Properties.Resources.TheAnswerPortablePdb);
             AssertEquivalentAfterRebuild(pdbMetadata.GetStream<TablesStream>());
         }
 
         [Fact]
         public void PreservePdbTableStreamWithLargeExternalIndicesNoChange()
         {
-            var pdbMetadata = PE.DotNet.Metadata.Metadata.FromBytes(Properties.Resources.LargeIndicesPdb);
+            var pdbMetadata = PE.DotNet.Metadata.MetadataDirectory.FromBytes(Properties.Resources.LargeIndicesPdb);
             AssertEquivalentAfterRebuild(pdbMetadata.GetStream<TablesStream>());
         }
 
         [Fact]
         public void GetImpliedTableRowCountFromNonPdbMetadataShouldGetLocalRowCount()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var stream = peImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
             Assert.Equal((uint) stream.GetTable(TableIndex.TypeDef).Count, stream.GetTableRowCount(TableIndex.TypeDef));
         }
@@ -81,7 +80,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void GetImpliedTableRowCountFromPdbMetadataShouldGetExternalRowCount()
         {
-            var pdbMetadata =  PE.DotNet.Metadata.Metadata.FromBytes(Properties.Resources.TheAnswerPortablePdb);
+            var pdbMetadata =  PE.DotNet.Metadata.MetadataDirectory.FromBytes(Properties.Resources.TheAnswerPortablePdb);
             var stream = pdbMetadata.GetStream<TablesStream>();
             Assert.Equal(2u, stream.GetTableRowCount(TableIndex.TypeDef));
             Assert.Equal(0u ,(uint) stream.GetTable(TableIndex.TypeDef).Count);
@@ -95,7 +94,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
             var context = new MetadataReaderContext(VirtualAddressFactory.Instance);
             var newTablesStream = new SerializedTableStream(context, tablesStream.Name, tempStream.ToArray());
 
-            var metadata = new PE.DotNet.Metadata.Metadata();
+            var metadata = new PE.DotNet.Metadata.MetadataDirectory();
             if (tablesStream.HasExternalRowCounts)
             {
                 var pdbStream = new PdbStream();

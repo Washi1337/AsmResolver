@@ -61,7 +61,7 @@ namespace AsmResolver
         public override uint GetPhysicalSize() => (uint) Data.Length;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteBytes(Data, 0, Data.Length);
         }

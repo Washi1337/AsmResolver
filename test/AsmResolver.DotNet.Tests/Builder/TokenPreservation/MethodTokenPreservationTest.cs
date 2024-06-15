@@ -1,7 +1,7 @@
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
     {
         private static ModuleDefinition CreateSampleMethodDefsModule(int typeCount, int methodsPerType, int parametersPerMethod = 0)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
 
             for (int i = 0; i < typeCount; i++)
             {

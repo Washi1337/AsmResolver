@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet.Cloning;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Fields;
@@ -38,7 +37,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
         private static TypeDefinition CloneType(Type type, out TypeDefinition originalTypeDef)
         {
-            var sourceModule = ModuleDefinition.FromFile(type.Module.Assembly.Location);
+            var sourceModule = ModuleDefinition.FromFile(type.Module.Assembly.Location, TestReaderParameters);
             originalTypeDef= (TypeDefinition) sourceModule.LookupMember(type.MetadataToken);
 
             var targetModule = PrepareTempModule();
@@ -60,7 +59,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
         private static MethodDefinition CloneMethod(MethodBase methodBase, out MethodDefinition originalMethodDef)
         {
-            var sourceModule = ModuleDefinition.FromFile(methodBase.Module.Assembly.Location);
+            var sourceModule = ModuleDefinition.FromFile(methodBase.Module.Assembly.Location, TestReaderParameters);
             originalMethodDef = (MethodDefinition) sourceModule.LookupMember(methodBase.MetadataToken);
 
             var targetModule = PrepareTempModule();
@@ -80,7 +79,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
         private static FieldDefinition CloneInitializerField(FieldInfo field, out FieldDefinition originalFieldDef)
         {
-            var sourceModule = ModuleDefinition.FromFile(field.Module.Assembly.Location);
+            var sourceModule = ModuleDefinition.FromFile(field.Module.Assembly.Location, TestReaderParameters);
             originalFieldDef = (FieldDefinition) sourceModule.LookupMember(field.MetadataToken);
 
             originalFieldDef = originalFieldDef.FindInitializerField();
@@ -102,14 +101,14 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneHelloWorldProgramType()
         {
-            var sourceModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var sourceModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var targetModule = PrepareTempModule();
 
             var programType = sourceModule.TopLevelTypes.First(t => t.Name == "Program");
-            var nestedType = new TypeDefinition("", "Nested", PE.DotNet.Metadata.Tables.Rows.TypeAttributes.NestedPublic);
+            var nestedType = new TypeDefinition("", "Nested", PE.DotNet.Metadata.Tables.TypeAttributes.NestedPublic);
             programType.NestedTypes.Add(nestedType);
 
-            var notNestedType = new TypeDefinition("", "NotNested", PE.DotNet.Metadata.Tables.Rows.TypeAttributes.Public);
+            var notNestedType = new TypeDefinition("", "NotNested", PE.DotNet.Metadata.Tables.TypeAttributes.Public);
             sourceModule.TopLevelTypes.Add(notNestedType);
 
             var result = new MemberCloner(targetModule)
@@ -186,7 +185,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CallToClonedMethods()
         {
-            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location, TestReaderParameters);
             var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
 
             var targetModule = PrepareTempModule();
@@ -212,7 +211,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void ReferenceToNestedClass()
         {
-            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location, TestReaderParameters);
             var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
 
             var targetModule = PrepareTempModule();
@@ -336,7 +335,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneCallbackResult()
         {
-            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location, TestReaderParameters);
             var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
 
             var targetModule = PrepareTempModule();
@@ -362,7 +361,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneCustomListenerResult()
         {
-            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location, TestReaderParameters);
             var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
 
             var targetModule = PrepareTempModule();
@@ -381,7 +380,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneAndInject()
         {
-            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location, TestReaderParameters);
             var targetModule = PrepareTempModule();
 
             var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
@@ -396,7 +395,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneAndInjectAndAssignToken()
         {
-            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location, TestReaderParameters);
             var targetModule = PrepareTempModule();
 
             var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
@@ -415,8 +414,8 @@ namespace AsmResolver.DotNet.Tests.Cloning
         public void CloneIncludedTypeArgument()
         {
             // https://github.com/Washi1337/AsmResolver/issues/482
-            
-            var sourceModule = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+
+            var sourceModule = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location, TestReaderParameters);
             var targetModule = PrepareTempModule();
 
             var type = sourceModule.LookupMember<TypeDefinition>(typeof(TestEnum).MetadataToken);

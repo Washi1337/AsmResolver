@@ -8,14 +8,14 @@ namespace AsmResolver.PE.File
     /// </summary>
     public sealed class PESegmentReference : ISegmentReference
     {
-        private readonly IPEFile _peFile;
+        private readonly PEFile _peFile;
 
         /// <summary>
         /// Creates a new PE reference.
         /// </summary>
         /// <param name="peFile">The underlying PE file.</param>
         /// <param name="rva">The virtual address of the segment.</param>
-        internal PESegmentReference(IPEFile peFile, uint rva)
+        internal PESegmentReference(PEFile peFile, uint rva)
         {
             _peFile = peFile;
             Rva = rva;
@@ -33,7 +33,10 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public bool CanRead => _peFile.TryGetSectionContainingRva(Rva, out var section) && section.IsReadable;
+        public bool CanRead
+            => _peFile.TryGetSectionContainingRva(Rva, out var section)
+            && section.IsReadable
+            && section.ContainsFileOffset(Offset);
 
         /// <inheritdoc />
         public bool IsBounded => false;
@@ -42,6 +45,13 @@ namespace AsmResolver.PE.File
         /// Gets a value indicating whether the reference points to a valid section within the PE file.
         /// </summary>
         public bool IsValidAddress => _peFile.TryGetSectionContainingRva(Rva, out _);
+
+        /// <summary>
+        /// Gets a value indicating whether the reference points to a valid physical section within the PE file.
+        /// </summary>
+        public bool PointsToPhysicalData
+            => _peFile.TryGetSectionContainingRva(Rva, out var section)
+            && section.ContainsFileOffset(Offset);
 
         /// <inheritdoc />
         public BinaryStreamReader CreateReader() => _peFile.CreateReaderAtRva(Rva);

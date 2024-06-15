@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
@@ -56,9 +56,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             get;
             private set;
         }
-
-        /// <inheritdoc />
-        public IndexSize IndexSize => Count > 0xFFFF ? IndexSize.Long : IndexSize.Short;
 
         /// <inheritdoc cref="IMetadataTable" />
         public TRow this[int index]
@@ -294,7 +291,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Rows.Count; i++)
                 Rows[i].Write(writer, Layout);

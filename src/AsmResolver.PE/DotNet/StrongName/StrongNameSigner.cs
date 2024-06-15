@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.DotNet.StrongName
 {
@@ -74,8 +73,8 @@ namespace AsmResolver.PE.DotNet.StrongName
 
         private byte[] GetHashToSign(
             Stream imageStream,
-            IPEFile file,
-            IPEImage image,
+            PEFile file,
+            PEImage image,
             AssemblyHashAlgorithm hashAlgorithm)
         {
             var hashBuilder = new StrongNameDataHashBuilder(imageStream, hashAlgorithm);

@@ -13,6 +13,11 @@ namespace AsmResolver.PE.Relocations.Builder
         private List<RelocationBlock>? _blocks = new();
 
         /// <summary>
+        /// Gets a value indicating whether there is any data added to the buffer.
+        /// </summary>
+        public bool IsEmpty => _relocations.Count == 0;
+
+        /// <summary>
         /// Adds a single base relocation to the buffer.
         /// </summary>
         /// <param name="relocation">The base relocation to add.</param>
@@ -72,7 +77,7 @@ namespace AsmResolver.PE.Relocations.Builder
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             EnsureBlocksCreated();
             for (int i = 0; i < _blocks!.Count; i++)

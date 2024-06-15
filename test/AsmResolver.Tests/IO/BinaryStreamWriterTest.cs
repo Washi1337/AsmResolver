@@ -74,6 +74,65 @@ namespace AsmResolver.Tests.IO
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        [InlineData(4)]
+        [InlineData(5)]
+        [InlineData(8)]
+        [InlineData(16)]
+        [InlineData(45)]
+        [InlineData(100)]
+        public void WriteZeroes(int count)
+        {
+            using var stream = new MemoryStream();
+            var writer = new BinaryStreamWriter(stream);
+
+            writer.WriteZeroes(count);
+
+            Assert.Equal(new byte[count], stream.ToArray());
+        }
+
+        [Theory]
+        [InlineData(new byte[] {0x03}, 3)]
+        [InlineData(new byte[] {0x7f}, 0x7f)]
+        [InlineData(new byte[] {0x80, 0x80}, 0x80)]
+        [InlineData(new byte[] {0xAE, 0x57}, 0x2E57)]
+        [InlineData(new byte[] {0xBF, 0xFF}, 0x3FFF)]
+        [InlineData(new byte[] {0xC0, 0x00, 0x40, 0x00}, 0x4000)]
+        [InlineData(new byte[] {0xDF, 0x12, 0x34, 0x56}, 0x1F123456)]
+        [InlineData(new byte[] {0xDF, 0xFF, 0xFF, 0xFF}, 0x1FFFFFFF)]
+        public void WriteCompressedUInt32(byte[] expected, uint value)
+        {
+            using var stream = new MemoryStream();
+            var writer = new BinaryStreamWriter(stream);
+
+            writer.WriteCompressedUInt32(value);
+
+            Assert.Equal(expected, stream.ToArray());
+        }
+
+        [Theory]
+        [InlineData(new byte[] {0x06}, 3)]
+        [InlineData(new byte[] {0x7B}, -3)]
+        [InlineData(new byte[] {0x80, 0x80}, 64)]
+        [InlineData(new byte[] {0x01}, -64)]
+        [InlineData(new byte[] {0xC0, 0x00, 0x40, 0x00}, 8192)]
+        [InlineData(new byte[] {0x80, 0x01}, -8192)]
+        [InlineData(new byte[] {0xDF, 0xFF, 0xFF, 0xFE}, 0xFFFFFFF)]
+        [InlineData(new byte[] {0xC0, 0x00, 0x00, 0x01}, -0x10000000)]
+        public void WriteCompressedInt32(byte[] expected, int value)
+        {
+            using var stream = new MemoryStream();
+            var writer = new BinaryStreamWriter(stream);
+
+            writer.WriteCompressedInt32(value);
+
+            Assert.Equal(expected, stream.ToArray());
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
         [InlineData(0b1000_0000)]
         [InlineData(0b100000_0000_0000)]
         [InlineData(int.MaxValue)]

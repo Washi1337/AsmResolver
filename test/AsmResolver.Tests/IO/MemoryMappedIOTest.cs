@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using AsmResolver.IO;
 using AsmResolver.Tests.Runners;
@@ -34,7 +35,7 @@ namespace AsmResolver.Tests.IO
             File.WriteAllBytes(tempPath, contents);
 
             using var service = new MemoryMappedFileService();
-            Assert.Throws<EndOfStreamException>(() =>
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
                 service.OpenFile(tempPath).CreateReader(0, 0, (uint) (contents.Length + 1)));
         }
     }

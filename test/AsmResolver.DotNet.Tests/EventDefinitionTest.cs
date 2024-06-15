@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadName()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleEvent));
             var @event = type.Events.FirstOrDefault(m => m.Name == nameof(SingleEvent.SimpleEvent));
             Assert.NotNull(@event);
@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(nameof(MultipleEvents.Event3), "System.ResolveEventHandler")]
         public void ReadReturnType(string eventName, string expectedReturnType)
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleEvents));
             var @event = type.Events.First(m => m.Name == eventName);
             Assert.Equal(expectedReturnType, @event.EventType.FullName);
@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadDeclaringType()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var @event = (EventDefinition) module.LookupMember(
                 typeof(SingleEvent).GetEvent(nameof(SingleEvent.SimpleEvent)).MetadataToken);
             Assert.NotNull(@event.DeclaringType);
@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadEventSemantics()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var @event = (EventDefinition) module.LookupMember(
                 typeof(SingleEvent).GetEvent(nameof(SingleEvent.SimpleEvent)).MetadataToken);
             Assert.Equal(2, @event.Semantics.Count);
@@ -52,7 +52,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var @event = (EventDefinition) module.LookupMember(
                 typeof(SingleEvent).GetEvent(nameof(SingleEvent.SimpleEvent)).MetadataToken);
 

@@ -6,11 +6,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using AsmResolver.Collections;
+using AsmResolver.DotNet.Config.Json;
 using AsmResolver.IO;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
-using AsmResolver.PE.Win32Resources;
 using AsmResolver.PE.Win32Resources.Builder;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Bundles
 {
@@ -279,12 +279,66 @@ namespace AsmResolver.DotNet.Bundles
                 manifestHasher.TransformBlock(fileHash, 0, fileHash.Length, fileHash, 0);
             }
 
-            manifestHasher.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+            manifestHasher.TransformFinalBlock(ArrayShim.Empty<byte>(), 0, 0);
             byte[] manifestHash = manifestHasher.Hash!;
 
             return Convert.ToBase64String(manifestHash)
                 .Substring(DefaultBundleIDLength)
                 .Replace('/', '_');
+        }
+
+        /// <summary>
+        /// Determines the runtime that the assemblies in the bundle are targeting.
+        /// </summary>
+        /// <returns>The runtime.</returns>
+        /// <exception cref="ArgumentException">Occurs when the runtime could not be determined.</exception>
+        public DotNetRuntimeInfo GetTargetRuntime()
+        {
+            return TryGetTargetRuntime(out var runtime)
+                ? runtime
+                : throw new ArgumentException("Could not determine the target runtime for the bundle");
+        }
+
+        /// <summary>
+        /// Attempts to determine the runtime that the assemblies in the bundle are targeting.
+        /// </summary>
+        /// <param name="targetRuntime">When the method returns <c>true</c>, contains the target runtime.</param>
+        /// <returns><c>true</c> if the runtime could be determined, <c>false</c> otherwise.</returns>
+        public bool TryGetTargetRuntime(out DotNetRuntimeInfo targetRuntime)
+        {
+            // Try find the runtimeconfig.json file.
+            for (int i = 0; i < Files.Count; i++)
+            {
+                var file = Files[i];
+                if (file.Type == BundleFileType.RuntimeConfigJson)
+                {
+                    var config = RuntimeConfiguration.FromJson(Encoding.UTF8.GetString(file.GetData()));
+                    if (config is not {RuntimeOptions.TargetFrameworkMoniker: { } tfm})
+                        continue;
+
+                    if (DotNetRuntimeInfo.TryParseMoniker(tfm, out targetRuntime))
+                        return true;
+                }
+            }
+
+            // If it is not present, make a best effort guess based on the bundle file format version.
+            switch (MajorVersion)
+            {
+                case 1:
+                    targetRuntime = new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(3, 1));
+                    return true;
+
+                case 2:
+                    targetRuntime = new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(5, 0));
+                    return true;
+
+                case 6:
+                    targetRuntime = new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(6, 0));
+                    return true;
+            }
+
+            targetRuntime = default;
+            return false;
         }
 
         /// <summary>
@@ -313,7 +367,7 @@ namespace AsmResolver.DotNet.Bundles
         /// </summary>
         /// <param name="writer">The output stream to write to.</param>
         /// <param name="parameters">The parameters to use for bundling all files into a single executable.</param>
-        public void WriteUsingTemplate(IBinaryStreamWriter writer, BundlerParameters parameters)
+        public void WriteUsingTemplate(BinaryStreamWriter writer, BundlerParameters parameters)
         {
             // Verify entry point assembly exists within the bundle and is a correct length.
             var appBinaryEntry = Files.FirstOrDefault(f => f.RelativePath == parameters.ApplicationBinaryPath);
@@ -429,7 +483,7 @@ namespace AsmResolver.DotNet.Bundles
         /// without a host application that invokes the manifest. If you want to produce a runnable executable, use one
         /// of the <c>WriteUsingTemplate</c> methods instead.
         /// </remarks>
-        public ulong WriteManifest(IBinaryStreamWriter writer, bool isArm64Linux)
+        public ulong WriteManifest(BinaryStreamWriter writer, bool isArm64Linux)
         {
             WriteFileContents(writer, isArm64Linux
                 ? 4096u
@@ -441,7 +495,7 @@ namespace AsmResolver.DotNet.Bundles
             return headerAddress;
         }
 
-        private void WriteFileContents(IBinaryStreamWriter writer, uint alignment)
+        private void WriteFileContents(BinaryStreamWriter writer, uint alignment)
         {
             for (int i = 0; i < Files.Count; i++)
             {
@@ -455,7 +509,7 @@ namespace AsmResolver.DotNet.Bundles
             }
         }
 
-        private void WriteManifestHeader(IBinaryStreamWriter writer)
+        private void WriteManifestHeader(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(MajorVersion);
             writer.WriteUInt32(MinorVersion);
@@ -474,7 +528,7 @@ namespace AsmResolver.DotNet.Bundles
             WriteFileHeaders(writer);
         }
 
-        private void WriteFileHeaders(IBinaryStreamWriter writer)
+        private void WriteFileHeaders(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Files.Count; i++)
             {
@@ -490,7 +544,7 @@ namespace AsmResolver.DotNet.Bundles
             }
         }
 
-        private static void WriteFileOffsetSizePair(IBinaryStreamWriter writer, BundleFile? file)
+        private static void WriteFileOffsetSizePair(BinaryStreamWriter writer, BundleFile? file)
         {
             if (file is not null)
             {

@@ -4,7 +4,6 @@ using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
@@ -13,7 +12,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
     {
         private static ModuleDefinition CreateSampleParameterDefsModule(int typeCount, int methodsPerType, int parametersPerMethod)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
 
             for (int i = 0; i < typeCount; i++)
             {
@@ -27,7 +26,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
             return RebuildAndReloadModule(module, MetadataBuilderFlags.None);
         }
-        
+
         protected static void AssertSameParameterTokens(ModuleDefinition module, ModuleDefinition newModule, params MetadataToken[] excludeTokens)
         {
             Assert.True(module.TopLevelTypes.Count <= newModule.TopLevelTypes.Count);
@@ -63,7 +62,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var method = new MethodDefinition(name,
                 MethodAttributes.Public | MethodAttributes.Static,
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
-            
+
             method.CilMethodBody = new CilMethodBody(method);
             method.CilMethodBody.Instructions.Add(CilOpCodes.Ret);
 
@@ -72,7 +71,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 method.Signature.ParameterTypes.Add(module.CorLibTypeFactory.Object);
                 method.ParameterDefinitions.Add(new ParameterDefinition((ushort) (i + 1), $"arg_{i}", 0));
             }
-            
+
             method.Parameters.PullUpdatesFromMethodSignature();
             return method;
         }
@@ -81,7 +80,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         public void PreserveParameterDefsNoChange()
         {
             var module = CreateSampleParameterDefsModule(3, 10, 3);
-            
+
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveParameterDefinitionIndices);
 
             AssertSameParameterTokens(module, newModule);
@@ -91,12 +90,12 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         public void PreserveParameterDefsChangeOrderOfTypes()
         {
             var module = CreateSampleParameterDefsModule(5, 10, 3);
-            
+
             const int swapIndex = 3;
             var type = module.TopLevelTypes[swapIndex];
             module.TopLevelTypes.RemoveAt(swapIndex);
             module.TopLevelTypes.Insert(swapIndex + 3, type);
-            
+
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveParameterDefinitionIndices);
 
             AssertSameParameterTokens(module, newModule);
@@ -112,7 +111,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var method = type.Methods[swapIndex];
             type.Methods.RemoveAt(swapIndex);
             type.Methods.Insert(swapIndex + 3, method);
-            
+
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveParameterDefinitionIndices);
 
             AssertSameParameterTokens(module, newModule);
@@ -126,7 +125,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var type = module.TopLevelTypes[2];
             var method = CreateDummyMethod(module, "ExtraMethod", 3);
             type.Methods.Insert(3, method);
-            
+
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveParameterDefinitionIndices);
 
             AssertSameParameterTokens(module, newModule);
@@ -141,7 +140,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             const int indexToRemove = 3;
             var method = type.Methods[indexToRemove];
             type.Methods.RemoveAt(indexToRemove);
-            
+
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveParameterDefinitionIndices);
 
             AssertSameParameterTokens(
@@ -159,12 +158,12 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 .TopLevelTypes.Last()
                 .Methods[0]
                 .ParameterDefinitions;
-                
+
             const int swapIndex = 3;
             var parameter = parameters[swapIndex];
             parameters.RemoveAt(swapIndex);
             parameters.Insert(swapIndex + 1, parameter);
-            
+
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveParameterDefinitionIndices);
 
             AssertSameParameterTokens(module, newModule);
@@ -179,7 +178,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 .TopLevelTypes.Last()
                 .Methods[0]
                 .ParameterDefinitions;
-                
+
             const int swapIndex = 3;
             var parameter = parameters[swapIndex];
             parameters.RemoveAt(swapIndex);

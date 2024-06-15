@@ -67,7 +67,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         protected override uint GetValueLength() => 0;
 
         /// <inheritdoc />
-        protected override void WriteValue(IBinaryStreamWriter writer)
+        protected override void WriteValue(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Tables.Count; i++)
                 Tables[i].Write(writer);

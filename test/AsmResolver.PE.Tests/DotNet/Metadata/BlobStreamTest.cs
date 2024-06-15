@@ -1,4 +1,4 @@
-using AsmResolver.PE.DotNet.Metadata.Blob;
+using AsmResolver.PE.DotNet.Metadata;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.DotNet.Metadata

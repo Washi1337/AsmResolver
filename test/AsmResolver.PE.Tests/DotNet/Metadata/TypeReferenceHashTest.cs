@@ -8,7 +8,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void HelloWorldTypeRefHash()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             byte[] hash = image.GetTypeReferenceHash();
 
             Assert.Equal(new byte[]
@@ -21,7 +21,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void TheAnswerTypeRefHash()
         {
-            var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetCore);
+            var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetCore, TestReaderParameters);
             byte[] hash = image.GetTypeReferenceHash();
 
             Assert.Equal(new byte[]

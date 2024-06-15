@@ -4,7 +4,6 @@ using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
@@ -13,7 +12,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
     {
         private static ModuleDefinition CreateSampleFieldDefsModule(int typeCount, int fieldsPerType)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
 
             for (int i = 0; i < typeCount; i++)
             {

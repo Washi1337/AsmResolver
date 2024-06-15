@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Config.Json;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet
 {
@@ -32,6 +35,17 @@ namespace AsmResolver.DotNet
         /// <param name="runtimeVersion">The version of .NET to target.</param>
         public DotNetCoreAssemblyResolver(IFileService fileService, Version runtimeVersion)
             : this(fileService, null, runtimeVersion, DotNetCorePathProvider.Default)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new .NET Core assembly resolver, by attempting to autodetect the current .NET or .NET Core
+        /// installation directory.
+        /// </summary>
+        /// <param name="readerParameters">The parameters to use while reading the assembly.</param>
+        /// <param name="runtimeVersion">The version of .NET to target.</param>
+        public DotNetCoreAssemblyResolver(ModuleReaderParameters readerParameters, Version runtimeVersion)
+            : this(readerParameters, null, runtimeVersion, DotNetCorePathProvider.Default)
         {
         }
 
@@ -81,7 +95,23 @@ namespace AsmResolver.DotNet
             RuntimeConfiguration? configuration,
             Version? fallbackVersion,
             DotNetCorePathProvider pathProvider)
-            : base(fileService)
+            : this(new ModuleReaderParameters(fileService), configuration, fallbackVersion, pathProvider)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new .NET Core assembly resolver.
+        /// </summary>
+        /// <param name="readerParameters">The parameters to use while reading the assembly.</param>
+        /// <param name="configuration">The runtime configuration to use, or <c>null</c> if no configuration is available.</param>
+        /// <param name="fallbackVersion">The version of .NET or .NET Core to use when no (valid) configuration is provided.</param>
+        /// <param name="pathProvider">The installation directory of .NET Core.</param>
+        public DotNetCoreAssemblyResolver(
+            ModuleReaderParameters readerParameters,
+            RuntimeConfiguration? configuration,
+            Version? fallbackVersion,
+            DotNetCorePathProvider pathProvider)
+            : base(readerParameters)
         {
             if (fallbackVersion is null)
                 throw new ArgumentNullException(nameof(fallbackVersion));
@@ -135,7 +165,7 @@ namespace AsmResolver.DotNet
                 return pathProvider.GetRuntimePathCandidates(framework.Name!, version).ToArray();
             }
 
-            return Array.Empty<string>();
+            return ArrayShim.Empty<string>();
         }
 
         /// <inheritdoc />
@@ -164,7 +194,7 @@ namespace AsmResolver.DotNet
             if (suffixIndex >= 0)
                 versionString = versionString.Remove(suffixIndex);
 
-            return Version.TryParse(versionString, out version);
+            return VersionShim.TryParse(versionString, out version);
         }
 
         private sealed class RuntimeNameComparer : IComparer<string>

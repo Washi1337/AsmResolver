@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Win32Resources
 {
@@ -73,7 +72,7 @@ namespace AsmResolver.PE.Win32Resources
         /// <inheritdoc />
         protected override IList<IResourceEntry> GetEntries()
         {
-            var result = new OwnedCollection<IResourceDirectory, IResourceEntry>(this);
+            var result = new OwnedCollection<ResourceDirectory, IResourceEntry>(this);
 
             // Optimisation, check for invalid resource directory offset, and prevention of self loop:
             if (_namedEntries + _idEntries == 0 || _depth >= MaxDepth)

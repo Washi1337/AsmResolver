@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -10,7 +11,7 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public class CilAssembler
     {
-        private readonly IBinaryStreamWriter _writer;
+        private readonly BinaryStreamWriter _writer;
         private readonly ICilOperandBuilder _operandBuilder;
         private readonly Func<string?>? _getMethodBodyName;
         private readonly IErrorListener _errorListener;
@@ -21,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="writer">The output stream to write the encoded instructions to.</param>
         /// <param name="operandBuilder">The object to use for creating raw operands.</param>
-        public CilAssembler(IBinaryStreamWriter writer, ICilOperandBuilder operandBuilder)
+        public CilAssembler(BinaryStreamWriter writer, ICilOperandBuilder operandBuilder)
             : this(writer, operandBuilder, default(string), ThrowErrorListener.Instance)
         {
         }
@@ -34,7 +35,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <param name="methodBodyName">The name of the method that is being serialized.</param>
         /// <param name="errorListener">The object used for recording error listener.</param>
         public CilAssembler(
-            IBinaryStreamWriter writer,
+            BinaryStreamWriter writer,
             ICilOperandBuilder operandBuilder,
             string? methodBodyName,
             IErrorListener errorListener)
@@ -55,7 +56,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <param name="getMethodBodyName">A delegate that is used for lazily obtaining the name of the method body.</param>
         /// <param name="errorListener">The object used for recording error listener.</param>
         public CilAssembler(
-            IBinaryStreamWriter writer,
+            BinaryStreamWriter writer,
             ICilOperandBuilder operandBuilder,
             Func<string?>? getMethodBodyName,
             IErrorListener errorListener)
@@ -160,7 +161,7 @@ namespace AsmResolver.PE.DotNet.Cil
                     break;
 
                 case CilOperandType.InlineSwitch:
-                    var labels = instruction.Operand as IList<ICilLabel> ?? Array.Empty<ICilLabel>();
+                    var labels = instruction.Operand as IList<ICilLabel> ?? ArrayShim.Empty<ICilLabel>();
                     _writer.WriteInt32(labels.Count);
 
                     int baseOffset = (int) _writer.Offset + labels.Count * sizeof(int);
@@ -293,7 +294,7 @@ namespace AsmResolver.PE.DotNet.Cil
                 .ToArray();
 
             string operandTypesString = expectedOperands.Length > 1
-                ? $"{string.Join(", ", names.Take(names.Length - 1))} or {names[names.Length - 1]}"
+                ? $"{StringShim.Join(", ", names.Take(names.Length - 1))} or {names[names.Length - 1]}"
                 : names[0];
 
             string found = instruction.Operand?.GetType().Name ?? "null";

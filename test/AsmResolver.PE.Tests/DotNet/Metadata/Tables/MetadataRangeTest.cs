@@ -1,6 +1,6 @@
 using System.Linq;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables

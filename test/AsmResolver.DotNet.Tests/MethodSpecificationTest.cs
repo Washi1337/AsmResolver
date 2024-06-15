@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMethod()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(typeof(GenericsTestClass)
                 .GetMethod(nameof(GenericsTestClass.MethodInstantiationFromGenericType))!.MetadataToken);
 
@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(typeof(GenericsTestClass)
                 .GetMethod(nameof(GenericsTestClass.MethodInstantiationFromGenericType))!.MetadataToken);
 
@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSignature()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(typeof(GenericsTestClass)
                 .GetMethod(nameof(GenericsTestClass.MethodInstantiationFromGenericType))!.MetadataToken);
 
@@ -67,7 +67,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void InstantiateGenericMethod()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(typeof(NonGenericType)
                 .GetMethod(nameof(NonGenericType.GenericMethodInNonGenericType))!.MetadataToken);
 
@@ -88,7 +88,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void InstantiateGenericMethodWithWrongNumberOfArgumentsShouldThrow()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(typeof(NonGenericType)
                 .GetMethod(nameof(NonGenericType.GenericMethodInNonGenericType))!.MetadataToken);
 
@@ -100,7 +100,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void InstantiateNonGenericMethodShouldThrow()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericsTestClass).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(typeof(NonGenericType)
                 .GetMethod(nameof(NonGenericType.NonGenericMethodInNonGenericType))!.MetadataToken);
 

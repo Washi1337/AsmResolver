@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveSystemObjectFramework()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             var reference = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Object");
             var definition = _fwResolver.ResolveType(reference);
@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveSystemObjectNetCore()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
 
             var reference = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Object");
             var definition = _coreResolver.ResolveType(reference);
@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveCorLibTypeSignature()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var definition = _fwResolver.ResolveType(module.CorLibTypeFactory.Object);
 
             Assert.Equal(module.CorLibTypeFactory.Object.Type, definition, _comparer);
@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveType()
         {
-            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
 
             var topLevelClass1 = new TypeReference(new AssemblyReference(module.Assembly!),
                 typeof(TopLevelClass1).Namespace, nameof(TopLevelClass1));
@@ -115,7 +115,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveNestedType()
         {
-            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
 
             var topLevelClass1 = new TypeReference(new AssemblyReference(module.Assembly!),
                 typeof(TopLevelClass1).Namespace, nameof(TopLevelClass1));
@@ -129,7 +129,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveNestedNestedType()
         {
-            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
 
             var topLevelClass1 = new TypeReference(new AssemblyReference(module.Assembly!),
                 typeof(TopLevelClass1).Namespace, nameof(TopLevelClass1));
@@ -144,7 +144,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveTypeWithModuleScope()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefModuleScope);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefModuleScope, TestReaderParameters);
             var reference = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 2));
 
             var definition = reference.Resolve();
@@ -156,7 +156,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveTypeWithNullScopeCurrentModule()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_CurrentModule);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_CurrentModule, TestReaderParameters);
             var reference = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 2));
 
             var definition = reference.Resolve();
@@ -168,7 +168,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveTypeWithNullScopeExportedType()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_ExportedType);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefNullScope_ExportedType, TestReaderParameters);
             var reference = module.LookupMember<TypeReference>(new MetadataToken(TableIndex.TypeRef, 1));
 
             var definition = reference.Resolve();
@@ -217,9 +217,9 @@ namespace AsmResolver.DotNet.Tests
             // Issue: https://github.com/Washi1337/AsmResolver/issues/124
 
             // Load assemblies.
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_Forwarder);
-            var assembly1 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly1_Forwarder);
-            var assembly2 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly2_Actual);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_Forwarder, TestReaderParameters);
+            var assembly1 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly1_Forwarder, TestReaderParameters);
+            var assembly2 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly2_Actual, TestReaderParameters);
 
             // Manually wire assemblies together for in-memory resolution.
             var resolver = (AssemblyResolverBase) module.MetadataResolver.AssemblyResolver;
@@ -238,9 +238,9 @@ namespace AsmResolver.DotNet.Tests
         public void MaliciousExportedTypeLoop()
         {
             // Load assemblies.
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousExportedTypeLoop);
-            var assembly1 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly1_MaliciousExportedTypeLoop);
-            var assembly2 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly2_MaliciousExportedTypeLoop);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousExportedTypeLoop, TestReaderParameters);
+            var assembly1 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly1_MaliciousExportedTypeLoop, TestReaderParameters);
+            var assembly2 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly2_MaliciousExportedTypeLoop, TestReaderParameters);
 
             // Manually wire assemblies together for in-memory resolution.
             var resolver = (AssemblyResolverBase) module.MetadataResolver.AssemblyResolver;
@@ -267,8 +267,8 @@ namespace AsmResolver.DotNet.Tests
         {
             // https://github.com/Washi1337/AsmResolver/issues/321
 
-            var mainApp = ModuleDefinition.FromBytes(Properties.Resources.DifferentNetVersion_MainApp);
-            var library = ModuleDefinition.FromBytes(Properties.Resources.DifferentNetVersion_Library);
+            var mainApp = ModuleDefinition.FromBytes(Properties.Resources.DifferentNetVersion_MainApp, TestReaderParameters);
+            var library = ModuleDefinition.FromBytes(Properties.Resources.DifferentNetVersion_Library, TestReaderParameters);
 
             mainApp.MetadataResolver.AssemblyResolver.AddToCache(library.Assembly!, library.Assembly!);
 
@@ -290,14 +290,14 @@ namespace AsmResolver.DotNet.Tests
         {
             // https://github.com/Washi1337/AsmResolver/issues/241
 
-            var classLibrary = ModuleDefinition.FromFile(typeof(ClassLibraryVB.Class1).Assembly.Location);
+            var classLibrary = ModuleDefinition.FromFile(typeof(ClassLibraryVB.Class1).Assembly.Location, TestReaderParameters);
             var definitions = classLibrary
                 .TopLevelTypes.First(t => t.Name == nameof(ClassLibraryVB.Class1))
                 .Methods.Where(m => m.Name == nameof(ClassLibraryVB.Class1.Test))
                 .OrderBy(x => x.Parameters.Count)
                 .ToArray();
 
-            var helloWorld = ModuleDefinition.FromFile(typeof(HelloWorldVB.Program).Assembly.Location);
+            var helloWorld = ModuleDefinition.FromFile(typeof(HelloWorldVB.Program).Assembly.Location, TestReaderParameters);
             var resolved = helloWorld.ManagedEntryPointMethod!.CilMethodBody!.Instructions
                 .Where(x => x.OpCode == CilOpCodes.Call)
                 .Select(x => ((IMethodDescriptor) x.Operand!).Resolve())

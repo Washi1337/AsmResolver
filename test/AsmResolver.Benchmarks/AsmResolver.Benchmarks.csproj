@@ -12,11 +12,27 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="$(SolutionDir)\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
-      <ProjectReference Include="$(SolutionDir)\src\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
-      <ProjectReference Include="$(SolutionDir)\src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj" />
-      <ProjectReference Include="$(SolutionDir)\src\AsmResolver.PE\AsmResolver.PE.csproj" />
-      <ProjectReference Include="$(SolutionDir)\src\AsmResolver\AsmResolver.csproj" />
+      <ProjectReference Include="..\..\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
+      <ProjectReference Include="..\..\src\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
+      <ProjectReference Include="..\..\src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj" />
+      <ProjectReference Include="..\..\src\AsmResolver.PE\AsmResolver.PE.csproj" />
+      <ProjectReference Include="..\..\src\AsmResolver\AsmResolver.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Methods\AsmResolver.DotNet.TestCases.Methods.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Types\AsmResolver.DotNet.TestCases.Types.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <EmbeddedResource Update="Properties\Resources.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Properties\Resources.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Resources.resx</DependentUpon>
+        </Compile>
+    </ItemGroup>
 </Project>

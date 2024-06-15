@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
@@ -16,7 +14,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveTypeRefsNoChangeShouldAtLeastHaveOriginalTypeRefs()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
             var originalTypeRefs = GetMembers<TypeReference>(module, TableIndex.TypeRef);
 
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveTypeReferenceIndices);
@@ -28,7 +26,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveTypeRefsWithTypeRefRemovedShouldAtLeastHaveOriginalTypeRefs()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
             var originalTypeRefs = GetMembers<TypeReference>(module, TableIndex.TypeRef);
 
             var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
@@ -44,7 +42,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveTypeRefsWithExtraImportShouldAtLeastHaveOriginalTypeRefs()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
             var originalTypeRefs = GetMembers<TypeReference>(module, TableIndex.TypeRef);
 
             var importer = new ReferenceImporter(module);
@@ -65,7 +63,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         [Fact]
         public void PreserveDuplicatedTypeRefs()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters.PEReaderParameters);
             var metadata = image.DotNetDirectory!.Metadata!;
             var strings = metadata.GetStream<StringsStream>();
             var table = metadata
@@ -77,7 +75,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             table.Add(objectRow);
 
             // Open module from modified image.
-            var module = ModuleDefinition.FromImage(image);
+            var module = ModuleDefinition.FromImage(image, TestReaderParameters);
 
             // Obtain references to Object.
             var references = module
@@ -126,7 +124,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveTypeReferenceIndices));
 
             // Verify that both object references are still there.
-            var newModule = ModuleDefinition.FromImage(image);
+            var newModule = ModuleDefinition.FromImage(image, TestReaderParameters);
             Assert.Equal(2, newModule.GetImportedTypeReferences().Count(t => t.Name == "Object"));
         }
 
@@ -135,7 +133,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         {
             // https://github.com/Washi1337/AsmResolver/issues/329
 
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_UnusualNestedTypeRefOrder);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_UnusualNestedTypeRefOrder, TestReaderParameters);
             var originalTypeRefs = GetMembers<TypeReference>(module, TableIndex.TypeRef);
 
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveTypeReferenceIndices);

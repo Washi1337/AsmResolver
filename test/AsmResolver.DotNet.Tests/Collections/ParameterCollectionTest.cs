@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Methods;
-using AsmResolver.PE.DotNet.Metadata.Strings;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Collections
@@ -13,21 +12,21 @@ namespace AsmResolver.DotNet.Tests.Collections
     {
         private static MethodDefinition ObtainStaticTestMethod(string name)
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
             return type.Methods.First(m => m.Name == name);
         }
 
         private static MethodDefinition ObtainInstanceTestMethod(string name)
         {
-            var module = ModuleDefinition.FromFile(typeof(InstanceMethods).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(InstanceMethods).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(InstanceMethods));
             return type.Methods.First(m => m.Name == name);
         }
 
         private static MethodDefinition ObtainGenericInstanceTestMethod(string name)
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericInstanceMethods<,>).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericInstanceMethods<,>).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == "GenericInstanceMethods`2");
             return type.Methods.First(m => m.Name == name);
         }
@@ -200,7 +199,7 @@ namespace AsmResolver.DotNet.Tests.Collections
         [Fact]
         public void ThisParameterOfCorLibShouldResultInCorLibTypeSignature()
         {
-            var module = ModuleDefinition.FromFile(typeof(object).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(object).Assembly.Location, TestReaderParameters);
             var type = module.CorLibTypeFactory.Object.Type.Resolve();
             var instanceMethod = type.Methods.First(t => !t.IsStatic);
             var signature = Assert.IsAssignableFrom<CorLibTypeSignature>(instanceMethod.Parameters.ThisParameter.ParameterType);

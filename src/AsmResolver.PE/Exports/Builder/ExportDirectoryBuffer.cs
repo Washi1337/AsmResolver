@@ -32,7 +32,7 @@ namespace AsmResolver.PE.Exports.Builder
         private readonly OrdinalNamePointerTableBuffer _ordinalNamePointerTable;
         private readonly NameTableBuffer _nameTableBuffer;
 
-        private IExportDirectory? _exportDirectory;
+        private ExportDirectory? _exportDirectory;
 
         /// <summary>
         /// Creates a new empty export directory buffer.
@@ -63,7 +63,7 @@ namespace AsmResolver.PE.Exports.Builder
         /// </summary>
         /// <param name="exportDirectory">The export directory to add.</param>
         /// <exception cref="InvalidProgramException">Occurs when a second directory is added.</exception>
-        public void AddDirectory(IExportDirectory exportDirectory)
+        public void AddDirectory(ExportDirectory exportDirectory)
         {
             if (!IsEmpty)
                 throw new InvalidProgramException("Cannot add a secondary export directory to the buffer.");
@@ -97,13 +97,13 @@ namespace AsmResolver.PE.Exports.Builder
         public override uint GetPhysicalSize() => ExportDirectoryHeaderSize + _contentsBuilder.GetPhysicalSize();
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             WriteExportDirectoryHeader(writer);
             _contentsBuilder.Write(writer);
         }
 
-        private void WriteExportDirectoryHeader(IBinaryStreamWriter writer)
+        private void WriteExportDirectoryHeader(BinaryStreamWriter writer)
         {
             _exportDirectory ??= new ExportDirectory(string.Empty);
             writer.WriteUInt32(_exportDirectory.ExportFlags);

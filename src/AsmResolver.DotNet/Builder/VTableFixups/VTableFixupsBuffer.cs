@@ -1,12 +1,9 @@
-using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Code.Native;
-using AsmResolver.PE.Code;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.VTableFixups;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.Platforms;
-using AsmResolver.PE.Relocations;
 
 namespace AsmResolver.DotNet.Builder.VTableFixups
 {

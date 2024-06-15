@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using AsmResolver.IO;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 using AsmResolver.Symbols.Pdb.Leaves;
 using AsmResolver.Symbols.Pdb.Metadata.Dbi;
 using AsmResolver.Symbols.Pdb.Metadata.Info;
@@ -130,9 +130,27 @@ public class PdbImage : ICodeViewSymbolProvider
     /// <summary>
     /// Reads a PDB image from the provided input file.
     /// </summary>
+    /// <param name="path">The path to the PDB file.</param>
+    /// <param name="readerParameters">The parameters to use while reading the PDB image.</param>
+    /// <returns>The read PDB image.</returns>
+    public static PdbImage FromFile(string path, PdbReaderParameters readerParameters)
+        => FromFile(MsfFile.FromFile(path), readerParameters);
+
+    /// <summary>
+    /// Reads a PDB image from the provided input file.
+    /// </summary>
     /// <param name="file">The input file.</param>
     /// <returns>The read PDB image.</returns>
     public static PdbImage FromFile(IInputFile file) => FromFile(MsfFile.FromFile(file));
+
+    /// <summary>
+    /// Reads a PDB image from the provided input file.
+    /// </summary>
+    /// <param name="file">The input file.</param>
+    /// <param name="readerParameters">The parameters to use while reading the PDB image.</param>
+    /// <returns>The read PDB image.</returns>
+    public static PdbImage FromFile(IInputFile file, PdbReaderParameters readerParameters)
+        => FromFile(MsfFile.FromFile(file), readerParameters);
 
     /// <summary>
     /// Interprets a byte array as a PDB image.
@@ -142,6 +160,15 @@ public class PdbImage : ICodeViewSymbolProvider
     public static PdbImage FromBytes(byte[] data) => FromFile(MsfFile.FromBytes(data));
 
     /// <summary>
+    /// Interprets a byte array as a PDB image.
+    /// </summary>
+    /// <param name="data">The data to interpret.</param>
+    /// <param name="readerParameters">The parameters to use while reading the PDB image.</param>
+    /// <returns>The read PDB image.</returns>
+    public static PdbImage FromBytes(byte[] data, PdbReaderParameters readerParameters)
+        => FromFile(MsfFile.FromBytes(data), readerParameters);
+
+    /// <summary>
     /// Reads an PDB image from the provided input stream reader.
     /// </summary>
     /// <param name="reader">The reader.</param>
@@ -149,14 +176,21 @@ public class PdbImage : ICodeViewSymbolProvider
     public static PdbImage FromReader(BinaryStreamReader reader) => FromFile(MsfFile.FromReader(reader));
 
     /// <summary>
+    /// Reads an PDB image from the provided input stream reader.
+    /// </summary>
+    /// <param name="reader">The reader.</param>
+    /// <param name="readerParameters">The parameters to use while reading the PDB image.</param>
+    /// <returns>The read PDB image.</returns>
+    public static PdbImage FromReader(BinaryStreamReader reader, PdbReaderParameters readerParameters)
+        => FromFile(MsfFile.FromReader(reader), readerParameters);
+
+    /// <summary>
     /// Loads a PDB image from the provided MSF file.
     /// </summary>
     /// <param name="file">The MSF file.</param>
     /// <returns>The read PDB image.</returns>
     public static PdbImage FromFile(MsfFile file)
-    {
-        return FromFile(file, new PdbReaderParameters(ThrowErrorListener.Instance));
-    }
+        => FromFile(file, new PdbReaderParameters(ThrowErrorListener.Instance));
 
     /// <summary>
     /// Loads a PDB image from the provided MSF file.
@@ -165,9 +199,7 @@ public class PdbImage : ICodeViewSymbolProvider
     /// <param name="readerParameters">The parameters to use while reading the PDB image.</param>
     /// <returns>The read PDB image.</returns>
     public static PdbImage FromFile(MsfFile file, PdbReaderParameters readerParameters)
-    {
-        return new SerializedPdbImage(file, readerParameters);
-    }
+        => new SerializedPdbImage(file, readerParameters);
 
     /// <summary>
     /// Obtains all records stored in the original TPI stream of the PDB image.

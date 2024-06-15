@@ -1,11 +1,6 @@
 using System;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Blob;
-using AsmResolver.PE.DotNet.Metadata.Guid;
-using AsmResolver.PE.DotNet.Metadata.Strings;
-using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
 namespace AsmResolver.DotNet.Serialized
 {
@@ -21,11 +16,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="image">The original PE image to read from.</param>
         /// <param name="parentModule">The root module object.</param>
         /// <param name="parameters">The module reader parameters.</param>
-        public ModuleReaderContext(IPEImage image, SerializedModuleDefinition parentModule, ModuleReaderParameters parameters)
+        public ModuleReaderContext(PEImage image, SerializedModuleDefinition parentModule, ModuleReaderParameters parameters)
         {
             Image = image ?? throw new ArgumentNullException(nameof(image));
             ParentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
-            Parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
+            Parameters = new ModuleReaderParameters(parameters) ?? throw new ArgumentNullException(nameof(parameters));
 
             // Both CLR and CoreCLR implement a slightly different loading procedure for EnC metadata.
             // While the difference is very subtle, it has a slight effect on which streams are selected
@@ -75,7 +70,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <summary>
         /// Gets the original PE image to read from.
         /// </summary>
-        public IPEImage Image
+        public PEImage Image
         {
             get;
         }
@@ -91,7 +86,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <summary>
         /// Gets the original metadata directory.
         /// </summary>
-        public IMetadata Metadata => Image.DotNetDirectory!.Metadata!;
+        public MetadataDirectory Metadata => Image.DotNetDirectory!.Metadata!;
 
         /// <summary>
         /// Gets the main tables stream in the metadata directory.

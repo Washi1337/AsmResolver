@@ -59,6 +59,9 @@ namespace AsmResolver.Patching
         {
             Contents.UpdateOffsets(in parameters);
             _imageBase = parameters.ImageBase;
+
+            foreach (var patch in Patches)
+                patch.UpdateOffsets(parameters);
         }
 
         /// <inheritdoc />
@@ -67,13 +70,13 @@ namespace AsmResolver.Patching
             : throw new InvalidOperationException("Segment is not readable.");
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             Contents.Write(writer);
             ApplyPatches(writer);
         }
 
-        private void ApplyPatches(IBinaryStreamWriter writer)
+        private void ApplyPatches(BinaryStreamWriter writer)
         {
             ulong offset = writer.Offset;
 
@@ -103,6 +106,18 @@ namespace AsmResolver.Patching
         public PatchedSegment Patch(uint relativeOffset, byte[] newData)
         {
             Patches.Add(new BytesPatch(relativeOffset, newData));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a segment patch to the list of patches to apply.
+        /// </summary>
+        /// <param name="relativeOffset">The offset to start patching at, relative to the start of the base segment.</param>
+        /// <param name="newSegment">The new segment to write.</param>
+        /// <returns>The current <see cref="PatchedSegment"/> instance.</returns>
+        public PatchedSegment Patch(uint relativeOffset, ISegment newSegment)
+        {
+            Patches.Add(new SegmentPatch(relativeOffset, newSegment));
             return this;
         }
     }

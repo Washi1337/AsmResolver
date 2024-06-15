@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
             var newImage = result.ConstructedImage;
 
-            return ModuleDefinition.FromImage(newImage);
+            return ModuleDefinition.FromImage(newImage, TestReaderParameters);
         }
 
         protected static void AssertSameTokens<TMember>(ModuleDefinition module, ModuleDefinition newModule,

@@ -1,9 +1,7 @@
 using System.Linq;
 using System.Text;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 using TestCaseResources = AsmResolver.DotNet.TestCases.Resources.Resources;
 
@@ -11,7 +9,7 @@ namespace AsmResolver.PE.Tests.DotNet.Resources
 {
     public class DotNetResourcesDirectoryTest
     {
-        private static ManifestResourceRow FindResourceRow(IMetadata metadata, string name)
+        private static ManifestResourceRow FindResourceRow(MetadataDirectory metadata, string name)
         {
             var stringsStream = metadata.GetStream<StringsStream>();
             var tablesStream = metadata.GetStream<TablesStream>();
@@ -24,7 +22,7 @@ namespace AsmResolver.PE.Tests.DotNet.Resources
         [Fact]
         public void ReadEmbeddedResource1Data()
         {
-            var image = PEImage.FromFile(typeof(TestCaseResources).Assembly.Location);
+            var image = PEImage.FromFile(typeof(TestCaseResources).Assembly.Location, TestReaderParameters);
             var metadata = image.DotNetDirectory!.Metadata!;
             var resource = FindResourceRow(metadata, "AsmResolver.DotNet.TestCases.Resources.Resources.EmbeddedResource1");
 
@@ -36,7 +34,7 @@ namespace AsmResolver.PE.Tests.DotNet.Resources
         [Fact]
         public void ReadEmbeddedResource2Data()
         {
-            var image = PEImage.FromFile(typeof(TestCaseResources).Assembly.Location);
+            var image = PEImage.FromFile(typeof(TestCaseResources).Assembly.Location, TestReaderParameters);
             var metadata = image.DotNetDirectory!.Metadata!;
             var resource = FindResourceRow(metadata, "AsmResolver.DotNet.TestCases.Resources.Resources.EmbeddedResource2");
 

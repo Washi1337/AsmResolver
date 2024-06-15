@@ -113,7 +113,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             _serialized ??= Serialize();
             writer.WriteBytes(_serialized);

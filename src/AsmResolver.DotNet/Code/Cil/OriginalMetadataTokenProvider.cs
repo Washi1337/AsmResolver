@@ -1,6 +1,6 @@
 using AsmResolver.DotNet.Builder.Metadata;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
 namespace AsmResolver.DotNet.Code.Cil
 {

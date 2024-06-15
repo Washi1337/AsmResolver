@@ -9,7 +9,7 @@ public class PdbReaderParameters
     /// Creates new PDB reader parameters.
     /// </summary>
     public PdbReaderParameters()
-        : this(ThrowErrorListener.Instance)
+        : this(EmptyErrorListener.Instance)
     {
     }
 

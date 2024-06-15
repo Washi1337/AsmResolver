@@ -28,6 +28,14 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
+        /// Gets the base address of the data in this input.
+        /// </summary>
+        ulong BaseAddress
+        {
+            get;
+        }
+
+        /// <summary>
         /// Creates a new binary reader at the provided address.
         /// </summary>
         /// <param name="address">The raw address to start reading from.</param>
@@ -39,6 +47,9 @@ namespace AsmResolver.IO
         BinaryStreamReader CreateReader(ulong address, uint rva, uint length);
     }
 
+    /// <summary>
+    /// Provides extension methods to various I/O related interfaces.
+    /// </summary>
     public static partial class IOExtensions
     {
         /// <summary>
@@ -47,6 +58,6 @@ namespace AsmResolver.IO
         /// <param name="factory">The factory to use.</param>
         /// <returns>The constructed reader.</returns>
         public static BinaryStreamReader CreateReader(this IInputFile factory)
-            => factory.CreateReader(0, 0, factory.Length);
+            => factory.CreateReader(factory.BaseAddress, 0, factory.Length);
     }
 }

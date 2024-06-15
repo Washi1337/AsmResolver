@@ -8,11 +8,7 @@ using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Blob;
-using AsmResolver.PE.DotNet.Metadata.Guid;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.UserStrings;
 using AsmResolver.PE.DotNet.StrongName;
 
 namespace AsmResolver.DotNet.Builder
@@ -143,6 +139,12 @@ namespace AsmResolver.DotNet.Builder
                 ReorderMetadataStreams(serializedModule, result.Directory.Metadata!);
             }
 
+            if (result.Directory.Metadata is { IsEncMetadata: true } metadata
+                && metadata.TryGetStream(TablesStream.MinimalStreamName, out _))
+            {
+                result.Directory.Metadata.GetStream<TablesStream>().ForceLargeColumns = true;
+            }
+
             return result;
         }
 
@@ -179,7 +181,10 @@ namespace AsmResolver.DotNet.Builder
         {
             var metadataBuffer = new MetadataBuffer(module.RuntimeVersion)
             {
-                OptimizeStringIndices = (MetadataBuilderFlags & MetadataBuilderFlags.NoStringsStreamOptimization) == 0
+                OptimizeStringIndices = (MetadataBuilderFlags & MetadataBuilderFlags.NoStringsStreamOptimization) == 0,
+                TablesStream = {
+                    ForceEncMetadata = (MetadataBuilderFlags & MetadataBuilderFlags.ForceEncMetadata) != 0
+                }
             };
 
             // Check if there exists a .NET directory to base off the metadata buffer on.
@@ -294,7 +299,7 @@ namespace AsmResolver.DotNet.Builder
                 importAction((TMember) member);
         }
 
-        private void ReorderMetadataStreams(SerializedModuleDefinition serializedModule, IMetadata newMetadata)
+        private void ReorderMetadataStreams(SerializedModuleDefinition serializedModule, MetadataDirectory newMetadata)
         {
             IMetadataStream? GetStreamOrNull<TStream>()
                 where TStream : class, IMetadataStream

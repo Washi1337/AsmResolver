@@ -30,7 +30,7 @@ var peImage = PEImage.FromFile(@"C:\myfile.exe");
 ```
 
 ``` csharp
-IPEFile peFile = ...
+PEFile peFile = ...
 var peImage = PEImage.FromFile(peFile);
 ```
 
@@ -59,36 +59,25 @@ var peImage = PEImage.FromModuleBaseAddress(hInstance);
 
 ## Writing a PE image
 
-Building an image back to a PE file can be done manually by constructing
-a `PEFile`, or by using one of the classes that implement the
-`IPEFileBuilder` interface.
+To write a PE image, you first need to serialize it back into a `PEFile` using a `IPEFileBuilder` instance:
 
-> [!NOTE]
-> Currently AsmResolver only provides a full fletched builder for .NET
-> images.
-
-Building a .NET image can be done through the
-`AsmResolver.PE.DotNet.Builder.ManagedPEFileBuilder` class:
-
-``` csharp
-var builder = new ManagedPEFileBuilder();
-var newPEFile = builder.CreateFile(image);
+```csharp
+var newPEFile = peImage.ToPEFile(new ManagedPEFileBuilder());
 ```
 
-Once a `PEFile` instance has been generated from the image, you can use
-it to write the executable to an output stream (such as a file on the
-disk or a memory stream).
-
-``` csharp
-using (var stream = File.Create(@"C:\mynewfile.exe"))
-{
-    var writer = new BinaryStreamWriter(stream);
-    newPEFile.Write(writer);
-}
+```csharp
+var newPEFile = peImage.ToPEFile(new UnmanagedPEFileBuilder());
 ```
 
-For more information on how to construct arbitrary `PEFile` instances
-for native images, look at [PE File Building](pe-building.md).
+Depending on the type of PE image you will need a different type of PE builder.
+See [PE File Building](pe-building.md) for more details.
+
+Once a `PEFile` instance has been constructed from the image, it can be written to an output stream (as described in [Writing PE files](../pefile/basics.md#writing-pe-files)):
+
+``` csharp
+using var stream = File.Create(@"C:\mynewfile.exe");
+newPEFile.Write(new BinaryStreamWriter(stream));
+```
 
 ## Strong name signing
 

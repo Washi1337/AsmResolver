@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace AsmResolver.DotNet.Memory
 {
@@ -27,5 +28,14 @@ namespace AsmResolver.DotNet.Memory
         /// Indicates the type layout depends on the bitness of the environment.
         /// </summary>
         IsPlatformDependent = 0b10,
+
+        /// <summary>
+        /// Indicates the type is a managed reference or contains managed references that are tracked by the
+        /// garbage collector.
+        /// </summary>
+        /// <remarks>
+        /// This is an equivalent to <c>RuntimeHelpers.IsReferenceOrContainsReferences</c>.
+        /// </remarks>
+        IsReferenceOrContainsReferences = 0b100
     }
 }

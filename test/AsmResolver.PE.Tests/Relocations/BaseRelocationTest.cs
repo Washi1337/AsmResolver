@@ -8,8 +8,8 @@ namespace AsmResolver.PE.Tests.Relocations
         [Fact]
         public void DotNetHelloWorld()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+
             Assert.Equal(new[]
             {
                 new BaseRelocation(RelocationType.HighLow, new VirtualAddress(0x2690)),

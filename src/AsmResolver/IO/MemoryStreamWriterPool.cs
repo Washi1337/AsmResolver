@@ -5,7 +5,7 @@ using System.IO;
 namespace AsmResolver.IO
 {
     /// <summary>
-    /// Provides a pool of reusable instances of <see cref="BinaryStreamWriter"/> that are meant to be used for
+    /// Provides a pool of reusable instances of <see cref="AsmResolver.IO.BinaryStreamWriter"/> that are meant to be used for
     /// constructing byte arrays.
     /// </summary>
     /// <remarks>
@@ -31,7 +31,7 @@ namespace AsmResolver.IO
         private void Return(BinaryStreamWriter writer) => _writers.Enqueue(writer);
 
         /// <summary>
-        /// Represents a single instance of a <see cref="BinaryStreamWriter"/> that is rented by a writer pool.
+        /// Represents a single instance of a <see cref="AsmResolver.IO.BinaryStreamWriter"/> that is rented by a writer pool.
         /// </summary>
         public ref struct RentedWriter
         {

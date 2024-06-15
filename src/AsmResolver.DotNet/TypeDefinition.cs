@@ -6,10 +6,9 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet
 {
@@ -885,7 +884,7 @@ namespace AsmResolver.DotNet
         /// <returns>The constructor, or <c>null</c> if none is present.</returns>
         public MethodDefinition? GetConstructor()
         {
-            return GetConstructor(SignatureComparer.Default, (IList<TypeSignature>) Array.Empty<TypeSignature>());
+            return GetConstructor(SignatureComparer.Default, (IList<TypeSignature>) ArrayShim.Empty<TypeSignature>());
         }
 
         /// <summary>

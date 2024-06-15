@@ -27,8 +27,13 @@ namespace AsmResolver.PE.Imports.Builder
             get;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether there is any data added to the buffer.
+        /// </summary>
+        public bool IsEmpty => _entriesLength == 0;
+
         /// <inheritdoc />
-        public override void AddModule(IImportedModule module)
+        public override void AddModule(ImportedModule module)
         {
             if (_entriesLength == 0)
                 _entriesLength = SerializedImportedModule.ModuleImportSize;
@@ -64,21 +69,21 @@ namespace AsmResolver.PE.Imports.Builder
         public override uint GetPhysicalSize() => _entriesLength + base.GetPhysicalSize() + HintNameTable.GetPhysicalSize();
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             WriteModuleImportEntries(writer);
             base.Write(writer);
             HintNameTable.Write(writer);
         }
 
-        private void WriteModuleImportEntries(IBinaryStreamWriter writer)
+        private void WriteModuleImportEntries(BinaryStreamWriter writer)
         {
             foreach (var module in Modules)
                 WriteModuleImportEntry(writer, module);
             WriteModuleImportEntry(writer, 0, 0, 0, 0, 0);
         }
 
-        private void WriteModuleImportEntry(IBinaryStreamWriter writer, IImportedModule module)
+        private void WriteModuleImportEntry(BinaryStreamWriter writer, ImportedModule module)
         {
             WriteModuleImportEntry(writer,
                 GetModuleThunkTable(module).Rva,
@@ -88,7 +93,7 @@ namespace AsmResolver.PE.Imports.Builder
                 ImportAddressDirectory.GetModuleThunkTable(module).Rva);
         }
 
-        private static void WriteModuleImportEntry(IBinaryStreamWriter writer, uint oft, uint timeDateStamp,
+        private static void WriteModuleImportEntry(BinaryStreamWriter writer, uint oft, uint timeDateStamp,
             uint forwarderChain, uint moduleNameRva, uint ft)
         {
             writer.WriteUInt32(oft);

@@ -1,9 +1,7 @@
 using AsmResolver.DotNet.TestCases.Fields;
-using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.Platforms;
 using Xunit;
 
@@ -46,7 +44,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         public void ReadByteArray()
         {
             // Open image.
-            var image = PEImage.FromFile(typeof(InitialValues).Assembly.Location);
+            var image = PEImage.FromFile(typeof(InitialValues).Assembly.Location, TestReaderParameters);
             var directory = image.DotNetDirectory!;
 
             // Get token of field.

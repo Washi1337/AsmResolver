@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Memory
 {
@@ -51,44 +49,46 @@ namespace AsmResolver.DotNet.Memory
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitArrayType(ArrayTypeSignature signature) =>
-            CreatePointerLayout(signature);
+            CreateReferenceLayout(signature);
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitBoxedType(BoxedTypeSignature signature) =>
-            CreatePointerLayout(signature);
+            CreateReferenceLayout(signature);
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitByReferenceType(ByReferenceTypeSignature signature) =>
-            CreatePointerLayout(signature);
+            CreateReferenceLayout(signature);
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitCorLibType(CorLibTypeSignature signature)
         {
-            (int elementSize, bool isPlatformDependent) = signature.ElementType switch
+            (int elementSize, bool isPlatformDependent, bool isReference) = signature.ElementType switch
             {
-                ElementType.Boolean => (sizeof(bool), false),
-                ElementType.Char => (sizeof(char), false),
-                ElementType.I1 => (sizeof(sbyte), false),
-                ElementType.U1 => (sizeof(byte), false),
-                ElementType.I2 => (sizeof(short), false),
-                ElementType.U2 => (sizeof(ushort), false),
-                ElementType.I4 => (sizeof(int), false),
-                ElementType.U4 => (sizeof(uint), false),
-                ElementType.I8 => (sizeof(long), false),
-                ElementType.U8 => (sizeof(ulong), false),
-                ElementType.R4 => (sizeof(float), false),
-                ElementType.R8 => (sizeof(double), false),
-                ElementType.String => (PointerSize, true),
-                ElementType.I => (PointerSize, true),
-                ElementType.U => (PointerSize, true),
-                ElementType.Object => (PointerSize, true),
-                ElementType.TypedByRef => (PointerSize * 2, true),
+                ElementType.Boolean => (sizeof(bool), false, false),
+                ElementType.Char => (sizeof(char), false, false),
+                ElementType.I1 => (sizeof(sbyte), false, false),
+                ElementType.U1 => (sizeof(byte), false, false),
+                ElementType.I2 => (sizeof(short), false, false),
+                ElementType.U2 => (sizeof(ushort), false, false),
+                ElementType.I4 => (sizeof(int), false, false),
+                ElementType.U4 => (sizeof(uint), false, false),
+                ElementType.I8 => (sizeof(long), false, false),
+                ElementType.U8 => (sizeof(ulong), false, false),
+                ElementType.R4 => (sizeof(float), false, false),
+                ElementType.R8 => (sizeof(double), false, false),
+                ElementType.String => (PointerSize, true, true),
+                ElementType.I => (PointerSize, true, false),
+                ElementType.U => (PointerSize, true, false),
+                ElementType.Object => (PointerSize, true, true),
+                ElementType.TypedByRef => (PointerSize * 2, true, false),
                 _ => throw new ArgumentOutOfRangeException(nameof(signature))
             };
 
             var attributes = _defaultAttributes;
             if (isPlatformDependent)
                 attributes |= MemoryLayoutAttributes.IsPlatformDependent;
+            if (isReference)
+                attributes |= MemoryLayoutAttributes.IsReferenceOrContainsReferences;
 
             return new TypeMemoryLayout(signature, (uint) elementSize, attributes);
         }
@@ -138,7 +138,7 @@ namespace AsmResolver.DotNet.Memory
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitSzArrayType(SzArrayTypeSignature signature)
-            => CreatePointerLayout(signature);
+            => CreateReferenceLayout(signature);
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitTypeDefOrRef(TypeDefOrRefSignature signature)
@@ -177,7 +177,7 @@ namespace AsmResolver.DotNet.Memory
         {
             return type.IsValueType
                 ? VisitValueTypeDefinition(type)
-                : CreatePointerLayout(type);
+                : CreateReferenceLayout(type);
         }
 
         private TypeMemoryLayout VisitValueTypeDefinition(TypeDefinition type)
@@ -232,6 +232,8 @@ namespace AsmResolver.DotNet.Memory
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
                 if (contentsLayout.IsPlatformDependent)
                     result.Attributes |= MemoryLayoutAttributes.IsPlatformDependent;
+                if (contentsLayout.IsReferenceOrContainsReferences)
+                    result.Attributes |= MemoryLayoutAttributes.IsReferenceOrContainsReferences;
 
                 // Fields are aligned to the alignment of the type, unless the field is smaller. In such a case, the
                 // field is aligned to its own field size.
@@ -278,6 +280,8 @@ namespace AsmResolver.DotNet.Memory
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
                 if (contentsLayout.IsPlatformDependent)
                     result.Attributes |= MemoryLayoutAttributes.IsPlatformDependent;
+                if (contentsLayout.IsReferenceOrContainsReferences)
+                    result.Attributes |= MemoryLayoutAttributes.IsReferenceOrContainsReferences;
 
                 result[field] = new FieldMemoryLayout(field, offset, contentsLayout);
 
@@ -288,7 +292,21 @@ namespace AsmResolver.DotNet.Memory
             return result;
         }
 
-        private TypeMemoryLayout CreatePointerLayout(ITypeDescriptor type) =>
-            new(type, (uint) PointerSize, _defaultAttributes | MemoryLayoutAttributes.IsPlatformDependent);
+        private TypeMemoryLayout CreateReferenceLayout(ITypeDescriptor type)
+        {
+            var attributes = _defaultAttributes
+                | MemoryLayoutAttributes.IsPlatformDependent
+                | MemoryLayoutAttributes.IsReferenceOrContainsReferences;
+
+            return new TypeMemoryLayout(type, (uint)PointerSize, attributes);
+        }
+
+        private TypeMemoryLayout CreatePointerLayout(ITypeDescriptor type)
+        {
+            var attributes = _defaultAttributes
+                | MemoryLayoutAttributes.IsPlatformDependent;
+
+            return new TypeMemoryLayout(type, (uint)PointerSize, attributes);
+        }
     }
 }

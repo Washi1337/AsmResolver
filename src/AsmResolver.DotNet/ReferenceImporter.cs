@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet
 {
@@ -301,7 +300,7 @@ namespace AsmResolver.DotNet
                 throw new ArgumentNullException(nameof(type));
             if (type.IsArray)
                 return ImportArrayType(type);
-            if (type.IsConstructedGenericType)
+            if (type is { IsGenericType: true, IsGenericTypeDefinition: false })
                 return ImportGenericType(type);
             if (type.IsPointer)
                 return new PointerTypeSignature(ImportTypeSignature(type.GetElementType()!));
@@ -563,7 +562,7 @@ namespace AsmResolver.DotNet
                 ? ImportTypeSignature(info.ReturnType)
                 : TargetModule.CorLibTypeFactory.Void;
 
-            var parameters = originalDeclaringType is { IsConstructedGenericType: true }
+            var parameters = originalDeclaringType is { IsGenericType: true, IsGenericTypeDefinition: false }
                 ? method.Module.ResolveMethod(method.MetadataToken)!.GetParameters()
                 : method.GetParameters();
 
@@ -646,7 +645,7 @@ namespace AsmResolver.DotNet
             if (field is null)
                 throw new ArgumentNullException(nameof(field));
 
-            if (field.DeclaringType is { IsConstructedGenericType: true })
+            if (field.DeclaringType is { IsGenericType: true, IsGenericTypeDefinition: false })
                 field = field.Module.ResolveField(field.MetadataToken)!;
 
             var scope = field.DeclaringType != null

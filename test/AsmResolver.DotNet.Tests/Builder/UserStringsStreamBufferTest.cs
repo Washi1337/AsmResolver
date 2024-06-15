@@ -1,7 +1,7 @@
 using System.Text;
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Builder.Metadata.UserStrings;
-using AsmResolver.PE.DotNet.Metadata.UserStrings;
+using AsmResolver.DotNet.Builder.Metadata;
+using AsmResolver.PE.DotNet.Metadata;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder
@@ -188,7 +188,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         [Fact]
         public void RebuildWithPreserveAbsentUSStream()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NoUSStream);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NoUSStream, TestReaderParameters);
             var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveUserStringIndices));
             Assert.False(image.DotNetDirectory!.Metadata!.TryGetStream<UserStringsStream>(out _));
         }

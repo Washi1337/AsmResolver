@@ -81,7 +81,7 @@ public static class PdbHashTable
     /// <typeparam name="TValue">The type of values in the input dictionary.</typeparam>
     public static void WriteAsPdbHashTable<TKey, TValue>(
         this IDictionary<TKey, TValue> dictionary,
-        IBinaryStreamWriter writer,
+        BinaryStreamWriter writer,
         Func<TKey, uint> hasher,
         Func<TKey, TValue, (uint, uint)> mapper)
         where TKey : notnull

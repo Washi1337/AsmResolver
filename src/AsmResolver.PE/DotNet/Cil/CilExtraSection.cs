@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.IO;
+using AsmResolver.Shims;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -14,7 +15,7 @@ namespace AsmResolver.PE.DotNet.Cil
     {
         private CilExtraSection()
         {
-            Data = Array.Empty<byte>();
+            Data = ArrayShim.Empty<byte>();
         }
 
         /// <summary>
@@ -131,7 +132,7 @@ namespace AsmResolver.PE.DotNet.Cil
         public override uint GetPhysicalSize() => (uint) Data.Length + 4;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteByte((byte) Attributes);
 

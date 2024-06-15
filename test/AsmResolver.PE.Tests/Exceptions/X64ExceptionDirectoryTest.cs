@@ -1,5 +1,4 @@
 using AsmResolver.PE.Exceptions;
-using AsmResolver.PE.Exceptions.X64;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.Exceptions
@@ -9,7 +8,7 @@ namespace AsmResolver.PE.Tests.Exceptions
         [Fact]
         public void ReadSEHTable()
         {
-            var image = PEImage.FromBytes(Properties.Resources.SEHSamples);
+            var image = PEImage.FromBytes(Properties.Resources.SEHSamples, TestReaderParameters);
             var exceptions = Assert.IsAssignableFrom<ExceptionDirectory<X64RuntimeFunction>>(image.Exceptions);
 
             Assert.Equal(0x1010u, exceptions.Entries[0].Begin.Rva);

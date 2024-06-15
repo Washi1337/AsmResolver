@@ -1,8 +1,8 @@
 # Advanced Module Reading
 
 Advanced users might need to configure AsmResolver\'s module reader. For
-example, instead of letting the module reader throw exceptions upon
-reading invalid data, errors should be ignored and recovered from. Other
+example, instead of letting the module reader ignore exceptions upon
+reading invalid data, errors could be collected or thrown. Other
 uses might include changing the way the underlying PE or method bodies
 are read. These kinds of settings can be configured using the
 `ModuleReaderParameters` class.
@@ -33,22 +33,23 @@ parameters.PEReaderParameters = new PEReaderParameters
 };
 ```
 
-For example, this can be in particular useful if you want to let
-AsmResolver ignore and recover from invalid data in the input file:
+For example, this can be in particular useful if you want to customize the
+way AsmResolver deals with invalid data.
 
 ``` csharp
-parameters.PEReaderParameters.ErrorListener = EmptyErrorListener.Instance;
+parameters.PEReaderParameters.ErrorListener = ThrowErrorListener.Instance;
 ```
 
 Alternatively, this property can also be set through the constructor of
 the `ModuleReaderParameters` class directly:
 
 ``` csharp
-var parameters = new ModuleReaderParameters(EmptyErrorListener.Instance);
+var parameters = new ModuleReaderParameters(ThrowErrorListener.Instance);
 ```
 
 For more information on customizing the underlying PE image reading
 process, see [Advanced PE Image Reading](../peimage/advanced-pe-reading.md).
+
 
 ## Changing working directory
 
@@ -154,7 +155,7 @@ public class CustomFieldRvaDataReader : FieldRvaDataReader
     public override ISegment ResolveFieldData(
         IErrorListener listener,
         Platform platform,
-        IDotNetDirectory directory,
+        DotNetDirectory directory,
         in FieldRvaRow fieldRvaRow)
     {
         // ...

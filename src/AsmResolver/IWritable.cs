@@ -17,6 +17,6 @@ namespace AsmResolver
         /// Serializes the structure to an output stream.
         /// </summary>
         /// <param name="writer">The output stream to write the data to.</param>
-        void Write(IBinaryStreamWriter writer);
+        void Write(BinaryStreamWriter writer);
     }
 }

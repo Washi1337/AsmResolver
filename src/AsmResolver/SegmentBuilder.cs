@@ -39,6 +39,11 @@ namespace AsmResolver
         public bool CanUpdateOffsets => true;
 
         /// <summary>
+        /// Gets a value indicating whether the collection of concatenated segments is empty.
+        /// </summary>
+        public bool IsEmpty => _items.Count == 0;
+
+        /// <summary>
         /// Adds the provided segment with no alignment.
         /// </summary>
         /// <param name="segment">The segment to add.</param>
@@ -83,7 +88,7 @@ namespace AsmResolver
         public uint GetVirtualSize() => _virtualSize;
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             for (int i = 0; i < _items.Count; i++)
             {

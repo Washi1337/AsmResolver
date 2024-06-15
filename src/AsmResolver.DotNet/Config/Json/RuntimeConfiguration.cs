@@ -1,5 +1,9 @@
+using System;
 using System.IO;
+
+#if NET5_0_OR_GREATER
 using System.Text.Json;
+#endif
 
 namespace AsmResolver.DotNet.Config.Json
 {
@@ -25,7 +29,18 @@ namespace AsmResolver.DotNet.Config.Json
         /// <returns>The parsed runtime configuration.</returns>
         public static RuntimeConfiguration? FromJson(string json)
         {
+#if NET5_0_OR_GREATER
             return JsonSerializer.Deserialize(json, RuntimeConfigurationSerializerContext.Default.RuntimeConfiguration);
+#else
+            var result = new RuntimeConfiguration();
+
+            var root = JSON.Parse(json);
+            if (!root.HasKey("runtimeOptions"))
+                return result;
+
+            result.RuntimeOptions = RuntimeOptions.FromJsonNode(root["runtimeOptions"]);
+            return result;
+#endif
         }
 
         /// <summary>
@@ -59,7 +74,11 @@ namespace AsmResolver.DotNet.Config.Json
         /// <returns>The JSON string.</returns>
         public string ToJson()
         {
+#if NET5_0_OR_GREATER
             return JsonSerializer.Serialize(this, RuntimeConfigurationSerializerContext.Default.RuntimeConfiguration);
+#else
+            throw new NotSupportedException();
+#endif
         }
 
         /// <summary>

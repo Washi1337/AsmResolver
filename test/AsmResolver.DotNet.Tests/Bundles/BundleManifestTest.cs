@@ -5,11 +5,11 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using AsmResolver.DotNet.Bundles;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Win32Resources.Version;
 using AsmResolver.Tests.Runners;
 using Xunit;
@@ -94,6 +94,46 @@ namespace AsmResolver.DotNet.Tests.Bundles
                 "Hello, World!\n");
         }
 
+        [Fact]
+        public void DetectNetCoreApp31Bundle()
+        {
+            var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V1);
+            Assert.Equal(
+                new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(3, 1)),
+                manifest.GetTargetRuntime()
+            );
+        }
+
+        [Fact]
+        public void DetectNet50Bundle()
+        {
+            var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V2);
+            Assert.Equal(
+                new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(5, 0)),
+                manifest.GetTargetRuntime()
+            );
+        }
+
+        [Fact]
+        public void DetectNet60Bundle()
+        {
+            var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6);
+            Assert.Equal(
+                new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(6, 0)),
+                manifest.GetTargetRuntime()
+            );
+        }
+
+        [Fact]
+        public void DetectNet80Bundle()
+        {
+            var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6_WithDependency);
+            Assert.Equal(
+                new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(8, 0)),
+                manifest.GetTargetRuntime()
+            );
+        }
+
         [SkippableFact]
         public void MarkFilesAsCompressed()
         {
@@ -138,7 +178,11 @@ namespace AsmResolver.DotNet.Tests.Bundles
             string appHostTemplatePath = FindAppHostTemplate("6.0");
 
             // Obtain expected version info.
-            var oldImage = PEImage.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6_WithResources);
+            var oldImage = PEImage.FromBytes(
+                Properties.Resources.HelloWorld_SingleFile_V6_WithResources,
+                TestReaderParameters.PEReaderParameters
+            );
+
             var versionInfo = VersionInfoResource.FromDirectory(oldImage.Resources!)!;
 
             // Bundle with PE image as template for PE headers and resources.
@@ -236,7 +280,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             var mainFile = manifest.Files.First(f => f.RelativePath.Contains("HelloWorld.dll"));
 
             // Patch entry point file.
-            var module = ModuleDefinition.FromBytes(mainFile.GetData());
+            var module = ModuleDefinition.FromBytes(mainFile.GetData(), TestReaderParameters);
             module.ManagedEntryPointMethod!.CilMethodBody!
                 .Instructions.First(i => i.OpCode.Code == CilCode.Ldstr)
                 .Operand = "Hello, Mars!";
@@ -358,6 +402,20 @@ namespace AsmResolver.DotNet.Tests.Bundles
                 Assert.Equal(file.IsCompressed, newFile.IsCompressed);
                 Assert.Equal(file.GetData(), newFile.GetData());
             }
+        }
+
+        [Fact]
+        public void BundleRuntimeContext()
+        {
+            var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6_WithDependency);
+            var context = new RuntimeContext(manifest);
+
+            var module = ModuleDefinition.FromBytes(
+                manifest.Files.First(x => x.RelativePath == "MainApp.dll").GetData(),
+                new ModuleReaderParameters(context));
+
+            var resolved = module.AssemblyReferences.First(x => x.Name == "Library").Resolve();
+            Assert.NotNull(resolved);
         }
     }
 }

@@ -2,7 +2,6 @@ using System.IO;
 using System.Linq;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Pdb;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
@@ -10,14 +9,14 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
 {
     public class PdbStreamTest
     {
-        private static IMetadata GetMetadata(bool rebuild)
+        private static MetadataDirectory GetMetadata(bool rebuild)
         {
-            var metadata = PE.DotNet.Metadata.Metadata.FromBytes(Properties.Resources.TheAnswerPortablePdb);
+            var metadata = MetadataDirectory.FromBytes(Properties.Resources.TheAnswerPortablePdb);
             if (rebuild)
             {
                 using var stream = new MemoryStream();
                 metadata.Write(new BinaryStreamWriter(stream));
-                metadata = PE.DotNet.Metadata.Metadata.FromBytes(stream.ToArray());
+                metadata = MetadataDirectory.FromBytes(stream.ToArray());
             }
 
             return metadata;

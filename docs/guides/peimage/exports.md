@@ -3,7 +3,7 @@
 Dynamically linked libraries (DLLs) often expose symbols through
 defining exports in the exports directory.
 
-The `IPEImage` interface exposes the `Exports` property, exposing a
+The `PEImage` class exposes the `Exports` property, exposing a
 mutable instance of `ExportDirectory`, which defines the following properties:
 
 -   `Name`: The name of the dynamically linked library.
@@ -32,7 +32,7 @@ defines:
 ## Example
 
 Below is an example of a program that lists all symbols exported by a
-given `IPEImage` instance:
+given `PEImage` instance:
 
 ``` csharp
 foreach (var symbol in peImage.Exports.Entries)

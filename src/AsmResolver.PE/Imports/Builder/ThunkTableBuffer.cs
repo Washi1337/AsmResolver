@@ -75,7 +75,7 @@ namespace AsmResolver.PE.Imports.Builder
         public override uint GetPhysicalSize() => _length;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             foreach (var member in _members)
             {

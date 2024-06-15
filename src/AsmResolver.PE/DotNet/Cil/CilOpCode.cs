@@ -63,6 +63,11 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <summary>
+        /// Gets a value indicating whether the opcode is valid and interpreted by the runtime.
+        /// </summary>
+        public bool IsValid => _value != 0 && Mnemonic != "unused";
+
+        /// <summary>
         /// Gets the mnemonic of the operation code.
         /// </summary>
         public string Mnemonic => CilOpCodeNames.Names[IsLarge ? Byte2 + 256 : Byte1];

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.PE.Win32Resources;
 using Xunit;
 
@@ -41,12 +42,12 @@ namespace AsmResolver.PE.Tests.Win32Resources
 
                 if (expected.IsData)
                 {
-                    Assert.IsAssignableFrom<IResourceData>(current);
+                    Assert.IsAssignableFrom<ResourceData>(current);
                 }
                 else
                 {
-                    Assert.IsAssignableFrom<IResourceDirectory>(current);
-                    var subEntries = ((IResourceDirectory) current).Entries;
+                    Assert.IsAssignableFrom<ResourceDirectory>(current);
+                    var subEntries = ((ResourceDirectory) current).Entries;
                     Assert.Equal(expected.Entries.Count, subEntries.Count);
 
                     for (int i = 0; i < subEntries.Count; i++)
@@ -61,7 +62,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
         [Fact]
         public void DotNetHelloWorld()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             var expected = new ResourceEntryInfo(0)
             {
@@ -119,7 +120,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
                     Assert.True(dirCount < maxDirCount, "Traversal reached limit of resource directories.");
 
                     dirCount++;
-                    foreach (var entry in ((IResourceDirectory) current).Entries)
+                    foreach (var entry in ((ResourceDirectory) current).Entries)
                         stack.Push(entry);
                 }
             }
@@ -143,7 +144,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             Assert.Equal(16u, entry.Id);
             Assert.True(entry.IsDirectory);
 
-            var directory = (IResourceDirectory) entry;
+            var directory = (ResourceDirectory) entry;
             Assert.Empty(directory.Entries);
         }
 
@@ -153,9 +154,9 @@ namespace AsmResolver.PE.Tests.Win32Resources
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDataOffset,
                 new PEReaderParameters(EmptyErrorListener.Instance));
 
-            var directory = (IResourceDirectory) peImage.Resources!.Entries[0];
-            directory = (IResourceDirectory) directory.Entries[0];
-            var data = (IResourceData) directory.Entries[0];
+            var directory = (ResourceDirectory) peImage.Resources!.Entries[0];
+            directory = (ResourceDirectory) directory.Entries[0];
+            var data = (ResourceData) directory.Entries[0];
 
             Assert.Null(data.Contents);
         }
@@ -217,7 +218,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             Assert.Empty(root.Entries);
 
             var directory = new ResourceDirectory(ResourceType.String);
-            root.AddOrReplaceEntry(directory);
+            root.InsertOrReplaceEntry(directory);
 
             Assert.Same(directory, Assert.Single(root.Entries));
         }
@@ -233,7 +234,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             Assert.Single(root.Entries);
 
             var directory = new ResourceDirectory(5678u);
-            root.AddOrReplaceEntry(directory);
+            root.InsertOrReplaceEntry(directory);
 
             Assert.Equal(2, root.Entries.Count);
         }
@@ -249,7 +250,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             var oldDirectory = root.GetDirectory(1234u);
 
             var newDirectory = new ResourceDirectory(1234u);
-            root.AddOrReplaceEntry(newDirectory);
+            root.InsertOrReplaceEntry(newDirectory);
 
             Assert.NotSame(oldDirectory, root.GetEntry(1234u));
             Assert.Same(newDirectory, Assert.Single(root.Entries));
@@ -266,7 +267,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             var oldDirectory = root.GetDirectory(1234u);
 
             var newEntry = new ResourceData(1234u, new DataSegment(new byte[] { 1, 2, 3, 4 }));
-            root.AddOrReplaceEntry(newEntry);
+            root.InsertOrReplaceEntry(newEntry);
 
             Assert.NotSame(oldDirectory, root.GetEntry(1234u));
             Assert.Same(newEntry, Assert.Single(root.Entries));
@@ -298,6 +299,23 @@ namespace AsmResolver.PE.Tests.Win32Resources
 
             Assert.True(root.RemoveEntry(1234u));
             Assert.Single(root.Entries);
+        }
+
+        [Theory]
+        [InlineData(ResourceType.Icon, new[] {ResourceType.Icon, ResourceType.String, ResourceType.Version})]
+        [InlineData(ResourceType.RcData, new[] {ResourceType.String, ResourceType.RcData, ResourceType.Version})]
+        [InlineData(ResourceType.Manifest, new[] {ResourceType.String, ResourceType.Version, ResourceType.Manifest})]
+        [InlineData(ResourceType.String, new[] {ResourceType.String, ResourceType.Version})]
+        public void InsertShouldPreserveOrder(ResourceType insertedEntry, ResourceType[] expected)
+        {
+            var image = new PEImage();
+
+            image.Resources = new ResourceDirectory(0u);
+            image.Resources.Entries.Add(new ResourceDirectory(ResourceType.String));
+            image.Resources.Entries.Add(new ResourceDirectory(ResourceType.Version));
+            image.Resources.InsertOrReplaceEntry(new ResourceDirectory(insertedEntry));
+
+            Assert.Equal(expected, image.Resources.Entries.Select(x => (ResourceType) x.Id));
         }
 
     }

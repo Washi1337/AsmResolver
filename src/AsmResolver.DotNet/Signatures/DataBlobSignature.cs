@@ -1,8 +1,7 @@
 using System;
-using System.Buffers.Binary;
 using System.Text;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -91,7 +90,8 @@ namespace AsmResolver.DotNet.Signatures
         public static DataBlobSignature FromValue(char value)
         {
             byte[] bytes = new byte[2];
-            BinaryPrimitives.WriteUInt16LittleEndian(bytes, value);
+            bytes[0] = (byte)(value & 0xFF);
+            bytes[1] = (byte)((value >> 8) & 0xFF);
             return new DataBlobSignature(bytes);
         }
 
@@ -133,7 +133,8 @@ namespace AsmResolver.DotNet.Signatures
         public static DataBlobSignature FromValue(ushort value)
         {
             byte[] bytes = new byte[2];
-            BinaryPrimitives.WriteUInt16LittleEndian(bytes, value);
+            bytes[0] = (byte)(value & 0xFF);
+            bytes[1] = (byte)((value >> 8) & 0xFF);
             return new DataBlobSignature(bytes);
         }
 
@@ -147,7 +148,8 @@ namespace AsmResolver.DotNet.Signatures
         public static DataBlobSignature FromValue(short value)
         {
             byte[] bytes = new byte[2];
-            BinaryPrimitives.WriteInt16LittleEndian(bytes, value);
+            bytes[0] = (byte)(value & 0xFF);
+            bytes[1] = (byte)((value >> 8) & 0xFF);
             return new DataBlobSignature(bytes);
         }
 
@@ -161,7 +163,10 @@ namespace AsmResolver.DotNet.Signatures
         public static DataBlobSignature FromValue(uint value)
         {
             byte[] bytes = new byte[4];
-            BinaryPrimitives.WriteUInt32LittleEndian(bytes, value);
+            bytes[0] = (byte)(value & 0xFF);
+            bytes[1] = (byte)((value >> 8) & 0xFF);
+            bytes[2] = (byte)((value >> 16) & 0xFF);
+            bytes[3] = (byte)((value >> 24) & 0xFF);
             return new DataBlobSignature(bytes);
         }
 
@@ -175,7 +180,10 @@ namespace AsmResolver.DotNet.Signatures
         public static DataBlobSignature FromValue(int value)
         {
             byte[] bytes = new byte[4];
-            BinaryPrimitives.WriteInt32LittleEndian(bytes, value);
+            bytes[0] = (byte)(value & 0xFF);
+            bytes[1] = (byte)((value >> 8) & 0xFF);
+            bytes[2] = (byte)((value >> 16) & 0xFF);
+            bytes[3] = (byte)((value >> 24) & 0xFF);
             return new DataBlobSignature(bytes);
         }
 
@@ -189,7 +197,14 @@ namespace AsmResolver.DotNet.Signatures
         public static DataBlobSignature FromValue(ulong value)
         {
             byte[] bytes = new byte[8];
-            BinaryPrimitives.WriteUInt64LittleEndian(bytes, value);
+            bytes[0] = (byte)(value & 0xFF);
+            bytes[1] = (byte)((value >> 8) & 0xFF);
+            bytes[2] = (byte)((value >> 16) & 0xFF);
+            bytes[3] = (byte)((value >> 24) & 0xFF);
+            bytes[4] = (byte)((value >> 32) & 0xFF);
+            bytes[5] = (byte)((value >> 40) & 0xFF);
+            bytes[6] = (byte)((value >> 48) & 0xFF);
+            bytes[7] = (byte)((value >> 56) & 0xFF);
             return new DataBlobSignature(bytes);
         }
 
@@ -203,7 +218,14 @@ namespace AsmResolver.DotNet.Signatures
         public static DataBlobSignature FromValue(long value)
         {
             byte[] bytes = new byte[8];
-            BinaryPrimitives.WriteInt64LittleEndian(bytes, value);
+            bytes[0] = (byte)(value & 0xFF);
+            bytes[1] = (byte)((value >> 8) & 0xFF);
+            bytes[2] = (byte)((value >> 16) & 0xFF);
+            bytes[3] = (byte)((value >> 24) & 0xFF);
+            bytes[4] = (byte)((value >> 32) & 0xFF);
+            bytes[5] = (byte)((value >> 40) & 0xFF);
+            bytes[6] = (byte)((value >> 48) & 0xFF);
+            bytes[7] = (byte)((value >> 56) & 0xFF);
             return new DataBlobSignature(bytes);
         }
 

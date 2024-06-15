@@ -75,8 +75,7 @@ section.Contents = new VirtualSegment(physicalContents, 0x1000); // Create a new
 file.Sections.Add(section);
 ```
 
-For more advanced section building, see
-[Building Sections](../peimage/pe-building.md#building-sections)
+For composing the contents of a section, see also
 [Reading and Writing File Segments](../core/segments.md).
 
 ## Updating Section Offsets

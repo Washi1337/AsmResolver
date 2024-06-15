@@ -59,7 +59,7 @@ namespace AsmResolver.PE.DotNet.VTableFixups
                 : sizeof(ulong));
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Items.Count; i++)
             {

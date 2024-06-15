@@ -1,9 +1,6 @@
 using System.Linq;
 using System.Text;
 using AsmResolver.DotNet.Bundles;
-using AsmResolver.PE.DotNet.Metadata.Strings;
-using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Bundles
@@ -37,7 +34,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6);
             var bundleFile = manifest.Files.First(f => f.RelativePath == "HelloWorld.dll");
 
-            var embeddedImage = ModuleDefinition.FromBytes(bundleFile.GetData());
+            var embeddedImage = ModuleDefinition.FromBytes(bundleFile.GetData(), TestReaderParameters);
             Assert.Equal("HelloWorld.dll", embeddedImage.Name);
         }
     }

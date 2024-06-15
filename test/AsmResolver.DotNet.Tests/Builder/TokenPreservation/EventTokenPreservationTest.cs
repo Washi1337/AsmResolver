@@ -3,7 +3,7 @@ using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
@@ -12,8 +12,8 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
     {
         private static ModuleDefinition CreateSampleEventDefsModule(int typeCount, int EventsPerType)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
-            
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore, TestReaderParameters);
+
             var eventHandlerTypeRef = new TypeReference(
                 module,
                 module.CorLibTypeFactory.CorLibScope,
@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         private static EventDefinition CreateDummyEventToType(TypeDefinition dummyType, ITypeDefOrRef eventHandlerTypeRef, string name)
         {
             var eventHandlerTypeSig = eventHandlerTypeRef.ToTypeSignature();
-            
+
             // Define new event.
             var @event = new EventDefinition(name, 0, eventHandlerTypeRef);
 
@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         public void PreserveEventDefsNoChange()
         {
             var module = CreateSampleEventDefsModule(10, 10);
-            
+
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveEventDefinitionIndices);
 
             AssertSameTokens(module, newModule, t => t.Events);
@@ -90,12 +90,12 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         public void PreserveEventDefsChangeOrderOfTypes()
         {
             var module = CreateSampleEventDefsModule(10, 10);
-            
+
             const int swapIndex = 3;
             var type = module.TopLevelTypes[swapIndex];
             module.TopLevelTypes.RemoveAt(swapIndex);
             module.TopLevelTypes.Insert(swapIndex + 1, type);
-            
+
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveEventDefinitionIndices);
 
             AssertSameTokens(module, newModule, t => t.Events);
@@ -111,7 +111,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var Event = type.Events[swapIndex];
             type.Events.RemoveAt(swapIndex);
             type.Events.Insert(swapIndex + 1, Event);
-            
+
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveEventDefinitionIndices);
 
             AssertSameTokens(module, newModule, t => t.Events);
@@ -127,12 +127,12 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 module.CorLibTypeFactory.CorLibScope,
                 "System",
                 nameof(EventHandler));
-            
+
             // Create new event.
             var type = module.TopLevelTypes[2];
             var @event = CreateDummyEventToType(type, eventHandlerTypeRef, "ExtraEvent");
             type.Events.Insert(3, @event);
-            
+
             // Rebuild and verify.
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveEventDefinitionIndices);
             AssertSameTokens(module, newModule, t => t.Events);
@@ -147,11 +147,11 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             const int indexToRemove = 3;
             var Event = type.Events[indexToRemove];
             type.Events.RemoveAt(indexToRemove);
-            
+
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveEventDefinitionIndices);
 
             AssertSameTokens(module, newModule, m => m.Events, Event.MetadataToken);
         }
-        
+
     }
 }

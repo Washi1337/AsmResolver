@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using AsmResolver.Collections;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Code.Native
 {
@@ -14,7 +16,7 @@ namespace AsmResolver.DotNet.Code.Native
     /// </summary>
     public class NativeSymbolsProvider : INativeSymbolsProvider
     {
-        private readonly Dictionary<string, IImportedModule> _modules = new();
+        private readonly Dictionary<string, ImportedModule> _modules = new();
         private readonly Dictionary<ISegmentReference, BaseRelocation> _relocations = new();
 
         private readonly Dictionary<uint, ExportedSymbol> _fixedExportedSymbols = new();
@@ -50,7 +52,7 @@ namespace AsmResolver.DotNet.Code.Native
             return newSymbol;
         }
 
-        private IImportedModule GetModuleByName(string name)
+        private ImportedModule GetModuleByName(string name)
         {
             if (!_modules.TryGetValue(name, out var module))
             {
@@ -63,7 +65,7 @@ namespace AsmResolver.DotNet.Code.Native
 
         private static bool TryGetSimilarSymbol(
             ImportedSymbol symbol,
-            IImportedModule module,
+            ImportedModule module,
             [NotNullWhen(true)] out ImportedSymbol? existingSymbol)
         {
             for (int i = 0; i < module.Symbols.Count; i++)
@@ -134,7 +136,7 @@ namespace AsmResolver.DotNet.Code.Native
         /// Gets a collection of all imported external modules.
         /// </summary>
         /// <returns>The modules.</returns>
-        public IEnumerable<IImportedModule> GetImportedModules() => _modules.Values;
+        public IEnumerable<ImportedModule> GetImportedModules() => _modules.Values;
 
         /// <summary>
         /// Gets a collection of all base relocations that need to be applied in the final PE image.
@@ -150,7 +152,7 @@ namespace AsmResolver.DotNet.Code.Native
         {
             baseOrdinal = 1;
             if (_fixedExportedSymbols.Count == 0 && _floatingExportedSymbols.Count == 0)
-                return Array.Empty<ExportedSymbol>();
+                return ArrayShim.Empty<ExportedSymbol>();
 
             // Check if no fixed symbols at all, then just return the floating exports.
             if (_fixedExportedSymbols.Count == 0)

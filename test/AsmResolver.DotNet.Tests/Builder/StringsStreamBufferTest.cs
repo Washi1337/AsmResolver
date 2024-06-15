@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using AsmResolver.DotNet.Builder.Metadata.Strings;
+using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.DotNet.Metadata;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder

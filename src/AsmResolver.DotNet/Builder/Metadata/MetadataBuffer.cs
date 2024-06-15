@@ -1,17 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using AsmResolver.DotNet.Builder.Metadata.Blob;
-using AsmResolver.DotNet.Builder.Metadata.Guid;
-using AsmResolver.DotNet.Builder.Metadata.Strings;
-using AsmResolver.DotNet.Builder.Metadata.Tables;
-using AsmResolver.DotNet.Builder.Metadata.UserStrings;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Blob;
-using AsmResolver.PE.DotNet.Metadata.Guid;
-using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
 namespace AsmResolver.DotNet.Builder.Metadata
 {
@@ -82,10 +72,10 @@ namespace AsmResolver.DotNet.Builder.Metadata
         } = true;
 
         /// <inheritdoc />
-        public IMetadata CreateMetadata()
+        public MetadataDirectory CreateMetadata()
         {
             // Create metadata directory.
-            var result = new PE.DotNet.Metadata.Metadata
+            var result = new MetadataDirectory
             {
                 VersionString = _versionString,
                 IsEncMetadata = TablesStream.IsEncMetadata
@@ -111,7 +101,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             return result;
         }
 
-        private static TStream? AddIfNotEmpty<TStream>(IMetadata metadata, IMetadataStreamBuffer streamBuffer)
+        private static TStream? AddIfNotEmpty<TStream>(MetadataDirectory metadata, IMetadataStreamBuffer streamBuffer)
             where TStream : class, IMetadataStream
         {
             return !streamBuffer.IsEmpty
@@ -119,7 +109,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
                 : null;
         }
 
-        private static TStream Add<TStream>(IMetadata metadata, IMetadataStreamBuffer streamBuffer)
+        private static TStream Add<TStream>(MetadataDirectory metadata, IMetadataStreamBuffer streamBuffer)
             where TStream : class, IMetadataStream
         {
             var stream = streamBuffer.CreateStream();

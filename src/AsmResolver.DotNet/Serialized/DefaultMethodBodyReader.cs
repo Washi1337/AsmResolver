@@ -2,7 +2,7 @@ using System;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Serialized
 {
@@ -12,6 +12,11 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class DefaultMethodBodyReader : IMethodBodyReader
     {
+        /// <summary>
+        /// Gets the singleton instance of the <see cref="DefaultMethodBodyReader"/> class.
+        /// </summary>
+        public static DefaultMethodBodyReader Instance { get; } = new();
+
         /// <inheritdoc />
         public virtual MethodBody? ReadMethodBody(ModuleReaderContext context, MethodDefinition owner, in MethodDefinitionRow row)
         {

@@ -15,7 +15,7 @@ To test whether a PE image has ReadyToRun metadata, query the
 ```csharp
 using AsmResolver.PE.DotNet.ReadyToRun;
 
-IPEImage image = ...
+PEImage image = ...
 
 var header = image.DotNetDirectory.ManagedNativeHeader;
 if (header is ReadyToRunDirectory directory)

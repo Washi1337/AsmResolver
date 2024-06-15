@@ -2,7 +2,7 @@
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Code.Cil
@@ -142,7 +142,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [Fact]
         public void ModreqReturnTypeShouldNotAffectPopCount()
         {
-            var module = ModuleDefinition.FromFile(typeof(TestClass).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(TestClass).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.Single(t => t.MetadataToken == typeof(TestClass).MetadataToken);
             var property = type.Properties[0];
             var setter = property.SetMethod;

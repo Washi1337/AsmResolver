@@ -12,6 +12,6 @@ namespace AsmResolver.PE.Builder
         /// </summary>
         /// <param name="image">The image to assemble.</param>
         /// <returns>The assembled PE file.</returns>
-        PEFile CreateFile(IPEImage image);
+        PEFile CreateFile(PEImage image);
     }
 }

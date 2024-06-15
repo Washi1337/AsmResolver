@@ -6,7 +6,6 @@ using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet
 {
@@ -173,14 +172,20 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the method definition representing the first get accessor of this property definition.
         /// </summary>
-        public MethodDefinition? GetMethod =>
-            Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Getter)?.Method;
+        public MethodDefinition? GetMethod
+        {
+            get => Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Getter)?.Method;
+            set => SetSemanticMethods(value, SetMethod);
+        }
 
         /// <summary>
         /// Gets the method definition representing the first set accessor of this property definition.
         /// </summary>
-        public MethodDefinition? SetMethod =>
-            Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Setter)?.Method;
+        public MethodDefinition? SetMethod
+        {
+            get => Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Setter)?.Method;
+            set => SetSemanticMethods(GetMethod, value);
+        }
 
         /// <summary>
         /// Clear <see cref="Semantics"/> and apply these methods to the property definition.

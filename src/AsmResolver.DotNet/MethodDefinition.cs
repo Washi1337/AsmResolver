@@ -8,10 +8,8 @@ using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet
 {
@@ -474,7 +472,44 @@ namespace AsmResolver.DotNet
         {
             get => (ImplAttributes & MethodImplAttributes.NoInlining) != 0;
             set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.NoInlining)
-                                    | (value ? MethodImplAttributes.NoInlining : 0);
+                | (value ? MethodImplAttributes.NoInlining : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the method should be inlined if possible.
+        /// </summary>
+        public bool IsAggressiveInlining
+        {
+            get => (ImplAttributes & MethodImplAttributes.AggressiveInlining) != 0;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.AggressiveInlining)
+                | (value ? MethodImplAttributes.AggressiveInlining : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the method contains hot code and should be aggressively optimized.
+        /// </summary>
+        public bool IsAggressiveOptimization
+        {
+            get => (ImplAttributes & MethodImplAttributes.AggressiveOptimization) != 0;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.AggressiveOptimization)
+                | (value ? MethodImplAttributes.AggressiveOptimization : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating that the JIT compiler should look for security mitigation attributes,
+        /// such as the user-defined <c>System.Runtime.CompilerServices.SecurityMitigationsAttribute</c>. If found,
+        /// the JIT compiler applies any related security mitigations. Available starting with .NET Framework 4.8.
+        /// </summary>
+        /// <remarks>
+        /// This is an undocumented flag and is currently not used:
+        /// Original addition: https://github.com/dotnet/dotnet-api-docs/pull/2253
+        /// Documentation removal: https://github.com/dotnet/dotnet-api-docs/pull/4652
+        /// </remarks>
+        public bool HasSecurityMitigations
+        {
+            get => (ImplAttributes & MethodImplAttributes.SecurityMitigations) != 0;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.SecurityMitigations)
+                | (value ? MethodImplAttributes.SecurityMitigations : 0);
         }
 
         /// <inheritdoc />

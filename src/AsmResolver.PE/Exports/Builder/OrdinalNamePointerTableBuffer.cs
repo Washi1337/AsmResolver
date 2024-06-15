@@ -63,19 +63,19 @@ namespace AsmResolver.PE.Exports.Builder
         public override uint GetPhysicalSize() => OrdinalTableSize + NamePointerTableSize;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             WriteOrdinalTable(writer);
             WriteNamePointerTable(writer);
         }
 
-        private void WriteNamePointerTable(IBinaryStreamWriter writer)
+        private void WriteNamePointerTable(BinaryStreamWriter writer)
         {
             foreach (var entry in _namedEntries)
                 writer.WriteUInt32(_nameTableBuffer.GetNameRva(entry.Name));
         }
 
-        private void WriteOrdinalTable(IBinaryStreamWriter writer)
+        private void WriteOrdinalTable(BinaryStreamWriter writer)
         {
             foreach (ushort ordinal in _ordinals)
                 writer.WriteUInt16(ordinal);

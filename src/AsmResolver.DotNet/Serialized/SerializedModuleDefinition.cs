@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using AsmResolver.DotNet.Collections;
-using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.DotNet.Serialized
@@ -25,7 +26,7 @@ namespace AsmResolver.DotNet.Serialized
         /// </summary>
         /// <param name="peImage">The image to interpret as a .NET module.</param>
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
-        public SerializedModuleDefinition(IPEImage peImage, ModuleReaderParameters readerParameters)
+        public SerializedModuleDefinition(PEImage peImage, ModuleReaderParameters readerParameters)
             : base(new MetadataToken(TableIndex.Module, 1))
         {
             if (peImage is null)
@@ -70,15 +71,34 @@ namespace AsmResolver.DotNet.Serialized
             OriginalTargetRuntime = DetectTargetRuntime();
 
             // Initialize metadata resolution engines.
-            var resolver = CreateAssemblyResolver(readerParameters.PEReaderParameters.FileService);
-            if (!string.IsNullOrEmpty(readerParameters.WorkingDirectory)
-                && resolver is AssemblyResolverBase resolverBase
-                && !resolverBase.SearchDirectories.Contains(readerParameters.WorkingDirectory!))
+            if (readerParameters.RuntimeContext is { } runtimeContext)
             {
-                resolverBase.SearchDirectories.Add(readerParameters.WorkingDirectory!);
+                RuntimeContext = runtimeContext;
+            }
+            else
+            {
+                RuntimeContext = new RuntimeContext(OriginalTargetRuntime, readerParameters);
+
+                if (RuntimeContext.AssemblyResolver is AssemblyResolverBase resolver)
+                {
+                    // Add current file's directory as a search directory (if present).
+                    if (!string.IsNullOrEmpty(peImage.FilePath)
+                        && Path.GetDirectoryName(peImage.FilePath) is { } directory
+                        && !resolver.SearchDirectories.Contains(directory))
+                    {
+                        resolver.SearchDirectories.Add(directory);
+                    }
+
+                    // Add current working directory as a search directory (if present).
+                    if (!string.IsNullOrEmpty(readerParameters.WorkingDirectory)
+                        && !resolver.SearchDirectories.Contains(readerParameters.WorkingDirectory!))
+                    {
+                        resolver.SearchDirectories.Add(readerParameters.WorkingDirectory!);
+                    }
+                }
             }
 
-            MetadataResolver = new DefaultMetadataResolver(resolver);
+            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
 
             // Prepare lazy RID lists.
             _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.Field, TableIndex.TypeDef,
@@ -94,7 +114,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        public override IDotNetDirectory DotNetDirectory => ReaderContext.Image.DotNetDirectory!;
+        public override DotNetDirectory DotNetDirectory => ReaderContext.Image.DotNetDirectory!;
 
         /// <summary>
         /// Gets the reading context that is used for reading the contents of the module.
@@ -138,32 +158,14 @@ namespace AsmResolver.DotNet.Serialized
             ReaderContext.TablesStream.GetIndexEncoder(codedIndex);
 
         /// <inheritdoc />
-        public override IEnumerable<TypeReference> GetImportedTypeReferences()
+        public override IEnumerable<IMetadataMember> EnumerateTableMembers(TableIndex tableIndex)
         {
-            var table = ReaderContext.TablesStream.GetTable(TableIndex.TypeRef);
+            var table = ReaderContext.TablesStream.GetTable(tableIndex);
 
             for (uint rid = 1; rid <= table.Count; rid++)
             {
-                if (TryLookupMember(new MetadataToken(TableIndex.TypeRef, rid), out var member)
-                    && member is TypeReference reference)
-                {
-                    yield return reference;
-                }
-            }
-        }
-
-        /// <inheritdoc />
-        public override IEnumerable<MemberReference> GetImportedMemberReferences()
-        {
-            var table = ReaderContext.TablesStream.GetTable(TableIndex.MemberRef);
-
-            for (uint rid = 1; rid <= table.Count; rid++)
-            {
-                if (TryLookupMember(new MetadataToken(TableIndex.MemberRef, rid), out var member)
-                    && member is MemberReference reference)
-                {
-                    yield return reference;
-                }
+                if (TryLookupMember(new MetadataToken(tableIndex, rid), out var member))
+                    yield return member;
             }
         }
 
@@ -289,7 +291,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetRuntimeVersion() => ReaderContext.Metadata!.VersionString;
+        protected override string GetRuntimeVersion() => ReaderContext.Metadata.VersionString;
 
         /// <inheritdoc />
         protected override IManagedEntryPoint? GetManagedEntryPoint()
@@ -312,7 +314,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IResourceDirectory? GetNativeResources() => ReaderContext.Image.Resources;
+        protected override ResourceDirectory? GetNativeResources() => ReaderContext.Image.Resources;
 
         /// <inheritdoc />
         protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReaderContext.Image.DebugData);

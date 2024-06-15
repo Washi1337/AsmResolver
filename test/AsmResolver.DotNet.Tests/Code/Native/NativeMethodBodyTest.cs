@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,18 +5,14 @@ using System.Runtime.InteropServices;
 using System.Text;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.Patching;
 using AsmResolver.PE;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.Code;
-using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
-using AsmResolver.PE.Platforms;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -36,7 +31,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
 
         private static NativeMethodBody CreateDummyBody(bool isVoid, bool is32Bit)
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.TheAnswer_NetFx);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TheAnswer_NetFx, TestReaderParameters);
 
             module.IsILOnly = false;
             if (is32Bit)
@@ -65,7 +60,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             return method.NativeMethodBody = new NativeMethodBody(method);
         }
 
-        private static IReadableSegment GetNewCodeSegment(IPEImage image)
+        private static IReadableSegment GetNewCodeSegment(PEImage image)
         {
             var methodTable = image.DotNetDirectory!.Metadata!
                 .GetStream<TablesStream>()
@@ -249,7 +244,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             module.Write(stream);
 
             // Reload and look up native method.
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             var method = newModule.GetAllTypes().SelectMany(t => t.Methods).First(m => m.IsNative);
 
             // Verify if code behind the entry address is consistent.

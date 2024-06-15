@@ -4,21 +4,18 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Serialized;
-using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Platforms;
 using AsmResolver.PE.Win32Resources;
 
@@ -51,7 +48,7 @@ namespace AsmResolver.DotNet
         private TokenAllocator? _tokenAllocator;
 
         private readonly LazyVariable<ModuleDefinition, string> _runtimeVersion;
-        private readonly LazyVariable<ModuleDefinition, IResourceDirectory?> _nativeResources;
+        private readonly LazyVariable<ModuleDefinition, ResourceDirectory?> _nativeResources;
         private IList<DebugDataEntry>? _debugData;
         private ReferenceImporter? _defaultImporter;
 
@@ -62,7 +59,7 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromBytes(byte[] buffer) =>
-            FromImage(PEImage.FromBytes(buffer));
+            FromBytes(buffer, new ModuleReaderParameters());
 
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
@@ -99,15 +96,7 @@ namespace AsmResolver.DotNet
         /// <param name="file">The portable executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IInputFile file) => FromImage(PEImage.FromFile(file));
-
-        /// <summary>
-        /// Reads a .NET module from the provided input file.
-        /// </summary>
-        /// <param name="file">The portable executable file to load.</param>
-        /// <returns>The module.</returns>
-        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IPEFile file) => FromImage(PEImage.FromFile(file));
+        public static ModuleDefinition FromFile(IInputFile file) => FromFile(file, new ModuleReaderParameters());
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -116,7 +105,25 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IPEFile file, ModuleReaderParameters readerParameters) =>
+        public static ModuleDefinition FromFile(IInputFile file, ModuleReaderParameters readerParameters) =>
+            FromImage(PEImage.FromFile(file, readerParameters.PEReaderParameters), readerParameters);
+
+        /// <summary>
+        /// Reads a .NET module from the provided input file.
+        /// </summary>
+        /// <param name="file">The portable executable file to load.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromFile(PEFile file) => FromFile(file, new ModuleReaderParameters());
+
+        /// <summary>
+        /// Reads a .NET module from the provided input file.
+        /// </summary>
+        /// <param name="file">The portable executable file to load.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromFile(PEFile file, ModuleReaderParameters readerParameters) =>
             FromImage(PEImage.FromFile(file, readerParameters.PEReaderParameters), readerParameters);
 
         /// <summary>
@@ -228,7 +235,7 @@ namespace AsmResolver.DotNet
         /// <param name="peImage">The image containing the .NET metadata.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage)
+        public static ModuleDefinition FromImage(PEImage peImage)
         {
             var moduleParameters = new ModuleReaderParameters(Path.GetDirectoryName(peImage.FilePath))
             {
@@ -247,11 +254,12 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET data directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReaderParameters readerParameters) =>
+        public static ModuleDefinition FromImage(PEImage peImage, ModuleReaderParameters readerParameters) =>
             new SerializedModuleDefinition(peImage, readerParameters);
 
-        // Disable non-nullable property initialization warnings for the CorLibTypeFactory and MetadataResolver
-        // properties. These are expected to be initialized by constructors that use this base constructor.
+        // Disable non-nullable property initialization warnings for the CorLibTypeFactory, RuntimeContext and
+        // MetadataResolver properties. These are expected to be initialized by constructors that use this base
+        // constructor.
 #pragma warning disable 8618
 
         /// <summary>
@@ -267,7 +275,7 @@ namespace AsmResolver.DotNet
             _encBaseId = new LazyVariable<ModuleDefinition, Guid>(x => x.GetEncBaseId());
             _managedEntryPoint = new LazyVariable<ModuleDefinition, IManagedEntryPoint?>(x => x.GetManagedEntryPoint());
             _runtimeVersion = new LazyVariable<ModuleDefinition, string>(x => x.GetRuntimeVersion());
-            _nativeResources = new LazyVariable<ModuleDefinition, IResourceDirectory?>(x => x.GetNativeResources());
+            _nativeResources = new LazyVariable<ModuleDefinition, ResourceDirectory?>(x => x.GetNativeResources());
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
 
@@ -295,7 +303,9 @@ namespace AsmResolver.DotNet
             Name = name;
 
             CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory(this);
-            MetadataResolver = new DefaultMetadataResolver(new DotNetFrameworkAssemblyResolver());
+            OriginalTargetRuntime = DetectTargetRuntime();
+            RuntimeContext = new RuntimeContext(OriginalTargetRuntime);
+            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
 
             TopLevelTypes.Add(new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0));
         }
@@ -310,13 +320,10 @@ namespace AsmResolver.DotNet
         {
             Name = name;
 
-            var importer = new ReferenceImporter(this);
-            corLib = (AssemblyReference) importer.ImportScope(corLib);
-
-            CorLibTypeFactory = new CorLibTypeFactory(corLib);
-
+            CorLibTypeFactory = new CorLibTypeFactory(corLib.ImportWith(DefaultImporter));
             OriginalTargetRuntime = DetectTargetRuntime();
-            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver(UncachedFileService.Instance));
+            RuntimeContext = new RuntimeContext(OriginalTargetRuntime);
+            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
 
             TopLevelTypes.Add(new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0));
         }
@@ -336,13 +343,22 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// When this property is <c>null</c>, the module is a new module that is not yet assembled.
         /// </remarks>
-        public virtual IDotNetDirectory? DotNetDirectory
+        public virtual DotNetDirectory? DotNetDirectory
         {
             get;
         } = null;
 
         /// <summary>
-        /// Gets the runtime that this module targeted upon creation or reading.
+        /// Gets the object describing the current active runtime context the module is loaded in.
+        /// </summary>
+        public RuntimeContext RuntimeContext
+        {
+            get;
+            protected set;
+        }
+
+        /// <summary>
+        /// Gets the runtime that this module was targeted for at compile-time.
         /// </summary>
         public DotNetRuntimeInfo OriginalTargetRuntime
         {
@@ -636,7 +652,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the contents of the native Win32 resources data directory of the underlying
         /// portable executable (PE) file.
         /// </summary>
-        public IResourceDirectory? NativeResourceDirectory
+        public ResourceDirectory? NativeResourceDirectory
         {
             get => _nativeResources.GetValue(this);
             set => _nativeResources.SetValue(value);
@@ -915,7 +931,7 @@ namespace AsmResolver.DotNet
         /// import new type references into the module. This method only serves as a way to easily get all the type
         /// references that were imported during the last compilation or assembly process.
         /// </remarks>
-        public virtual IEnumerable<TypeReference> GetImportedTypeReferences() => Enumerable.Empty<TypeReference>();
+        public virtual IEnumerable<TypeReference> GetImportedTypeReferences() => EnumerateTableMembers<TypeReference>(TableIndex.TypeRef);
 
         /// <summary>
         /// Obtains a list of member references that were imported into the module.
@@ -926,7 +942,43 @@ namespace AsmResolver.DotNet
         /// import new member references into the module. This method only serves as a way to easily get all the member
         /// references that were imported during the last compilation or assembly process.
         /// </remarks>
-        public virtual IEnumerable<MemberReference> GetImportedMemberReferences() => Enumerable.Empty<MemberReference>();
+        public virtual IEnumerable<MemberReference> GetImportedMemberReferences() => EnumerateTableMembers<MemberReference>(TableIndex.MemberRef);
+
+        /// <summary>
+        /// Enumerates all metadata members stored in the module.
+        /// </summary>
+        /// <param name="tableIndex">The table to enumerate the members for.</param>
+        /// <returns>The members.</returns>
+        /// <remarks>
+        /// The return value of this method does not update when new members are added or imported into the module.
+        /// This method only serves as a way to easily get all the member references that were imported during the last
+        /// compilation or assembly process. This method can also only enumerate members in a table for which there is
+        /// an explicit <see cref="IMetadataMember" /> implementation available, and will return an empty collection
+        /// for tables that do not have one.
+        /// </remarks>
+        public virtual IEnumerable<IMetadataMember> EnumerateTableMembers(TableIndex tableIndex)
+        {
+            return Enumerable.Empty<IMetadataMember>();
+        }
+
+        /// <summary>
+        /// Enumerates all metadata members stored in the module.
+        /// </summary>
+        /// <param name="tableIndex">The table to enumerate the members for.</param>
+        /// <typeparam name="TMember">The type of members to return.</typeparam>
+        /// <returns>The members.</returns>
+        /// <remarks>
+        /// The return value of this method does not update when new members are added or imported into the module.
+        /// This method only serves as a way to easily get all the member references that were imported during the last
+        /// compilation or assembly process. This method can also only enumerate members in a table for which there is
+        /// an explicit <see cref="IMetadataMember" /> implementation available, and will return an empty collection
+        /// for tables that do not have one.
+        /// </remarks>
+        public virtual IEnumerable<TMember> EnumerateTableMembers<TMember>(TableIndex tableIndex)
+            where TMember : IMetadataMember
+        {
+            return EnumerateTableMembers(tableIndex).Cast<TMember>();
+        }
 
         /// <summary>
         /// Enumerates all types (including nested types) defined in the module.
@@ -1133,7 +1185,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="NativeResourceDirectory"/> property.
         /// </remarks>
-        protected virtual IResourceDirectory? GetNativeResources() => null;
+        protected virtual ResourceDirectory? GetNativeResources() => null;
 
         /// <summary>
         /// Obtains the native debug data directory of the underlying PE image (if available).
@@ -1165,48 +1217,6 @@ namespace AsmResolver.DotNet
             return Assembly is not null && Assembly.TryGetTargetFramework(out var targetRuntime)
                 ? targetRuntime
                 : CorLibTypeFactory.ExtractDotNetRuntimeInfo();
-        }
-
-        /// <summary>
-        /// Creates an assembly resolver based on the corlib reference.
-        /// </summary>
-        /// <returns>The resolver.</returns>
-        protected IAssemblyResolver CreateAssemblyResolver(IFileService fileService)
-        {
-            string? directory = !string.IsNullOrEmpty(FilePath)
-                ? Path.GetDirectoryName(FilePath)
-                : null;
-
-            var runtime = OriginalTargetRuntime;
-
-            AssemblyResolverBase resolver;
-            switch (runtime.Name)
-            {
-                case DotNetRuntimeInfo.NetFramework:
-                case DotNetRuntimeInfo.NetStandard
-                    when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
-                    resolver = new DotNetFrameworkAssemblyResolver(fileService);
-                    break;
-
-                case DotNetRuntimeInfo.NetStandard
-                    when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(
-                        runtime.Version, out var coreVersion):
-                    resolver = new DotNetCoreAssemblyResolver(fileService, coreVersion);
-                    break;
-
-                case DotNetRuntimeInfo.NetCoreApp:
-                    resolver = new DotNetCoreAssemblyResolver(fileService, runtime.Version);
-                    break;
-
-                default:
-                    resolver = new DotNetFrameworkAssemblyResolver(fileService);
-                    break;
-            }
-
-            if (!string.IsNullOrEmpty(directory))
-                resolver.SearchDirectories.Add(directory!);
-
-            return resolver;
         }
 
         /// <inheritdoc />
@@ -1291,11 +1301,9 @@ namespace AsmResolver.DotNet
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
-        public void Write(IBinaryStreamWriter writer, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
+        public void Write(BinaryStreamWriter writer, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            fileBuilder
-                .CreateFile(ToPEImage(imageBuilder))
-                .Write(writer);
+            ToPEImage(imageBuilder).ToPEFile(fileBuilder).Write(writer);
         }
 
         /// <summary>
@@ -1303,7 +1311,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <returns>IPEImage built using <see cref="ManagedPEImageBuilder"/> by default</returns>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
-        public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder(), true);
+        public PEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder(), true);
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
@@ -1317,7 +1325,7 @@ namespace AsmResolver.DotNet
         /// <exception cref="MetadataBuilderException">
         /// Occurs when the construction of the PE image failed completely.
         /// </exception>
-        public IPEImage ToPEImage(IPEImageBuilder imageBuilder) => ToPEImage(imageBuilder, true);
+        public PEImage ToPEImage(IPEImageBuilder imageBuilder) => ToPEImage(imageBuilder, true);
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
@@ -1334,7 +1342,7 @@ namespace AsmResolver.DotNet
         /// <exception cref="MetadataBuilderException">
         /// Occurs when the construction of the PE image failed completely.
         /// </exception>
-        public IPEImage ToPEImage(IPEImageBuilder imageBuilder, bool throwOnNonFatalError)
+        public PEImage ToPEImage(IPEImageBuilder imageBuilder, bool throwOnNonFatalError)
         {
             var result = imageBuilder.CreateImage(this);
 

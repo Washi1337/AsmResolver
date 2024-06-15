@@ -1,6 +1,6 @@
 using System.Linq;
 using AsmResolver.DotNet.TestCases.Generics;
-using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.DotNet.Metadata;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadName()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == typeof(GenericType<,,>).Name);
 
             Assert.Equal(new Utf8String[]
@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadTypeOwner()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
             var token = typeof(GenericType<,,>).GetGenericArguments()[0].MetadataToken;
 
             var genericParameter = (GenericParameter) module.LookupMember(token);
@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMethodOwner()
         {
-            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
             var method = typeof(GenericType<,,>).GetMethod("GenericMethodInGenericType");
             var token = method.GetGenericArguments()[0].MetadataToken;
 
@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadSingleGenericParameterConstraint()
         {
-            var module = ModuleDefinition.FromFile(typeof(NonGenericType).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(NonGenericType).Assembly.Location, TestReaderParameters);
             var token = typeof(NonGenericType)
                 .GetMethod(nameof(NonGenericType.GenericMethodWithConstraints))
                 .GetGenericArguments()[0]
@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMultipleGenericParameterConstraints()
         {
-            var module = ModuleDefinition.FromFile(typeof(NonGenericType).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(NonGenericType).Assembly.Location, TestReaderParameters);
             var token = typeof(NonGenericType)
                 .GetMethod(nameof(NonGenericType.GenericMethodWithConstraints))
                 .GetGenericArguments()[1]

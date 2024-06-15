@@ -6,7 +6,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Types.Structs;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Tests
             var stream = new MemoryStream();
             field.Module.Write(stream);
 
-            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             return newModule
                 .TopLevelTypes.First(t => t.FullName == field.DeclaringType.FullName)
                 .Fields.First(f => f.Name == field.Name);
@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadName()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleField));
             Assert.Equal(nameof(SingleField.IntField), type.Fields[0].Name);
         }
@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Tests
         {
             const string newName = "NewName";
 
-            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleField));
             var field = type.Fields[0];
 
@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadDeclaringType()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
             var field = (FieldDefinition) module.LookupMember(
                 typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
             Assert.NotNull(field.DeclaringType);
@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadFieldSignature()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
             var field = (FieldDefinition) module.LookupMember(
                 typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
             Assert.NotNull(field.Signature);
@@ -70,7 +70,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentFieldSignature()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
             var field = (FieldDefinition) module.LookupMember(
                 typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
 
@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadFullName()
         {
-            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
             var field = (FieldDefinition) module.LookupMember(
                 typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
 
@@ -94,7 +94,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadFieldRva()
         {
-            var module = ModuleDefinition.FromFile(typeof(InitialValues).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(InitialValues).Assembly.Location, TestReaderParameters);
             var field = module
                 .TopLevelTypes.First(t => t.Name == nameof(InitialValues))
                 .Fields.First(f => f.Name == nameof(InitialValues.ByteArray));
@@ -109,7 +109,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentFieldRva()
         {
-            var module = ModuleDefinition.FromFile(typeof(InitialValues).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(InitialValues).Assembly.Location, TestReaderParameters);
             var field = module
                 .TopLevelTypes.First(t => t.Name == nameof(InitialValues))
                 .Fields.First(f => f.Name == nameof(InitialValues.ByteArray));
@@ -133,7 +133,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadInvalidFieldRva()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.FieldRvaTest);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.FieldRvaTest, TestReaderParameters);
             Assert.Throws<NotSupportedException>(() =>
                 module.GetModuleType()!.Fields.First(f => f.Name == "InvalidFieldRva").FieldRva);
 
@@ -145,7 +145,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadVirtualFieldRva()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_VirtualSegment);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_VirtualSegment, TestReaderParameters);
             var data = module.GetModuleType()!.Fields.First(f => f.Name == "__dummy__").FieldRva;
             var readableData = Assert.IsAssignableFrom<IReadableSegment>(data);
             Assert.Equal(new byte[4], readableData.ToArray());
@@ -155,7 +155,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNativeIntFieldRvaX86()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_IntPtrFieldRva_X86);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_IntPtrFieldRva_X86, TestReaderParameters);
             var data = module.GetModuleType()!.Fields.First(f => f.Name == "__dummy__").FieldRva;
             var readableData = Assert.IsAssignableFrom<IReadableSegment>(data);
             Assert.Equal(new byte[] {0xEF, 0xCD, 0xAB, 0x89}, readableData.ToArray());
@@ -164,7 +164,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadNativeIntFieldRvaX64()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_IntPtrFieldRva_X64);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_IntPtrFieldRva_X64, TestReaderParameters);
             var data = module.GetModuleType()!.Fields.First(f => f.Name == "__dummy__").FieldRva;
             var readableData = Assert.IsAssignableFrom<IReadableSegment>(data);
             Assert.Equal(new byte[] {0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01}, readableData.ToArray());
@@ -176,7 +176,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(nameof(ExplicitOffsetsStruct.BoolField), 100)]
         public void ReadFieldOffset(string name, int offset)
         {
-            var module = ModuleDefinition.FromFile(typeof(ExplicitOffsetsStruct).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(ExplicitOffsetsStruct).Assembly.Location, TestReaderParameters);
             var field = module
                 .TopLevelTypes.First(t => t.Name == nameof(ExplicitOffsetsStruct))
                 .Fields.First(f => f.Name == name);
@@ -190,7 +190,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(nameof(ExplicitOffsetsStruct.BoolField), 100)]
         public void PersistentFieldOffset(string name, int offset)
         {
-            var module = ModuleDefinition.FromFile(typeof(ExplicitOffsetsStruct).Assembly.Location);
+            var module = ModuleDefinition.FromFile(typeof(ExplicitOffsetsStruct).Assembly.Location, TestReaderParameters);
             var field = module
                 .TopLevelTypes.First(t => t.Name == nameof(ExplicitOffsetsStruct))
                 .Fields.First(f => f.Name == name);

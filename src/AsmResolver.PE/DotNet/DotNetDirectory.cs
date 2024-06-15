@@ -2,16 +2,16 @@ using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Resources;
 using AsmResolver.PE.DotNet.VTableFixups;
-using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.DotNet
 {
     /// <summary>
-    /// Provides a basic implementation of a CLR 2.0 data directory present in a PE image containing .NET metadata.
+    /// Represents a data directory containing the CLR 2.0 header and data directories of a .NET binary.
     /// </summary>
-    public class DotNetDirectory : SegmentBase, IDotNetDirectory
+    public class DotNetDirectory : SegmentBase
     {
-        private readonly LazyVariable<DotNetDirectory, IMetadata?> _metadata;
+        private readonly LazyVariable<DotNetDirectory, MetadataDirectory?> _metadata;
         private readonly LazyVariable<DotNetDirectory, DotNetResourcesDirectory?> _resources;
         private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _strongName;
         private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _codeManagerTable;
@@ -24,7 +24,7 @@ namespace AsmResolver.PE.DotNet
         /// </summary>
         public DotNetDirectory()
         {
-            _metadata = new LazyVariable<DotNetDirectory, IMetadata?>(x => x.GetMetadata());
+            _metadata = new LazyVariable<DotNetDirectory, MetadataDirectory?>(x => x.GetMetadata());
             _resources = new LazyVariable<DotNetDirectory, DotNetResourcesDirectory?>(x => x.GetResources());
             _strongName = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetStrongName());
             _codeManagerTable = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetCodeManagerTable());
@@ -33,77 +33,113 @@ namespace AsmResolver.PE.DotNet
             _managedNativeHeader = new LazyVariable<DotNetDirectory, IManagedNativeHeader?>(x => x.GetManagedNativeHeader());
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the major runtime version of the directory format.
+        /// </summary>
+        /// <remarks>
+        /// This field is set to 2 in most .NET binaries.
+        /// </remarks>
         public ushort MajorRuntimeVersion
         {
             get;
             set;
         } = 2;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the minor runtime version of the directory format.
+        /// </summary>
+        /// <remarks>
+        /// This field is set to 5 in most .NET binaries.
+        /// </remarks>
         public ushort MinorRuntimeVersion
         {
             get;
             set;
         } = 5;
 
-        /// <inheritdoc />
-        public IMetadata? Metadata
+        /// <summary>
+        /// Gets or sets the data directory containing the metadata of the .NET binary.
+        /// </summary>
+        public MetadataDirectory? Metadata
         {
             get => _metadata.GetValue(this);
             set => _metadata.SetValue(value);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the flags associated to the .NET binary.
+        /// </summary>
         public DotNetDirectoryFlags Flags
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the metadata token or entry point virtual address, depending on whether
+        /// <see cref="DotNetDirectoryFlags.NativeEntryPoint"/> is set in <see cref="Flags" />.
+        /// </summary>
+        /// <remarks>
+        /// Setting this property will not alter <see cref="Flags"/>. This means that even if a native entry point is
+        /// assigned to this property, the <see cref="DotNetDirectoryFlags.NativeEntryPoint"/> flag should be set
+        /// manually for a properly working .NET module.
+        /// </remarks>
         public DotNetEntryPoint EntryPoint
         {
             get;
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the data directory containing the embedded resources data of the .NET binary (if available).
+        /// </summary>
         public DotNetResourcesDirectory? DotNetResources
         {
             get => _resources.GetValue(this);
             set => _resources.SetValue(value);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the data directory containing the strong name signature of the .NET binary (if available).
+        /// </summary>
         public IReadableSegment? StrongName
         {
             get => _strongName.GetValue(this);
             set => _strongName.SetValue(value);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the data directory containing the code manager table of the .NET binary (if available).
+        /// </summary>
         public IReadableSegment? CodeManagerTable
         {
             get => _codeManagerTable.GetValue(this);
             set => _codeManagerTable.SetValue(value);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the data directory containing the VTable fixups that need to be applied when executing mixed
+        /// mode applications (if available).
+        /// </summary>
         public VTableFixupsDirectory? VTableFixups
         {
             get => _vtableFixups.GetValue(this);
             set => _vtableFixups.SetValue(value);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the data directory containing the addresses to native stubs of exports defined in the
+        /// .NET binary (if available).
+        /// </summary>
         public IReadableSegment? ExportAddressTable
         {
             get => _exportAddressTable.GetValue(this);
             set => _exportAddressTable.SetValue(value);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the data directory containing the managed native header of a mixed mode application (if available).
+        /// </summary>
         public IManagedNativeHeader? ManagedNativeHeader
         {
             get => _managedNativeHeader.GetValue(this);
@@ -120,26 +156,21 @@ namespace AsmResolver.PE.DotNet
             + 6 * DataDirectory.DataDirectorySize;  // data directories.
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
             writer.WriteUInt32(GetPhysicalSize());
             writer.WriteUInt16(MajorRuntimeVersion);
             writer.WriteUInt16(MinorRuntimeVersion);
-            CreateDataDirectoryHeader(Metadata).Write(writer);
+            DataDirectory.CreateForSegment(Metadata).Write(writer);
             writer.WriteUInt32((uint) Flags);
             writer.WriteUInt32(EntryPoint.GetRawValue());
-            CreateDataDirectoryHeader(DotNetResources).Write(writer);
-            CreateDataDirectoryHeader(StrongName).Write(writer);
-            CreateDataDirectoryHeader(CodeManagerTable).Write(writer);
-            CreateDataDirectoryHeader(VTableFixups).Write(writer);
-            CreateDataDirectoryHeader(ExportAddressTable).Write(writer);
-            CreateDataDirectoryHeader(ManagedNativeHeader).Write(writer);
+            DataDirectory.CreateForSegment(DotNetResources).Write(writer);
+            DataDirectory.CreateForSegment(StrongName).Write(writer);
+            DataDirectory.CreateForSegment(CodeManagerTable).Write(writer);
+            DataDirectory.CreateForSegment(VTableFixups).Write(writer);
+            DataDirectory.CreateForSegment(ExportAddressTable).Write(writer);
+            DataDirectory.CreateForSegment(ManagedNativeHeader).Write(writer);
         }
-
-        private static DataDirectory CreateDataDirectoryHeader(ISegment? directoryContents) =>
-            directoryContents is not null
-                ? new DataDirectory(directoryContents.Rva, directoryContents.GetPhysicalSize())
-                : new DataDirectory(0, 0);
 
         /// <summary>
         /// Obtains the data directory containing the metadata of the .NET binary.
@@ -148,7 +179,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Metadata"/> property
         /// </remarks>
-        protected virtual IMetadata? GetMetadata() => null;
+        protected virtual MetadataDirectory? GetMetadata() => null;
 
         /// <summary>
         /// Obtains the data directory containing the embedded resources data of the .NET binary.

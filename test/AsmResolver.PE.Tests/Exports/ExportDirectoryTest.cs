@@ -2,11 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Builder;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.Exports.Builder;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -24,14 +23,14 @@ namespace AsmResolver.PE.Tests.Exports
         [Fact]
         public void ReadName()
         {
-            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
+            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports, TestReaderParameters);
             Assert.Equal("SimpleDll.dll", image.Exports?.Name);
         }
 
         [Fact]
         public void ReadExportNames()
         {
-            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
+            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports, TestReaderParameters);
             Assert.Equal(new[]
             {
                 "NamedExport1",
@@ -42,7 +41,7 @@ namespace AsmResolver.PE.Tests.Exports
         [Fact]
         public void ReadExportAddresses()
         {
-            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
+            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports, TestReaderParameters);
             Assert.NotNull(image.Exports);
             Assert.Equal(new[]
             {
@@ -54,7 +53,7 @@ namespace AsmResolver.PE.Tests.Exports
         [Fact]
         public void ReadOrdinals()
         {
-            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
+            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports, TestReaderParameters);
             Assert.NotNull(image.Exports);
             Assert.Equal(new[]
             {
@@ -66,7 +65,7 @@ namespace AsmResolver.PE.Tests.Exports
         [Fact]
         public void ChangeBaseOrdinalShouldUpdateAllOrdinals()
         {
-            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
+            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports, TestReaderParameters);
             image.Exports!.BaseOrdinal = 10;
             Assert.Equal(new[]
             {
@@ -78,7 +77,7 @@ namespace AsmResolver.PE.Tests.Exports
         [Fact]
         public void RemoveExportShouldUpdateOrdinals()
         {
-            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
+            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports, TestReaderParameters);
             var export = image.Exports!.Entries[0];
             image.Exports.Entries.RemoveAt(0);
             Assert.Equal(0u, export.Ordinal);
@@ -88,7 +87,7 @@ namespace AsmResolver.PE.Tests.Exports
         [Fact]
         public void InsertExportShouldUpdateOrdinals()
         {
-            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
+            var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports, TestReaderParameters);
             image.Exports!.Entries.Insert(0, new ExportedSymbol(new VirtualAddress(0x1234), "NewExport"));
             Assert.Equal(new[]
             {
@@ -98,7 +97,7 @@ namespace AsmResolver.PE.Tests.Exports
             }, image.Exports.Entries.Select(e => e.Ordinal));
         }
 
-        private static IPEImage RebuildAndReloadManagedPE(IPEImage image)
+        private static PEImage RebuildAndReloadManagedPE(PEImage image)
         {
             // Build.
             using var tempStream = new MemoryStream();
@@ -107,14 +106,14 @@ namespace AsmResolver.PE.Tests.Exports
             newPeFile.Write(new BinaryStreamWriter(tempStream));
 
             // Reload.
-            var newImage = PEImage.FromBytes(tempStream.ToArray());
+            var newImage = PEImage.FromBytes(tempStream.ToArray(), TestReaderParameters);
             return newImage;
         }
 
         [Fact]
         public void PersistentExportLibraryName()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             image.Exports = new ExportDirectory("HelloWorld.dll")
             {
                 Entries = {new ExportedSymbol(new VirtualAddress(0x12345678), "TestExport")}
@@ -126,7 +125,7 @@ namespace AsmResolver.PE.Tests.Exports
         [Fact]
         public void PersistentExportedSymbol()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Prepare mock.
             var exportDirectory = new ExportDirectory("HelloWorld.dll");
@@ -148,7 +147,7 @@ namespace AsmResolver.PE.Tests.Exports
         [Fact]
         public void PersistentExportedSymbolByOrdinal()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Prepare mock.
             var exportDirectory = new ExportDirectory("HelloWorld.dll");
@@ -170,7 +169,7 @@ namespace AsmResolver.PE.Tests.Exports
         [Fact]
         public void PersistentExportedSymbolMany()
         {
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
             // Prepare mock.
             var exportDirectory = new ExportDirectory("HelloWorld.dll");
@@ -222,7 +221,7 @@ namespace AsmResolver.PE.Tests.Exports
         [Fact]
         public void ReadForwarderSymbol()
         {
-            var exports = PEImage.FromBytes(Properties.Resources.ForwarderDlls_ProxyDll).Exports!;
+            var exports = PEImage.FromBytes(Properties.Resources.ForwarderDlls_ProxyDll, TestReaderParameters).Exports!;
 
             var bar = exports.Entries.First(x => x.Name == "Bar");
             var baz = exports.Entries.First(x => x.Name == "Baz");
@@ -238,7 +237,7 @@ namespace AsmResolver.PE.Tests.Exports
             var file = PEFile.FromBytes(Properties.Resources.ForwarderDlls_ProxyDll);
 
             // Update a forwarder name.
-            var exports = PEImage.FromFile(file).Exports!;
+            var exports = PEImage.FromFile(file, TestReaderParameters).Exports!;
             var bar = exports.Entries.First(x => x.Name == "Bar");
             bar.ForwarderName = "ActualDll.Bar";
 
@@ -262,7 +261,7 @@ namespace AsmResolver.PE.Tests.Exports
             file.Write(stream);
 
             // Verify new forwarder symbol is present.
-            var newExports = PEImage.FromBytes(stream.ToArray()).Exports!;
+            var newExports = PEImage.FromBytes(stream.ToArray(), TestReaderParameters).Exports!;
             var newBar = newExports.Entries.First(x => x.Name == "Bar");
             Assert.Equal("ActualDll.Bar", newBar.ForwarderName);
 

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
@@ -14,14 +13,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Gets the layout of the table.
         /// </summary>
         TableLayout Layout
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the size of an index into this table.
-        /// </summary>
-        IndexSize IndexSize
         {
             get;
         }
@@ -101,6 +92,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Serializes the table to an output stream, according to the table layout provided in <see cref="Layout" />.
         /// </summary>
         /// <param name="writer">The output stream to write to.</param>
-        void Write(IBinaryStreamWriter writer);
+        void Write(BinaryStreamWriter writer);
     }
 }
