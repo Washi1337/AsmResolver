@@ -93,6 +93,33 @@ var module = ModuleDefinition.FromModuleBaseAddress(hInstance);
 For more information on customizing the reading process, see [Advanced Module Reading](advanced-module-reading.md).
 
 
+## Opening multiple .NET modules using Runtime Contexts
+
+By default, AsmResolver auto-detects the runtime the module originally targets, and each module assumes their own set of caches and resolved dependencies.
+
+To force a module to be loaded as a specific runtime, define a `RuntimeContext` with the provided runtime info:
+
+```csharp
+// Define a context targeting .NET Core 3.1.
+var context = new RuntimeContext(new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(3, 1)));
+
+// Load module within the context.
+var module = ModuleDefinition.FromFile(@"C:\Path\To\File.exe", new ModuleReaderParameters(context));
+```
+
+Modules can also be loaded explicitly into an existing context from another module:
+
+```csharp
+ModuleDefinition primaryModule = ...;
+
+// Load a module within the same context as the primary module.
+var secondaryModule = ModuleDefinition.FromFile("C:\Path\To\Dependency.dll", new ModuleReaderParameters(primaryModule.RuntimeContext));
+```
+
+Reusing an existing context ensures that the same target runtime is assumed, and that equivalent assembly references resolve to the same assembly definition instances.
+This provides additional caching performance, and avoids many problems when processing multiple files at once.
+
+
 ## Writing a .NET module
 
 Writing a .NET module can be done through one of the `Write` method
