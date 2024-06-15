@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Memory
         /// garbage collector.
         /// </summary>
         /// <remarks>
-        /// This is an equivalent to <see cref="RuntimeHelpers.IsReferenceOrContainsReferences{T}"/>.
+        /// This is an equivalent to <c>RuntimeHelpers.IsReferenceOrContainsReferences</c>.
         /// </remarks>
         IsReferenceOrContainsReferences = 0b100
     }

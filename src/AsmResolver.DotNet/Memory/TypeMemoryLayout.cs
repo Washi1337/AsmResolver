@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet.Memory
         /// tracked by the garbage collector.
         /// </summary>
         /// <remarks>
-        /// This is an equivalent to <see cref="RuntimeHelpers.IsReferenceOrContainsReferences{T}"/>.
+        /// This is an equivalent to <c>RuntimeHelpers.IsReferenceOrContainsReferences</c>.
         /// </remarks>
         public bool IsReferenceOrContainsReferences => (Attributes & MemoryLayoutAttributes.IsReferenceOrContainsReferences) != 0;
 

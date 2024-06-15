@@ -47,6 +47,9 @@ namespace AsmResolver.IO
         BinaryStreamReader CreateReader(ulong address, uint rva, uint length);
     }
 
+    /// <summary>
+    /// Provides extension methods to various I/O related interfaces.
+    /// </summary>
     public static partial class IOExtensions
     {
         /// <summary>

@@ -74,7 +74,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         public const string SpecialBuildKey = "SpecialBuild";
 
-        private readonly IDictionary<string, string> _entries = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _entries = new();
 
         /// <summary>
         /// Creates a new string table.
@@ -184,26 +184,30 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <inheritdoc />
         public bool ContainsKey(string key) => _entries.ContainsKey(key);
 
+#pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
+
         /// <inheritdoc />
         public bool TryGetValue(string key, [NotNullWhen(true)] out string? value) => _entries.TryGetValue(key, out value);
 
+#pragma warning restore CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
+
         /// <inheritdoc />
-        public void Add(KeyValuePair<string, string> item) => _entries.Add(item);
+        public void Add(KeyValuePair<string, string> item) => ((IDictionary<string, string>) _entries).Add(item);
 
         /// <inheritdoc />
         public bool Remove(string key) => _entries.Remove(key);
 
         /// <inheritdoc />
-        public bool Remove(KeyValuePair<string, string> item) => _entries.Remove(item);
+        public bool Remove(KeyValuePair<string, string> item) => ((IDictionary<string, string>) _entries).Remove(item);
 
         /// <inheritdoc />
         public void Clear() => _entries.Clear();
 
         /// <inheritdoc />
-        public bool Contains(KeyValuePair<string, string> item) => _entries.Contains(item);
+        public bool Contains(KeyValuePair<string, string> item) => ((IDictionary<string, string>) _entries).Contains(item);
 
         /// <inheritdoc />
-        public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex) => _entries.CopyTo(array, arrayIndex);
+        public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex) => ((IDictionary<string, string>) _entries).CopyTo(array, arrayIndex);
 
         /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => _entries.GetEnumerator();
