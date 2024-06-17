@@ -734,21 +734,28 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
 
     private static bool TryPatchSegment(BuilderContext context, ISegment? segment, uint rva, uint size)
     {
-        if (segment is null || context.BaseImage?.PEFile is not { } peFile)
+        // Does the RVA physically exist in the PE?
+        if (segment is null
+            || !context.TryGetSectionContainingRva(rva, out var section)
+            || section.Contents is null)
+        {
+            return false;
+        }
+
+        ulong fileOffset = section.RvaToFileOffset(rva);
+        if (!section.ContainsFileOffset(fileOffset))
             return false;
 
         // Before we can measure size, we need to update offsets.
         segment.UpdateOffsets(new RelocationParameters(
             context.Image.ImageBase,
-            peFile.RvaToFileOffset(rva),
+            fileOffset,
             rva,
             context.Platform.Is32Bit
         ));
 
         // Do we fit in the existing segment?
-        if (segment.GetPhysicalSize() <= size
-            && context.TryGetSectionContainingRva(rva, out var section)
-            && section.Contents is not null)
+        if (segment.GetPhysicalSize() <= size)
         {
             uint relativeOffset = rva - section.Rva;
             section.Contents = section.Contents.AsPatchedSegment().Patch(relativeOffset, segment);
