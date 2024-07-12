@@ -689,31 +689,37 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets a value indicating whether the method is a get method for a property.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Semantics))]
         public bool IsGetMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.Getter) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a set method for a property.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Semantics))]
         public bool IsSetMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.Setter) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is an add method for an event.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Semantics))]
         public bool IsAddMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.AddOn) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a remove method for an event.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Semantics))]
         public bool IsRemoveMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.RemoveOn) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a fire method for an event.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Semantics))]
         public bool IsFireMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.Fire) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a (class) constructor.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Name))]
         public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && Name?.Value is ".cctor" or ".ctor";
 
         /// <summary>
