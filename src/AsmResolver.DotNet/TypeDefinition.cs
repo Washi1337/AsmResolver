@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
@@ -451,6 +452,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets a value indicating whether the type is enclosed by another type.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(DeclaringType))]
         public bool IsNested => DeclaringType != null;
 
         /// <summary>
@@ -469,16 +471,19 @@ namespace AsmResolver.DotNet
         IResolutionScope? ITypeDescriptor.Scope => GetDeclaringScope();
 
         /// <inheritdoc />
+        [MemberNotNullWhen(true, nameof(BaseType))]
         public bool IsValueType => BaseType is {} && (BaseType.IsTypeOf("System", nameof(ValueType)) || IsEnum);
 
         /// <summary>
         /// Gets a value indicating whether the type defines an enumeration of discrete values.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(BaseType))]
         public bool IsEnum => BaseType?.IsTypeOf("System", nameof(Enum)) ?? false;
 
         /// <summary>
         /// Gets a value indicating whether the type describes a delegate referring to a method.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(BaseType))]
         public bool IsDelegate
         {
             get
@@ -499,6 +504,7 @@ namespace AsmResolver.DotNet
         /// If the global (i.e., &lt;Module&gt;) type was not added or does not exist yet in the <see cref="Module"/>,
         /// this will return <c>false</c>.
         /// </remarks>
+        [MemberNotNullWhen(true, nameof(Module))]
         public bool IsModuleType
         {
             get
@@ -511,6 +517,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Determines whether the type is marked as read-only.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(BaseType))]
         public bool IsReadOnly =>
             IsValueType
             && this.HasCustomAttribute("System.Runtime.CompilerServices", nameof(ReadOnlyAttribute));
@@ -518,6 +525,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Determines whether the type is marked with the IsByRefLike attribute, indicating a ref struct definition.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(BaseType))]
         public bool IsByRefLike =>
             IsValueType
             && this.HasCustomAttribute("System.Runtime.CompilerServices", "IsByRefLikeAttribute");
