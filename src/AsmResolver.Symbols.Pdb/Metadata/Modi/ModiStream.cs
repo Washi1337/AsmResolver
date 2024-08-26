@@ -10,7 +10,7 @@ public class ModiStream : SegmentBase
 {
     private readonly LazyVariable<ModiStream, IReadableSegment?> _symbols;
     private readonly LazyVariable<ModiStream, IReadableSegment?> _c11LineInfo;
-    private readonly LazyVariable<ModiStream, IReadableSegment?> _c13LineInfo;
+    private readonly LazyVariable<ModiStream, C13LineInfoStream?> _c13LineInfo;
     private readonly LazyVariable<ModiStream, IReadableSegment?> _globalReferences;
 
     /// <summary>
@@ -20,7 +20,7 @@ public class ModiStream : SegmentBase
     {
         _symbols = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetSymbols());
         _c11LineInfo = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetC11LineInfo());
-        _c13LineInfo = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetC13LineInfo());
+        _c13LineInfo = new LazyVariable<ModiStream, C13LineInfoStream?>(x => x.GetC13LineInfo());
         _globalReferences = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetGlobalReferences());
     }
 
@@ -57,7 +57,7 @@ public class ModiStream : SegmentBase
     /// <summary>
     /// Gets or sets the sub-stream containing the C13-style line information.
     /// </summary>
-    public IReadableSegment? C13LineInfo
+    public C13LineInfoStream? C13LineInfo
     {
         get => _c13LineInfo.GetValue(this);
         set => _c13LineInfo.SetValue(value);
@@ -111,7 +111,7 @@ public class ModiStream : SegmentBase
     /// <remarks>
     /// This method is called upon initialization of the <see cref="C13LineInfo"/> property.
     /// </remarks>
-    protected virtual IReadableSegment? GetC13LineInfo() => null;
+    protected virtual C13LineInfoStream? GetC13LineInfo() => null;
 
     /// <summary>
     /// Obtains the sub-stream containing the global references.

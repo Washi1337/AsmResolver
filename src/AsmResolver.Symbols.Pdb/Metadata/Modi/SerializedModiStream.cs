@@ -32,6 +32,8 @@ public class SerializedModiStream : ModiStream
     /// <param name="c13Size">The size of the C13-style line information sub-stream.</param>
     public SerializedModiStream(BinaryStreamReader reader, uint symbolSize, uint c11Size, uint c13Size)
     {
+        _reader = reader;
+
         _symbolSize = symbolSize >= 4
             ? symbolSize - 4
             : 0;
@@ -40,23 +42,21 @@ public class SerializedModiStream : ModiStream
         _c13Size = c13Size;
 
         Signature = reader.ReadUInt32();
-
-        _reader = reader;
     }
 
     /// <inheritdoc />
     protected override IReadableSegment? GetSymbols() => _symbolSize > 0
-        ? _reader.Fork().ReadSegment(_symbolSize)
+        ? _reader.ForkRelative(sizeof(uint)).ReadSegment(_symbolSize)
         : null;
 
     /// <inheritdoc />
     protected override IReadableSegment? GetC11LineInfo() => _c11Size > 0
-        ? _reader.ForkRelative(_symbolSize).ReadSegment(_c11Size)
+        ? _reader.ForkRelative(sizeof(uint) + _symbolSize).ReadSegment(_c11Size)
         : null;
 
     /// <inheritdoc />
-    protected override IReadableSegment? GetC13LineInfo() => _c13Size > 0
-        ? _reader.ForkRelative(_symbolSize + _c11Size).ReadSegment(_c13Size)
+    protected override C13LineInfoStream? GetC13LineInfo() => _c13Size > 0
+        ? new SerializedC13LineInfoStream(_reader.ForkRelative(sizeof(uint) + _symbolSize + _c11Size, _c13Size))
         : null;
 
     /// <inheritdoc />
