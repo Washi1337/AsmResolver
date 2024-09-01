@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
@@ -183,7 +183,7 @@ namespace AsmResolver.DotNet.Signatures
             // Check that every type argument is compatible with each other.
             for (int i = 0; i < TypeArguments.Count; i++)
             {
-                var variance = genericType?.GenericParameters[i].Attributes & GenericParameterAttributes.VarianceMask;
+                var variance = genericType?.GenericParameters[i].Variance;
 
                 bool argumentIsCompatible = variance switch
                 {
