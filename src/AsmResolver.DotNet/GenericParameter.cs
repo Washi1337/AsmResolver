@@ -92,6 +92,70 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets or sets a value indicating the variance of this generic parameter.
+        /// </summary>
+        public GenericParameterAttributes Variance
+        {
+            get => Attributes & GenericParameterAttributes.VarianceMask;
+            set => Attributes = (Attributes & ~GenericParameterAttributes.VarianceMask)
+                                | value & GenericParameterAttributes.VarianceMask;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this generic parameter is <see cref="GenericParameterAttributes.NonVariant"/>.
+        /// </summary>
+        public bool IsNonVariant
+        {
+            get => Variance == GenericParameterAttributes.NonVariant;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this generic parameter is <see cref="GenericParameterAttributes.Covariant"/>.
+        /// </summary>
+        public bool IsCovariant
+        {
+            get => Variance == GenericParameterAttributes.Covariant;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this generic parameter is <see cref="GenericParameterAttributes.Contravariant"/>.
+        /// </summary>
+        public bool IsContravariant
+        {
+            get => Variance == GenericParameterAttributes.Contravariant;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this generic parameter has a <see cref="GenericParameterAttributes.ReferenceTypeConstraint"/>.
+        /// </summary>
+        public bool HasReferenceTypeConstraint
+        {
+            get => (Attributes & GenericParameterAttributes.ReferenceTypeConstraint) != 0;
+            set => Attributes = (Attributes & ~GenericParameterAttributes.ReferenceTypeConstraint)
+                                | (value ? GenericParameterAttributes.ReferenceTypeConstraint : default);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this generic parameter has a <see cref="GenericParameterAttributes.NotNullableValueTypeConstraint"/>.
+        /// </summary>
+        public bool HasNotNullableValueTypeConstraint
+        {
+            get => (Attributes & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0;
+            set => Attributes = (Attributes & ~GenericParameterAttributes.NotNullableValueTypeConstraint)
+                                | (value ? GenericParameterAttributes.NotNullableValueTypeConstraint : default);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this generic parameter has a <see cref="GenericParameterAttributes.DefaultConstructorConstraint"/>.
+        /// </summary>
+        public bool HasDefaultConstructorConstraint
+        {
+            get => (Attributes & GenericParameterAttributes.DefaultConstructorConstraint) != 0;
+            set => Attributes = (Attributes & ~GenericParameterAttributes.DefaultConstructorConstraint)
+                                | (value ? GenericParameterAttributes.DefaultConstructorConstraint : default);
+        }
+
+        /// <summary>
         /// Gets the index of this parameter within the list of generic parameters that the owner defines.
         /// </summary>
         public ushort Number => Owner is null ? (ushort) 0 : (ushort) Owner.GenericParameters.IndexOf(this);
