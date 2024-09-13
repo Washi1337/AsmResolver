@@ -10,8 +10,13 @@ namespace AsmResolver.DotNet.Signatures
     /// <remarks>
     /// This type signature should not be used directly.
     /// </remarks>
-    public class SentinelTypeSignature : TypeSignature
+    public sealed class SentinelTypeSignature : TypeSignature
     {
+        /// <summary>
+        /// The singleton instance of the sentinel type signature.
+        /// </summary>
+        public static SentinelTypeSignature Instance { get; } = new();
+
         /// <inheritdoc />
         public override ElementType ElementType => ElementType.Sentinel;
 
@@ -26,6 +31,10 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public override bool IsValueType => false;
+
+        private SentinelTypeSignature()
+        {
+        }
 
         /// <inheritdoc />
         public override TypeDefinition? Resolve() => throw new InvalidOperationException();

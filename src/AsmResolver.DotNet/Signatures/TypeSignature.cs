@@ -135,7 +135,7 @@ namespace AsmResolver.DotNet.Signatures
                         FromReader(ref context, ref reader));
 
                 case ElementType.Sentinel:
-                    return new SentinelTypeSignature();
+                    return SentinelTypeSignature.Instance;
 
                 case ElementType.Pinned:
                     return new PinnedTypeSignature(FromReader(ref context, ref reader));
