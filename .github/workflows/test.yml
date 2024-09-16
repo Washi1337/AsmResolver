@@ -1,0 +1,138 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+      - development
+      - simple
+    paths-ignore:
+      - '.github/workflows/docs.yml'
+      - 'docs/**'
+  pull_request:
+    branches:
+      - master
+      - development
+    paths-ignore:
+      - '.github/workflows/docs.yml'
+      - 'docs/*'
+  workflow_dispatch: 
+
+concurrency:
+  group: ${{github.workflow}}-${{github.event.pull_request.number || github.ref}}
+  cancel-in-progress: true
+
+env:
+  # Right now we can't run experimental tests that can fail, since it will affect the PR
+  # We could potentially exclude experimental build on PR and only run it on master push
+  EXPERIMENTAL: false
+
+  # You are interested in changing these values
+  BUILD_CONFIGURATIONS:                 "['Release']"
+  DOTNET_TARGET_FRAMEWORKS:             "['netcoreapp3.1', 'net5.0', 'net6.0', 'net7.0', 'net8.0']"
+  DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64: "['net6.0', 'net7.0', 'net8.0']"
+  FRAMEWORK_TARGET_FRAMEWORKS:          "['net35', 'net48']"
+
+jobs:
+
+  # https://stackoverflow.com/a/77549656
+  variables:
+    name: Variable Accessibility Workaround for Jobs
+    runs-on: ubuntu-latest
+    outputs:
+      EXPERIMENTAL: ${{env.EXPERIMENTAL}}
+      BUILD_CONFIGURATIONS: ${{env.BUILD_CONFIGURATIONS}}
+      DOTNET_TARGET_FRAMEWORKS: ${{env.DOTNET_TARGET_FRAMEWORKS}}
+      DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64: ${{env.DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64}}
+      FRAMEWORK_TARGET_FRAMEWORKS: ${{env.FRAMEWORK_TARGET_FRAMEWORKS}}
+    steps:
+      - name: Compute outputs
+        run: |
+          echo "EXPERIMENTAL=${{env.EXPERIMENTAL}}" >> $GITHUB_OUTPUT
+          echo "BUILD_CONFIGURATIONS=${{env.BUILD_CONFIGURATIONS}}" >> $GITHUB_OUTPUT
+          echo "DOTNET_TARGET_FRAMEWORKS=${{env.DOTNET_TARGET_FRAMEWORKS}}" >> $GITHUB_OUTPUT
+          echo "DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64=${{env.DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64}}" >> $GITHUB_OUTPUT
+          echo "FRAMEWORK_TARGET_FRAMEWORKS=${{env.FRAMEWORK_TARGET_FRAMEWORKS}}" >> $GITHUB_OUTPUT
+
+  build:
+    name: Build
+    needs: [variables]
+    strategy:
+      matrix:
+        image: [ 
+          { os: 'windows', code: 'windows-latest', arch: 'x64' },
+          { os: 'windows', code: 'windows-latest', arch: 'x86' },
+        ]
+        build_configuration: ${{fromJson(needs.variables.outputs.BUILD_CONFIGURATIONS)}}
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      os: ${{matrix.image.os}}
+      image: ${{matrix.image.code}}
+      architecture: ${{matrix.image.arch}}
+      build_configuration: ${{matrix.build_configuration}}
+
+  test:
+    name: Test
+    needs: [variables, build]
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [ 
+          { os: 'windows', code: 'windows-latest', arch: 'x64' },
+          { os: 'windows', code: 'windows-latest', arch: 'x86' },
+          { os: 'ubuntu', code: 'ubuntu-latest', arch: 'x64' },
+          { os: 'macos', code: 'macos-13', arch: 'x64' },
+          { os: 'macos', code: 'macos-14', arch: 'arm64' },
+          { os: 'macos', code: 'macos-14', arch: 'x64' },
+        ]
+        build_configuration: ${{fromJson(needs.variables.outputs.BUILD_CONFIGURATIONS)}}
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+      os: ${{matrix.image.os}}
+      image: ${{matrix.image.code}}
+      architecture: ${{matrix.image.arch}}
+      dotnet_target_frameworks: ${{needs.variables.outputs.DOTNET_TARGET_FRAMEWORKS}}
+      build_configuration: ${{matrix.build_configuration}}
+      #ignore non-windows tests since support is yet lacking
+      experimental: ${{matrix.image.os != 'windows'}}
+
+  publish:
+    name: Publish NuGet Packages
+    needs: [variables, test]
+    uses: ./.github/workflows/reusable-publish.yml
+    with:
+      image: 'windows-latest'
+      architecture: 'x64'
+      build_configuration: 'Release'
+
+  test-results:
+    name: Download and Upload Test Results
+    needs: [variables, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+     
+      - name: Download and Publish Test Results
+        uses: ./.github/actions/test-results-download-publish
+
+      - name: Download and Publish Test Results
+        uses: ./.github/actions/test-results-download-publish
+        with:
+          experimental: true
+
+  cleanup-build-output:
+    name: Cleanup Build Output
+    needs: [variables, test-results, publish]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: joutvhu/delete-artifact@v2
+        with:
+          pattern: build-cache-*
+      - uses: joutvhu/delete-artifact@v2
+        with:
+          pattern: test-results-*
+      - uses: joutvhu/delete-artifact@v2
+        with:
+          pattern: experimental-test-results-*

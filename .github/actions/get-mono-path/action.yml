@@ -1,0 +1,47 @@
+name: Get Mono Path
+description: Get Mono path for the architecture
+
+inputs:
+  os:
+    description: 'The OS to use'
+    required: true
+  architecture:
+    description: 'The architecture to use'
+    required: true
+
+outputs:
+  path:
+    description: 'The Mono path for the architecture'
+    value: ${{ steps.set-path.outputs.path }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get Program Files path for x86
+      if: ${{inputs.os == 'windows' && inputs.architecture == 'x86'}}
+      uses: ./.github/actions/get-program-files
+      id: get-program-files-x86
+      with:
+        architecture: x86
+        
+    - name: Get Program Files path for x64
+      if: ${{inputs.os == 'windows' && (inputs.architecture == 'x86' || inputs.architecture == 'x64')}}
+      uses: ./.github/actions/get-program-files
+      id: get-program-files-x64
+      with:
+        architecture: x64
+
+    - name: Set Mono path for ${{inputs.architecture}}
+      id: set-path
+      run: |
+        if ('${{inputs.os == 'windows'}}' -eq 'true') {
+          if ('${{inputs.architecture == 'x86'}}' -eq 'true') {
+            $mono = "${{steps.get-program-files-x86.outputs.path}}/Mono/bin/mono.exe";
+          } else {
+            $mono = "${{steps.get-program-files-x64.outputs.path}}/Mono/bin/mono.exe";
+          }
+        } else {
+          $mono = 'mono';
+        }
+        "path=$mono" | Out-File -FilePath $env:GITHUB_OUTPUT -Append;
+      shell: pwsh

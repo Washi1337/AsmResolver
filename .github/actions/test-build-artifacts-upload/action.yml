@@ -1,0 +1,22 @@
+name: Upload Build Artifacts
+description: Upload the build artifacts for the specified image and build configuration
+
+inputs:
+  image:
+    description: 'The image to use'
+    required: true
+  architecture:
+    description: 'The architecture to use'
+    required: true
+  build_configuration:
+    description: 'The build configuration to use'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: artifacts-${{inputs.image}}-${{inputs.architecture}}-${{inputs.build_configuration}}
+        path: artifacts/

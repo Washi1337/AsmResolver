@@ -1,33 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <Title>AsmResolver.DotNet.Dynamic</Title>
-        <Description>Dynamic method support for the AsmResolver executable file inspection toolsuite.</Description>
-        <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly dynamic</PackageTags>
-        <NoWarn>1701;1702;NU5105</NoWarn>
-    </PropertyGroup>
+  <PropertyGroup>
+    <Title>AsmResolver.DotNet.Dynamic</Title>
+    <Description>Dynamic method support for the AsmResolver executable file inspection toolsuite.</Description>
+    <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly dynamic</PackageTags>
+    <IsTrimmable>false</IsTrimmable>
+  </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\AsmResolver.DotNet.Dynamic.xml</DocumentationFile>
-    </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DocumentationFile>bin\Debug\AsmResolver.DotNet.Dynamic.xml</DocumentationFile>
+  </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\AsmResolver.DotNet.Dynamic.xml</DocumentationFile>
-    </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile>bin\Release\AsmResolver.DotNet.Dynamic.xml</DocumentationFile>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Nullable" Version="1.3.1">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
+  </ItemGroup>
 
 </Project>

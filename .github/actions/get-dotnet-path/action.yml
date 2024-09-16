@@ -1,0 +1,54 @@
+name: Get .NET Path
+description: Get .NET path for the architecture
+
+inputs:
+  os:
+    description: 'The OS to use'
+    required: true
+  architecture:
+    description: 'The architecture to use'
+    required: true
+
+outputs:
+  path:
+    description: 'The .NET path for the architecture'
+    value: ${{ steps.set-path.outputs.path }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get Program Files path for x86
+      if: ${{inputs.os == 'windows' && inputs.architecture == 'x86'}}
+      uses: ./.github/actions/get-program-files
+      id: get-program-files-x86
+      with:
+        architecture: x86
+        
+    - name: Get Program Files path for x64
+      if: ${{inputs.os == 'windows' && (inputs.architecture == 'x86' || inputs.architecture == 'x64')}}
+      uses: ./.github/actions/get-program-files
+      id: get-program-files-x64
+      with:
+        architecture: x64
+
+    - name: Set .NET path for ${{inputs.architecture}}
+      id: set-path
+      run: |
+        if ('${{inputs.os == 'windows'}}' -eq 'true') {
+          if ('${{inputs.architecture == 'x86'}}' -eq 'true') {
+            $dotnet = "${{steps.get-program-files-x86.outputs.path}}/dotnet/dotnet.exe";
+          } else {
+            $dotnet = "${{steps.get-program-files-x64.outputs.path}}/dotnet/dotnet.exe";
+          }
+        } elseif ('${{inputs.image == 'macos-14'}}' -eq 'true') {
+          if ('${{inputs.architecture == 'x64'}}' -eq 'true') {
+            $dotnet = "/Users/runner/.dotnet/x64/dotnet";
+          } else {
+            $dotnet = "/Users/runner/.dotnet/dotnet";
+          }
+        } else {
+          # Ubuntu only has x64
+          $dotnet = 'dotnet';
+        }
+        "path=$dotnet" | Out-File -FilePath $env:GITHUB_OUTPUT -Append;
+      shell: pwsh

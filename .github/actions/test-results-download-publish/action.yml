@@ -1,0 +1,27 @@
+name: Download and Publish Test Results
+description: Download the test results for the specified operating system and build configuration
+
+inputs:
+  experimental:
+    required: false
+    default: "false"
+    description: 'Whether the tests are mandatory for the build to pass'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download Test Results
+      uses: actions/download-artifact@v4
+      with:
+        pattern: ${{(inputs.experimental == 'true' && 'experimental-') || ''}}test-results-*
+        path: test-results
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        check_name: Test Results ${{(inputs.experimental == 'true' && '(Experimental)') || ''}}
+        files: test-results/**/*.trx
+        fail_on: ${{(inputs.experimental == 'true' && 'nothing') || 'test failures'}}
+        #check_run: ${{inputs.experimental != 'true'}}
+        comment_mode: ${{(inputs.experimental == 'true' && 'off') || 'always'}}

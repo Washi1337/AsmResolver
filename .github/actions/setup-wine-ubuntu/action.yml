@@ -1,0 +1,30 @@
+name: Install Wine on Ubuntu
+description: Install Wine on Ubuntu
+
+runs:
+  using: "composite"
+  steps:
+    - run: sudo dpkg --add-architecture i386
+      shell: bash
+
+    - run: |
+        sudo mkdir -pm755 /etc/apt/keyrings;
+        sudo wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key;
+        sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
+      shell: bash
+
+    - run: sudo apt-get update
+      shell: bash
+
+    - run: sudo apt install --install-recommends winehq-staging=${{env.WINE_VERSION}}
+      shell: bash
+      env: 
+        WINE_VERSION: 9.17~jammy-1
+   
+    - run: |
+        mkdir -p /usr/share/wine/mono
+        curl -L -o mono.tar.xz ${{env.WINE_MONO}}
+        tar -xf mono.tar.xz -C /usr/share/wine/mono
+      shell: bash
+      env: 
+        WINE_MONO: https://github.com/madewokherd/wine-mono/releases/download/wine-mono-9.3.0/wine-mono-9.3.0-x86.tar.xz
