@@ -5,10 +5,6 @@ name: Reusable Workflow Test
 on:
   workflow_call:
     inputs:
-      os:
-        required: true
-        type: string
-        description: 'The operating system to use'
       image:
         required: true
         type: string
@@ -54,25 +50,25 @@ jobs:
 
       # Wine
       - name: Setup Wine on Ubuntu
-        if: ${{inputs.os == 'ubuntu'}}
+        if: ${{runner.os == 'Linux'}}
         uses: ./.github/actions/setup-wine-ubuntu
 
       - name: Setup Wine on OS X
-        if: ${{inputs.os == 'macos'}}
+        if: ${{runner.os == 'macOS'}}
         uses: ./.github/actions/setup-wine-macos
 
       - name: Get Installed Wine Information
-        if: ${{inputs.os == 'ubuntu' || inputs.os == 'macos'}}
+        if: ${{runner.os == 'Linux' || runner.os == 'macOS'}}
         run: wine --version
 
       - name: Get Installed Wine Programs Information
-        if: ${{inputs.os == 'ubuntu' || inputs.os == 'macos'}}
+        if: ${{runner.os == 'Linux' || runner.os == 'macOS'}}
         run: wine uninstaller --list
       # Wine
 
       # .NET
       - name: Setup .NET on Ubuntu and OS X (Intel/Arm)
-        if: ${{inputs.os == 'ubuntu' || (inputs.image == 'macos-13' || (inputs.image == 'macos-14' && inputs.architecture == 'arm64'))}}
+        if: ${{runner.os == 'Linux' || (inputs.image == 'macos-13' || (inputs.image == 'macos-14' && inputs.architecture == 'arm64'))}}
         uses: ./.github/actions/setup-dotnet-unix
         with:
           target_framework: ''
@@ -86,7 +82,7 @@ jobs:
           target_framework_array: ${{inputs.dotnet_target_frameworks}}
 
       - name: Setup .NET on Windows
-        if: ${{inputs.os == 'windows'}}
+        if: ${{runner.os == 'Windows'}}
         uses: ./.github/actions/setup-dotnet-windows
         with:
           architecture: ${{inputs.architecture}}
@@ -97,7 +93,6 @@ jobs:
         uses: ./.github/actions/get-dotnet-path
         id: get-dotnet-path
         with:
-          os: ${{inputs.os}}
           architecture: ${{inputs.architecture}}
 
       - name: Get Installed .NET Information for ${{inputs.architecture}}
@@ -107,7 +102,7 @@ jobs:
 
       # Mono
       - name: Setup Mono on Windows
-        if: ${{inputs.os == 'windows'}}
+        if: ${{runner.os == 'Windows'}}
         uses: ./.github/actions/setup-mono-windows
         with:
           architecture: ${{inputs.architecture}}
@@ -116,7 +111,6 @@ jobs:
         uses: ./.github/actions/get-mono-path
         id: get-mono-path
         with:
-          os: ${{inputs.os}}
           architecture: ${{inputs.architecture}}
 
       - name: Get Installed Mono Information

@@ -18,7 +18,7 @@ runs:
 
     - run: sudo apt install --install-recommends winehq-staging=${{env.WINE_VERSION}}
       shell: bash
-      env: 
+      env:  
         WINE_VERSION: 9.17~jammy-1
    
     - run: |

@@ -6,6 +6,7 @@ on:
       - master
       - development
       - simple
+      - simple-osx
     paths-ignore:
       - '.github/workflows/docs.yml'
       - 'docs/**'
@@ -77,24 +78,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ 
-          { os: 'windows', code: 'windows-latest', arch: 'x64' },
-          { os: 'windows', code: 'windows-latest', arch: 'x86' },
-          { os: 'ubuntu', code: 'ubuntu-latest', arch: 'x64' },
-          { os: 'macos', code: 'macos-13', arch: 'x64' },
-          { os: 'macos', code: 'macos-14', arch: 'arm64' },
-          { os: 'macos', code: 'macos-14', arch: 'x64' },
+        runner: [ 
+          { image: 'windows-latest', arch: 'x64' },
+          { image: 'windows-latest', arch: 'x86' },
+          { image: 'ubuntu-latest', arch: 'x64' },
+          { image: 'macos-13', arch: 'x64' },
+          { image: 'macos-14', arch: 'arm64' },
+          { image: 'macos-14', arch: 'x64' },
         ]
         build_configuration: ${{fromJson(needs.variables.outputs.BUILD_CONFIGURATIONS)}}
     uses: ./.github/workflows/reusable-test.yml
     with:
-      os: ${{matrix.image.os}}
-      image: ${{matrix.image.code}}
-      architecture: ${{matrix.image.arch}}
+      image: ${{matrix.runner.image}}
+      architecture: ${{matrix.runner.arch}}
       dotnet_target_frameworks: ${{needs.variables.outputs.DOTNET_TARGET_FRAMEWORKS}}
       build_configuration: ${{matrix.build_configuration}}
       #ignore non-windows tests since support is yet lacking
-      experimental: ${{matrix.image.os != 'windows'}}
+      experimental: ${{matrix.runner.image != 'windows-latest'}}
 
   publish:
     name: Publish NuGet Packages
