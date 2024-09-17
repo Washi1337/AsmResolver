@@ -132,7 +132,7 @@ jobs:
           $files = Get-ChildItem -Path ./test -Recurse -Filter *.csproj | ? { $_.FullName -inotmatch 'TestBinaries' };
           $hasError = $false;
           foreach ($file in $files) {
-            & "${{steps.get-dotnet-path.outputs.path}}" test $file.FullName -c ${{inputs.build_configuration}} -l trx -l 'console;verbosity=normal' --blame;
+            & "${{steps.get-dotnet-path.outputs.path}}" test $file.FullName -c ${{inputs.build_configuration}} -l trx -l 'console;verbosity=normal';
             Write-Host "Exit code for $($file.FullName): $exitCode"
             $hasError = $hasError -or $LASTEXITCODE -ne 0;
           }
