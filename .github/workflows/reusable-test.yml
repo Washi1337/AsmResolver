@@ -46,7 +46,7 @@ jobs:
     runs-on: ${{inputs.image}}
     continue-on-error: ${{inputs.is_experimental}}
     timeout-minutes: 10
-    if: ${{ !inputs.skip_experimental || (inputs.is_experimental && !inputs.skip_experimental) }}
+    if: ${{ !inputs.is_experimental || (inputs.is_experimental && !inputs.skip_experimental) }}
     steps:
       - uses: actions/checkout@v4
 
