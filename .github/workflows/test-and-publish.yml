@@ -25,7 +25,8 @@ concurrency:
 
 env:
   # Right now we can't run experimental tests that can fail, since it will affect the PR
-  # We could potentially exclude experimental build on PR and only run it on master push
+  # By default we only run it on master/development branches
+  # Unless the variable will be true
   EXPERIMENTAL: false
 
   # You are interested in changing these values
@@ -54,7 +55,7 @@ jobs:
     name: Variable Accessibility Workaround for Jobs
     runs-on: ubuntu-latest
     outputs:
-      EXPERIMENTAL: ${{env.EXPERIMENTAL}}
+      EXPERIMENTAL: ${{ env.EXPERIMENTAL || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development' }}
       BUILD_CONFIGURATIONS: ${{env.BUILD_CONFIGURATIONS}}
       DOTNET_TARGET_FRAMEWORKS: ${{env.DOTNET_TARGET_FRAMEWORKS}}
       DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64: ${{env.DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64}}
