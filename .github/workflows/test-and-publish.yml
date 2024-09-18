@@ -55,7 +55,7 @@ jobs:
     name: Variable Accessibility Workaround for Jobs
     runs-on: ubuntu-latest
     outputs:
-      EXPERIMENTAL: ${{ env.EXPERIMENTAL || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development' }}
+      EXPERIMENTAL: ${{ env.EXPERIMENTAL == 'true' || (github.event == 'push' && github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development') }}
       BUILD_CONFIGURATIONS: ${{env.BUILD_CONFIGURATIONS}}
       DOTNET_TARGET_FRAMEWORKS: ${{env.DOTNET_TARGET_FRAMEWORKS}}
       DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64: ${{env.DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64}}
@@ -108,7 +108,8 @@ jobs:
       dotnet_target_frameworks: ${{needs.variables.outputs.DOTNET_TARGET_FRAMEWORKS}}
       build_configuration: ${{matrix.build_configuration}}
       #ignore non-windows tests since support is yet lacking
-      experimental: ${{matrix.runner.image != 'windows-latest'}}
+      is_experimental: ${{matrix.runner.image != 'windows-latest'}}
+      skip_experimental: ${{ needs.variables.outputs.EXPERIMENTAL != 'true' }}
 
   publish:
     name: Publish NuGet Packages

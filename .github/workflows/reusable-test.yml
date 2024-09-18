@@ -21,11 +21,16 @@ on:
         required: true
         type: string
         description: 'The build configuration to use'
-      experimental:
+      is_experimental:
         required: false
         type: boolean
         default: false
         description: 'Whether the tests are mandatory for the build to pass'
+      skip_experimental:
+        required: false
+        type: boolean
+        default: false
+        description: 'Whether to skip the experimental tests'
 
 env:
   # Disable the .NET logo in the console output.
@@ -36,35 +41,12 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
-  find-pr:
-    name: Find Pull Request
-    runs-on: ubuntu-latest
-    outputs:
-      pr_found: ${{ steps.pr.outputs.number != '' }}
-    steps:
-      - name: Find Pull Request
-        uses: juliangruber/find-pull-request-action@v1
-        id: pr
-        with:
-          github-token: ${{ github.token }}
-          state: open
-          branch: '${{ github.event.workflow_run.head_commit.author.username }}:${{ github.event.workflow_run.head_branch }}'
-          author: ${{ github.event.workflow_run.head_commit.author.name }}
-
-      - run: |
-          printf '%s\n' "$JSON_DOC" > foo.json
-          cat foo.json
-        env:
-          JSON_DOC: ${{ toJSON(steps.pr.outputs) }}
-        shell: bash
-
   test:
     name: Execute Tests
-    needs: [find-pr]
     runs-on: ${{inputs.image}}
-    continue-on-error: ${{inputs.experimental}}
+    continue-on-error: ${{inputs.is_experimental}}
     timeout-minutes: 10
-    if: ${{!inputs.experimental || (inputs.experimental && needs.find-pr.outputs.pr_found == 'false')}}
+    if: ${{ !inputs.skip_experimental || (inputs.is_experimental && !inputs.skip_experimental) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -172,4 +154,4 @@ jobs:
           image: ${{inputs.image}}
           architecture: ${{inputs.architecture}}
           build_configuration: ${{inputs.build_configuration}}
-          experimental: ${{inputs.experimental}}
+          experimental: ${{inputs.is_experimental}}
