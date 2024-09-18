@@ -20,3 +20,4 @@ runs:
       with:
         name: build-cache-${{inputs.image}}-${{inputs.architecture}}-${{inputs.build_configuration}}
         path: artifacts/
+        retention-days: 1

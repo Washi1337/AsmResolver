@@ -2,6 +2,9 @@ name: Download and Publish Test Results
 description: Download the test results for the specified operating system and build configuration
 
 inputs:
+  workflow_run:
+    required: true
+    description: 'The workflow run Id to download the test results from'
   experimental:
     required: false
     default: "false"
@@ -10,18 +13,35 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Download Event File
+      uses: actions/download-artifact@v4
+      with:
+        run-id: ${{ fromJson(inputs.workflow_run).id }}
+        github-token: ${{ github.token }}
+        name: test-event-file
+        merge-multiple: false
+
     - name: Download Test Results
       uses: actions/download-artifact@v4
       with:
+        run-id: ${{ fromJson(inputs.workflow_run).id }}
+        github-token: ${{ github.token }}
         pattern: ${{(inputs.experimental == 'true' && 'experimental-') || ''}}test-results-*
         path: test-results
+        merge-multiple: false
 
     - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
+      uses: nike4613/actions-test-results@v3
       with:
         check_name: Test Results ${{(inputs.experimental == 'true' && '(Experimental)') || ''}}
         files: test-results/**/*.trx
         fail_on: ${{(inputs.experimental == 'true' && 'nothing') || 'test failures'}}
-        #check_run: ${{inputs.experimental != 'true'}}
         comment_mode: ${{(inputs.experimental == 'true' && 'off') || 'always'}}
+        use_emojis: true
+        
+        commit: ${{ fromJson(inputs.workflow_run).head_sha }}
+        event_file: event.json
+        event_name: ${{ fromJson(inputs.workflow_run).event }}
+        #gist_token: ${{ secrets.gist_token }}
+    
+        comment_on_commit: true

@@ -1,4 +1,4 @@
-name: Test and Publish
+name: Test and Publish NuGet
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - master
       - development
       - simple
-      - simple-osx
+      - simple-test2
     paths-ignore:
       - '.github/workflows/docs.yml'
       - 'docs/**'
@@ -36,6 +36,19 @@ env:
 
 jobs:
 
+  # This technique allows us to run `test-results-publish.yml` with the owner's secrets
+  # without comprimizing the security
+  upload-event-file:
+    name: Upload Event File
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload event file
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-event-file
+          path: ${{ github.event_path }}
+          retention-days: 1
+
   # https://stackoverflow.com/a/77549656
   variables:
     name: Variable Accessibility Workaround for Jobs
@@ -56,7 +69,7 @@ jobs:
           echo "FRAMEWORK_TARGET_FRAMEWORKS=${{env.FRAMEWORK_TARGET_FRAMEWORKS}}" >> $GITHUB_OUTPUT
 
   build:
-    name: Build
+    name: Perform Build
     needs: [variables]
     strategy:
       matrix:
@@ -73,7 +86,7 @@ jobs:
       build_configuration: ${{matrix.build_configuration}}
 
   test:
-    name: Test
+    name: Execute Tests
     needs: [variables, build]
     strategy:
       fail-fast: false
@@ -104,35 +117,3 @@ jobs:
       image: 'windows-latest'
       architecture: 'x64'
       build_configuration: 'Release'
-
-  test-results:
-    name: Download and Upload Test Results
-    needs: [variables, test]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    if: always()
-    steps:
-      - uses: actions/checkout@v4
-     
-      - name: Download and Publish Test Results
-        uses: ./.github/actions/test-results-download-publish
-
-      - name: Download and Publish Test Results
-        uses: ./.github/actions/test-results-download-publish
-        with:
-          experimental: true
-
-  cleanup-build-output:
-    name: Cleanup Build Output
-    needs: [variables, test-results, publish]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: joutvhu/delete-artifact@v2
-        with:
-          pattern: build-cache-*
-      - uses: joutvhu/delete-artifact@v2
-        with:
-          pattern: test-results-*
-      - uses: joutvhu/delete-artifact@v2
-        with:
-          pattern: experimental-test-results-*

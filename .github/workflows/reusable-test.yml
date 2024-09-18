@@ -1,4 +1,4 @@
-name: Reusable Workflow Test
+name: 🔒Reusable Workflow Test
 # We build the binaries for all os and configurations
 # So we don't have to do that on each test run
 
@@ -36,11 +36,35 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
+  find-pr:
+    name: Find Pull Request
+    runs-on: ubuntu-latest
+    outputs:
+      pr_found: ${{ steps.pr.outputs.number != '' }}
+    steps:
+      - name: Find Pull Request
+        uses: juliangruber/find-pull-request-action@v1
+        id: pr
+        with:
+          github-token: ${{ github.token }}
+          state: open
+          branch: '${{ github.event.workflow_run.head_commit.author.username }}:${{ github.event.workflow_run.head_branch }}'
+          author: ${{ github.event.workflow_run.head_commit.author.name }}
+
+      - run: |
+          printf '%s\n' "$JSON_DOC" > foo.json
+          cat foo.json
+        env:
+          JSON_DOC: ${{ toJSON(steps.pr.outputs) }}
+        shell: bash
+
   test:
-    name: Test
+    name: Execute Tests
+    needs: [find-pr]
     runs-on: ${{inputs.image}}
     continue-on-error: ${{inputs.experimental}}
     timeout-minutes: 10
+    if: ${{!inputs.experimental || (inputs.experimental && needs.find-pr.outputs.pr_found == 'false')}}
     steps:
       - uses: actions/checkout@v4
 
