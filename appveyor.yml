@@ -55,6 +55,21 @@
     files:
       - docs/*
 
+  #---------------------------------#
+  #  Install .NET                   #
+  #---------------------------------#
+  install:
+    - ps: $env:DOTNET_INSTALL_DIR = "$pwd\.dotnetsdk"
+    - ps: mkdir $env:DOTNET_INSTALL_DIR -Force | Out-Null
+    - ps: Invoke-WebRequest -Uri "https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.ps1" -OutFile "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1"
+    - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Version 3.1 -InstallDir $env:DOTNET_INSTALL_DIR'
+    - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Version 5.0 -InstallDir $env:DOTNET_INSTALL_DIR'
+    - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Version 6.0 -InstallDir $env:DOTNET_INSTALL_DIR'
+    - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Version 7.0 -InstallDir $env:DOTNET_INSTALL_DIR'
+    - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Version 8.0 -InstallDir $env:DOTNET_INSTALL_DIR'
+    - ps: $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
+    - ps: dotnet --info
+
   before_build:
     - dotnet restore
 
