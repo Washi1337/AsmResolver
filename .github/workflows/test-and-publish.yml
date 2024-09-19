@@ -74,16 +74,15 @@ jobs:
     needs: [variables]
     strategy:
       matrix:
-        image: [ 
-          { os: 'windows', code: 'windows-latest', arch: 'x64' },
-          { os: 'windows', code: 'windows-latest', arch: 'x86' },
+        runner: [ 
+          { image: 'windows-latest', arch: 'x64' },
+          { image: 'windows-latest', arch: 'x86' },
         ]
         build_configuration: ${{fromJson(needs.variables.outputs.BUILD_CONFIGURATIONS)}}
     uses: ./.github/workflows/reusable-build.yml
     with:
-      os: ${{matrix.image.os}}
-      image: ${{matrix.image.code}}
-      architecture: ${{matrix.image.arch}}
+      image: ${{matrix.runner.image}}
+      architecture: ${{matrix.runner.arch}}
       build_configuration: ${{matrix.build_configuration}}
 
   test:
