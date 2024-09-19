@@ -31,6 +31,8 @@ jobs:
     outputs:
       version_suffix: ${{ steps.set-vars.outputs.version_suffix }}
     steps:
+      - uses: actions/checkout@v4
+
       - id: git-vars
         name: Get git branch information
         shell: bash
