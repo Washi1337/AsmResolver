@@ -140,6 +140,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         public void Add(TRow item) => Rows.Add(item);
 
+        /// <summary>
+        /// Inserts a row in the table at the provided index.
+        /// </summary>
+        /// <param name="index">The index to insert at.</param>
+        /// <param name="item">The row to insert.</param>
+        public void Insert(int index, TRow item) => Rows.Insert(index, item);
+
         /// <inheritdoc />
         public void Clear() => Rows.Clear();
 
@@ -217,17 +224,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return result;
         }
 
-        /// <summary>
-        /// Gets a single row in a table by a key. This requires the table to be sorted.
-        /// </summary>
-        /// <param name="keyColumnIndex">The column number to get the key from.</param>
-        /// <param name="key">The key to search.</param>
-        /// <param name="row">When this functions returns <c>true</c>, this parameter contains the first row that
-        /// contains the given key.</param>
-        /// <returns><c>true</c> if the row was found, <c>false</c> otherwise.</returns>
-        public bool TryGetRowByKey(int keyColumnIndex, uint key, out TRow row)
+        /// <inheritdoc />
+        public bool TryGetRidByKey(int keyColumnIndex, uint key, out uint rid)
         {
-            row = default;
+            rid = 0;
             if (Count == 0)
                 return false;
 
@@ -250,11 +250,31 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 }
                 else
                 {
-                    row = currentRow;
+                    rid = (uint) (m + 1);
                     return true;
                 }
             }
 
+            return false;
+        }
+
+        /// <summary>
+        /// Gets a single row in a table by a key. This requires the table to be sorted.
+        /// </summary>
+        /// <param name="keyColumnIndex">The column number to get the key from.</param>
+        /// <param name="key">The key to search.</param>
+        /// <param name="row">When this functions returns <c>true</c>, this parameter contains the first row that
+        /// contains the given key.</param>
+        /// <returns><c>true</c> if the row was found, <c>false</c> otherwise.</returns>
+        public bool TryGetRowByKey(int keyColumnIndex, uint key, out TRow row)
+        {
+            if (TryGetRidByKey(keyColumnIndex, key, out uint rid))
+            {
+                row = GetByRid(rid);
+                return true;
+            }
+
+            row = default;
             return false;
         }
 
