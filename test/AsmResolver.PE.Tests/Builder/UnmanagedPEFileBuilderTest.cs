@@ -5,6 +5,7 @@ using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;
+using AsmResolver.Shims;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -222,10 +223,14 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
 
         Assert.Equal(data, metadataStream.Contents.WriteIntoArray());
 
+        string expectedOutput = RuntimeInformationShim.IsRunningOnUnix
+            ? $"Unknown heap type: {name}\n\nHello\n1 + 2 = 3\n"
+            : "Hello\n1 + 2 = 3\n";
+
         _fixture.GetRunner<NativePERunner>().RebuildAndRun(
             file,
             "MixedModeHelloWorld.exe",
-            "Hello\n1 + 2 = 3\n"
+            expectedOutput
         );
     }
 }
