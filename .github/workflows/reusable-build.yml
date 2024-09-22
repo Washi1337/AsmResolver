@@ -44,11 +44,11 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            let gitHash = "${{ steps.git-vars.outputs.git_hash }}";
             let runNumber = "${{ github.run_number }}"; 
+            let gitHash = "${{ steps.git-vars.outputs.git_hash }}";
             let rawGitRef = "${{ steps.git-vars.outputs.git_branch }}";
             console.log("rawGitRef: " + rawGitRef);
-            let gitRef = rawGitRef.replace(/^refs\/heads\//, "");
+            let gitRef = rawGitRef.replace(/^refs\/heads\//, "").replace(/^refs\/heads\//, "").replace(/[//!@#$%&]/g, "_");
             if(gitRef.indexOf("refs/pull/") === 0) {
               gitRef = "pr-" + gitRef.substring(10, gitRef.lastIndexOf("/"));
             }
