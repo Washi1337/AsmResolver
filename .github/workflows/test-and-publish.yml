@@ -118,3 +118,7 @@ jobs:
       image: 'windows-latest'
       architecture: 'x64'
       build_configuration: 'Release'
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      NIGHTLY_NUGET_API_KEY: ${{ secrets.NIGHTLY_NUGET_API_KEY }}
+      NIGHTLY_NUGET_SOURCE: ${{ secrets.NIGHTLY_NUGET_SOURCE }}
