@@ -16,7 +16,12 @@ runs:
     - run: sudo apt-get update
       shell: bash
 
-    - run: sudo apt install --install-recommends winehq-staging=${{env.WINE_VERSION}}
+    - run: |
+        sudo apt install --install-recommends \
+        winehq-staging=${{env.WINE_VERSION}} \
+        wine-staging=${{env.WINE_VERSION}} \
+        wine-staging-i386=${{env.WINE_VERSION}} \
+        wine-staging-amd64=${{env.WINE_VERSION}}
       shell: bash
       env:  
         WINE_VERSION: 9.17~jammy-1
