@@ -16,7 +16,8 @@ runs:
     - run: sudo apt-get update
       shell: bash
 
-    - run: sudo apt install --install-recommends \
+    - run: |
+        sudo apt install --install-recommends \
         winehq-staging=${{env.WINE_VERSION}} \
         wine-staging=${{env.WINE_VERSION}} \
         wine-staging-i386=${{env.WINE_VERSION}} \
