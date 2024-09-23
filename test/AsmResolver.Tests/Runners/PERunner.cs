@@ -25,7 +25,7 @@ namespace AsmResolver.Tests.Runners
             get;
         }
 
-        public void RebuildAndRun(PEFile peFile, string fileName, string expectedOutput, int timeout = 5000,
+        public void RebuildAndRun(PEFile peFile, string fileName, string expectedOutput, int timeout = 30000,
             [CallerFilePath] string testClass = "File",
             [CallerMemberName] string testMethod = "Test")
         {
@@ -59,7 +59,7 @@ namespace AsmResolver.Tests.Runners
         }
 
         public string RunAndCaptureOutput(string fileName, byte[] contents, string[]? arguments = null,
-            int timeout = 5000,
+            int timeout = 30000,
             [CallerFilePath] string testClass = "File",
             [CallerMemberName] string testMethod = "Test")
         {
@@ -69,7 +69,7 @@ namespace AsmResolver.Tests.Runners
             return RunAndCaptureOutput(testExecutablePath, arguments, timeout);
         }
 
-        public string RunAndCaptureOutput(string filePath, string[]? arguments = null, int timeout = 5000)
+        public string RunAndCaptureOutput(string filePath, string[]? arguments = null, int timeout = 30000)
         {
             var info = GetStartInfo(filePath, arguments);
             info.RedirectStandardError = true;

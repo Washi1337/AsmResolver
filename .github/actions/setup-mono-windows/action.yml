@@ -1,0 +1,28 @@
+name: Setup Mono Windows
+description: Setup Mono for Windows using the latest version
+
+inputs:
+  architecture:
+    description: 'The architecture to setup Mono for'
+    required: true
+  version:
+    description: 'The Mono version to install'
+    required: false
+
+outputs:
+  path:
+    description: 'The Mono path for the architecture'
+    value: '${{steps.get-program-files.outputs.path}}/Mono/bin/mono.exe'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Mono
+      run: choco install mono --yes --no-progress --${{inputs.architecture}} ${{(inputs.version != '' && '--version=') || ''}}${{inputs.version}} --ignore-checksums
+      shell: pwsh
+
+    - name: Get Program Files path for ${{inputs.architecture}}
+      uses: ./.github/actions/get-program-files
+      id: get-program-files
+      with:
+        architecture: ${{inputs.architecture}}
