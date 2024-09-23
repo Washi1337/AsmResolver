@@ -48,7 +48,7 @@ jobs:
             let gitHash = "${{ steps.git-vars.outputs.git_hash }}";
             let rawGitRef = "${{ steps.git-vars.outputs.git_branch }}";
             console.log("rawGitRef: " + rawGitRef);
-            let gitRef = rawGitRef.replace(/^refs\/heads\//, "").replace(/^refs\/heads\//, "").replace(/[//!@#$%&]/g, "_");
+            let gitRef = rawGitRef.replace(/^refs\/heads\//, "").replace(/^refs\/heads\//, "").replace(/[_//!@#$%&]/g, "-");
             if(gitRef.indexOf("refs/pull/") === 0) {
               gitRef = "pr-" + gitRef.substring(10, gitRef.lastIndexOf("/"));
             }
