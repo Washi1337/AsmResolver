@@ -15,6 +15,13 @@ on:
         required: true
         type: string
         description: 'The build configuration to use'
+    secrets:
+      NUGET_API_KEY:
+        required: true
+      NIGHTLY_NUGET_API_KEY:
+        required: true
+      NIGHTLY_NUGET_SOURCE:
+        required: true
 
 env:
   # Disable the .NET logo in the console output.
