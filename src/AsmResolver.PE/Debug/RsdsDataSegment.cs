@@ -38,7 +38,7 @@ namespace AsmResolver.PE.Debug
             reader.ReadBytes(buffer, 0, 16);
             result.Guid = new Guid(buffer);
             result.Age = reader.ReadUInt32();
-            result.Path = Encoding.UTF8.GetString(reader.ReadBytesUntil(0x00));
+            result.Path = Encoding.UTF8.GetString(reader.ReadBytesUntil(0x00, false));
 
             return result;
         }
