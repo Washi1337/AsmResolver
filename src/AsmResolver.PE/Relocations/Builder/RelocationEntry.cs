@@ -47,6 +47,11 @@ namespace AsmResolver.PE.Relocations.Builder
         /// </summary>
         public int Offset => _value & 0xFFF;
 
+        /// <summary>
+        /// Gets a value indicating the entry is a zero entry.
+        /// </summary>
+        public bool IsEmpty => _value == 0;
+
         /// <inheritdoc />
         public uint GetPhysicalSize() => sizeof(ushort);
 
