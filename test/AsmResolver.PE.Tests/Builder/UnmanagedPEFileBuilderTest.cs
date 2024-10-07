@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;
 using AsmResolver.Shims;
@@ -232,5 +233,20 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
             "MixedModeHelloWorld.exe",
             expectedOutput
         );
+    }
+
+    [Fact]
+    public void AddExportToExistingDirectory()
+    {
+        var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports, TestReaderParameters);
+        image.Exports!.Entries.Add(new ExportedSymbol(new VirtualAddress(0x13371337), "MySymbol"));
+
+        var file = image.ToPEFile(new UnmanagedPEFileBuilder());
+        using var stream = new MemoryStream();
+        file.Write(stream);
+
+        var newImage = PEImage.FromBytes(stream.ToArray(), TestReaderParameters);
+        Assert.NotNull(newImage.Exports);
+        Assert.Equal(image.Exports.Entries.Select(x => x.Name), newImage.Exports.Entries.Select(x => x.Name));
     }
 }

@@ -193,24 +193,18 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
             header.SetDataDirectory(DataDirectoryIndex.ImportDirectory, context.ImportDirectory);
             header.SetDataDirectory(DataDirectoryIndex.IatDirectory, context.ImportDirectory.ImportAddressDirectory);
         }
+        else
+        {
+            header.SetDataDirectory(DataDirectoryIndex.ImportDirectory, null);
+            header.SetDataDirectory(DataDirectoryIndex.IatDirectory, null);
+        }
 
-        if (!context.ExportDirectory.IsEmpty)
-            header.SetDataDirectory(DataDirectoryIndex.ExportDirectory, context.ExportDirectory);
-
-        if (!context.DebugDirectory.IsEmpty)
-            header.SetDataDirectory(DataDirectoryIndex.DebugDirectory, context.DebugDirectory);
-
-        if (!context.ResourceDirectory.IsEmpty)
-            header.SetDataDirectory(DataDirectoryIndex.ResourceDirectory, context.ResourceDirectory);
-
-        if (context.Image.DotNetDirectory is not null)
-            header.SetDataDirectory(DataDirectoryIndex.ClrDirectory, context.Image.DotNetDirectory);
-
-        if (context.Image.TlsDirectory is not null)
-            header.SetDataDirectory(DataDirectoryIndex.TlsDirectory, context.Image.TlsDirectory);
-
-        if (!context.RelocationsDirectory.IsEmpty)
-            header.SetDataDirectory(DataDirectoryIndex.BaseRelocationDirectory, context.RelocationsDirectory);
+        header.SetDataDirectory(DataDirectoryIndex.ExportDirectory, !context.ExportDirectory.IsEmpty ? context.ExportDirectory : null);
+        header.SetDataDirectory(DataDirectoryIndex.DebugDirectory, !context.DebugDirectory.IsEmpty ? context.DebugDirectory : null);
+        header.SetDataDirectory(DataDirectoryIndex.ResourceDirectory, !context.ResourceDirectory.IsEmpty ? context.ResourceDirectory : null);
+        header.SetDataDirectory(DataDirectoryIndex.ClrDirectory, context.Image.DotNetDirectory);
+        header.SetDataDirectory(DataDirectoryIndex.TlsDirectory, context.Image.TlsDirectory);
+        header.SetDataDirectory(DataDirectoryIndex.BaseRelocationDirectory, !context.RelocationsDirectory.IsEmpty ? context.RelocationsDirectory : null);
     }
 
     /// <summary>
@@ -234,10 +228,6 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
         if (TrampolineImports && !context.ImportDirectory.IsEmpty)
             contents.Add(context.ImportDirectory);
 
-        // Reconstructed exports.
-        if (!context.ExportDirectory.IsEmpty)
-            contents.Add(context.ExportDirectory);
-
         // Reconstructed debug directory.
         if (!context.DebugDirectory.IsEmpty)
         {
@@ -258,7 +248,7 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
             context.ImportTrampolines.ApplyPatches(context.ClonedSections);
         }
 
-        // Code for newly added exports.
+        // Add newly added exports code.
         if (context.Image.Exports is { Entries: { Count: > 0 } entries })
         {
             for (int i = 0; i < entries.Count; i++)
@@ -350,6 +340,13 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
                 AddOrPatch(directory.CallbackFunctions, originalDirectory?.CallbackFunctions);
         }
 
+        // Add export directory.
+        if (image.Exports is { Entries.Count: > 0 })
+        {
+            if (!TryPatchDataDirectory(context, context.ExportDirectory, DataDirectoryIndex.ExportDirectory))
+                contents.Add(context.ExportDirectory, (uint) context.Platform.PointerSize);
+        }
+
         if (contents.Count == 0)
             return null;
 
@@ -385,10 +382,6 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
             for (int i = 0; i < fixups.Count; i++)
                 contents.Add(fixups[i].Tokens, (uint) context.Platform.PointerSize);
         }
-
-        // Add export directory.
-        if (image.Exports is { Entries.Count: > 0 })
-            contents.Add(context.ExportDirectory, (uint) context.Platform.PointerSize);
 
         if (image.TlsDirectory is { } directory)
         {
