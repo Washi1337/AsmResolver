@@ -188,12 +188,15 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
 
         header.EnsureDataDirectoryCount(OptionalHeader.DefaultNumberOfRvasAndSizes);
 
+        // NOTE: We need to explicitly check if imports.count == 0 because the buffer may not be populated if
+        // IAT trampolining (and thus IAT rebuilding) is disabled. In such a case, we want to preserve the existing IAT
+        // rather than remove it.
         if (!context.ImportDirectory.IsEmpty)
         {
             header.SetDataDirectory(DataDirectoryIndex.ImportDirectory, context.ImportDirectory);
             header.SetDataDirectory(DataDirectoryIndex.IatDirectory, context.ImportDirectory.ImportAddressDirectory);
         }
-        else
+        else if (context.Image.Imports.Count == 0)
         {
             header.SetDataDirectory(DataDirectoryIndex.ImportDirectory, null);
             header.SetDataDirectory(DataDirectoryIndex.IatDirectory, null);
