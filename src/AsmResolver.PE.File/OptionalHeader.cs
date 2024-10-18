@@ -414,8 +414,10 @@ namespace AsmResolver.PE.File
         /// Maps a segment to a data directory.
         /// </summary>
         /// <param name="index">The index.</param>
-        /// <param name="contents">The contents of the data directory.</param>
-        public void SetDataDirectory(DataDirectoryIndex index, ISegment contents)
+        /// <param name="contents">
+        /// The contents of the data directory, or <c>null</c> to indicate an absence of the directory.
+        /// </param>
+        public void SetDataDirectory(DataDirectoryIndex index, ISegment? contents)
         {
             SetDataDirectory(index, DataDirectory.CreateForSegment(contents));
         }

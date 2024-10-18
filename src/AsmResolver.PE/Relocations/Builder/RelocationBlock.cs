@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.Relocations.Builder
@@ -36,18 +35,27 @@ namespace AsmResolver.PE.Relocations.Builder
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => (uint) (Entries.Count + 1) * sizeof(ushort) + 2 * sizeof(uint);
+        public override uint GetPhysicalSize()
+        {
+            // Ensure the ending zero entry is included in the size.
+            int totalCount = Entries.Count + (Entries[Entries.Count - 1].IsEmpty ? 0 : 1);
+            return (uint) totalCount * sizeof(ushort) + 2 * sizeof(uint);
+        }
 
         /// <inheritdoc />
         public override void Write(BinaryStreamWriter writer)
         {
+            // Block header.
             writer.WriteUInt32(PageRva);
             writer.WriteUInt32(GetPhysicalSize());
 
+            // Write all entries in block.
             for (int i = 0; i < Entries.Count; i++)
                 Entries[i].Write(writer);
 
-            default(RelocationEntry).Write(writer);
+            // Ensure block ends with zero entry.
+            if (!Entries[Entries.Count - 1].IsEmpty)
+                default(RelocationEntry).Write(writer);
         }
 
     }
