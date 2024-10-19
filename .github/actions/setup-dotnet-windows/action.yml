@@ -29,6 +29,13 @@ runs:
       with:
         architecture: x86
 
+    - name: Setup .NET ${{inputs.architecture}} ${{steps.get_channels.outputs.channels_multiline}}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          ${{steps.get_channels.outputs.channel}}
+          ${{steps.get_channels.outputs.channels_multiline}}
+
     - name: Setup .NET x86 ${{steps.get_channels.outputs.channels_multiline}}
       uses: dlemstra/setup-dotnet@add-architecture-option
       if: ${{inputs.architecture == 'x86'}}
@@ -39,10 +46,3 @@ runs:
           ${{steps.get_channels.outputs.channels_multiline}}
       env:
         DOTNET_INSTALL_DIR: ${{steps.get-program-files-x86.outputs.path}}/dotnet
-
-    - name: Setup .NET ${{inputs.architecture}} ${{steps.get_channels.outputs.channels_multiline}}
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: |
-          ${{steps.get_channels.outputs.channel}}
-          ${{steps.get_channels.outputs.channels_multiline}}
