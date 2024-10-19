@@ -101,6 +101,10 @@ jobs:
         with:
           architecture: ${{inputs.architecture}}
 
+      - name: Get Installed .NET Information for Default
+        run: 'dotnet --info'
+        shell: pwsh
+
       - name: Get Installed .NET Information for ${{inputs.architecture}}
         run: '& "${{steps.get-dotnet-path.outputs.path}}" --info'
         shell: pwsh
