@@ -101,6 +101,18 @@ jobs:
         with:
           architecture: ${{inputs.architecture}}
 
+      - name: Get .NET path for x64
+        if: ${{runner.os == 'Windows' && inputs.architecture == 'x86'}}
+        uses: ./.github/actions/get-dotnet-path
+        id: get-dotnet-x64-path
+        with:
+          architecture: x64
+
+      - name: Get Installed .NET Information for Windows x64
+        if: ${{runner.os == 'Windows' && inputs.architecture == 'x86'}}
+        run: '& "${{steps.get-dotnet-x64-path.outputs.path}}" --info'
+        shell: pwsh
+
       - name: Get Installed .NET Information for ${{inputs.architecture}}
         run: '& "${{steps.get-dotnet-path.outputs.path}}" --info'
         shell: pwsh
