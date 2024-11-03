@@ -245,9 +245,19 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="property">The property to include.</param>
         /// <returns>The metadata cloner that the property is added to.</returns>
-        public MemberCloner Include(PropertyDefinition property)
+        public MemberCloner Include(PropertyDefinition property) => Include(property, true);
+
+        /// <summary>
+        /// Adds a single property to the list of members to clone.
+        /// </summary>
+        /// <param name="property">The property to include.</param>
+        /// <param name="recursive">Indicates the attached semantic methods (getters and setters) should be included.</param>
+        /// <returns>The metadata cloner that the property is added to.</returns>
+        public MemberCloner Include(PropertyDefinition property, bool recursive)
         {
             _propertiesToClone.Add(property);
+            if (recursive)
+                IncludeSemantics(property);
             return this;
         }
 
@@ -256,10 +266,29 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="event">The event to include.</param>
         /// <returns>The metadata cloner that the event is added to.</returns>
-        public MemberCloner Include(EventDefinition @event)
+        public MemberCloner Include(EventDefinition @event) => Include(@event, true);
+
+        /// <summary>
+        /// Adds a single event to the list of members to clone.
+        /// </summary>
+        /// <param name="event">The event to include.</param>
+        /// <param name="recursive">Indicates the attached semantic methods (add, remove, fire) should be included.</param>
+        /// <returns>The metadata cloner that the property is added to.</returns>
+        public MemberCloner Include(EventDefinition @event, bool recursive)
         {
             _eventsToClone.Add(@event);
+            if (recursive)
+                IncludeSemantics(@event);
             return this;
+        }
+
+        private void IncludeSemantics(IHasSemantics member)
+        {
+            foreach (var semantic in member.Semantics)
+            {
+                if (semantic.Method is not null)
+                    _methodsToClone.Add(semantic.Method);
+            }
         }
 
         /// <summary>
