@@ -45,6 +45,9 @@ namespace AsmResolver.PE.Debug
         {
             BinaryStreamReader reader;
 
+            if (_sizeOfData == 0)
+                return new EmptyDebugDataSegment(_type);
+
             if (_addressOfRawData == 0 || _context.File.MappingMode == File.PEMappingMode.Unmapped)
             {
                 if (!_context.File.TryCreateReaderAtFileOffset(_pointerToRawData, out reader))

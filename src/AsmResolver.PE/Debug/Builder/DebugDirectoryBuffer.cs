@@ -27,7 +27,7 @@ namespace AsmResolver.PE.Debug.Builder
         public void AddEntry(DebugDataEntry entry)
         {
             _headers.Add(entry);
-            if (entry.Contents != null)
+            if (entry.Contents is not null and not EmptyDebugDataSegment)
                 _streamsTable.Add(entry.Contents, 4);
         }
 
