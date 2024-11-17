@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Signatures
@@ -30,6 +29,8 @@ namespace AsmResolver.DotNet.Signatures
             if (ReferenceEquals(x, y))
                 return true;
             if (x is null || y is null)
+                return false;
+            if (x.ElementType != y.ElementType)
                 return false;
 
             switch (x.ElementType)
