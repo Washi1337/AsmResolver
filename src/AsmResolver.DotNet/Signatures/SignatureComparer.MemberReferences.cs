@@ -44,6 +44,8 @@ namespace AsmResolver.DotNet.Signatures
 
             if (x is MethodSpecification specification)
                 return Equals(specification, y as MethodSpecification);
+            else if (y is MethodSpecification)
+                return false;
 
             return x.Name == y.Name
                    && Equals(x.DeclaringType, y.DeclaringType)
