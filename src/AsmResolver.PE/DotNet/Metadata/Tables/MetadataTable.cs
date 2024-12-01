@@ -315,7 +315,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return new OffsetRange(
                 Offset + Layout.RowSize * (rid - 1),
-                Offset + Layout.RowSize
+                Offset + Layout.RowSize * rid
             );
         }
 
