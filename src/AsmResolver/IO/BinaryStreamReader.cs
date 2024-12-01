@@ -318,6 +318,23 @@ namespace AsmResolver.IO
             return new decimal(_buffer);
         }
 
+        /// <summary>
+        /// Attempts to read the provided amount of bytes from the input stream.
+        /// </summary>
+        /// <param name="count">The number of bytes to read.</param>
+        /// <returns>The bytes.</returns>
+        /// <exception cref="EndOfStreamException">
+        /// Occurs when more bytes were attempted to be read than there were available.
+        /// </exception>
+        public byte[] ReadBytes(int count)
+        {
+            byte[] data = new byte[count];
+            int readCount = ReadBytes(data, 0, data.Length);
+            if (readCount != count)
+                throw new EndOfStreamException();
+            return data;
+        }
+
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// Attempts to read the provided amount of bytes from the input stream.
