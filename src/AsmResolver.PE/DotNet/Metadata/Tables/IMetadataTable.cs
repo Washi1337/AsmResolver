@@ -1,13 +1,12 @@
 using System;
 using System.Collections;
-using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     /// <summary>
     /// Represents a metadata table stored in the tables stream of a managed executable.
     /// </summary>
-    public interface IMetadataTable : ICollection
+    public interface IMetadataTable : ICollection, ISegment
     {
         /// <summary>
         /// Gets the layout of the table.
@@ -99,9 +98,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         void UpdateTableLayout(TableLayout layout);
 
         /// <summary>
-        /// Serializes the table to an output stream, according to the table layout provided in <see cref="Layout" />.
+        /// Calculates the offset range of a row within the table.
         /// </summary>
-        /// <param name="writer">The output stream to write to.</param>
-        void Write(BinaryStreamWriter writer);
+        /// <param name="rid">The identifier of the row to get the bounds of.</param>
+        /// <returns>The bounds.</returns>
+        /// <remarks>
+        /// This method does not do any verification on whether <paramref name="rid"/> is a valid row in the table.
+        /// </remarks>
+        OffsetRange GetRowBounds(uint rid);
     }
 }

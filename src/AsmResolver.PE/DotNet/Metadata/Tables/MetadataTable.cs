@@ -14,7 +14,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// Provides a base implementation of a metadata table in the table stream of a managed executable file.
     /// </summary>
     /// <typeparam name="TRow">The type of rows that this table stores.</typeparam>
-    public class MetadataTable<TRow> : IMetadataTable, ICollection<TRow>
+    public class MetadataTable<TRow> : SegmentBase, IMetadataTable, ICollection<TRow>
         where TRow : struct, IMetadataRow
     {
         private RefList<TRow>? _items;
@@ -311,7 +311,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public void Write(BinaryStreamWriter writer)
+        public OffsetRange GetRowBounds(uint rid)
+        {
+            return new OffsetRange(
+                Offset + Layout.RowSize * (rid - 1),
+                Offset + Layout.RowSize
+            );
+        }
+
+        /// <inheritdoc />
+        public override uint GetPhysicalSize() => Layout.RowSize * (uint) Count;
+
+        /// <inheritdoc />
+        public override void Write(BinaryStreamWriter writer)
         {
             for (int i = 0; i < Rows.Count; i++)
                 Rows[i].Write(writer, Layout);

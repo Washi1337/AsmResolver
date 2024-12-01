@@ -50,6 +50,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             ReadRowDelegate readRow)
             : base(tableIndex, originalLayout, isSorted)
         {
+            Offset = reader.Offset;
+            Rva = reader.Rva;
+
             _reader = reader;
             _originalLayout = originalLayout;
             _rowCount = (int) (reader.Length / originalLayout.RowSize);
