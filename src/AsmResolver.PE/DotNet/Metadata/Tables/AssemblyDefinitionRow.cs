@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the assembly definition metadata table.
     /// </summary>
-    public struct AssemblyDefinitionRow : IMetadataRow
+    public struct AssemblyDefinitionRow : IMetadataRow, IEquatable<AssemblyDefinitionRow>
     {
         /// <summary>
         /// Reads a single assembly definition row from an input stream.
@@ -181,11 +181,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Culture, (IndexSize) layout.Columns[8].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided assembly definition row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(AssemblyDefinitionRow other)
         {
             return HashAlgorithm == other.HashAlgorithm
@@ -230,14 +226,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public IEnumerator<uint> GetEnumerator()
-        {
-            return new MetadataRowColumnEnumerator(this);
-        }
+        public IEnumerator<uint> GetEnumerator() => new MetadataRowColumnEnumerator(this);
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(AssemblyDefinitionRow left, AssemblyDefinitionRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(AssemblyDefinitionRow left, AssemblyDefinitionRow right) => !(left == right);
     }
 }

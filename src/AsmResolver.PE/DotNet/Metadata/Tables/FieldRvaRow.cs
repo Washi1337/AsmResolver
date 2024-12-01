@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the implementation map metadata table.
     /// </summary>
-    public struct FieldRvaRow : IMetadataRow
+    public struct FieldRvaRow : IMetadataRow, IEquatable<FieldRvaRow>
     {
         /// <summary>
         /// Reads a single field RVA row from an input stream.
@@ -123,5 +123,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(FieldRvaRow left, FieldRvaRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(FieldRvaRow left, FieldRvaRow right) => !(left == right);
     }
 }

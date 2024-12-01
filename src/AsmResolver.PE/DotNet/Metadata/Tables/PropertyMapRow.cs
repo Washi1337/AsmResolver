@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the property map metadata table.
     /// </summary>
-    public struct PropertyMapRow : IMetadataRow
+    public struct PropertyMapRow : IMetadataRow, IEquatable<PropertyMapRow>
     {
         /// <summary>
         /// Reads a single property map row from an input stream.
@@ -74,11 +74,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(PropertyList, (IndexSize) layout.Columns[1].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided property map row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(PropertyMapRow other)
         {
             return Parent == other.Parent && PropertyList == other.PropertyList;
@@ -115,5 +111,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(PropertyMapRow left, PropertyMapRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(PropertyMapRow left, PropertyMapRow right) => !(left == right);
     }
 }

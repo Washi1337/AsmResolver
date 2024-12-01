@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the method semantics metadata table.
     /// </summary>
-    public struct MethodSemanticsRow : IMetadataRow
+    public struct MethodSemanticsRow : IMetadataRow, IEquatable<MethodSemanticsRow>
     {
         /// <summary>
         /// Reads a single method semantics row from an input stream.
@@ -90,11 +90,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Association, (IndexSize) layout.Columns[2].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided method semantics row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(MethodSemanticsRow other)
         {
             return Attributes == other.Attributes && Method == other.Method && Association == other.Association;
@@ -134,5 +130,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(MethodSemanticsRow left, MethodSemanticsRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(MethodSemanticsRow left, MethodSemanticsRow right) => !(left == right);
     }
 }

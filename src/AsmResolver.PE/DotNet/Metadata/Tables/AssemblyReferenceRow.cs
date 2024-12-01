@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the assembly definition metadata table.
     /// </summary>
-    public struct AssemblyReferenceRow : IMetadataRow
+    public struct AssemblyReferenceRow : IMetadataRow, IEquatable<AssemblyReferenceRow>
     {
         /// <summary>
         /// Reads a single assembly definition row from an input stream.
@@ -180,11 +180,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(HashValue, (IndexSize) layout.Columns[8].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided assembly reference row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(AssemblyReferenceRow other)
         {
             return MajorVersion == other.MajorVersion
@@ -238,5 +234,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(AssemblyReferenceRow left, AssemblyReferenceRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(AssemblyReferenceRow left, AssemblyReferenceRow right) => !(left == right);
     }
 }

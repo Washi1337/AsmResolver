@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the type reference metadata table.
     /// </summary>
-    public struct TypeReferenceRow : IMetadataRow
+    public struct TypeReferenceRow : IMetadataRow, IEquatable<TypeReferenceRow>
     {
         /// <summary>
         /// Reads a single type reference row from an input stream.
@@ -101,11 +101,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return $"({ResolutionScope:X8}, {Name:X8}, {Namespace:X8})";
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided type reference row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(TypeReferenceRow other)
         {
             return ResolutionScope == other.ResolutionScope
@@ -141,5 +137,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(TypeReferenceRow left, TypeReferenceRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(TypeReferenceRow left, TypeReferenceRow right) => !(left == right);
     }
 }

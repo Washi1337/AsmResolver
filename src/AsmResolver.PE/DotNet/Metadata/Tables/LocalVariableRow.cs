@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the Portable PDB local variable metadata table.
     /// </summary>
-    public struct LocalVariableRow : IMetadataRow
+    public struct LocalVariableRow : IMetadataRow, IEquatable<LocalVariableRow>
     {
         /// <summary>
         /// Creates a new row for the Portable PDB Local Variable metadata table.
@@ -87,11 +87,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Name, (IndexSize) layout.Columns[2].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided local variable row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(LocalVariableRow other)
         {
             return Attributes == other.Attributes
@@ -124,5 +120,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public IEnumerator<uint> GetEnumerator() => new MetadataRowColumnEnumerator(this);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(LocalVariableRow left, LocalVariableRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(LocalVariableRow left, LocalVariableRow right) => !(left == right);
     }
 }

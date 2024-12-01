@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the assembly processor metadata table.
     /// </summary>
-    public struct AssemblyProcessorRow : IMetadataRow
+    public struct AssemblyProcessorRow : IMetadataRow, IEquatable<AssemblyProcessorRow>
     {
         /// <summary>
         /// Reads a single assembly processor row from an input stream.
@@ -96,5 +96,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(AssemblyProcessorRow left, AssemblyProcessorRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(AssemblyProcessorRow left, AssemblyProcessorRow right) => !(left == right);
     }
 }

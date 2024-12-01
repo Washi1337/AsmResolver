@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the assembly operating system metadata table.
     /// </summary>
-    public struct AssemblyOSRow : IMetadataRow
+    public struct AssemblyOSRow : IMetadataRow, IEquatable<AssemblyOSRow>
     {
         /// <summary>
         /// Reads a single assembly operating system row from an input stream.
@@ -87,11 +87,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteUInt32(MinorVersion);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided assembly operating system row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(AssemblyOSRow other)
         {
             return PlatformId == other.PlatformId
@@ -130,5 +126,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(AssemblyOSRow left, AssemblyOSRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(AssemblyOSRow left, AssemblyOSRow right) => !(left == right);
     }
 }

@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the event map metadata table.
     /// </summary>
-    public struct EventDefinitionRow : IMetadataRow
+    public struct EventDefinitionRow : IMetadataRow, IEquatable<EventDefinitionRow>
     {
         /// <summary>
         /// Reads a single event definition row from an input stream.
@@ -92,11 +92,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(EventType, (IndexSize) layout.Columns[2].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided event definitino row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(EventDefinitionRow other)
         {
             return Attributes == other.Attributes && Name == other.Name && EventType == other.EventType;
@@ -136,5 +132,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(EventDefinitionRow left, EventDefinitionRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(EventDefinitionRow left, EventDefinitionRow right) => !(left == right);
     }
 }

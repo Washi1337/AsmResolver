@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the field definition metadata table.
     /// </summary>
-    public struct FieldDefinitionRow : IMetadataRow
+    public struct FieldDefinitionRow : IMetadataRow, IEquatable<FieldDefinitionRow>
     {
         /// <summary>
         /// Reads a single field definition row from an input stream.
@@ -92,11 +92,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Signature, (IndexSize) layout.Columns[2].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided field definition row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(FieldDefinitionRow other)
         {
             return Attributes == other.Attributes && Name == other.Name && Signature == other.Signature;
@@ -136,5 +132,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(FieldDefinitionRow left, FieldDefinitionRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(FieldDefinitionRow left, FieldDefinitionRow right) => !(left == right);
     }
 }

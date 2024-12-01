@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the event pointer metadata table.
     /// </summary>
-    public struct EventPointerRow : IMetadataRow
+    public struct EventPointerRow : IMetadataRow, IEquatable<EventPointerRow>
     {
         /// <summary>
         /// Reads a single event pointer row from an input stream.
@@ -58,11 +58,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Event,(IndexSize) layout.Columns[0].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided event pointer row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(EventPointerRow other)
         {
             return Event == other.Event;
@@ -96,5 +92,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(EventPointerRow left, EventPointerRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(EventPointerRow left, EventPointerRow right) => !(left == right);
     }
 }

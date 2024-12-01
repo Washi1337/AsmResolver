@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the Portable PDB state machine method metadata table.
     /// </summary>
-    public struct StateMachineMethodRow : IMetadataRow
+    public struct StateMachineMethodRow : IMetadataRow, IEquatable<StateMachineMethodRow>
     {
         /// <summary>
         /// Creates a new row for the Portable PDB state machine method metadata table.
@@ -77,11 +77,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(KickoffMethod, (IndexSize) layout.Columns[1].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided state machine method row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(StateMachineMethodRow other)
         {
             return MoveNextMethod == other.MoveNextMethod && KickoffMethod == other.KickoffMethod;
@@ -109,5 +105,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public IEnumerator<uint> GetEnumerator() => new MetadataRowColumnEnumerator(this);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(StateMachineMethodRow left, StateMachineMethodRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(StateMachineMethodRow left, StateMachineMethodRow right) => !(left == right);
     }
 }

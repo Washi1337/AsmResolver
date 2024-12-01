@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the stand-alone signature metadata table.
     /// </summary>
-    public struct StandAloneSignatureRow : IMetadataRow
+    public struct StandAloneSignatureRow : IMetadataRow, IEquatable<StandAloneSignatureRow>
     {
         /// <summary>
         /// Reads a single stand-alone signature row from an input stream.
@@ -58,11 +58,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Signature, (IndexSize) layout.Columns[0].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided stand-alone signature row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(StandAloneSignatureRow other)
         {
             return Signature == other.Signature;
@@ -96,5 +92,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(StandAloneSignatureRow left, StandAloneSignatureRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(StandAloneSignatureRow left, StandAloneSignatureRow right) => !(left == right);
     }
 }

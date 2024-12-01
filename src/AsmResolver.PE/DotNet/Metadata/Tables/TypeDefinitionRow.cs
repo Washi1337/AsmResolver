@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the type definition metadata table.
     /// </summary>
-    public struct TypeDefinitionRow : IMetadataRow
+    public struct TypeDefinitionRow : IMetadataRow, IEquatable<TypeDefinitionRow>
     {
         /// <summary>
         /// Reads a single type definition row from an input stream.
@@ -144,11 +144,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return $"({(uint) Attributes:X8}, {Name:X8}, {Namespace:X8}, {Extends:X8}, {FieldList:X8}, {MethodList:X8})";
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided type definition row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(TypeDefinitionRow other)
         {
             return Attributes == other.Attributes
@@ -190,5 +186,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(TypeDefinitionRow left, TypeDefinitionRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(TypeDefinitionRow left, TypeDefinitionRow right) => !(left == right);
     }
 }

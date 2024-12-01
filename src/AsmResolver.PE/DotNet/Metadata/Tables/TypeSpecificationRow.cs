@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the type specification metadata table.
     /// </summary>
-    public struct TypeSpecificationRow : IMetadataRow
+    public struct TypeSpecificationRow : IMetadataRow, IEquatable<TypeSpecificationRow>
     {
         /// <summary>
         /// Reads a single type specification row from an input stream.
@@ -59,11 +59,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Signature, (IndexSize) layout.Columns[0].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided module row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(TypeSpecificationRow other)
         {
             return Signature == other.Signature;
@@ -97,5 +93,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(TypeSpecificationRow left, TypeSpecificationRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(TypeSpecificationRow left, TypeSpecificationRow right) => !(left == right);
     }
 }
