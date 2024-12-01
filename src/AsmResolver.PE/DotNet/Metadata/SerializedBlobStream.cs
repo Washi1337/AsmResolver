@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
@@ -113,6 +115,27 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             index = 0;
             return false;
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<(uint Index, byte[] Blob)> EnumerateBlobs()
+        {
+            uint currentIndex = 1;
+
+            while (currentIndex < _reader.Length)
+            {
+                byte[]? result = GetBlobByIndex(currentIndex);
+
+                if (result is null)
+                    break;
+
+                yield return (currentIndex, result);
+
+                uint byteCount = (uint) result.Length;
+
+                currentIndex += byteCount.GetCompressedSize();
+                currentIndex += byteCount;
+            }
         }
     }
 }

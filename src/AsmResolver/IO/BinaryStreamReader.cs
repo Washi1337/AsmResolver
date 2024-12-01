@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using AsmResolver.Shims;
 
 namespace AsmResolver.IO
 {
@@ -382,6 +383,9 @@ namespace AsmResolver.IO
         /// <returns>The remaining bytes.</returns>
         public byte[] ReadToEnd()
         {
+            if (RemainingLength == 0)
+                return ArrayShim.Empty<byte>();
+
             byte[] buffer = new byte[RemainingLength];
             ReadBytes(buffer, 0, buffer.Length);
             return buffer;

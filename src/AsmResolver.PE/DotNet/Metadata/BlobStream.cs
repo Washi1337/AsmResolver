@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
@@ -61,5 +62,16 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="index">When the function returns <c>true</c>, contains the index at which the blob was found.</param>
         /// <returns><c>true</c> if the blob index was found, <c>false</c> otherwise.</returns>
         public abstract bool TryFindBlobIndex(byte[]? blob, out uint index);
+
+        /// <summary>
+        /// Performs a linear sweep on the stream and yields all blobs that are stored.
+        /// </summary>
+        /// <returns>The blob enumerator.</returns>
+        /// <remarks>
+        /// As blobs can be referenced at any offset within the heap, the heap is technically allowed to contain
+        /// garbage data in between blob entries. As such, this linear sweep enumerator may not be an accurate
+        /// depiction of all blobs that are used by the module.
+        /// </remarks>
+        public abstract IEnumerable<(uint Index, byte[] Blob)> EnumerateBlobs();
     }
 }

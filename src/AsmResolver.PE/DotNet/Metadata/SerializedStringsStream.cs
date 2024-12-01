@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
@@ -102,6 +103,25 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             index = 0;
             return false;
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<(uint Index, Utf8String String)> EnumerateStrings()
+        {
+            uint currentIndex = 1;
+
+            while (currentIndex < _reader.Length)
+            {
+                var result = GetStringByIndex(currentIndex);
+
+                if (result is null)
+                    break;
+
+                yield return (currentIndex, result);
+
+                currentIndex += (uint) result.ByteCount;
+                currentIndex++; // Zero terminator.
+            }
         }
     }
 }

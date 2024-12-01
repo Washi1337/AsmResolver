@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Text;
 using AsmResolver.IO;
 
@@ -75,8 +76,12 @@ namespace AsmResolver.PE.DotNet.Metadata
                     byte[] data = new byte[length];
                     int actualLength = stringsReader.ReadBytes(data, 0, (int) length);
 
-                    // Exclude the terminator byte.
-                    value = Encoding.Unicode.GetString(data, 0, actualLength - 1);
+                    // Exclude the terminator byte if we were able to read the string in its entirety.
+                    if (actualLength == length)
+                        actualLength--;
+
+                    // Decode.
+                    value = Encoding.Unicode.GetString(data, 0, actualLength);
                 }
 
                 _cachedStrings.TryAdd(index, value);
@@ -120,6 +125,27 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             index = 0;
             return false;
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<(uint Index, string String)> EnumerateStrings()
+        {
+            uint currentIndex = 1;
+
+            while (currentIndex < _reader.Length)
+            {
+                string? result = GetStringByIndex(currentIndex);
+
+                if (result is null)
+                    break;
+
+                yield return (currentIndex, result);
+
+                uint byteCount = (uint) Encoding.Unicode.GetByteCount(result) + 1;
+
+                currentIndex += byteCount.GetCompressedSize();
+                currentIndex += byteCount;
+            }
         }
     }
 }

@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata
 {
     /// <summary>
@@ -52,5 +55,11 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="index">When the function returns <c>true</c>, contains the index at which the GUID was found.</param>
         /// <returns><c>true</c> if the GUID index was found, <c>false</c> otherwise.</returns>
         public abstract bool TryFindGuidIndex(System.Guid guid, out uint index);
+
+        /// <summary>
+        /// Performs a linear sweep on the stream and yields all GUIDs that are stored.
+        /// </summary>
+        /// <returns>The GUID enumerator.</returns>
+        public abstract IEnumerable<Guid> EnumerateGuids();
     }
 }

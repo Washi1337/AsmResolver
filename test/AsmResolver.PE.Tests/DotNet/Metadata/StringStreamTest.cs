@@ -1,3 +1,4 @@
+using System.Linq;
 using AsmResolver.PE.DotNet.Metadata;
 using Xunit;
 
@@ -22,27 +23,56 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [InlineData(null)]
         [InlineData("ABC")]
         [InlineData("DEF")]
-        public void FindExistingString(string? value) => AssertHasString(new byte[]
-            {
-                0x00, 0x41, 0x42, 0x43, 0x00, 0x44, 0x45, 0x46, 0x00
-            },
-            value);
+        public void FindExistingString(string? value) => AssertHasString(
+            [0x00, 0x41, 0x42, 0x43, 0x00, 0x44, 0x45, 0x46, 0x00],
+            value
+        );
 
         [Theory]
         [InlineData("ABC")]
         [InlineData("DEF")]
-        public void FindExistingStringButNotZeroTerminated(string value) => AssertDoesNotHaveString(new byte[]
-            {
-                0x00, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46
-            },
-            value);
+        public void FindExistingStringButNotZeroTerminated(string value) => AssertDoesNotHaveString(
+            [0x00, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46],
+            value
+        );
 
         [Theory]
         [InlineData("CDE")]
-        public void FindNonExistingString(string value) => AssertDoesNotHaveString(new byte[]
-            {
-                0x00, 0x41, 0x42, 0x43, 0x00, 0x44, 0x45, 0x46, 0x00
-            },
-            value);
+        public void FindNonExistingString(string value) => AssertDoesNotHaveString(
+            [0x00, 0x41, 0x42, 0x43, 0x00, 0x44, 0x45, 0x46, 0x00],
+            value
+        );
+
+        [Fact]
+        public void EnumerateStrings()
+        {
+            var stream = new SerializedStringsStream([0x00, 0x41, 0x42, 0x43, 0x00, 0x44, 0x45, 0x46, 0x00]);
+            Assert.Equal([
+                (1, "ABC"),
+                (5, "DEF")
+            ], stream.EnumerateStrings());
+        }
+
+        [Fact]
+        public void EnumerateStringsNotZeroTerminated()
+        {
+            var stream = new SerializedStringsStream([0x00, 0x41, 0x42, 0x43, 0x00, 0x44, 0x45, 0x46]);
+            Assert.Equal([
+                (1, "ABC"),
+                (5, "DEF")
+            ], stream.EnumerateStrings());
+        }
+
+        [Fact]
+        public void EnumerateStringsEmptyStrings()
+        {
+            var stream = new SerializedStringsStream([0x00, 0x41, 0x42, 0x43, 0x00, 0x00, 0x00, 0x44, 0x45, 0x46]);
+            Assert.Equal([
+                (1, "ABC"),
+                (5, ""),
+                (6, ""),
+                (7, "DEF")
+            ], stream.EnumerateStrings());
+        }
     }
 }
