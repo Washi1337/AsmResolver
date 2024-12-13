@@ -60,6 +60,14 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
+        public void MatchTopLevelTypeRefTypeRefWithEmptyNamespace()
+        {
+            var reference1 = new TypeReference(_someAssemblyReference, null, "SomeType");
+            var reference2 = new TypeReference(_someAssemblyReference, "", "SomeType");
+            Assert.Equal(reference1, reference2, _comparer);
+        }
+
+        [Fact]
         public void MatchTopLevelTypeRefTypeDef()
         {
             var assembly = new AssemblyDefinition(_someAssemblyReference.Name, _someAssemblyReference.Version);

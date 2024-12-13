@@ -84,7 +84,8 @@ namespace AsmResolver.DotNet
         public Utf8String? Namespace
         {
             get => _namespace.GetValue(this);
-            set => _namespace.SetValue(value);
+            set => _namespace.SetValue(Utf8String.IsNullOrEmpty(value) ? null : value);
+            // According to the specification, the namespace should always be null or non-empty.
         }
 
         string? ITypeDescriptor.Namespace => Namespace;
