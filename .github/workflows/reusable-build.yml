@@ -27,7 +27,7 @@ env:
 jobs:
   get-version:
     name: Calculating Version Suffix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       version_suffix: ${{ steps.set-vars.outputs.version_suffix }}
     steps:

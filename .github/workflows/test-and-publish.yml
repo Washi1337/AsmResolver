@@ -41,7 +41,7 @@ jobs:
   # without comprimizing the security
   upload-event-file:
     name: Upload Event File
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Upload event file
         uses: actions/upload-artifact@v4
@@ -53,7 +53,7 @@ jobs:
   # https://stackoverflow.com/a/77549656
   variables:
     name: Variable Accessibility Workaround for Jobs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       EXPERIMENTAL: ${{ env.EXPERIMENTAL == 'true' || (github.event == 'push' && github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development') }}
       BUILD_CONFIGURATIONS: ${{env.BUILD_CONFIGURATIONS}}
@@ -75,8 +75,8 @@ jobs:
     strategy:
       matrix:
         runner: [ 
-          { image: 'windows-latest', arch: 'x64' },
-          { image: 'windows-latest', arch: 'x86' },
+          { image: 'windows-2022', arch: 'x64' },
+          { image: 'windows-2022', arch: 'x86' },
         ]
         build_configuration: ${{fromJson(needs.variables.outputs.BUILD_CONFIGURATIONS)}}
     uses: ./.github/workflows/reusable-build.yml
@@ -92,9 +92,9 @@ jobs:
       fail-fast: false
       matrix:
         runner: [ 
-          { image: 'windows-latest', arch: 'x64' },
-          { image: 'windows-latest', arch: 'x86' },
-          { image: 'ubuntu-latest', arch: 'x64' },
+          { image: 'windows-2022', arch: 'x64' },
+          { image: 'windows-2022', arch: 'x86' },
+          { image: 'ubuntu-22.04', arch: 'x64' },
           { image: 'macos-13', arch: 'x64' },
           { image: 'macos-14', arch: 'arm64' },
           { image: 'macos-14', arch: 'x64' },
@@ -106,8 +106,8 @@ jobs:
       architecture: ${{matrix.runner.arch}}
       dotnet_target_frameworks: ${{needs.variables.outputs.DOTNET_TARGET_FRAMEWORKS}}
       build_configuration: ${{matrix.build_configuration}}
-      #ignore non-windows tests since support is yet lacking
-      is_experimental: ${{matrix.runner.image != 'windows-latest' && matrix.runner.image != 'ubuntu-latest'}}
+      # Ignore MacOS test results since support is yet lacking
+      is_experimental: ${{matrix.runner.image != 'windows-2022' && matrix.runner.image != 'ubuntu-22.04'}}
       skip_experimental: ${{ needs.variables.outputs.EXPERIMENTAL != 'true' }}
 
   publish:
@@ -115,7 +115,7 @@ jobs:
     needs: [variables, test]
     uses: ./.github/workflows/reusable-publish.yml
     with:
-      image: 'windows-latest'
+      image: 'windows-2022'
       architecture: 'x64'
       build_configuration: 'Release'
     secrets:

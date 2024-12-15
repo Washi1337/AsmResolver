@@ -34,7 +34,7 @@ env:
 jobs:
   publish:
     name: Publish NuGet Packages from Build Output Cache
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
