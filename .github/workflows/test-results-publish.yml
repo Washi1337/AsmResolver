@@ -11,7 +11,7 @@ permissions: {}
 jobs:
   publish-test-results:
     if: github.event.workflow_run.conclusion != 'skipped' && github.event.workflow_run.conclusion != 'cancelled'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Publish Test Results
 
     permissions:
