@@ -127,8 +127,7 @@ jobs:
       - name: Download Build Cache
         uses: ./.github/actions/test-build-cache-download
         with:
-            #image: ${{inputs.image}}
-            image: 'windows-latest'
+            image: 'windows-2022'
             architecture: ${{(inputs.architecture == 'arm64' && 'x64') || inputs.architecture}}
             build_configuration: ${{inputs.build_configuration}}
 
