@@ -773,5 +773,19 @@ namespace AsmResolver.DotNet.Tests
             Assert.Throws<ArgumentException>(() => type2.NestedTypes.Add(nestedType));
         }
 
+        [Fact]
+        public void NamespaceShouldBeNullIfEmptyStringGiven()
+        {
+            var type = new TypeDefinition(string.Empty, "SomeType", TypeAttributes.Public);
+            Assert.Null(type.Namespace);
+        }
+
+        [Fact]
+        public void NamespaceShouldBeNullIfEmptyStringSet()
+        {
+            var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public);
+            type.Namespace = string.Empty;
+            Assert.Null(type.Namespace);
+        }
     }
 }

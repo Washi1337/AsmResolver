@@ -189,5 +189,22 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal(signature.Type, reference, Comparer);
         }
+
+        [Fact]
+        public void NamespaceShouldBeNullIfEmptyStringGiven()
+        {
+            var module = new ModuleDefinition("SomeModule");
+            var type = new TypeReference(module, string.Empty, "SomeType");
+            Assert.Null(type.Namespace);
+        }
+
+        [Fact]
+        public void NamespaceShouldBeNullIfEmptyStringSet()
+        {
+            var module = new ModuleDefinition("SomeModule");
+            var type = new TypeReference(module, "SomeNamespace", "SomeType");
+            type.Namespace = string.Empty;
+            Assert.Null(type.Namespace);
+        }
     }
 }
