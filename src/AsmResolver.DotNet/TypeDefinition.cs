@@ -769,29 +769,62 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
+        /// <summary>
+        /// Determines whether the provided definition can be accessed by the type.
+        /// </summary>
+        /// <param name="definition">The definition to access.</param>
+        /// <returns><c>true</c> if this type can access <paramref name="definition"/>, <c>false</c> otherwise.</returns>
+        public bool CanAccessDefinition(IMemberDefinition definition)
+        {
+            return definition.IsAccessibleFromType(this);
+        }
+
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
         {
-            // TODO: Check types of the same family.
-
-            if (this == type)
+            if (SignatureComparer.Default.Equals(this, type))
                 return true;
 
-            var comparer = new SignatureComparer();
-            bool isInSameAssembly = comparer.Equals(Module, type.Module);
+            bool isInSameAssembly = SignatureComparer.Default.Equals(Module, type.Module);
 
-            if (IsNested)
+            // Most common case: A top-level types is accessible by all other types in the same assembly, or types in
+            // a different assembly if this top-level type is public.
+            if (DeclaringType is not { } declaringType)
+                return IsPublic || isInSameAssembly;
+
+            // The current type is a nested type, which means in order to be accessible, `type` needs to be able to
+            // access the declaring type first before it can reach the current type.
+            if (!declaringType.IsAccessibleFromType(type))
+                return false;
+
+            // Types can always access their direct nested types.
+            if (SignatureComparer.Default.Equals(declaringType, type))
+                return true;
+
+            // Assuming declaring type is accessible, then public nested types are always accessible.
+            if (IsNestedPublic)
+                return true;
+
+            // If the current type is marked assembly (internal in C#), `type` must be in the same assembly.
+            if (IsNestedAssembly || IsNestedFamilyOrAssembly)
+                return isInSameAssembly;
+
+            // If the current type is marked family (protected in C#), `type` must be in the type hierarchy.
+            //
+            //      class A
+            //      {
+            //          protected class B {} // <-- `this`
+            //      }
+            //
+            //      class C : A {} // <-- `type` ( can access A+B )
+            //
+            if ((IsNestedFamily || IsNestedFamilyOrAssembly || IsNestedFamilyAndAssembly)
+                && type.BaseType?.Resolve() is { } baseType)
             {
-                if (DeclaringType is not { } declaringType || !declaringType.IsAccessibleFromType(type))
-                    return false;
-
-                return IsNestedPublic
-                       || isInSameAssembly && IsNestedAssembly
-                       || DeclaringType == type;
+                return (!IsNestedFamilyAndAssembly || isInSameAssembly) && IsAccessibleFromType(baseType);
             }
 
-            return IsPublic
-                   || isInSameAssembly;
+            return false;
         }
 
         /// <summary>
