@@ -19,13 +19,35 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         {
             return type switch
             {
-                CompilerIdentifier => new CompilerIdentifierSection(reader.ReadAsciiString()),
+                CompilerIdentifier => ReadCompilerIdentifierSection(ref reader),
                 ImportSections => new SerializedImportSectionsSection(context, ref reader),
                 RuntimeFunctions when context.File.FileHeader.Machine == MachineType.Amd64 => new SerializedX64RuntimeFunctionsSection(context, ref reader),
                 MethodDefEntryPoints => new SerializedMethodEntryPointsSection(ref reader),
                 ReadyToRunSectionType.DebugInfo => new SerializedDebugInfoSection(context, reader),
-                _ => new CustomReadyToRunSection(type, reader.ReadSegment(reader.Length))
+                _ => ReadUnsupportedReadyToRunSection(ref reader)
             };
+
+            CompilerIdentifierSection ReadCompilerIdentifierSection(ref BinaryStreamReader reader)
+            {
+                ulong offset = reader.Offset;
+                uint rva = reader.Rva;
+
+                var section = new CompilerIdentifierSection(reader.ReadAsciiString());
+                section.UpdateOffsets(new RelocationParameters(offset, rva));
+
+                return section;
+            }
+
+            CustomReadyToRunSection ReadUnsupportedReadyToRunSection(ref BinaryStreamReader reader)
+            {
+                ulong offset = reader.Offset;
+                uint rva = reader.Rva;
+
+                var section = new CustomReadyToRunSection(type, reader.ReadSegment(reader.Length));
+                section.UpdateOffsets(new RelocationParameters(offset, rva));
+
+                return section;
+            }
         }
     }
 }
