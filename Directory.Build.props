@@ -8,7 +8,7 @@
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
         <LangVersion>10</LangVersion>
         <VersionPrefix>6.0.0</VersionPrefix>
-        <VersionSuffix>beta.1</VersionSuffix>
+        <VersionSuffix>beta.2</VersionSuffix>
         <Deterministic>true</Deterministic>
         <UseArtifactsOutput>true</UseArtifactsOutput>
     </PropertyGroup>
