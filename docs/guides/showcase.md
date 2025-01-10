@@ -39,9 +39,9 @@ Below a non-exhaustive list of awesome projects (sorted alphabetically) that use
 ## CTF Writeups
 
 - [FLARE-ON 9 Challenge 8 - backdoor](https://washi1337.github.io/ctf-writeups/writeups/flare-on/2022/8/) - Deobfuscating solving challenge 8 of the annual FLARE-ON challenge using AsmResolver.
-- [The Refinery Files 0x05: Flare On 9](https://github.com/binref/refinery/blob/master/tutorials/tbr-files.v0x05.flare.on.9.ipynb) - Another angle at deobfuscating challenge 8 of the annual FLARE-ON challenge.
+- [The Refinery Files 0x05: Flare On 9](https://github.com/binref/refinery/blob/master/tutorials/notebooks/tbr-files.v0x05.flare.on.9.ipynb) - Another angle at deobfuscating challenge 8 of the annual FLARE-ON challenge.
 
 
 There are [many more projects](https://github.com/Washi1337/AsmResolver/network/dependents?package_id=UGFja2FnZS0xMTk5ODkwODU5) using AsmResolver.
 Do you have a cool AsmResolver-based project you want to showcase in this list as well?
-Consider opening a ticket on the [Issue Board](https://github.com/Washi1337/AsmResolver/issue).
+Consider opening a ticket on the [Issue Board](https://github.com/Washi1337/AsmResolver/issues).
