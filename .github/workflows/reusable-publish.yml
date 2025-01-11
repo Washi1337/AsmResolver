@@ -51,7 +51,7 @@ jobs:
 
       - name: Push to NuGet
         if: ${{github.ref == 'refs/heads/master'}}
-        run: dotnet nuget push "./artifacts/**/*.nupkg" -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
+        run: dotnet nuget push "./artifacts/**/*.nupkg" -k ${{secrets.NUGET_API_KEY}} -s https://api.nuget.org/v3/index.json --skip-duplicate
         shell: pwsh
 
       - name: Push to NuGet Nightly
