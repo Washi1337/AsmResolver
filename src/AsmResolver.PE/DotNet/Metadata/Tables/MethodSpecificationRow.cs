@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the method specification metadata table.
     /// </summary>
-    public struct MethodSpecificationRow : IMetadataRow
+    public struct MethodSpecificationRow : IMetadataRow, IEquatable<MethodSpecificationRow>
     {
         /// <summary>
         /// Reads a single method specification row from an input stream.
@@ -73,11 +73,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Instantiation,(IndexSize) layout.Columns[1].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided method specification row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(MethodSpecificationRow other)
         {
             return Method == other.Method && Instantiation == other.Instantiation;
@@ -114,5 +110,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(MethodSpecificationRow left, MethodSpecificationRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(MethodSpecificationRow left, MethodSpecificationRow right) => !(left == right);
     }
 }

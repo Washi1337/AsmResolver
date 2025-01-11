@@ -55,6 +55,7 @@ Stable Builds:
 Nightly Builds:
 
 - [AppVeyor](https://ci.appveyor.com/project/Washi1337/asmresolver/build/artifacts)
+- [Nightly Nuget Feed](https://nuget.washi.dev/)
 
 | Branch | Build status |
 |--------|--------|

@@ -74,7 +74,7 @@ PdbImage image = ...;
 foreach (var module in image.Modules)
 {
     Console.WriteLine(module.Name);
-    foreach (var symbol in image.Symbols)
+    foreach (var symbol in module.Symbols)
         Console.WriteLine($"\t- {symbol}");
     Console.WriteLine();
 }

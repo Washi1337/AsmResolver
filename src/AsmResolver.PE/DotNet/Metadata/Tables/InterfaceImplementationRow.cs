@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the interface implementation metadata table.
     /// </summary>
-    public struct InterfaceImplementationRow : IMetadataRow
+    public struct InterfaceImplementationRow : IMetadataRow, IEquatable<InterfaceImplementationRow>
     {
         /// <summary>
         /// Reads a single interface implementation row from an input stream.
@@ -75,11 +75,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Interface, (IndexSize) layout.Columns[1].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided interface implementation row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(InterfaceImplementationRow other)
         {
             return Class == other.Class && Interface == other.Interface;
@@ -116,5 +112,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(InterfaceImplementationRow left, InterfaceImplementationRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(InterfaceImplementationRow left, InterfaceImplementationRow right) => !(left == right);
     }
 }

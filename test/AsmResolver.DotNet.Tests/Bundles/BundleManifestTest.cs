@@ -307,9 +307,8 @@ namespace AsmResolver.DotNet.Tests.Bundles
                     "HelloWorld.exe",
                     bundleStream.ToArray(),
                     null,
-                    5000,
-                    className,
-                    methodName);
+                    testClass: className,
+                    testMethod: methodName);
 
             Assert.Equal("Hello, Mars!\n", output);
         }
@@ -337,9 +336,8 @@ namespace AsmResolver.DotNet.Tests.Bundles
                     Path.ChangeExtension(fileName, ".exe"),
                     stream.ToArray(),
                     null,
-                    5000,
-                    className,
-                    methodName);
+                    testClass: className,
+                    testMethod: methodName);
 
             Assert.Equal(expectedOutput.Replace("\r\n", "\n"), output);
         }

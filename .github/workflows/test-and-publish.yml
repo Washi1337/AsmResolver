@@ -1,0 +1,124 @@
+name: Test and Publish NuGet
+
+on:
+  push:
+    branches:
+      - master
+      - development
+      - simple
+      - simple-test2
+    paths-ignore:
+      - '.github/workflows/docs.yml'
+      - 'docs/**'
+  pull_request:
+    branches:
+      - master
+      - development
+    paths-ignore:
+      - '.github/workflows/docs.yml'
+      - 'docs/*'
+  workflow_dispatch: 
+
+concurrency:
+  group: ${{github.workflow}}-${{github.event.pull_request.number || github.ref}}
+  cancel-in-progress: true
+
+env:
+  # Right now we can't run experimental tests that can fail, since it will affect the PR
+  # By default we only run it on master/development branches
+  # Unless the variable will be true
+  EXPERIMENTAL: false
+
+  # You are interested in changing these values
+  BUILD_CONFIGURATIONS:                 "['Release']"
+  DOTNET_TARGET_FRAMEWORKS:             "['netcoreapp3.1', 'net5.0', 'net6.0', 'net7.0', 'net8.0']"
+  DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64: "['net6.0', 'net7.0', 'net8.0']"
+  FRAMEWORK_TARGET_FRAMEWORKS:          "['net35', 'net48']"
+
+jobs:
+
+  # This technique allows us to run `test-results-publish.yml` with the owner's secrets
+  # without comprimizing the security
+  upload-event-file:
+    name: Upload Event File
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Upload event file
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-event-file
+          path: ${{ github.event_path }}
+          retention-days: 1
+
+  # https://stackoverflow.com/a/77549656
+  variables:
+    name: Variable Accessibility Workaround for Jobs
+    runs-on: ubuntu-22.04
+    outputs:
+      EXPERIMENTAL: ${{ env.EXPERIMENTAL == 'true' || (github.event == 'push' && github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development') }}
+      BUILD_CONFIGURATIONS: ${{env.BUILD_CONFIGURATIONS}}
+      DOTNET_TARGET_FRAMEWORKS: ${{env.DOTNET_TARGET_FRAMEWORKS}}
+      DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64: ${{env.DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64}}
+      FRAMEWORK_TARGET_FRAMEWORKS: ${{env.FRAMEWORK_TARGET_FRAMEWORKS}}
+    steps:
+      - name: Compute outputs
+        run: |
+          echo "EXPERIMENTAL=${{env.EXPERIMENTAL}}" >> $GITHUB_OUTPUT
+          echo "BUILD_CONFIGURATIONS=${{env.BUILD_CONFIGURATIONS}}" >> $GITHUB_OUTPUT
+          echo "DOTNET_TARGET_FRAMEWORKS=${{env.DOTNET_TARGET_FRAMEWORKS}}" >> $GITHUB_OUTPUT
+          echo "DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64=${{env.DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64}}" >> $GITHUB_OUTPUT
+          echo "FRAMEWORK_TARGET_FRAMEWORKS=${{env.FRAMEWORK_TARGET_FRAMEWORKS}}" >> $GITHUB_OUTPUT
+
+  build:
+    name: Perform Build
+    needs: [variables]
+    strategy:
+      matrix:
+        runner: [ 
+          { image: 'windows-2022', arch: 'x64' },
+          { image: 'windows-2022', arch: 'x86' },
+        ]
+        build_configuration: ${{fromJson(needs.variables.outputs.BUILD_CONFIGURATIONS)}}
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      image: ${{matrix.runner.image}}
+      architecture: ${{matrix.runner.arch}}
+      build_configuration: ${{matrix.build_configuration}}
+
+  test:
+    name: Execute Tests
+    needs: [variables, build]
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ 
+          { image: 'windows-2022', arch: 'x64' },
+          { image: 'windows-2022', arch: 'x86' },
+          { image: 'ubuntu-22.04', arch: 'x64' },
+          { image: 'macos-13', arch: 'x64' },
+          { image: 'macos-14', arch: 'arm64' },
+          { image: 'macos-14', arch: 'x64' },
+        ]
+        build_configuration: ${{fromJson(needs.variables.outputs.BUILD_CONFIGURATIONS)}}
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+      image: ${{matrix.runner.image}}
+      architecture: ${{matrix.runner.arch}}
+      dotnet_target_frameworks: ${{needs.variables.outputs.DOTNET_TARGET_FRAMEWORKS}}
+      build_configuration: ${{matrix.build_configuration}}
+      # Ignore MacOS test results since support is yet lacking
+      is_experimental: ${{matrix.runner.image != 'windows-2022' && matrix.runner.image != 'ubuntu-22.04'}}
+      skip_experimental: ${{ needs.variables.outputs.EXPERIMENTAL != 'true' }}
+
+  publish:
+    name: Publish NuGet Packages
+    needs: [variables, test]
+    uses: ./.github/workflows/reusable-publish.yml
+    with:
+      image: 'windows-2022'
+      architecture: 'x64'
+      build_configuration: 'Release'
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      NIGHTLY_NUGET_API_KEY: ${{ secrets.NIGHTLY_NUGET_API_KEY }}
+      NIGHTLY_NUGET_SOURCE: ${{ secrets.NIGHTLY_NUGET_SOURCE }}

@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the parameter pointer metadata table.
     /// </summary>
-    public struct ParameterPointerRow : IMetadataRow
+    public struct ParameterPointerRow : IMetadataRow, IEquatable<ParameterPointerRow>
     {
         /// <summary>
         /// Reads a single parameter pointer row from an input stream.
@@ -58,11 +58,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Parameter, (IndexSize) layout.Columns[0].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided parameter pointer row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(ParameterPointerRow other)
         {
             return Parameter == other.Parameter;
@@ -96,5 +92,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(ParameterPointerRow left, ParameterPointerRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(ParameterPointerRow left, ParameterPointerRow right) => !(left == right);
     }
 }

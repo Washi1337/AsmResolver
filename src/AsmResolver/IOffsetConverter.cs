@@ -3,7 +3,7 @@ using System;
 namespace AsmResolver
 {
     /// <summary>
-    /// Provides members for converting virtual addresses to file offsets and vice versa. 
+    /// Provides members for converting virtual addresses to file offsets and vice versa.
     /// </summary>
     public interface IOffsetConverter
     {
@@ -20,7 +20,7 @@ namespace AsmResolver
         /// </summary>
         /// <param name="rva">The virtual address, relative to the image base, to convert.</param>
         /// <returns>The file offset.</returns>
-        /// /// <exception cref="ArgumentOutOfRangeException">Occurs when the virtual address falls outside of the range of the convertible addresses.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when the virtual address falls outside of the range of the convertible addresses.</exception>
         ulong RvaToFileOffset(uint rva);
     }
 }

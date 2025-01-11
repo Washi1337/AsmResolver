@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the implementation map metadata table.
     /// </summary>
-    public struct ImplementationMapRow : IMetadataRow
+    public struct ImplementationMapRow : IMetadataRow, IEquatable<ImplementationMapRow>
     {
         /// <summary>
         /// Reads a single implementation map row from an input stream.
@@ -102,11 +102,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(ImportScope, (IndexSize) layout.Columns[3].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided implementation map row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(ImplementationMapRow other)
         {
             return Attributes == other.Attributes
@@ -150,5 +146,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(ImplementationMapRow left, ImplementationMapRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(ImplementationMapRow left, ImplementationMapRow right) => !(left == right);
     }
 }

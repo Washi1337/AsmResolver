@@ -1,0 +1,10 @@
+<Project>
+
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+    
+    <PropertyGroup>
+        <ArtifactsPath>$(MSBuildThisFileDirectory)..\artifacts\tools</ArtifactsPath>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+</Project>

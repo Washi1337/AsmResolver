@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the Portable PDB import scope metadata table.
     /// </summary>
-    public struct ImportScopeRow : IMetadataRow
+    public struct ImportScopeRow : IMetadataRow, IEquatable<ImportScopeRow>
     {
         /// <summary>
         /// Creates a new row for the Portable PDB import scope metadata table.
@@ -76,11 +76,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Imports, (IndexSize) layout.Columns[1].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided import scope row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(ImportScopeRow other)
         {
             return Parent == other.Parent && Imports == other.Imports;
@@ -108,5 +104,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public IEnumerator<uint> GetEnumerator() => new MetadataRowColumnEnumerator(this);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(ImportScopeRow left, ImportScopeRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(ImportScopeRow left, ImportScopeRow right) => !(left == right);
     }
 }

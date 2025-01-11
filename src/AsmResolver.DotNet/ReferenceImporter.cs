@@ -730,7 +730,7 @@ namespace AsmResolver.DotNet
 
         TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitSentinelType(SentinelTypeSignature signature)
         {
-            return new SentinelTypeSignature();
+            return signature;
         }
 
         TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitSzArrayType(SzArrayTypeSignature signature)

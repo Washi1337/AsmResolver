@@ -1,0 +1,22 @@
+name: Download Test Build Cache
+description: Download the build cache for the specified image and build configuration
+
+inputs:
+  image:
+    description: 'The image to use'
+    required: true
+  architecture:
+    description: 'The architecture to use'
+    required: true
+  build_configuration:
+    description: 'The build configuration to use'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download Build Cache
+      uses: actions/download-artifact@v4
+      with:
+        name: build-cache-${{inputs.image}}-${{inputs.architecture}}-${{inputs.build_configuration}}
+        path: artifacts/

@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the method pointer metadata table.
     /// </summary>
-    public struct MethodPointerRow : IMetadataRow
+    public struct MethodPointerRow : IMetadataRow, IEquatable<MethodPointerRow>
     {
         /// <summary>
         /// Reads a single field pointer row from an input stream.
@@ -58,11 +58,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Method, (IndexSize) layout.Columns[0].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided method pointer row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(MethodPointerRow other)
         {
             return Method == other.Method;
@@ -96,5 +92,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(MethodPointerRow left, MethodPointerRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(MethodPointerRow left, MethodPointerRow right) => !(left == right);
     }
 }

@@ -169,7 +169,7 @@ namespace AsmResolver.DotNet.Cloning
                     break;
 
                 case CilOperandType.InlineSig when instruction.Operand is StandAloneSignature standAlone:
-                    instruction.Operand = new StandAloneSignature(standAlone.Signature switch
+                    clonedInstruction.Operand = new StandAloneSignature(standAlone.Signature switch
                     {
                         MethodSignature signature => context.Importer.ImportMethodSignature(signature),
                         GenericInstanceMethodSignature signature => context.Importer.ImportGenericInstanceMethodSignature(signature),

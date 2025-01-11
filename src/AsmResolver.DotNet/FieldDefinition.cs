@@ -405,16 +405,32 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
         {
+            // The field is only accessible if its declaring type is accessible.
             if (DeclaringType is not { } declaringType || !declaringType.IsAccessibleFromType(type))
                 return false;
 
-            var comparer = new SignatureComparer();
-            bool isInSameAssembly = comparer.Equals(declaringType.Module, type.Module);
+            // Public fields are always accessible.
+            if (IsPublic)
+                return true;
 
-            return IsPublic
-                   || isInSameAssembly && IsAssembly
-                   || comparer.Equals(DeclaringType, type);
-            // TODO: check if in the same family of declaring types.
+            // Types can always access their own fields.
+            if (SignatureComparer.Default.Equals(declaringType, type))
+                return true;
+
+            bool isInSameAssembly = SignatureComparer.Default.Equals(declaringType.Module, type.Module);
+
+            // Assembly (internal in C#) fields are accessible by types in the same assembly.
+            if (IsAssembly || IsFamilyOrAssembly)
+                return isInSameAssembly;
+
+            // Family (protected in C#) fields are accessible by any base type.
+            if ((IsFamily || IsFamilyOrAssembly || IsFamilyAndAssembly)
+                && type.BaseType?.Resolve() is { } baseType)
+            {
+                return (!IsFamilyAndAssembly || isInSameAssembly) && IsAccessibleFromType(baseType);
+            }
+
+            return false;
         }
 
         /// <summary>

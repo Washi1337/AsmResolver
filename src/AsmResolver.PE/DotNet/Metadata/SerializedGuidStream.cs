@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
@@ -94,6 +95,14 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             index = 0;
             return false;
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<Guid> EnumerateGuids()
+        {
+            int totalGuids = (int) (_reader.Length / GuidSize);
+            for (int i = 0; i < totalGuids; i++)
+                yield return GetGuidByIndex((uint) (i + 1));
         }
     }
 }

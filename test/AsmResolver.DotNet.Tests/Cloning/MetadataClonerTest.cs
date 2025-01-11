@@ -9,6 +9,7 @@ using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
+using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.DotNet.TestCases.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.Tests.Listeners;
@@ -38,7 +39,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         private static TypeDefinition CloneType(Type type, out TypeDefinition originalTypeDef)
         {
             var sourceModule = ModuleDefinition.FromFile(type.Module.Assembly.Location, TestReaderParameters);
-            originalTypeDef= (TypeDefinition) sourceModule.LookupMember(type.MetadataToken);
+            originalTypeDef= sourceModule.LookupMember<TypeDefinition>(type.MetadataToken);
 
             var targetModule = PrepareTempModule();
 
@@ -60,7 +61,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         private static MethodDefinition CloneMethod(MethodBase methodBase, out MethodDefinition originalMethodDef)
         {
             var sourceModule = ModuleDefinition.FromFile(methodBase.Module.Assembly.Location, TestReaderParameters);
-            originalMethodDef = (MethodDefinition) sourceModule.LookupMember(methodBase.MetadataToken);
+            originalMethodDef = sourceModule.LookupMember<MethodDefinition>(methodBase.MetadataToken);
 
             var targetModule = PrepareTempModule();
 
@@ -68,13 +69,31 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Include(originalMethodDef)
                 .Clone();
 
-
-            var clonedMethod = (MethodDefinition) result.ClonedMembers.First();
+            var clonedMethod = result.ClonedMembers.OfType<MethodDefinition>().First();
 
             Assert.True(result.ContainsClonedMember(originalMethodDef));
             Assert.Equal(clonedMethod, result.GetClonedMember(originalMethodDef));
 
             return clonedMethod;
+        }
+
+        private static PropertyDefinition CloneProperty(PropertyInfo property, out PropertyDefinition originalProperty)
+        {
+            var sourceModule = ModuleDefinition.FromFile(property.Module.Assembly.Location, TestReaderParameters);
+            originalProperty = sourceModule.LookupMember<PropertyDefinition>(property.MetadataToken);
+
+            var targetModule = PrepareTempModule();
+
+            var result = new MemberCloner(targetModule)
+                .Include(originalProperty)
+                .Clone();
+
+            var clonedProperty = result.ClonedMembers.OfType<PropertyDefinition>().First();
+
+            Assert.True(result.ContainsClonedMember(originalProperty));
+            Assert.Equal(clonedProperty, result.GetClonedMember(originalProperty));
+
+            return clonedProperty;
         }
 
         private static FieldDefinition CloneInitializerField(FieldInfo field, out FieldDefinition originalFieldDef)
@@ -253,6 +272,18 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             Assert.Equal(originalSpec, newSpec, _signatureComparer);
             Assert.NotSame(originalSpec.Module, newSpec.Module);
+        }
+
+        [Fact]
+        public void CloneSemantics()
+        {
+            var clonedProperty = CloneProperty(typeof(SingleProperty).GetProperty(nameof(SingleProperty.IntProperty)), out var originalProperty);
+
+            Assert.Equal(originalProperty.Name, clonedProperty.Name);
+            Assert.Equal(
+                originalProperty.Semantics.Select(x => x.Method!.Name),
+                clonedProperty.Semantics.Select(x => x.Method!.Name)
+            );
         }
 
         [Fact]

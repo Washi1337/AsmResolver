@@ -43,17 +43,25 @@ namespace AsmResolver.PE.Debug
         /// <inheritdoc />
         protected override IDebugDataSegment? GetContents()
         {
-            if (_sizeOfData == 0)
-                return null;
+            BinaryStreamReader reader;
 
-            var reference = _context.File.GetReferenceToRva(_addressOfRawData);
-            if (!reference.CanRead)
+            if (_sizeOfData == 0)
+                return new EmptyDebugDataSegment(_type);
+
+            if (_addressOfRawData == 0 || _context.File.MappingMode == File.PEMappingMode.Unmapped)
+            {
+                if (!_context.File.TryCreateReaderAtFileOffset(_pointerToRawData, out reader))
+                {
+                    _context.BadImage("Debug data entry contains an invalid file offset.");
+                    return null;
+                }
+            }
+            else if (!_context.File.TryCreateReaderAtRva(_addressOfRawData, out reader))
             {
                 _context.BadImage("Debug data entry contains an invalid RVA.");
                 return null;
             }
 
-            var reader = reference.CreateReader();
             if (_sizeOfData > reader.Length)
             {
                 _context.BadImage("Debug data entry contains a too large size.");

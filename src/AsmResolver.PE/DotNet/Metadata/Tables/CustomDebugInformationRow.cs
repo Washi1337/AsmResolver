@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the Portable PDB custom debug information metadata table.
     /// </summary>
-    public struct CustomDebugInformationRow : IMetadataRow
+    public struct CustomDebugInformationRow : IMetadataRow, IEquatable<CustomDebugInformationRow>
     {
         /// <summary>
         /// Creates a new row for the Portable PDB custom debug information metadata table.
@@ -93,11 +93,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Value, (IndexSize) layout.Columns[2].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided custom debug information row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(CustomDebugInformationRow other)
         {
             return Parent == other.Parent && Kind == other.Kind && Value == other.Value;
@@ -128,5 +124,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public IEnumerator<uint> GetEnumerator() => new MetadataRowColumnEnumerator(this);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(CustomDebugInformationRow left, CustomDebugInformationRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(CustomDebugInformationRow left, CustomDebugInformationRow right) => !(left == right);
     }
 }

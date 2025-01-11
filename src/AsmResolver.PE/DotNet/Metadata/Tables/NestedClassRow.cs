@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the nested class metadata table.
     /// </summary>
-    public struct NestedClassRow : IMetadataRow
+    public struct NestedClassRow : IMetadataRow, IEquatable<NestedClassRow>
     {
         /// <summary>
         /// Reads a single nested class row from an input stream.
@@ -73,11 +73,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(EnclosingClass, (IndexSize) layout.Columns[1].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided nested class row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(NestedClassRow other)
         {
             return NestedClass == other.NestedClass && EnclosingClass == other.EnclosingClass;
@@ -114,5 +110,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(NestedClassRow left, NestedClassRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(NestedClassRow left, NestedClassRow right) => !(left == right);
     }
 }

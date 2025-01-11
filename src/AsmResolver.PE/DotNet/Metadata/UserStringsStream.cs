@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.PE.DotNet.Metadata
@@ -66,5 +67,16 @@ namespace AsmResolver.PE.DotNet.Metadata
             token = MetadataToken.Zero;
             return false;
         }
+
+        /// <summary>
+        /// Performs a linear sweep on the stream and yields all strings that are stored.
+        /// </summary>
+        /// <returns>The strings enumerator.</returns>
+        /// <remarks>
+        /// As strings can be referenced at any offset within the heap, the heap is technically allowed to contain
+        /// garbage data in between string entries. As such, this linear sweep enumerator may not be an accurate
+        /// depiction of all strings that are used by the module.
+        /// </remarks>
+        public abstract IEnumerable<(uint Index, string String)> EnumerateStrings();
     }
 }

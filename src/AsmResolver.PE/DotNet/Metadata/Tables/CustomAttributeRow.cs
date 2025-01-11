@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the custom attribute metadata table.
     /// </summary>
-    public struct CustomAttributeRow : IMetadataRow
+    public struct CustomAttributeRow : IMetadataRow, IEquatable<CustomAttributeRow>
     {
         /// <summary>
         /// Reads a single custom attribute row from an input stream.
@@ -84,11 +84,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             set;
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided custom attribute row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(CustomAttributeRow other)
         {
             return Parent == other.Parent
@@ -132,5 +128,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(CustomAttributeRow left, CustomAttributeRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(CustomAttributeRow left, CustomAttributeRow right) => !(left == right);
     }
 }

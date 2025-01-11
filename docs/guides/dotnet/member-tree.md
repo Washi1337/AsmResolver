@@ -376,3 +376,44 @@ MethodDefinition adder = property.AddMethod;
 MethodDefinition remover = property.RemoveMethod;
 MethodDefinition fire = property.FireMethod;
 ```
+
+## Accessibility Tests
+
+Most member definitions are marked with accessibility modifiers
+(e.g., `public` or `private`). These modifiers puts limits on
+which entities in an assembly can use the definition.
+
+AsmResolver provides built-in methods to test whether a given
+definition is accessible by another.
+
+For example, given the following two classes:
+
+```csharp
+public class Class1
+{
+    private int _field;
+
+    public void Method() { ... }
+}
+
+public class Class2 { ... }
+```
+
+AsmResolver can programmatically determine whether the private field
+`_field` is accessible by another entity using the `IsAccessibleFromType`
+and`CanAccessDefinition` methods:
+
+```csharp
+var module = ModuleDefinition.FromFile(...);
+
+var class1 = module.TopLevelTypes.First(t => t.Name == "Class1");
+var field = class1.Fields.First(f => f.Name == "_field");
+var method = class1.Methods.First(m => m.Name == "Method");
+
+var class2 = module.TopLevelTypes.First(t => t.Name == "Class2");
+
+Console.WriteLine(field.IsAccessibleFromType(class1)); // True
+Console.WriteLine(field.IsAccessibleFromType(class2)); // False
+Console.WriteLine(method.CanAccessDefinition(field)); // True
+Console.WriteLine(class2.CanAccessDefinition(field)); // False
+```

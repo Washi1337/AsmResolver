@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the file metadata table.
     /// </summary>
-    public struct FileReferenceRow : IMetadataRow
+    public struct FileReferenceRow : IMetadataRow, IEquatable<FileReferenceRow>
     {
         /// <summary>
         /// Reads a single file row from an input stream.
@@ -87,11 +87,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(HashValue, (IndexSize) layout.Columns[2].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided file row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(FileReferenceRow other)
         {
             return Attributes == other.Attributes && Name == other.Name && HashValue == other.HashValue;
@@ -131,5 +127,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(FileReferenceRow left, FileReferenceRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(FileReferenceRow left, FileReferenceRow right) => !(left == right);
     }
 }

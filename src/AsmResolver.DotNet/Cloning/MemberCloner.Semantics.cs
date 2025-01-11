@@ -17,9 +17,10 @@ namespace AsmResolver.DotNet.Cloning
                 {
                     declaringType.Properties.Add(clonedProperty);
                 }
-                var clonedMember = clonedProperty;
-                _listeners.OnClonedMember(property, clonedMember);
-                _listeners.OnClonedProperty(property, clonedMember);
+
+                context.ClonedMembers.Add(property, clonedProperty);
+                _listeners.OnClonedMember(property, clonedProperty);
+                _listeners.OnClonedProperty(property, clonedProperty);
             }
         }
 
@@ -54,9 +55,10 @@ namespace AsmResolver.DotNet.Cloning
                 {
                     declaringType.Events.Add(clonedEvent);
                 }
-                var clonedMember = clonedEvent;
-                _listeners.OnClonedMember(@event, clonedMember);
-                _listeners.OnClonedEvent(@event, clonedMember);
+
+                context.ClonedMembers.Add(@event, clonedEvent);
+                _listeners.OnClonedMember(@event, clonedEvent);
+                _listeners.OnClonedEvent(@event, clonedEvent);
             }
         }
 
@@ -82,9 +84,11 @@ namespace AsmResolver.DotNet.Cloning
         {
             foreach (var semantics in semanticsProvider.Semantics)
             {
-                clonedProvider.Semantics.Add(new MethodSemantics(
-                    (MethodDefinition) context.ClonedMembers[semantics.Method!],
-                    semantics.Attributes));
+                if (context.ClonedMembers.TryGetValue(semantics.Method!, out var m)
+                    && m is MethodDefinition semanticMethod)
+                {
+                    clonedProvider.Semantics.Add(new MethodSemantics(semanticMethod, semantics.Attributes));
+                }
             }
         }
     }

@@ -689,31 +689,37 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets a value indicating whether the method is a get method for a property.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Semantics))]
         public bool IsGetMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.Getter) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a set method for a property.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Semantics))]
         public bool IsSetMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.Setter) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is an add method for an event.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Semantics))]
         public bool IsAddMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.AddOn) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a remove method for an event.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Semantics))]
         public bool IsRemoveMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.RemoveOn) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a fire method for an event.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Semantics))]
         public bool IsFireMethod => Semantics is not null && (Semantics.Attributes & MethodSemanticsAttributes.Fire) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a (class) constructor.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(Name))]
         public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && Name?.Value is ".cctor" or ".ctor";
 
         /// <summary>
@@ -797,19 +803,51 @@ namespace AsmResolver.DotNet
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
+        /// <summary>
+        /// Determines whether the provided definition can be accessed by the method.
+        /// </summary>
+        /// <param name="definition">The definition to access.</param>
+        /// <returns><c>true</c> if this method can access <paramref name="definition"/>, <c>false</c> otherwise.</returns>
+        public bool CanAccessDefinition(IMemberDefinition definition)
+        {
+            if (definition is TypeDefinition type)
+                return IsAccessibleFromType(type);
+
+            if (definition.DeclaringType is { } declaringType)
+                return IsAccessibleFromType(declaringType);
+
+            return false;
+        }
+
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
         {
+            // The method is only accessible if its declaring type is accessible.
             if (DeclaringType is not { } declaringType || !declaringType.IsAccessibleFromType(type))
                 return false;
 
-            var comparer = new SignatureComparer();
-            bool isInSameAssembly = comparer.Equals(declaringType.Module, type.Module);
+            // Public methods are always accessible.
+            if (IsPublic)
+                return true;
 
-            return IsPublic
-                   || isInSameAssembly && IsAssembly
-                   || comparer.Equals(DeclaringType, type);
-            // TODO: check if in the same family of declaring types.
+            // Types can always access their own methods.
+            if (SignatureComparer.Default.Equals(declaringType, type))
+                return true;
+
+            bool isInSameAssembly = SignatureComparer.Default.Equals(declaringType.Module, type.Module);
+
+            // Assembly (internal in C#) methods are accessible by types in the same assembly.
+            if (IsAssembly || IsFamilyOrAssembly)
+                return isInSameAssembly;
+
+            // Family (protected in C#) methods are accessible by any base type.
+            if ((IsFamily || IsFamilyOrAssembly || IsFamilyAndAssembly)
+                && type.BaseType?.Resolve() is { } baseType)
+            {
+                return (!IsFamilyAndAssembly || isInSameAssembly) && IsAccessibleFromType(baseType);
+            }
+
+            return false;
         }
 
         /// <summary>

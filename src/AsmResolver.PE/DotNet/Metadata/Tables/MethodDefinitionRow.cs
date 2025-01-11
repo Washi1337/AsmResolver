@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the method definition metadata table.
     /// </summary>
-    public struct MethodDefinitionRow : IMetadataRow
+    public struct MethodDefinitionRow : IMetadataRow, IEquatable<MethodDefinitionRow>
     {
         /// <summary>
         /// Reads a single method definition row from an input stream.
@@ -204,5 +204,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(MethodDefinitionRow left, MethodDefinitionRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(MethodDefinitionRow left, MethodDefinitionRow right) => !(left == right);
     }
 }

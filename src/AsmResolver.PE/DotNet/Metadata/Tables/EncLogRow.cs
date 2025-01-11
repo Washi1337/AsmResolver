@@ -9,7 +9,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the Edit-and-Continue log metadata table.
     /// </summary>
-    public struct EncLogRow : IMetadataRow
+    public struct EncLogRow : IMetadataRow, IEquatable<EncLogRow>
     {
         /// <summary>
         /// Reads a single edit-and-continue log row from an input stream.
@@ -67,11 +67,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             set;
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided edit-and-continue log row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(EncLogRow other)
         {
             return Token.Equals(other.Token) && FuncCode == other.FuncCode;
@@ -115,5 +111,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(EncLogRow left, EncLogRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(EncLogRow left, EncLogRow right) => !(left == right);
     }
 }

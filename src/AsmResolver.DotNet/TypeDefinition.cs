@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
@@ -93,7 +94,8 @@ namespace AsmResolver.DotNet
         public Utf8String? Namespace
         {
             get => _namespace.GetValue(this);
-            set => _namespace.SetValue(value);
+            set => _namespace.SetValue(Utf8String.IsNullOrEmpty(value) ? null : value);
+            // According to the specification, the namespace should always be null or non-empty.
         }
 
         string? ITypeDescriptor.Namespace => Namespace;
@@ -451,6 +453,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets a value indicating whether the type is enclosed by another type.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(DeclaringType))]
         public bool IsNested => DeclaringType != null;
 
         /// <summary>
@@ -469,16 +472,19 @@ namespace AsmResolver.DotNet
         IResolutionScope? ITypeDescriptor.Scope => GetDeclaringScope();
 
         /// <inheritdoc />
+        [MemberNotNullWhen(true, nameof(BaseType))]
         public bool IsValueType => BaseType is {} && (BaseType.IsTypeOf("System", nameof(ValueType)) || IsEnum);
 
         /// <summary>
         /// Gets a value indicating whether the type defines an enumeration of discrete values.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(BaseType))]
         public bool IsEnum => BaseType?.IsTypeOf("System", nameof(Enum)) ?? false;
 
         /// <summary>
         /// Gets a value indicating whether the type describes a delegate referring to a method.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(BaseType))]
         public bool IsDelegate
         {
             get
@@ -499,6 +505,7 @@ namespace AsmResolver.DotNet
         /// If the global (i.e., &lt;Module&gt;) type was not added or does not exist yet in the <see cref="Module"/>,
         /// this will return <c>false</c>.
         /// </remarks>
+        [MemberNotNullWhen(true, nameof(Module))]
         public bool IsModuleType
         {
             get
@@ -511,6 +518,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Determines whether the type is marked as read-only.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(BaseType))]
         public bool IsReadOnly =>
             IsValueType
             && this.HasCustomAttribute("System.Runtime.CompilerServices", nameof(ReadOnlyAttribute));
@@ -518,6 +526,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Determines whether the type is marked with the IsByRefLike attribute, indicating a ref struct definition.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(BaseType))]
         public bool IsByRefLike =>
             IsValueType
             && this.HasCustomAttribute("System.Runtime.CompilerServices", "IsByRefLikeAttribute");
@@ -760,29 +769,62 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
+        /// <summary>
+        /// Determines whether the provided definition can be accessed by the type.
+        /// </summary>
+        /// <param name="definition">The definition to access.</param>
+        /// <returns><c>true</c> if this type can access <paramref name="definition"/>, <c>false</c> otherwise.</returns>
+        public bool CanAccessDefinition(IMemberDefinition definition)
+        {
+            return definition.IsAccessibleFromType(this);
+        }
+
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
         {
-            // TODO: Check types of the same family.
-
-            if (this == type)
+            if (SignatureComparer.Default.Equals(this, type))
                 return true;
 
-            var comparer = new SignatureComparer();
-            bool isInSameAssembly = comparer.Equals(Module, type.Module);
+            bool isInSameAssembly = SignatureComparer.Default.Equals(Module, type.Module);
 
-            if (IsNested)
+            // Most common case: A top-level types is accessible by all other types in the same assembly, or types in
+            // a different assembly if this top-level type is public.
+            if (DeclaringType is not { } declaringType)
+                return IsPublic || isInSameAssembly;
+
+            // The current type is a nested type, which means in order to be accessible, `type` needs to be able to
+            // access the declaring type first before it can reach the current type.
+            if (!declaringType.IsAccessibleFromType(type))
+                return false;
+
+            // Types can always access their direct nested types.
+            if (SignatureComparer.Default.Equals(declaringType, type))
+                return true;
+
+            // Assuming declaring type is accessible, then public nested types are always accessible.
+            if (IsNestedPublic)
+                return true;
+
+            // If the current type is marked assembly (internal in C#), `type` must be in the same assembly.
+            if (IsNestedAssembly || IsNestedFamilyOrAssembly)
+                return isInSameAssembly;
+
+            // If the current type is marked family (protected in C#), `type` must be in the type hierarchy.
+            //
+            //      class A
+            //      {
+            //          protected class B {} // <-- `this`
+            //      }
+            //
+            //      class C : A {} // <-- `type` ( can access A+B )
+            //
+            if ((IsNestedFamily || IsNestedFamilyOrAssembly || IsNestedFamilyAndAssembly)
+                && type.BaseType?.Resolve() is { } baseType)
             {
-                if (DeclaringType is not { } declaringType || !declaringType.IsAccessibleFromType(type))
-                    return false;
-
-                return IsNestedPublic
-                       || isInSameAssembly && IsNestedAssembly
-                       || DeclaringType == type;
+                return (!IsNestedFamilyAndAssembly || isInSameAssembly) && IsAccessibleFromType(baseType);
             }
 
-            return IsPublic
-                   || isInSameAssembly;
+            return false;
         }
 
         /// <summary>

@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the Edit-and-Continue remap metadata table.
     /// </summary>
-    public struct EncMapRow : IMetadataRow
+    public struct EncMapRow : IMetadataRow, IEquatable<EncMapRow>
     {
         /// <summary>
         /// Reads a single edit-and-continue remap row from an input stream.
@@ -52,11 +52,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             set;
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided edit-and-continue remap row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(EncMapRow other)
         {
             return Token.Equals(other.Token);
@@ -96,5 +92,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(EncMapRow left, EncMapRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(EncMapRow left, EncMapRow right) => !(left == right);
     }
 }

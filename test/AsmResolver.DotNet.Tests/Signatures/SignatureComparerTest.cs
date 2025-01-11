@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
@@ -56,6 +57,14 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var reference1 = new TypeReference(_someAssemblyReference, "SomeNamespace", "SomeType");
             var reference2 = new TypeReference(_someAssemblyReference, "SomeOtherNamespace", "SomeType");
             Assert.NotEqual(reference1, reference2, _comparer);
+        }
+
+        [Fact]
+        public void MatchTopLevelTypeRefTypeRefWithEmptyNamespace()
+        {
+            var reference1 = new TypeReference(_someAssemblyReference, null, "SomeType");
+            var reference2 = new TypeReference(_someAssemblyReference, "", "SomeType");
+            Assert.Equal(reference1, reference2, _comparer);
         }
 
         [Fact]
@@ -115,6 +124,19 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var signature2 = PropertySignature.CreateStatic(type.ToTypeSignature());
 
             Assert.Equal(signature1, signature2, _comparer);
+        }
+
+        [Fact]
+        public void MethodSpecificationsAndTheirBaseMethodShouldNotMatch()
+        {
+            var moduleDefinition = ModuleDefinition.FromFile(typeof(GenericInstanceMethods).Assembly.Location, TestReaderParameters);
+            var methodDefinition = moduleDefinition
+                .GetAllTypes().First(t => t.Name == nameof(GenericInstanceMethods))
+                .Methods.First(t => t.Name == nameof(GenericInstanceMethods.InstanceMethodOneTypeParameter));
+            var methodSpecification = methodDefinition.MakeGenericInstanceMethod(moduleDefinition.CorLibTypeFactory.Int32);
+
+            Assert.NotEqual<IMethodDescriptor>(methodDefinition, methodSpecification, _comparer);
+            Assert.NotEqual<IMethodDescriptor>(methodSpecification, methodDefinition, _comparer);
         }
 
         [Fact]

@@ -1,0 +1,48 @@
+name: Setup .NET Windows
+description: Setup .NET for Windows using the provided target framework and architecture
+
+inputs:
+  architecture:
+    description: 'The .NET architecture to setup'
+    required: true
+  target_framework:
+    description: 'The .NET target framework to setup'
+    required: true
+  target_framework_array:
+    description: 'The .NET target frameworks to setup'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get .NET Channel for ${{inputs.target_framework}}
+      uses: ./.github/actions/get-dotnet-channel
+      id: get_channels
+      with:
+        target_framework: ${{inputs.target_framework}}
+        target_framework_array: ${{inputs.target_framework_array}}
+
+    - name: Get Program Files path for x86
+      uses: ./.github/actions/get-program-files
+      if: ${{inputs.architecture == 'x86'}}
+      id: get-program-files-x86
+      with:
+        architecture: x86
+
+    - name: Setup .NET x86 ${{steps.get_channels.outputs.channels_multiline}}
+      uses: dlemstra/setup-dotnet@add-architecture-option
+      if: ${{inputs.architecture == 'x86'}}
+      with:
+        dotnet-architecture: x86
+        dotnet-version: |
+          ${{steps.get_channels.outputs.channel}}
+          ${{steps.get_channels.outputs.channels_multiline}}
+      env:
+        DOTNET_INSTALL_DIR: ${{steps.get-program-files-x86.outputs.path}}/dotnet
+
+    - name: Setup .NET ${{inputs.architecture}} ${{steps.get_channels.outputs.channels_multiline}}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          ${{steps.get_channels.outputs.channel}}
+          ${{steps.get_channels.outputs.channels_multiline}}

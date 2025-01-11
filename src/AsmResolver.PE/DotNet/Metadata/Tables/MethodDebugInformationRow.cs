@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the Portable PDB Document metadata table.
     /// </summary>
-    public struct MethodDebugInformationRow : IMetadataRow
+    public struct MethodDebugInformationRow : IMetadataRow, IEquatable<MethodDebugInformationRow>
     {
         /// <summary>
         /// Creates a new row for the Portable PDB Method Debug Information metadata table.
@@ -79,11 +79,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(SequencePoints, (IndexSize) layout.Columns[1].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided method debug information row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(MethodDebugInformationRow other)
         {
             return Document == other.Document && SequencePoints == other.SequencePoints;
@@ -118,5 +114,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return GetEnumerator();
         }
 
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(MethodDebugInformationRow left, MethodDebugInformationRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(MethodDebugInformationRow left, MethodDebugInformationRow right) => !(left == right);
     }
 }

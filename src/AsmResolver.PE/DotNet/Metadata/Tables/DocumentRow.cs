@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the Portable PDB Document metadata table.
     /// </summary>
-    public struct DocumentRow : IMetadataRow
+    public struct DocumentRow : IMetadataRow, IEquatable<DocumentRow>
     {
         /// <summary>
         /// Creates a new row for the Portable PDB Document metadata table.
@@ -101,11 +101,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Language, (IndexSize) layout.Columns[3].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided document row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(DocumentRow other)
         {
             return Name == other.Name
@@ -137,5 +133,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public IEnumerator<uint> GetEnumerator() => new MetadataRowColumnEnumerator(this);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(DocumentRow left, DocumentRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(DocumentRow left, DocumentRow right) => !(left == right);
     }
 }

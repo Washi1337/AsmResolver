@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the field pointer metadata table.
     /// </summary>
-    public struct FieldPointerRow : IMetadataRow
+    public struct FieldPointerRow : IMetadataRow, IEquatable<FieldPointerRow>
     {
         /// <summary>
         /// Reads a single field pointer row from an input stream.
@@ -58,16 +58,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Field, (IndexSize) layout.Columns[0].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided field pointer row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(FieldPointerRow other)
         {
             return Field == other.Field;
         }
-
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
@@ -97,5 +92,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(FieldPointerRow left, FieldPointerRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(FieldPointerRow left, FieldPointerRow right) => !(left == right);
     }
 }

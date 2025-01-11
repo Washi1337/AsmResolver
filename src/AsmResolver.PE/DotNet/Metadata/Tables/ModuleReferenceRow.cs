@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents a single row in the module definition metadata table.
     /// </summary>
-    public struct ModuleReferenceRow : IMetadataRow
+    public struct ModuleReferenceRow : IMetadataRow, IEquatable<ModuleReferenceRow>
     {
         /// <summary>
         /// Reads a single module reference row from an input stream.
@@ -59,11 +59,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteIndex(Name, (IndexSize) layout.Columns[0].Size);
         }
 
-        /// <summary>
-        /// Determines whether this row is considered equal to the provided module row.
-        /// </summary>
-        /// <param name="other">The other row.</param>
-        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool Equals(ModuleReferenceRow other)
         {
             return Name == other.Name;
@@ -97,5 +93,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return GetEnumerator();
         }
+
+        /// <summary>
+        /// Determines whether two rows are considered equal.
+        /// </summary>
+        public static bool operator ==(ModuleReferenceRow left, ModuleReferenceRow right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two rows are not considered equal.
+        /// </summary>
+        public static bool operator !=(ModuleReferenceRow left, ModuleReferenceRow right) => !(left == right);
     }
 }

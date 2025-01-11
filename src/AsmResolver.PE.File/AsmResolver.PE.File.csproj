@@ -1,35 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <Title>AsmResolver.PE.File</Title>
-        <Description>Raw PE file models for the AsmResolver executable file inspection toolsuite.</Description>
-        <PackageTags>exe pe headers sections inspection manipulation assembly disassembly</PackageTags>
-        <NoWarn>1701;1702;NU5105</NoWarn>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <IsTrimmable>true</IsTrimmable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <Title>AsmResolver.PE.File</Title>
+    <Description>Raw PE file models for the AsmResolver executable file inspection toolsuite.</Description>
+    <PackageTags>exe pe headers sections inspection manipulation assembly disassembly</PackageTags>
+    <NoWarn>1701;1702;NU5105</NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\AsmResolver.PE.File.xml</DocumentationFile>
-    </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DocumentationFile>bin\Debug\AsmResolver.PE.File.xml</DocumentationFile>
+  </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\AsmResolver.PE.File.xml</DocumentationFile>
-    </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile>bin\Release\AsmResolver.PE.File.xml</DocumentationFile>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\AsmResolver\AsmResolver.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Nullable" Version="1.3.1">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AsmResolver\AsmResolver.csproj" />
+  </ItemGroup>
 
 </Project>

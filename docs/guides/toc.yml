@@ -5,6 +5,8 @@
   href: overview.md
 - name: FAQ
   href: faq.md
+- name: Projects that use AsmResolver
+  href: showcase.md
 
 - name: Core API
 - name: Reading and Writing File Segments

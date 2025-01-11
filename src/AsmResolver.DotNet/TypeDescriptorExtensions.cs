@@ -183,8 +183,8 @@ namespace AsmResolver.DotNet
         /// <returns>The constructed reference.</returns>
         public static MemberReference CreateMemberReference(
             this IMemberRefParent parent,
-            string memberName,
-            MemberSignature signature)
+            string? memberName,
+            MemberSignature? signature)
         {
             return new MemberReference(parent, memberName, signature);
         }
