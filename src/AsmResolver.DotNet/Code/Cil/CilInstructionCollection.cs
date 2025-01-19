@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Code.Cil
     /// Represents a collection of CIL instructions found in a method body.
     /// </summary>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public partial class CilInstructionCollection : IList<CilInstruction>
+    public partial class CilInstructionCollection : IList<CilInstruction>, IReadOnlyList<CilInstruction>
     {
         private readonly List<CilInstruction> _items = new();
         private ICilLabel? _endLabel;
@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Code.Cil
             get;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ICollection{T}.Count" />
         public int Count => _items.Count;
 
         /// <inheritdoc />
@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         public int Size => _items.Sum(x => x.Size);
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IList{T}.Item" />
         public CilInstruction this[int index]
         {
             get => _items[index];

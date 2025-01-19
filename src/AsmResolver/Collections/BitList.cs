@@ -1,14 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace AsmResolver.Collections
 {
     /// <summary>
     /// Represents a bit vector that can be resized dynamically.
     /// </summary>
-    public class BitList : IList<bool>
+    public class BitList : IList<bool>, IReadOnlyList<bool>
     {
         private const int WordSize = sizeof(int) * 8;
         private uint[] _words;
@@ -31,7 +30,7 @@ namespace AsmResolver.Collections
             _words = new uint[((uint) capacity).Align(WordSize)];
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ICollection{T}.Count" />
         public int Count
         {
             get;
@@ -41,7 +40,7 @@ namespace AsmResolver.Collections
         /// <inheritdoc />
         public bool IsReadOnly => false;
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IList{T}.Item" />
         public bool this[int index]
         {
             get
