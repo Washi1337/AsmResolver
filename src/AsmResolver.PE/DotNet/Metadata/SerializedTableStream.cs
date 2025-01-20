@@ -217,7 +217,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             int tableIndexBitCount = (int) Math.Ceiling(Math.Log(tables.Length, 2));
             int maxSmallTableMemberCount = ushort.MaxValue >> tableIndexBitCount;
 
-            return tables.Select(t => _combinedRowCounts[(int) t]).All(c => c < maxSmallTableMemberCount)
+            return tables.Select(t => _combinedRowCounts[(int) t]).All(c => c <= maxSmallTableMemberCount)
                 ? IndexSize.Short
                 : IndexSize.Long;
         }
