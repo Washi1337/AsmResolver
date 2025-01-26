@@ -65,6 +65,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
         public void WriteBundleManifestV1Windows()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            Skip.IfNot(RuntimeInformation.ProcessArchitecture == Architecture.X64);
             AssertWriteManifestWindowsPreservesOutput(
                  BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V1),
                 "3.1",
@@ -76,6 +77,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
         public void WriteBundleManifestV2Windows()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            Skip.IfNot(RuntimeInformation.ProcessArchitecture == Architecture.X64);
             AssertWriteManifestWindowsPreservesOutput(
                 BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V2),
                 "5.0",
@@ -87,6 +89,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
         public void WriteBundleManifestV6Windows()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            Skip.IfNot(RuntimeInformation.ProcessArchitecture == Architecture.X64);
             AssertWriteManifestWindowsPreservesOutput(
                 BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6),
                 "6.0",
@@ -173,6 +176,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
         public void WriteWithWin32Resources()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            Skip.IfNot(RuntimeInformation.ProcessArchitecture == Architecture.X64);
 
             var manifest = BundleManifest.FromBytes(Properties.Resources.HelloWorld_SingleFile_V6_WithResources);
             string appHostTemplatePath = FindAppHostTemplate("6.0");
@@ -253,6 +257,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
         public void PatchAndRepackageExistingBundleV1()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            Skip.IfNot(RuntimeInformation.ProcessArchitecture == Architecture.X64);
             AssertPatchAndRepackageChangesOutput(Properties.Resources.HelloWorld_SingleFile_V1);
         }
 
@@ -260,6 +265,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
         public void PatchAndRepackageExistingBundleV2()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            Skip.IfNot(RuntimeInformation.ProcessArchitecture == Architecture.X64);
             AssertPatchAndRepackageChangesOutput(Properties.Resources.HelloWorld_SingleFile_V2);
         }
 
@@ -267,6 +273,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
         public void PatchAndRepackageExistingBundleV6()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            Skip.IfNot(RuntimeInformation.ProcessArchitecture == Architecture.X64);
             AssertPatchAndRepackageChangesOutput(Properties.Resources.HelloWorld_SingleFile_V6);
         }
 
