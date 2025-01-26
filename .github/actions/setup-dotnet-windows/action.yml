@@ -42,6 +42,7 @@ runs:
 
     - name: Setup .NET ${{inputs.architecture}} ${{steps.get_channels.outputs.channels_multiline}}
       uses: actions/setup-dotnet@v4
+      if: ${{inputs.architecture != 'x86'}}
       with:
         dotnet-version: |
           ${{steps.get_channels.outputs.channel}}
