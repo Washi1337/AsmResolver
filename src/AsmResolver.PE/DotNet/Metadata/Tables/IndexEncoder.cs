@@ -76,6 +76,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             long tableIndex = codedIndex & _tableIndexBitMask;
             uint rowIndex = codedIndex >> _tableIndexBitCount;
 
+            // When RID is invalid, force an invalid metadata token without throwing an exception.
+            // See also https://github.com/Washi1337/AsmResolver/issues/608
+            if (rowIndex > 0x00FFFFFF)
+                rowIndex = 0;
+
             return new MetadataToken(tableIndex >= _tables.Length
                     ? TableIndex.Module
                     : _tables[tableIndex],
