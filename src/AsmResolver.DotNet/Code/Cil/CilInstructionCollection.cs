@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         public int Size => _items.Sum(x => x.Size);
 
-        /// <inheritdoc cref="IList{T}.Item" />
+        /// <inheritdoc cref="IList{T}.this" />
         public CilInstruction this[int index]
         {
             get => _items[index];
