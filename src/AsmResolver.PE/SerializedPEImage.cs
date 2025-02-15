@@ -18,8 +18,6 @@ namespace AsmResolver.PE
     /// </summary>
     public class SerializedPEImage : PEImage
     {
-        private readonly MachineType _originalArchitecture;
-
         /// <summary>
         /// Opens a PE image from a file.
         /// </summary>
@@ -38,8 +36,6 @@ namespace AsmResolver.PE
             SubSystem = peFile.OptionalHeader.SubSystem;
             DllCharacteristics = peFile.OptionalHeader.DllCharacteristics;
             ImageBase = peFile.OptionalHeader.ImageBase;
-
-            _originalArchitecture = MachineType;
         }
 
         /// <inheritdoc />
@@ -92,7 +88,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
-            return _originalArchitecture switch
+            return ReaderContext.Platform.TargetMachine switch
             {
                 MachineType.Amd64 => new X64ExceptionDirectory(ReaderContext, reader),
                 _ => ReaderContext.NotSupportedAndReturn<IExceptionDirectory>()
