@@ -90,6 +90,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void CorLibWithFullScopeExactly()
         {
+            // Order matters for Mono
             var type = _module.CorLibTypeFactory.Object;
             string name = TypeNameBuilder.GetAssemblyQualifiedName(type, false);
             Assert.Equal("System.Object, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e", name);
