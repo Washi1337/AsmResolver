@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using AsmResolver.Shims;
@@ -172,9 +172,15 @@ namespace AsmResolver.DotNet.Signatures.Parsing
 
         private void WriteAssemblySpec(AssemblyDescriptor assembly)
         {
+            // Order matters for Mono
+
             WriteIdentifier(assembly.Name, true);
             _writer.Write(", Version=");
             _writer.Write(assembly.Version.ToString());
+
+            _writer.Write(", Culture=");
+            WriteIdentifier(assembly.Culture ?? "neutral");
+
             _writer.Write(", PublicKeyToken=");
 
             var token = assembly.GetPublicKeyToken();
@@ -182,9 +188,6 @@ namespace AsmResolver.DotNet.Signatures.Parsing
                 _writer.Write("null");
             else
                 WriteHexBlob(token);
-
-            _writer.Write(", Culture=");
-            WriteIdentifier(assembly.Culture ?? "neutral");
         }
 
         private void WriteIdentifier(string? identifier, bool escapeDots = false)
