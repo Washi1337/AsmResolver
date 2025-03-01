@@ -199,7 +199,7 @@ namespace AsmResolver.DotNet.Tests
             var instance = factory.CorLibScope
                 .CreateTypeReference("System.Collections.Generic", "KeyValuePair`2")
                 .MakeGenericInstanceType(
-                    false,
+                    true,
                     factory.String.MakeSzArrayType(),
                     factory.Int32.MakeSzArrayType()
                 );
