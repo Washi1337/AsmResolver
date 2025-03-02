@@ -451,7 +451,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             var type = sourceModule.LookupMember<TypeDefinition>(typeof(TestEnum).MetadataToken);
             var method = sourceModule.LookupMember<MethodDefinition>(typeof(CustomAttributesTestClass)
-                .GetMethod(nameof(CustomAttributesTestClass.FIxedLocalTypeArgument))!
+                .GetMethod(nameof(CustomAttributesTestClass.FixedLocalTypeArgument))!
                 .MetadataToken);
 
             var result = new MemberCloner(targetModule)
