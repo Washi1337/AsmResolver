@@ -104,6 +104,19 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
+        public void ValueType()
+        {
+            const string ns = "System";
+            const string name = "Nullable`1";
+
+            var corlib = new AssemblyReference(_module.CorLibTypeFactory.CorLibScope.GetAssembly()!);
+            var expected = new TypeReference(_module, corlib, ns, name).ToTypeSignature(true);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}, {corlib.FullName}");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Fact]
         public void SimpleArrayType()
         {
             const string ns = "MyNamespace";
@@ -159,7 +172,6 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[{argumentType.Namespace}.{argumentType.Name},{argumentType2.Namespace}.{argumentType2.Name}]");
             Assert.Equal(expected, actual, _comparer);
         }
-
 
         [Fact]
         public void GenericTypeSingleBracketsMultiElementsWithPlus()
@@ -217,6 +229,21 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(expected, actual, _comparer);
         }
 
+        [Fact]
+        public void GenericValueType()
+        {
+            const string ns = "System";
+            const string name = "Nullable`1";
+
+            var corlib = new AssemblyReference(_module.CorLibTypeFactory.CorLibScope.GetAssembly()!);
+            var elementType = new TypeReference(_module, corlib, ns, name);
+            var argumentType = _module.CorLibTypeFactory.Int32;
+
+            var expected = elementType.MakeGenericInstanceType(true, argumentType);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[[{argumentType.Namespace}.{argumentType.Name}, {corlib.FullName}]], {corlib.FullName}");
+            Assert.Equal(expected, actual, _comparer);
+        }
 
         [Fact]
         public void SpacesInAssemblySpec()

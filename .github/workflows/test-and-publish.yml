@@ -106,8 +106,8 @@ jobs:
       architecture: ${{matrix.runner.arch}}
       dotnet_target_frameworks: ${{needs.variables.outputs.DOTNET_TARGET_FRAMEWORKS}}
       build_configuration: ${{matrix.build_configuration}}
-      # Ignore MacOS test results since support is yet lacking
-      is_experimental: ${{matrix.runner.image != 'windows-2022' && matrix.runner.image != 'ubuntu-22.04'}}
+      # TODO: Fully support tests on non-x64 and MacOS.
+      is_experimental: ${{matrix.runner.arch != 'x64' || (matrix.runner.image != 'windows-2022' && matrix.runner.image != 'ubuntu-22.04')}}
       skip_experimental: ${{ needs.variables.outputs.EXPERIMENTAL != 'true' }}
 
   publish:
