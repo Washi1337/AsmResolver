@@ -26,6 +26,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestBinaries", "TestBinaries", "{7919C544-023E-4617-A41C-27A69DB397DE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DotNet", "DotNet", "{B3AF102B-ABE1-41B2-AE48-C40702F45AB0}"
+	ProjectSection(SolutionItems) = preProject
+		test\TestBinaries\DotNet\Directory.Build.props = test\TestBinaries\DotNet\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloWorld", "test\TestBinaries\DotNet\HelloWorld\HelloWorld.csproj", "{856EEF27-8430-4360-9E4C-F923AF142D23}"
 EndProject

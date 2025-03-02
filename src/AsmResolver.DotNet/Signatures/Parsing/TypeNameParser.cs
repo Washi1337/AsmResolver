@@ -34,10 +34,10 @@ namespace AsmResolver.DotNet.Signatures.Parsing
         {
             var lexer = new TypeNameLexer(new StringReader(canonicalName));
             var parser = new TypeNameParser(module, lexer);
-            return parser.ParseTypeSpec();
+            return parser.ParseTypeSpec().ToTypeSignature(module);
         }
 
-        private TypeSignature ParseTypeSpec()
+        private ParsedTypeFullName ParseTypeSpec()
         {
             bool lastHasConsumedTypeName = _lexer.HasConsumedTypeName;
 
@@ -47,61 +47,19 @@ namespace AsmResolver.DotNet.Signatures.Parsing
             _lexer.HasConsumedTypeName = true;
 
             // See if the type full name contains an assembly ref.
-            var scope = TryExpect(TypeNameTerminal.Comma).HasValue
+            typeSpec.Scope = TryExpect(TypeNameTerminal.Comma).HasValue
                 ? (IResolutionScope) ParseAssemblyNameSpec()
                 : null;
 
             _lexer.HasConsumedTypeName = lastHasConsumedTypeName;
 
-            if (typeSpec.GetUnderlyingTypeDefOrRef() is TypeReference reference)
-                SetScope(reference, scope);
-
-            // Ensure corlib type sigs are used.
-            if (Comparer.Equals(typeSpec.Scope, _module.CorLibTypeFactory.CorLibScope))
-            {
-                var corlibType = _module.CorLibTypeFactory.FromType(typeSpec);
-                if (corlibType != null)
-                    return corlibType;
-            }
-
             return typeSpec;
         }
 
-        private void SetScope(TypeReference reference, IResolutionScope? newScope)
-        {
-            // Find the top-most type.
-            while (reference.Scope is TypeReference declaringType)
-                reference = declaringType;
-
-            // If the scope is null, it means it was omitted from the fully qualified type name.
-            // In this case, the CLR first looks into the current assembly, and then into corlib.
-            if (newScope is not null)
-            {
-                // Update scope.
-                reference.Scope = newScope;
-            }
-            else
-            {
-                // First look into the current module.
-                reference.Scope = _module;
-                var definition = reference.Resolve();
-                if (definition is null)
-                {
-                    // If that fails, try corlib.
-                    reference.Scope = _module.CorLibTypeFactory.CorLibScope;
-                    definition = reference.Resolve();
-
-                    // If both lookups fail, revert to the normal module as scope as a fallback.
-                    if (definition is null)
-                        reference.Scope = _module;
-                }
-            }
-        }
-
-        private TypeSignature ParseSimpleTypeSpec()
+        private ParsedTypeFullName ParseSimpleTypeSpec()
         {
             // Parse type name.
-            var typeName = ParseTypeName();
+            var result = new ParsedTypeFullName(ParseTypeName());
 
             // Check for annotations.
             while (true)
@@ -109,36 +67,36 @@ namespace AsmResolver.DotNet.Signatures.Parsing
                 switch (_lexer.Peek().Terminal)
                 {
                     case TypeNameTerminal.Ampersand:
-                        typeName = ParseByReferenceTypeSpec(typeName);
+                        ParseByReferenceTypeSpec(result);
                         break;
 
                     case TypeNameTerminal.Star:
-                        typeName = ParsePointerTypeSpec(typeName);
+                        ParsePointerTypeSpec(result);
                         break;
 
                     case TypeNameTerminal.OpenBracket:
-                        typeName = ParseArrayOrGenericTypeSpec(typeName);
+                        ParseArrayOrGenericTypeSpec(result);
                         break;
 
                     default:
-                        return typeName;
+                        return result;
                 }
             }
         }
 
-        private TypeSignature ParseByReferenceTypeSpec(TypeSignature typeName)
+        private void ParseByReferenceTypeSpec(ParsedTypeFullName result)
         {
             Expect(TypeNameTerminal.Ampersand);
-            return new ByReferenceTypeSignature(typeName);
+            result.Annotations.Add(new TypeAnnotation(TypeAnnotationType.ByReference));
         }
 
-        private TypeSignature ParsePointerTypeSpec(TypeSignature typeName)
+        private void ParsePointerTypeSpec(ParsedTypeFullName result)
         {
             Expect(TypeNameTerminal.Star);
-            return new PointerTypeSignature(typeName);
+            result.Annotations.Add(new TypeAnnotation(TypeAnnotationType.Pointer));
         }
 
-        private TypeSignature ParseArrayOrGenericTypeSpec(TypeSignature typeName)
+        private void ParseArrayOrGenericTypeSpec(ParsedTypeFullName result)
         {
             Expect(TypeNameTerminal.OpenBracket);
 
@@ -146,19 +104,30 @@ namespace AsmResolver.DotNet.Signatures.Parsing
             {
                 case TypeNameTerminal.OpenBracket:
                 case TypeNameTerminal.Identifier:
-                    return ParseGenericTypeSpec(typeName);
+                    ParseGenericTypeSpec(result);
+                    break;
 
                 default:
-                    return ParseArrayTypeSpec(typeName);
+                    ParseArrayTypeSpec(result);
+                    break;
             }
         }
 
-        private TypeSignature ParseArrayTypeSpec(TypeSignature typeName)
+        private void ParseArrayTypeSpec(ParsedTypeFullName result)
         {
-            var dimensions = new List<ArrayDimension>
+            var dimension = ParseArrayDimension();
+
+            // Fast path: optimize for SZ arrays (to avoid list allocation).
+            if (_lexer.Peek().Terminal == TypeNameTerminal.CloseBracket
+                && dimension is { Size: null, LowerBound: null })
             {
-                ParseArrayDimension()
-            };
+                _lexer.Next();
+                result.Annotations.Add(new TypeAnnotation(TypeAnnotationType.SzArray));
+                return;
+            }
+
+            // Slow path: full array specification.
+            var dimensions = new List<ArrayDimension> { dimension };
 
             bool stop = false;
             while (!stop)
@@ -169,19 +138,14 @@ namespace AsmResolver.DotNet.Signatures.Parsing
                     case TypeNameTerminal.CloseBracket:
                         stop = true;
                         break;
+
                     case TypeNameTerminal.Comma:
                         dimensions.Add(ParseArrayDimension());
                         break;
                 }
             }
 
-            if (dimensions.Count == 1 && dimensions[0].Size == null && dimensions[0].LowerBound == null)
-                return new SzArrayTypeSignature(typeName);
-
-            var result = new ArrayTypeSignature(typeName);
-            foreach (var dimension in dimensions)
-                result.Dimensions.Add(dimension);
-            return result;
+            result.Annotations.Add(new TypeAnnotation(dimensions));
         }
 
         private ArrayDimension ParseArrayDimension()
@@ -205,12 +169,9 @@ namespace AsmResolver.DotNet.Signatures.Parsing
                         {
                             int secondNumber = int.Parse(secondNumberToken.Value.Text);
                             size = secondNumber - firstNumber;
-                            lowerBound = firstNumber;
                         }
-                        else
-                        {
-                            lowerBound = firstNumber;
-                        }
+
+                        lowerBound = firstNumber;
                     }
 
                     return new ArrayDimension(size, lowerBound);
@@ -222,11 +183,10 @@ namespace AsmResolver.DotNet.Signatures.Parsing
             }
         }
 
-        private TypeSignature ParseGenericTypeSpec(TypeSignature typeName)
+        private void ParseGenericTypeSpec(ParsedTypeFullName result)
         {
-            var result = new GenericInstanceTypeSignature(typeName.ToTypeDefOrRef(), typeName.IsValueType);
-
-            result.TypeArguments.Add(ParseGenericTypeArgument(result));
+            var arguments = new List<ParsedTypeFullName>();
+            arguments.Add(ParseGenericTypeArgument());
 
             bool stop = false;
             while (!stop)
@@ -238,46 +198,30 @@ namespace AsmResolver.DotNet.Signatures.Parsing
                         stop = true;
                         break;
                     case TypeNameTerminal.Comma:
-                        result.TypeArguments.Add(ParseGenericTypeArgument(result));
+                        arguments.Add(ParseGenericTypeArgument());
                         break;
                 }
             }
 
-            return result;
+            result.Annotations.Add(new TypeAnnotation(arguments));
         }
 
-        private TypeSignature ParseGenericTypeArgument(GenericInstanceTypeSignature genericInstance)
+        private ParsedTypeFullName ParseGenericTypeArgument()
         {
             var extraBracketToken = TryExpect(TypeNameTerminal.OpenBracket);
+
             var result = !extraBracketToken.HasValue
                 ? ParseSimpleTypeSpec()
                 : ParseTypeSpec();
+
+            // If we started with double brackets, then we should end with double brackets.
             if (extraBracketToken.HasValue)
                 Expect(TypeNameTerminal.CloseBracket);
+
             return result;
         }
 
-        private TypeSignature ParseTypeName()
-        {
-            // Note: This is a slight deviation from grammar (but is equivalent), to make the parsing easier.
-            //       We read all components
-            (string? ns, var names) = ParseNamespaceTypeName();
-
-            TypeReference? result = null;
-            for (int i = 0; i < names.Count; i++)
-            {
-                result = result is null
-                    ? new TypeReference(_module, _module, ns, names[i])
-                    : new TypeReference(_module, result, null, names[i]);
-            }
-
-            if (result is null)
-                throw new FormatException();
-
-            return result.ToTypeSignature();
-        }
-
-        private (string? Namespace, IList<string> TypeNames) ParseNamespaceTypeName()
+        private TypeName ParseTypeName()
         {
             var names = ParseDottedExpression(TypeNameTerminal.Identifier);
 
@@ -300,7 +244,7 @@ namespace AsmResolver.DotNet.Signatures.Parsing
                 names.Add(nextIdentifier.Text);
             }
 
-            return (ns, names);
+            return new TypeName(ns, names);
         }
 
         private List<string> ParseDottedExpression(TypeNameTerminal terminal)
@@ -338,6 +282,13 @@ namespace AsmResolver.DotNet.Signatures.Parsing
                 {
                     newReference.Version = ParseVersion();
                 }
+                else if (propertyName.Equals("culture", StringComparison.OrdinalIgnoreCase))
+                {
+                    string culture = ParseCulture();
+                    newReference.Culture = !culture.Equals("neutral", StringComparison.OrdinalIgnoreCase)
+                        ? culture
+                        : null;
+                }
                 else if (propertyName.Equals("publickey", StringComparison.OrdinalIgnoreCase))
                 {
                     newReference.PublicKeyOrToken = ParseHexBlob();
@@ -347,13 +298,6 @@ namespace AsmResolver.DotNet.Signatures.Parsing
                 {
                     newReference.PublicKeyOrToken = ParseHexBlob();
                     newReference.HasPublicKey = false;
-                }
-                else if (propertyName.Equals("culture", StringComparison.OrdinalIgnoreCase))
-                {
-                    string culture = ParseCulture();
-                    newReference.Culture = !culture.Equals("neutral", StringComparison.OrdinalIgnoreCase)
-                        ? culture
-                        : null;
                 }
                 else
                 {
