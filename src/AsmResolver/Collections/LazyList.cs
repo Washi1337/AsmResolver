@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 
 namespace AsmResolver.Collections
 {
@@ -11,7 +10,7 @@ namespace AsmResolver.Collections
     /// </summary>
     /// <typeparam name="TItem">The type of elements the list stores.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public abstract class LazyList<TItem> : IList<TItem>
+    public abstract class LazyList<TItem> : IList<TItem>, IReadOnlyList<TItem>
     {
         private readonly List<TItem> _items;
 
@@ -32,7 +31,7 @@ namespace AsmResolver.Collections
             _items = new List<TItem>(capacity);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IList{T}.Item" />
         public TItem this[int index]
         {
             get
@@ -50,7 +49,7 @@ namespace AsmResolver.Collections
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="ICollection{T}.Count" />
         public virtual int Count
         {
             get

@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.PE.File;
+using AsmResolver.PE.Platforms;
 
 namespace AsmResolver.PE
 {
@@ -27,6 +28,22 @@ namespace AsmResolver.PE
         {
             File = file;
             Parameters = parameters;
+
+            if (!Platform.TryGet(file.FileHeader.Machine, out var platform))
+            {
+                this.BadImage($"File header contains an invalid or unsupported PE image architecture {file.FileHeader.Machine}.");
+                platform = Platform.Get(MachineType.I386);
+            }
+
+            Platform = platform;
+        }
+
+        /// <summary>
+        /// Gets the platform that is assumed while parsing the PE file.
+        /// </summary>
+        public Platform Platform
+        {
+            get;
         }
 
         /// <summary>
@@ -53,8 +70,7 @@ namespace AsmResolver.PE
         /// <returns>The created relocation parameters.</returns>
         public RelocationParameters GetRelocation(ulong offset, uint rva)
         {
-            return new RelocationParameters(File.OptionalHeader.ImageBase, offset, rva,
-                File.OptionalHeader.Magic == OptionalHeaderMagic.PE32);
+            return new RelocationParameters(File.OptionalHeader.ImageBase, offset, rva, Platform.Is32Bit);
         }
 
         /// <inheritdoc />

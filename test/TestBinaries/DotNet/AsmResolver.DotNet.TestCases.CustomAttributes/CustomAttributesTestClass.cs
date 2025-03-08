@@ -44,6 +44,11 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         {
         }
 
+        [TestCase((object) TestEnum.Value3)]
+        public void FixedEnumAsObjectArgument()
+        {
+        }
+
         [TestCase(typeof(string))]
         public void FixedTypeArgument()
         {
@@ -55,7 +60,7 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         }
 
         [TestCase(typeof(TestEnum))]
-        public void FIxedLocalTypeArgument()
+        public void FixedLocalTypeArgument()
         {
         }
 
@@ -79,8 +84,18 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         {
         }
 
+        [TestCase(ObjectValue = TestEnum.Value2)]
+        public void NamedEnumAsObjectArgument()
+        {
+        }
+
         [TestCase(TypeValue = typeof(int))]
         public void NamedTypeArgument()
+        {
+        }
+
+        [TestCase(ObjectValue = typeof(int))]
+        public void NamedTypeAsObjectArgument()
         {
         }
 
@@ -139,6 +154,11 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         {
         }
 
+        [TestCase((object) typeof(int))]
+        public void FixedTypeAsObjectArgument()
+        {
+        }
+
         [TestCase<int>(1)]
         public void FixedGenericInt32Argument()
         {
@@ -191,6 +211,11 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
 
         [TestCase<Type>(Value = typeof(int))]
         public void NamedGenericTypeArgument()
+        {
+        }
+
+        [TestCase<object>(Value = typeof(int))]
+        public void NamedGenericTypeAsObjectArgument()
         {
         }
 

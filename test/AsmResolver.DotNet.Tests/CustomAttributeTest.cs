@@ -160,11 +160,58 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(false, false)]
         [InlineData(true, false)]
         [InlineData(true, true)]
+        public void FixedEnumAsObjectArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedEnumAsObjectArgument),rebuild, access);
+            Assert.Single(attribute.Signature!.FixedArguments);
+            Assert.Empty(attribute.Signature.NamedArguments);
+
+            var fixedArg = Assert.Single(attribute.Signature!.FixedArguments);
+            var boxedArg = Assert.IsAssignableFrom<BoxedArgument>(fixedArg.Element);
+            Assert.Equal(typeof(TestEnum).FullName, boxedArg.Type.FullName);
+            int value = Assert.IsAssignableFrom<int>(boxedArg.Value);
+            Assert.Equal((int) TestEnum.Value3, value);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
         public void FixedNullTypeArgument(bool rebuild, bool access)
         {
             var attribute =  GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedNullTypeArgument),rebuild, access);
             var fixedArg = Assert.Single(attribute.Signature!.FixedArguments);
             Assert.Null(fixedArg.Element);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void FixedTypeAsObjectArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedTypeAsObjectArgument),rebuild, access);
+
+            var fixedArg = Assert.Single(attribute.Signature!.FixedArguments);
+            var boxedArg = Assert.IsAssignableFrom<BoxedArgument>(fixedArg.Element);
+            Assert.Equal("System.Type", boxedArg.Type.FullName);
+            var type = Assert.IsAssignableFrom<TypeSignature>(boxedArg.Value);
+            Assert.Equal("System.Int32", type.FullName);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void NamedGenericTypeAsObjectArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedGenericTypeAsObjectArgument),rebuild, access);
+
+            var namedArg = Assert.Single(attribute.Signature!.NamedArguments);
+            var boxedArg = Assert.IsAssignableFrom<BoxedArgument>(namedArg.Argument.Element);
+            Assert.Equal("System.Type", boxedArg.Type.FullName);
+            var type = Assert.IsAssignableFrom<TypeSignature>(boxedArg.Value);
+            Assert.Equal("System.Int32", type.FullName);
         }
 
         [Theory]
@@ -199,7 +246,7 @@ namespace AsmResolver.DotNet.Tests
             var instance = factory.CorLibScope
                 .CreateTypeReference("System.Collections.Generic", "KeyValuePair`2")
                 .MakeGenericInstanceType(
-                    false,
+                    true,
                     factory.String.MakeSzArrayType(),
                     factory.Int32.MakeSzArrayType()
                 );
@@ -256,6 +303,21 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(false, false)]
         [InlineData(true, false)]
         [InlineData(true, true)]
+        public void NamedEnumAsObjectArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedEnumAsObjectArgument),rebuild, access);
+
+            var namedArg = Assert.Single(attribute.Signature!.NamedArguments);
+            var boxedArg = Assert.IsAssignableFrom<BoxedArgument>(namedArg.Argument.Element);
+            Assert.Equal(typeof(TestEnum).FullName, boxedArg.Type.FullName);
+            int value = Assert.IsAssignableFrom<int>(boxedArg.Value);
+            Assert.Equal((int) TestEnum.Value2, value);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
         public void NamedTypeArgument(bool rebuild, bool access)
         {
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedTypeArgument),rebuild, access);
@@ -269,6 +331,21 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature.NamedArguments[0];
             Assert.Equal(nameof(TestCaseAttribute.TypeValue), argument.MemberName);
             Assert.Equal(expected, (ITypeDescriptor) argument.Argument.Element, _comparer);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void NamedTypeAsObjectArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedTypeAsObjectArgument),rebuild, access);
+
+            var namedArg = Assert.Single(attribute.Signature!.NamedArguments);
+            var boxedArg = Assert.IsAssignableFrom<BoxedArgument>(namedArg.Argument.Element);
+            Assert.Equal("System.Type", boxedArg.Type.FullName);
+            var type = Assert.IsAssignableFrom<TypeSignature>(boxedArg.Value);
+            Assert.Equal("System.Int32", type.FullName);
         }
 
         [Fact]

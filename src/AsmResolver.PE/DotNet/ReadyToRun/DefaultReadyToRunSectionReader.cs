@@ -21,7 +21,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             {
                 CompilerIdentifier => ReadCompilerIdentifierSection(ref reader),
                 ImportSections => new SerializedImportSectionsSection(context, ref reader),
-                RuntimeFunctions when context.File.FileHeader.Machine == MachineType.Amd64 => new SerializedX64RuntimeFunctionsSection(context, ref reader),
+                RuntimeFunctions when context.Platform.TargetMachine == MachineType.Amd64 => new SerializedX64RuntimeFunctionsSection(context, ref reader),
                 MethodDefEntryPoints => new SerializedMethodEntryPointsSection(ref reader),
                 ReadyToRunSectionType.DebugInfo => new SerializedDebugInfoSection(context, reader),
                 _ => ReadUnsupportedReadyToRunSection(ref reader)

@@ -374,11 +374,16 @@ public class ManagedPEFileBuilder : PEFileBuilder
             return;
         }
 
-        AddMethodBodiesToTable(context, tablesStream);
-        AddFieldRvasToTable(context, tablesStream);
+        AddMethodBodySegments(context, tablesStream);
+        AddFieldRvaSegments(context, tablesStream);
     }
 
-    private void AddMethodBodiesToTable(PEFileBuilderContext context, TablesStream tablesStream)
+    /// <summary>
+    /// Adds all method bodies referenced by the method metadata table to the PE file.
+    /// </summary>
+    /// <param name="context">The context for the new PE file.</param>
+    /// <param name="tablesStream">The tables stream to get the method body RVAs from.</param>
+    protected virtual void AddMethodBodySegments(PEFileBuilderContext context, TablesStream tablesStream)
     {
         var methodTable = tablesStream.GetTable<MethodDefinitionRow>();
         for (uint rid = 1; rid <= methodTable.Count; rid++)
@@ -416,7 +421,12 @@ public class ManagedPEFileBuilder : PEFileBuilder
         return null;
     }
 
-    private void AddFieldRvasToTable(PEFileBuilderContext context, TablesStream tablesStream)
+    /// <summary>
+    /// Adds all segments referenced by the FieldRva metadata table to the PE file.
+    /// </summary>
+    /// <param name="context">The context for the new PE file.</param>
+    /// <param name="tablesStream">The tables stream to get the Field RVAs from.</param>
+    protected virtual void AddFieldRvaSegments(PEFileBuilderContext context, TablesStream tablesStream)
     {
         var directory = context.Image.DotNetDirectory!;
 
