@@ -117,6 +117,23 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
+        public void NestedValueType()
+        {
+            const string ns = "System.Collections.Generic";
+            const string name = "List`1";
+            const string nestedTypeName = "Enumerator";
+
+            var corlib = KnownCorLibs.NetStandard_v2_0_0_0;
+            var expected = new TypeReference(_module, corlib, ns, name)
+                .CreateTypeReference(nestedTypeName)
+                .ToTypeSignature(true)
+                .ImportWith(_module.DefaultImporter);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}+{nestedTypeName}, {corlib.FullName}");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Fact]
         public void SimpleArrayType()
         {
             const string ns = "MyNamespace";

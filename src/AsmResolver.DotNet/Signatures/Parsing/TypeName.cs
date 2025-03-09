@@ -37,7 +37,7 @@ internal readonly struct TypeName(string? ns, IList<string> names)
 
         // Walk over nested type names.
         for (int i = 1; i < Names.Count; i++)
-            type = new TypeReference(type, null, Names[i]);
+            type = new TypeReference(contextModule, type, null, Names[i]);
 
         return type;
     }

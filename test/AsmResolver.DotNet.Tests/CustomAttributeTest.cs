@@ -258,6 +258,26 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(false, false)]
         [InlineData(true, false)]
         [InlineData(true, true)]
+        public void FixedGenericNestedTypeArgument(bool rebuild, bool access)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedGenericNestedTypeArgument),rebuild, access);
+            Assert.Empty(attribute.Signature!.NamedArguments);
+            var argument = Assert.Single(attribute.Signature.FixedArguments);
+
+            var factory = attribute.Constructor!.Module!.CorLibTypeFactory;
+            var expected = factory.CorLibScope
+                .CreateTypeReference("System.Collections.Generic", "List`1")
+                .CreateTypeReference("Enumerator")
+                .MakeGenericInstanceType(true, factory.Int32);
+
+            var type = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(argument.Element);
+            Assert.Equal(expected, type, _comparer);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
         public void NamedInt32Argument(bool rebuild, bool access)
         {
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedInt32Argument),rebuild, access);
