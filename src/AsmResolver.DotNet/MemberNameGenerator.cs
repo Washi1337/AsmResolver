@@ -238,32 +238,24 @@ namespace AsmResolver.DotNet
             return state;
         }
 
-        private static StringBuilder AppendTypeFullName(StringBuilder state, ITypeDescriptor? type)
+        private static StringBuilder AppendTypeFullName(StringBuilder state, ITypeDescriptor? type) => type switch
         {
-            switch (type)
-            {
-                case TypeSignature signature:
-                    return signature.AcceptVisitor(Instance, state);
+            TypeSignature signature => signature.AcceptVisitor(Instance, state),
+            ITypeDefOrRef reference => AppendTypeFullName(state, reference),
+            ExportedType exported => AppendSimpleFullName(state, exported),
+            null => state.Append(TypeSignature.NullTypeToString),
+            _ => throw new ArgumentOutOfRangeException(nameof(type))
+        };
 
-                case ITypeDefOrRef reference:
-                    return AppendTypeFullName(state, reference);
-
-                case null:
-                    return state.Append(TypeSignature.NullTypeToString);
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type));
-            }
-        }
-
-        private static StringBuilder AppendTypeFullName(StringBuilder state, ITypeDefOrRef? type)
+        private static StringBuilder AppendTypeFullName(StringBuilder state, ITypeDefOrRef? type) => type switch
         {
-            if (type is null)
-                return state.Append(TypeSignature.NullTypeToString);
+            null => state.Append(TypeSignature.NullTypeToString),
+            TypeSpecification specification => AppendTypeFullName(state, specification.Signature),
+            _ => AppendSimpleFullName(state, type)
+        };
 
-            if (type is TypeSpecification specification)
-                return AppendTypeFullName(state, specification.Signature);
-
+        private static StringBuilder AppendSimpleFullName(StringBuilder state, ITypeDescriptor type)
+        {
             if (type.DeclaringType is { } declaringType)
             {
                 AppendTypeFullName(state, declaringType);
