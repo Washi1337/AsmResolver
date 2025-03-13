@@ -133,17 +133,35 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
+        public override void UpdateOffsets(in RelocationParameters parameters)
+        {
+            base.UpdateOffsets(in parameters);
+
+            var current = parameters.WithAdvance(GetHeaderSize());
+            foreach (var stream in Streams)
+            {
+                stream.UpdateOffsets(current);
+                current.Advance(stream.GetPhysicalSize());
+            }
+        }
+
+        /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
-            return (uint) (sizeof(uint)                              // Signature
-                           + 2 * sizeof(ushort)                      // Version
-                           + sizeof(uint)                            // Reserved
-                           + sizeof(uint)                            // Version length
-                           + ((uint) VersionString.Length).Align(4)  // Version
-                           + sizeof(ushort)                          // Flags
-                           + sizeof(ushort)                          // Stream count
-                           + GetSizeOfStreamHeaders()                // Stream headers
+            return (uint) (GetHeaderSize()                // Stream headers
                            + Streams.Sum(s => s.GetPhysicalSize())); // Streams
+        }
+
+        private uint GetHeaderSize()
+        {
+            return sizeof(uint)                           // Signature
+                + 2 * sizeof(ushort)                      // Version
+                + sizeof(uint)                            // Reserved
+                + sizeof(uint)                            // Version length
+                + ((uint) VersionString.Length).Align(4)  // Version
+                + sizeof(ushort)                          // Flags
+                + sizeof(ushort)                          // Stream count
+                + GetSizeOfStreamHeaders();
         }
 
         /// <inheritdoc />

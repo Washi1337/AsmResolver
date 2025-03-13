@@ -294,6 +294,22 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
+        public override void UpdateOffsets(in RelocationParameters parameters)
+        {
+            base.UpdateOffsets(in parameters);
+
+            var current = parameters;
+            foreach (var table in Tables)
+            {
+                if (table is null)
+                    continue;
+
+                table.UpdateOffsets(current);
+                current.Advance(table.GetPhysicalSize());
+            }
+        }
+
+        /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
             SynchronizeTableLayoutsWithFlags();
