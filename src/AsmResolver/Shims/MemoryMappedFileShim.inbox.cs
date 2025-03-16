@@ -12,11 +12,13 @@ internal sealed unsafe class MemoryMappedFileShim : IDisposable
 
     public MemoryMappedFileShim(string path)
     {
-        _file = MemoryMappedFile.CreateFromFile(path, FileMode.Open, null, 0, MemoryMappedFileAccess.Read);
+        var file = File.OpenRead(path);
+        _file = MemoryMappedFile.CreateFromFile(file, null, 0, MemoryMappedFileAccess.Read, HandleInheritability.None, leaveOpen: false);
+        Size = file.Length;
         _accessor = _file.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
     }
 
-    public long Size => _accessor.Capacity;
+    public long Size { get; }
     public byte* BasePointer => (byte*)_accessor.SafeMemoryMappedViewHandle.DangerousGetHandle();
 
     public void Dispose()
