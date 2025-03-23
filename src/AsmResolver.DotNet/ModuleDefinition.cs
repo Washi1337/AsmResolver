@@ -320,7 +320,13 @@ namespace AsmResolver.DotNet
         {
             Name = name;
 
-            CorLibTypeFactory = new CorLibTypeFactory(corLib.ImportWith(DefaultImporter));
+            // CorLib libraries should not reference themselves.
+            // https://github.com/Washi1337/AsmResolver/issues/620
+            IResolutionScope corLibScope = corLib.Name == name && name is not null && KnownCorLibs.KnownCorLibNames.Contains(name)
+                ? this
+                : corLib.ImportWith(DefaultImporter);
+
+            CorLibTypeFactory = new CorLibTypeFactory(corLibScope);
             OriginalTargetRuntime = DetectTargetRuntime();
             RuntimeContext = new RuntimeContext(OriginalTargetRuntime);
             MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
