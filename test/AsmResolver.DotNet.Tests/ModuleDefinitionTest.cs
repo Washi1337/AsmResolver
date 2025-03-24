@@ -320,7 +320,7 @@ namespace AsmResolver.DotNet.Tests
             // https://github.com/Washi1337/AsmResolver/issues/620
 
             var assembly = new AssemblyDefinition("mscorlib", new Version(4, 0, 0, 0));
-            var module = new ModuleDefinition("mscorlib", new AssemblyReference(assembly));
+            var module = new ModuleDefinition("mscorlib", null);
             assembly.Modules.Add(module);
 
             Assert.Same(module.CorLibTypeFactory.CorLibScope, module);
