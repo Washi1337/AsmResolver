@@ -315,6 +315,19 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void CorLibModuleHasModuleDefinitionCorLibScope()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/620
+
+            var assembly = new AssemblyDefinition("mscorlib", new Version(4, 0, 0, 0));
+            var module = new ModuleDefinition("mscorlib", null);
+            assembly.Modules.Add(module);
+
+            Assert.Same(module.CorLibTypeFactory.CorLibScope, module);
+            Assert.Empty(module.AssemblyReferences);
+        }
+
+        [Fact]
         public void CreateNewCorLibFactory()
         {
             var module = new ModuleDefinition("MySampleModule");

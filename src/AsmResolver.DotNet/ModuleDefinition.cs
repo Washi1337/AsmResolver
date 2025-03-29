@@ -314,13 +314,16 @@ namespace AsmResolver.DotNet
         /// Defines a new .NET module.
         /// </summary>
         /// <param name="name">The name of the module.</param>
-        /// <param name="corLib">The reference to the common object runtime (COR) library that this module will use.</param>
-        public ModuleDefinition(string? name, AssemblyReference corLib)
+        /// <param name="corLib">
+        /// The reference to the common object runtime (COR) library that this module will use.
+        /// If null, this module will be treated as a standalone core library.
+        /// </param>
+        public ModuleDefinition(string? name, AssemblyReference? corLib)
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
 
-            CorLibTypeFactory = new CorLibTypeFactory(corLib.ImportWith(DefaultImporter));
+            CorLibTypeFactory = new CorLibTypeFactory((IResolutionScope?)corLib?.ImportWith(DefaultImporter) ?? this);
             OriginalTargetRuntime = DetectTargetRuntime();
             RuntimeContext = new RuntimeContext(OriginalTargetRuntime);
             MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
