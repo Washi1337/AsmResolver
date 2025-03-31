@@ -82,6 +82,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets the type of the attribute.
+        /// </summary>
+        public ITypeDefOrRef? Type => Constructor?.DeclaringType;
+
+        /// <summary>
         /// Obtains the parent member of the attribute.
         /// </summary>
         /// <returns>The member</returns>
