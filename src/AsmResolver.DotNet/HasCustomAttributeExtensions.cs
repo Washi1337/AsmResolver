@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet
             for (int i = 0; i < self.CustomAttributes.Count; i++)
             {
                 var attribute = self.CustomAttributes[i];
-                var declaringType = attribute.Constructor?.DeclaringType;
+                var declaringType = attribute.Type;
                 if (declaringType is null)
                     continue;
 
@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet
             for (int i = 0; i < self.CustomAttributes.Count; i++)
             {
                 var attribute = self.CustomAttributes[i];
-                var declaringType = attribute.Constructor?.DeclaringType;
+                var declaringType = attribute.Type;
                 if (declaringType is null)
                     continue;
 

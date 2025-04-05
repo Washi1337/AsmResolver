@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Tests
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
 
             Assert.All(type.CustomAttributes, a =>
-                Assert.Equal(nameof(TestCaseAttribute), a.Constructor!.DeclaringType!.Name));
+                Assert.Equal(nameof(TestCaseAttribute), a.Type!.Name));
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Tests
 
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
             Assert.All(type.CustomAttributes, a =>
-                Assert.Equal(nameof(TestCaseAttribute), a.Constructor!.DeclaringType!.Name));
+                Assert.Equal(nameof(TestCaseAttribute), a.Type!.Name));
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet.Tests
                 attributeName += "`1";
 
             var attribute = method.CustomAttributes
-                .First(c => c.Constructor!.DeclaringType!.Name!.Value.StartsWith(attributeName));
+                .First(c => c.Type!.Name!.Value.StartsWith(attributeName));
 
             if (access)
             {
