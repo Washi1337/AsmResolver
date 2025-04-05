@@ -1,3 +1,4 @@
+#if NET35
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
@@ -72,3 +73,4 @@ internal sealed unsafe partial class MemoryMappedFileShim
         CloseHandle(_fileHandle);
     }
 }
+#endif

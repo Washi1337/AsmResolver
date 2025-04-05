@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿#if NET35
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace AsmResolver.Shims;
@@ -50,3 +51,4 @@ internal sealed unsafe partial class MemoryMappedFileShim
         munmap(filePointer, (nuint)_size);
     }
 }
+#endif

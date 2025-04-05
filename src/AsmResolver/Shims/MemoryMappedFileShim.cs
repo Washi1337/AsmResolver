@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NET35
+using System;
 using System.Threading;
 
 namespace AsmResolver.Shims;
@@ -54,3 +55,4 @@ internal sealed unsafe partial class MemoryMappedFileShim : IDisposable
         DisposeCore();
     }
 }
+#endif
