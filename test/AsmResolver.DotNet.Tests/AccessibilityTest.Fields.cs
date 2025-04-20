@@ -142,6 +142,6 @@ public partial class AccessibilityTest
         var field = AddField(type1, "Field1", FieldAttributes.Private);
         var type2 = AddNestedType(type1, "Type2", TypeAttributes.NestedPrivate);
 
-        Assert.False(field.IsAccessibleFromType(type2));
+        Assert.True(field.IsAccessibleFromType(type2));
     }
 }

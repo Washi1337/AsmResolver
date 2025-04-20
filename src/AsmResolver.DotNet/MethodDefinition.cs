@@ -830,9 +830,14 @@ namespace AsmResolver.DotNet
             if (IsPublic)
                 return true;
 
-            // Types can always access their own methods.
-            if (SignatureComparer.Default.Equals(declaringType, type))
-                return true;
+            // Types can always access their own methods and any methods in their declaring types.
+            var type1 = type;
+            while (type1 is not null)
+            {
+                if (SignatureComparer.Default.Equals(declaringType, type1))
+                    return true;
+                type1 = type1.DeclaringType;
+            }
 
             bool isInSameAssembly = SignatureComparer.Default.Equals(declaringType.Module, type.Module);
 

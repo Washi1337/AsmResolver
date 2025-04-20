@@ -143,7 +143,7 @@ public partial class AccessibilityTest
         var method = AddMethod(type1, "Method1", MethodAttributes.Private);
         var type2 = AddNestedType(type1, "Type2", TypeAttributes.NestedPrivate);
 
-        Assert.False(method.IsAccessibleFromType(type2));
+        Assert.True(method.IsAccessibleFromType(type2));
     }
 
 }
