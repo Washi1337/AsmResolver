@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Code;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -162,27 +163,6 @@ namespace AsmResolver.DotNet.Builder
 
                 var token = typeDefTable.Add(row);
                 _tokenMapping.Register(type, token);
-
-                if (type.IsNested)
-                {
-                    // As per the ECMA-335; nested types should always follow their enclosing types in the TypeDef table.
-                    // Proper type def collections that are passed onto this function therefore should have been added
-                    // already to the buffer. If not, we have an invalid ordering of types.
-
-                    var enclosingTypeToken = GetTypeDefinitionToken(type.DeclaringType);
-                    if (enclosingTypeToken.Rid == 0)
-                    {
-                        ErrorListener.MetadataBuilder(
-                            $"Nested type {type.SafeToString()} is added before its enclosing class {type.DeclaringType.SafeToString()}."
-                        );
-                    }
-
-                    var nestedClassRow = new NestedClassRow(
-                        token.Rid,
-                        enclosingTypeToken.Rid);
-
-                    nestedClassTable.Add(type, nestedClassRow);
-                }
             }
         }
 
@@ -361,6 +341,7 @@ namespace AsmResolver.DotNet.Builder
                 AddCustomAttributes(typeToken, type);
                 AddSecurityDeclarations(typeToken, type);
                 DefineInterfaces(typeToken, type.Interfaces);
+                AddNestedClassRow(type, rid);
                 AddMethodImplementations(typeToken, type.MethodImplementations);
                 DefineGenericParameters(typeToken, type);
                 AddClassLayout(typeToken, type.ClassLayout);
@@ -571,6 +552,30 @@ namespace AsmResolver.DotNet.Builder
             var row = new EventMapRow(typeRid, eventList);
             mapTable.Add(type, row);
             eventList += (uint) type.Events.Count;
+        }
+
+        private void AddNestedClassRow(TypeDefinition type, uint rid)
+        {
+            if (!type.IsNested)
+                return;
+
+            var table = Metadata.TablesStream.GetSortedTable<TypeDefinition, NestedClassRow>(TableIndex.NestedClass);
+
+            // As per the ECMA-335 II.2; nested types should always follow their enclosing types in the TypeDef table.
+            // However, from empirical testing, the runtime actually does not seem to mind unsorted TypeDefs.
+            // Hence, we still add the nested class even if the RID ordering was technically not correct.
+            // See also: https://github.com/Washi1337/AsmResolver/issues/545
+
+            var enclosingTypeToken = GetTypeDefinitionToken(type.DeclaringType);
+            if (enclosingTypeToken.Rid == 0 || enclosingTypeToken.Rid > rid)
+            {
+                ErrorListener.MetadataBuilder(
+                    $"Nested type {type.SafeToString()} is added before its enclosing class {type.DeclaringType.SafeToString()}."
+                );
+            }
+
+            var row = new NestedClassRow(rid, enclosingTypeToken.Rid);
+            table.Add(type, row);
         }
 
         private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> implementations)

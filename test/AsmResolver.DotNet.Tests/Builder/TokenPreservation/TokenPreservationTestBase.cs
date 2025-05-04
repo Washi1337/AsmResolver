@@ -32,7 +32,11 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
         protected static ModuleDefinition RebuildAndReloadModule(ModuleDefinition module, MetadataBuilderFlags builderFlags)
         {
-            var bag = new DiagnosticBag();
+            return RebuildAndReloadModule(module, builderFlags, new DiagnosticBag());
+        }
+
+        protected static ModuleDefinition RebuildAndReloadModule(ModuleDefinition module, MetadataBuilderFlags builderFlags, DiagnosticBag bag)
+        {
             var builder = new ManagedPEImageBuilder(new DotNetDirectoryFactory(builderFlags), bag);
 
             var result = builder.CreateImage(module);

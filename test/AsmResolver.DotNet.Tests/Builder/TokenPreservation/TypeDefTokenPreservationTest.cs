@@ -119,5 +119,33 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var fields = Assert.Single(newModuleType.Fields);
             Assert.Equal("OtherField", fields.Name);
         }
+
+        [Fact]
+        public void PreserveInvalidNestedTypeOrderingShouldNonFatallyThrow()
+        {
+            // Prepare.
+            var module = new ModuleDefinition("SomeModule", KnownCorLibs.SystemRuntime_v8_0_0_0);
+            module.TopLevelTypes.Add(new TypeDefinition(null, "Type1", TypeAttributes.Public));
+            module.TopLevelTypes.Add(new TypeDefinition(null, "Type2", TypeAttributes.Public));
+            module = RebuildAndReloadModule(module, MetadataBuilderFlags.None);
+
+            // Move type1 into type2.
+            var type1 = module.TopLevelTypes[1];
+            var type2 = module.TopLevelTypes[2];
+            module.TopLevelTypes.Remove(type1);
+            type2.NestedTypes.Add(type1);
+            type1.IsNestedPublic = true;
+
+            // Rebuild with type token preservation should not fatally throw.
+            var bag = new DiagnosticBag();
+            var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveTypeDefinitionIndices, bag);
+
+            // Assert exception was recorded.
+            Assert.Contains(bag.Exceptions, ex => ex is MetadataBuilderException);
+
+            // Assert that nested type relation is preserved.
+            var newType2 = newModule.TopLevelTypes.First(t => t.Name == type2.Name);
+            Assert.Contains(newType2.NestedTypes, t => t.Name == type1.Name);
+        }
     }
 }
