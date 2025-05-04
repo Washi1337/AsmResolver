@@ -173,7 +173,8 @@ namespace AsmResolver.DotNet.Builder
                     if (enclosingTypeToken.Rid == 0)
                     {
                         ErrorListener.MetadataBuilder(
-                            $"Nested type {type.SafeToString()} is added before its enclosing class {type.DeclaringType.SafeToString()}.");
+                            $"Nested type {type.SafeToString()} is added before its enclosing class {type.DeclaringType.SafeToString()}."
+                        );
                     }
 
                     var nestedClassRow = new NestedClassRow(
