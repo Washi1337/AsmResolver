@@ -1,6 +1,8 @@
+using System;
 using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.TestCases.Fields;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -42,10 +44,11 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(nameof(Constants.Double), Constants.Double)]
         [InlineData(nameof(Constants.Char), Constants.Char)]
         [InlineData(nameof(Constants.String), Constants.String)]
+        [InlineData(nameof(Constants.NullString), Constants.NullString)]
         public void ReadAndInterpretData(string name, object expected)
         {
             var constant = GetFieldConstant(name);
-            Assert.Equal(expected, constant.Value.InterpretData(constant.Type));
+            Assert.Equal(expected, constant.InterpretData());
         }
 
         [Theory]
@@ -62,6 +65,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(nameof(Constants.Double))]
         [InlineData(nameof(Constants.Char))]
         [InlineData(nameof(Constants.String))]
+        [InlineData(nameof(Constants.NullString))]
         public void PersistentConstants(string name)
         {
             var constant = GetFieldConstant(name);
@@ -98,5 +102,37 @@ namespace AsmResolver.DotNet.Tests
             Assert.Null(constantValue);
         }
 
+        [Theory]
+        [InlineData(ElementType.Boolean)]
+        [InlineData(ElementType.Char)]
+        [InlineData(ElementType.I1)]
+        [InlineData(ElementType.U1)]
+        [InlineData(ElementType.I2)]
+        [InlineData(ElementType.U2)]
+        [InlineData(ElementType.I4)]
+        [InlineData(ElementType.U4)]
+        [InlineData(ElementType.I)]
+        [InlineData(ElementType.U)]
+        [InlineData(ElementType.I8)]
+        [InlineData(ElementType.U8)]
+        [InlineData(ElementType.R4)]
+        [InlineData(ElementType.R8)]
+        [InlineData(ElementType.String)]
+        public void DefaultConstantHasDataEqualToZero(ElementType elementType)
+        {
+            ModuleDefinition module = new("Module");
+            var type = module.CorLibTypeFactory.FromElementType(elementType);
+            var constant = Constant.FromDefault(type);
+            object value = constant.InterpretData();
+            if (elementType is ElementType.String)
+            {
+                Assert.Null(value);
+            }
+            else
+            {
+                Assert.IsType<IConvertible>(value, exactMatch: false);
+                Assert.Equal(0, ((IConvertible)value).ToInt32(null));
+            }
+        }
     }
 }

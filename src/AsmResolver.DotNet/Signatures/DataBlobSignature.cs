@@ -35,12 +35,14 @@ namespace AsmResolver.DotNet.Signatures
             set;
         }
 
+        private bool IsNull => Data.Length == 4 && Data[0] == 0 && Data[1] == 0 && Data[2] == 0 && Data[3] == 0;
+
         /// <summary>
         /// Interprets the raw data stored in the <see cref="Data"/> property as a literal.
         /// </summary>
         /// <param name="elementType">The type of the literal.</param>
         /// <returns>The deserialized literal.</returns>
-        public object InterpretData(ElementType elementType)
+        public object? InterpretData(ElementType elementType)
         {
             var reader = new BinaryStreamReader(Data);
 
@@ -59,6 +61,7 @@ namespace AsmResolver.DotNet.Signatures
                 ElementType.R4 => reader.ReadSingle(),
                 ElementType.R8 => reader.ReadDouble(),
                 ElementType.String => Encoding.Unicode.GetString(reader.ReadToEnd()),
+                ElementType.Class when IsNull => null,
                 _ => throw new ArgumentOutOfRangeException(nameof(elementType))
             };
         }
@@ -266,10 +269,26 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>
         /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
         /// </returns>
-        public static DataBlobSignature FromValue(string value)
+        public static DataBlobSignature FromValue(string? value)
         {
+            if (value == null)
+                return FromNull();
             byte[] bytes = Encoding.Unicode.GetBytes(value);
             return new DataBlobSignature(bytes);
+        }
+
+        /// <summary>
+        /// Create a <see cref="DataBlobSignature"/> representing a null reference
+        /// </summary>
+        /// <remarks>
+        /// This can be used for any non-primitive default value.
+        /// </remarks>
+        /// <returns>
+        /// A new <see cref="DataBlobSignature"/> with the correct <see cref="Data"/>
+        /// </returns>
+        public static DataBlobSignature FromNull()
+        {
+            return new DataBlobSignature([0, 0, 0, 0]);
         }
     }
 }
