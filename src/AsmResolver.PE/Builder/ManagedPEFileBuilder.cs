@@ -431,6 +431,9 @@ public class ManagedPEFileBuilder : PEFileBuilder
         var directory = context.Image.DotNetDirectory!;
 
         var fieldRvaTable = tablesStream.GetTable<FieldRvaRow>(TableIndex.FieldRva);
+        var fieldTable = tablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
+        var blobStream = directory.Metadata!.GetStream<BlobStream>();
+        var classLayoutTable = tablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);
         if (fieldRvaTable.Count == 0)
             return;
 
@@ -440,6 +443,7 @@ public class ManagedPEFileBuilder : PEFileBuilder
         for (uint rid = 1; rid <= fieldRvaTable.Count; rid++)
         {
             ref var row = ref fieldRvaTable.GetRowRef(rid);
+
             var data = reader.ResolveFieldData(
                 ErrorListener,
                 context.Platform,
@@ -450,8 +454,61 @@ public class ManagedPEFileBuilder : PEFileBuilder
             if (data is null)
                 continue;
 
-            table.Add(data);
+            var requiredAlignment = TryGetRequiredAlignment(in row);
+
+            if (requiredAlignment != 0)
+            {
+                table.Add(data, requiredAlignment);
+            }
+            else
+            {
+                table.Add(data);
+            }
+
             row.Data = data.ToReference();
+        }
+
+        uint TryGetRequiredAlignment(in FieldRvaRow row)
+        {
+            if (row.Field > fieldTable.Count)
+            {
+                return 0;
+            }
+
+            var fieldSigBlobIndex = fieldTable.GetByRid(row.Field).Signature;
+            if (!blobStream.TryGetBlobReaderByIndex(fieldSigBlobIndex, out var sigReader))
+            {
+                return 0;
+            }
+
+            // calling convention
+            _ = sigReader.ReadByte();
+
+            if ((ElementType)sigReader.ReadByte() != ElementType.ValueType)
+            {
+                return 0;
+            }
+
+            if (!sigReader.TryReadCompressedUInt32(out var codedIndex))
+            {
+                return 0;
+            }
+
+            var typeToken = tablesStream
+                .GetIndexEncoder(CodedIndex.TypeDefOrRef)
+                .DecodeIndex(codedIndex);
+
+            if (typeToken.Table != TableIndex.TypeDef)
+            {
+                return 0;
+            }
+
+            if (!classLayoutTable.TryGetRowByKey(2, typeToken.Rid, out var layout))
+            {
+                return 0;
+            }
+
+            return layout.PackingSize;
         }
     }
 }

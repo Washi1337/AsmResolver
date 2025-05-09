@@ -86,15 +86,15 @@ method instead.
 
 Types and members can also be imported by passing on an instance of
 various `System.Reflection` classes.
-             
-|Member type to import |Method to use        |Result type          |     
-|----------------------|---------------------|---------------------|             
-|`Type`                |`ImportType`         |`ITypeDefOrRef`      |         
-|`Type`                |`ImportTypeSignature`|`TypeSignature`      |         
-|`MethodBase`          |`ImportMethod`       |`IMethodDefOrRef`    |         
-|`MethodInfo`          |`ImportMethod`       |`IMethodDefOrRef`    |         
-|`ConstructorInfo`     |`ImportMethod`       |`IMethodDefOrRef`    |         
-|`FieldInfo`           |`ImportScope`        |`MemberReference`    |             
+
+|Member type to import |Method to use        |Result type          |
+|----------------------|---------------------|---------------------|
+|`Type`                |`ImportType`         |`ITypeDefOrRef`      |
+|`Type`                |`ImportTypeSignature`|`TypeSignature`      |
+|`MethodBase`          |`ImportMethod`       |`IMethodDefOrRef`    |
+|`MethodInfo`          |`ImportMethod`       |`IMethodDefOrRef`    |
+|`ConstructorInfo`     |`ImportMethod`       |`IMethodDefOrRef`    |
+|`FieldInfo`           |`ImportScope`        |`MemberReference`    |
 
 There is limited support for importing complex types. Types that can be
 imported through reflection include:
@@ -212,7 +212,7 @@ Framework, then you will run in the exact issue described in the above.
 ``` csharp
 var reference = importer.ImportType(typeof(DateTime));
 
-// `reference` will target `[mscorlib] System.DateTime` when running on .NET Framework, and `[System.Runtime] System.DateTime` when running on .NET Core.
+// `reference` will target `[mscorlib] System.DateTime` when running on .NET Framework, and `[System.Private.CoreLib] System.DateTime` when running on .NET Core.
 ```
 
 Therefore, always make sure you are importing from a .NET module that is
