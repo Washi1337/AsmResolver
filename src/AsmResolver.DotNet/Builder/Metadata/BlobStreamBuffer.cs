@@ -110,8 +110,9 @@ namespace AsmResolver.DotNet.Builder.Metadata
         /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
         /// <param name="signature">The signature to lookup or add.</param>
         /// <param name="errorListener">The object responsible for collecting diagnostic information.</param>
+        /// <param name="diagnosticSource">The object that is reported back when serialization of the blob fails.</param>
         /// <returns>The index of the signature.</returns>
-        public uint GetBlobIndex(ITypeCodedIndexProvider provider, BlobSignature? signature, IErrorListener errorListener)
+        public uint GetBlobIndex(ITypeCodedIndexProvider provider, BlobSignature? signature, IErrorListener errorListener, object? diagnosticSource = null)
         {
             if (signature is null)
                 return 0u;
@@ -119,7 +120,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
             // Serialize blob.
 
             using var rentedWriter = _blobWriterPool.Rent();
-            signature.Write(new BlobSerializationContext(rentedWriter.Writer, provider, errorListener));
+            signature.Write(new BlobSerializationContext(rentedWriter.Writer, provider, errorListener, diagnosticSource));
 
             return GetBlobIndex(rentedWriter.GetData());
         }
