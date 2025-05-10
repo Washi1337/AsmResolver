@@ -117,7 +117,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     localVarSig.VariableTypes.Add(body.LocalVariables[i].VariableType);
 
                 var standAloneSig = new StandAloneSignature(localVarSig);
-                token = context.TokenProvider.GetStandAloneSignatureToken(standAloneSig);
+                token = context.TokenProvider.GetStandAloneSignatureToken(standAloneSig, body.Owner);
             }
 
             var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, new DataSegment(code));
@@ -133,7 +133,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 if (needsFatFormat)
                     attributes |= CilExtraSectionAttributes.FatFormat;
 
-                var rawSectionData = SerializeExceptionHandlers(context, body.ExceptionHandlers, needsFatFormat);
+                var rawSectionData = SerializeExceptionHandlers(context, body, needsFatFormat);
                 var section = new CilExtraSection(attributes, rawSectionData);
                 fatBody.ExtraSections.Add(section);
             }
@@ -148,29 +148,34 @@ namespace AsmResolver.DotNet.Code.Cil
             using var rentedWriter = _writerPool.Rent();
             var assembler = new CilAssembler(
                 rentedWriter.Writer,
-                new CilOperandBuilder(context.TokenProvider, bag),
+                new CilOperandBuilder(context.TokenProvider, bag, body.Owner),
                 body.Owner.SafeToString,
-                bag);
+                bag
+            );
 
             assembler.WriteInstructions(body.Instructions);
 
             return rentedWriter.GetData();
         }
 
-        private byte[] SerializeExceptionHandlers(MethodBodySerializationContext context, IList<CilExceptionHandler> exceptionHandlers, bool needsFatFormat)
+        private byte[] SerializeExceptionHandlers(MethodBodySerializationContext context, CilMethodBody body, bool needsFatFormat)
         {
+            var handlers = body.ExceptionHandlers;
+
             using var rentedWriter = _writerPool.Rent();
 
-            for (int i = 0; i < exceptionHandlers.Count; i++)
-            {
-                var handler = exceptionHandlers[i];
-                WriteExceptionHandler(context, rentedWriter.Writer, handler, needsFatFormat);
-            }
+            for (int i = 0; i < handlers.Count; i++)
+                WriteExceptionHandler(context, rentedWriter.Writer, body, handlers[i], needsFatFormat);
 
             return rentedWriter.GetData();
         }
 
-        private void WriteExceptionHandler(MethodBodySerializationContext context, BinaryStreamWriter writer, CilExceptionHandler handler, bool useFatFormat)
+        private static void WriteExceptionHandler(
+            MethodBodySerializationContext context,
+            BinaryStreamWriter writer,
+            CilMethodBody body,
+            CilExceptionHandler handler,
+            bool useFatFormat)
         {
             if (handler.IsFat && !useFatFormat)
                 throw new InvalidOperationException("Can only serialize fat exception handlers in fat format.");
@@ -207,12 +212,12 @@ namespace AsmResolver.DotNet.Code.Cil
 
                     var token = handler.ExceptionType switch
                     {
-                        TypeReference typeReference => provider.GetTypeReferenceToken(typeReference),
-                        TypeDefinition typeDefinition => provider.GetTypeDefinitionToken(typeDefinition),
-                        TypeSpecification typeSpecification => provider.GetTypeSpecificationToken(typeSpecification),
+                        TypeReference typeReference => provider.GetTypeReferenceToken(typeReference, body.Owner),
+                        TypeDefinition typeDefinition => provider.GetTypeDefinitionToken(typeDefinition, body.Owner),
+                        TypeSpecification typeSpecification => provider.GetTypeSpecificationToken(typeSpecification, body.Owner),
                         _ => context.ErrorListener.RegisterExceptionAndReturnDefault<MetadataToken>(
-                            new ArgumentOutOfRangeException(
-                                $"Invalid or unsupported exception type ({handler.ExceptionType.SafeToString()})"))
+                            new ArgumentOutOfRangeException($"Invalid or unsupported exception type ({handler.ExceptionType.SafeToString()})")
+                        )
                     };
                     writer.WriteUInt32(token.ToUInt32());
                     break;

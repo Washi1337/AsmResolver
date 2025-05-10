@@ -82,6 +82,15 @@ namespace AsmResolver.DotNet
         protected virtual DataBlobSignature? GetValue() => null;
 
         /// <summary>
+        /// Interprets the raw data stored in the <see cref="Value"/> property as a literal.
+        /// </summary>
+        /// <returns>The deserialized literal.</returns>
+        public object? InterpretData()
+        {
+            return Value?.InterpretData(Type);
+        }
+
+        /// <summary>
         /// Create a <see cref="Constant"/> from a value
         /// </summary>
         /// <param name="value">The value to be assigned to the constant</param>
@@ -184,6 +193,30 @@ namespace AsmResolver.DotNet
         /// <returns>
         /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
         /// </returns>
+        public static Constant FromValue(nuint value)
+        {
+            return FromValue((uint)value);
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromValue(nint value)
+        {
+            return FromValue((int)value);
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> from a value
+        /// </summary>
+        /// <param name="value">The value to be assigned to the constant</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
         public static Constant FromValue(ulong value)
         {
             return new Constant(ElementType.U8, DataBlobSignature.FromValue(value));
@@ -232,9 +265,61 @@ namespace AsmResolver.DotNet
         /// <returns>
         /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
         /// </returns>
-        public static Constant FromValue(string value)
+        public static Constant FromValue(string? value)
         {
-            return new Constant(ElementType.String, DataBlobSignature.FromValue(value));
+            return new Constant(value is null ? ElementType.Class : ElementType.String, DataBlobSignature.FromValue(value));
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> representing a null reference
+        /// </summary>
+        /// <remarks>
+        /// This can be used for any non-primitive default value.
+        /// </remarks>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromNull()
+        {
+            return new Constant(ElementType.Class, DataBlobSignature.FromNull());
+        }
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> representing a default value
+        /// </summary>
+        /// <param name="elementType">The type of the new constant.</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromDefault(ElementType elementType) => elementType switch
+        {
+            ElementType.Boolean => FromValue(false),
+            ElementType.Char => FromValue('\0'),
+            ElementType.I1 => FromValue((sbyte)0),
+            ElementType.U1 => FromValue((byte)0),
+            ElementType.I2 => FromValue((short)0),
+            ElementType.U2 => FromValue((ushort)0),
+            ElementType.I4 => FromValue(0),
+            ElementType.U4 => FromValue(0u),
+            ElementType.I => FromValue((nint)0),
+            ElementType.U => FromValue((nuint)0),
+            ElementType.I8 => FromValue(0L),
+            ElementType.U8 => FromValue(0UL),
+            ElementType.R4 => FromValue(0f),
+            ElementType.R8 => FromValue(0d),
+            _ => FromNull(),
+        };
+
+        /// <summary>
+        /// Create a <see cref="Constant"/> representing a default value
+        /// </summary>
+        /// <param name="type">The type of the new constant.</param>
+        /// <returns>
+        /// A new <see cref="Constant"/> with the correct <see cref="Type"/> and <see cref="Value"/>
+        /// </returns>
+        public static Constant FromDefault(TypeSignature type)
+        {
+            return FromDefault(type.ElementType);
         }
     }
 }

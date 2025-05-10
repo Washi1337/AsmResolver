@@ -200,7 +200,7 @@ namespace AsmResolver.DotNet.Signatures
             }
             else
             {
-                index = context.IndexProvider.GetTypeDefOrRefIndex(type);
+                index = context.IndexProvider.GetTypeDefOrRefIndex(type, context.DiagnosticSource);
             }
 
             context.Writer.WriteCompressedUInt32(index);

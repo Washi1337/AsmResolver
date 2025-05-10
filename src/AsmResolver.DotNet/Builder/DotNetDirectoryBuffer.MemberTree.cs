@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.IO;
-using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Code;
-using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Builder
@@ -70,7 +67,7 @@ namespace AsmResolver.DotNet.Builder
 
             // Ensure reference to corlib is added.
             if (module.CorLibTypeFactory.CorLibScope is AssemblyReference corLibScope)
-                GetAssemblyReferenceToken(corLibScope);
+                GetAssemblyReferenceToken(corLibScope, module);
 
             AddFileReferencesInModule(module);
             AddExportedTypesInModule(module);
@@ -124,7 +121,8 @@ namespace AsmResolver.DotNet.Builder
                 offset,
                 resource.Attributes,
                 Metadata.StringsStream.GetStringIndex(resource.Name),
-                AddImplementation(resource.Implementation));
+                AddImplementation(resource.Implementation, resource)
+            );
 
             var token = table.Add(row);
             _tokenMapping.Register(resource, token);
@@ -143,7 +141,6 @@ namespace AsmResolver.DotNet.Builder
         public void DefineTypes(IEnumerable<TypeDefinition> types)
         {
             var typeDefTable = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
-            var nestedClassTable = Metadata.TablesStream.GetSortedTable<TypeDefinition, NestedClassRow>(TableIndex.NestedClass);
 
             if (types is ICollection<TypeDefinition> collection)
                 typeDefTable.EnsureCapacity(typeDefTable.Count + collection.Count);
@@ -181,7 +178,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new FieldDefinitionRow(
                     field.Attributes,
                     Metadata.StringsStream.GetStringIndex(field.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, field.Signature, ErrorListener));
+                    Metadata.BlobStream.GetBlobIndex(this, field.Signature, ErrorListener, field));
 
                 var token = table.Add(row);
                 _tokenMapping.Register(field, token);
@@ -208,7 +205,7 @@ namespace AsmResolver.DotNet.Builder
                     method.ImplAttributes,
                     method.Attributes,
                     Metadata.StringsStream.GetStringIndex(method.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, method.Signature, ErrorListener),
+                    Metadata.BlobStream.GetBlobIndex(this, method.Signature, ErrorListener, method),
                     0);
 
                 var token = table.Add(row);
@@ -257,7 +254,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new PropertyDefinitionRow(
                     property.Attributes,
                     Metadata.StringsStream.GetStringIndex(property.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, property.Signature, ErrorListener));
+                    Metadata.BlobStream.GetBlobIndex(this, property.Signature, ErrorListener, property));
 
                 var token = table.Add(row);
                 _tokenMapping.Register(property, token);
@@ -279,7 +276,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new EventDefinitionRow(
                     @event.Attributes,
                     Metadata.StringsStream.GetStringIndex(@event.Name),
-                    GetTypeDefOrRefIndex(@event.EventType));
+                    GetTypeDefOrRefIndex(@event.EventType, @event));
 
                 var token = table.Add(row);
                 _tokenMapping.Register(@event, token);
@@ -323,7 +320,7 @@ namespace AsmResolver.DotNet.Builder
 
                 // Update extends, field list and method list columns.
                 ref var typeRow = ref typeDefTable.GetRowRef(rid);
-                typeRow.Extends = GetTypeDefOrRefIndex(type.BaseType);
+                typeRow.Extends = GetTypeDefOrRefIndex(type.BaseType, type);
                 typeRow.FieldList = fieldList;
                 typeRow.MethodList = methodList;
 
@@ -342,7 +339,7 @@ namespace AsmResolver.DotNet.Builder
                 AddSecurityDeclarations(typeToken, type);
                 DefineInterfaces(typeToken, type.Interfaces);
                 AddNestedClassRow(type, rid);
-                AddMethodImplementations(typeToken, type.MethodImplementations);
+                AddMethodImplementations(type, typeToken, type.MethodImplementations);
                 DefineGenericParameters(typeToken, type);
                 AddClassLayout(typeToken, type.ClassLayout);
             }
@@ -370,7 +367,7 @@ namespace AsmResolver.DotNet.Builder
             {
                 var field = type.Fields[i];
 
-                var newToken = GetFieldDefinitionToken(field);
+                var newToken = GetFieldDefinitionToken(field, type);
                 if (newToken == MetadataToken.Zero)
                 {
                     ErrorListener.MetadataBuilder(
@@ -401,7 +398,7 @@ namespace AsmResolver.DotNet.Builder
             {
                 var method = type.Methods[i];
 
-                var newToken = GetMethodDefinitionToken(method);
+                var newToken = GetMethodDefinitionToken(method, type);
                 if (newToken == MetadataToken.Zero)
                 {
                     ErrorListener.MetadataBuilder(
@@ -578,7 +575,7 @@ namespace AsmResolver.DotNet.Builder
             table.Add(type, row);
         }
 
-        private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> implementations)
+        private void AddMethodImplementations(TypeDefinition type, MetadataToken typeToken, IList<MethodImplementation> implementations)
         {
             var table = Metadata.TablesStream.GetSortedTable<MethodImplementation, MethodImplementationRow>(TableIndex.MethodImpl);
 
@@ -587,8 +584,9 @@ namespace AsmResolver.DotNet.Builder
                 var implementation = implementations[i];
                 var row = new MethodImplementationRow(
                     typeToken.Rid,
-                    AddMethodDefOrRef(implementation.Body),
-                    AddMethodDefOrRef(implementation.Declaration));
+                    AddMethodDefOrRef(implementation.Body, type),
+                    AddMethodDefOrRef(implementation.Declaration, type)
+                );
 
                 table.Add(implementation, row);
             }
@@ -627,11 +625,14 @@ namespace AsmResolver.DotNet.Builder
         private void AddExportedTypesInModule(ModuleDefinition module)
         {
             for (int i = 0; i < module.ExportedTypes.Count; i++)
-                AddExportedType(module.ExportedTypes[i]);
+                AddExportedType(module.ExportedTypes[i], module);
         }
 
-        private MetadataToken AddExportedType(ExportedType exportedType)
+        private MetadataToken AddExportedType(ExportedType exportedType, object? diagnosticSource = null)
         {
+            if (!AssertIsImported(exportedType, diagnosticSource))
+                return MetadataToken.Zero;
+
             var table = Metadata.TablesStream.GetTable<ExportedTypeRow>(TableIndex.ExportedType);
 
             var row = new ExportedTypeRow(
@@ -639,7 +640,8 @@ namespace AsmResolver.DotNet.Builder
                 exportedType.TypeDefId,
                 Metadata.StringsStream.GetStringIndex(exportedType.Name),
                 Metadata.StringsStream.GetStringIndex(exportedType.Namespace),
-                AddImplementation(exportedType.Implementation));
+                AddImplementation(exportedType.Implementation, exportedType)
+            );
 
             var token = table.Add(row);
             _tokenMapping.Register(exportedType, token);
@@ -650,11 +652,14 @@ namespace AsmResolver.DotNet.Builder
         private void AddFileReferencesInModule(ModuleDefinition module)
         {
             for (int i = 0; i < module.FileReferences.Count; i++)
-                AddFileReference(module.FileReferences[i]);
+                AddFileReference(module.FileReferences[i], module);
         }
 
-        private MetadataToken AddFileReference(FileReference fileReference)
+        private MetadataToken AddFileReference(FileReference fileReference, object? diagnosticSource = null)
         {
+            if (!AssertIsImported(fileReference, diagnosticSource))
+                return MetadataToken.Zero;
+
             var table = Metadata.TablesStream.GetTable<FileReferenceRow>(TableIndex.File);
 
             var row = new FileReferenceRow(
