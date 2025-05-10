@@ -590,6 +590,14 @@ namespace AsmResolver.DotNet.Tests
             Assert.Same(type, module.GetModuleType());
         }
 
+        [Fact]
+        public void CreateModuleTypeShouldHaveFirstRid()
+        {
+            var module = new ModuleDefinition("SomeModule");
+            var type = module.GetOrCreateModuleType();
+            Assert.Equal(1u, type.MetadataToken.Rid);
+        }
+
         [Theory]
         [InlineData(false, false, false)]
         [InlineData(false, true, false)]

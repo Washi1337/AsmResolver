@@ -307,7 +307,7 @@ namespace AsmResolver.DotNet
             RuntimeContext = new RuntimeContext(OriginalTargetRuntime);
             MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
 
-            TopLevelTypes.Add(new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0));
+            CreateAndInsertModuleType();
         }
 
         /// <summary>
@@ -328,7 +328,7 @@ namespace AsmResolver.DotNet
             RuntimeContext = new RuntimeContext(OriginalTargetRuntime);
             MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
 
-            TopLevelTypes.Add(new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0));
+            CreateAndInsertModuleType();
         }
 
         /// <summary>
@@ -466,7 +466,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets an object responsible for assigning new <see cref="MetadataToken"/> to members
+        /// Gets an object responsible for assigning new metadata tokens to metadata members.
         /// </summary>
         public TokenAllocator TokenAllocator
         {
@@ -1044,12 +1044,27 @@ namespace AsmResolver.DotNet
         /// <returns>The module type.</returns>
         public TypeDefinition GetOrCreateModuleType()
         {
-            var moduleType = GetModuleType();
+            return GetModuleType() ?? CreateAndInsertModuleType();
+        }
 
-            if (moduleType is null)
+        private TypeDefinition CreateAndInsertModuleType()
+        {
+            var moduleType = new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0);
+            TopLevelTypes.Insert(0, moduleType);
+
+            // Check if we can assign RID 1 to the type using the token allocator. This avoids users accidentally
+            // overriding the module type later by using the token allocator.
+            var token = TokenAllocator.GetNextAvailableToken(TableIndex.TypeDef);
+            if (token.Rid == 1)
             {
-                moduleType = new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0);
-                TopLevelTypes.Insert(0, moduleType);
+                TokenAllocator.AssignNextAvailableToken(moduleType);
+            }
+            else
+            {
+                // If RID 1 is not possible, we still want to assign RID 1 to the type explicitly, to have metadata
+                // builders configured to preserve RIDs deliberately crash on conflicting RIDs.
+
+                moduleType.MetadataToken = new MetadataToken(TableIndex.TypeDef, 1);
             }
 
             return moduleType;
