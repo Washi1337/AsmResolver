@@ -440,6 +440,7 @@ public class ManagedPEFileBuilder : PEFileBuilder
         for (uint rid = 1; rid <= fieldRvaTable.Count; rid++)
         {
             ref var row = ref fieldRvaTable.GetRowRef(rid);
+
             var data = reader.ResolveFieldData(
                 ErrorListener,
                 context.Platform,
@@ -450,7 +451,17 @@ public class ManagedPEFileBuilder : PEFileBuilder
             if (data is null)
                 continue;
 
-            table.Add(data);
+            uint requiredAlignment = TryGetRequiredFieldAlignment(context, row);
+
+            if (requiredAlignment != 0)
+            {
+                table.Add(data, requiredAlignment);
+            }
+            else
+            {
+                table.Add(data);
+            }
+
             row.Data = data.ToReference();
         }
     }

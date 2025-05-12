@@ -1,4 +1,9 @@
+using System;
 using System.IO;
+using System.Linq;
+using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
+using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -109,5 +114,43 @@ namespace AsmResolver.PE.Tests.Builder
             Assert.Equal(0x12345678u, table[1].Data.Rva);
         }
 
+        [Fact]
+        public void RvaFieldAlignmentIsPreserved()
+        {
+            var image = PEImage.FromFile(typeof(RVAField).Assembly.Location, TestReaderParameters);
+
+            var tablesStream = image.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
+
+            var fieldRvaTable = tablesStream.GetTable<FieldRvaRow>();
+            var typeDefTable = tablesStream.GetTable<TypeDefinitionRow>();
+            var stringHeap = image.DotNetDirectory.Metadata.GetStream<StringsStream>();
+
+            var privateImplDetailsTypeRid = typeDefTable
+                .Select((t, i) => (TypeDef: t, Rid: i))
+                .Single(tuple => stringHeap.GetStringByIndex(tuple.TypeDef.Name)!.Equals("<PrivateImplementationDetails>"))
+                .Rid;
+
+            var fieldRange = tablesStream.GetFieldRange((uint)privateImplDetailsTypeRid + 1);
+
+            var targetField = fieldRange.Single(f =>
+                fieldRvaTable.TryGetRowByKey(1, f.Rid, out var row)
+                && row.Data.CreateReader().ReadBytes(8 * 4).AsSpan().SequenceEqual(MemoryMarshal.AsBytes([1L, 2, 3, 4]))
+            );
+
+            _ = fieldRvaTable.TryGetRidByKey(1, targetField.Rid, out var targetRvaField);
+
+            // ensure we start aligned
+            Assert.Equal(0u, fieldRvaTable.GetByRid(targetRvaField).Data.Rva % 8);
+
+            var stream = new MemoryStream();
+            var file = new ManagedPEFileBuilder(EmptyErrorListener.Instance).CreateFile(image);
+            file.Write(stream);
+
+            var newImage = PEImage.FromBytes(stream.ToArray(), TestReaderParameters);
+
+            var newFieldRvaRow = newImage.DotNetDirectory!.Metadata!.GetStream<TablesStream>().GetTable<FieldRvaRow>().GetByRid(targetRvaField);
+
+            Assert.Equal(0u, newFieldRvaRow.Data.Rva % 8);
+        }
     }
 }

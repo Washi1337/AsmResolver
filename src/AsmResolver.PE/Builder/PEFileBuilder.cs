@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Builder
@@ -270,6 +273,63 @@ namespace AsmResolver.PE.Builder
             var relocations = context.Image.Relocations;
             for (int i = 0; i < relocations.Count; i++)
                 context.RelocationsDirectory.Add(relocations[i]);
+        }
+
+
+        /// <summary>
+        /// Gets the required alignment of a field RVA, according to <see href="https://github.com/dotnet/runtime/blob/main/docs/design/specs/Ecma-335-Augments.md#rules-for-il-rewriters">the CoreCLR ECMA-335 augments</see>.
+        /// </summary>
+        /// <param name="context">The context from which the field type will be resolved.</param>
+        /// <param name="row">The field RVA row.</param>
+        /// <returns>The required alignment of the field, or 0 if it could not be determined.</returns>
+        protected virtual uint TryGetRequiredFieldAlignment(TContext context, in FieldRvaRow row)
+        {
+            var directory = context.Image.DotNetDirectory!;
+            var tablesStream = directory.Metadata!.GetStream<TablesStream>();
+            var blobStream = directory.Metadata.GetStream<BlobStream>();
+
+            var fieldTable = tablesStream.GetTable<FieldDefinitionRow>();
+            var classLayoutTable = tablesStream.GetTable<ClassLayoutRow>();
+
+            if (row.Field > fieldTable.Count)
+            {
+                return 0;
+            }
+
+            uint fieldSigBlobIndex = fieldTable.GetByRid(row.Field).Signature;
+            if (!blobStream.TryGetBlobReaderByIndex(fieldSigBlobIndex, out var sigReader))
+            {
+                return 0;
+            }
+
+            // calling convention
+            _ = sigReader.ReadByte();
+
+            if ((ElementType)sigReader.ReadByte() != ElementType.ValueType)
+            {
+                return 0;
+            }
+
+            if (!sigReader.TryReadCompressedUInt32(out uint codedIndex))
+            {
+                return 0;
+            }
+
+            var typeToken = tablesStream
+                .GetIndexEncoder(CodedIndex.TypeDefOrRef)
+                .DecodeIndex(codedIndex);
+
+            if (typeToken.Table != TableIndex.TypeDef)
+            {
+                return 0;
+            }
+
+            if (!classLayoutTable.TryGetRowByKey(2, typeToken.Rid, out var layout))
+            {
+                return 0;
+            }
+
+            return layout.PackingSize;
         }
     }
 }

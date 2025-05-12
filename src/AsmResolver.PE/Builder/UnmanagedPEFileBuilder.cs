@@ -676,7 +676,17 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
             if (data is null)
                 continue;
 
-            table.Add(data);
+            uint requiredAlignment = TryGetRequiredFieldAlignment(context, row);
+
+            if (requiredAlignment != 0)
+            {
+                table.Add(data, requiredAlignment);
+            }
+            else
+            {
+                table.Add(data);
+            }
+
             row.Data = data.ToReference();
         }
     }
