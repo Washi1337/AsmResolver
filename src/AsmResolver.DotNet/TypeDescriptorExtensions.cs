@@ -71,6 +71,15 @@ namespace AsmResolver.DotNet
             new ArrayTypeSignature(type.ToTypeSignature(), dimensions);
 
         /// <summary>
+        /// Constructs a new boxed type signature with the provided type descriptor as element type.
+        /// as element type.
+        /// </summary>
+        /// <param name="type">The element type.</param>
+        /// <returns>The constructed boxed type signature.</returns>
+        public static BoxedTypeSignature MakeBoxedType(this ITypeDescriptor type) =>
+            new BoxedTypeSignature(type.ToTypeSignature());
+
+        /// <summary>
         /// Constructs a new by-reference type signature with the provided type descriptor as element type.
         /// as element type.
         /// </summary>
