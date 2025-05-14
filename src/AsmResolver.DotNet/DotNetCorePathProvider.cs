@@ -196,11 +196,26 @@ namespace AsmResolver.DotNet
                 // with the help of System.Reflection. The assembly of System.Object is either System.Runtime
                 // or System.Private.CoreLib, which is located at <installation_directory>/shared/<runtime>/<version>/.
 
-                string corlibPath = typeof(object).Assembly.Location;
-                string versionPath = Path.GetDirectoryName(corlibPath)!;
-                string runtimePath = Path.GetDirectoryName(versionPath)!;
-                string sharedPath = Path.GetDirectoryName(runtimePath)!;
-                return Path.GetDirectoryName(sharedPath);
+#if NET8_0_OR_GREATER
+                [UnconditionalSuppressMessage("SingleFile", "IL3000", Justification = "We're explicitly checking for this scenario.")]
+#endif
+                static string? TryGetObjectCoreLibPath()
+                {
+                    string corlibPath = typeof(object).Assembly.Location;
+
+                    // The path will be empty when publishing as single-file
+                    if (string.IsNullOrEmpty(corlibPath))
+                    {
+                        return null;
+                    }
+
+                    string versionPath = Path.GetDirectoryName(corlibPath)!;
+                    string runtimePath = Path.GetDirectoryName(versionPath)!;
+                    string sharedPath = Path.GetDirectoryName(runtimePath)!;
+                    return Path.GetDirectoryName(sharedPath);
+                }
+
+                return TryGetObjectCoreLibPath();
             }
 
             return null;

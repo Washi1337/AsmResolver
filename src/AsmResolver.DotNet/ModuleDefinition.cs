@@ -164,11 +164,14 @@ namespace AsmResolver.DotNet
         public static ModuleDefinition FromModule(Module module) => FromModule(module, new ModuleReaderParameters());
 
         /// <summary>
-        /// Opens a module from an instance of a <see cref="System.Reflection.Module"/>.
+        /// Opens a module from an instance of a <see cref="Module"/>.
         /// </summary>
         /// <param name="module">The reflection module to load.</param>
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
+#if NET8_0_OR_GREATER
+        [UnconditionalSuppressMessage("SingleFile", "IL3002", Justification = "We're explicitly checking for unmapped module names.")]
+#endif
         public static ModuleDefinition FromModule(Module module, ModuleReaderParameters readerParameters)
         {
             if (!ReflectionHacks.TryGetHINSTANCE(module, out var handle))
