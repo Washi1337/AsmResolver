@@ -318,7 +318,23 @@ namespace AsmResolver.DotNet
         /// The reference to the common object runtime (COR) library that this module will use.
         /// If null, this module will be treated as a standalone core library.
         /// </param>
+        /// <remarks>
+        /// This constructor co-exists with the Utf8String overload for backwards compatibility.
+        /// </remarks>
         public ModuleDefinition(string? name, AssemblyReference? corLib)
+            : this((Utf8String?)name, corLib)
+        {
+        }
+
+        /// <summary>
+        /// Defines a new .NET module.
+        /// </summary>
+        /// <param name="name">The name of the module.</param>
+        /// <param name="corLib">
+        /// The reference to the common object runtime (COR) library that this module will use.
+        /// If null, this module will be treated as a standalone core library.
+        /// </param>
+        public ModuleDefinition(Utf8String? name, AssemblyReference? corLib)
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
