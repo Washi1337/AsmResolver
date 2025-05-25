@@ -163,6 +163,18 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Constructs a reference to a type within the provided resolution scope.
+        /// </summary>
+        /// <param name="scope">The scope the type is defined in.</param>
+        /// <param name="ns">The namespace of the type.</param>
+        /// <param name="name">The name of the type.</param>
+        /// <returns>The constructed reference.</returns>
+        public static TypeReference CreateTypeReference(this IResolutionScope scope, Utf8String? ns, Utf8String name)
+        {
+            return new TypeReference(scope, ns, name);
+        }
+
+        /// <summary>
         /// Constructs a reference to a nested type.
         /// </summary>
         /// <param name="declaringType">The enclosing type.</param>
@@ -184,6 +196,27 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Constructs a reference to a nested type.
+        /// </summary>
+        /// <param name="declaringType">The enclosing type.</param>
+        /// <param name="nestedTypeName">The name of the nested type.</param>
+        /// <returns>The constructed reference.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when <paramref name="declaringType"/> cannot be used as a declaring type of a type reference.
+        /// </exception>
+        public static TypeReference CreateTypeReference(this ITypeDefOrRef declaringType, Utf8String nestedTypeName)
+        {
+            var parent = declaringType switch
+            {
+                TypeReference reference => reference,
+                TypeDefinition definition => definition.ToTypeReference(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            return new TypeReference(parent, null, nestedTypeName);
+        }
+
+        /// <summary>
         /// Constructs a reference to a member declared within the provided parent member.
         /// </summary>
         /// <param name="parent">The declaring member.</param>
@@ -193,6 +226,21 @@ namespace AsmResolver.DotNet
         public static MemberReference CreateMemberReference(
             this IMemberRefParent parent,
             string? memberName,
+            MemberSignature? signature)
+        {
+            return new MemberReference(parent, memberName, signature);
+        }
+
+        /// <summary>
+        /// Constructs a reference to a member declared within the provided parent member.
+        /// </summary>
+        /// <param name="parent">The declaring member.</param>
+        /// <param name="memberName">The name of the member to reference.</param>
+        /// <param name="signature">The signature of the member to reference.</param>
+        /// <returns>The constructed reference.</returns>
+        public static MemberReference CreateMemberReference(
+            this IMemberRefParent parent,
+            Utf8String? memberName,
             MemberSignature? signature)
         {
             return new MemberReference(parent, memberName, signature);
