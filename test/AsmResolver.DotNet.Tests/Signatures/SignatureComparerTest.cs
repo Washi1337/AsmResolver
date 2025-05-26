@@ -176,15 +176,22 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var type1 = referencedTypes[0]!;
             var type2 = referencedTypes[1]!;
 
-            var resolvedType1 = type1.Resolve();
-            var resolvedType2 = type2.Resolve();
+            var resolvedType1 = type1.Resolve()!;
+            var resolvedType2 = type2.Resolve()!;
+
+            var resolvedTypeReference1 = resolvedType1.ToTypeReference().ImportWith(module.DefaultImporter);
+            var resolvedTypeReference2 = resolvedType2.ToTypeReference().ImportWith(module.DefaultImporter);
 
             Assert.Equal(type1, resolvedType1, _comparer);
+            Assert.Equal(type1, resolvedTypeReference1, _comparer);
             Assert.Equal(type2, resolvedType2, _comparer);
+            Assert.Equal(type2, resolvedTypeReference2, _comparer);
 
             Assert.NotEqual(type1, type2, _comparer);
             Assert.NotEqual(type1, resolvedType2, _comparer); // Fails
+            Assert.NotEqual(type1, resolvedTypeReference2, _comparer); // Fails
             Assert.NotEqual(type2, resolvedType1, _comparer); // Fails
+            Assert.NotEqual(type2, resolvedTypeReference1, _comparer); // Fails
         }
 
         [Fact]
