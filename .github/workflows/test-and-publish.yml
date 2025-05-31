@@ -88,13 +88,19 @@ jobs:
         run: |
           dotnet restore AsmResolver.sln;
           dotnet build AsmResolver.sln --configuration Release
-      
+
       # For non-master branches (e.g., development or feature branches) we apply a fixup on the version suffix.
       - name: Build on non-master branch
         if: ${{github.ref != 'refs/heads/master'}}
         run: |
-          dotnet restore AsmResolver.sln --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} --property:CheckEolTargetFramework=false;
-          dotnet build AsmResolver.sln --configuration Release --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} --property:CheckEolTargetFramework=false;
+          dotnet restore AsmResolver.sln `
+            --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} `
+            --property:CheckEolTargetFramework=false
+
+          dotnet build AsmResolver.sln `
+            --configuration Release `
+            --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} `
+            --property:CheckEolTargetFramework=false
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
@@ -113,14 +119,20 @@ jobs:
       matrix:
         runner: [ 
           { image: 'windows-2022', arch: 'x64' },
-          { image: 'windows-2022', arch: 'x86' },
+          { image: 'windows-2022', arch: 'x86' }, 
           { image: 'ubuntu-22.04', arch: 'x64' },
         ]
     runs-on: ${{ matrix.runner.image }}
 
     steps:
       - uses: actions/checkout@v4
-        
+
+      - name: Get .NET Installation Path
+        uses: ./.github/actions/dotnet-path
+        id: dotnet-path
+        with:
+          architecture: ${{ matrix.runner.arch }}
+
       # We need to include many dotnet versions, even including the ones that are EOL, as many tests build and run
       # binaries from all kinds of versions.
       - name: Setup .NET
@@ -136,28 +148,57 @@ jobs:
             6.0.x
             8.0.x
             9.0.x
+        env:
+          DOTNET_INSTALL_DIR: ${{steps.dotnet-path.outputs.install-path}}
 
       - name: Get Installed .NET Information
         shell: pwsh
-        run: 'dotnet --info'
+        run: '& "${{ steps.dotnet-path.outputs.exe-path }}" --info'
+
 
       # We need wine on linux as many tests build and run (semi-)native PE files.
       - name: Setup Wine
         if: ${{runner.os == 'Linux'}}
         uses: ./.github/actions/setup-wine-ubuntu
 
-      # Download artifacts built in previous build job.
+      - name: Get Installed Wine Information
+        if: ${{runner.os == 'Linux'}}
+        run: wine --version
+
+
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
           path: artifacts/
+          if-no-files-found: 'warn'
+          retention-days: 1
+
 
       # Run all csproj tests, outputting test results as TRX files.
-      - name: Run Tests
+      - name: Run Tests (x86)
         shell: pwsh
+        if: "${{ matrix.runner.arch == 'x86' }}"
         run: |
-          dotnet test AsmResolver.sln --no-build --configuration Release --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} --property:CheckEolTargetFramework=false --logger "trx" --logger "console;verbosity=minimal"
+          & "${{ steps.dotnet-path.outputs.exe-path }}" test AsmResolver.sln `
+            --arch x86 `
+            --configuration Release `
+            --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} `
+            --property:CheckEolTargetFramework=false `
+            --logger "trx" `
+            --logger "console;verbosity=minimal"
+
+      - name: Run Tests (x64)
+        shell: pwsh
+        if: "${{ matrix.runner.arch == 'x64' }}"
+        run: |
+          & "${{ steps.dotnet-path.outputs.exe-path }}" test AsmResolver.sln `
+            --configuration Release `
+            --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} `
+            --property:CheckEolTargetFramework=false `
+            --logger "trx" `
+            --logger "console;verbosity=minimal"
+
 
       # Collect all trx files and upload them.
       - name: Upload Test Results
@@ -188,7 +229,7 @@ jobs:
         name: build-artifacts
         path: artifacts/
 
-    - name: Push to NuGet Nightly
+    - name: Push to NuGet Nightly`
       if: ${{github.ref == 'refs/heads/development'}}
       shell: pwsh
       env:
