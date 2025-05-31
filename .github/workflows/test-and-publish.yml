@@ -93,8 +93,8 @@ jobs:
       - name: Build on non-master branch
         if: ${{github.ref != 'refs/heads/master'}}
         run: |
-          dotnet restore AsmResolver.sln --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}};
-          dotnet build AsmResolver.sln --configuration Release --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}};
+          dotnet restore AsmResolver.sln --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} --property:CheckEolTargetFramework=false;
+          dotnet build AsmResolver.sln --configuration Release --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} --property:CheckEolTargetFramework=false;
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
@@ -106,7 +106,6 @@ jobs:
   # Multiplexed test job running all tests on different architectures.
   test:
     name: Test
-    runs-on: ubuntu-22.04
     needs: [get-version, build]
     timeout-minutes: 20
     strategy:
@@ -117,6 +116,7 @@ jobs:
           { image: 'windows-2022', arch: 'x86' },
           { image: 'ubuntu-22.04', arch: 'x64' },
         ]
+    runs-on: ${{ matrix.runner.image }}
 
     steps:
       - uses: actions/checkout@v4
@@ -124,8 +124,9 @@ jobs:
       # We need to include many dotnet versions, even including the ones that are EOL, as many tests build and run
       # binaries from all kinds of versions.
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: dlemstra/setup-dotnet@add-architecture-option
         with:
+          dotnet-architecture: ${{ matrix.runner.arch }}
           dotnet-version: |
             2.0.x
             2.1.x
@@ -156,7 +157,7 @@ jobs:
       - name: Run Tests
         shell: pwsh
         run: |
-          dotnet test AsmResolver.sln --no-build --configuration Release --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} --logger "trx" --logger "console;verbosity=minimal"
+          dotnet test AsmResolver.sln --no-build --configuration Release --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} --property:CheckEolTargetFramework=false --logger "trx" --logger "console;verbosity=minimal"
 
       # Collect all trx files and upload them.
       - name: Upload Test Results
