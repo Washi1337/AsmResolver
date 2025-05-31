@@ -265,5 +265,29 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             Assert.Equal(IndexSize.Long, tablesStream.GuidIndexSize);
             Assert.Equal(IndexSize.Long, tablesStream.BlobIndexSize);
         }
+
+        [Fact]
+        public void UseCaseInsensitiveCompareForJTDStreamNameInEnCMetadata()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_LowercaseJTDStream, TestReaderParameters);
+            var metadata = peImage.DotNetDirectory!.Metadata!;
+
+            var tablesStream = metadata.GetStream<TablesStream>();
+
+            Assert.True(tablesStream.ForceLargeColumns);
+
+            var tableIndices = Enumerable.Range((int)TableIndex.Module, (int)TableIndex.Max).Select(x => (TableIndex)x)
+                .Where(x => x.IsValidTableIndex());
+            Assert.All(tableIndices, index => Assert.Equal(IndexSize.Long, tablesStream.GetTableIndexSize(index)));
+
+            var codedIndices = Enumerable
+                .Range((int)CodedIndex.TypeDefOrRef, CodedIndex.HasCustomDebugInformation - CodedIndex.TypeDefOrRef + 1)
+                .Select(x => (CodedIndex)x);
+            Assert.All(codedIndices, index => Assert.Equal(IndexSize.Long, tablesStream.GetIndexEncoder(index).IndexSize));
+
+            Assert.Equal(IndexSize.Long, tablesStream.StringIndexSize);
+            Assert.Equal(IndexSize.Long, tablesStream.GuidIndexSize);
+            Assert.Equal(IndexSize.Long, tablesStream.BlobIndexSize);
+        }
     }
 }
