@@ -5,40 +5,26 @@ on:
     branches:
       - master
       - development
-      - simple
-      - simple-test2
-    paths-ignore:
-      - '.github/workflows/docs.yml'
-      - 'docs/**'
+      - 'cicd/**'
   pull_request:
     branches:
       - master
       - development
-    paths-ignore:
-      - '.github/workflows/docs.yml'
-      - 'docs/*'
-  workflow_dispatch: 
+      - 'cicd/**'
 
 concurrency:
   group: ${{github.workflow}}-${{github.event.pull_request.number || github.ref}}
   cancel-in-progress: true
 
 env:
-  # Right now we can't run experimental tests that can fail, since it will affect the PR
-  # By default we only run it on master/development branches
-  # Unless the variable will be true
-  EXPERIMENTAL: false
-
-  # You are interested in changing these values
-  BUILD_CONFIGURATIONS:                 "['Release']"
-  DOTNET_TARGET_FRAMEWORKS:             "['netcoreapp3.1', 'net5.0', 'net6.0', 'net7.0', 'net8.0']"
-  DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64: "['net6.0', 'net7.0', 'net8.0']"
-  FRAMEWORK_TARGET_FRAMEWORKS:          "['net35', 'net48']"
+  # Disable the .NET logo in the console output.
+  DOTNET_NOLOGO: true
+  # Disable the .NET first time experience to skip caching NuGet packages and speed up the build.
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  # Disable sending .NET CLI telemetry to Microsoft.
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
-
-  # This technique allows us to run `test-results-publish.yml` with the owner's secrets
-  # without comprimizing the security
   upload-event-file:
     name: Upload Event File
     runs-on: ubuntu-22.04
@@ -50,44 +36,79 @@ jobs:
           path: ${{ github.event_path }}
           retention-days: 1
 
-  # https://stackoverflow.com/a/77549656
-  variables:
-    name: Variable Accessibility Workaround for Jobs
+  # Construct a version suffix including the branch name, build number and commit hash (e.g., "development.58+abcdef12").
+  get-version:
+    name: Calculating Version Suffix
     runs-on: ubuntu-22.04
     outputs:
-      EXPERIMENTAL: ${{ env.EXPERIMENTAL == 'true' || (github.event == 'push' && github.ref == 'refs/heads/master' || github.ref == 'refs/heads/development') }}
-      BUILD_CONFIGURATIONS: ${{env.BUILD_CONFIGURATIONS}}
-      DOTNET_TARGET_FRAMEWORKS: ${{env.DOTNET_TARGET_FRAMEWORKS}}
-      DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64: ${{env.DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64}}
-      FRAMEWORK_TARGET_FRAMEWORKS: ${{env.FRAMEWORK_TARGET_FRAMEWORKS}}
+      version_suffix: ${{ steps.set-vars.outputs.version_suffix }}
+
     steps:
-      - name: Compute outputs
+      - uses: actions/checkout@v4
+
+      - id: git-vars
+        name: Get git branch information
+        shell: bash
         run: |
-          echo "EXPERIMENTAL=${{env.EXPERIMENTAL}}" >> $GITHUB_OUTPUT
-          echo "BUILD_CONFIGURATIONS=${{env.BUILD_CONFIGURATIONS}}" >> $GITHUB_OUTPUT
-          echo "DOTNET_TARGET_FRAMEWORKS=${{env.DOTNET_TARGET_FRAMEWORKS}}" >> $GITHUB_OUTPUT
-          echo "DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64=${{env.DOTNET_TARGET_FRAMEWORKS_MACOS_ARM64}}" >> $GITHUB_OUTPUT
-          echo "FRAMEWORK_TARGET_FRAMEWORKS=${{env.FRAMEWORK_TARGET_FRAMEWORKS}}" >> $GITHUB_OUTPUT
+          echo "##[set-output name=git_branch;]$(echo $GITHUB_REF)"
+          echo "::set-output name=git_hash::$(git rev-parse --short HEAD)"
 
+      - id: set-vars
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let runNumber = "${{ github.run_number }}"; 
+            let gitHash = "${{ steps.git-vars.outputs.git_hash }}";
+            let rawGitRef = "${{ steps.git-vars.outputs.git_branch }}";
+            console.log("rawGitRef: " + rawGitRef);
+            let gitRef = rawGitRef.replace(/^refs\/heads\//, "").replace(/^refs\/heads\//, "").replace(/[_//!@#$%&]/g, "-");
+            if(gitRef.indexOf("refs/pull/") === 0) {
+              gitRef = "pr-" + gitRef.substring(10, gitRef.lastIndexOf("/"));
+            }
+            var versSuffix = `${gitRef}.${runNumber}+${gitHash}`;
+            console.log(versSuffix);
+            core.setOutput("version_suffix", versSuffix);
+
+  # Main build job for compiling all csprojs.
   build:
-    name: Perform Build
-    needs: [variables]
-    strategy:
-      matrix:
-        runner: [ 
-          { image: 'windows-2022', arch: 'x64' },
-          { image: 'windows-2022', arch: 'x86' },
-        ]
-        build_configuration: ${{fromJson(needs.variables.outputs.BUILD_CONFIGURATIONS)}}
-    uses: ./.github/workflows/reusable-build.yml
-    with:
-      image: ${{matrix.runner.image}}
-      architecture: ${{matrix.runner.arch}}
-      build_configuration: ${{matrix.build_configuration}}
+    name: Build
+    runs-on: windows-2022
+    needs: [get-version]
+    timeout-minutes: 10
 
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+
+      # Master branch is just a normal build.
+      - name: Build on master branch
+        if: ${{github.ref == 'refs/heads/master'}}
+        run: |
+          dotnet restore AsmResolver.sln;
+          dotnet build AsmResolver.sln --configuration Release
+      
+      # For non-master branches (e.g., development or feature branches) we apply a fixup on the version suffix.
+      - name: Build on non-master branch
+        if: ${{github.ref != 'refs/heads/master'}}
+        run: |
+          dotnet restore AsmResolver.sln --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}};
+          dotnet build AsmResolver.sln --configuration Release --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}};
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: artifacts/
+          retention-days: 7
+
+  # Multiplexed test job running all tests on different architectures.
   test:
-    name: Execute Tests
-    needs: [variables, build]
+    name: Test
+    runs-on: ubuntu-22.04
+    needs: [get-version, build]
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -95,30 +116,88 @@ jobs:
           { image: 'windows-2022', arch: 'x64' },
           { image: 'windows-2022', arch: 'x86' },
           { image: 'ubuntu-22.04', arch: 'x64' },
-          { image: 'macos-13', arch: 'x64' },
-          { image: 'macos-14', arch: 'arm64' },
-          { image: 'macos-14', arch: 'x64' },
         ]
-        build_configuration: ${{fromJson(needs.variables.outputs.BUILD_CONFIGURATIONS)}}
-    uses: ./.github/workflows/reusable-test.yml
-    with:
-      image: ${{matrix.runner.image}}
-      architecture: ${{matrix.runner.arch}}
-      dotnet_target_frameworks: ${{needs.variables.outputs.DOTNET_TARGET_FRAMEWORKS}}
-      build_configuration: ${{matrix.build_configuration}}
-      # TODO: Fully support tests on non-x64 and MacOS.
-      is_experimental: ${{matrix.runner.arch != 'x64' || (matrix.runner.image != 'windows-2022' && matrix.runner.image != 'ubuntu-22.04')}}
-      skip_experimental: ${{ needs.variables.outputs.EXPERIMENTAL != 'true' }}
 
+    steps:
+      - uses: actions/checkout@v4
+        
+      # We need to include many dotnet versions, even including the ones that are EOL, as many tests build and run
+      # binaries from all kinds of versions.
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            2.0.x
+            2.1.x
+            2.2.x
+            3.1.x
+            5.0.x
+            6.0.x
+            8.0.x
+            9.0.x
+
+      - name: Get Installed .NET Information
+        shell: pwsh
+        run: 'dotnet --info'
+
+      # We need wine on linux as many tests build and run (semi-)native PE files.
+      - name: Setup Wine
+        if: ${{runner.os == 'Linux'}}
+        uses: ./.github/actions/setup-wine-ubuntu
+
+      # Download artifacts built in previous build job.
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: artifacts/
+
+      # Run all csproj tests, outputting test results as TRX files.
+      - name: Run Tests
+        shell: pwsh
+        run: |
+          dotnet test AsmResolver.sln --no-build --configuration Release --property:VersionSuffix=${{needs.get-version.outputs.version_suffix}} --logger "trx" --logger "console;verbosity=minimal"
+
+      # Collect all trx files and upload them.
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{matrix.runner.image}}-${{matrix.runner.arch}}
+          path: '**/*.trx'
+          if-no-files-found: 'warn'
+          retention-days: 1
+
+  # Job to publish to nuget feeds.
   publish:
     name: Publish NuGet Packages
-    needs: [variables, test]
-    uses: ./.github/workflows/reusable-publish.yml
-    with:
-      image: 'windows-2022'
-      architecture: 'x64'
-      build_configuration: 'Release'
-    secrets:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-      NIGHTLY_NUGET_API_KEY: ${{ secrets.NIGHTLY_NUGET_API_KEY }}
-      NIGHTLY_NUGET_SOURCE: ${{ secrets.NIGHTLY_NUGET_SOURCE }}
+    runs-on: ubuntu-22.04
+    needs: [test]
+    if: ${{github.ref == 'refs/heads/development' || github.ref == 'refs/heads/master'}}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+        path: artifacts/
+
+    - name: Push to NuGet Nightly
+      if: ${{github.ref == 'refs/heads/development'}}
+      shell: pwsh
+      env:
+        NIGHTLY_NUGET_API_KEY: ${{secrets.NIGHTLY_NUGET_API_KEY}}
+        NIGHTLY_NUGET_SOURCE: ${{secrets.NIGHTLY_NUGET_SOURCE}}
+      run: dotnet nuget push "./artifacts/**/*.nupkg" -k "$env:NUGET_API_KEY" -s "$env:NIGHTLY_NUGET_SOURCE" --skip-duplicate
+
+    - name: Push to NuGet
+      if: ${{github.ref == 'refs/heads/master'}}
+      shell: pwsh
+      env:
+        NUGET_API_KEY: ${{secrets.NUGET_API_KEY}}
+      run: dotnet nuget push "./artifacts/**/*.nupkg" -k "$env:NUGET_API_KEY" -s https://api.nuget.org/v3/index.json --skip-duplicate
