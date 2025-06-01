@@ -29,6 +29,7 @@
 
   before_build:
     - dotnet restore
+    - msbuild /restore
 
   build:
     verbosity: minimal
@@ -74,6 +75,7 @@
 
   before_build:
     - dotnet restore
+    - msbuild /restore
 
   build:
     verbosity: minimal
