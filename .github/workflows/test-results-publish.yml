@@ -1,10 +1,9 @@
-
 name: Publish Test Results
 
 on:
   workflow_run:
     workflows:
-    - Test and Publish NuGet
+    - Test and Publish
     types: [completed]
 permissions: {}
 

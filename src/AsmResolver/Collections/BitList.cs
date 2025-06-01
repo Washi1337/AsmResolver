@@ -40,7 +40,7 @@ namespace AsmResolver.Collections
         /// <inheritdoc />
         public bool IsReadOnly => false;
 
-        /// <inheritdoc cref="IList{T}.Item" />
+        /// <inheritdoc cref="IList{T}.this[int]" />
         public bool this[int index]
         {
             get

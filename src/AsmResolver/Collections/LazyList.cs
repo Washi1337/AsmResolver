@@ -31,7 +31,7 @@ namespace AsmResolver.Collections
             _items = new List<TItem>(capacity);
         }
 
-        /// <inheritdoc cref="IList{T}.Item" />
+        /// <inheritdoc cref="IList{T}.this[int]" />
         public TItem this[int index]
         {
             get
