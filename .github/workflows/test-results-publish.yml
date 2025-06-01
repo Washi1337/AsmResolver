@@ -1,0 +1,36 @@
+name: Publish Test Results
+
+on:
+  workflow_run:
+    workflows:
+    - Test and Publish
+    types: [completed]
+permissions: {}
+
+jobs:
+  publish-test-results:
+    if: github.event.workflow_run.conclusion != 'skipped' && github.event.workflow_run.conclusion != 'cancelled'
+    runs-on: ubuntu-22.04
+    name: Publish Test Results
+
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: write
+      issues: read
+      actions: read
+      statuses: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download and Publish Test Results
+        uses: ./.github/actions/test-results-download-publish
+        with:
+          workflow_run: ${{toJSON(github.event.workflow_run)}}
+
+      - name: Download and Publish Test Results (Experimental)
+        uses: ./.github/actions/test-results-download-publish
+        with:
+          workflow_run: ${{toJSON(github.event.workflow_run)}}
+          experimental: true

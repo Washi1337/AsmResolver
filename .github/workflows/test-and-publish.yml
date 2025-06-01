@@ -1,4 +1,4 @@
-name: Test and Publish NuGet
+name: Test and Publish
 
 on:
   push:
@@ -86,8 +86,10 @@ jobs:
       - name: Build on master branch
         if: ${{github.ref == 'refs/heads/master'}}
         run: |
-          dotnet restore AsmResolver.sln;
-          dotnet build AsmResolver.sln --configuration Release
+          dotnet restore AsmResolver.sln
+          dotnet build AsmResolver.sln `
+            --configuration Release `
+            --property:CheckEolTargetFramework=false
 
       # For non-master branches (e.g., development or feature branches) we apply a fixup on the version suffix.
       - name: Build on non-master branch
@@ -119,8 +121,14 @@ jobs:
       matrix:
         runner: [ 
           { image: 'windows-2022', arch: 'x64' },
-          { image: 'windows-2022', arch: 'x86' }, 
           { image: 'ubuntu-22.04', arch: 'x64' },
+
+          # TODO: We disable x86 tests for now due to it being too unstable. 
+          # In particular, x86 tests often fail on spawning the xunit's test host process (cannot load hostpolicy.dll, 
+          # as if dotnet x86 is not installed/loaded properly). This should be addressed in the future, as dynamic 
+          # features that load metadata from live processes (as happens in e.g., AsmResolver.DotNet.Dynamic) should be 
+          # properly covered by CI across architectures as well.
+          # { image: 'windows-2022', arch: 'x86' },
         ]
     runs-on: ${{ matrix.runner.image }}
 
@@ -171,8 +179,6 @@ jobs:
         with:
           name: build-artifacts
           path: artifacts/
-          if-no-files-found: 'warn'
-          retention-days: 1
 
 
       # Run all csproj tests, outputting test results as TRX files.
@@ -209,6 +215,7 @@ jobs:
           path: '**/*.trx'
           if-no-files-found: 'warn'
           retention-days: 1
+
 
   # Job to publish to nuget feeds.
   publish:
