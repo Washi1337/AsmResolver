@@ -242,7 +242,7 @@ jobs:
       env:
         NIGHTLY_NUGET_API_KEY: ${{secrets.NIGHTLY_NUGET_API_KEY}}
         NIGHTLY_NUGET_SOURCE: ${{secrets.NIGHTLY_NUGET_SOURCE}}
-      run: dotnet nuget push "./artifacts/**/*.nupkg" -k "$env:NUGET_API_KEY" -s "$env:NIGHTLY_NUGET_SOURCE" --skip-duplicate
+      run: dotnet nuget push "./artifacts/**/*.nupkg" -k "$env:NIGHTLY_NUGET_API_KEY" -s "$env:NIGHTLY_NUGET_SOURCE" --skip-duplicate
 
     - name: Push to NuGet
       if: ${{github.ref == 'refs/heads/master'}}
