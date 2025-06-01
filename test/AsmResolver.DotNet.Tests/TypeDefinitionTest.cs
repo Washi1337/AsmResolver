@@ -725,6 +725,15 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void SystemEnumShouldNotBeValueType()
+        {
+            var module = ModuleDefinition.FromFile(typeof(Enum).Assembly.Location, TestReaderParameters);
+            var type = module.LookupMember<TypeDefinition>(typeof(Enum).MetadataToken);
+
+            Assert.False(type.IsValueType);
+        }
+
+        [Fact]
         public void AddTypeToModuleShouldSetOwner()
         {
             var module = new ModuleDefinition("Dummy");
