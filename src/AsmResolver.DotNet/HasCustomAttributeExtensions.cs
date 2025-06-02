@@ -9,12 +9,12 @@ namespace AsmResolver.DotNet
     public static class HasCustomAttributeExtensions
     {
         /// <summary>
-        /// Determines whether a metadata member is assigned an attributes that match a particular namespace and name.
+        /// Determines whether a metadata member is assigned an attribute that match a particular namespace and name.
         /// </summary>
         /// <param name="self">The metadata member.</param>
         /// <param name="ns">The namespace of the attribute type.</param>
         /// <param name="name">The name of the attribute type.</param>
-        /// <returns>The matching attributes.</returns>
+        /// <returns><c>true</c> if the member has a matching attribute, otherwise <c>false</c>.</returns>
         public static bool HasCustomAttribute(this IHasCustomAttribute self, string? ns, string? name)
         {
             // Note: we are not using the FindCustomAttributes to avoid allocations.
@@ -34,12 +34,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Determines whether a metadata member is assigned an attributes that match a particular namespace and name.
+        /// Determines whether a metadata member is assigned an attribute that match a particular namespace and name.
         /// </summary>
         /// <param name="self">The metadata member.</param>
         /// <param name="ns">The namespace of the attribute type.</param>
         /// <param name="name">The name of the attribute type.</param>
-        /// <returns>The matching attributes.</returns>
+        /// <returns><c>true</c> if the member has a matching attribute, otherwise <c>false</c>.</returns>
         public static bool HasCustomAttribute(this IHasCustomAttribute self, Utf8String? ns, Utf8String? name)
         {
             // Note: we are not using the FindCustomAttributes to avoid allocations.
