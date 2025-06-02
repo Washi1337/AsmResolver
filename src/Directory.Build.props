@@ -9,6 +9,7 @@
         <IsTrimmable>true</IsTrimmable>
         <NoWarn>1701;1702;NU5105</NoWarn>
         <ArtifactsPath>$(MSBuildThisFileDirectory)..\artifacts\src</ArtifactsPath>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>

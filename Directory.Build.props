@@ -1,8 +1,9 @@
 <Project>
 
     <PropertyGroup>
-        <Copyright>Copyright © Washi 2016-2024</Copyright>
+        <Copyright>Copyright © Washi 2016-2025</Copyright>
         <PackageLicense>https://github.com/Washi1337/AsmResolver/LICENSE.md</PackageLicense>
+        <RepositoryUrl>https://github.com/Washi1337/AsmResolver</RepositoryUrl>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>

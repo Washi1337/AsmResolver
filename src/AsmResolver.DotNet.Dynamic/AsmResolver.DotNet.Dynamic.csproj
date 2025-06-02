@@ -7,14 +7,6 @@
     <IsTrimmable>false</IsTrimmable>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DocumentationFile>bin\Debug\AsmResolver.DotNet.Dynamic.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DocumentationFile>bin\Release\AsmResolver.DotNet.Dynamic.xml</DocumentationFile>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
   </ItemGroup>
