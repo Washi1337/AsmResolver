@@ -243,7 +243,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="importer">The reference importer to us.</param>
         /// <returns>The imported signature.</returns>
-        public MemberSignature ImportWith(ReferenceImporter importer) => importer.ImportMethodSignature(this);
+        public MethodSignature ImportWith(ReferenceImporter importer) => importer.ImportMethodSignature(this);
 
         /// <inheritdoc />
         protected override CallingConventionSignature ImportWithInternal(ReferenceImporter importer) => ImportWith(importer);
