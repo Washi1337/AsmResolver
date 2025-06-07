@@ -157,8 +157,12 @@ namespace AsmResolver.DotNet.Tests.Signatures
         public void ParseGenericFromMethodSpecification()
         {
             var genericParameter = new GenericParameterSignature(GenericParameterType.Method, 0);
-            var method = new MethodDefinition("TestMethod", MethodAttributes.Private,
-                MethodSignature.CreateStatic(genericParameter));
+            var method = new MethodDefinition(
+                "TestMethod",
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(genericParameter)
+            );
+
             var genericInstance = new GenericInstanceMethodSignature();
             genericInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(int)));
             var methodSpecification = new MethodSpecification(method, genericInstance);
@@ -224,8 +228,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var type = new TypeDefinition("", "Test type", TypeAttributes.Public);
             var notGenericSignature = new TypeDefOrRefSignature(type);
 
-            var method = new MethodDefinition("TestMethod", MethodAttributes.Private,
-                MethodSignature.CreateStatic(notGenericSignature));
+            var method = new MethodDefinition(
+                "TestMethod",
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(notGenericSignature)
+            );
             var methodSpecification = new MethodSpecification(method, null);
 
             var context = GenericContext.FromMethod(methodSpecification);
@@ -310,8 +317,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             var genericParameter = new GenericParameterSignature(GenericParameterType.Type, 0);
 
-            var method = new MethodDefinition("Method", MethodAttributes.Private,
-                MethodSignature.CreateStatic(genericParameter));
+            var method = new MethodDefinition(
+                "Method",
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(genericParameter)
+            );
 
             var member = new MemberReference(typeSpecification, method.Name, method.Signature);
 
@@ -330,8 +340,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var type = new TypeDefinition("", "Test type", TypeAttributes.Public);
             var notGenericSignature = new TypeDefOrRefSignature(type);
 
-            var method = new MethodDefinition("Method", MethodAttributes.Private,
-                MethodSignature.CreateStatic(notGenericSignature));
+            var method = new MethodDefinition(
+                "Method",
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(notGenericSignature)
+            );
 
             var member = new MemberReference(type, method.Name, method.Signature);
 

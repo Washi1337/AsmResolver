@@ -32,10 +32,13 @@ namespace AsmResolver.DotNet.Cloning
             if (method.Signature is null)
                 throw new ArgumentException($"Method {method.SafeToString()} has no signature.");
 
-            var clonedMethod = new MethodDefinition(method.Name, method.Attributes,
-                context.Importer.ImportMethodSignature(method.Signature));
-            clonedMethod.ImplAttributes = method.ImplAttributes;
+            var clonedMethod = new MethodDefinition(
+                method.Name,
+                method.Attributes,
+                context.Importer.ImportMethodSignature(method.Signature)
+            );
 
+            clonedMethod.ImplAttributes = method.ImplAttributes;
             clonedMethod.Parameters.PullUpdatesFromMethodSignature();
 
             context.ClonedMembers[method] = clonedMethod;

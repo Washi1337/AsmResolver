@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
@@ -15,6 +16,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.VTableFixups;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
+using AsmResolver.Shims;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -567,6 +569,65 @@ namespace AsmResolver.DotNet.Tests
                 .Methods.First(m => m.Name == methodName);
 
             Assert.Equal(expectedFullName, method.FullName);
+        }
+
+        [Fact]
+        public void VerifyStaticShouldHaveHasThisUnsetOnConstruction()
+        {
+            var module = new ModuleDefinition("Module");
+            var factory = module.CorLibTypeFactory;
+
+            _ = new MethodDefinition("Static", MethodAttributes.Static, MethodSignature.CreateStatic(factory.Void));
+
+            Assert.ThrowsAny<ArgumentException>(() => new MethodDefinition(
+                "StaticWithHasThis",
+                MethodAttributes.Static,
+                MethodSignature.CreateInstance(factory.Void)
+            ));
+
+            Assert.ThrowsAny<ArgumentException>(() => new MethodDefinition(
+                "InstanceWithNoHasThis",
+                MethodAttributes.Private,
+                MethodSignature.CreateStatic(factory.Void)
+            ));
+        }
+
+        [Fact]
+        public void VerifyStaticShouldHaveHasThisUnsetOnExplicitVerify()
+        {
+            var module = new ModuleDefinition("Module");
+            var factory = module.CorLibTypeFactory;
+
+            var method = new MethodDefinition("Method", MethodAttributes.Static, MethodSignature.CreateStatic(factory.Void));
+            method.VerifyMetadata();
+
+            method.IsStatic = false;
+            method.Signature!.HasThis = false;
+            Assert.ThrowsAny<AggregateException>(() => method.VerifyMetadata());
+
+            method.IsStatic = true;
+            method.Signature!.HasThis = true;
+            Assert.ThrowsAny<AggregateException>(() => method.VerifyMetadata());
+        }
+
+        [Fact]
+        public void VerifyGenericParameterCount()
+        {
+            var module = new ModuleDefinition("Module");
+            var factory = module.CorLibTypeFactory;
+
+            var method = new MethodDefinition("Method", MethodAttributes.Static, MethodSignature.CreateStatic(factory.Void));
+            method.VerifyMetadata();
+
+            method.GenericParameters.Add(new GenericParameter("T1"));
+            method.GenericParameters.Add(new GenericParameter("T2"));
+
+            Assert.ThrowsAny<AggregateException>(() => method.VerifyMetadata());
+
+            method.Signature!.IsGeneric = true;
+            method.Signature!.GenericParameterCount = 2;
+
+            method.VerifyMetadata();
         }
 
         [Fact]
