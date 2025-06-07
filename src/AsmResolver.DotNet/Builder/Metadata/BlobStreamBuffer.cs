@@ -165,6 +165,11 @@ namespace AsmResolver.DotNet.Builder.Metadata
             if (signature is null)
                 return 0u;
 
+            if (signature is SerializedCustomAttributeSignature customAttributeSignature && customAttributeSignature.TryGetUninitialized() is { } blob)
+            {
+                return GetBlobIndex(blob);
+            }
+
             // Serialize blob.
 
             using var rentedWriter = _blobWriterPool.Rent();

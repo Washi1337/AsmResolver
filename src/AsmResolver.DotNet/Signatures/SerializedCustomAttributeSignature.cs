@@ -75,6 +75,12 @@ namespace AsmResolver.DotNet.Signatures
                 _reader.Fork().WriteToOutput(context.Writer);
         }
 
+        internal byte[]? TryGetUninitialized()
+        {
+            if (IsInitialized) return null;
+            return _reader.Fork().ReadToEnd();
+        }
+
         /// <inheritdoc />
         public override bool IsCompatibleWith(ICustomAttributeType constructor, IErrorListener listener)
         {
