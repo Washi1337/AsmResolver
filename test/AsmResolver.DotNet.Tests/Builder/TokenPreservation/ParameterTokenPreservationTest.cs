@@ -59,16 +59,18 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
         private static MethodDefinition CreateDummyMethod(ModuleDefinition module, string name, int parameterCount)
         {
-            var method = new MethodDefinition(name,
+            var method = new MethodDefinition(
+                name,
                 MethodAttributes.Public | MethodAttributes.Static,
-                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void)
+            );
 
-            method.CilMethodBody = new CilMethodBody(method);
+            method.CilMethodBody = new CilMethodBody();
             method.CilMethodBody.Instructions.Add(CilOpCodes.Ret);
 
             for (int i = 0; i < parameterCount; i++)
             {
-                method.Signature.ParameterTypes.Add(module.CorLibTypeFactory.Object);
+                method.Signature!.ParameterTypes.Add(module.CorLibTypeFactory.Object);
                 method.ParameterDefinitions.Add(new ParameterDefinition((ushort) (i + 1), $"arg_{i}", 0));
             }
 

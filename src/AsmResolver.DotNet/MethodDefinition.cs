@@ -50,7 +50,13 @@ namespace AsmResolver.DotNet
             _name = new LazyVariable<MethodDefinition, Utf8String?>(x => GetName());
             _declaringType = new LazyVariable<MethodDefinition, TypeDefinition?>(x => GetDeclaringType());
             _signature = new LazyVariable<MethodDefinition, MethodSignature?>(x => x.GetSignature());
-            _methodBody = new LazyVariable<MethodDefinition, MethodBody?>(x => x.GetBody());
+            _methodBody = new LazyVariable<MethodDefinition, MethodBody?>(x =>
+            {
+                var body = x.GetBody();
+                if (body is not null)
+                    body.Owner = this;
+                return body;
+            });
             _implementationMap = new LazyVariable<MethodDefinition, ImplementationMap?>(x => x.GetImplementationMap());
             _semantics = new LazyVariable<MethodDefinition, MethodSemantics?>(x => x.GetSemantics());
             _exportInfo = new LazyVariable<MethodDefinition, UnmanagedExportInfo?>(x => x.GetExportInfo());
@@ -583,8 +589,29 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public MethodBody? MethodBody
         {
-            get => _methodBody.GetValue(this);
-            set => _methodBody.SetValue(value);
+            get
+            {
+                lock (_methodBody)
+                {
+                    return _methodBody.GetValue(this);
+                }
+            }
+            set
+            {
+                lock (_methodBody)
+                {
+                    if (value is { Owner: { } originalOwner })
+                        throw new ArgumentException($"Method body is already assigned to method {originalOwner.SafeToString()}.");
+
+                    if (_methodBody.IsInitialized && _methodBody.GetValue(this) is { } originalBody)
+                        originalBody.Owner = null;
+
+                    _methodBody.SetValue(value);
+
+                    if (value is not null)
+                        value.Owner = this;
+                }
+            }
         }
 
         /// <summary>
@@ -749,7 +776,7 @@ namespace AsmResolver.DotNet
                 | MethodAttributes.RuntimeSpecialName,
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
 
-            cctor.CilMethodBody = new CilMethodBody(cctor);
+            cctor.CilMethodBody = new CilMethodBody();
             cctor.CilMethodBody.Instructions.Add(CilOpCodes.Ret);
 
             return cctor;
@@ -776,7 +803,7 @@ namespace AsmResolver.DotNet
             for (int i = 0; i < parameterTypes.Length; i++)
                 ctor.ParameterDefinitions.Add(new ParameterDefinition(null));
 
-            ctor.CilMethodBody = new CilMethodBody(ctor);
+            ctor.CilMethodBody = new CilMethodBody();
             ctor.CilMethodBody.Instructions.Add(CilOpCodes.Ret);
 
             return ctor;

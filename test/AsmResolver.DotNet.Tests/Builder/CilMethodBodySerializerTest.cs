@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Tests.Builder
                 MethodAttributes.Public | MethodAttributes.Static,
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
 
-            main.CilMethodBody = new CilMethodBody(main)
+            main.CilMethodBody = new CilMethodBody()
             {
                 ComputeMaxStackOnBuild = computeMaxStack,
                 MaxStack = maxStack,
@@ -46,9 +46,9 @@ namespace AsmResolver.DotNet.Tests.Builder
             });
 
             var newImage = builder.CreateImage(module).ConstructedImage;
-            var newModule = ModuleDefinition.FromImage(newImage, TestReaderParameters);
+            var newModule = ModuleDefinition.FromImage(newImage!, TestReaderParameters);
 
-            Assert.Equal(expectedMaxStack, newModule.ManagedEntryPointMethod.CilMethodBody.MaxStack);
+            Assert.Equal(expectedMaxStack, newModule.ManagedEntryPointMethod!.CilMethodBody!.MaxStack);
         }
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Serialized;
@@ -127,7 +126,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
                 MethodSignature.CreateStatic(isVoid ? module.CorLibTypeFactory.Void : module.CorLibTypeFactory.Int32));
 
             module.GetOrCreateModuleType().Methods.Add(method);
-            return method.CilMethodBody = new CilMethodBody(method);
+            return method.CilMethodBody = new CilMethodBody();
         }
 
         [Fact]
@@ -623,7 +622,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             module.GetOrCreateModuleType().Methods.Add(method);
 
             // Give it a method body.
-            var body = new CilMethodBody(method);
+            var body = new CilMethodBody();
             method.MethodBody = body;
 
             // Add some random local variables.
