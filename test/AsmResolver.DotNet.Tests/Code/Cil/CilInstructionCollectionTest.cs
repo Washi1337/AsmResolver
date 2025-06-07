@@ -431,5 +431,17 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             instructions.CalculateOffsets();
             Assert.Equal(offsets, instructions.Select(i => i.Offset));
         }
+
+        [Fact]
+        public void InsertInlineSigInstructionShouldOnlyAcceptWrappedMethodSignatures()
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+
+            instructions.Add(CilOpCodes.Calli, MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void).MakeStandAloneSignature());
+
+            Assert.ThrowsAny<InvalidCilInstructionException>(() =>
+                instructions.Add(CilOpCodes.Calli, new DataBlobSignature(new byte[] { 1, 2, 3 }).MakeStandAloneSignature())
+            );
+        }
     }
 }
