@@ -50,11 +50,11 @@ namespace AsmResolver.DotNet
             _name = new LazyVariable<MethodDefinition, Utf8String?>(x => GetName());
             _declaringType = new LazyVariable<MethodDefinition, TypeDefinition?>(x => GetDeclaringType());
             _signature = new LazyVariable<MethodDefinition, MethodSignature?>(x => x.GetSignature());
-            _methodBody = new LazyVariable<MethodDefinition, MethodBody?>(x =>
+            _methodBody = new LazyVariable<MethodDefinition, MethodBody?>(static x =>
             {
                 var body = x.GetBody();
                 if (body is not null)
-                    body.Owner = this;
+                    body.Owner = x;
                 return body;
             });
             _implementationMap = new LazyVariable<MethodDefinition, ImplementationMap?>(x => x.GetImplementationMap());
