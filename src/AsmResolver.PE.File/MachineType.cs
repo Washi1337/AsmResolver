@@ -210,6 +210,15 @@ namespace AsmResolver.PE.File
         Arm64DotNetNetBsd = Arm64 ^ DotNetNetBsdOSOverride,
 
         /// <summary>
+        /// Indicates the ARM 64-bit little endian architecturee, but specifically targets SunOS operating system derivatives.
+        /// </summary>
+        /// <remarks>
+        /// This value is only used by .NET PE images.
+        /// Reference: https://github.com/dotnet/runtime/issues/36364
+        /// </remarks>
+        Arm64DotNetSun = Amd64 ^ DotNetSunOSOverride,
+
+        /// <summary>
         /// Indicates EFI byte code.
         /// </summary>
         Ebc = 0x0EBC,

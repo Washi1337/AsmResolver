@@ -34,6 +34,18 @@ namespace AsmResolver.Tests.Runners
             Assert.Equal(expectedOutput.Replace("\r\n", "\n"), actualOutput);
         }
 
+        public void RebuildAndRun(PEFile peFile, string fileName, string[] expectedOutputs, int timeout = 30000,
+            [CallerFilePath] string testClass = "File",
+            [CallerMemberName] string testMethod = "Test")
+        {
+            string fullPath = Rebuild(peFile, fileName, testClass, testMethod);
+            string actualOutput = RunAndCaptureOutput(fullPath, null, timeout);
+            Assert.Contains(
+                expectedOutputs,
+                s => s.Replace("\r\n", "\n") == actualOutput
+            );
+        }
+
         public string GetTestDirectory(string testClass, string testName)
         {
             string path = Path.Combine(BasePath, testClass, testName);

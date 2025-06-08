@@ -242,7 +242,7 @@ public class UnmanagedPEFileBuilder : PEFileBuilder<UnmanagedPEFileBuilder.Build
 
         // New CLR bootstrapper
         if (context.ClrBootstrapper.HasValue)
-            contents.Add(context.ClrBootstrapper.Value.Segment);
+            contents.Add(context.ClrBootstrapper.Value.Segment, context.Platform.ThunkStubAlignment);
 
         // Import trampolines.
         if (TrampolineImports)

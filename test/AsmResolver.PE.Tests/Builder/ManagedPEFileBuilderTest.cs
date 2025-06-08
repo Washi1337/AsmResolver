@@ -1,13 +1,13 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
+using AsmResolver.Tests;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -22,11 +22,25 @@ namespace AsmResolver.PE.Tests.Builder
             _fixture = fixture;
         }
 
-        [Fact]
-        public void HelloWorldRebuild32BitNoChange()
+        [SkippableTheory]
+        [InlineData(MachineType.I386)]
+        [InlineData(MachineType.Amd64)]
+        [InlineData(MachineType.Arm64)]
+        public void HelloWorldRebuildNoChange(MachineType machineType)
         {
+            XunitHelpers.SkipIfNotMachine(machineType);
+
             // Read image
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var image = PEImage.FromBytes(
+                machineType switch
+                {
+                    MachineType.I386 => Properties.Resources.HelloWorld,
+                    MachineType.Amd64 => Properties.Resources.HelloWorld_X64,
+                    MachineType.Arm64 => Properties.Resources.HelloWorld_Arm64,
+                    _ => throw new ArgumentOutOfRangeException(nameof(machineType))
+                },
+                TestReaderParameters
+            );
 
             // Rebuild
             var builder = new ManagedPEFileBuilder();
@@ -38,25 +52,11 @@ namespace AsmResolver.PE.Tests.Builder
                 .RebuildAndRun(peFile, "HelloWorld", "Hello World!\n");
         }
 
-        [Fact]
-        public void HelloWorldRebuild64BitNoChange()
+        [SkippableFact]
+        public void HelloWorldX86ToX64()
         {
-            // Read image
-            var image = PEImage.FromBytes(Properties.Resources.HelloWorld_X64, TestReaderParameters);
+            XunitHelpers.SkipIfNotX64();
 
-            // Rebuild
-            var builder = new ManagedPEFileBuilder();
-            var peFile = builder.CreateFile(image);
-
-            // Verify
-            _fixture
-                .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(peFile, "HelloWorld", "Hello World!\n");
-        }
-
-        [Fact]
-        public void HelloWorld32BitTo64Bit()
-        {
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
@@ -74,9 +74,11 @@ namespace AsmResolver.PE.Tests.Builder
                 .RebuildAndRun(peFile, "HelloWorld", "Hello World!\n");
         }
 
-        [Fact]
-        public void HelloWorld64BitTo32Bit()
+        [SkippableFact]
+        public void HelloWorldX64ToX86()
         {
+            XunitHelpers.SkipIfNotX86OrX64();
+
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld_X64, TestReaderParameters);
 
