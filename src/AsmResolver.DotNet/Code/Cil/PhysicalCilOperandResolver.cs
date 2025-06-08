@@ -12,16 +12,19 @@ namespace AsmResolver.DotNet.Code.Cil
     public class PhysicalCilOperandResolver : ICilOperandResolver
     {
         private readonly ModuleDefinition _contextModule;
+        private readonly MethodDefinition _method;
         private readonly CilMethodBody _methodBody;
 
         /// <summary>
         /// Creates a new instance of the <see cref="PhysicalCilOperandResolver"/> class.
         /// </summary>
         /// <param name="contextModule">The context module.</param>
+        /// <param name="method">The method that will own the method body.</param>
         /// <param name="methodBody">The method body that references the operands.</param>
-        public PhysicalCilOperandResolver(ModuleDefinition contextModule, CilMethodBody methodBody)
+        public PhysicalCilOperandResolver(ModuleDefinition contextModule, MethodDefinition method, CilMethodBody methodBody)
         {
             _contextModule = contextModule ?? throw new ArgumentNullException(nameof(contextModule));
+            _method = method;
             _methodBody = methodBody ?? throw new ArgumentNullException(nameof(methodBody));
         }
 
@@ -49,7 +52,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <inheritdoc />
         public virtual object? ResolveParameter(int index)
         {
-            var parameters = _methodBody.Owner.Parameters;
+            var parameters = _method.Parameters;
             return parameters.ContainsSignatureIndex(index) ? parameters.GetBySignatureIndex(index) : null;
         }
     }

@@ -72,7 +72,7 @@ namespace AsmResolver.DotNet.Cloning
             CloneParameterDefinitionsInMethod(context, method, clonedMethod);
 
             if (method.CilMethodBody is not null)
-                clonedMethod.CilMethodBody = CloneCilMethodBody(context, method);
+                CloneCilMethodBody(context, method);
 
             CloneCustomAttributes(context, method, clonedMethod);
             CloneGenericParameters(context, method, clonedMethod);
@@ -87,23 +87,23 @@ namespace AsmResolver.DotNet.Cloning
                 clonedMethod.ParameterDefinitions.Add(CloneParameterDefinition(context, parameterDef));
         }
 
-        private static CilMethodBody CloneCilMethodBody(MemberCloneContext context, MethodDefinition method)
+        private static void CloneCilMethodBody(MemberCloneContext context, MethodDefinition method)
         {
             var body = method.CilMethodBody!;
 
             var clonedMethod = (MethodDefinition) context.ClonedMembers[method];
 
             // Clone method body header.
-            var clonedBody = new CilMethodBody(clonedMethod);
-            clonedBody.InitializeLocals = body.InitializeLocals;
-            clonedBody.MaxStack = body.MaxStack;
+            var clonedBody = clonedMethod.CilMethodBody = new CilMethodBody
+            {
+                InitializeLocals = body.InitializeLocals,
+                MaxStack = body.MaxStack
+            };
 
             // Clone contents.
             CloneLocalVariables(context, body, clonedBody);
             CloneCilInstructions(context, body, clonedBody);
             CloneExceptionHandlers(context, body, clonedBody);
-
-            return clonedBody;
         }
 
         private static void CloneLocalVariables(MemberCloneContext context, CilMethodBody body, CilMethodBody clonedBody)
@@ -211,7 +211,7 @@ namespace AsmResolver.DotNet.Cloning
                 case CilOperandType.InlineArgument:
                 case CilOperandType.ShortInlineArgument:
                     clonedInstruction.Operand = instruction.Operand is Parameter parameter
-                        ? clonedBody.Owner.Parameters.GetBySignatureIndex(parameter.MethodSignatureIndex)
+                        ? clonedBody.Owner!.Parameters.GetBySignatureIndex(parameter.MethodSignatureIndex)
                         : instruction.Operand;
                     break;
 

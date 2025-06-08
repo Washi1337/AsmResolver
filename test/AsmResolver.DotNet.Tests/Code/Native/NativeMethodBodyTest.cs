@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             method.DeclaringType!.Methods.Remove(method);
             module.GetOrCreateModuleType().Methods.Add(method);
 
-            return method.NativeMethodBody = new NativeMethodBody(method);
+            return method.NativeMethodBody = new NativeMethodBody();
         }
 
         private static IReadableSegment GetNewCodeSegment(PEImage image)

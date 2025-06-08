@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             var method = new MethodDefinition("Dummy", flags, signature);
 
-            var body = new CilMethodBody(method);
+            var body = new CilMethodBody();
             for (int i = 0; i < localCount; i++)
                 body.LocalVariables.Add(new CilLocalVariable(_module.CorLibTypeFactory.Object));
 

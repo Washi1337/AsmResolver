@@ -15,20 +15,28 @@ using AsmResolver.DotNet.Code.Cil;  // High level and easy to use models related
 
 ## The CilMethodBody class
 
-The `MethodDefinition` class defines a property called `CilMethodBody`,
-which exposes the managed implementation of the method, written in the
-Common Intermediate Language, or CIL for short.
-
-Each `CilMethodBody` is assigned to exactly one `MethodDefinition`. Upon
-instantiation of such a method body, it is therefore required to specify
-the owner of the body:
+Each `MethodDefinition` class defines a property `CilMethodBody`,
+which exposes the managed implementation of the method, written in the Common Intermediate Language (CIL).
 
 ``` csharp
 MethodDefinition method = ...
 
-CilMethodBody body = new CilMethodBody(method);
+var body = new CilMethodBody();
 method.CilMethodBody = body;
 ```
+
+> [!NOTE]
+> Each method body can be assigned to exactly one method, and every method can only have one method body.
+> Assigning a method body to another method will result in an exception to be thrown.
+> To swap method bodies, you will first have to remove it from the existing method (e.g., by setting `MethodDefinition::CilMethodBody` property to `null`).
+
+> [!NOTE]
+> Prior to AsmResolver v6.0.0, `CilMethodBody` needs to be initialized with the owner explicitly set.
+> ```csharp
+> MethodDefinition method = ...
+> var body = new CilMethodBody(owner: method);
+> ```
+
 
 The `CilMethodBody` class consists of the following basic building
 blocks:
@@ -210,8 +218,8 @@ Below an example on how to use the `ReferenceImporter` to emit a call to
 var importer = new ReferenceImporter(targetModule);
 var writeLine = importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] { typeof(string) } );
 
-body.Instructions.Add(new CilInstruction(CilOpCodes.Ldstr, "Hello, world!"));
-body.Instructions.Add(new CilInstruction(CilOpCodes.Call, writeLine));
+body.Instructions.Add(CilOpCodes.Ldstr, "Hello, world!");
+body.Instructions.Add(CilOpCodes.Call, writeLine);
 ```
 
 More information on the capabilities and limitations of the
@@ -235,7 +243,7 @@ body.Instructions.Add(instruction);
 
 body.Instructions.OptimizeMacros();
 
-// instruction is now optimized to "ldc.i4.1".
+// `instruction` is now optimized to "ldc.i4.1".
 ```
 
 ``` csharp
@@ -244,7 +252,7 @@ body.Instructions.Add(instruction);
 
 body.Instructions.ExpandMacros();
 
-// instruction is now expanded to "ldc.i4 1".
+// `instruction` is now expanded to "ldc.i4 1".
 ```
 
 ### Pretty printing CIL Instructions

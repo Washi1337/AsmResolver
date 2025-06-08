@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -14,7 +13,6 @@ using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.VTableFixups;
-using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
 using AsmResolver.Shims;
 using AsmResolver.Tests.Runners;
@@ -52,7 +50,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
             var method = type.Methods.First(m => m.Name == methodName);
-            Assert.Equal(expectedReturnType, method.Signature.ReturnType.FullName);
+            Assert.Equal(expectedReturnType, method.Signature!.ReturnType.FullName);
         }
 
         [Fact]
@@ -60,7 +58,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod)).MetadataToken);
+                typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod))!.MetadataToken);
             Assert.NotNull(method.DeclaringType);
             Assert.Equal(nameof(SingleMethod), method.DeclaringType.Name);
         }
@@ -70,7 +68,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod)).MetadataToken);
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod))!.MetadataToken);
             Assert.Empty(method.ParameterDefinitions);
         }
 
@@ -79,7 +77,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.SingleParameterMethod)).MetadataToken);
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.SingleParameterMethod))!.MetadataToken);
             Assert.Single(method.ParameterDefinitions);
         }
 
@@ -88,7 +86,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod)).MetadataToken);
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod))!.MetadataToken);
             Assert.Equal(3, method.ParameterDefinitions.Count);
         }
 
@@ -97,7 +95,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod)).MetadataToken);
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod))!.MetadataToken);
             Assert.Empty(method.Parameters);
         }
 
@@ -106,7 +104,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.SingleParameterMethod)).MetadataToken);
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.SingleParameterMethod))!.MetadataToken);
             Assert.Single(method.Parameters);
             Assert.Equal("intParameter", method.Parameters[0].Name);
             Assert.True(method.Parameters[0].ParameterType.IsTypeOf("System", "Int32"));
@@ -117,7 +115,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod)).MetadataToken);
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod))!.MetadataToken);
             Assert.Equal(3, method.Parameters.Count);
 
             Assert.Equal("intParameter", method.Parameters[0].Name);
@@ -138,7 +136,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.IntParameterlessMethod)).MetadataToken);
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.IntParameterlessMethod))!.MetadataToken);
 
             Assert.Equal(
                 "System.Int32 AsmResolver.DotNet.TestCases.Methods.MultipleMethods::IntParameterlessMethod()",
@@ -150,7 +148,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod)).MetadataToken);
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod))!.MetadataToken);
 
             Assert.Equal(
                 "System.Void AsmResolver.DotNet.TestCases.Methods.MultipleMethods::VoidParameterlessMethod()",
@@ -162,7 +160,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.SingleParameterMethod)).MetadataToken);
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.SingleParameterMethod))!.MetadataToken);
 
             Assert.Equal(
                 "System.Void AsmResolver.DotNet.TestCases.Methods.MultipleMethods::SingleParameterMethod(System.Int32)",
@@ -174,7 +172,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod)).MetadataToken);
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod))!.MetadataToken);
 
             Assert.Equal(
                 "System.Void AsmResolver.DotNet.TestCases.Methods.MultipleMethods::MultipleParameterMethod(System.Int32, System.String, AsmResolver.DotNet.TestCases.Methods.MultipleMethods)",
@@ -186,7 +184,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod)).MetadataToken);
+                typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod))!.MetadataToken);
 
             Assert.False(method.IsGetMethod);
             Assert.False(method.IsSetMethod);
@@ -200,7 +198,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(SingleProperty).GetMethod("get_" + nameof(SingleProperty.IntProperty)).MetadataToken);
+                typeof(SingleProperty).GetMethod("get_" + nameof(SingleProperty.IntProperty))!.MetadataToken);
 
             Assert.True(method.IsGetMethod);
         }
@@ -210,7 +208,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(SingleProperty).GetMethod("set_" + nameof(SingleProperty.IntProperty)).MetadataToken);
+                typeof(SingleProperty).GetMethod("set_" + nameof(SingleProperty.IntProperty))!.MetadataToken);
 
             Assert.True(method.IsSetMethod);
         }
@@ -220,7 +218,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(SingleEvent).GetMethod("add_" + nameof(SingleEvent.SimpleEvent)).MetadataToken);
+                typeof(SingleEvent).GetMethod("add_" + nameof(SingleEvent.SimpleEvent))!.MetadataToken);
 
             Assert.True(method.IsAddMethod);
         }
@@ -230,7 +228,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(
-                typeof(SingleEvent).GetMethod("remove_" + nameof(SingleEvent.SimpleEvent)).MetadataToken);
+                typeof(SingleEvent).GetMethod("remove_" + nameof(SingleEvent.SimpleEvent))!.MetadataToken);
 
             Assert.True(method.IsRemoveMethod);
         }
@@ -242,7 +240,7 @@ namespace AsmResolver.DotNet.Tests
             var method = module.TopLevelTypes
                 .First(t => t.Name == nameof(MultipleMethods)).Methods
                 .First(m => m.Name == nameof(MultipleMethods.IntParameterlessMethod));
-            Assert.True(method.Signature.ReturnsValue);
+            Assert.True(method.Signature!.ReturnsValue);
         }
 
         [Fact]
@@ -252,7 +250,7 @@ namespace AsmResolver.DotNet.Tests
             var method = module.TopLevelTypes
                 .First(t => t.Name == nameof(MultipleMethods)).Methods
                 .First(m => m.Name == nameof(MultipleMethods.VoidParameterlessMethod));
-            Assert.False(method.Signature.ReturnsValue);
+            Assert.False(method.Signature!.ReturnsValue);
         }
 
         private static AssemblyDefinition CreateDummyLibraryWithExport(int methodCount, bool is32Bit)
@@ -300,7 +298,7 @@ namespace AsmResolver.DotNet.Tests
                     MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
 
                 // Add a Console.WriteLine call
-                var body = new CilMethodBody(method);
+                var body = new CilMethodBody();
                 method.MethodBody = body;
                 body.Instructions.Add(CilOpCodes.Ldstr, $"Hello from {methodName}.");
                 body.Instructions.Add(CilOpCodes.Call, writeLine);
@@ -651,6 +649,67 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.True(ctor.IsConstructor);
             Assert.Equal(new[] {factory.Int32, factory.Double}, ctor.Parameters.Select(x => x.ParameterType));
+        }
+
+        [Fact]
+        public void BodyHasOwner()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, TestReaderParameters);
+            var method = module.LookupMember<MethodDefinition>(
+                typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod))!.MetadataToken
+            );
+
+            var body = method.MethodBody;
+            Assert.NotNull(body);
+            Assert.Same(method, body.Owner);
+        }
+
+        [Fact]
+        public void RemovingBodyShouldClearOwner()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, TestReaderParameters);
+            var method = module.LookupMember<MethodDefinition>(
+                typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod))!.MetadataToken
+            );
+
+            var body = method.MethodBody!;
+            Assert.Same(method, body.Owner);
+            method.MethodBody = null;
+            Assert.Null(body.Owner);
+        }
+
+        [Fact]
+        public void AssigningNewBodyShouldUpdateOwner()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, TestReaderParameters);
+            var method = module.LookupMember<MethodDefinition>(
+                typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod))!.MetadataToken
+            );
+
+            var originalBody = method.MethodBody!;
+            var newBody = new CilMethodBody();
+
+            Assert.Same(method, originalBody.Owner);
+            Assert.Null(newBody.Owner);
+
+            method.MethodBody = newBody;
+
+            Assert.Null(originalBody.Owner);
+            Assert.Same(method, newBody.Owner);
+        }
+
+        [Fact]
+        public void AssignBodyOfOtherMethodShouldThrow()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location, TestReaderParameters);
+            var method1 = module.LookupMember<MethodDefinition>(
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod))!.MetadataToken
+            );
+            var method2 = module.LookupMember<MethodDefinition>(
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.IntParameterlessMethod))!.MetadataToken
+            );
+
+            Assert.ThrowsAny<ArgumentException>(() => method1.MethodBody = method2.MethodBody);
         }
     }
 }

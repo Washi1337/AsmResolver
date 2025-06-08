@@ -71,12 +71,12 @@ namespace AsmResolver.DotNet.Dynamic
         /// <param name="method">The method that owns the method body.</param>
         /// <param name="dynamicMethodObj">The Dynamic Method/Delegate/DynamicResolver.</param>
         /// <returns>The method body.</returns>
-        private static CilMethodBody CreateDynamicMethodBody(MethodDefinition method, object dynamicMethodObj)
+        private static CilMethodBody CreateDynamicMethodBody(DynamicMethodDefinition method, object dynamicMethodObj)
         {
             if (method.Module is not SerializedModuleDefinition module)
                 throw new ArgumentException("Method body should reference a serialized module.");
 
-            var result = new CilMethodBody(method);
+            var result = new CilMethodBody();
             object resolver = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
 
             // We prefer to extract the information from DynamicILInfo if it is there, as it has more accurate info
@@ -125,7 +125,7 @@ namespace AsmResolver.DotNet.Dynamic
             if (code is not null)
             {
                 var reader = new BinaryStreamReader(code);
-                var operandResolver = new DynamicCilOperandResolver(module, result, tokenList);
+                var operandResolver = new DynamicCilOperandResolver(module, method, result, tokenList);
                 var disassembler = new CilDisassembler(reader, operandResolver);
                 result.Instructions.AddRange(disassembler.ReadInstructions());
             }

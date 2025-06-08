@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var method = new MethodDefinition("Method", MethodAttributes.Static,
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
-            method.CilMethodBody = new CilMethodBody(method);
+            method.CilMethodBody = new CilMethodBody();
 
             var instruction = new CilInstruction(CilOpCodes.Nop);
             Assert.Equal(0, instruction.GetStackPopCount(method.CilMethodBody));
@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var method = new MethodDefinition("Method", MethodAttributes.Static,
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
-            method.CilMethodBody = new CilMethodBody(method);
+            method.CilMethodBody = new CilMethodBody();
 
             var instruction = new CilInstruction(CilOpCodes.Ret);
             Assert.Equal(0, instruction.GetStackPopCount(method.CilMethodBody));
@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var method = new MethodDefinition("Method", MethodAttributes.Static,
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Int32));
-            method.CilMethodBody = new CilMethodBody(method);
+            method.CilMethodBody = new CilMethodBody();
 
             var instruction = new CilInstruction(CilOpCodes.Ret);
             Assert.Equal(1, instruction.GetStackPopCount(method.CilMethodBody));
@@ -49,7 +49,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var method = new MethodDefinition("Method", MethodAttributes.Static,
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Int32));
-            method.CilMethodBody = new CilMethodBody(method);
+            method.CilMethodBody = new CilMethodBody();
 
             var type = new TypeReference(_module, null, "SomeType");
             var member = new MemberReference(type, "SomeMethod",
@@ -64,7 +64,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var method = new MethodDefinition("Method", MethodAttributes.Static,
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Int32));
-            method.CilMethodBody = new CilMethodBody(method);
+            method.CilMethodBody = new CilMethodBody();
 
             var type = new TypeReference(_module, null, "SomeType");
             var member = new MemberReference(type, "SomeMethod",
@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var method = new MethodDefinition("Method", MethodAttributes.Static,
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Int32));
-            method.CilMethodBody = new CilMethodBody(method);
+            method.CilMethodBody = new CilMethodBody();
 
             var type = new TypeReference(_module, null, "SomeType");
             var member = new MemberReference(type, "SomeMethod",
@@ -95,7 +95,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var method = new MethodDefinition("Method", MethodAttributes.Static,
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Int32));
-            method.CilMethodBody = new CilMethodBody(method);
+            method.CilMethodBody = new CilMethodBody();
 
             var type = new TypeReference(_module, null, "SomeType");
             var member = new MemberReference(type, "SomeMethod",
@@ -144,19 +144,11 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var module = ModuleDefinition.FromFile(typeof(TestClass).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.Single(t => t.MetadataToken == typeof(TestClass).MetadataToken);
-            var property = type.Properties[0];
-            var setter = property.SetMethod;
-            var body = setter.CilMethodBody;
-            var ret = body.Instructions[^1];
+            var body = type.Properties[0].SetMethod!.CilMethodBody!;
+            Assert.Equal(0, body.Instructions[^1].GetStackPopCount(body));
 
-            Assert.Equal(0, ret.GetStackPopCount(body));
-
-            property = type.Properties[1];
-            setter = property.SetMethod;
-            body = setter.CilMethodBody;
-            ret = body.Instructions[^1];
-
-            Assert.Equal(0, ret.GetStackPopCount(body));
+            body = type.Properties[1].SetMethod!.CilMethodBody!;
+            Assert.Equal(0, body.Instructions[^1].GetStackPopCount(body));
         }
     }
 
