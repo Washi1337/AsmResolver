@@ -591,10 +591,9 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                lock (_methodBody)
-                {
-                    return _methodBody.GetValue(this);
-                }
+                // We don't need to lock here as GetValue already locks on the lazy variable when necessary.
+                // ReSharper disable once InconsistentlySynchronizedField
+                return _methodBody.GetValue(this);
             }
             set
             {
