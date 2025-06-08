@@ -83,6 +83,12 @@ method.NativeMethodBody = body;
 > Assigning a method body to another method will result in an exception to be thrown.
 > To swap method bodies, you will first have to remove it from the existing method (e.g., by setting `MethodDefinition::NativeMethodBody` property to `null`).
 
+> [!NOTE]
+> Prior to AsmResolver v6.0.0, `NativeMethodBody` needs to be initialized with the owner explicitly set.
+> ```csharp
+> MethodDefinition method = ...
+> var body = new NativeMethodBody(owner: method);
+> ```
 
 The `NativeMethodBody` class consists of the following basic building blocks:
 

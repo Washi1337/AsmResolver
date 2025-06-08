@@ -30,6 +30,13 @@ method.CilMethodBody = body;
 > Assigning a method body to another method will result in an exception to be thrown.
 > To swap method bodies, you will first have to remove it from the existing method (e.g., by setting `MethodDefinition::CilMethodBody` property to `null`).
 
+> [!NOTE]
+> Prior to AsmResolver v6.0.0, `CilMethodBody` needs to be initialized with the owner explicitly set.
+> ```csharp
+> MethodDefinition method = ...
+> var body = new CilMethodBody(owner: method);
+> ```
+
 
 The `CilMethodBody` class consists of the following basic building
 blocks:
