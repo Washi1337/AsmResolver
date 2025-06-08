@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Builder.Metadata;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -82,6 +84,35 @@ namespace AsmResolver.DotNet.Tests.Builder
             var result = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
             var newModule = ModuleDefinition.FromImage(result, TestReaderParameters);
             Assert.Equal(module.Name, newModule.Name);
+        }
+
+        [Fact]
+        public void ConstructPEImageFromNewModuleWithNoMemberSignaturePreservation()
+        {
+            // Prepare module.
+            var module = new ModuleDefinition("Module");
+            var factory = module.CorLibTypeFactory;
+            var method = new MethodDefinition(
+                "Foo",
+                MethodAttributes.Public | MethodAttributes.Static,
+                MethodSignature.CreateStatic(factory.Void)
+            );
+            module.GetOrCreateModuleType().Methods.Add(method);
+            module.ManagedEntryPoint = method;
+
+            // Introduce inconsistency in method metadata.
+            method.IsStatic = false;
+
+            // Verify default behavior stops building.
+            Assert.ThrowsAny<AggregateException>(() => module.ToPEImage(new ManagedPEImageBuilder()));
+
+            // Disabling metadata verification should make the build succeed.
+            var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.NoMemberSignatureVerification));
+
+            var newModule = ModuleDefinition.FromImage(image, TestReaderParameters);
+            var newMethod = newModule.GetModuleType()!.Methods.First(m => m.Name == "Foo");
+            Assert.Equal(method.IsStatic, newMethod.IsStatic);
+            Assert.Equal(method.Signature!.HasThis, newMethod.Signature!.HasThis);
         }
 
         [Fact]
