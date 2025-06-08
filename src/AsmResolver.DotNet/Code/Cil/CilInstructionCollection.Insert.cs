@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -379,7 +380,8 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <summary>
-        /// Verifies and inserts a instruction into the collection that references a standalone signature.
+        /// Verifies and inserts a instruction into the collection that references a standalone signature
+        /// referencing a method signature in the blob stream.
         /// </summary>
         /// <param name="index">The zero-based index at which the instruction should be inserted at.</param>
         /// <param name="code">The opcode.</param>
@@ -392,6 +394,9 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             if (code.OperandType != CilOperandType.InlineSig)
                 throw new InvalidCilInstructionException(code);
+
+            if (code == CilOpCodes.Calli && signature.Signature is not MethodSignature)
+                throw new InvalidCilInstructionException($"Operation code calli requires a method signature wrapped in a standalone signature as operand.");
 
             return InsertAndReturn(index, code, signature);
         }

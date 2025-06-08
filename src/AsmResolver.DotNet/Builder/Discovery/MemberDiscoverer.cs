@@ -412,8 +412,9 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // Define getter.
             var getMethod = new MethodDefinition(
                 $"get_{property.Name}",
-                MethodPlaceHolderAttributes | MethodAttributes.SpecialName,
-                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Object));
+                MethodPlaceHolderAttributes | MethodAttributes.SpecialName | MethodAttributes.Static,
+                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Object)
+            );
 
             // Add members.
             placeHolderType.Methods.Add(getMethod);
@@ -439,12 +440,14 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // Define add and remove methods.
             var addMethod = new MethodDefinition(
                 $"add_{@event.Name}",
-                MethodPlaceHolderAttributes | MethodAttributes.SpecialName,
-                signature);
+                MethodPlaceHolderAttributes | MethodAttributes.SpecialName | MethodAttributes.Static,
+                signature
+            );
             var removeMethod = new MethodDefinition(
                 $"remove_{@event.Name}",
-                MethodPlaceHolderAttributes | MethodAttributes.SpecialName,
-                signature);
+                MethodPlaceHolderAttributes | MethodAttributes.SpecialName | MethodAttributes.Static,
+                signature
+            );
 
             // Add members.
             placeHolderType.Methods.Add(addMethod);

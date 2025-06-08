@@ -217,7 +217,8 @@ namespace AsmResolver.DotNet.Code.Cil
         public CilInstruction Add(CilOpCode code, IMetadataMember member) => Insert(Count, code, member);
 
         /// <summary>
-        /// Verifies and adds a instruction to the end of the collection that references a standalone signature.
+        /// Verifies and adds a instruction to the end of the collection that references a standalone signature
+        /// referencing a method signature in the blob stream.
         /// </summary>
         /// <param name="code">The opcode.</param>
         /// <param name="signature">The referenced signature.</param>

@@ -189,7 +189,8 @@ namespace AsmResolver.DotNet.Builder
         /// Allocates metadata rows for the provided method definitions in the buffer.
         /// </summary>
         /// <param name="methods">The methods to define.</param>
-        public void DefineMethods(IEnumerable<MethodDefinition> methods)
+        /// <param name="validateSignatures">Set to <c>true</c> if the signatures should be validated for consistency with what is defined in metadata.</param>
+        public void DefineMethods(IEnumerable<MethodDefinition> methods, bool validateSignatures = true)
         {
             var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
             if (methods is ICollection<MethodDefinition> collection)
@@ -214,6 +215,9 @@ namespace AsmResolver.DotNet.Builder
                 // If the method is supposed to be exported as an unmanaged symbol, register it.
                 if (method.ExportInfo.HasValue)
                     VTableFixups.MapTokenToExport(method.ExportInfo.Value, token);
+
+                if (validateSignatures)
+                    method.VerifyMetadata(ErrorListener);
             }
         }
 

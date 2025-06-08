@@ -68,11 +68,43 @@ namespace AsmResolver.DotNet
         /// <paramref name="attributes"/> and vice versa.
         /// </remarks>
         public MethodDefinition(Utf8String? name, MethodAttributes attributes, MethodSignature? signature)
+            : this(name, attributes, signature, true)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new method definition.
+        /// </summary>
+        /// <param name="name">The name of the method.</param>
+        /// <param name="attributes">The attributes.</param>
+        /// <param name="signature">The signature of the method</param>
+        /// <param name="verify">
+        /// Set to <c>true</c> if the value stored in <paramref name="attributes"/> and <paramref name="signature"/>
+        /// should be checked for consistency.
+        /// </param>
+        /// <remarks>
+        /// For a valid .NET image, if <see cref="CallingConventionSignature.HasThis"/> of the signature referenced by
+        /// <paramref name="signature"/> is set, the <see cref="MethodAttributes.Static"/> bit should be unset in
+        /// <paramref name="attributes"/> and vice versa.
+        /// </remarks>
+        /// <exception cref="ArgumentException">
+        /// Occurs when <paramref name="verify"/> is <c>true</c> and <paramref name="attributes"/> contains
+        /// a value that is inconsistent with the flags of <paramref name="signature"/>.
+        /// </exception>
+        public MethodDefinition(Utf8String? name, MethodAttributes attributes, MethodSignature? signature, bool verify)
             : this(new MetadataToken(TableIndex.Method, 0))
         {
             Name = name;
             Attributes = attributes;
             Signature = signature;
+
+            if (verify && signature is { HasThis: var hasThis } && IsStatic != !hasThis)
+            {
+                throw new ArgumentException(hasThis
+                    ? "A static method requires a signature with the HasThis flag unset."
+                    : "An instance method requires a signature with the HasThis flag set."
+                );
+            }
         }
 
         /// <summary>
@@ -957,6 +989,62 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="ExportInfo"/> property.
         /// </remarks>
         protected virtual UnmanagedExportInfo? GetExportInfo() => null;
+
+        /// <summary>
+        /// Asserts whether the method's metadata is consistent with its signature.
+        /// </summary>
+        /// <exception cref="AggregateException">
+        /// Occurs when the method contains invalid or inconsistent metadata.
+        /// The inner exceptions stored in this aggregation are all individual diagnostics found.
+        /// </exception>
+        public void VerifyMetadata() => VerifyMetadata(ThrowErrorListener.Instance);
+
+        /// <summary>
+        /// Asserts whether the method's metadata is consistent with its signature.
+        /// </summary>
+        /// <param name="listener">The object to report the diagnostics to.</param>
+        public void VerifyMetadata(IErrorListener listener)
+        {
+            DiagnosticBag? bag = null;
+            DiagnosticBag GetBag() => bag ??= new DiagnosticBag();
+
+            if (Signature is null)
+            {
+                GetBag().MetadataBuilder($"Method has no signature assigned.");
+            }
+            else
+            {
+                if (IsStatic != !Signature.HasThis)
+                {
+                    GetBag().MetadataBuilder(IsStatic
+                        ? "Method is static but its signature has the HasThis flag set."
+                        : "Method is non-static but its signature has the HasThis flag unset."
+                    );
+                }
+
+                if (GenericParameters.Count > 0 && !Signature.IsGeneric)
+                {
+                    GetBag().MetadataBuilder(
+                        "Method defines generic parameters but its signature is not marked as generic."
+                    );
+                }
+
+                if (GenericParameters.Count != Signature.GenericParameterCount)
+                {
+                    GetBag().MetadataBuilder(
+                        $"Method defines {GenericParameters.Count} generic parameters but its signature defines {Signature.GenericParameterCount} parameters."
+                    );
+                }
+            }
+
+            if (bag is not null)
+            {
+                listener.RegisterException(new AggregateException(
+                    $"Method {this.SafeToString()} contains invalid or inconsistent metadata.",
+                    bag.Exceptions
+                ));
+            }
+        }
 
         /// <inheritdoc />
         public override string ToString() => FullName;

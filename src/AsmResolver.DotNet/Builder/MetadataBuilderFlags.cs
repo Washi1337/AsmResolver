@@ -17,103 +17,103 @@ namespace AsmResolver.DotNet.Builder
         /// Indicates indices into the #Blob stream should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveBlobIndices = 0x1,
+        PreserveBlobIndices = 1 << 0,
 
         /// <summary>
         /// Indicates indices into the #GUID stream should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveGuidIndices = 0x2,
+        PreserveGuidIndices = 1 << 1,
 
         /// <summary>
         /// Indicates indices into the #Strings stream should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveStringIndices = 0x4,
+        PreserveStringIndices = 1 << 2,
 
         /// <summary>
         /// Indicates indices into the #US stream should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveUserStringIndices = 0x8,
+        PreserveUserStringIndices = 1 << 3,
 
         /// <summary>
         /// Indicates indices into the type references table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveTypeReferenceIndices = 0x10,
+        PreserveTypeReferenceIndices = 1 << 4,
 
         /// <summary>
         /// Indicates indices into the type definition table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveTypeDefinitionIndices = 0x20,
+        PreserveTypeDefinitionIndices = 1 << 5,
 
         /// <summary>
         /// Indicates indices into the field definition table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveFieldDefinitionIndices = 0x40,
+        PreserveFieldDefinitionIndices = 1 << 6,
 
         /// <summary>
         /// Indicates indices into the method definition table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveMethodDefinitionIndices = 0x80,
+        PreserveMethodDefinitionIndices = 1 << 7,
 
         /// <summary>
         /// Indicates indices into the parameter definition table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveParameterDefinitionIndices = 0x100,
+        PreserveParameterDefinitionIndices = 1 << 8,
 
         /// <summary>
         /// Indicates indices into the member reference table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveMemberReferenceIndices = 0x200,
+        PreserveMemberReferenceIndices = 1 << 9,
 
         /// <summary>
         /// Indicates indices into the stand-alone signature table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveStandAloneSignatureIndices = 0x400,
+        PreserveStandAloneSignatureIndices = 1 << 10,
 
         /// <summary>
         /// Indicates indices into the event definition table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveEventDefinitionIndices = 0x800,
+        PreserveEventDefinitionIndices = 1 << 11,
 
         /// <summary>
         /// Indicates indices into the property definition table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreservePropertyDefinitionIndices = 0x1000,
+        PreservePropertyDefinitionIndices = 1 << 12,
 
         /// <summary>
         /// Indicates indices into the module reference table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveModuleReferenceIndices = 0x2000,
+        PreserveModuleReferenceIndices = 1 << 13,
 
         /// <summary>
         /// Indicates indices into the type specification table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveTypeSpecificationIndices = 0x4000,
+        PreserveTypeSpecificationIndices = 1 << 14,
 
         /// <summary>
         /// Indicates indices into the assembly reference table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveAssemblyReferenceIndices = 0x8000,
+        PreserveAssemblyReferenceIndices = 1 << 15,
 
         /// <summary>
         /// Indicates indices into the method specification table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveMethodSpecificationIndices = 0x10000,
+        PreserveMethodSpecificationIndices = 1 << 16,
 
         /// <summary>
         /// Indicates indices into the tables stream should be preserved whenever possible during the construction
@@ -129,13 +129,13 @@ namespace AsmResolver.DotNet.Builder
         /// Indicates unconventional / spurious metadata streams present in the .NET metadata directory should be
         /// preserved when possible.
         /// </summary>
-        PreserveUnknownStreams = 0x20000,
+        PreserveUnknownStreams = 1 << 17,
 
         /// <summary>
         /// Indicates unconventional metadata stream order in the .NET metadata directory should be preserved when
         /// possible.
         /// </summary>
-        PreserveStreamOrder = 0x40000,
+        PreserveStreamOrder = 1 << 18,
 
         /// <summary>
         /// Indicates any kind of index into a blob or tables stream, as well as unknown spurious metadata streams
@@ -154,7 +154,7 @@ namespace AsmResolver.DotNet.Builder
         /// Setting this flag will disable this optimization.
         /// </para>
         /// </summary>
-        NoStringsStreamOptimization = 0x20000,
+        NoStringsStreamOptimization = 1 << 19,
 
         /// <summary>
         /// <para>
@@ -167,11 +167,24 @@ namespace AsmResolver.DotNet.Builder
         /// or depend on individual resource items to be present. Setting this flag will disable this optimization.
         /// </para>
         /// </summary>
-        NoResourceDataDeduplication = 0x40000,
+        NoResourceDataDeduplication = 1 << 20,
 
         /// <summary>
         /// Setting this flag will force the builder to emit edit-and-continue metadata, even if it is not required.
         /// </summary>
-        ForceEncMetadata = 0x80000
+        ForceEncMetadata = 1 << 21,
+
+        /// <summary>
+        /// <para>
+        /// By default, AsmResolver will validate member definitions that hold signatures for consistency with their
+        /// associated metadata. This includes e.g., testing whether static methods have the HasThis unset in their
+        /// signatures, and verifying that the number of generic parameters is consistent with what is defined in their
+        /// signature.
+        /// </para>
+        /// <para>
+        /// Setting this flag will disable this verification.
+        /// </para>
+        /// </summary>
+        NoMemberSignatureVerification = 1 << 22,
     }
 }
