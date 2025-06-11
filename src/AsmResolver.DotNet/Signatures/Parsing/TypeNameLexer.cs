@@ -112,7 +112,7 @@ namespace AsmResolver.DotNet.Signatures.Parsing
                     {
                         break;
                     }
-                    else if (char.IsWhiteSpace(currentChar) || ReservedChars.Contains(currentChar))
+                    else if (ReservedChars.Contains(currentChar))
                     {
                         break;
                     }
