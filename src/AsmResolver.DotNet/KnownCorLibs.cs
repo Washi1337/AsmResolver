@@ -221,6 +221,16 @@ namespace AsmResolver.DotNet
             });
 
         /// <summary>
+        /// References System.Runtime.dll, Version=10.0.0.0, PublicKeyToken=B03F5F7F11D50A3A. This is used by .NET
+        /// assemblies targeting .NET 10.0.
+        /// </summary>
+        public static readonly AssemblyReference SystemRuntime_v10_0_0_0 = new("System.Runtime",
+            new Version(10, 0, 0, 0), false, new byte[]
+            {
+                0xB0, 0x3F, 0x5F, 0x7F, 0x11, 0xD5, 0x0A, 0x3A
+            });
+
+        /// <summary>
         /// References netstandard.dll, Version=2.0.0.0, PublicKeyToken=CC7B13FFCD2DDD51. This is used by .NET
         /// assemblies targeting .NET standard 2.0.
         /// </summary>
@@ -260,6 +270,7 @@ namespace AsmResolver.DotNet
                 SystemRuntime_v7_0_0_0,
                 SystemRuntime_v8_0_0_0,
                 SystemRuntime_v9_0_0_0,
+                SystemRuntime_v10_0_0_0,
                 SystemPrivateCoreLib_v4_0_0_0,
                 SystemPrivateCoreLib_v5_0_0_0,
                 SystemPrivateCoreLib_v6_0_0_0,
@@ -322,6 +333,7 @@ namespace AsmResolver.DotNet
                 (7, 0) => SystemRuntime_v7_0_0_0,
                 (8, 0) => SystemRuntime_v8_0_0_0,
                 (9, 0) => SystemRuntime_v9_0_0_0,
+                (10, 0) => SystemRuntime_v10_0_0_0,
                 _ => throw new ArgumentException($"Invalid or unsupported .NET or .NET Core version {version}.")
             };
         }
