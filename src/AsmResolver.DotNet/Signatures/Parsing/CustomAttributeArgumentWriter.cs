@@ -91,15 +91,7 @@ namespace AsmResolver.DotNet.Signatures.Parsing
 
             if (argumentType.IsTypeOf("System", "Type"))
             {
-                // Type names must include the assembly spec for 'corelib' as well. E.g., this is what Roslyn emits:
-                //
-                // 'System.Collections.Generic.List`1[[System.Uri, System.Runtime, Version=10.0.0.0, Culture=neutral,
-                //  PublicKeyToken=b03f5f7f11d50a3a]], System.Collections, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
-                //
-                // When parsing 'Type' attribute elements, if the assembly spec is not specified, types would otherwise default to 'corlib', but that
-                // would not necessarily be correct. For instance, 'System.Uri' is not in 'System.Private.CoreLib.dll', it's in 'System.Private.Uri.dll'.
-                // Emitting the assembly spec in all cases fixes this issue, and results in the same output as Roslyn.
-                writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName((TypeSignature) element, omitCorLib: false));
+                writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName((TypeSignature) element));
                 return;
             }
 

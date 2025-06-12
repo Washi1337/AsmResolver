@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 
@@ -152,6 +153,8 @@ namespace AsmResolver.DotNet
         /// <returns>The reference to the default core lib.</returns>
         /// <exception cref="ArgumentException">The runtime information is invalid or unsupported.</exception>
         public AssemblyReference GetDefaultCorLib() => KnownCorLibs.FromRuntimeInfo(this);
+
+        public AssemblyReference? GetAssumedImplCorLib() => KnownCorLibs.TryImplFromRuntimeInfo(this);
 
         /// <inheritdoc />
         public override string ToString() => $"{Name},Version=v{Version}";
