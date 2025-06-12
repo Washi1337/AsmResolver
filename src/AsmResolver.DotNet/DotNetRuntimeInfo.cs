@@ -148,12 +148,17 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Obtains a reference to the default core lib reference of this runtime.
+        /// Obtains a reference to the default core lib of this runtime.
         /// </summary>
         /// <returns>The reference to the default core lib.</returns>
         /// <exception cref="ArgumentException">The runtime information is invalid or unsupported.</exception>
         public AssemblyReference GetDefaultCorLib() => KnownCorLibs.FromRuntimeInfo(this);
 
+        /// <summary>
+        /// Obtains a reference to the assumed implementation core lib for this runtime.
+        /// </summary>
+        /// <returns>The reference to the assumed implementation core lib.</returns>
+        /// <exception cref="ArgumentException">The runtime information is invalid or unsupported.</exception>
         public AssemblyReference? GetAssumedImplCorLib() => KnownCorLibs.TryImplFromRuntimeInfo(this);
 
         /// <inheritdoc />

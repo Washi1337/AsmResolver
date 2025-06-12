@@ -294,7 +294,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Obtains a reference to the default core lib reference for the provided .NET target runtime.
+        /// Obtains a reference to the default core lib for the provided .NET target runtime.
         /// </summary>
         /// <param name="runtimeInfo">The runtime to target.</param>
         /// <returns>The reference to the default core lib.</returns>
@@ -314,10 +314,10 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Obtains a reference to the default core lib reference for the provided .NET target runtime.
+        /// Obtains a reference to the assumed implementation core lib for the provided .NET target runtime.
         /// </summary>
         /// <param name="runtimeInfo">The runtime to target.</param>
-        /// <returns>The reference to the default core lib.</returns>
+        /// <returns>The reference to the assumed implementation core lib.</returns>
         /// <exception cref="ArgumentException">The runtime information is invalid or unsupported.</exception>
         public static AssemblyReference? TryImplFromRuntimeInfo(DotNetRuntimeInfo runtimeInfo)
         {
