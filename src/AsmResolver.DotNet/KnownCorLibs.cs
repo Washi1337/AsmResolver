@@ -379,6 +379,7 @@ namespace AsmResolver.DotNet
                 (7, 0) => SystemPrivateCoreLib_v7_0_0_0,
                 (8, 0) => SystemPrivateCoreLib_v8_0_0_0,
                 (9, 0) => SystemPrivateCoreLib_v9_0_0_0,
+                (10, 0) => SystemPrivateCoreLib_v10_0_0_0,
                 _ => throw new ArgumentException($"Invalid or unsupported .NET or .NET Core version {version}.")
             };
         }
