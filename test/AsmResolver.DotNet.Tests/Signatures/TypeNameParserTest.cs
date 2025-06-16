@@ -352,5 +352,21 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.NotNull(type.Resolve());
             Assert.NotNull(type.ImportWith(module.DefaultImporter).Resolve());
         }
+
+        [Fact]
+        public void GenericTypeNameWithInnerFQNRoundtrips()
+        {
+            // https://github.com/Washi1337/AsmResolver/pull/647
+            // to hit the original bug of this issue, the assembly's PublicKeyToken needs to begin with a digit, which this corelib does
+            var module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemPrivateCoreLib_v8_0_0_0);
+            var expectedType = module.CorLibTypeFactory.CorLibScope
+                .CreateTypeReference("System", "Action`1")
+                .MakeGenericInstanceType(isValueType: false, module.CorLibTypeFactory.Int32)
+                .ImportWith(module.DefaultImporter);
+            string typeName = TypeNameBuilder.GetAssemblyQualifiedName(expectedType, omitCorLib: false);
+            var actualType = TypeNameParser.Parse(module, typeName);
+
+            Assert.Equal(expectedType, actualType, SignatureComparer.Default);
+        }
     }
 }
