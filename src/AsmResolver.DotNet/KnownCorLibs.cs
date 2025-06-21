@@ -101,7 +101,7 @@ namespace AsmResolver.DotNet
             });
 
         /// <summary>
-        /// References System.Private.CoreLib.dll, Version=9.0.0.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by .NET
+        /// References System.Private.CoreLib.dll, Version=10.0.0.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by .NET
         /// assemblies targeting .NET 10.0.
         /// </summary>
         public static readonly AssemblyReference SystemPrivateCoreLib_v10_0_0_0 = new("System.Private.CoreLib",
