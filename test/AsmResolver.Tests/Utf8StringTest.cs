@@ -62,6 +62,7 @@ namespace AsmResolver.Tests
         [InlineData(null, "")]
         [InlineData(null, null)]
         [InlineData("", "")]
+        [InlineData("α", "β")]
         public void StringConcat(string? a, string? b)
         {
             Utf8String? s1 = a;

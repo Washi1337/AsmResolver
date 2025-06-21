@@ -200,7 +200,7 @@ namespace AsmResolver
             if (other is null || other.Length == 0)
                 return this;
 
-            byte[] result = new byte[Length + other.Length];
+            byte[] result = new byte[_data.Length + other.Length];
             Buffer.BlockCopy(_data, 0, result, 0, _data.Length);
             Buffer.BlockCopy(other, 0, result, _data.Length, other.Length);
             return result;
