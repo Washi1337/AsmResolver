@@ -7,21 +7,25 @@ namespace AsmResolver.Tests.Patching
 {
     public class PatchedSegmentTest
     {
-        private readonly DataSegment _input = new(Enumerable
-            .Range(0, 1000)
-            .Select(x => (byte) (x & 0xFF))
-            .ToArray());
-
-        [Fact]
-        public void SimpleBytesPatch()
+        [Theory]
+        [InlineData(0x0u)]
+        [InlineData(0x1000u)]
+        public void SimpleBytesPatch(uint baseOffset)
         {
-            var patched = new PatchedSegment(_input);
+            var input = new DataSegment(
+                Enumerable.Range(0, 1000)
+                    .Select(x => (byte) (x & 0xFF))
+                    .ToArray()
+            );
+            input.UpdateOffsets(new RelocationParameters(baseOffset, baseOffset));
 
-            uint relativeOffset = 10;
-            byte[] newData = {0xFF, 0xFE, 0xFD, 0xFC};
+            var patched = new PatchedSegment(input);
+
+            const uint relativeOffset = 10;
+            byte[] newData = [0xFF, 0xFE, 0xFD, 0xFC];
             patched.Patches.Add(new BytesPatch(relativeOffset, newData));
 
-            byte[] expected = _input.ToArray();
+            byte[] expected = input.ToArray();
             Buffer.BlockCopy(newData, 0, expected, (int) relativeOffset, newData.Length);
 
             byte[] result = patched.WriteIntoArray();
@@ -31,7 +35,12 @@ namespace AsmResolver.Tests.Patching
         [Fact]
         public void DoublePatchedSegmentShouldReturnSameInstance()
         {
-            var x = _input.AsPatchedSegment();
+            var x = new DataSegment(
+                Enumerable.Range(0, 1000)
+                    .Select(x1 => (byte) (x1 & 0xFF))
+                    .ToArray()
+            ).AsPatchedSegment();
+
             var y = x.AsPatchedSegment();
             Assert.Same(x, y);
         }
@@ -39,14 +48,20 @@ namespace AsmResolver.Tests.Patching
         [Fact]
         public void SimpleBytesPatchFluent()
         {
-            uint relativeOffset = 10;
-            byte[] newData = {0xFF, 0xFE, 0xFD, 0xFC};
+            const uint relativeOffset = 10;
+            byte[] newData = [0xFF, 0xFE, 0xFD, 0xFC];
 
-            var patched = _input
+            var input = new DataSegment(
+                Enumerable.Range(0, 1000)
+                    .Select(x => (byte) (x & 0xFF))
+                    .ToArray()
+            );
+
+            var patched = input
                 .AsPatchedSegment()
-                .Patch(10, newData);
+                .Patch(relativeOffset, newData);
 
-            byte[] expected = _input.ToArray();
+            byte[] expected = input.ToArray();
             Buffer.BlockCopy(newData, 0, expected, (int) relativeOffset, newData.Length);
 
             byte[] result = patched.WriteIntoArray();

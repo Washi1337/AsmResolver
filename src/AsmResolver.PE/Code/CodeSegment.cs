@@ -71,10 +71,11 @@ namespace AsmResolver.PE.Code
         /// <inheritdoc />
         public override void Write(BinaryStreamWriter writer)
         {
+            ulong writerBase = writer.Offset;
             writer.WriteBytes(Code);
 
             for (int i = 0; i < AddressFixups.Count; i++)
-                new AddressFixupPatch(AddressFixups[i]).Apply(new PatchContext(this, ImageBase, writer));
+                new AddressFixupPatch(AddressFixups[i]).Apply(new PatchContext(this, ImageBase, writerBase, writer));
 
             writer.Offset = Offset + GetPhysicalSize();
         }

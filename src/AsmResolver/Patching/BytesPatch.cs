@@ -44,7 +44,7 @@ namespace AsmResolver.Patching
         /// <inheritdoc />
         public void Apply(in PatchContext context)
         {
-            context.Writer.Offset = context.Segment.Offset + RelativeOffset;
+            context.Writer.Offset = context.WriterBase + RelativeOffset;
             context.Writer.WriteBytes(NewData);
         }
     }
