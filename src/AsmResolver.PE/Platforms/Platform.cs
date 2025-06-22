@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
 using AsmResolver.PE.File;
@@ -11,6 +12,8 @@ namespace AsmResolver.PE.Platforms
     /// </summary>
     public abstract class Platform
     {
+        private static readonly ConcurrentDictionary<MachineType, GenericPlatform> GenericPlatforms = new();
+
         /// <summary>
         /// Gets a target platform by its machine type.
         /// </summary>
@@ -20,6 +23,16 @@ namespace AsmResolver.PE.Platforms
         public static Platform Get(MachineType machineType) => TryGet(machineType, out var platform)
             ? platform
             : throw new NotSupportedException($"Unsupported machine type {machineType}.");
+
+        /// <summary>
+        /// Gets a target platform by its machine type, and falls back to <see cref="GenericPlatform"/> if the
+        /// provided architecture is not officially supported.
+        /// </summary>
+        /// <param name="machineType">The machine type.</param>
+        /// <returns>The target platform.</returns>
+        public static Platform GetOrGeneric(MachineType machineType) => TryGet(machineType, out var platform)
+            ? platform
+            : GenericPlatforms.GetOrAdd(machineType, static machine => new GenericPlatform(machine));
 
         /// <summary>
         /// Gets a target platform by its machine type.

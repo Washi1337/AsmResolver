@@ -216,7 +216,7 @@ namespace AsmResolver.PE.File
         /// This value is only used by .NET PE images.
         /// Reference: https://github.com/dotnet/runtime/issues/36364
         /// </remarks>
-        Arm64DotNetSun = Amd64 ^ DotNetSunOSOverride,
+        Arm64DotNetSun = Arm64 ^ DotNetSunOSOverride,
 
         /// <summary>
         /// Indicates EFI byte code.

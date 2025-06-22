@@ -28,14 +28,7 @@ namespace AsmResolver.PE
         {
             File = file;
             Parameters = parameters;
-
-            if (!Platform.TryGet(file.FileHeader.Machine, out var platform))
-            {
-                this.BadImage($"File header contains an invalid or unsupported PE image architecture {file.FileHeader.Machine}.");
-                platform = Platform.Get(MachineType.I386);
-            }
-
-            Platform = platform;
+            Platform = Platform.GetOrGeneric(file.FileHeader.Machine);
         }
 
         /// <summary>

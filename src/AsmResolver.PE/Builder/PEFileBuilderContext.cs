@@ -21,7 +21,7 @@ public class PEFileBuilderContext
     public PEFileBuilderContext(PEImage image)
     {
         Image = image;
-        Platform = Platform.Get(image.MachineType);
+        Platform = Platform.GetOrGeneric(image.MachineType);
 
         ImportDirectory = new ImportDirectoryBuffer(Platform.Is32Bit);
         ExportDirectory = new ExportDirectoryBuffer();
