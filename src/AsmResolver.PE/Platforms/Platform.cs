@@ -56,6 +56,12 @@ namespace AsmResolver.PE.Platforms
                     or MachineType.Amd64DotNetSun
                     or MachineType.Amd64DotNetFreeBsd
                     or MachineType.Amd64DotNetNetBsd => Amd64Platform.Instance,
+                MachineType.ArmNt
+                    or MachineType.ArmNtDotNetApple
+                    or MachineType.ArmNtDotNetLinux
+                    or MachineType.ArmNtDotNetSun
+                    or MachineType.ArmNtDotNetFreeBsd
+                    or MachineType.ArmNtDotNetNetBsd => Arm32Platform.Instance,
                 MachineType.Arm64
                     or MachineType.Arm64DotNetApple
                     or MachineType.Arm64DotNetLinux

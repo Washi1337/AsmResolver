@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.IO;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Relocations;
@@ -83,7 +84,7 @@ public class Arm64Platform : Platform
     public override AddressTableInitializerStub CreateAddressTableInitializer(ISymbol virtualProtect)
     {
         // TODO: add support for initializer stubs.
-        throw new System.NotSupportedException("Address Table Initializer Stubs are currently not supported in the ARM64 target platform.");
+        throw new NotSupportedException($"Address table initializer stub generation is not supported for {TargetMachine} platforms.");
     }
 
     private sealed class Arm64ThunkStub(ISymbol symbol) : SegmentBase

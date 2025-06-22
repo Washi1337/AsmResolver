@@ -156,6 +156,16 @@ namespace AsmResolver.PE.File
         ArmNtDotNetLinux = ArmNt ^ DotNetLinuxOSOverride,
 
         /// <summary>
+        /// Indicates the ARM thumb-2 little endian architecture, but specifically targets SunOS operating system
+        /// derivatives.
+        /// </summary>
+        /// <remarks>
+        /// This value is only used by .NET PE images.
+        /// Reference: https://github.com/dotnet/runtime/issues/36364
+        /// </remarks>
+        ArmNtDotNetSun = ArmNt ^ DotNetSunOSOverride,
+
+        /// <summary>
         /// Indicates the ARM thumb-2 little endian architecture, but specifically targets NetBSD operating system
         /// derivatives.
         /// </summary>
