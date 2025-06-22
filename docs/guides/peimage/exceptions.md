@@ -17,11 +17,11 @@ using AsmResolver.PE.Exceptions;
 
 The `PEImage` class exposes the data directory through the `Exceptions`
 property.
-This is of type `IExceptionsDirectory`, which exposes individual `IRuntimeFunction`s through its `GetEntries` method:
+This is of type `IExceptionsDirectory`, which exposes individual `IRuntimeFunction`s through its `GetFunctions` method:
 
 ``` csharp
 PEImage image = ...;
-foreach (var function in image.Exceptions.GetEntries())
+foreach (var function in image.Exceptions.GetFunctions())
 {
     Console.WriteLine($"Begin:   {function.Begin.Rva:X8}");
     Console.WriteLine($"End:     {function.End.Rva:X8}");
@@ -32,7 +32,7 @@ foreach (var function in image.Exceptions.GetEntries())
 Different platforms use different physical formats for their runtime
 functions.
 To figure out what kind of format an image is using, check
-the `Machine` field in the file header of the PE file.
+the `MachineType` field in the file header of the PE file.
 
 ```csharp
 PEImage image = ...;
@@ -47,16 +47,16 @@ Below a table of the currently supported architectures and their corresponding r
 | `Arm64`      | `Arm64RuntimeFunction` |
 
 
-Entries in the data directory can be casted to the appropriate specific function types.
+Functions in the data directory can be casted to the appropriate platform-specific function types.
 For example, for AMD64 targets, you can cast all entries to a `X64RuntimeFunction`, and then access their platform-specific fields:
 
 ``` csharp
 PEImage image = ...;
-var directory = peImage.Exceptions;
+var directory = image.Exceptions;
 
 if (image.MachineType == MachineType.Amd64)
 {
-    foreach (var function in directory.GetEntries().Cast<X64RuntimeFunction>())
+    foreach (var function in directory.GetFunctions().Cast<X64RuntimeFunction>())
     {
         X64UnwindInfo unwindInfo = function.UnwindInfo;
         // ...
@@ -74,17 +74,14 @@ This class also exposes the x64-specific unwind info using the `X64UnwindInfo` c
 X64RuntimeFunction function = ...;
 X64UnwindInfo unwindInfo = function.UnwindInfo;
 
-// Get handler start.
 Console.WriteLine($"Unwind Codes: {unwindInfo.UnwindCodes.Length}");
-
-// Read custom SEH data associated to this unwind information.
-var dataReader = function.ExceptionHandlerData.CreateReader();
 ```
 
 ## ARM64
 
-For AMD64 targets, AsmResolver represents functions in the data directory using the `Arm64RuntimeFunction` class.
-Unwind info on ARM64 can either be packed or unpacked format, which is represented by `Arm64PackedUnwindInfo` and `Arm64UnpackedUnwindInfo` respectively.
+For ARM64 targets, AsmResolver represents functions in the data directory using the `Arm64RuntimeFunction` class.
+Unwind info on ARM64 can either be in a packed or unpacked format. 
+This is implemented by the `Arm64PackedUnwindInfo` and `Arm64UnpackedUnwindInfo` classes respectively.
 
 To determine whether a function has packed or unpacked unwind info, you can use e.g., pattern matching:
 
@@ -102,10 +99,11 @@ switch (function.UnwindInfo)
 }
 ```
 
-Packed unwind information is a bitvector that stores flags and counts suitable for many (smaller) functions (see [msdn](https://learn.microsoft.com/en-us/cpp/build/arm64-exception-handling?view=msvc-170#packed-unwind-data) for all fields).
+Packed unwind information is a single bit vector that stores flags describing a simple exception handling mechanism for a single function (see [msdn](https://learn.microsoft.com/en-us/cpp/build/arm64-exception-handling?view=msvc-170#packed-unwind-data) for all fields), and is suitable for many simple (smaller) functions without sacrificing much disk space:
 
 ```csharp
 Arm64PackedUnwindInfo packedInfo = ...;
+
 Console.WriteLine($"Frame Size: {packedInfo.FrameSize}");
 ```
 
@@ -113,5 +111,6 @@ Unpacked unwind information follows the `xdata` format (see [msdn](https://learn
 
 ```csharp
 Arm64UnpackedUnwindInfo unpackedInfo = ...;
+
 Console.WriteLine($"Unwind Codes: {unpackedInfo.UnwindCodes.Length}");
 ```
