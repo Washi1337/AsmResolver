@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Exceptions
     public class X64RuntimeFunction : IRuntimeFunction, IWritable
     {
         /// <summary>
-        /// Get th
+        /// The size of a single entry.
         /// </summary>
         public const int EntrySize = sizeof(uint) * 3;
 
@@ -48,6 +48,8 @@ namespace AsmResolver.PE.Exceptions
             get;
             set;
         }
+
+        IUnwindInfo? IRuntimeFunction.UnwindInfo => UnwindInfo;
 
         /// <summary>
         /// Reads a single <see cref="X64RuntimeFunction"/> from the provided input stream.

@@ -7,7 +7,7 @@ namespace AsmResolver.PE.Exceptions
     /// Encodes the effects a function has on the stack pointer, and where the nonvolatile
     /// registers are saved on the stack.
     /// </summary>
-    public class X64UnwindInfo : SegmentBase
+    public class X64UnwindInfo : SegmentBase, IUnwindInfo
     {
         private byte _firstByte;
         private byte _frameByte;

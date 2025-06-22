@@ -122,7 +122,7 @@ public class ManagedPEFileBuilder : PEFileBuilder
         }
 
         if (context.ClrBootstrapper.HasValue)
-            contents.Add(context.ClrBootstrapper.Value.Segment);
+            contents.Add(context.ClrBootstrapper.Value.Segment, context.Platform.ThunkStubAlignment);
 
         if (context.Image.Exports is { Entries: { Count: > 0 } entries })
         {

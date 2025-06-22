@@ -43,6 +43,12 @@ namespace AsmResolver.PE.Platforms
                     or MachineType.Amd64DotNetSun
                     or MachineType.Amd64DotNetFreeBsd
                     or MachineType.Amd64DotNetNetBsd => Amd64Platform.Instance,
+                MachineType.Arm64
+                    or MachineType.Arm64DotNetApple
+                    or MachineType.Arm64DotNetLinux
+                    or MachineType.Arm64DotNetSun
+                    or MachineType.Arm64DotNetFreeBsd
+                    or MachineType.Arm64DotNetNetBsd => Arm64Platform.Instance,
                 _ => null
             };
 
@@ -82,6 +88,14 @@ namespace AsmResolver.PE.Platforms
         /// Gets a value indicating the size of a single pointer.
         /// </summary>
         public int PointerSize => Is32Bit ? sizeof(uint) : sizeof(ulong);
+
+        /// <summary>
+        /// Gets the default byte-boundary used in aligning thunk stubs in a PE file.
+        /// </summary>
+        public abstract uint ThunkStubAlignment
+        {
+            get;
+        }
 
         /// <summary>
         /// Creates a new thunk stub that transfers control to the provided symbol.

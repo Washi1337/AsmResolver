@@ -62,6 +62,14 @@ namespace AsmResolver
 
         /// <inheritdoc />
         public ISegment? GetSegment() => throw new InvalidOperationException();
+
+        /// <inheritdoc />
+        public override string ToString() => Additive switch
+        {
+            < 0 => $"({Base})-0x{-Additive:X}",
+            0 => $"{Base}",
+            > 0 => $"({Base})+0x{Additive:X}",
+        };
     }
 
 }

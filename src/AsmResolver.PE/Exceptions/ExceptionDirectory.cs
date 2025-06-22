@@ -15,12 +15,12 @@ namespace AsmResolver.PE.Exceptions
         /// <summary>
         /// Gets a collection of functions that are stored in the table.
         /// </summary>
-        public IList<TFunction> Entries
+        public IList<TFunction> Functions
         {
             get
             {
                 if (_entries is null)
-                    Interlocked.CompareExchange(ref _entries, GetEntries(), null);
+                    Interlocked.CompareExchange(ref _entries, GetFunctions(), null);
                 return _entries;
             }
         }
@@ -30,11 +30,11 @@ namespace AsmResolver.PE.Exceptions
         /// </summary>
         /// <returns>The entries.</returns>
         /// <remarks>
-        /// This method is called upon initialization of the <see cref="Entries"/> property.
+        /// This method is called upon initialization of the <see cref="Functions"/> property.
         /// </remarks>
-        protected virtual IList<TFunction> GetEntries() => new List<TFunction>();
+        protected virtual IList<TFunction> GetFunctions() => new List<TFunction>();
 
         /// <inheritdoc />
-        IEnumerable<IRuntimeFunction> IExceptionDirectory.GetEntries() => (IEnumerable<IRuntimeFunction>) Entries;
+        IEnumerable<IRuntimeFunction> IExceptionDirectory.GetFunctions() => (IEnumerable<IRuntimeFunction>) Functions;
     }
 }
