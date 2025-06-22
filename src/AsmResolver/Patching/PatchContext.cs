@@ -42,11 +42,11 @@ namespace AsmResolver.Patching
         /// Gets the actual offset the writer started writing the segment at.
         /// </summary>
         /// <remarks>
-        /// This property is in most cases equivalent to <see cref="ISegment.Offset" />. However, callers may be calling
+        /// This property is in most cases equivalent to <c>Segment.Offset</c>. However, callers may be calling
         /// <see cref="PatchedSegment.Write"/> with a <see cref="BinaryStreamWriter"/> that is not writing the entire
         /// enclosing file (e.g., when calling <see cref="Extensions.WriteIntoArray(ISegment)"/>).
         /// Implementations of <see cref="IPatch"/> should therefore always prefer <see cref="WriterBase"/> over
-        /// <see cref="ISegment.Offset"/> when adjusting the current offset of <see cref="Writer"/>.
+        /// <c>Segment.Offset</c> when adjusting the current offset of <see cref="Writer"/>.
         /// </remarks>
         public ulong WriterBase
         {
