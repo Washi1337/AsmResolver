@@ -101,6 +101,16 @@ namespace AsmResolver.DotNet
             });
 
         /// <summary>
+        /// References System.Private.CoreLib.dll, Version=10.0.0.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by .NET
+        /// assemblies targeting .NET 10.0.
+        /// </summary>
+        public static readonly AssemblyReference SystemPrivateCoreLib_v10_0_0_0 = new("System.Private.CoreLib",
+            new Version(10, 0, 0, 0), false, new byte[]
+            {
+                0x7C, 0xEC, 0x85, 0xD7, 0xBE, 0xA7, 0x79, 0x8E
+            });
+
+        /// <summary>
         /// References System.Runtime.dll, Version=4.0.0.0, PublicKeyToken=B03F5F7F11D50A3A. This is used by .NET
         /// assemblies targeting .NET standard 1.0 and 1.1.
         /// </summary>
@@ -277,6 +287,7 @@ namespace AsmResolver.DotNet
                 SystemPrivateCoreLib_v7_0_0_0,
                 SystemPrivateCoreLib_v8_0_0_0,
                 SystemPrivateCoreLib_v9_0_0_0,
+                SystemPrivateCoreLib_v10_0_0_0,
             };
 
             KnownCorLibNames = new HashSet<string>(KnownCorLibReferences.Select(r => r.Name!.Value));
