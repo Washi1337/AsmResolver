@@ -49,6 +49,8 @@ namespace AsmResolver.PE.Exceptions
             set;
         }
 
+        IUnwindInfo? IRuntimeFunction.UnwindInfo => UnwindInfo;
+
         /// <summary>
         /// Reads a single <see cref="X64RuntimeFunction"/> from the provided input stream.
         /// </summary>

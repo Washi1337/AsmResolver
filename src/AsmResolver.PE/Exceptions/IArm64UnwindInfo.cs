@@ -3,12 +3,12 @@ namespace AsmResolver.PE.Exceptions;
 /// <summary>
 /// Provides members describing unwind information for an ARM64 runtime function.
 /// </summary>
-public interface IArm64UnwindInfo
+public interface IArm64UnwindInfo : IUnwindInfo
 {
     /// <summary>
     /// Gets the raw contents of the data field for the RUNTIME_FUNCTION entry.
     /// </summary>
-    uint Data
+    uint FieldValue
     {
         get;
     }

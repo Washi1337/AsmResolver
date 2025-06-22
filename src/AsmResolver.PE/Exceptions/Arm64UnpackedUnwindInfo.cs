@@ -37,7 +37,7 @@ public class Arm64UnpackedUnwindInfo : SegmentBase, IArm64UnwindInfo
     private ushort _extendedEpilogCount;
     private byte _extendedCodeWords;
 
-    uint IArm64UnwindInfo.Data => Rva;
+    uint IArm64UnwindInfo.FieldValue => Rva;
 
     /// <inheritdoc />
     public uint FunctionLength
@@ -102,7 +102,16 @@ public class Arm64UnpackedUnwindInfo : SegmentBase, IArm64UnwindInfo
     } = ArrayShim.Empty<byte>();
 
     /// <summary>
-    /// When available, gets or sets a reference to optional exception handler data.
+    /// When available, gets or sets a reference to the exception handler data.
+    /// </summary>
+    public ISegmentReference ExceptionHandler
+    {
+        get;
+        set;
+    } = SegmentReference.Null;
+
+    /// <summary>
+    /// When available, gets or sets a reference to the exception handler data.
     /// </summary>
     public ISegmentReference ExceptionHandlerData
     {
@@ -139,7 +148,10 @@ public class Arm64UnpackedUnwindInfo : SegmentBase, IArm64UnwindInfo
         result.UnwindCodes = reader.ReadBytes(wordCount * sizeof(uint));
 
         if (result.X)
-            result.ExceptionHandlerData = context.File.GetReferenceToRva(reader.ReadUInt32());
+        {
+            result.ExceptionHandler = context.File.GetReferenceToRva(reader.ReadUInt32());
+            result.ExceptionHandlerData = context.File.GetReferenceToRva(reader.Rva);
+        }
 
         return result;
     }
@@ -200,6 +212,10 @@ public class Arm64UnpackedUnwindInfo : SegmentBase, IArm64UnwindInfo
         writer.Align(sizeof(uint));
 
         if (X)
+        {
             writer.WriteUInt32(ExceptionHandlerData.Rva);
+            if (ExceptionHandlerData.IsBounded && ExceptionHandlerData.GetSegment() is {} segment)
+                segment.Write(writer);
+        }
     }
 }

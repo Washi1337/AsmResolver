@@ -20,5 +20,13 @@ namespace AsmResolver.PE.Exceptions
         {
             get;
         }
+
+        /// <summary>
+        /// Gets the unwind information associated to the referenced function.
+        /// </summary>
+        IUnwindInfo? UnwindInfo
+        {
+            get;
+        }
     }
 }

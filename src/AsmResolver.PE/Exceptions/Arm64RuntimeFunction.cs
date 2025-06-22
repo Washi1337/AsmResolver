@@ -64,11 +64,13 @@ public class Arm64RuntimeFunction : IRuntimeFunction, IWritable
     /// <summary>
     /// Gets or sets the unwind info associated with this runtime function.
     /// </summary>
-    public IArm64UnwindInfo UnwindInfo
+    public IArm64UnwindInfo? UnwindInfo
     {
         get;
         set;
     }
+
+    IUnwindInfo? IRuntimeFunction.UnwindInfo => UnwindInfo;
 
     /// <inheritdoc />
     public uint GetPhysicalSize() => sizeof(uint) * 2;
@@ -77,6 +79,6 @@ public class Arm64RuntimeFunction : IRuntimeFunction, IWritable
     public void Write(BinaryStreamWriter writer)
     {
         writer.WriteUInt32(Begin.Rva);
-        writer.WriteUInt32(UnwindInfo.Data);
+        writer.WriteUInt32(UnwindInfo?.FieldValue ?? 0u);
     }
 }

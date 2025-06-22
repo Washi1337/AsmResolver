@@ -47,7 +47,7 @@ public class Arm64PackedUnwindInfo : IArm64UnwindInfo
         _flags = flags;
     }
 
-    uint IArm64UnwindInfo.Data => _flags;
+    uint IArm64UnwindInfo.FieldValue => _flags;
 
     /// <inheritdoc />
     public uint FunctionLength
@@ -101,4 +101,8 @@ public class Arm64PackedUnwindInfo : IArm64UnwindInfo
         get => _flags.GetFlags(FrameSizeBitIndex, FrameSizeBitMask) * 16u;
         set => _flags = _flags.SetFlags(FrameSizeBitIndex, FrameSizeBitMask, value / 16u);
     }
+
+    ISegmentReference IUnwindInfo.ExceptionHandler => SegmentReference.Null;
+
+    ISegmentReference IUnwindInfo.ExceptionHandlerData => SegmentReference.Null;
 }
