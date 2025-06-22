@@ -13,12 +13,12 @@ public class Arm64ExceptionDirectoryTest
         var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldC_Arm64, TestReaderParameters);
         var exceptions = Assert.IsAssignableFrom<ExceptionDirectory<Arm64RuntimeFunction>>(image.Exceptions);
 
-        Assert.Equal(0x1000u, exceptions.Entries[0].Begin.Rva);
-        Assert.Equal(0x1018u, exceptions.Entries[0].End.Rva);
-        Assert.Equal(0x1058u, exceptions.Entries[3].Begin.Rva);
-        Assert.Equal(0x1080u, exceptions.Entries[3].End.Rva);
-        Assert.Equal(0x1BD8u, exceptions.Entries[^1].Begin.Rva);
-        Assert.Equal(0x1C08u, exceptions.Entries[^1].End.Rva);
+        Assert.Equal(0x1000u, exceptions.Functions[0].Begin.Rva);
+        Assert.Equal(0x1018u, exceptions.Functions[0].End.Rva);
+        Assert.Equal(0x1058u, exceptions.Functions[3].Begin.Rva);
+        Assert.Equal(0x1080u, exceptions.Functions[3].End.Rva);
+        Assert.Equal(0x1BD8u, exceptions.Functions[^1].Begin.Rva);
+        Assert.Equal(0x1C08u, exceptions.Functions[^1].End.Rva);
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public class Arm64ExceptionDirectoryTest
     {
         var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldC_Arm64, TestReaderParameters);
         var exceptions = Assert.IsAssignableFrom<ExceptionDirectory<Arm64RuntimeFunction>>(image.Exceptions);
-        Assert.IsAssignableFrom<Arm64PackedUnwindInfo>(exceptions.Entries[3].UnwindInfo);
+        Assert.IsAssignableFrom<Arm64PackedUnwindInfo>(exceptions.Functions[3].UnwindInfo);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class Arm64ExceptionDirectoryTest
     {
         var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldC_Arm64, TestReaderParameters);
         var exceptions = Assert.IsAssignableFrom<ExceptionDirectory<Arm64RuntimeFunction>>(image.Exceptions);
-        Assert.IsAssignableFrom<Arm64UnpackedUnwindInfo>(exceptions.Entries[0].UnwindInfo);
+        Assert.IsAssignableFrom<Arm64UnpackedUnwindInfo>(exceptions.Functions[0].UnwindInfo);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class Arm64ExceptionDirectoryTest
         // Read original packed info
         var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldC_Arm64, TestReaderParameters);
         var exceptions = Assert.IsAssignableFrom<ExceptionDirectory<Arm64RuntimeFunction>>(image.Exceptions);
-        var function = exceptions.Entries[3];
+        var function = exceptions.Functions[3];
         var unwindInfo = Assert.IsAssignableFrom<Arm64PackedUnwindInfo>(function.UnwindInfo);
 
         // Write
@@ -71,7 +71,7 @@ public class Arm64ExceptionDirectoryTest
         // Read original unpacked info
         var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldC_Arm64, TestReaderParameters);
         var exceptions = Assert.IsAssignableFrom<ExceptionDirectory<Arm64RuntimeFunction>>(image.Exceptions);
-        var function = exceptions.Entries[7];
+        var function = exceptions.Functions[7];
         var unwindInfo = Assert.IsAssignableFrom<Arm64UnpackedUnwindInfo>(function.UnwindInfo);
 
         // Write

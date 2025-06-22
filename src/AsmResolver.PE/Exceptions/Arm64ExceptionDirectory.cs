@@ -16,7 +16,7 @@ internal class Arm64ExceptionDirectory : ExceptionDirectory<Arm64RuntimeFunction
     }
 
     /// <inheritdoc />
-    protected override IList<Arm64RuntimeFunction> GetEntries()
+    protected override IList<Arm64RuntimeFunction> GetFunctions()
     {
         var reader = _reader.Fork();
         var result = new List<Arm64RuntimeFunction>();

@@ -16,7 +16,7 @@ namespace AsmResolver.PE.Exceptions
         }
 
         /// <inheritdoc />
-        protected override IList<X64RuntimeFunction> GetEntries()
+        protected override IList<X64RuntimeFunction> GetFunctions()
         {
             var reader = _reader.Fork();
             var result = new List<X64RuntimeFunction>();
