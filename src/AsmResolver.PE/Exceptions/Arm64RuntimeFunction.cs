@@ -41,8 +41,8 @@ public class Arm64RuntimeFunction : IRuntimeFunction, IWritable
             return new Arm64RuntimeFunction(begin, new Arm64PackedUnwindInfo(unwindInfoRva));
 
         var info = context.File.TryCreateReaderAtRva(unwindInfoRva, out var unwindReader)
-            ? Arm64XDataUnwindInfo.FromReader(context, ref unwindReader)
-            : new Arm64XDataUnwindInfo();
+            ? Arm64UnpackedUnwindInfo.FromReader(context, ref unwindReader)
+            : new Arm64UnpackedUnwindInfo();
 
         return new Arm64RuntimeFunction(begin, info);
     }

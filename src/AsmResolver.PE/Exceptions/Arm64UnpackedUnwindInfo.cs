@@ -7,7 +7,7 @@ namespace AsmResolver.PE.Exceptions;
 /// <summary>
 /// Represents an unpacked ARM64 .xdata unwind info record associated to a RUNTIME_FUNCTION of an ARM64 executable file.
 /// </summary>
-public class Arm64XDataUnwindInfo : SegmentBase, IArm64UnwindInfo
+public class Arm64UnpackedUnwindInfo : SegmentBase, IArm64UnwindInfo
 {
     private const int FunctionLengthBitIndex = 0;
     private const int FunctionLengthBitLength = 17;
@@ -116,9 +116,9 @@ public class Arm64XDataUnwindInfo : SegmentBase, IArm64UnwindInfo
     /// <param name="context">The reader context.</param>
     /// <param name="reader">The input stream.</param>
     /// <returns>The read unwind record.</returns>
-    public static Arm64XDataUnwindInfo FromReader(PEReaderContext context, ref BinaryStreamReader reader)
+    public static Arm64UnpackedUnwindInfo FromReader(PEReaderContext context, ref BinaryStreamReader reader)
     {
-        var result = new Arm64XDataUnwindInfo();
+        var result = new Arm64UnpackedUnwindInfo();
         result.UpdateOffsets(context.GetRelocation(reader.Offset, reader.Rva));
 
         result._header = reader.ReadUInt32();

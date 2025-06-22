@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.File
@@ -60,6 +61,8 @@ namespace AsmResolver.PE.File
         public ISegment? GetSegment() => throw new InvalidOperationException();
 
         /// <inheritdoc />
-        public override string ToString() => $"0x{Rva:X8}";
+        public override string ToString() => string.IsNullOrEmpty(_peFile.FilePath)
+            ? $"[module]+0x{Rva:X8}"
+            : $"{Path.GetFileName(_peFile.FilePath)}+0x{Rva:X8}";
     }
 }

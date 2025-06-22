@@ -1,3 +1,5 @@
+using System.IO;
+using AsmResolver.IO;
 using AsmResolver.PE.Exceptions;
 using Xunit;
 
@@ -28,10 +30,64 @@ public class Arm64ExceptionDirectoryTest
     }
 
     [Fact]
-    public void ReadXDataUnwindInfo()
+    public void ReadUnpackedUnwindInfo()
     {
         var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldC_Arm64, TestReaderParameters);
         var exceptions = Assert.IsAssignableFrom<ExceptionDirectory<Arm64RuntimeFunction>>(image.Exceptions);
-        Assert.IsAssignableFrom<Arm64XDataUnwindInfo>(exceptions.Entries[0].UnwindInfo);
+        Assert.IsAssignableFrom<Arm64UnpackedUnwindInfo>(exceptions.Entries[0].UnwindInfo);
+    }
+
+    [Fact]
+    public void RoundtripPackedUnwindInfo()
+    {
+        // Read original packed info
+        var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldC_Arm64, TestReaderParameters);
+        var exceptions = Assert.IsAssignableFrom<ExceptionDirectory<Arm64RuntimeFunction>>(image.Exceptions);
+        var function = exceptions.Entries[3];
+        var unwindInfo = Assert.IsAssignableFrom<Arm64PackedUnwindInfo>(function.UnwindInfo);
+
+        // Write
+        using var stream = new MemoryStream();
+        function.Write(new BinaryStreamWriter(stream));
+
+        // Re-read
+        var context = new PEReaderContext(image.PEFile!, TestReaderParameters);
+        var reader = new BinaryStreamReader(stream.ToArray());
+        var newFunction = Arm64RuntimeFunction.FromReader(context, ref reader);
+        var newUnwindInfo = Assert.IsAssignableFrom<Arm64PackedUnwindInfo>(newFunction.UnwindInfo);
+
+        // Verify equivalence
+        Assert.Equal(unwindInfo.FunctionLength, newUnwindInfo.FunctionLength);
+        Assert.Equal(unwindInfo.FPRegisterCount, newUnwindInfo.FPRegisterCount);
+        Assert.Equal(unwindInfo.IntegerRegisterCount, newUnwindInfo.IntegerRegisterCount);
+        Assert.Equal(unwindInfo.HomesRegisters, newUnwindInfo.HomesRegisters);
+        Assert.Equal(unwindInfo.CR, newUnwindInfo.CR);
+        Assert.Equal(unwindInfo.FrameSize, newUnwindInfo.FrameSize);
+    }
+
+    [Fact]
+    public void RoundtripUnpackedUnwindInfo()
+    {
+        // Read original unpacked info
+        var image = PEImage.FromBytes(Properties.Resources.NativeHelloWorldC_Arm64, TestReaderParameters);
+        var exceptions = Assert.IsAssignableFrom<ExceptionDirectory<Arm64RuntimeFunction>>(image.Exceptions);
+        var function = exceptions.Entries[7];
+        var unwindInfo = Assert.IsAssignableFrom<Arm64UnpackedUnwindInfo>(function.UnwindInfo);
+
+        // Write
+        using var stream = new MemoryStream();
+        unwindInfo.Write(new BinaryStreamWriter(stream));
+
+        // Reread
+        var context = new PEReaderContext(image.PEFile!, TestReaderParameters);
+        var reader = new BinaryStreamReader(stream.ToArray());
+        var newUnwindInfo = Arm64UnpackedUnwindInfo.FromReader(context, ref reader);
+
+        // Verify equivalence
+        Assert.Equal(unwindInfo.FunctionLength, newUnwindInfo.FunctionLength);
+        Assert.Equal(unwindInfo.Version, newUnwindInfo.Version);
+        Assert.Equal(unwindInfo.EpilogScopes, newUnwindInfo.EpilogScopes);
+        Assert.Equal(unwindInfo.UnwindCodes, newUnwindInfo.UnwindCodes);
+        Assert.Equal(unwindInfo.ExceptionHandlerData.Rva, newUnwindInfo.ExceptionHandlerData.Rva);
     }
 }
