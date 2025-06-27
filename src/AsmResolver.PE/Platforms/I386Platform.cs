@@ -8,6 +8,11 @@ namespace AsmResolver.PE.Platforms
     /// <summary>
     /// Provides information and services for the I386 target platform.
     /// </summary>
+    /// <remarks>
+    /// Note that .NET AnyCPU binaries are also compiled as i386 binaries.
+    /// To distinguish between x86 and AnyCPU .NET binaries, refer to the .NET data directory's attributes to see if
+    /// <c>ILOnly</c> is set.
+    /// </remarks>
     public class I386Platform : Platform
     {
         /// <summary>

@@ -72,16 +72,17 @@ namespace AsmResolver.Patching
         /// <inheritdoc />
         public void Write(BinaryStreamWriter writer)
         {
+            ulong writerBase = writer.Offset;
             Contents.Write(writer);
-            ApplyPatches(writer);
+            ApplyPatches(writer, writerBase);
         }
 
-        private void ApplyPatches(BinaryStreamWriter writer)
+        private void ApplyPatches(BinaryStreamWriter writer, ulong writerBase)
         {
             ulong offset = writer.Offset;
 
             for (int i = 0; i < Patches.Count; i++)
-                Patches[i].Apply(new PatchContext(Contents, _imageBase, writer));
+                Patches[i].Apply(new PatchContext(Contents, _imageBase, writerBase, writer));
 
             writer.Offset = offset;
         }

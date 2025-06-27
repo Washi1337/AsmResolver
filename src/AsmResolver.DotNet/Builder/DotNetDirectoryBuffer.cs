@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Builder
             Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
             Resources = new DotNetResourcesDirectoryBuffer();
-            VTableFixups = new VTableFixupsBuffer(Platform.Get(module.MachineType), symbolsProvider);
+            VTableFixups = new VTableFixupsBuffer(Platform.GetOrGeneric(module.MachineType), symbolsProvider);
         }
 
         /// <summary>

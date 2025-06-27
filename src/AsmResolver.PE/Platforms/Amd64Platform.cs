@@ -35,7 +35,7 @@ namespace AsmResolver.PE.Platforms
         {
             var segment = new DataSegment([
                     0x48, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // rex.w rex.b mov rax, [&symbol]
-                    0xFF, 0xE0 // jmp [rax]
+                    0xFF, 0xE0                                                  // jmp [rax]
                 ])
                 .AsPatchedSegment()
                 .Patch(2, AddressFixupType.Absolute64BitAddress, entryPoint);
@@ -48,14 +48,25 @@ namespace AsmResolver.PE.Platforms
         /// <inheritdoc />
         public override bool TryExtractThunkAddress(PEImage image, BinaryStreamReader reader, out uint rva)
         {
-            if (reader.ReadUInt16() != 0xA148)
+            ushort opcode = reader.ReadUInt16();
+            switch (opcode)
             {
-                rva = 0;
-                return false;
-            }
+                case 0xA148:
+                    // 0x48, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  ; rex.w rex.b mov rax, [&symbol]
+                    // 0xFF, 0xE0                                                  ; jmp [rax]
+                    rva = (uint) (reader.ReadUInt64() - image.ImageBase);
+                    return reader.ReadUInt16() == 0xE0FF;
 
-            rva = (uint) (reader.ReadUInt64() - image.ImageBase);
-            return reader.ReadUInt16() == 0xE0FF;
+                case 0x25FF:
+                    // 0xFF, 0x25, 0x00, 0x00, 0x00, 0x00   ; jmp [rip+rel(&symbol)]
+                    uint relative = reader.ReadUInt32();
+                    rva = reader.Rva + relative;
+                    return true;
+
+                default:
+                    rva = 0;
+                    return false;
+            }
         }
 
         /// <inheritdoc />
