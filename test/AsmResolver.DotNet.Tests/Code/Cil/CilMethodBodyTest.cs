@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
         private CilMethodBody RebuildAndLookup(CilMethodBody methodBody)
         {
-            var module = methodBody.Owner.DeclaringModule!;
+            var module = methodBody.Owner!.DeclaringModule!;
 
             var stream = new MemoryStream();
             module.Write(stream);

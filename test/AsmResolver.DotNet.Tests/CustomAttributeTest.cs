@@ -752,8 +752,7 @@ namespace AsmResolver.DotNet.Tests
             var factory = module.CorLibTypeFactory;
             var ctor = factory.CorLibScope
                 .CreateTypeReference("System", "CLSCompliantAttribute")
-                .CreateMemberReference(".ctor", MethodSignature.CreateInstance(factory.Void, factory.Boolean))
-                .ImportWith(module.DefaultImporter);
+                .CreateMemberReference(".ctor", MethodSignature.CreateInstance(factory.Void, factory.Boolean));
 
             var attribute = new CustomAttribute(ctor);
 

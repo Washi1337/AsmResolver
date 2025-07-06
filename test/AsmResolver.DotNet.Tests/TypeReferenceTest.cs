@@ -25,14 +25,13 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = new ModuleDefinition("SomeModule");
             module.GetOrCreateModuleType().Fields.Add(new FieldDefinition(
-                "SomeField",
-                FieldAttributes.Static,
-                new TypeDefOrRefSignature(new TypeReference(
-                    new AssemblyReference("SomeAssembly", new Version(1, 0, 0, 0)),
-                    "SomeNamespace",
-                    "SomeName")
-                ).ImportWith(module.DefaultImporter)
-            ));
+                    "SomeField",
+                    FieldAttributes.Static,
+                    new AssemblyReference("SomeAssembly", new Version(1, 0, 0, 0))
+                        .CreateTypeReference("SomeNamespace", "SomeName")
+                        .ToTypeSignature(false)
+                )
+            );
 
             var image = module.ToPEImage();
 
@@ -60,14 +59,10 @@ namespace AsmResolver.DotNet.Tests
             module.GetOrCreateModuleType().Fields.Add(new FieldDefinition(
                 "SomeField",
                 FieldAttributes.Static,
-                new TypeDefOrRefSignature(new TypeReference(
-                    new TypeReference(
-                        new AssemblyReference("SomeAssembly", new Version(1, 0, 0, 0)),
-                        "SomeNamespace",
-                        "SomeName"),
-                    null,
-                    "SomeNestedType"
-                )).ImportWith(module.DefaultImporter)
+                new AssemblyReference("SomeAssembly", new Version(1, 0, 0, 0))
+                    .CreateTypeReference("SomeNamespace", "SomeName")
+                    .CreateTypeReference("SomeNestedType")
+                    .ToTypeSignature(false)
             ));
 
             var image = module.ToPEImage();
@@ -96,11 +91,7 @@ namespace AsmResolver.DotNet.Tests
             module.GetOrCreateModuleType().Fields.Add(new FieldDefinition(
                 "SomeField",
                 FieldAttributes.Static,
-                new TypeDefOrRefSignature(new TypeReference(
-                    module,
-                    "SomeNamepace",
-                    "SomeName")
-                ).ImportWith(module.DefaultImporter)
+                module.CreateTypeReference("SomeNamepace", "SomeName").ToTypeSignature(false)
             ));
 
             var image = module.ToPEImage();
@@ -119,11 +110,7 @@ namespace AsmResolver.DotNet.Tests
             module.GetOrCreateModuleType().Fields.Add(new FieldDefinition(
                 "SomeField",
                 FieldAttributes.Static,
-                new TypeDefOrRefSignature(new TypeReference(
-                    null,
-                    "SomeNamespace",
-                    "SomeName")
-                ).ImportWith(module.DefaultImporter)
+                new TypeReference(null, "SomeNamespace", "SomeName").ToTypeSignature(false)
             ));
 
             var image = module.ToPEImage();
