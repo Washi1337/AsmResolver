@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet
         public string FullName => Name ?? NullName;
 
         /// <inheritdoc />
-        public ModuleDefinition? Module
+        public ModuleDefinition? ContextModule
         {
             get;
             private set;
@@ -95,8 +95,8 @@ namespace AsmResolver.DotNet
 
         ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
-            get => Module;
-            set => Module = value;
+            get => ContextModule;
+            set => ContextModule = value;
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public bool IsImportedInModule(ModuleDefinition module) => Module == module;
+        public bool IsImportedInModule(ModuleDefinition module) => ContextModule == module;
 
         /// <summary>
         /// Imports the file using the provided reference importer object.

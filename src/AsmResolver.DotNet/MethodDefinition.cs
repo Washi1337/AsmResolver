@@ -47,8 +47,8 @@ namespace AsmResolver.DotNet
         protected MethodDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<MethodDefinition, Utf8String?>(x => GetName());
-            _declaringType = new LazyVariable<MethodDefinition, TypeDefinition?>(x => GetDeclaringType());
+            _name = new LazyVariable<MethodDefinition, Utf8String?>(x => x.GetName());
+            _declaringType = new LazyVariable<MethodDefinition, TypeDefinition?>(x => x.GetDeclaringType());
             _signature = new LazyVariable<MethodDefinition, MethodSignature?>(x => x.GetSignature());
             _methodBody = new LazyVariable<MethodDefinition, MethodBody?>(static x =>
             {
@@ -551,7 +551,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public virtual ModuleDefinition? Module => DeclaringType?.Module;
+        public virtual ModuleDefinition? DeclaringModule => DeclaringType?.DeclaringModule;
+
+        ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <summary>
         /// Gets the type that defines the method.
@@ -846,8 +848,7 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
-            return Module == module
-                   && (Signature?.IsImportedInModule(module) ?? false);
+            return DeclaringModule == module && (Signature?.IsImportedInModule(module) ?? false);
         }
 
         /// <summary>
@@ -898,7 +899,7 @@ namespace AsmResolver.DotNet
                 type1 = type1.DeclaringType;
             }
 
-            bool isInSameAssembly = SignatureComparer.Default.Equals(declaringType.Module, type.Module);
+            bool isInSameAssembly = SignatureComparer.Default.Equals(declaringType.DeclaringModule, type.DeclaringModule);
 
             // Assembly (internal in C#) methods are accessible by types in the same assembly.
             if (IsAssembly || IsFamilyOrAssembly)

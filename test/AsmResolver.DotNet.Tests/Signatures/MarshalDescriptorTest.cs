@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         private static MethodDefinition RebuildAndLookup(MethodDefinition method)
         {
             var builder = new ManagedPEImageBuilder();
-            var newImage = builder.CreateImage(method.Module).ConstructedImage;
+            var newImage = builder.CreateImage(method.DeclaringModule!).ConstructedImage;
             var newModule = ModuleDefinition.FromImage(newImage, TestReaderParameters);
             return LookupMethodInModule(newModule, method.Name);
         }
@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         private static FieldDefinition RebuildAndLookup(FieldDefinition field)
         {
             var builder = new ManagedPEImageBuilder();
-            var newImage = builder.CreateImage(field.Module).ConstructedImage;
+            var newImage = builder.CreateImage(field.DeclaringModule!).ConstructedImage;
             var newModule = ModuleDefinition.FromImage(newImage, TestReaderParameters);
             return LookupFieldInModule(newModule, field.Name);
         }

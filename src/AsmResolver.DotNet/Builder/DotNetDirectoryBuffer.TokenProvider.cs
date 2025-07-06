@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Builder
         /// <inheritdoc />
         public MetadataToken GetTypeDefinitionToken(TypeDefinition? type, object? diagnosticSource = null)
         {
-            return AssertIsImported(type, diagnosticSource)
+            return AssertIsInSameModule(type, diagnosticSource)
                 ? _tokenMapping[type]
                 : MetadataToken.Zero;
         }
@@ -58,7 +58,7 @@ namespace AsmResolver.DotNet.Builder
         /// <inheritdoc />
         public MetadataToken GetFieldDefinitionToken(FieldDefinition? field, object? diagnosticSource = null)
         {
-            return AssertIsImported(field, diagnosticSource)
+            return AssertIsInSameModule(field, diagnosticSource)
                 ? _tokenMapping[field]
                 : MetadataToken.Zero;
         }
@@ -66,7 +66,7 @@ namespace AsmResolver.DotNet.Builder
         /// <inheritdoc />
         public MetadataToken GetMethodDefinitionToken(MethodDefinition? method, object? diagnosticSource = null)
         {
-            return AssertIsImported(method, diagnosticSource)
+            return AssertIsInSameModule(method, diagnosticSource)
                 ? _tokenMapping[method]
                 : MetadataToken.Zero;
         }
@@ -79,7 +79,7 @@ namespace AsmResolver.DotNet.Builder
         /// <returns>The metadata token of the added parameter definition.</returns>
         public MetadataToken GetParameterDefinitionToken(ParameterDefinition? parameter)
         {
-            return AssertIsImported(parameter, parameter?.Method)
+            return AssertIsInSameModule(parameter, parameter?.Method)
                 ? _tokenMapping[parameter]
                 : MetadataToken.Zero;
         }
@@ -91,7 +91,7 @@ namespace AsmResolver.DotNet.Builder
         /// <returns>The metadata token of the added property definition.</returns>
         public MetadataToken GetPropertyDefinitionToken(PropertyDefinition? property)
         {
-            return AssertIsImported(property, property?.DeclaringType)
+            return AssertIsInSameModule(property, property?.DeclaringType)
                 ? _tokenMapping[property]
                 : MetadataToken.Zero;
         }
@@ -103,7 +103,7 @@ namespace AsmResolver.DotNet.Builder
         /// <returns>The metadata token of the added event definition.</returns>
         public MetadataToken GetEventDefinitionToken(EventDefinition? @event)
         {
-            return AssertIsImported(@event, @event?.DeclaringType)
+            return AssertIsInSameModule(@event, @event?.DeclaringType)
                 ? _tokenMapping[@event]
                 : MetadataToken.Zero;
         }

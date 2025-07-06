@@ -86,7 +86,7 @@ namespace AsmResolver.DotNet.Signatures
         public IList<TypeSignature> TypeArguments => _typeArguments;
 
         /// <inheritdoc />
-        public override string? Name
+        public override string Name
         {
             get
             {
@@ -102,7 +102,7 @@ namespace AsmResolver.DotNet.Signatures
         public override IResolutionScope? Scope => GenericType.Scope;
 
         /// <inheritdoc />
-        public override ModuleDefinition? Module => GenericType.Module;
+        public override ModuleDefinition? ContextModule => GenericType.ContextModule;
 
         /// <inheritdoc />
         public override bool IsValueType => _isValueType;
@@ -111,7 +111,7 @@ namespace AsmResolver.DotNet.Signatures
         public override TypeDefinition? Resolve() => GenericType.Resolve();
 
         /// <inheritdoc />
-        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => GenericType;
+        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => GenericType;
 
         /// <inheritdoc />
         public override bool IsImportedInModule(ModuleDefinition module)
@@ -137,13 +137,13 @@ namespace AsmResolver.DotNet.Signatures
 
             // Interfaces have System.Object as direct base class.
             if (genericType.IsInterface)
-                return Module!.CorLibTypeFactory.Object;
+                return ContextModule!.CorLibTypeFactory.Object;
 
             if (genericType.BaseType is not { } baseType)
                 return null;
 
             // If the base type is not generic, treat it as a normal TypeDefOrRef.
-            if (baseType is TypeDefinition or TypeReference)
+            if (baseType.MetadataToken.Table is TableIndex.TypeDef or TableIndex.TypeRef)
                 return baseType.ToTypeSignature(IsValueType);
 
             // At this point we expect a type specification. Substitute any generic type arguments present in it.

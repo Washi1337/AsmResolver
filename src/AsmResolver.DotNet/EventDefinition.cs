@@ -105,7 +105,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ModuleDefinition? Module => DeclaringType?.Module;
+        public ModuleDefinition? DeclaringModule => DeclaringType?.DeclaringModule;
+
+        ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <summary>
         /// Gets the type that defines the property.
@@ -199,8 +201,7 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
-            return Module == module
-                   && (EventType?.IsImportedInModule(module) ?? false);
+            return DeclaringModule == module && (EventType?.IsImportedInModule(module) ?? false);
         }
 
         /// <inheritdoc />

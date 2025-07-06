@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public virtual ModuleDefinition? Module => Scope?.Module;
+        public virtual ModuleDefinition? ContextModule => Scope?.ContextModule;
 
         /// <inheritdoc />
         public ITypeDescriptor? DeclaringType => Scope as ITypeDescriptor;

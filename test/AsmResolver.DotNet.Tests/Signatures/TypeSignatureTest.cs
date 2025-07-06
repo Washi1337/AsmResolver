@@ -624,7 +624,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var signature = module.GetOrCreateModuleType().ToTypeSignature();
-            Assert.Same(module, signature.Module);
+            Assert.Same(module, signature.ContextModule);
         }
 
         [Fact]
@@ -636,7 +636,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 .ToTypeSignature();
 
             Assert.Null(signature.Scope);
-            Assert.Same(module, signature.Module);
+            Assert.Same(module, signature.ContextModule);
         }
 
         [Fact]
@@ -649,7 +649,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 .MakeSzArrayType();
 
             Assert.Null(signature.Scope);
-            Assert.Same(module, signature.Module);
+            Assert.Same(module, signature.ContextModule);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet
 
         string IFullNameProvider.FullName => ((IFullNameProvider) this).Name!;
 
-        ModuleDefinition? IModuleProvider.Module => null;
+        ModuleDefinition? IModuleProvider.ContextModule => null;
 
         IResolutionScope? ITypeDescriptor.Scope => null;
 

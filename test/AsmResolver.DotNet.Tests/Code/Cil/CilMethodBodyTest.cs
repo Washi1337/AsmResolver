@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
         private CilMethodBody RebuildAndLookup(CilMethodBody methodBody)
         {
-            var module = methodBody.Owner.Module!;
+            var module = methodBody.Owner.DeclaringModule!;
 
             var stream = new MemoryStream();
             module.Write(stream);
@@ -236,7 +236,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             body.ExceptionHandlers.Add(new CilExceptionHandler
             {
                 HandlerType = CilExceptionHandlerType.Exception,
-                ExceptionType = body.Owner.Module.CorLibTypeFactory.Object.ToTypeDefOrRef(),
+                ExceptionType = body.Owner.DeclaringModule.CorLibTypeFactory.Object.ToTypeDefOrRef(),
                 TryStart = tryStart,
                 TryEnd = tryEnd,
                 HandlerStart = handlerStart,
@@ -267,7 +267,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             body.ExceptionHandlers.Add(new CilExceptionHandler
             {
                 HandlerType = CilExceptionHandlerType.Finally,
-                ExceptionType = body.Owner.Module.CorLibTypeFactory.Object.ToTypeDefOrRef(),
+                ExceptionType = body.Owner.DeclaringModule.CorLibTypeFactory.Object.ToTypeDefOrRef(),
                 TryStart = tryStart,
                 TryEnd = tryEnd,
                 HandlerStart = handlerStart,
@@ -298,7 +298,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             body.ExceptionHandlers.Add(new CilExceptionHandler
             {
                 HandlerType = CilExceptionHandlerType.Exception,
-                ExceptionType = body.Owner.Module.CorLibTypeFactory.Object.ToTypeDefOrRef(),
+                ExceptionType = body.Owner.DeclaringModule.CorLibTypeFactory.Object.ToTypeDefOrRef(),
                 TryStart = tryStart,
                 TryEnd = tryEnd,
                 HandlerStart = handlerStart,
@@ -360,7 +360,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             body.ExceptionHandlers.Add(new CilExceptionHandler
             {
                 HandlerType = CilExceptionHandlerType.Exception,
-                ExceptionType = body.Owner!.Module!.CorLibTypeFactory.Object.ToTypeDefOrRef(),
+                ExceptionType = body.Owner!.DeclaringModule!.CorLibTypeFactory.Object.ToTypeDefOrRef(),
                 TryStart = start,
                 TryEnd = handler,
                 HandlerStart = handler,
@@ -395,7 +395,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             body.ExceptionHandlers.Add(new CilExceptionHandler
             {
                 HandlerType = CilExceptionHandlerType.Exception,
-                ExceptionType = body.Owner!.Module!.CorLibTypeFactory.Object.ToTypeDefOrRef(),
+                ExceptionType = body.Owner!.DeclaringModule!.CorLibTypeFactory.Object.ToTypeDefOrRef(),
                 TryStart = start,
                 TryEnd = handler,
                 HandlerStart = handler,

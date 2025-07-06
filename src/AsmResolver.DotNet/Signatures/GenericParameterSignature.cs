@@ -1,5 +1,4 @@
 ﻿using System;
-using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Signatures
@@ -84,7 +83,7 @@ namespace AsmResolver.DotNet.Signatures
         public override TypeDefinition? Resolve() => null;
 
         /// <inheritdoc />
-        public override bool IsImportedInModule(ModuleDefinition module) => Module == module;
+        public override bool IsImportedInModule(ModuleDefinition module) => ContextModule == module;
 
         /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => null;

@@ -65,7 +65,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ModuleDefinition? Module => Owner?.Module;
+        public ModuleDefinition? DeclaringModule => Owner?.DeclaringModule;
+
+        ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes

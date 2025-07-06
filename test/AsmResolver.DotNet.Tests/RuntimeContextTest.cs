@@ -68,7 +68,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location, new ModuleReaderParameters(context));
 
             Assert.Equal(context.TargetRuntime, module.RuntimeContext.TargetRuntime);
-            Assert.Equal("mscorlib", module.CorLibTypeFactory.Object.Resolve()?.Module?.Assembly?.Name);
+            Assert.Equal("mscorlib", module.CorLibTypeFactory.Object.Resolve()?.DeclaringModule?.Assembly?.Name);
         }
 
         [Fact]
@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location, new ModuleReaderParameters(context));
 
             Assert.Equal(context.TargetRuntime, module.RuntimeContext.TargetRuntime);
-            Assert.Equal("System.Private.CoreLib", module.CorLibTypeFactory.Object.Resolve()?.Module?.Assembly?.Name);
+            Assert.Equal("System.Private.CoreLib", module.CorLibTypeFactory.Object.Resolve()?.DeclaringModule?.Assembly?.Name);
         }
 
         [Fact]

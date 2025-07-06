@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Signatures
                         desc = ts.Signature;
                 }
 
-                if ((desc?.Module ?? desc?.Scope?.Module)?.CorLibTypeFactory.FromType(desc!) is { } corLibType)
+                if ((desc?.ContextModule ?? desc?.Scope?.ContextModule)?.CorLibTypeFactory.FromType(desc!) is { } corLibType)
                     desc = corLibType;
 
                 return desc;
@@ -85,7 +85,7 @@ namespace AsmResolver.DotNet.Signatures
             // It can still be an exported type, we need to resolve the type then and check if the definitions match.
             return x.Resolve() is { } definition1
                    && y.Resolve() is { } definition2
-                   && Equals(definition1.Module!.Assembly, definition2.Module!.Assembly)
+                   && Equals(definition1.DeclaringModule!.Assembly, definition2.DeclaringModule!.Assembly)
                    && Equals(definition1.DeclaringType, definition2.DeclaringType);
         }
 

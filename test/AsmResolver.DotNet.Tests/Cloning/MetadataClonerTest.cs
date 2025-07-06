@@ -271,7 +271,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Operand;
 
             Assert.Equal(originalSpec, newSpec, _signatureComparer);
-            Assert.NotSame(originalSpec.Module, newSpec.Module);
+            Assert.NotSame(originalSpec.ContextModule, newSpec.ContextModule);
         }
 
         [Fact]

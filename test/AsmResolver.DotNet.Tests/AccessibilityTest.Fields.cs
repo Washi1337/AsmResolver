@@ -7,7 +7,7 @@ public partial class AccessibilityTest
 {
     private static FieldDefinition AddField(TypeDefinition declaringType, string name, FieldAttributes attributes)
     {
-        var field = new FieldDefinition(name, attributes, declaringType.Module!.CorLibTypeFactory.Object);
+        var field = new FieldDefinition(name, attributes, declaringType.DeclaringModule!.CorLibTypeFactory.Object);
         declaringType.Fields.Add(field);
         return field;
     }

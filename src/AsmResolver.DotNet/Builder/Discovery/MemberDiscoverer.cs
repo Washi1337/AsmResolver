@@ -154,7 +154,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 var token = new MetadataToken(tableIndex, rid);
                 var definition = (TMember) _module.LookupMember(token);
 
-                if (definition.Module == _module)
+                if (definition.ContextModule == _module)
                 {
                     // Member is still present in the module.
                     resultingList.Add(definition);

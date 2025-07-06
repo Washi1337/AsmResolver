@@ -8,7 +8,7 @@ public partial class AccessibilityTest
 {
     private static MethodDefinition AddMethod(TypeDefinition declaringType, string name, MethodAttributes attributes)
     {
-        var method = new MethodDefinition(name, attributes, MethodSignature.CreateInstance(declaringType.Module!.CorLibTypeFactory.Void));
+        var method = new MethodDefinition(name, attributes, MethodSignature.CreateInstance(declaringType.DeclaringModule!.CorLibTypeFactory.Void));
         declaringType.Methods.Add(method);
         return method;
     }

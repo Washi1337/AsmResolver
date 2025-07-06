@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override ModuleDefinition? Module => BaseType.Module;
+        public override ModuleDefinition? ContextModule => BaseType.ContextModule;
 
         /// <inheritdoc />
         public override string? Namespace => BaseType.Namespace;

@@ -150,7 +150,7 @@ namespace AsmResolver.DotNet.Tests
             var definition = reference.Resolve();
 
             Assert.NotNull(definition);
-            Assert.Same(module, definition.Module);
+            Assert.Same(module, definition.DeclaringModule);
         }
 
         [Fact]
@@ -162,7 +162,7 @@ namespace AsmResolver.DotNet.Tests
             var definition = reference.Resolve();
 
             Assert.NotNull(definition);
-            Assert.Same(module, definition.Module);
+            Assert.Same(module, definition.DeclaringModule);
         }
 
         [Fact]
@@ -174,7 +174,7 @@ namespace AsmResolver.DotNet.Tests
             var definition = reference.Resolve();
 
             Assert.NotNull(definition);
-            Assert.Equal("mscorlib", definition.Module!.Assembly!.Name);
+            Assert.Equal("mscorlib", definition.DeclaringModule!.Assembly!.Name);
         }
 
         [Fact]

@@ -112,7 +112,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ModuleDefinition? Module => Parent?.Module;
+        public ModuleDefinition? ContextModule => Parent?.ContextModule;
 
         /// <summary>
         /// Gets the type that declares the referenced member, if available.
@@ -157,8 +157,7 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
-            return Module == module
-                   && (Signature?.IsImportedInModule(module) ?? false);
+            return ContextModule == module && (Signature?.IsImportedInModule(module) ?? false);
         }
 
         /// <summary>
@@ -175,16 +174,16 @@ namespace AsmResolver.DotNet
 
         FieldDefinition? IFieldDescriptor.Resolve()
         {
-            if (!IsField)
-                throw new InvalidOperationException("Member reference must reference a field.");
-            return Module?.MetadataResolver.ResolveField(this);
+            return IsField
+                ? ContextModule?.MetadataResolver.ResolveField(this)
+                : throw new InvalidOperationException("Member reference must reference a field.");
         }
 
         MethodDefinition? IMethodDescriptor.Resolve()
         {
-            if (!IsMethod)
-                throw new InvalidOperationException("Member reference must reference a method.");
-            return Module?.MetadataResolver.ResolveMethod(this);
+            return IsMethod
+                ? ContextModule?.MetadataResolver.ResolveMethod(this)
+                : throw new InvalidOperationException("Member reference must reference a method.");
         }
 
         /// <summary>

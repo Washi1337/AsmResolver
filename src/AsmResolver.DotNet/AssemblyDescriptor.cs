@@ -189,6 +189,12 @@ namespace AsmResolver.DotNet
             get;
         }
 
+        /// <inheritdoc />
+        public abstract ModuleDefinition? ContextModule
+        {
+            get;
+        }
+
         /// <summary>
         /// When the application is signed with a strong name, obtains the public key token of the assembly
         /// </summary>

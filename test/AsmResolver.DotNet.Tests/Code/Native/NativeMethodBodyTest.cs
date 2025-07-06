@@ -82,8 +82,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             };
 
             // Serialize module to PE image.
-            var module = body.Owner.Module!;
-            var image = module.ToPEImage();
+            var image = body.Owner!.DeclaringModule!.ToPEImage();
 
             // Lookup method row.
             var segment = GetNewCodeSegment(image);
@@ -124,8 +123,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             ));
 
             // Serialize module to PE image.
-            var module = body.Owner.Module!;
-            var image = module.ToPEImage();
+            var image = body.Owner!.DeclaringModule!.ToPEImage();
 
             // Verify import is added to PE image.
             Assert.Contains(image.Imports, m =>
@@ -161,8 +159,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             ));
 
             // Serialize module to PE image.
-            var module = body.Owner.Module!;
-            var image = module.ToPEImage();
+            var image = body.Owner!.DeclaringModule!.ToPEImage();
 
             // Verify import is added to PE image.
             Assert.Contains(image.Imports, m =>
@@ -215,8 +212,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             ));
 
             // Serialize module to PE image.
-            var module = body.Owner.Module!;
-            var image = module.ToPEImage();
+            var image = body.Owner!.DeclaringModule!.ToPEImage();
 
             // Verify import is added to PE image.
             var importedModule = Assert.Single(image.Imports);
@@ -239,9 +235,8 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             };
 
             // Serialize module.
-            var module = body.Owner.Module!;
             using var stream = new MemoryStream();
-            module.Write(stream);
+            body.Owner!.DeclaringModule!.Write(stream);
 
             // Reload and look up native method.
             var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
@@ -294,7 +289,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             // Verify.
             _fixture
                 .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(body.Owner.Module!, "StringPointer.exe", "Hello, world!\n");
+                .RebuildAndRun(body.Owner!.DeclaringModule!, "StringPointer.exe", "Hello, world!\n");
         }
 
         [SkippableTheory]
@@ -326,7 +321,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             InjectCallToNativeBody(body, messageSymbol, fixupOffset, fixupType);
 
             // Add symbol to new section.
-            var image = body.Owner.Module!.ToPEImage();
+            var image = body.Owner!.DeclaringModule!.ToPEImage();
             var file = new ManagedPEFileBuilder().CreateFile(image);
             file.Sections.Add(new PESection(
                 ".asmres",
@@ -345,7 +340,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             body.AddressFixups.Add(new AddressFixup(fixupOffset, fixupType, messageSymbol));
 
             // Update main to call native method, convert the returned pointer to a String, and write to stdout.
-            var module = body.Owner.Module!;
+            var module = body.Owner!.DeclaringModule!;
             body.Owner.Signature!.ReturnType = module.CorLibTypeFactory.IntPtr;
 
             var stringConstructor = module.CorLibTypeFactory.String.Type

@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet
         string? INameProvider.Name => Name;
 
         /// <inheritdoc />
-        public ModuleDefinition? Module
+        public ModuleDefinition? ContextModule
         {
             get;
             private set;
@@ -61,8 +61,8 @@ namespace AsmResolver.DotNet
 
         ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
-            get => Module;
-            set => Module = value;
+            get => ContextModule;
+            set => ContextModule = value;
         }
 
         /// <inheritdoc />
@@ -77,7 +77,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public bool IsImportedInModule(ModuleDefinition module) => Module == module;
+        public bool IsImportedInModule(ModuleDefinition module) => ContextModule == module;
 
         /// <summary>
         /// Imports the module reference using the provided reference importer object.
@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual Utf8String? GetName() => null;
 
-        AssemblyDescriptor? IResolutionScope.GetAssembly() => Module?.Assembly;
+        AssemblyDescriptor? IResolutionScope.GetAssembly() => ContextModule?.Assembly;
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.

@@ -110,12 +110,12 @@ namespace AsmResolver.DotNet.Builder
             get;
         }
 
-        private bool AssertIsImported([NotNullWhen(true)] IModuleProvider? member, object? diagnosticSource)
+        private bool AssertIsInSameModule([NotNullWhen(true)] IModuleProvider? member, object? diagnosticSource)
         {
             if (member is null)
                 return false;
 
-            if (member.Module != Module)
+            if (member.ContextModule != Module)
             {
                 ErrorListener.RegisterException(new MemberNotImportedException((IMetadataMember) member, diagnosticSource));
                 return false;

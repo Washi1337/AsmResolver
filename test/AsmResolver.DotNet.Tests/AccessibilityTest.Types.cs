@@ -23,7 +23,7 @@ public partial class AccessibilityTest
 
     private static TypeDefinition AddNestedType(TypeDefinition declaringType, string name, TypeAttributes attributes, ITypeDefOrRef baseType = null)
     {
-        var type = new TypeDefinition(null, name, attributes, baseType ?? declaringType.Module!.CorLibTypeFactory.Object.Type);
+        var type = new TypeDefinition(null, name, attributes, baseType ?? declaringType.DeclaringModule!.CorLibTypeFactory.Object.Type);
         declaringType.NestedTypes.Add(type);
         return type;
     }

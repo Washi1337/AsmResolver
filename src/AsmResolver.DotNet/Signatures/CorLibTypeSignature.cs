@@ -20,9 +20,9 @@ namespace AsmResolver.DotNet.Signatures
             {
                 Type = module.TopLevelTypes.First(t => t.IsTypeOf("System", name));
             }
-            else if (corlibScope.Module is not null)
+            else if (corlibScope.ContextModule is not null)
             {
-                Type = new TypeReference(corlibScope.Module, corlibScope, "System", name);
+                Type = new TypeReference(corlibScope.ContextModule, corlibScope, "System", name);
             }
             else
             {
@@ -79,13 +79,10 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override bool IsImportedInModule(ModuleDefinition module) => Module == module;
+        public override bool IsImportedInModule(ModuleDefinition module) => ContextModule == module;
 
         /// <inheritdoc />
-        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef()
-        {
-            return Type;
-        }
+        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => Type;
 
         /// <inheritdoc />
         public override ElementType ElementType
@@ -105,7 +102,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override TypeSignature GetReducedType()
         {
-            var factory = Module!.CorLibTypeFactory;
+            var factory = ContextModule!.CorLibTypeFactory;
             return ElementType switch
             {
                 ElementType.I1 or ElementType.U1 => factory.SByte,
@@ -120,7 +117,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override TypeSignature GetVerificationType()
         {
-            var factory = Module!.CorLibTypeFactory;
+            var factory = ContextModule!.CorLibTypeFactory;
             return GetReducedType().ElementType switch
             {
                 ElementType.I1 or ElementType.Boolean => factory.SByte,
@@ -135,7 +132,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override TypeSignature GetIntermediateType()
         {
-            var factory = Module!.CorLibTypeFactory;
+            var factory = ContextModule!.CorLibTypeFactory;
             var verificationType = GetVerificationType();
             return verificationType.ElementType switch
             {

@@ -45,8 +45,8 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
             // Create signature for add/remove methods.
             var signature = MethodSignature.CreateStatic(
-                eventHandlerTypeRef.Module!.CorLibTypeFactory.Void,
-                eventHandlerTypeRef.Module.CorLibTypeFactory.Object,
+                eventHandlerTypeRef.ContextModule!.CorLibTypeFactory.Void,
+                eventHandlerTypeRef.ContextModule.CorLibTypeFactory.Object,
                 eventHandlerTypeSig);
 
             var methodAttributes = MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.SpecialName

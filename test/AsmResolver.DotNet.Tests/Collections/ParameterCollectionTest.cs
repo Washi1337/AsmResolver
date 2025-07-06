@@ -146,21 +146,25 @@ namespace AsmResolver.DotNet.Tests.Collections
         public void UpdateReturnTypeFromStaticParameterlessMethodShouldThrow()
         {
             var method = ObtainStaticTestMethod(nameof(MultipleMethods.VoidParameterlessMethod));
-            Assert.Throws<InvalidOperationException>(() => method.Parameters.ReturnParameter.ParameterType = method.Module.CorLibTypeFactory.Int32);
+            Assert.Throws<InvalidOperationException>(
+                () => method.Parameters.ReturnParameter.ParameterType = method.DeclaringModule!.CorLibTypeFactory.Int32
+            );
         }
 
         [Fact]
         public void UpdateThisParameterParameterTypeShouldThrow()
         {
             var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceParameterlessMethod));
-            Assert.Throws<InvalidOperationException>(() => method.Parameters.ThisParameter.ParameterType = method.Module.CorLibTypeFactory.Int32);
+            Assert.Throws<InvalidOperationException>(
+                () => method.Parameters.ThisParameter!.ParameterType = method.DeclaringModule!.CorLibTypeFactory.Int32
+            );
         }
 
         [Fact]
         public void MoveMethodToOtherTypeShouldUpdateThisParameter()
         {
             var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceParameterlessMethod));
-            var newType = method.Module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
+            var newType = method.DeclaringModule!.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
             method.DeclaringType.Methods.Remove(method);
             newType.Methods.Add(method);
 

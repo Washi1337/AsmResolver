@@ -64,7 +64,7 @@ namespace AsmResolver.DotNet
         public string FullName => MemberNameGenerator.GetTypeFullName(this);
 
         /// <inheritdoc />
-        public ModuleDefinition? Module => Signature?.Module;
+        public ModuleDefinition? ContextModule => Signature?.ContextModule;
 
         /// <inheritdoc />
         public IResolutionScope? Scope => Signature?.Scope;
@@ -112,7 +112,7 @@ namespace AsmResolver.DotNet
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <inheritdoc />
-        public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
+        public TypeDefinition? Resolve() => ContextModule?.MetadataResolver.ResolveType(this);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 

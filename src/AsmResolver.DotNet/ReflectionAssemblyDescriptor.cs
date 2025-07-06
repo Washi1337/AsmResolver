@@ -55,6 +55,9 @@ namespace AsmResolver.DotNet
         public override bool IsCorLib => Name is not null && KnownCorLibs.KnownCorLibNames.Contains(Name);
 
         /// <inheritdoc />
+        public override ModuleDefinition? ContextModule => _parentModule;
+
+        /// <inheritdoc />
         public override byte[]? GetPublicKeyToken() => _assemblyName.GetPublicKeyToken();
 
         /// <inheritdoc />

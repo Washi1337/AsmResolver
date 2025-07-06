@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
@@ -233,7 +232,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
                         while (reader.CanRead(size))
                         {
-                            var handler = CilExceptionHandler.FromReader(method.Module!, result, ref reader, section.IsFat);
+                            var handler = CilExceptionHandler.FromReader(method.DeclaringModule!, result, ref reader, section.IsFat);
                             result.ExceptionHandlers.Add(handler);
                         }
                     }

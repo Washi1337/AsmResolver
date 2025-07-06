@@ -70,7 +70,7 @@ namespace AsmResolver.DotNet
         public string FullName => MemberNameGenerator.GetMethodFullName(this);
 
         /// <inheritdoc />
-        public ModuleDefinition? Module => Method?.Module;
+        public ModuleDefinition? ContextModule => Method?.ContextModule;
 
         /// <summary>
         /// Gets the declaring type of the method.

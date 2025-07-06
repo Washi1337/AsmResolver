@@ -4,7 +4,6 @@ using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Properties;
-using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -101,7 +100,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var stream = new MemoryStream();
             var method = (MethodDefinition) attribute.Parent!;
-            method.Module!.Write(stream);
+            method.DeclaringModule!.Write(stream);
             var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
 
             return newModule
@@ -226,7 +225,7 @@ namespace AsmResolver.DotNet.Tests
 
             var argument = attribute.Signature.FixedArguments[0];
             Assert.Equal(
-                attribute.Constructor!.Module!.CorLibTypeFactory.String,
+                attribute.Constructor!.ContextModule!.CorLibTypeFactory.String,
                 argument.Element as TypeSignature, _comparer);
         }
 
@@ -241,7 +240,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Empty(attribute.Signature.NamedArguments);
 
             var argument = attribute.Signature.FixedArguments[0];
-            var factory = attribute.Constructor!.Module!.CorLibTypeFactory;
+            var factory = attribute.Constructor!.ContextModule!.CorLibTypeFactory;
 
             var instance = factory.CorLibScope
                 .CreateTypeReference("System.Collections.Generic", "KeyValuePair`2")
@@ -264,7 +263,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Empty(attribute.Signature!.NamedArguments);
             var argument = Assert.Single(attribute.Signature.FixedArguments);
 
-            var factory = attribute.Constructor!.Module!.CorLibTypeFactory;
+            var factory = attribute.Constructor!.ContextModule!.CorLibTypeFactory;
             var expected = factory.CorLibScope
                 .CreateTypeReference("System.Collections.Generic", "List`1")
                 .CreateTypeReference("Enumerator")
@@ -345,7 +344,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Single(attribute.Signature.NamedArguments);
 
             var expected = new TypeReference(
-                attribute.Constructor!.Module!.CorLibTypeFactory.CorLibScope,
+                attribute.Constructor!.ContextModule!.CorLibTypeFactory.CorLibScope,
                 "System", "Int32");
 
             var argument = attribute.Signature.NamedArguments[0];
@@ -390,7 +389,7 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.GenericType),rebuild, access);
             var argument = attribute.Signature!.FixedArguments[0];
 
-            var module = attribute.Constructor!.Module!;
+            var module = attribute.Constructor!.ContextModule!;
             var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
             var expected = nestedClass.MakeGenericInstanceType(false, module.CorLibTypeFactory.Object);
 
@@ -409,7 +408,7 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.GenericTypeArray),rebuild, access);
             var argument = attribute.Signature!.FixedArguments[0];
 
-            var module = attribute.Constructor!.Module!;
+            var module = attribute.Constructor!.ContextModule!;
             var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
             var expected = nestedClass
                 .MakeGenericInstanceType(false, module.CorLibTypeFactory.Object)
@@ -445,7 +444,7 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.TypePassedAsObject),rebuild, access);
             var argument = attribute.Signature!.FixedArguments[0];
 
-            var module = attribute.Constructor!.Module!;
+            var module = attribute.Constructor!.ContextModule!;
             var element = Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
             Assert.Equal(module.CorLibTypeFactory.Int32, (ITypeDescriptor) element.Value, _comparer);
         }
@@ -638,7 +637,7 @@ namespace AsmResolver.DotNet.Tests
                 rebuild, access, true);
             var argument = attribute.Signature!.FixedArguments[0];
 
-            var expected = attribute.Constructor!.Module!.CorLibTypeFactory.Int32;
+            var expected = attribute.Constructor!.ContextModule!.CorLibTypeFactory.Int32;
             var element = Assert.IsAssignableFrom<TypeSignature>(argument.Element);
             Assert.Equal(expected, element, _comparer);
         }
@@ -728,7 +727,7 @@ namespace AsmResolver.DotNet.Tests
                 rebuild, access, true);
             var argument = attribute.Signature!.NamedArguments[0];
 
-            var expected = attribute.Constructor!.Module!.CorLibTypeFactory.Int32;
+            var expected = attribute.Constructor!.ContextModule!.CorLibTypeFactory.Int32;
             var element = Assert.IsAssignableFrom<TypeSignature>(argument.Argument.Element);
             Assert.Equal(expected, element, _comparer);
         }

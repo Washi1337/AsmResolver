@@ -188,7 +188,10 @@ namespace AsmResolver.DotNet
         /// </summary>
         public ModuleDefinition? ManifestModule => Modules.Count > 0 ? Modules[0] : null;
 
-        ModuleDefinition? IModuleProvider.Module => ManifestModule;
+        ModuleDefinition? IMetadataDefinition.DeclaringModule => ManifestModule;
+
+        /// <inheritdoc />
+        public override ModuleDefinition? ContextModule => ManifestModule;
 
         /// <summary>
         /// Gets a collection of modules that this .NET assembly defines.

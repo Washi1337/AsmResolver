@@ -75,7 +75,9 @@ namespace AsmResolver.DotNet
             TargetRuntime = manifest.GetTargetRuntime();
             DefaultReaderParameters = new ModuleReaderParameters(readerParameters) {RuntimeContext = this};
             AssemblyResolver = new BundleAssemblyResolver(manifest, readerParameters);
-            RuntimeCorLib = AssemblyResolver.Resolve(TargetRuntime.GetDefaultCorLib())?.ManifestModule?.CorLibTypeFactory.Object.Resolve()?.Module?.Assembly;
+            RuntimeCorLib = AssemblyResolver.Resolve(TargetRuntime.GetDefaultCorLib())?
+                .ManifestModule?.CorLibTypeFactory.Object.Resolve()?
+                .DeclaringModule?.Assembly;
         }
 
         /// <summary>

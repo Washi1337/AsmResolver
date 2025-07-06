@@ -48,15 +48,15 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Creates a new reference to a type.
         /// </summary>
-        /// <param name="module">The module that references the type.</param>
+        /// <param name="contextModule">The module that references the type.</param>
         /// <param name="scope">The scope that defines the type.</param>
         /// <param name="ns">The namespace the type resides in.</param>
         /// <param name="name">The name of the type.</param>
-        public TypeReference(ModuleDefinition? module, IResolutionScope? scope, Utf8String? ns, Utf8String? name)
+        public TypeReference(ModuleDefinition? contextModule, IResolutionScope? scope, Utf8String? ns, Utf8String? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
             _scope.SetValue(scope);
-            Module = module;
+            ContextModule = contextModule;
             Namespace = ns;
             Name = name;
         }
@@ -104,7 +104,7 @@ namespace AsmResolver.DotNet
         public bool IsValueType => Resolve()?.IsValueType ?? false;
 
         /// <inheritdoc />
-        public ModuleDefinition? Module
+        public ModuleDefinition? ContextModule
         {
             get;
             protected set;
@@ -136,13 +136,13 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public TypeSignature ToTypeSignature(bool isValueType)
         {
-            return Module?.CorLibTypeFactory.FromType(this) as TypeSignature
+            return ContextModule?.CorLibTypeFactory.FromType(this) as TypeSignature
                    ?? new TypeDefOrRefSignature(this, isValueType);
         }
 
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module) =>
-            Module == module && (Scope?.IsImportedInModule(module) ?? false);
+            ContextModule == module && (Scope?.IsImportedInModule(module) ?? false);
 
         /// <summary>
         /// Imports the type reference using the provided reference importer object.
@@ -155,7 +155,7 @@ namespace AsmResolver.DotNet
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <inheritdoc />
-        public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
+        public TypeDefinition? Resolve() => ContextModule?.MetadataResolver.ResolveType(this);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 

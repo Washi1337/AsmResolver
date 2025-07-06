@@ -29,10 +29,10 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override TypeSignature GetVerificationType()
         {
-            if (Module is null)
+            if (ContextModule is null)
                 throw new InvalidOperationException("Cannot determine verification type of a non-imported type.");
 
-            var factory = Module.CorLibTypeFactory;
+            var factory = ContextModule.CorLibTypeFactory;
             return BaseType.GetReducedType().ElementType switch
             {
                 ElementType.I1 or ElementType.Boolean => factory.SByte.MakeByReferenceType(),

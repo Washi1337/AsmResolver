@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.Shims;
 
@@ -66,7 +65,7 @@ namespace AsmResolver.DotNet.Signatures.Parsing
 
                 case ElementType.Object:
                     // Most efficient way to store "null" is writing null as a string (two bytes).
-                    TypeSignature.WriteFieldOrPropType(_context, argumentType.Module!.CorLibTypeFactory.String);
+                    TypeSignature.WriteFieldOrPropType(_context, argumentType.ContextModule!.CorLibTypeFactory.String);
                     break;
 
                 case ElementType.SzArray:
@@ -168,7 +167,7 @@ namespace AsmResolver.DotNet.Signatures.Parsing
                             $"Object elements in a custom attribute signature should be either 'null' or an instance of {nameof(BoxedArgument)}.");
 
                         // Write null as a recovery.
-                        innerTypeSig = argumentType.Module!.CorLibTypeFactory.String;
+                        innerTypeSig = argumentType.ContextModule!.CorLibTypeFactory.String;
                         value = null;
                     }
 
@@ -216,7 +215,7 @@ namespace AsmResolver.DotNet.Signatures.Parsing
             }
 
             // Try inferring the enum type from the argument value.
-            var corLibTypeFactory = argumentType.Module!.CorLibTypeFactory;
+            var corLibTypeFactory = argumentType.ContextModule!.CorLibTypeFactory;
             var elementType = Type.GetTypeCode(element.GetType()) switch
             {
                 TypeCode.Boolean => corLibTypeFactory.Boolean,
