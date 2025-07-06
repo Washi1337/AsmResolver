@@ -164,7 +164,7 @@ namespace AsmResolver.DotNet.Builder
                     break;
 
                 case TableIndex.File:
-                    entryPointToken = AddFileReference((FileReference) Module.ManagedEntryPoint, Module);
+                    entryPointToken = AddFileReference((FileReference) Module.ManagedEntryPoint);
                     break;
 
                 default:
@@ -233,9 +233,6 @@ namespace AsmResolver.DotNet.Builder
 
         private void DefineGenericParameter(MetadataToken ownerToken, GenericParameter parameter)
         {
-            if (!AssertIsImported(parameter, parameter.Owner))
-                return;
-
             var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
 

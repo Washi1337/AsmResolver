@@ -32,13 +32,13 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddResolutionScope(IResolutionScope? scope, bool allowDuplicates, bool preserveRid, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(scope, diagnosticSource))
+            if (scope is null)
                 return 0;
 
             var token = scope.MetadataToken.Table switch
             {
                 TableIndex.AssemblyRef => AddAssemblyReference(scope as AssemblyReference, allowDuplicates, preserveRid, diagnosticSource),
-                TableIndex.TypeRef => AddTypeReference(scope as TypeReference, allowDuplicates, preserveRid, diagnosticSource),
+                TableIndex.TypeRef => AddTypeReference(scope as TypeReference, allowDuplicates, preserveRid),
                 TableIndex.ModuleRef => AddModuleReference(scope as ModuleReference, allowDuplicates, preserveRid, diagnosticSource),
                 TableIndex.Module => new MetadataToken(TableIndex.Module, 1),
                 _ => throw new ArgumentOutOfRangeException(nameof(scope))
@@ -52,7 +52,7 @@ namespace AsmResolver.DotNet.Builder
         /// <inheritdoc />
         public uint GetTypeDefOrRefIndex(ITypeDefOrRef? type, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(type, diagnosticSource))
+            if (type is null)
                 return 0;
 
             var token = type.MetadataToken.Table switch
@@ -70,7 +70,7 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddMemberRefParent(IMemberRefParent? parent, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(parent, diagnosticSource))
+            if (parent is null)
                 return 0;
 
             var token = parent.MetadataToken.Table switch
@@ -90,7 +90,7 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddMethodDefOrRef(IMethodDefOrRef? method, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(method, diagnosticSource))
+            if (method is null)
                 return 0;
 
             var token = method.MetadataToken.Table switch
@@ -107,7 +107,7 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddCustomAttributeType(ICustomAttributeType? constructor, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(constructor, diagnosticSource))
+            if (constructor is null)
                 return 0;
 
             var token = constructor.MetadataToken.Table switch
@@ -157,14 +157,14 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddImplementation(IImplementation? implementation, object? diagnosticSource = null)
         {
-            if (implementation is null || !AssertIsImported(implementation, diagnosticSource))
+            if (implementation is null)
                 return 0;
 
             var token = implementation switch
             {
                 AssemblyReference assemblyReference => GetAssemblyReferenceToken(assemblyReference, diagnosticSource),
-                ExportedType exportedType => AddExportedType(exportedType, diagnosticSource),
-                FileReference fileReference => AddFileReference(fileReference, diagnosticSource),
+                ExportedType exportedType => AddExportedType(exportedType),
+                FileReference fileReference => AddFileReference(fileReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(implementation))
             };
 

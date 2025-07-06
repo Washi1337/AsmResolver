@@ -183,29 +183,6 @@ namespace AsmResolver.DotNet.Tests.Builder
         }
 
         [Fact]
-        public void BuildInvalidImageShouldRegisterDiagnostics()
-        {
-            // Prepare temp assembly.
-            var assembly = new AssemblyDefinition("Assembly", new Version(1, 0, 0, 0));
-            var module = new ModuleDefinition("Module");
-            assembly.Modules.Add(module);
-
-            // Add some field with an non-imported field type.
-            module.GetOrCreateModuleType().Fields.Add(new FieldDefinition(
-                "Field",
-                FieldAttributes.Static,
-                new TypeReference(null, "NonImportedNamespace", "NonImportedType").ToTypeSignature()));
-
-            // Build.
-            var bag = new DiagnosticBag();
-            var image = module.ToPEImage(new ManagedPEImageBuilder(bag), false);
-
-            // Verify diagnostics.
-            Assert.NotNull(image);
-            Assert.Contains(bag.Exceptions, x => x is MemberNotImportedException);
-        }
-
-        [Fact]
         public void BuildingImageShouldConsiderJTDStreamAndUseLargeColumns()
         {
             var moduleDefinition = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_JTDStream, TestReaderParameters);

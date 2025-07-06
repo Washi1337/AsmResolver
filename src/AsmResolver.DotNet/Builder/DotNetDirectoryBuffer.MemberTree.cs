@@ -629,14 +629,11 @@ namespace AsmResolver.DotNet.Builder
         private void AddExportedTypesInModule(ModuleDefinition module)
         {
             for (int i = 0; i < module.ExportedTypes.Count; i++)
-                AddExportedType(module.ExportedTypes[i], module);
+                AddExportedType(module.ExportedTypes[i]);
         }
 
-        private MetadataToken AddExportedType(ExportedType exportedType, object? diagnosticSource = null)
+        private MetadataToken AddExportedType(ExportedType exportedType)
         {
-            if (!AssertIsImported(exportedType, diagnosticSource))
-                return MetadataToken.Zero;
-
             var table = Metadata.TablesStream.GetTable<ExportedTypeRow>(TableIndex.ExportedType);
 
             var row = new ExportedTypeRow(
@@ -656,14 +653,11 @@ namespace AsmResolver.DotNet.Builder
         private void AddFileReferencesInModule(ModuleDefinition module)
         {
             for (int i = 0; i < module.FileReferences.Count; i++)
-                AddFileReference(module.FileReferences[i], module);
+                AddFileReference(module.FileReferences[i]);
         }
 
-        private MetadataToken AddFileReference(FileReference fileReference, object? diagnosticSource = null)
+        private MetadataToken AddFileReference(FileReference fileReference)
         {
-            if (!AssertIsImported(fileReference, diagnosticSource))
-                return MetadataToken.Zero;
-
             var table = Metadata.TablesStream.GetTable<FileReferenceRow>(TableIndex.File);
 
             var row = new FileReferenceRow(
