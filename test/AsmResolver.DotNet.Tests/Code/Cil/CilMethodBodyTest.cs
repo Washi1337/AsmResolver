@@ -322,6 +322,91 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         }
 
         [Fact]
+        public void UnreachableBlockShouldNotBeScheduled()
+        {
+            var body = CreateDummyBody(true);
+            var il = body.Instructions;
+
+            // Exit early.
+            il.Add(CilOpCodes.Ret);
+
+            // Create unreachable deliberate stack underflow.
+            il.Add(CilOpCodes.Pop);
+            il.Add(CilOpCodes.Ret);
+
+            // Max stack computation should succeed.
+            Assert.Equal(0, body.ComputeMaxStack());
+        }
+
+        [Fact]
+        public void UnreachableExceptionHandlerShouldNotBeScheduled()
+        {
+            var start = new CilInstructionLabel();
+            var handler = new CilInstructionLabel();
+            var end = new CilInstructionLabel();
+
+            var body = CreateDummyBody(true);
+            var il = body.Instructions;
+
+            // Exit early.
+            il.Add(CilOpCodes.Ret);
+
+            // Create unreachable try-catch with deliberate stack underflow in try block.
+            start.Instruction = il.Add(CilOpCodes.Pop);
+            il.Add(CilOpCodes.Leave, end);
+            handler.Instruction = il.Add(CilOpCodes.Leave, end);
+            end.Instruction = il.Add(CilOpCodes.Ret);
+
+            body.ExceptionHandlers.Add(new CilExceptionHandler
+            {
+                HandlerType = CilExceptionHandlerType.Exception,
+                ExceptionType = body.Owner!.Module!.CorLibTypeFactory.Object.ToTypeDefOrRef(),
+                TryStart = start,
+                TryEnd = handler,
+                HandlerStart = handler,
+                HandlerEnd = end
+            });
+
+            // Max stack computation should succeed.
+            Assert.Equal(0, body.ComputeMaxStack());
+        }
+
+        [Fact]
+        public void EnterTryBlockWithNonEmptyStackShouldThrow()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/652
+
+            var start = new CilInstructionLabel();
+            var handler = new CilInstructionLabel();
+            var end = new CilInstructionLabel();
+
+            var body = CreateDummyBody(true);
+            var il = body.Instructions;
+
+            // Push value.
+            il.Add(CilOpCodes.Ldc_I4, 1337);
+
+            // Create try block that consumes value
+            start.Instruction = il.Add(CilOpCodes.Pop);
+            il.Add(CilOpCodes.Leave, end);
+            handler.Instruction = il.Add(CilOpCodes.Leave, end);
+            end.Instruction = il.Add(CilOpCodes.Ret);
+
+            body.ExceptionHandlers.Add(new CilExceptionHandler
+            {
+                HandlerType = CilExceptionHandlerType.Exception,
+                ExceptionType = body.Owner!.Module!.CorLibTypeFactory.Object.ToTypeDefOrRef(),
+                TryStart = start,
+                TryEnd = handler,
+                HandlerStart = handler,
+                HandlerEnd = end
+            });
+
+            // Max stack computation should succeed.
+            Assert.ThrowsAny<StackImbalanceException>(() => body.ComputeMaxStack());
+        }
+
+        [Fact]
         public void LazyInitializationTest()
         {
             // https://github.com/Washi1337/AsmResolver/issues/97

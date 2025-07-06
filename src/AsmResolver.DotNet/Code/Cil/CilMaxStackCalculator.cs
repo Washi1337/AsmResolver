@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using AsmResolver.PE.DotNet.Cil;
 
@@ -10,20 +11,36 @@ namespace AsmResolver.DotNet.Code.Cil
         private readonly CilMethodBody _body;
         private readonly Stack<StackState> _agenda;
         private readonly int?[] _recordedStackSizes;
+        private readonly Dictionary<int, List<CilExceptionHandler>>? _handlers;
 
         public CilMaxStackCalculator(CilMethodBody body)
         {
             _body = body ?? throw new ArgumentNullException(nameof(body));
 
-            if (_body.Instructions.Count > 0)
-            {
-                _agenda = new Stack<StackState>();
-                _recordedStackSizes = new int?[_body.Instructions.Count];
-            }
-            else
+            if (_body.Instructions.Count <= 0)
             {
                 _agenda = null!;
                 _recordedStackSizes = null!;
+            }
+            else
+            {
+                _agenda = new Stack<StackState>();
+                _recordedStackSizes = new int?[_body.Instructions.Count];
+
+                if (body.ExceptionHandlers.Count > 0)
+                {
+                    _handlers = new Dictionary<int, List<CilExceptionHandler>>(body.ExceptionHandlers.Count);
+                    foreach (var handler in body.ExceptionHandlers)
+                    {
+                        if (handler.TryStart is not { Offset: int startOffset })
+                            continue;
+
+                        if (!_handlers.TryGetValue(startOffset, out var list))
+                            _handlers.Add(startOffset, list = new List<CilExceptionHandler>());
+
+                        list.Add(handler);
+                    }
+                }
             }
         }
 
@@ -34,14 +51,14 @@ namespace AsmResolver.DotNet.Code.Cil
 
             int result = 0;
 
-            // Add entry points to agenda.
-            ScheduleEntryPoints();
+            // Schedule offset 0.
+            _agenda.Push(new StackState(0, 0));
 
             while (_agenda.Count > 0)
             {
                 var currentState = _agenda.Pop();
 
-                // Check if we got passed the end of the method body. This only happens if the CIL code is invalid.
+                // Check if we passed the end of the method body. This only happens if the CIL code is invalid.
                 if (currentState.InstructionIndex >= _body.Instructions.Count)
                 {
                     var last = _body.Instructions[_body.Instructions.Count - 1];
@@ -53,7 +70,9 @@ namespace AsmResolver.DotNet.Code.Cil
                 {
                     // Check if previously visited state is consistent with current observation.
                     if (recordedStackSize.Value != currentState.StackSize)
+                    {
                         throw new StackImbalanceException(_body, _body.Instructions[currentState.InstructionIndex].Offset);
+                    }
                 }
                 else
                 {
@@ -61,7 +80,8 @@ namespace AsmResolver.DotNet.Code.Cil
                     _recordedStackSizes[currentState.InstructionIndex] = currentState.StackSize;
 
                     // Schedule successors of current instruction.
-                    ScheduleSuccessors(currentState);
+                    ScheduleNaturalSuccessors(in currentState);
+                    ScheduleExceptionalSuccessors(in currentState);
                 }
 
                 // Maintain largest found stack size.
@@ -72,39 +92,7 @@ namespace AsmResolver.DotNet.Code.Cil
             return result;
         }
 
-        private void ScheduleEntryPoints()
-        {
-            // Schedule offset 0.
-            _agenda.Push(new StackState(0, 0));
-
-            // Handler blocks are not referenced explicitly by instructions.
-            // Therefore we need to schedule them explicitly as well.
-            var instructions = _body.Instructions;
-
-            for (int i = 0; i < _body.ExceptionHandlers.Count; i++)
-            {
-                var handler = _body.ExceptionHandlers[i];
-
-                // Determine stack size at the start of the handler block.
-                int stackDelta = handler.HandlerType switch
-                {
-                    CilExceptionHandlerType.Exception => 1,
-                    CilExceptionHandlerType.Filter => 1,
-                    CilExceptionHandlerType.Finally => 0,
-                    CilExceptionHandlerType.Fault => 0,
-                    _ => throw new ArgumentOutOfRangeException(nameof(handler.HandlerType))
-                };
-
-                if (handler.TryStart is {Offset: var o1 })
-                    _agenda.Push(new StackState(instructions.GetIndexByOffset(o1), 0));
-                if (handler.HandlerStart is {Offset: var o2 })
-                    _agenda.Push(new StackState(instructions.GetIndexByOffset(o2), stackDelta));
-                if (handler.FilterStart is {Offset: var o3})
-                    _agenda.Push(new StackState(instructions.GetIndexByOffset(o3), 1));
-            }
-        }
-
-        private void ScheduleSuccessors(in StackState currentState)
+        private void ScheduleNaturalSuccessors(in StackState currentState)
         {
             var instruction = _body.Instructions[currentState.InstructionIndex];
 
@@ -134,16 +122,16 @@ namespace AsmResolver.DotNet.Code.Cil
                         // Schedule branch target.
                         switch (instruction.Operand)
                         {
+                            case ICilLabel label:
+                                ScheduleLabel(currentState.InstructionIndex, label, nextStackSize);
+                                break;
+
                             case sbyte delta:
                                 ScheduleDelta(currentState.InstructionIndex, delta, nextStackSize);
                                 break;
 
                             case int delta:
                                 ScheduleDelta(currentState.InstructionIndex, delta, nextStackSize);
-                                break;
-
-                            case ICilLabel label:
-                                ScheduleLabel(currentState.InstructionIndex, label, nextStackSize);
                                 break;
 
                             default:
@@ -194,6 +182,38 @@ namespace AsmResolver.DotNet.Code.Cil
                         throw new NotSupportedException(
                             $"Invalid or unsupported operand type at offset IL_{instruction.Offset:X4}.");
                 }
+            }
+        }
+
+        private void ScheduleExceptionalSuccessors(in StackState currentState)
+        {
+            var instruction = _body.Instructions[currentState.InstructionIndex];
+
+            // Did we just enter at least one exception handler try block?
+            if (_handlers is null || !_handlers.TryGetValue(instruction.Offset, out var handlers))
+                return;
+
+            // ECMA-335 Section I.12.4.2.8.1 prohibits entering try blocks with a non-zero stack size.
+            if (currentState.StackSize != 0)
+                throw new StackImbalanceException(_body, instruction.Offset);
+
+            // Schedule handler starts.
+            foreach (var handler in handlers)
+            {
+                // Determine stack size at the start of the handler block.
+                int stackDelta = handler.HandlerType switch
+                {
+                    CilExceptionHandlerType.Exception => 1,
+                    CilExceptionHandlerType.Filter => 1,
+                    CilExceptionHandlerType.Finally => 0,
+                    CilExceptionHandlerType.Fault => 0,
+                    _ => throw new ArgumentOutOfRangeException(nameof(handler.HandlerType))
+                };
+
+                if (handler.HandlerStart is { } handlerStart)
+                    ScheduleLabel(currentState.InstructionIndex, handlerStart, stackDelta);
+                if (handler.FilterStart is { } filterStart)
+                    ScheduleLabel(currentState.InstructionIndex, filterStart, 1);
             }
         }
 
