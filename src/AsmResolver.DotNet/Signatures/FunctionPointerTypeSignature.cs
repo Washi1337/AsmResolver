@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Signatures
         public override bool IsValueType => true;
 
         /// <inheritdoc />
-        public override TypeDefinition? Resolve() => GetUnderlyingTypeDefOrRef()?.Resolve();
+        public override TypeDefinition? Resolve(ModuleDefinition context) => GetUnderlyingTypeDefOrRef()?.Resolve(context);
 
         /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() =>

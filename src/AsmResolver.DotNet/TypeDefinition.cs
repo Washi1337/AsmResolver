@@ -861,8 +861,9 @@ namespace AsmResolver.DotNet
         }
 
         TypeDefinition ITypeDescriptor.Resolve() => this;
-
+        TypeDefinition ITypeDescriptor.Resolve(ModuleDefinition context) => this;
         IMemberDefinition IMemberDescriptor.Resolve() => this;
+        IMemberDefinition? IMemberDescriptor.Resolve(ModuleDefinition context) => this;
 
         /// <summary>
         /// When this type is an enum, extracts the underlying enum type.

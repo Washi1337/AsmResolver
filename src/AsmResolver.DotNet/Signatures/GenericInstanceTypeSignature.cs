@@ -108,7 +108,7 @@ namespace AsmResolver.DotNet.Signatures
         public override bool IsValueType => _isValueType;
 
         /// <inheritdoc />
-        public override TypeDefinition? Resolve() => GenericType.Resolve();
+        public override TypeDefinition? Resolve(ModuleDefinition context) => GenericType.Resolve(context);
 
         /// <inheritdoc />
         public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => GenericType;

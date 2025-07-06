@@ -84,7 +84,11 @@ namespace AsmResolver.DotNet
 
         IMemberDefinition? IMemberDescriptor.Resolve() => null;
 
+        IMemberDefinition? IMemberDescriptor.Resolve(ModuleDefinition context) => null;
+
         TypeDefinition? ITypeDescriptor.Resolve() => null;
+
+        TypeDefinition? ITypeDescriptor.Resolve(ModuleDefinition context) => null;
 
         ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef() => this;
 

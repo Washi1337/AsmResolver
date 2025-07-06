@@ -198,6 +198,8 @@ namespace AsmResolver.DotNet
 
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
+        IMemberDefinition IMemberDescriptor.Resolve(ModuleDefinition context) => this;
+
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {

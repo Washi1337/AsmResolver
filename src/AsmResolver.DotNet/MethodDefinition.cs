@@ -845,6 +845,12 @@ namespace AsmResolver.DotNet
 
         MethodDefinition IMethodDescriptor.Resolve() => this;
 
+        MethodDefinition IMethodDescriptor.Resolve(ModuleDefinition context) => this;
+
+        IMemberDefinition IMemberDescriptor.Resolve() => this;
+
+        IMemberDefinition IMemberDescriptor.Resolve(ModuleDefinition context) => this;
+
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
@@ -860,8 +866,6 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
-
-        IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <summary>
         /// Determines whether the provided definition can be accessed by the method.

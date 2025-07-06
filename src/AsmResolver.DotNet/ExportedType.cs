@@ -142,7 +142,14 @@ namespace AsmResolver.DotNet
         public bool IsValueType => Resolve()?.IsValueType ?? false;
 
         /// <inheritdoc />
-        public TypeDefinition? Resolve() => ContextModule?.MetadataResolver.ResolveType(this);
+        public TypeDefinition? Resolve() => ContextModule is { } context ? Resolve(context) : null;
+
+        /// <inheritdoc />
+        public TypeDefinition? Resolve(ModuleDefinition context) => context.MetadataResolver.ResolveType(this);
+
+        IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
+
+        IMemberDefinition? IMemberDescriptor.Resolve(ModuleDefinition context) => Resolve(context);
 
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
@@ -159,8 +166,6 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
-
-        IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 
         /// <inheritdoc />
         public ITypeDefOrRef ToTypeDefOrRef() => new TypeReference(ContextModule, Scope, Namespace, Name);

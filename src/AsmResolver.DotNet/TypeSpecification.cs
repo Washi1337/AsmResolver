@@ -112,9 +112,14 @@ namespace AsmResolver.DotNet
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <inheritdoc />
-        public TypeDefinition? Resolve() => ContextModule?.MetadataResolver.ResolveType(this);
+        public TypeDefinition? Resolve() => ContextModule is { } context ? Resolve(context) : null;
+
+        /// <inheritdoc />
+        public TypeDefinition? Resolve(ModuleDefinition context) => ContextModule?.MetadataResolver.ResolveType(this);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
+
+        IMemberDefinition? IMemberDescriptor.Resolve(ModuleDefinition context) => Resolve(context);
 
         /// <summary>
         /// Obtains the signature the type specification is referencing.

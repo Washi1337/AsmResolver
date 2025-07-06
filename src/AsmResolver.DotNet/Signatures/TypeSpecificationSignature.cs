@@ -33,12 +33,10 @@ namespace AsmResolver.DotNet.Signatures
         public override IResolutionScope? Scope => BaseType.Scope;
 
         /// <inheritdoc />
-        public override TypeDefinition? Resolve() =>
-            BaseType.Resolve();
+        public override TypeDefinition? Resolve(ModuleDefinition context) => BaseType.Resolve(context);
 
         /// <inheritdoc />
-        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() =>
-            BaseType.GetUnderlyingTypeDefOrRef();
+        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => BaseType.GetUnderlyingTypeDefOrRef();
 
         /// <inheritdoc />
         public override bool IsImportedInModule(ModuleDefinition module) => BaseType.IsImportedInModule(module);

@@ -16,7 +16,6 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<AssemblyReference, byte[]?> _publicKeyOrToken;
         private readonly LazyVariable<AssemblyReference, byte[]?> _hashValue;
         private byte[]? _publicKeyToken;
-        private ModuleDefinition? _contextModule;
 
         /// <summary>
         /// Initializes a new assembly reference.
@@ -81,13 +80,17 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public override ModuleDefinition? ContextModule => _contextModule;
+        public ModuleDefinition? ContextModule
+        {
+            get;
+            private set;
+        }
 
         /// <inheritdoc />
         ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
-            get => _contextModule;
-            set => _contextModule = value;
+            get => ContextModule;
+            set => ContextModule = value;
         }
 
         /// <summary>

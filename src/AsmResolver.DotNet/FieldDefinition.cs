@@ -385,6 +385,12 @@ namespace AsmResolver.DotNet
 
         FieldDefinition IFieldDescriptor.Resolve() => this;
 
+        FieldDefinition IFieldDescriptor.Resolve(ModuleDefinition context) => this;
+
+        IMemberDefinition IMemberDescriptor.Resolve() => this;
+
+        IMemberDefinition IMemberDescriptor.Resolve(ModuleDefinition context) => this;
+
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
@@ -400,8 +406,6 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
-
-        IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)

@@ -73,10 +73,7 @@ namespace AsmResolver.DotNet.Signatures
             };
 
         /// <inheritdoc />
-        public override TypeDefinition? Resolve()
-        {
-            return Type.Resolve();
-        }
+        public override TypeDefinition? Resolve(ModuleDefinition context) => Type.Resolve(context);
 
         /// <inheritdoc />
         public override bool IsImportedInModule(ModuleDefinition module) => ContextModule == module;
