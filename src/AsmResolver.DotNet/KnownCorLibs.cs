@@ -373,7 +373,7 @@ namespace AsmResolver.DotNet
         {
             return (version.Major, version.Minor) switch
             {
-                (1, 0 or 1) or (2, 0 or 1) or (3,0 or 1) => SystemPrivateCoreLib_v4_0_0_0,
+                (1, 0 or 1) or (2, 0 or 1 or 2) or (3,0 or 1) => SystemPrivateCoreLib_v4_0_0_0,
                 (5, 0) => SystemPrivateCoreLib_v5_0_0_0,
                 (6, 0) => SystemPrivateCoreLib_v6_0_0_0,
                 (7, 0) => SystemPrivateCoreLib_v7_0_0_0,
