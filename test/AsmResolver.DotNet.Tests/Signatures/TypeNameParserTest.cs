@@ -13,7 +13,10 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
         public TypeNameParserTest()
         {
-            _module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemRuntime_v4_2_2_0);
+            _module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemRuntime_v4_2_2_0)
+            {
+                TopLevelTypes = { new TypeDefinition("System", "Action", TypeAttributes.Class) }
+            };
             _comparer = new SignatureComparer();
         }
 
@@ -354,6 +357,31 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
+        public void ReadTypeWithoutFullyQualifiedNameShouldParseToRuntimeCorLib()
+        {
+            var type = TypeNameParser.Parse(_module, "System.Array");
+
+            Assert.NotEqual(_module.RuntimeContext.RuntimeCorLib, _module.CorLibTypeFactory.CorLibScope.GetAssembly(), _comparer);
+            Assert.Equal(_module.RuntimeContext.RuntimeCorLib, type.Scope.GetAssembly(), _comparer);
+        }
+
+        [Fact]
+        public void ReadTypeWithoutFullyQualifiedNameNotInCorLibShouldHaveNullScope()
+        {
+            var type = TypeNameParser.Parse(_module, "System.Uri");
+
+            Assert.Null(type.Scope);
+        }
+
+        [Fact]
+        public void ReadTypeWithoutFullyQualifiedNameResolvesToContextModuleFirst()
+        {
+            var type = TypeNameParser.Parse(_module, "System.Action");
+
+            Assert.Equal(_module, type.Scope, _comparer);
+        }
+
+        [Fact]
         public void GenericTypeNameWithInnerFQNRoundtrips()
         {
             // https://github.com/Washi1337/AsmResolver/pull/647
@@ -363,7 +391,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 .CreateTypeReference("System", "Action`1")
                 .MakeGenericInstanceType(isValueType: false, module.CorLibTypeFactory.Int32)
                 .ImportWith(module.DefaultImporter);
-            string typeName = TypeNameBuilder.GetAssemblyQualifiedName(expectedType, omitCorLib: false);
+            string typeName = TypeNameBuilder.GetAssemblyQualifiedName(expectedType);
             var actualType = TypeNameParser.Parse(module, typeName);
 
             Assert.Equal(expectedType, actualType, SignatureComparer.Default);

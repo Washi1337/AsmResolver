@@ -29,20 +29,13 @@ internal readonly struct TypeName(string? ns, IList<string> names)
                 // However, we would prefer to use the implementation corlib for the runtime targeted, not the one it was compiled against.
                 if (contextModule.RuntimeContext.RuntimeCorLib is {} runtimeCorLib)
                 {
-                    type.Scope = runtimeCorLib.ImportWith(contextModule.DefaultImporter);
+                    type.Scope = new AssemblyReference(runtimeCorLib);
                     definition = type.Resolve();
                 }
 
                 if (definition is null)
                 {
-                    // fall back to the CorLibScope
-                    type.Scope = contextModule.CorLibTypeFactory.CorLibScope;
-                    definition = type.Resolve();
-                    if (definition is null)
-                    {
-                        // All lookups failed, leave no scope.
-                        type.Scope = null;
-                    }
+                    type.Scope = null;
                 }
             }
         }
