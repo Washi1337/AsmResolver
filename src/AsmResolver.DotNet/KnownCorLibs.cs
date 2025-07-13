@@ -262,7 +262,7 @@ namespace AsmResolver.DotNet
 
         static KnownCorLibs()
         {
-            KnownCorLibReferences = new HashSet<AssemblyReference>(new SignatureComparer())
+            KnownCorLibReferences = new HashSet<AssemblyReference>(SignatureComparer.Default)
             {
                 NetStandard_v2_0_0_0,
                 NetStandard_v2_1_0_0,
@@ -294,7 +294,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Obtains a reference to the default core lib reference for the provided .NET target runtime.
+        /// Obtains a reference to the default core lib for the provided .NET target runtime.
         /// </summary>
         /// <param name="runtimeInfo">The runtime to target.</param>
         /// <returns>The reference to the default core lib.</returns>
@@ -309,6 +309,26 @@ namespace AsmResolver.DotNet
 
             if (runtimeInfo.IsNetCoreApp)
                 return SelectNetCoreCorLib(runtimeInfo.Version);
+
+            throw new ArgumentException($"Invalid or unsupported runtime version {runtimeInfo}.");
+        }
+
+        /// <summary>
+        /// Obtains a reference to the assumed implementation core lib for the provided .NET target runtime.
+        /// </summary>
+        /// <param name="runtimeInfo">The runtime to target.</param>
+        /// <returns>The reference to the assumed implementation core lib.</returns>
+        /// <exception cref="ArgumentException">The runtime information is invalid or unsupported.</exception>
+        public static AssemblyReference? TryImplFromRuntimeInfo(DotNetRuntimeInfo runtimeInfo)
+        {
+            if (runtimeInfo.IsNetStandard)
+                return null;
+
+            if (runtimeInfo.IsNetFramework)
+                return SelectFrameworkCorLib(runtimeInfo.Version);
+
+            if (runtimeInfo.IsNetCoreApp)
+                return SelectNetCoreImplCorLib(runtimeInfo.Version);
 
             throw new ArgumentException($"Invalid or unsupported runtime version {runtimeInfo}.");
         }
@@ -345,6 +365,21 @@ namespace AsmResolver.DotNet
                 (8, 0) => SystemRuntime_v8_0_0_0,
                 (9, 0) => SystemRuntime_v9_0_0_0,
                 (10, 0) => SystemRuntime_v10_0_0_0,
+                _ => throw new ArgumentException($"Invalid or unsupported .NET or .NET Core version {version}.")
+            };
+        }
+
+        private static AssemblyReference SelectNetCoreImplCorLib(Version version)
+        {
+            return (version.Major, version.Minor) switch
+            {
+                (1, 0 or 1) or (2, 0 or 1 or 2) or (3,0 or 1) => SystemPrivateCoreLib_v4_0_0_0,
+                (5, 0) => SystemPrivateCoreLib_v5_0_0_0,
+                (6, 0) => SystemPrivateCoreLib_v6_0_0_0,
+                (7, 0) => SystemPrivateCoreLib_v7_0_0_0,
+                (8, 0) => SystemPrivateCoreLib_v8_0_0_0,
+                (9, 0) => SystemPrivateCoreLib_v9_0_0_0,
+                (10, 0) => SystemPrivateCoreLib_v10_0_0_0,
                 _ => throw new ArgumentException($"Invalid or unsupported .NET or .NET Core version {version}.")
             };
         }

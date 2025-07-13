@@ -26,12 +26,17 @@ internal readonly struct TypeName(string? ns, IList<string> names)
             if (definition is null)
             {
                 // If that fails, try corlib.
-                type.Scope = contextModule.CorLibTypeFactory.CorLibScope;
-                definition = type.Resolve();
+                // However, we would prefer to use the implementation corlib for the runtime targeted, not the one it was compiled against.
+                if (contextModule.RuntimeContext.RuntimeCorLib is {} runtimeCorLib)
+                {
+                    type.Scope = new AssemblyReference(runtimeCorLib);
+                    definition = type.Resolve();
+                }
 
-                // If both lookups fail, revert to the normal module as scope as a fallback.
                 if (definition is null)
-                    type.Scope = contextModule;
+                {
+                    type.Scope = null;
+                }
             }
         }
 

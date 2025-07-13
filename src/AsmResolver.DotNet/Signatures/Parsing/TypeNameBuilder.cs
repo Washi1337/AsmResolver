@@ -5,18 +5,25 @@ using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures.Parsing
 {
+    // Type names must include the assembly spec for 'corelib' as well. E.g., this is what Roslyn emits:
+    //
+    // 'System.Collections.Generic.List`1[[System.Uri, System.Runtime, Version=10.0.0.0, Culture=neutral,
+    //  PublicKeyToken=b03f5f7f11d50a3a]], System.Collections, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
+    //
+    // When parsing 'Type' attribute elements, if the assembly spec is not specified, types would otherwise default to 'corlib', but that
+    // would not necessarily be correct. For instance, 'System.Uri' is not in 'System.Private.CoreLib.dll', it's in 'System.Private.Uri.dll'.
+    // Emitting the assembly spec in all cases fixes this issue, and results in the same output as Roslyn.
+
     /// <summary>
     /// Provides a mechanism for building up a fully qualified type names, as they are stored in custom attribute signatures.
     /// </summary>
     public sealed class TypeNameBuilder : ITypeSignatureVisitor<object?>
     {
         private readonly TextWriter _writer;
-        private readonly bool _omitCorLib;
 
-        private TypeNameBuilder(TextWriter writer, bool omitCorLib)
+        private TypeNameBuilder(TextWriter writer)
         {
             _writer = writer ?? throw new ArgumentNullException(nameof(writer));
-            _omitCorLib = omitCorLib;
         }
 
         /// <summary>
@@ -24,19 +31,10 @@ namespace AsmResolver.DotNet.Signatures.Parsing
         /// </summary>
         /// <param name="signature">The type to convert to a string.</param>
         /// <returns>The built up type name.</returns>
-        public static string GetAssemblyQualifiedName(TypeSignature signature) =>
-            GetAssemblyQualifiedName(signature, true);
-
-        /// <summary>
-        /// Builds up an assembly qualified type name.
-        /// </summary>
-        /// <param name="signature">The type to convert to a string.</param>
-        /// <param name="omitCorLib">Indicates any reference to corlib should not be included explicitly.</param>
-        /// <returns>The built up type name.</returns>
-        public static string GetAssemblyQualifiedName(TypeSignature signature, bool omitCorLib)
+        public static string GetAssemblyQualifiedName(TypeSignature signature)
         {
             var writer = new StringWriter();
-            var builder = new TypeNameBuilder(writer, omitCorLib);
+            var builder = new TypeNameBuilder(writer);
             builder.WriteTypeAssemblyQualifiedName(signature);
             return writer.ToString();
         }
@@ -48,9 +46,6 @@ namespace AsmResolver.DotNet.Signatures.Parsing
             var assembly = type.Scope?.GetAssembly();
             if (assembly is not null && assembly != type.Module?.Assembly)
             {
-                if (assembly.IsCorLib && _omitCorLib)
-                    return;
-
                 _writer.Write(", ");
                 WriteAssemblySpec(assembly);
             }
