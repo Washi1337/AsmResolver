@@ -4,6 +4,7 @@
     <Title>AsmResolver.DotNet</Title>
     <Description>High level .NET image models for the AsmResolver executable file inspection toolsuite.</Description>
     <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

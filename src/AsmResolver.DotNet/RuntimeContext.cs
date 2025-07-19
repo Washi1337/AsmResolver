@@ -118,7 +118,7 @@ namespace AsmResolver.DotNet
             {
                 case DotNetRuntimeInfo.NetFramework:
                 case DotNetRuntimeInfo.NetStandard when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
-                    return new DotNetFrameworkAssemblyResolver(readerParameters);
+                    return new DotNetFrameworkAssemblyResolver(readerParameters, MonoPathProvider.Default);
 
                 case DotNetRuntimeInfo.NetStandard when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(runtime.Version, out var coreVersion):
                     return new DotNetCoreAssemblyResolver(readerParameters, coreVersion);
@@ -127,7 +127,7 @@ namespace AsmResolver.DotNet
                     return new DotNetCoreAssemblyResolver(readerParameters, runtime.Version);
 
                 default:
-                    return new DotNetFrameworkAssemblyResolver(readerParameters);
+                    return new DotNetFrameworkAssemblyResolver(readerParameters, MonoPathProvider.Default);
             }
         }
     }

@@ -17,20 +17,28 @@ namespace AsmResolver.DotNet.Tests
         private readonly SignatureComparer _comparer = new();
 
         [Fact]
-        public void ResolveCorLib()
+        public void ResolveFrameworkCorLib()
         {
-            var assemblyName = typeof(object).Assembly.GetName();
-            var assemblyRef = new AssemblyReference(
-                assemblyName.Name,
-                assemblyName.Version!,
-                false,
-                assemblyName.GetPublicKeyToken());
+            var corlib = KnownCorLibs.MsCorLib_v4_0_0_0;
 
-            var resolver = new DotNetCoreAssemblyResolver(new Version(3, 1, 0));
-            var assemblyDef = resolver.Resolve(assemblyRef);
+            var resolver = new DotNetFrameworkAssemblyResolver();
+            var assemblyDef = resolver.Resolve(corlib);
 
             Assert.NotNull(assemblyDef);
-            Assert.Equal(assemblyName.Name, assemblyDef.Name);
+            Assert.Equal(corlib.Name, assemblyDef.Name);
+            Assert.NotNull(assemblyDef.ManifestModule!.FilePath);
+        }
+
+        [Fact]
+        public void ResolveCoreCorLib()
+        {
+            var corlib = KnownCorLibs.SystemRuntime_v4_2_2_0;
+
+            var resolver = new DotNetCoreAssemblyResolver(new Version(3, 1, 0));
+            var assemblyDef = resolver.Resolve(corlib);
+
+            Assert.NotNull(assemblyDef);
+            Assert.Equal(corlib.Name, assemblyDef.Name);
             Assert.NotNull(assemblyDef.ManifestModule!.FilePath);
         }
 
@@ -39,12 +47,7 @@ namespace AsmResolver.DotNet.Tests
         {
             using var service = new ByteArrayFileService();
 
-            var assemblyName = typeof(object).Assembly.GetName();
-            var assemblyRef = new AssemblyReference(
-                assemblyName.Name,
-                assemblyName.Version!,
-                false,
-                assemblyName.GetPublicKeyToken());
+            var assemblyRef = KnownCorLibs.SystemRuntime_v4_2_2_0;
 
             var resolver = new DotNetCoreAssemblyResolver(service, new Version(3, 1, 0));
             Assert.Empty(service.GetOpenedFiles());

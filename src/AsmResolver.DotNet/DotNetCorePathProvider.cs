@@ -13,11 +13,12 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class DotNetCorePathProvider
     {
-        private static readonly string[] DefaultDotNetUnixPaths = {
+        private static readonly string[] DefaultDotNetUnixPaths =
+        [
             "/usr/share/dotnet/",
             "/usr/local/share/dotnet/",
             "/opt/dotnet/"
-        };
+        ];
 
         private static readonly Regex NetCoreRuntimePattern = new(@"\.NET( Core)? \d+\.\d+\.\d+");
         private readonly List<DotNetInstallationInfo> _installedRuntimes = new();
@@ -40,7 +41,10 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Creates a new .NET installation path provider, using the provided installation folder for .NET.
         /// </summary>
-        /// <param name="installationDirectory">The .NET installation folder.</param>
+        /// <param name="installationDirectory">
+        /// The .NET installation folder. This should be the path to the directory containing the main <c>dotnet</c> or
+        /// <c>dotnet.exe</c> CLI utility.
+        /// </param>
         public DotNetCorePathProvider(string? installationDirectory)
         {
             if (!string.IsNullOrEmpty(installationDirectory) && Directory.Exists(installationDirectory))
@@ -56,7 +60,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the installation path of the .NET installation on the current system.
+        /// Gets the path to the .NET installation on the current system.
         /// </summary>
         public static string? DefaultInstallationPath
         {
