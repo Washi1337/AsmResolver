@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet;
@@ -12,11 +10,11 @@ namespace AsmResolver.DotNet;
 /// </summary>
 public class MonoPathProvider
 {
-    private static readonly string[] DefaultWindowsMonoInstallDirectories = [
+    private static readonly string[] DefaultMonoWindowsPaths = [
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Mono")
     ];
 
-    private static readonly string[] DefaultUnixMonoInstallDirectories = [
+    private static readonly string[] DefaultMonoUnixPaths = [
         "/usr/lib/mono",
         "/lib/mono"
     ];
@@ -101,7 +99,7 @@ public class MonoPathProvider
     private static string? FindWindowsMonoPath()
     {
         // Try common windows installs.
-        foreach (string knownPath in DefaultWindowsMonoInstallDirectories)
+        foreach (string knownPath in DefaultMonoWindowsPaths)
         {
             if (Directory.Exists(knownPath))
                 return knownPath;
@@ -110,40 +108,18 @@ public class MonoPathProvider
         return null;
     }
 
-    private static unsafe string? RealPath(string path)
-    {
-        const int PATH_MAX = 4096;
-
-        byte[] bytes = new byte[PATH_MAX + 1];
-        int length = 0;
-
-        fixed (byte* realName = bytes)
-        {
-            if (realpath(path, realName) == 0)
-                return null;
-
-            for (byte* ptr = realName; *ptr != 0 && ptr != realName + PATH_MAX; ptr++)
-                length++;
-        }
-
-        return Encoding.ASCII.GetString(bytes, 0, length);
-
-        [DllImport ("libc")]
-        static extern nint realpath([MarshalAs(UnmanagedType.LPStr)] string path, byte* buffer);
-    }
-
     private static string? FindUnixMonoPath()
     {
         // Try common unix installs first.
-        foreach (string knownPath in DefaultUnixMonoInstallDirectories)
+        foreach (string knownPath in DefaultMonoUnixPaths)
         {
             if (Directory.Exists(knownPath))
                 return knownPath;
         }
 
         // If we're running on nix, we need to get it from the nix package.
-        if (Directory.Exists("/nix/store"))
-            return FindNixMonoPath();
+        if (Directory.Exists("/nix/store") && FindNixMonoPath() is { } nixPath)
+            return nixPath;
 
         return null;
     }
@@ -160,7 +136,7 @@ public class MonoPathProvider
         {
             string candidateMonoBinaryPath = Path.Combine(path, "mono");
             if (File.Exists(candidateMonoBinaryPath)
-                && RealPath(candidateMonoBinaryPath) is { } binaryPath
+                && NativeMethods.RealPath(candidateMonoBinaryPath) is { } binaryPath
                 && Path.GetDirectoryName(Path.GetDirectoryName(binaryPath)) is { } rootPath
                 && PathShim.Combine(rootPath, "lib", "mono") is { } installPath
                 && Directory.Exists(installPath))

@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet
 
         private void DetectGacDirectories(MonoPathProvider? monoPathProvider)
         {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            if (RuntimeInformationShim.IsRunningOnWindows)
             {
                 DetectWindowsGacDirectories();
             }

@@ -121,10 +121,10 @@ namespace AsmResolver.DotNet
                     return new DotNetFrameworkAssemblyResolver(readerParameters, MonoPathProvider.Default);
 
                 case DotNetRuntimeInfo.NetStandard when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(runtime.Version, out var coreVersion):
-                    return new DotNetCoreAssemblyResolver(readerParameters, coreVersion);
+                    return new DotNetCoreAssemblyResolver(coreVersion, readerParameters);
 
                 case DotNetRuntimeInfo.NetCoreApp:
-                    return new DotNetCoreAssemblyResolver(readerParameters, runtime.Version);
+                    return new DotNetCoreAssemblyResolver(runtime.Version, readerParameters);
 
                 default:
                     return new DotNetFrameworkAssemblyResolver(readerParameters, MonoPathProvider.Default);

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Config.Json;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.IO;
@@ -16,10 +17,16 @@ namespace AsmResolver.DotNet.Tests
 
         private readonly SignatureComparer _comparer = new();
 
-        [Fact]
-        public void ResolveFrameworkCorLib()
+        [Theory]
+        [InlineData(2, 0)]
+        [InlineData(4, 0)]
+        [InlineData(4, 7)]
+        public void ResolveFrameworkCorLib(int major, int minor)
         {
-            var corlib = KnownCorLibs.MsCorLib_v4_0_0_0;
+            var corlib = KnownCorLibs.FromRuntimeInfo(new DotNetRuntimeInfo(
+                DotNetRuntimeInfo.NetFramework,
+                new Version(major, minor)
+            ));
 
             var resolver = new DotNetFrameworkAssemblyResolver();
             var assemblyDef = resolver.Resolve(corlib);
@@ -29,12 +36,17 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(assemblyDef.ManifestModule!.FilePath);
         }
 
-        [Fact]
-        public void ResolveCoreCorLib()
+        [Theory]
+        [InlineData(3, 1)]
+        [InlineData(8, 0)]
+        public void ResolveCoreCorLib(int major, int minor)
         {
-            var corlib = KnownCorLibs.SystemRuntime_v4_2_2_0;
+            var corlib = KnownCorLibs.FromRuntimeInfo(new DotNetRuntimeInfo(
+                DotNetRuntimeInfo.NetCoreApp,
+                new Version(major, minor)
+            ));
 
-            var resolver = new DotNetCoreAssemblyResolver(new Version(3, 1, 0));
+            var resolver = new DotNetCoreAssemblyResolver(new Version(major, minor, 0));
             var assemblyDef = resolver.Resolve(corlib);
 
             Assert.NotNull(assemblyDef);
@@ -49,7 +61,7 @@ namespace AsmResolver.DotNet.Tests
 
             var assemblyRef = KnownCorLibs.SystemRuntime_v4_2_2_0;
 
-            var resolver = new DotNetCoreAssemblyResolver(service, new Version(3, 1, 0));
+            var resolver = new DotNetCoreAssemblyResolver(new Version(3, 1, 0), new ModuleReaderParameters(service));
             Assert.Empty(service.GetOpenedFiles());
             Assert.NotNull(resolver.Resolve(assemblyRef));
             Assert.NotEmpty(service.GetOpenedFiles());

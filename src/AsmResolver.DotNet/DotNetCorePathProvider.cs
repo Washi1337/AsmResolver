@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using AsmResolver.Shims;
 
@@ -13,12 +12,18 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class DotNetCorePathProvider
     {
+        private static readonly string[] DefaultDotNetWindowsPaths = [
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "dotnet")
+        ];
+
         private static readonly string[] DefaultDotNetUnixPaths =
         [
             "/usr/share/dotnet/",
             "/usr/local/share/dotnet/",
             "/opt/dotnet/"
         ];
+
+        private const string DotNetDefaultLocationRegistry = "/etc/dotnet/install_location";
 
         private static readonly Regex NetCoreRuntimePattern = new(@"\.NET( Core)? \d+\.\d+\.\d+");
         private readonly List<DotNetInstallationInfo> _installedRuntimes = new();
@@ -176,22 +181,13 @@ namespace AsmResolver.DotNet
         {
             if (RuntimeInformationShim.IsRunningOnWindows)
             {
-                // Probe PATH for installation folder of dotnet.
-                string[] paths = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator);
-                foreach (string path in paths)
-                {
-                    if (File.Exists(Path.Combine(path, "dotnet.exe")))
-                        return path;
-                }
+                if (FindWindowsDotNetPath() is { } path)
+                    return path;
             }
             else if (RuntimeInformationShim.IsRunningOnUnix)
             {
-                // Probe default locations for installation folder of dotnet.
-                foreach (string path in DefaultDotNetUnixPaths)
-                {
-                    if (File.Exists(Path.Combine(path, "dotnet")))
-                        return path;
-                }
+                if (FindUnixDotNetPath() is { } path)
+                    return path;
             }
 
             if (NetCoreRuntimePattern.Match(RuntimeInformationShim.FrameworkDescription).Success)
@@ -220,6 +216,75 @@ namespace AsmResolver.DotNet
                 }
 
                 return TryGetObjectCoreLibPath();
+            }
+
+            return null;
+        }
+
+        private static string? FindWindowsDotNetPath()
+        {
+            // Probe PATH for installation folder of dotnet.
+            string[] paths = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator);
+            foreach (string path in paths)
+            {
+                if (File.Exists(Path.Combine(path, "dotnet.exe")))
+                    return path;
+            }
+
+            // Probe default locations for installation folder of dotnet.
+            foreach (string path in DefaultDotNetWindowsPaths)
+            {
+                if (File.Exists(Path.Combine(path, "dotnet.exe")))
+                    return path;
+            }
+
+            return null;
+        }
+
+        private static string? FindUnixDotNetPath()
+        {
+            // Probe default locations for installation folder of dotnet.
+            foreach (string path in DefaultDotNetUnixPaths)
+            {
+                if (File.Exists(Path.Combine(path, "dotnet")))
+                    return path;
+            }
+
+            // Check /etc/dotnet/install_location for default installation:
+            // Reference: https://github.com/dotnet/designs/blob/ece1f853d2ba4c174151291056ff29d9101d0091/accepted/2020/install-locations.md?plain=1#L48
+            if (File.Exists(DotNetDefaultLocationRegistry))
+            {
+                using var fs = File.OpenText(DotNetDefaultLocationRegistry);
+                string? path = fs.ReadLine()?.TrimEnd();
+                if (!string.IsNullOrEmpty(path) && File.Exists(Path.Combine(path, "dotnet")))
+                    return path;
+            }
+
+            // If we're running on nix, we need to get it from the nix package.
+            if (Directory.Exists("/nix/store") && FindNixDotNetPath() is { } nixPath)
+                return nixPath;
+
+            return null;
+        }
+
+        private static string? FindNixDotNetPath()
+        {
+            // Probe "dotnet" from PATH. It will be in "<nix-dotnet-root>/dotnet".
+            string[]? paths = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator);
+            if (paths is null)
+                return null;
+
+            foreach (string path in paths)
+            {
+                string candidateDotNetPath = Path.Combine(path, "dotnet");
+                if (File.Exists(candidateDotNetPath)
+                    && NativeMethods.RealPath(candidateDotNetPath) is { } binaryPath
+                    && Path.GetDirectoryName(binaryPath) is { } rootPath
+                    && PathShim.Combine(rootPath, "shared") is { } sharedPath // Check if we have a "shared" directory.
+                    && Directory.Exists(sharedPath))
+                {
+                    return rootPath;
+                }
             }
 
             return null;
