@@ -28,7 +28,8 @@ namespace AsmResolver.DotNet.Serialized
             _row = row;
             Attributes = row.Attributes;
 
-            ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = context.ParentModule;
+            if (_context.ParentModule.GetParentTypeRid(MetadataToken.Rid) == 0)
+                ((IOwnedCollectionElement<ModuleDefinition>)this).Owner = _context.ParentModule;
         }
 
         /// <inheritdoc />
