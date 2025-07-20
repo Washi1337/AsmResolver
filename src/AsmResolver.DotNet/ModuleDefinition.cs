@@ -29,7 +29,8 @@ namespace AsmResolver.DotNet
         MetadataMember,
         IResolutionScope,
         IHasCustomAttribute,
-        IOwnedCollectionElement<AssemblyDefinition>
+        IOwnedCollectionElement<AssemblyDefinition>,
+        ITypeOwner
     {
         private readonly LazyVariable<ModuleDefinition, Utf8String?> _name;
         private readonly LazyVariable<ModuleDefinition, Guid> _mvid;
@@ -1133,7 +1134,9 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="TopLevelTypes"/> property.
         /// </remarks>
         protected virtual IList<TypeDefinition> GetTopLevelTypes() =>
-            new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
+            new OwnedCollection<ITypeOwner, TypeDefinition>(this);
+
+        IList<TypeDefinition> ITypeOwner.OwnedTypes => TopLevelTypes;
 
         /// <summary>
         /// Obtains the list of references to .NET assemblies that the module uses.

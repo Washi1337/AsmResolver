@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Serialized
             Attributes = row.Attributes;
 
             if (_context.ParentModule.GetParentTypeRid(MetadataToken.Rid) == 0)
-                ((IOwnedCollectionElement<ModuleDefinition>)this).Owner = _context.ParentModule;
+                ((IOwnedCollectionElement<ITypeOwner>) this).Owner = _context.ParentModule;
         }
 
         /// <inheritdoc />
@@ -55,7 +55,7 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<TypeDefinition> GetNestedTypes()
         {
             var rids = _context.ParentModule.GetNestedTypeRids(MetadataToken.Rid);
-            var result = new MemberCollection<TypeDefinition, TypeDefinition>(this, rids.Count);
+            var result = new MemberCollection<ITypeOwner, TypeDefinition>(this, rids.Count);
 
             foreach (uint rid in rids)
             {

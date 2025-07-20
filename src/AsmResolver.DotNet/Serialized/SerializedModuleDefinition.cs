@@ -189,7 +189,7 @@ namespace AsmResolver.DotNet.Serialized
             var typeDefTable = ReaderContext.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
             int nestedTypeCount = ReaderContext.TablesStream.GetTable(TableIndex.NestedClass).Count;
 
-            var types = new MemberCollection<ModuleDefinition, TypeDefinition>(this,
+            var types = new MemberCollection<ITypeOwner, TypeDefinition>(this,
                 typeDefTable.Count - nestedTypeCount);
 
             for (int i = 0; i < typeDefTable.Count; i++)
