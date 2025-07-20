@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet
         IMemberDefinition,
         IOwnedCollectionElement<TypeDefinition>,
         IMemberRefParent,
-        ICustomAttributeType,
+        IMethodDefOrRef,
         IHasGenericParameters,
         IMemberForwarded,
         IHasSecurityDeclaration,
@@ -564,7 +564,7 @@ namespace AsmResolver.DotNet
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
-        ITypeDefOrRef? IMethodDefOrRef.DeclaringType => DeclaringType;
+        ITypeDefOrRef? ICustomAttributeType.DeclaringType => DeclaringType;
 
         TypeDefinition? IOwnedCollectionElement<TypeDefinition>.Owner
         {
