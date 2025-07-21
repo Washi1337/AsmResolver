@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Config.Json;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.IO;
@@ -16,21 +17,40 @@ namespace AsmResolver.DotNet.Tests
 
         private readonly SignatureComparer _comparer = new();
 
-        [Fact]
-        public void ResolveCorLib()
+        [Theory]
+        [InlineData(2, 0)]
+        [InlineData(4, 0)]
+        [InlineData(4, 7)]
+        public void ResolveFrameworkCorLib(int major, int minor)
         {
-            var assemblyName = typeof(object).Assembly.GetName();
-            var assemblyRef = new AssemblyReference(
-                assemblyName.Name,
-                assemblyName.Version!,
-                false,
-                assemblyName.GetPublicKeyToken());
+            var corlib = KnownCorLibs.FromRuntimeInfo(new DotNetRuntimeInfo(
+                DotNetRuntimeInfo.NetFramework,
+                new Version(major, minor)
+            ));
 
-            var resolver = new DotNetCoreAssemblyResolver(new Version(3, 1, 0));
-            var assemblyDef = resolver.Resolve(assemblyRef);
+            var resolver = new DotNetFrameworkAssemblyResolver();
+            var assemblyDef = resolver.Resolve(corlib);
 
             Assert.NotNull(assemblyDef);
-            Assert.Equal(assemblyName.Name, assemblyDef.Name);
+            Assert.Equal(corlib.Name, assemblyDef.Name);
+            Assert.NotNull(assemblyDef.ManifestModule!.FilePath);
+        }
+
+        [Theory]
+        [InlineData(3, 1)]
+        [InlineData(8, 0)]
+        public void ResolveCoreCorLib(int major, int minor)
+        {
+            var corlib = KnownCorLibs.FromRuntimeInfo(new DotNetRuntimeInfo(
+                DotNetRuntimeInfo.NetCoreApp,
+                new Version(major, minor)
+            ));
+
+            var resolver = new DotNetCoreAssemblyResolver(new Version(major, minor, 0));
+            var assemblyDef = resolver.Resolve(corlib);
+
+            Assert.NotNull(assemblyDef);
+            Assert.Equal(corlib.Name, assemblyDef.Name);
             Assert.NotNull(assemblyDef.ManifestModule!.FilePath);
         }
 
@@ -39,14 +59,9 @@ namespace AsmResolver.DotNet.Tests
         {
             using var service = new ByteArrayFileService();
 
-            var assemblyName = typeof(object).Assembly.GetName();
-            var assemblyRef = new AssemblyReference(
-                assemblyName.Name,
-                assemblyName.Version!,
-                false,
-                assemblyName.GetPublicKeyToken());
+            var assemblyRef = KnownCorLibs.SystemRuntime_v4_2_2_0;
 
-            var resolver = new DotNetCoreAssemblyResolver(service, new Version(3, 1, 0));
+            var resolver = new DotNetCoreAssemblyResolver(new Version(3, 1, 0), new ModuleReaderParameters(service));
             Assert.Empty(service.GetOpenedFiles());
             Assert.NotNull(resolver.Resolve(assemblyRef));
             Assert.NotEmpty(service.GetOpenedFiles());

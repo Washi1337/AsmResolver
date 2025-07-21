@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using AsmResolver.Collections;
 using AsmResolver.DotNet.Config.Json;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.IO;
@@ -23,7 +22,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="runtimeVersion">The version of .NET to target.</param>
         public DotNetCoreAssemblyResolver(Version runtimeVersion)
-            : this(UncachedFileService.Instance, null, runtimeVersion, DotNetCorePathProvider.Default)
+            : this(runtimeVersion, DotNetCorePathProvider.Default)
         {
         }
 
@@ -31,10 +30,15 @@ namespace AsmResolver.DotNet
         /// Creates a new .NET Core assembly resolver, by attempting to autodetect the current .NET or .NET Core
         /// installation directory.
         /// </summary>
-        /// <param name="fileService">The service to use for reading files from the disk.</param>
         /// <param name="runtimeVersion">The version of .NET to target.</param>
-        public DotNetCoreAssemblyResolver(IFileService fileService, Version runtimeVersion)
-            : this(fileService, null, runtimeVersion, DotNetCorePathProvider.Default)
+        /// <param name="pathProvider">The installation directory of .NET Core.</param>
+        public DotNetCoreAssemblyResolver(Version runtimeVersion, DotNetCorePathProvider pathProvider)
+            : this(
+                null,
+                runtimeVersion,
+                pathProvider,
+                new ModuleReaderParameters(UncachedFileService.Instance)
+            )
         {
         }
 
@@ -42,10 +46,15 @@ namespace AsmResolver.DotNet
         /// Creates a new .NET Core assembly resolver, by attempting to autodetect the current .NET or .NET Core
         /// installation directory.
         /// </summary>
+        /// <param name="runtimeVersion">The version of .NET to target.</param>
         /// <param name="readerParameters">The parameters to use while reading the assembly.</param>
-        /// <param name="runtimeVersion">The version of .NET to target.</param>
-        public DotNetCoreAssemblyResolver(ModuleReaderParameters readerParameters, Version runtimeVersion)
-            : this(readerParameters, null, runtimeVersion, DotNetCorePathProvider.Default)
+        public DotNetCoreAssemblyResolver(Version runtimeVersion, ModuleReaderParameters readerParameters)
+            : this(
+                null,
+                runtimeVersion,
+                DotNetCorePathProvider.Default,
+                readerParameters
+            )
         {
         }
 
@@ -56,61 +65,27 @@ namespace AsmResolver.DotNet
         /// <param name="configuration">The runtime configuration as specified by the *.runtimeconfig.json file.</param>
         /// <param name="fallbackVersion">The version of .NET to fallback on if the runtime configuration is insufficient.</param>
         public DotNetCoreAssemblyResolver(RuntimeConfiguration? configuration, Version fallbackVersion)
-            : this(UncachedFileService.Instance, configuration, fallbackVersion, DotNetCorePathProvider.Default)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new .NET Core assembly resolver, by attempting to autodetect the current .NET or .NET Core
-        /// installation directory.
-        /// </summary>
-        /// <param name="fileService">The service to use for reading files from the disk.</param>
-        /// <param name="configuration">The runtime configuration as specified by the *.runtimeconfig.json file.</param>
-        /// <param name="fallbackVersion">The version of .NET to fallback on if the runtime configuration is insufficient.</param>
-        public DotNetCoreAssemblyResolver(IFileService fileService, RuntimeConfiguration? configuration, Version fallbackVersion)
-            : this(fileService, configuration, fallbackVersion, DotNetCorePathProvider.Default)
+            : this(
+                configuration,
+                fallbackVersion,
+                DotNetCorePathProvider.Default,
+                new ModuleReaderParameters(UncachedFileService.Instance)
+            )
         {
         }
 
         /// <summary>
         /// Creates a new .NET Core assembly resolver.
         /// </summary>
-        /// <param name="fileService">The service to use for reading files from the disk.</param>
-        /// <param name="configuration">The runtime configuration to use.</param>
-        /// <param name="pathProvider">The installation directory of .NET Core.</param>
-        public DotNetCoreAssemblyResolver(IFileService fileService, RuntimeConfiguration? configuration, DotNetCorePathProvider pathProvider)
-            : this(fileService, configuration, null, pathProvider)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new .NET Core assembly resolver.
-        /// </summary>
-        /// <param name="fileService">The service to use for reading files from the disk.</param>
         /// <param name="configuration">The runtime configuration to use, or <c>null</c> if no configuration is available.</param>
         /// <param name="fallbackVersion">The version of .NET or .NET Core to use when no (valid) configuration is provided.</param>
         /// <param name="pathProvider">The installation directory of .NET Core.</param>
-        public DotNetCoreAssemblyResolver(
-            IFileService fileService,
-            RuntimeConfiguration? configuration,
-            Version? fallbackVersion,
-            DotNetCorePathProvider pathProvider)
-            : this(new ModuleReaderParameters(fileService), configuration, fallbackVersion, pathProvider)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new .NET Core assembly resolver.
-        /// </summary>
         /// <param name="readerParameters">The parameters to use while reading the assembly.</param>
-        /// <param name="configuration">The runtime configuration to use, or <c>null</c> if no configuration is available.</param>
-        /// <param name="fallbackVersion">The version of .NET or .NET Core to use when no (valid) configuration is provided.</param>
-        /// <param name="pathProvider">The installation directory of .NET Core.</param>
         public DotNetCoreAssemblyResolver(
-            ModuleReaderParameters readerParameters,
             RuntimeConfiguration? configuration,
             Version? fallbackVersion,
-            DotNetCorePathProvider pathProvider)
+            DotNetCorePathProvider pathProvider,
+            ModuleReaderParameters readerParameters)
             : base(readerParameters)
         {
             if (fallbackVersion is null)
