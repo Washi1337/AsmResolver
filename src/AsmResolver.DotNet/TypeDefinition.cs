@@ -22,8 +22,8 @@ namespace AsmResolver.DotNet
         IMemberDefinition,
         IHasGenericParameters,
         IHasSecurityDeclaration,
-        IOwnedCollectionElement<ModuleDefinition>,
-        IOwnedCollectionElement<TypeDefinition>
+        IOwnedCollectionElement<ITypeOwner>,
+        ITypeOwner
     {
         internal static readonly Utf8String ModuleTypeName = "<Module>";
 
@@ -420,16 +420,37 @@ namespace AsmResolver.DotNet
             set => _baseType.SetValue(value);
         }
 
+        ITypeOwner? IOwnedCollectionElement<ITypeOwner>.Owner
+        {
+            get => DeclaringType is not null ? DeclaringType : _module;
+            set
+            {
+                switch (value)
+                {
+                    case ModuleDefinition module:
+                        DeclaringType = null;
+                        _module = module;
+                        break;
+                    case TypeDefinition type:
+                        DeclaringType = type;
+                        _module = null;
+                        break;
+                    case null:
+                        DeclaringType = null;
+                        _module = null;
+                        break;
+                    default:
+                        throw new NotSupportedException("The Owner of a TypeDefinition must be a ModuleDefinition or another TypeDefinition");
+                }
+            }
+        }
+
+        IList<TypeDefinition> ITypeOwner.OwnedTypes => NestedTypes;
+
         /// <summary>
         /// Gets the module that defines the type.
         /// </summary>
         public ModuleDefinition? Module => DeclaringType is not null ? DeclaringType.Module : _module;
-
-        ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
-        {
-            get => Module;
-            set => _module = value;
-        }
 
         /// <summary>
         /// When this type is nested, gets the enclosing type.
@@ -443,12 +464,6 @@ namespace AsmResolver.DotNet
         ITypeDefOrRef? ITypeDefOrRef.DeclaringType => DeclaringType;
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
-
-        TypeDefinition? IOwnedCollectionElement<TypeDefinition>.Owner
-        {
-            get => DeclaringType;
-            set => DeclaringType = value;
-        }
 
         /// <summary>
         /// Gets a value indicating whether the type is enclosed by another type.
@@ -1015,7 +1030,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="NestedTypes"/> property.
         /// </remarks>
         protected virtual IList<TypeDefinition> GetNestedTypes() =>
-            new OwnedCollection<TypeDefinition, TypeDefinition>(this);
+            new OwnedCollection<ITypeOwner, TypeDefinition>(this);
 
         /// <summary>
         /// Obtains the enclosing class of the type definition if available.

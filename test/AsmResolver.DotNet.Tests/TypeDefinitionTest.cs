@@ -796,5 +796,16 @@ namespace AsmResolver.DotNet.Tests
             type.Namespace = string.Empty;
             Assert.Null(type.Namespace);
         }
+
+        [Fact]
+        public void NestedTypeRemovedFromOwnerShouldHaveNoModule()
+        {
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
+            var nestedType = module.LookupMember<TypeDefinition>(typeof(TopLevelClass1.Nested1).MetadataToken);
+
+            nestedType.DeclaringType!.NestedTypes.Remove(nestedType);
+
+            Assert.Null(nestedType.Module);
+        }
     }
 }

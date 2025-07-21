@@ -489,7 +489,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 BaseType = module.CorLibTypeFactory.Object.Type;
 
                 // HACK: override the module containing this type:
-                ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = module;
+                ((IOwnedCollectionElement<ITypeOwner>) this).Owner = module;
             }
         }
 
