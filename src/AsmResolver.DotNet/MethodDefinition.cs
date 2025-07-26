@@ -804,7 +804,8 @@ namespace AsmResolver.DotNet
                 MethodAttributes.Private
                 | MethodAttributes.Static
                 | MethodAttributes.SpecialName
-                | MethodAttributes.RuntimeSpecialName,
+                | MethodAttributes.RuntimeSpecialName
+                | MethodAttributes.HideBySig,
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
 
             cctor.CilMethodBody = new CilMethodBody();
