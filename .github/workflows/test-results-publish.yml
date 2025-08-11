@@ -22,7 +22,7 @@ jobs:
       statuses: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Download and Publish Test Results
         uses: ./.github/actions/test-results-download-publish
