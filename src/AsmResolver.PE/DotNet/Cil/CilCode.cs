@@ -12,7 +12,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Do nothing (No operation).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.nop?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.nop"/>
         /// </remarks>
         Nop,
 
@@ -20,7 +20,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Inform a debugger that a breakpoint has been reached.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.break?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.break"/>
         /// </remarks>
         Break,
 
@@ -28,7 +28,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument 0 onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_0?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_0"/>
         /// </remarks>
         Ldarg_0,
 
@@ -36,7 +36,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument 1 onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_1"/>
         /// </remarks>
         Ldarg_1,
 
@@ -44,7 +44,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument 2 onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_2"/>
         /// </remarks>
         Ldarg_2,
 
@@ -52,7 +52,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument 3 onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_3?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_3"/>
         /// </remarks>
         Ldarg_3,
 
@@ -60,7 +60,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable 0 onto stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_0?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_0"/>
         /// </remarks>
         Ldloc_0,
 
@@ -68,7 +68,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable 1 onto stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_1"/>
         /// </remarks>
         Ldloc_1,
 
@@ -76,7 +76,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable 2 onto stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_2"/>
         /// </remarks>
         Ldloc_2,
 
@@ -84,7 +84,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable 3 onto stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_3?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_3"/>
         /// </remarks>
         Ldloc_3,
 
@@ -92,7 +92,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_0?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_0"/>
         /// </remarks>
         Stloc_0,
 
@@ -100,7 +100,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable 1.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_1"/>
         /// </remarks>
         Stloc_1,
 
@@ -108,7 +108,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable 2.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_2"/>
         /// </remarks>
         Stloc_2,
 
@@ -116,7 +116,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable 3.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_3?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_3"/>
         /// </remarks>
         Stloc_3,
 
@@ -124,7 +124,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument onto the stack, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_s"/>
         /// </remarks>
         Ldarg_S,
 
@@ -132,7 +132,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Fetch the address of argument, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarga_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarga_s"/>
         /// </remarks>
         Ldarga_S,
 
@@ -140,7 +140,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value to the argument numbered, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.starg_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.starg_s"/>
         /// </remarks>
         Starg_S,
 
@@ -148,7 +148,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable of index onto stack, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_s"/>
         /// </remarks>
         Ldloc_S,
 
@@ -156,7 +156,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load address of local variable with index, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloca_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloca_s"/>
         /// </remarks>
         Ldloca_S,
 
@@ -164,7 +164,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable with index, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_s"/>
         /// </remarks>
         Stloc_S,
 
@@ -172,7 +172,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push a null reference on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldnull?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldnull"/>
         /// </remarks>
         Ldnull,
 
@@ -180,7 +180,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push -1 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_m1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_m1"/>
         /// </remarks>
         Ldc_I4_M1,
 
@@ -188,7 +188,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 0 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_0?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_0"/>
         /// </remarks>
         Ldc_I4_0,
 
@@ -196,7 +196,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_1"/>
         /// </remarks>
         Ldc_I4_1,
 
@@ -204,7 +204,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 2 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_2"/>
         /// </remarks>
         Ldc_I4_2,
 
@@ -212,7 +212,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 3 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_3?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_3"/>
         /// </remarks>
         Ldc_I4_3,
 
@@ -220,7 +220,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 4 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_4"/>
         /// </remarks>
         Ldc_I4_4,
 
@@ -228,7 +228,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 5 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_5?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_5"/>
         /// </remarks>
         Ldc_I4_5,
 
@@ -236,7 +236,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 6 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_6?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_6"/>
         /// </remarks>
         Ldc_I4_6,
 
@@ -244,7 +244,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 7 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_7?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_7"/>
         /// </remarks>
         Ldc_I4_7,
 
@@ -252,7 +252,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 8 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_8"/>
         /// </remarks>
         Ldc_I4_8,
 
@@ -260,7 +260,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push num onto the stack as int32, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_s"/>
         /// </remarks>
         Ldc_I4_S,
 
@@ -268,7 +268,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push num of type int32 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4"/>
         /// </remarks>
         Ldc_I4,
 
@@ -276,7 +276,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push num of type int64 onto the stack as int64.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i8"/>
         /// </remarks>
         Ldc_I8,
 
@@ -284,7 +284,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push num of type float32 onto the stack as F.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_r4"/>
         /// </remarks>
         Ldc_R4,
 
@@ -292,7 +292,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push num of type float64 onto the stack as F.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_r8"/>
         /// </remarks>
         Ldc_R8,
 
@@ -300,7 +300,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Duplicate the value on the top of the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.dup?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.dup"/>
         /// </remarks>
         Dup = 0x25,
 
@@ -308,7 +308,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop value from the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.pop?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.pop"/>
         /// </remarks>
         Pop,
 
@@ -316,7 +316,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Exit current method and jump to the specified method.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.jmp?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.jmp"/>
         /// </remarks>
         Jmp,
 
@@ -324,7 +324,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Call method described by method.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.call?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.call"/>
         /// </remarks>
         Call,
 
@@ -332,7 +332,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Call method indicated on the stack with arguments described by a calling convention.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.calli?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.calli"/>
         /// </remarks>
         Calli,
 
@@ -340,7 +340,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Return from method, possibly with a value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ret?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ret"/>
         /// </remarks>
         Ret,
 
@@ -348,7 +348,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.br_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.br_s"/>
         /// </remarks>
         Br_S,
 
@@ -356,7 +356,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if value is zero (false), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brfalse_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brfalse_s"/>
         /// </remarks>
         Brfalse_S,
 
@@ -364,7 +364,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if value is non-zero (true), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brtrue_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brtrue_s"/>
         /// </remarks>
         Brtrue_S,
 
@@ -372,7 +372,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if equal, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.beq_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.beq_s"/>
         /// </remarks>
         Beq_S,
 
@@ -380,7 +380,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than or equal to, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_s"/>
         /// </remarks>
         Bge_S,
 
@@ -388,7 +388,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_s"/>
         /// </remarks>
         Bgt_S,
 
@@ -396,7 +396,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than or equal to, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_s"/>
         /// </remarks>
         Ble_S,
 
@@ -404,7 +404,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_s"/>
         /// </remarks>
         Blt_S,
 
@@ -412,7 +412,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if unequal or unordered, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bne_un_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bne_un_s"/>
         /// </remarks>
         Bne_Un_S,
 
@@ -420,7 +420,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than or equal to (unsigned or unordered), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_un_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_un_s"/>
         /// </remarks>
         Bge_Un_S,
 
@@ -428,7 +428,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than (unsigned or unordered), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_un_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_un_s"/>
         /// </remarks>
         Bgt_Un_S,
 
@@ -436,7 +436,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than or equal to (unsigned or unordered), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_un_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_un_s"/>
         /// </remarks>
         Ble_Un_S,
 
@@ -444,7 +444,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than (unsigned or unordered), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_un_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_un_s"/>
         /// </remarks>
         Blt_Un_S,
 
@@ -452,7 +452,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.br?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.br"/>
         /// </remarks>
         Br,
 
@@ -460,7 +460,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if value is zero (false).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brfalse?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brfalse"/>
         /// </remarks>
         Brfalse,
 
@@ -468,7 +468,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if value is non-zero (true).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brtrue?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brtrue"/>
         /// </remarks>
         Brtrue,
 
@@ -476,7 +476,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if equal.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.beq?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.beq"/>
         /// </remarks>
         Beq,
 
@@ -484,7 +484,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than or equal to.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge"/>
         /// </remarks>
         Bge,
 
@@ -492,7 +492,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt"/>
         /// </remarks>
         Bgt,
 
@@ -500,7 +500,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than or equal to.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble"/>
         /// </remarks>
         Ble,
 
@@ -508,7 +508,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt"/>
         /// </remarks>
         Blt,
 
@@ -516,7 +516,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if unequal or unordered.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bne_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bne_un"/>
         /// </remarks>
         Bne_Un,
 
@@ -524,7 +524,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than or equal to (unsigned or unordered).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_un"/>
         /// </remarks>
         Bge_Un,
 
@@ -532,7 +532,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than (unsigned or unordered).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_un"/>
         /// </remarks>
         Bgt_Un,
 
@@ -540,7 +540,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than or equal to (unsigned or unordered).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_un"/>
         /// </remarks>
         Ble_Un,
 
@@ -548,7 +548,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than (unsigned or unordered).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_un"/>
         /// </remarks>
         Blt_Un,
 
@@ -556,7 +556,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Jump to one of n values.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.switch?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.switch"/>
         /// </remarks>
         Switch,
 
@@ -564,7 +564,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type int8 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i1"/>
         /// </remarks>
         Ldind_I1,
 
@@ -572,7 +572,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type unsigned int8 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u1"/>
         /// </remarks>
         Ldind_U1,
 
@@ -580,7 +580,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type int16 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i2"/>
         /// </remarks>
         Ldind_I2,
 
@@ -588,7 +588,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type unsigned int16 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u2"/>
         /// </remarks>
         Ldind_U2,
 
@@ -596,7 +596,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type int32 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i4"/>
         /// </remarks>
         Ldind_I4,
 
@@ -604,7 +604,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type unsigned int32 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u4"/>
         /// </remarks>
         Ldind_U4,
 
@@ -612,7 +612,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type signed or unsigned int64 as signed int64 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i8"/>
         /// </remarks>
         Ldind_I8,
 
@@ -620,7 +620,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type native int as native int on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i"/>
         /// </remarks>
         Ldind_I,
 
@@ -628,7 +628,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type float32 as F on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_r4"/>
         /// </remarks>
         Ldind_R4,
 
@@ -636,7 +636,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type float64 as F on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_r8"/>
         /// </remarks>
         Ldind_R8,
 
@@ -644,7 +644,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type object ref as O on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_ref?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_ref"/>
         /// </remarks>
         Ldind_Ref,
 
@@ -652,7 +652,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type object ref (type O) into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_ref?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_ref"/>
         /// </remarks>
         Stind_Ref,
 
@@ -660,7 +660,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type int8 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i1"/>
         /// </remarks>
         Stind_I1,
 
@@ -668,7 +668,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type int16 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i2"/>
         /// </remarks>
         Stind_I2,
 
@@ -676,7 +676,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type int32 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i4"/>
         /// </remarks>
         Stind_I4,
 
@@ -684,7 +684,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type int64 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i8"/>
         /// </remarks>
         Stind_I8,
 
@@ -692,7 +692,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type float32 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_r4"/>
         /// </remarks>
         Stind_R4,
 
@@ -700,7 +700,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type float64 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_r8"/>
         /// </remarks>
         Stind_R8,
 
@@ -708,7 +708,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Add two values, returning a new value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add"/>
         /// </remarks>
         Add,
 
@@ -716,7 +716,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subtract value2 from value1, returning a new value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub"/>
         /// </remarks>
         Sub,
 
@@ -724,7 +724,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Multiply values.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul"/>
         /// </remarks>
         Mul,
 
@@ -732,7 +732,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Divide two values to return a quotient or floating-point result.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.div?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.div"/>
         /// </remarks>
         Div,
 
@@ -740,7 +740,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Divide two values, unsigned, returning a quotient.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.div_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.div_un"/>
         /// </remarks>
         Div_Un,
 
@@ -748,7 +748,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Remainder when dividing one value by another.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rem?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rem"/>
         /// </remarks>
         Rem,
 
@@ -756,7 +756,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Remainder when dividing one unsigned value by another.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rem_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rem_un"/>
         /// </remarks>
         Rem_Un,
 
@@ -764,7 +764,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Bitwise AND of two integral values, returns an integral value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.and?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.and"/>
         /// </remarks>
         And,
 
@@ -772,7 +772,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Bitwise OR of two integer values, returns an integer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.or?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.or"/>
         /// </remarks>
         Or,
 
@@ -780,7 +780,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Bitwise XOR of integer values, returns an integer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.xor?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.xor"/>
         /// </remarks>
         Xor,
 
@@ -788,7 +788,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Shift an integer left (shifting in zeros), return an integer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shl?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shl"/>
         /// </remarks>
         Shl,
 
@@ -796,7 +796,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Shift an integer right (shift in sign), return an integer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shr?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shr"/>
         /// </remarks>
         Shr,
 
@@ -804,7 +804,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Shift an integer right (shift in zero), return an integer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shr_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shr_un"/>
         /// </remarks>
         Shr_Un,
 
@@ -812,7 +812,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Negate value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.neg?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.neg"/>
         /// </remarks>
         Neg,
 
@@ -820,7 +820,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Bitwise complement (logical not).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.not?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.not"/>
         /// </remarks>
         Not,
 
@@ -828,7 +828,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to int8, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i1"/>
         /// </remarks>
         Conv_I1,
 
@@ -836,7 +836,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to int16, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i2"/>
         /// </remarks>
         Conv_I2,
 
@@ -844,7 +844,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to int32, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i4"/>
         /// </remarks>
         Conv_I4,
 
@@ -852,7 +852,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to int64, pushing int64 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i8"/>
         /// </remarks>
         Conv_I8,
 
@@ -860,7 +860,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to float32, pushing F on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r4"/>
         /// </remarks>
         Conv_R4,
 
@@ -868,7 +868,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to float64, pushing F on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r8"/>
         /// </remarks>
         Conv_R8,
 
@@ -876,7 +876,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to unsigned int32, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u4"/>
         /// </remarks>
         Conv_U4,
 
@@ -884,7 +884,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to unsigned int64, pushing int64 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u8"/>
         /// </remarks>
         Conv_U8,
 
@@ -892,7 +892,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Call a method associated with an object.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.callvirt?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.callvirt"/>
         /// </remarks>
         Callvirt,
 
@@ -900,7 +900,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Copy a value type from src to dest.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cpobj?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cpobj"/>
         /// </remarks>
         Cpobj,
 
@@ -908,7 +908,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Copy the value stored at address src to the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldobj?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldobj"/>
         /// </remarks>
         Ldobj,
 
@@ -916,7 +916,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push a string object for the literal string.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldstr?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldstr"/>
         /// </remarks>
         Ldstr,
 
@@ -924,7 +924,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Allocate an uninitialized object or value type and call ctor.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.newobj?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.newobj"/>
         /// </remarks>
         Newobj,
 
@@ -932,7 +932,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Cast obj to class.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.castclass?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.castclass"/>
         /// </remarks>
         Castclass,
 
@@ -940,7 +940,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Test if obj is an instance of class, returning null or an instance of that class or interface.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.isinst?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.isinst"/>
         /// </remarks>
         Isinst,
 
@@ -948,7 +948,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned integer to floating-point, pushing F on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r_un"/>
         /// </remarks>
         Conv_R_Un,
 
@@ -956,7 +956,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Extract a value-type from obj, its boxed representation, and push a controlled-mutability managed pointer to it to the top of the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unbox?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unbox"/>
         /// </remarks>
         Unbox = 0x79,
 
@@ -964,7 +964,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Throw an exception.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.throw?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.throw"/>
         /// </remarks>
         Throw,
 
@@ -972,7 +972,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the value of field of object (or value type) obj, onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldfld?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldfld"/>
         /// </remarks>
         Ldfld,
 
@@ -980,7 +980,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the address of field of object obj on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldflda?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldflda"/>
         /// </remarks>
         Ldflda,
 
@@ -988,7 +988,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace the value of field of the object obj with value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stfld?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stfld"/>
         /// </remarks>
         Stfld,
 
@@ -996,7 +996,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the value of the static field on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldsfld?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldsfld"/>
         /// </remarks>
         Ldsfld,
 
@@ -1004,7 +1004,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the address of the static field, field, on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldsflda?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldsflda"/>
         /// </remarks>
         Ldsflda,
 
@@ -1012,7 +1012,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace the value of the static field.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stsfld?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stsfld"/>
         /// </remarks>
         Stsfld,
 
@@ -1020,7 +1020,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store a value at an address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stobj?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stobj"/>
         /// </remarks>
         Stobj,
 
@@ -1028,7 +1028,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an int8 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i1_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i1_un"/>
         /// </remarks>
         Conv_Ovf_I1_Un,
 
@@ -1036,7 +1036,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an int16 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i2_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i2_un"/>
         /// </remarks>
         Conv_Ovf_I2_Un,
 
@@ -1044,7 +1044,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an int32 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i4_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i4_un"/>
         /// </remarks>
         Conv_Ovf_I4_Un,
 
@@ -1052,7 +1052,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an int64 (on the stack as int64) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i8_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i8_un"/>
         /// </remarks>
         Conv_Ovf_I8_Un,
 
@@ -1060,7 +1060,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an unsigned int8 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u1_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u1_un"/>
         /// </remarks>
         Conv_Ovf_U1_Un,
 
@@ -1068,7 +1068,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an unsigned int16 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u2_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u2_un"/>
         /// </remarks>
         Conv_Ovf_U2_Un,
 
@@ -1076,7 +1076,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an unsigned int32 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u4_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u4_un"/>
         /// </remarks>
         Conv_Ovf_U4_Un,
 
@@ -1084,7 +1084,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an unsigned int64 (on the stack as int64) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u8_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u8_un"/>
         /// </remarks>
         Conv_Ovf_U8_Un,
 
@@ -1092,7 +1092,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to a native int (on the stack as native int) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i_un"/>
         /// </remarks>
         Conv_Ovf_I_Un,
 
@@ -1100,7 +1100,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to a native unsigned int (on the stack as native int) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u_un"/>
         /// </remarks>
         Conv_Ovf_U_Un,
 
@@ -1108,7 +1108,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert a boxable value to its boxed form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.box?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.box"/>
         /// </remarks>
         Box,
 
@@ -1116,7 +1116,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Create a new array with elements of type etype.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.newarr?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.newarr"/>
         /// </remarks>
         Newarr,
 
@@ -1124,7 +1124,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the length (of type native unsigned int) of array on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldlen?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldlen"/>
         /// </remarks>
         Ldlen,
 
@@ -1132,7 +1132,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the address of element at index onto the top of the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelema?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelema"/>
         /// </remarks>
         Ldelema,
 
@@ -1140,7 +1140,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type int8 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i1"/>
         /// </remarks>
         Ldelem_I1,
 
@@ -1148,7 +1148,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type unsigned int8 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u1"/>
         /// </remarks>
         Ldelem_U1,
 
@@ -1156,7 +1156,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type int16 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i2"/>
         /// </remarks>
         Ldelem_I2,
 
@@ -1164,7 +1164,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type unsigned int16 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u2"/>
         /// </remarks>
         Ldelem_U2,
 
@@ -1172,7 +1172,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type int32 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i4"/>
         /// </remarks>
         Ldelem_I4,
 
@@ -1180,7 +1180,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type unsigned int32 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u4"/>
         /// </remarks>
         Ldelem_U4,
 
@@ -1188,7 +1188,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type signed or unsigned int64 at index onto the top of the stack as a signed int64.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i8"/>
         /// </remarks>
         Ldelem_I8,
 
@@ -1196,7 +1196,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type native int at index onto the top of the stack as a native int.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i"/>
         /// </remarks>
         Ldelem_I,
 
@@ -1204,7 +1204,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type float32 at index onto the top of the stack as an F.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_r4"/>
         /// </remarks>
         Ldelem_R4,
 
@@ -1212,7 +1212,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type float64 at index onto the top of the stack as an F.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_r8"/>
         /// </remarks>
         Ldelem_R8,
 
@@ -1220,7 +1220,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element at index onto the top of the stack as an O. The type of the O is the same as the element type of the array pushed on the CIL stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_ref?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_ref"/>
         /// </remarks>
         Ldelem_Ref,
 
@@ -1228,7 +1228,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the i value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i"/>
         /// </remarks>
         Stelem_I,
 
@@ -1236,7 +1236,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the int8 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i1"/>
         /// </remarks>
         Stelem_I1,
 
@@ -1244,7 +1244,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the int16 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i2"/>
         /// </remarks>
         Stelem_I2,
 
@@ -1252,7 +1252,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the int32 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i4"/>
         /// </remarks>
         Stelem_I4,
 
@@ -1260,7 +1260,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the int64 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i8"/>
         /// </remarks>
         Stelem_I8,
 
@@ -1268,7 +1268,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the float32 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_r4"/>
         /// </remarks>
         Stelem_R4,
 
@@ -1276,7 +1276,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the float64 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_r8"/>
         /// </remarks>
         Stelem_R8,
 
@@ -1284,7 +1284,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the ref value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_ref?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_ref"/>
         /// </remarks>
         Stelem_Ref,
 
@@ -1292,7 +1292,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element at index onto the top of the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem"/>
         /// </remarks>
         Ldelem,
 
@@ -1300,7 +1300,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem"/>
         /// </remarks>
         Stelem,
 
@@ -1308,7 +1308,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Extract a value-type from obj, its boxed representation, and copy to the top of the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unbox_any?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unbox_any"/>
         /// </remarks>
         Unbox_Any,
 
@@ -1316,7 +1316,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an int8 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i1"/>
         /// </remarks>
         Conv_Ovf_I1 = 0xB3,
 
@@ -1324,7 +1324,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an unsigned int8 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u1"/>
         /// </remarks>
         Conv_Ovf_U1,
 
@@ -1332,7 +1332,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an int16 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i2"/>
         /// </remarks>
         Conv_Ovf_I2,
 
@@ -1340,7 +1340,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an unsigned int16 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u2"/>
         /// </remarks>
         Conv_Ovf_U2,
 
@@ -1348,7 +1348,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an int32 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i4"/>
         /// </remarks>
         Conv_Ovf_I4,
 
@@ -1356,7 +1356,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an unsigned int32 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u4"/>
         /// </remarks>
         Conv_Ovf_U4,
 
@@ -1364,7 +1364,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an int64 (on the stack as int64) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i8"/>
         /// </remarks>
         Conv_Ovf_I8,
 
@@ -1372,7 +1372,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an unsigned int64 (on the stack as int64) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u8"/>
         /// </remarks>
         Conv_Ovf_U8,
 
@@ -1380,7 +1380,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the address stored in a typed reference.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.refanyval?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.refanyval"/>
         /// </remarks>
         Refanyval = 0xC2,
 
@@ -1388,7 +1388,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Throw ArithmeticException if value is not a finite number.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ckfinite?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ckfinite"/>
         /// </remarks>
         Ckfinite,
 
@@ -1396,7 +1396,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push a typed reference to ptr of type class onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mkrefany?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mkrefany"/>
         /// </remarks>
         Mkrefany = 0xC6,
 
@@ -1404,7 +1404,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert metadata token to its runtime representation.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldtoken?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldtoken"/>
         /// </remarks>
         Ldtoken = 0xD0,
 
@@ -1412,7 +1412,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to unsigned int16, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u2"/>
         /// </remarks>
         Conv_U2,
 
@@ -1420,7 +1420,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to unsigned int8, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u1"/>
         /// </remarks>
         Conv_U1,
 
@@ -1428,7 +1428,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to native int, pushing native int on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i"/>
         /// </remarks>
         Conv_I,
 
@@ -1436,7 +1436,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to a native int (on the stack as native int) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i"/>
         /// </remarks>
         Conv_Ovf_I,
 
@@ -1444,7 +1444,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to a native unsigned int (on the stack as native int) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u"/>
         /// </remarks>
         Conv_Ovf_U,
 
@@ -1452,7 +1452,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Add signed integer values with overflow check.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add_ovf?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add_ovf"/>
         /// </remarks>
         Add_Ovf,
 
@@ -1460,7 +1460,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Add unsigned integer values with overflow check.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add_ovf_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add_ovf_un"/>
         /// </remarks>
         Add_Ovf_Un,
 
@@ -1468,7 +1468,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Multiply signed integer values. Signed result shall fit in same size.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul_ovf?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul_ovf"/>
         /// </remarks>
         Mul_Ovf,
 
@@ -1476,7 +1476,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Multiply unsigned integer values. Unsigned result shall fit in same size.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul_ovf_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul_ovf_un"/>
         /// </remarks>
         Mul_Ovf_Un,
 
@@ -1484,7 +1484,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subtract native int from a native int. Signed result shall fit in same size.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub_ovf?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub_ovf"/>
         /// </remarks>
         Sub_Ovf,
 
@@ -1492,7 +1492,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subtract native unsigned int from a native unsigned int. Unsigned result shall fit in same size.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub_ovf_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub_ovf_un"/>
         /// </remarks>
         Sub_Ovf_Un,
 
@@ -1500,7 +1500,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// End finally clause of an exception block.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.endfinally?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.endfinally"/>
         /// </remarks>
         Endfinally,
 
@@ -1508,7 +1508,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Exit a protected region of code.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.leave?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.leave"/>
         /// </remarks>
         Leave,
 
@@ -1516,7 +1516,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Exit a protected region of code, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.leave_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.leave_s"/>
         /// </remarks>
         Leave_S,
 
@@ -1524,7 +1524,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type native int into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i"/>
         /// </remarks>
         Stind_I,
 
@@ -1532,7 +1532,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to native unsigned int, pushing native int on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u"/>
         /// </remarks>
         Conv_U,
 
@@ -1540,7 +1540,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime 
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix7?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix7"/>
         /// </remarks>
         Prefix7 = 0xF8,
 
@@ -1548,7 +1548,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime 
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix6?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix6"/>
         /// </remarks>
         Prefix6,
 
@@ -1556,7 +1556,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime 
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix5?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix5"/>
         /// </remarks>
         Prefix5,
 
@@ -1564,7 +1564,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime 
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix4"/>
         /// </remarks>
         Prefix4,
 
@@ -1572,7 +1572,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime 
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix3?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix3"/>
         /// </remarks>
         Prefix3,
 
@@ -1580,7 +1580,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime 
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix2"/>
         /// </remarks>
         Prefix2,
 
@@ -1588,7 +1588,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime 
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix1"/>
         /// </remarks>
         Prefix1,
 
@@ -1596,7 +1596,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime 
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefixref?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefixref"/>
         /// </remarks>
         Prefixref,
 
@@ -1604,7 +1604,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Return argument list handle for the current method.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.arglist?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.arglist"/>
         /// </remarks>
         Arglist = 0xFE00,
 
@@ -1612,7 +1612,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 (of type int32) if value1 equals value2, else push 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ceq?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ceq"/>
         /// </remarks>
         Ceq,
 
@@ -1620,7 +1620,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 (of type int32) if value1 greater that value2, else push 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cgt?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cgt"/>
         /// </remarks>
         Cgt,
 
@@ -1628,7 +1628,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 (of type int32) if value1 greater that value2, unsigned or unordered, else push 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cgt_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cgt_un"/>
         /// </remarks>
         Cgt_Un,
 
@@ -1636,7 +1636,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 (of type int32) if value1 lower than value2, else push 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.clt?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.clt"/>
         /// </remarks>
         Clt,
 
@@ -1644,7 +1644,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 (of type int32) if value1 lower than value2, unsigned or unordered, else push 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.clt_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.clt_un"/>
         /// </remarks>
         Clt_Un,
 
@@ -1652,7 +1652,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push a pointer to a method referenced by method, on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldftn?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldftn"/>
         /// </remarks>
         Ldftn,
 
@@ -1660,7 +1660,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push address of virtual method on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldvirtftn?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldvirtftn"/>
         /// </remarks>
         Ldvirtftn,
 
@@ -1668,7 +1668,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg"/>
         /// </remarks>
         Ldarg = 0xFE09,
 
@@ -1676,7 +1676,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Fetch the address of the argument indexed.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarga?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarga"/>
         /// </remarks>
         Ldarga,
 
@@ -1684,7 +1684,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value to the argument.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.starg?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.starg"/>
         /// </remarks>
         Starg,
 
@@ -1692,7 +1692,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable of index onto stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc"/>
         /// </remarks>
         Ldloc,
 
@@ -1700,7 +1700,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load address of local variable with index index.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloca?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloca"/>
         /// </remarks>
         Ldloca,
 
@@ -1708,7 +1708,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable index.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc"/>
         /// </remarks>
         Stloc,
 
@@ -1716,7 +1716,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Allocate space from the local memory pool.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.localloc?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.localloc"/>
         /// </remarks>
         Localloc,
 
@@ -1724,7 +1724,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// End an exception handling filter clause.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.endfilter?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.endfilter"/>
         /// </remarks>
         Endfilter = 0xFE11,
 
@@ -1732,7 +1732,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subsequent pointer instruction might be unaligned.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unaligned?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unaligned"/>
         /// </remarks>
         Unaligned,
 
@@ -1740,7 +1740,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subsequent pointer reference is volatile.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.volatile?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.volatile"/>
         /// </remarks>
         Volatile,
 
@@ -1748,7 +1748,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subsequent call terminates current method.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.tailcall?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.tailcall"/>
         /// </remarks>
         Tailcall,
 
@@ -1756,7 +1756,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Initialize the value at address dest.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.initobj?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.initobj"/>
         /// </remarks>
         Initobj,
 
@@ -1764,7 +1764,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Call a virtual method on a type constrained to be type T.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained"/>
         /// </remarks>
         Constrained,
 
@@ -1772,7 +1772,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Copy data from memory to memory.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cpblk?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cpblk"/>
         /// </remarks>
         Cpblk,
 
@@ -1780,7 +1780,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Set all bytes in a block of memory to a given byte value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.initblk?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.initblk"/>
         /// </remarks>
         Initblk,
 
@@ -1788,7 +1788,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Rethrow the current exception.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rethrow?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rethrow"/>
         /// </remarks>
         Rethrow = 0xFE1A,
 
@@ -1796,7 +1796,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the size, in bytes, of a type as an unsigned int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sizeof?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sizeof"/>
         /// </remarks>
         Sizeof = 0xFE1C,
 
@@ -1804,7 +1804,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the type token stored in a typed reference.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.refanytype?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.refanytype"/>
         /// </remarks>
         Refanytype,
 
@@ -1812,7 +1812,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Specify that the subsequent array address operation performs no type check at runtime, and that it returns a controlled-mutability managed pointer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.readonly?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.readonly"/>
         /// </remarks>
         Readonly
     }
