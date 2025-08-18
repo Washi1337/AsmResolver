@@ -158,6 +158,27 @@ namespace AsmResolver.DotNet.Bundles
         /// <summary>
         /// Attempts to automatically locate and parse the bundle header in the provided file.
         /// </summary>
+        /// <param name="stream">The raw contents of the file to read.</param>
+        /// <returns>The read manifest.</returns>
+        public static BundleManifest FromStream(Stream stream)
+        {
+            return FromDataSource(new StreamDataSource(stream));
+        }
+
+        /// <summary>
+        /// Parses the bundle header in the provided file at the provided address.
+        /// </summary>
+        /// <param name="stream">The raw contents of the file to read.</param>
+        /// <param name="offset">The address within the file to start reading the bundle at.</param>
+        /// <returns>The read manifest.</returns>
+        public static BundleManifest FromStream(Stream stream, ulong offset)
+        {
+            return FromDataSource(new StreamDataSource(stream), offset);
+        }
+
+        /// <summary>
+        /// Attempts to automatically locate and parse the bundle header in the provided file.
+        /// </summary>
         /// <param name="source">The raw contents of the file to read.</param>
         /// <returns>The read manifest.</returns>
         public static BundleManifest FromDataSource(IDataSource source)

@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             module.Write(stream);
 
-            var image = PEImage.FromBytes(stream.ToArray());
+            var image = PEImage.FromStream(stream);
             var symbol = image
                 .Imports.FirstOrDefault(m => m.Name == "mscoree.dll")
                 ?.Symbols.FirstOrDefault(m => m.Name == "_CorExeMain");
@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             var module = ModuleDefinition.FromBytes(Properties.Resources.ForwarderLibrary, TestReaderParameters);
             module.Write(stream);
 
-            var image = PEImage.FromBytes(stream.ToArray());
+            var image = PEImage.FromStream(stream);
             var symbol = image
                 .Imports.FirstOrDefault(m => m.Name == "mscoree.dll")
                 ?.Symbols.FirstOrDefault(m => m.Name == "_CorDllMain");

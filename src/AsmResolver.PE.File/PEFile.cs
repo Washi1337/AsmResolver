@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -153,6 +153,14 @@ namespace AsmResolver.PE.File
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static PEFile FromBytes(byte[] raw) => FromReader(new BinaryStreamReader(raw));
+
+        /// <summary>
+        /// Reads an unmapped PE file from memory.
+        /// </summary>
+        /// <param name="raw">The raw stream representing the contents of the PE file to read.</param>
+        /// <returns>The PE file that was read.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static PEFile FromStream(Stream raw) => FromReader(new BinaryStreamReader(raw));
 
         /// <summary>
         /// Reads a mapped PE file starting at the provided module base address (HINSTANCE).

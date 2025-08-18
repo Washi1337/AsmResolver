@@ -52,7 +52,7 @@ public class Arm64ExceptionDirectoryTest
 
         // Re-read
         var context = new PEReaderContext(image.PEFile!, TestReaderParameters);
-        var reader = new BinaryStreamReader(stream.ToArray());
+        var reader = new BinaryStreamReader(stream);
         var newFunction = Arm64RuntimeFunction.FromReader(context, ref reader);
         var newUnwindInfo = Assert.IsAssignableFrom<Arm64PackedUnwindInfo>(newFunction.UnwindInfo);
 
@@ -80,7 +80,7 @@ public class Arm64ExceptionDirectoryTest
 
         // Reread
         var context = new PEReaderContext(image.PEFile!, TestReaderParameters);
-        var reader = new BinaryStreamReader(stream.ToArray());
+        var reader = new BinaryStreamReader(stream);
         var newUnwindInfo = Arm64UnpackedUnwindInfo.FromReader(context, ref reader);
 
         // Verify equivalence

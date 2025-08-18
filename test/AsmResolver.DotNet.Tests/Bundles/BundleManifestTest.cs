@@ -148,7 +148,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             using var stream = new MemoryStream();
             ulong address = manifest.WriteManifest(new BinaryStreamWriter(stream), false);
 
-            var reader = new BinaryStreamReader(stream.ToArray());
+            var reader = new BinaryStreamReader(stream);
             reader.Offset = address;
             var newManifest = BundleManifest.FromReader(reader);
             AssertBundlesAreEqual(manifest, newManifest);
@@ -169,7 +169,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             parameters.SubSystem = subSystem;
             manifest.WriteUsingTemplate(stream, parameters);
 
-            var newFile = PEFile.FromBytes(stream.ToArray());
+            var newFile = PEFile.FromStream(stream);
             Assert.Equal(subSystem, newFile.OptionalHeader.SubSystem);
         }
 
@@ -205,7 +205,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             Assert.Equal("Hello, World!\n", output);
 
             // Verify that resources were added properly.
-            var newImage = PEImage.FromBytes(stream.ToArray());
+            var newImage = PEImage.FromStream(stream);
             Assert.NotNull(newImage.Resources);
             var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources);
             Assert.NotNull(newVersionInfo);
@@ -335,7 +335,7 @@ namespace AsmResolver.DotNet.Tests.Bundles
             using var stream = new MemoryStream();
             manifest.WriteUsingTemplate(stream, BundlerParameters.FromTemplate(appHostTemplatePath, fileName));
 
-            var newManifest = BundleManifest.FromBytes(stream.ToArray());
+            var newManifest = BundleManifest.FromStream(stream);
             AssertBundlesAreEqual(manifest, newManifest);
 
             string output = _fixture

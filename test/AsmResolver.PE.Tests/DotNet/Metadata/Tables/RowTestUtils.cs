@@ -18,7 +18,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
 
             using var tempStream = new MemoryStream();
             expected.Write(new BinaryStreamWriter(tempStream), table.Layout);
-            var reader = new BinaryStreamReader(tempStream.ToArray());
+            var reader = new BinaryStreamReader(tempStream);
             var newRow = readRow(ref reader, table.Layout);
 
             Assert.Equal(expected, newRow);
@@ -33,7 +33,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
 
             using var tempStream = new MemoryStream();
             expected.Write(new BinaryStreamWriter(tempStream), table.Layout);
-            var reader = new BinaryStreamReader(tempStream.ToArray());
+            var reader = new BinaryStreamReader(tempStream);
             var newRow = readRow(new MetadataReaderContext(VirtualAddressFactory.Instance), ref reader, table.Layout);
 
             Assert.Equal(expected, newRow);
