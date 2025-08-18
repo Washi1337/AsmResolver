@@ -67,8 +67,6 @@ namespace AsmResolver.IO
         public int ReadBytes(ulong address, byte[] buffer, int index, int count)
         {
             long offset = (long)address - (long)BaseAddress;
-            if (offset < 0 || offset + count > _stream.Length)
-                throw new ArgumentOutOfRangeException(nameof(address), "The address is out of range of the data source.");
             _stream.Seek(offset, SeekOrigin.Begin);
             return _stream.Read(buffer, index, count);
         }
@@ -78,8 +76,6 @@ namespace AsmResolver.IO
         public int ReadBytes(ulong address, Span<byte> buffer)
         {
             long offset = (long)address - (long)BaseAddress;
-            if (offset < 0 || offset + buffer.Length > _stream.Length)
-                throw new ArgumentOutOfRangeException(nameof(address), "The address is out of range of the data source.");
             _stream.Seek(offset, SeekOrigin.Begin);
             return _stream.Read(buffer);
         }
