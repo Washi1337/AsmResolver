@@ -52,8 +52,11 @@ namespace AsmResolver.IO
                 if (offset < 0 || offset >= _stream.Length)
                     throw new IndexOutOfRangeException();
 
-                _stream.Seek(offset, SeekOrigin.Begin);
-                return (byte)_stream.ReadByte();
+                lock (_stream)
+                {
+                    _stream.Seek(offset, SeekOrigin.Begin);
+                    return (byte)_stream.ReadByte();
+                }
             }
         }
 
@@ -67,8 +70,11 @@ namespace AsmResolver.IO
         public int ReadBytes(ulong address, byte[] buffer, int index, int count)
         {
             long offset = (long)address - (long)BaseAddress;
-            _stream.Seek(offset, SeekOrigin.Begin);
-            return _stream.Read(buffer, index, count);
+            lock (_stream)
+            {
+                _stream.Seek(offset, SeekOrigin.Begin);
+                return _stream.Read(buffer, index, count);
+            }
         }
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
@@ -76,8 +82,11 @@ namespace AsmResolver.IO
         public int ReadBytes(ulong address, Span<byte> buffer)
         {
             long offset = (long)address - (long)BaseAddress;
-            _stream.Seek(offset, SeekOrigin.Begin);
-            return _stream.Read(buffer);
+            lock (_stream)
+            {
+                _stream.Seek(offset, SeekOrigin.Begin);
+                return _stream.Read(buffer);
+            }
         }
 #endif
     }
