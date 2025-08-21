@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet.Signatures
                 (null, null) => true,
                 (TypeSignature ts1, TypeSignature ts2) => SignatureEquals(ts1, ts2),
                 (InvalidTypeDefOrRef i1, InvalidTypeDefOrRef i2) => i1.Error == i2.Error,
-                (ITypeDefOrRef or ExportedType, ITypeDefOrRef or ExportedType) => SimpleTypeEquals(x, y),
+                (ITypeDefOrRef or ExportedType or CorLibTypeSignature, ITypeDefOrRef or ExportedType or CorLibTypeSignature) => SimpleTypeEquals(x, y),
                 _ => false,
             };
 
