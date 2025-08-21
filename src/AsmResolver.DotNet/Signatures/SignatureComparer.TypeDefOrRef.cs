@@ -36,10 +36,18 @@ namespace AsmResolver.DotNet.Signatures
             {
                 if (desc is TypeDefOrRefSignature tdors)
                     desc = tdors.Type;
+
                 if (desc is TypeSpecification ts)
-                    desc = ts.Signature;
+                {
+                    if (ts.Signature is TypeDefOrRefSignature tdors2)
+                        desc = tdors2.Type;
+                    else
+                        desc = ts.Signature;
+                }
+
                 if ((desc?.Module ?? desc?.Scope?.Module)?.CorLibTypeFactory.FromType(desc!) is { } corLibType)
                     desc = corLibType;
+
                 return desc;
             }
         }
