@@ -190,8 +190,8 @@ namespace AsmResolver.DotNet
                 path = PathShim.Combine(directory, assembly.Culture!, assembly.Name);
                 string? result = ProbeFileFromFilePathWithoutExtension(path)
                                  ?? ProbeFileFromFilePathWithoutExtension(Path.Combine(path, assembly.Name));
-                if (result is null)
-                    return null;
+                if (result is not null)
+                    return result;
             }
 
             // If that fails, assume neutral culture.
