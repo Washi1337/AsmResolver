@@ -20,13 +20,36 @@ namespace AsmResolver.DotNet.Signatures
             if (x is null || y is null)
                 return false;
 
-            return x switch
+            x = Reduce(x);
+            y = Reduce(y);
+
+            return (x, y) switch
             {
-                InvalidTypeDefOrRef invalidType => Equals(invalidType, y as InvalidTypeDefOrRef),
-                TypeSpecification specification => Equals(specification, y as TypeSpecification),
-                TypeSignature signature => Equals(signature, y as TypeSignature),
-                _ => SimpleTypeEquals(x, y)
+                (null, null) => true,
+                (TypeSignature ts1, TypeSignature ts2) => SignatureEquals(ts1, ts2),
+                (InvalidTypeDefOrRef i1, InvalidTypeDefOrRef i2) => i1.Error == i2.Error,
+                (ITypeDefOrRef or ExportedType or CorLibTypeSignature, ITypeDefOrRef or ExportedType or CorLibTypeSignature) => SimpleTypeEquals(x, y),
+                _ => false,
             };
+
+            static ITypeDescriptor? Reduce(ITypeDescriptor? desc)
+            {
+                if (desc is TypeDefOrRefSignature tdors)
+                    desc = tdors.Type;
+
+                if (desc is TypeSpecification ts)
+                {
+                    if (ts.Signature is TypeDefOrRefSignature tdors2)
+                        desc = tdors2.Type;
+                    else
+                        desc = ts.Signature;
+                }
+
+                if ((desc?.Module ?? desc?.Scope?.Module)?.CorLibTypeFactory.FromType(desc!) is { } corLibType)
+                    desc = corLibType;
+
+                return desc;
+            }
         }
 
         /// <inheritdoc />
@@ -94,7 +117,7 @@ namespace AsmResolver.DotNet.Signatures
             if (x is null || y is null)
                 return false;
 
-            return Equals(x.Signature, y.Signature);
+            return SignatureEquals(x.Signature, y.Signature);
         }
 
         /// <inheritdoc />

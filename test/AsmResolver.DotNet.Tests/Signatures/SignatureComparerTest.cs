@@ -247,6 +247,15 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(_comparer.GetHashCode(definition), _comparer.GetHashCode(signature));
         }
 
+        [Fact]
+        public void TypeSigOfTypeRefShouldCompareEqualToTypeRef()
+        {
+            var typeRef = new TypeReference(KnownCorLibs.NetStandard_v2_0_0_0, "System", "Action");
+
+            Assert.Equal((ITypeDescriptor)typeRef, typeRef.ToTypeSignature(false), _comparer);
+            Assert.Equal((ITypeDescriptor)typeRef.ToTypeSignature(false), typeRef, _comparer);
+        }
+
         private class NestedTypes
         {
             public class FirstType
