@@ -250,7 +250,7 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
         using var stream = new MemoryStream();
         file.Write(stream);
 
-        var newImage = PEImage.FromBytes(stream.ToArray(), TestReaderParameters);
+        var newImage = PEImage.FromStream(stream, TestReaderParameters);
         var metadataStream = Assert.IsAssignableFrom<CustomMetadataStream>(
             newImage.DotNetDirectory!.Metadata!.Streams.First(x => x.Name == name)
         );
@@ -277,7 +277,7 @@ public class UnmanagedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
         using var stream = new MemoryStream();
         file.Write(stream);
 
-        var newImage = PEImage.FromBytes(stream.ToArray(), TestReaderParameters);
+        var newImage = PEImage.FromStream(stream, TestReaderParameters);
         Assert.NotNull(newImage.Exports);
         Assert.Equal(image.Exports.Entries.Select(x => x.Name), newImage.Exports.Entries.Select(x => x.Name));
     }

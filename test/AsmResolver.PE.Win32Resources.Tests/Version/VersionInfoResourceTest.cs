@@ -55,7 +55,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             versionInfo.Write(new BinaryStreamWriter(tempStream));
 
             // Reload.
-            var infoReader = new BinaryStreamReader(tempStream.ToArray());
+            var infoReader = new BinaryStreamReader(tempStream);
             var newVersionInfo = VersionInfoResource.FromReader(ref infoReader);
             var newFixedVersionInfo = newVersionInfo.FixedVersionInfo;
 
@@ -127,7 +127,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             versionInfo.Write(new BinaryStreamWriter(tempStream));
 
             // Reload.
-            var infoReader = new BinaryStreamReader(tempStream.ToArray());
+            var infoReader = new BinaryStreamReader(tempStream);
             var newVersionInfo = VersionInfoResource.FromReader(ref infoReader);
 
             // Verify.
@@ -162,7 +162,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             versionInfo.Write(new BinaryStreamWriter(tempStream));
 
             // Reload.
-            var infoReader = new BinaryStreamReader(tempStream.ToArray());
+            var infoReader = new BinaryStreamReader(tempStream);
             var newVersionInfo = VersionInfoResource.FromReader(ref infoReader);
 
             // Verify.
@@ -194,7 +194,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             new ManagedPEFileBuilder().CreateFile(image).Write(new BinaryStreamWriter(stream));
 
             // Reload version info.
-            var newImage = PEImage.FromBytes(stream.ToArray());
+            var newImage = PEImage.FromStream(stream);
             var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources!)!;
             Assert.NotNull(newVersionInfo);
 
@@ -233,7 +233,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             file.Write(stream);
 
             // Reopen and verify.
-            var newImage = PEImage.FromBytes(stream.ToArray());
+            var newImage = PEImage.FromStream(stream);
             var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources!)!;
             var newInfo = newVersionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);
             Assert.Equal("This is a test application", newInfo.Tables[0][StringTable.FileDescriptionKey]);

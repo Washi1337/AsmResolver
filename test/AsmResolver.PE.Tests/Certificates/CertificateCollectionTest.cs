@@ -29,7 +29,7 @@ namespace AsmResolver.PE.Tests.Certificates
             using var stream = new MemoryStream();
             file.Write(stream);
 
-            var newImage = PEImage.FromBytes(stream.ToArray(), TestReaderParameters);
+            var newImage = PEImage.FromStream(stream, TestReaderParameters);
             var newCertificate = Assert.Single(newImage.Certificates);
             Assert.Equal(certificate.Revision, newCertificate.Revision);
             Assert.Equal(certificate.Type, newCertificate.Type);

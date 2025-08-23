@@ -143,7 +143,7 @@ namespace AsmResolver.Tests.IO
 
             writer.Write7BitEncodedInt32(value);
 
-            var reader = new BinaryStreamReader(stream.ToArray());
+            var reader = new BinaryStreamReader(stream);
             Assert.Equal(value, reader.Read7BitEncodedInt32());
         }
 

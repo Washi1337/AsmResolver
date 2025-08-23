@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using AsmResolver.IO;
 using AsmResolver.PE.Builder;
@@ -66,6 +67,25 @@ namespace AsmResolver.PE
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static PEImage FromBytes(byte[] bytes, PEReaderParameters readerParameters) =>
             FromFile(PEFile.FromBytes(bytes), readerParameters);
+
+        /// <summary>
+        /// Opens a PE image from a stream.
+        /// </summary>
+        /// <param name="stream">The stream to interpret.</param>
+        /// <returns>The PE image that was opened.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static PEImage FromStream(Stream stream) =>
+            FromFile(PEFile.FromStream(stream));
+
+        /// <summary>
+        /// Opens a PE image from a stream.
+        /// </summary>
+        /// <param name="stream">The stream to interpret.</param>
+        /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
+        /// <returns>The PE image that was opened.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static PEImage FromStream(Stream stream, PEReaderParameters readerParameters) =>
+            FromFile(PEFile.FromStream(stream), readerParameters);
 
         /// <summary>
         /// Reads a mapped PE image starting at the provided module base address (HINSTANCE).
