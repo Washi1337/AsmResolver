@@ -315,7 +315,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportNonImportedTypeDefOrRefShouldResultInNewInstance()
         {
-            var signature = new TypeReference(_module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
+            var signature = new TypeReference(null, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
                 .ToTypeSignature();
 
             var imported = _importer.ImportTypeSignature(signature);
@@ -328,7 +328,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportTypeSpecWithNonImportedBaseTypeShouldResultInNewInstance()
         {
-            var signature = new TypeReference(_module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
+            var signature = new TypeReference(null, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
                 .ToTypeSignature()
                 .MakeSzArrayType();
 
@@ -371,7 +371,7 @@ namespace AsmResolver.DotNet.Tests
 
             var instance = genericType.MakeGenericInstanceType(
                 new TypeDefOrRefSignature(
-                    new TypeReference(_module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream"), false)
+                    new TypeReference(null, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream"), false)
             );
 
             var imported = _importer.ImportTypeSignature(instance);

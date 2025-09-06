@@ -37,10 +37,14 @@ namespace AsmResolver.DotNet
         /// <param name="scope">The scope that defines the type.</param>
         /// <param name="ns">The namespace the type resides in.</param>
         /// <param name="name">The name of the type.</param>
+        /// <remarks>
+        /// The resulting type will inherit the context module from <paramref name="scope"/>.
+        /// </remarks>
         public TypeReference(IResolutionScope? scope, Utf8String? ns, Utf8String? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
             _scope.SetValue(scope);
+            ContextModule = scope?.ContextModule; // Assume the scope defines the module context.
             Namespace = ns;
             Name = name;
         }
@@ -106,6 +110,9 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public ModuleDefinition? ContextModule
         {
+            // Note: We cannot make this a computed property that returns `Scope.ContextModule`, because a TypeRef's
+            // scope can be null and still be "valid" (albeit not according to spec). In such a case the runtime
+            // assumes it references a type in the current module. We therefore have to keep track of it separately.
             get;
             protected set;
         }

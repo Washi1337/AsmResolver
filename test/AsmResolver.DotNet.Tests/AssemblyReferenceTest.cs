@@ -67,5 +67,26 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(assemblyDef.Name, assemblyDef.Name);
             Assert.Equal(assemblyDef.Version, assemblyDef.Version);
         }
+
+        [Fact]
+        public void CreateTypeReferenceFromImportedAssemblyShouldBeImported()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var someAssembly = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
+            module.AssemblyReferences.Add(someAssembly);
+
+            var reference = someAssembly.CreateTypeReference("Namespace", "Type");
+            Assert.True(reference.IsImportedInModule(module));
+        }
+
+        [Fact]
+        public void CreateTypeReferenceFromImportedAssemblyShouldNotBeImported()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var someAssembly = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
+
+            var reference = someAssembly.CreateTypeReference("Namespace", "Type");
+            Assert.False(reference.IsImportedInModule(module));
+        }
     }
 }

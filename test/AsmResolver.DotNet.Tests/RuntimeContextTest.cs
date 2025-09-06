@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ForceNetStandardLoadAsNetCore()
         {
-            var context = new RuntimeContext(new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(3, 1)));
+            var context = new RuntimeContext(new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(8, 0)));
             var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location, new ModuleReaderParameters(context));
 
             Assert.Equal(context.TargetRuntime, module.RuntimeContext.TargetRuntime);
