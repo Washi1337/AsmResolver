@@ -71,7 +71,12 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void CreateTypeReferenceFromImportedAssemblyShouldBeImported()
         {
+
+
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var systemConsole = new AssemblyReference("System.Console", new Version(8, 0, 0, 0));
+            module.DefaultImporter.ImportScope(systemConsole);
+
             var someAssembly = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
             module.AssemblyReferences.Add(someAssembly);
 
@@ -80,7 +85,7 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
-        public void CreateTypeReferenceFromImportedAssemblyShouldNotBeImported()
+        public void CreateTypeReferenceFromNonImportedAssemblyShouldNotBeImported()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var someAssembly = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
