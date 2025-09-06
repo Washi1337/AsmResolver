@@ -95,6 +95,20 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ImportTypeRefWithNullScopeShouldReturnTypeRefToContextAssembly()
+        {
+            var assembly = new AssemblyDefinition("OtherModule", new Version(1, 0, 0, 0));
+            var module = new ModuleDefinition("OtherModule.dll");
+            assembly.Modules.Add(module);
+
+            var reference = new TypeReference(module, null, "SomeNamespace", "SomeName");
+
+            Assert.Null(reference.Scope);
+            var importedType = _importer.ImportType(reference);
+            Assert.Equal(assembly, importedType.Scope?.GetAssembly(), SignatureComparer.Default);
+        }
+
+        [Fact]
         public void ImportNestedTypeShouldImportParentType()
         {
             var declaringType = new TypeReference(_dummyAssembly, "SomeNamespace", "SomeName");
