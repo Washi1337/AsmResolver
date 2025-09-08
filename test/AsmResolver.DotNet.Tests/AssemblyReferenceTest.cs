@@ -71,8 +71,6 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void CreateTypeReferenceFromImportedAssemblyShouldBeImported()
         {
-
-
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var systemConsole = new AssemblyReference("System.Console", new Version(8, 0, 0, 0));
             module.DefaultImporter.ImportScope(systemConsole);
@@ -92,6 +90,26 @@ namespace AsmResolver.DotNet.Tests
 
             var reference = someAssembly.CreateTypeReference("Namespace", "Type");
             Assert.False(reference.IsImportedInModule(module));
+        }
+
+        [Fact]
+        public void CreateClassGenericType()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var genericType = module.CorLibTypeFactory.CorLibScope
+                .CreateTypeReference("System.Collections.Generic", "List`1")
+                .MakeGenericInstanceType(module.CorLibTypeFactory.Int32);
+            Assert.False(genericType.IsValueType);
+        }
+
+        [Fact]
+        public void CreateValueTypeGenericType()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var genericType = module.CorLibTypeFactory.CorLibScope
+                .CreateTypeReference("System", "Nullable`1")
+                .MakeGenericInstanceType(module.CorLibTypeFactory.Int32);
+            Assert.True(genericType.IsValueType);
         }
     }
 }
