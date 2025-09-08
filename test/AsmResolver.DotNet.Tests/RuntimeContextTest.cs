@@ -68,17 +68,17 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location, new ModuleReaderParameters(context));
 
             Assert.Equal(context.TargetRuntime, module.RuntimeContext.TargetRuntime);
-            Assert.Equal("mscorlib", module.CorLibTypeFactory.Object.Resolve()?.Module?.Assembly?.Name);
+            Assert.Equal("mscorlib", module.CorLibTypeFactory.Object.Resolve()?.DeclaringModule?.Assembly?.Name);
         }
 
         [Fact]
         public void ForceNetStandardLoadAsNetCore()
         {
-            var context = new RuntimeContext(new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(3, 1)));
+            var context = new RuntimeContext(new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(8, 0)));
             var module = ModuleDefinition.FromFile(typeof(Class).Assembly.Location, new ModuleReaderParameters(context));
 
             Assert.Equal(context.TargetRuntime, module.RuntimeContext.TargetRuntime);
-            Assert.Equal("System.Private.CoreLib", module.CorLibTypeFactory.Object.Resolve()?.Module?.Assembly?.Name);
+            Assert.Equal("System.Private.CoreLib", module.CorLibTypeFactory.Object.Resolve()?.DeclaringModule?.Assembly?.Name);
         }
 
         [Fact]

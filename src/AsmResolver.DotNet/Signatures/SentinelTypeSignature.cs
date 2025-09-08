@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override TypeDefinition? Resolve() => throw new InvalidOperationException();
+        public override TypeDefinition? Resolve(ModuleDefinition context) => throw new InvalidOperationException();
 
         /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => null;

@@ -135,7 +135,7 @@ namespace AsmResolver.DotNet.Collections
             {
                 var genArgs = new TypeSignature[declaringType.GenericParameters.Count];
                 for (int i = 0; i < genArgs.Length; i++)
-                    genArgs[i] = new GenericParameterSignature(_owner.Module, GenericParameterType.Type, i);
+                    genArgs[i] = new GenericParameterSignature(_owner.DeclaringModule, GenericParameterType.Type, i);
                 result = declaringType.MakeGenericInstanceType(genArgs);
             }
             else

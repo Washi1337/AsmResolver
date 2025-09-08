@@ -26,7 +26,7 @@ public class OriginalMetadataTokenProvider : IMetadataTokenProvider
 
     private MetadataToken GetToken(IMetadataMember member, object? diagnosticSource)
     {
-        if (_module is not null && member is IModuleProvider provider && provider.Module != _module)
+        if (_module is not null && member is IModuleProvider provider && provider.ContextModule != _module)
             throw new MemberNotImportedException(member, diagnosticSource);
 
         return member.MetadataToken;

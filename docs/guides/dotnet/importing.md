@@ -1,55 +1,119 @@
-# Reference Importing
+# References to External Metadata
 
-.NET modules use entries in the TypeRef or MemberRef tables to reference
-types or members from external assemblies. Importing references into the
-current module, therefore, form a key role when creating new- or
-modifying existing .NET modules. When a member is not imported into the
-current module, a `MemberNotImportedException` will be thrown when you
-are trying to create a PE image or write the module to the disk.
+Next to metadata symbols defined in the current module (see [The Member Tree](./member-tree.md)), .NET modules can also reference metadata defined in external assemblies using the `AssemblyRef`, `TypeRef` and `MemberRef` tables.
+Thus, when you want to use a type, field or method defined in a different assembly, it is required to turn these definitions into the appropriate references first.
 
-AsmResolver provides the `ReferenceImporter` class that does most of the
-heavy lifting. Obtaining an instance of `ReferenceImporter` can be done
-in two ways.
+Below an overview of how AsmResolver represents definitions and their corresponding reference type.
 
-Either instantiate one yourself:
+| Definition           | Reference                                  | 
+|----------------------|--------------------------------------------|
+| `AssemblyDefinition` | `AssemblyReference`                        |
+| `TypeDefinition`     | `TypeReference`                            |
+| `MethodDefinition`   | `MemberReference` with a `MethodSignature` |
+| `FieldDefinition`    | `MemberReference` with a `FieldSignature`  |
+
+> [!NOTE]
+> While there also exists both a `ModuleDefinition` and `ModuleReference`, these two are unrelated. `ModuleDefinition` defines a module in a .NET assembly manifest, while `ModuleReference` is used to reference native modules such as `kernel32.dll` or `libc.so`
+
+
+## Resolution scopes
+
+The root scope of any external reference is an `IResolutionScope`.
+
+Typically, resolution scopes are references to external assemblies, which are represented by an `AssemblyReference`.
+All assemblies imported by a module are stored in `ModuleDefinition::AssemblyReferences`:
+
+```csharp
+ModuleDefinition module = ...;
+foreach (var assembly in module.AssemblyReferences)
+    Console.WriteLine(assembly);
+```
+
+You can add new `AssemblyReference`s to this list, but the preferred way of adding a new assembly reference to is by using an importer:
+
+```csharp
+ModuleDefinition module = ...;
+var systemConsole = new AssemblyReference(
+        "System.Console", 
+        new Version(8, 0, 0, 0)
+    ).ImportWith(module.DefaultImporter);
+```
+
+You can also import existing `AssemblyDefinition`s and turn them into `AssemblyReference`s:
+
+```csharp
+ModuleDefinition module = ...;
+AssemblyDefinition otherAssembly = ...;
+var otherAssemblyRef = otherAssembly.ImportWith(module.DefaultImporter);
+```
+
+`ModuleDefinition` also provides a default corlib assembly scope that the module targets:
+
+```csharp
+ModuleDefinition module = ...;
+var corlib = module.CorLibTypeFactory.CorLibScope;
+```
+
+In most cases this will return an `AssemblyReference` to either `mscorlib`, `netstandard`, `System.Runtime` or `System.Private.Corlib`.
+In case `module` is a corlib assembly itself, it will reference itself instead.
+
+
+## Type and member references
+
+Similar to assembly references, external types and members are represented using `TypeReference` and
+`MemberReference`.
+
+To create new references, use the fluent factory methods `CreateTypeReference` and `CreateMemberReference` on any `IResolutionScope` or `ITypeDescriptor`.
+Below is an example of how to create a fully imported reference to
+`void System.Console.WriteLine(string)`:
+
+``` csharp
+var method = factory.CorLibScope
+    .CreateTypeReference("System", "Console")
+    .CreateMemberReference("WriteLine", MethodSignature.CreateStatic(
+        factory.Void, factory.String));
+
+// importedMethod now references "void System.Console.WriteLine(string)"
+```
+
+Generic type instantiations can also be created using
+`MakeGenericInstanceType`:
 
 ``` csharp
 ModuleDefinition module = ...
-var importer = new ReferenceImporter(module);
+
+var factory = module.CorLibTypeFactory;
+var importedMethod = factory.CorLibScope
+    .CreateTypeReference("System.Collections.Generic", "List`1")
+    .MakeGenericInstanceType(factory.Int32)
+    .ToTypeDefOrRef()
+    .CreateMemberReference("Add", MethodSignature.CreateInstance(
+        factory.Void,
+        new GenericParameterSignature(GenericParameterType.Type, 0)));
+
+// importedMethod now references "System.Collections.Generic.List`1<System.Int32>.Add(!0)"
 ```
 
-Or obtain the default instance that comes with every `ModuleDefinition`
-object. This avoids allocating new reference importers every time.
+Similarly, generic method instantiations can be constructed using
+`MakeGenericInstanceMethod`:
 
 ``` csharp
 ModuleDefinition module = ...
-var importer = module.DefaultImporter;
+
+var factory = module.CorLibTypeFactory;
+var importedMethod = factory.CorLibScope
+    .CreateTypeReference("System", "Array")
+    .CreateMemberReference("Empty", MethodSignature.CreateStatic(
+        new GenericParameterSignature(GenericParameterType.Method, 0).MakeSzArrayType(), 1))
+    .MakeGenericInstanceMethod(factory.String);
+
+// importedMethod now references "!0[] System.Array.Empty<System.String>()"
 ```
 
-The example snippets that will follow in this article assume that there
-is such a `ReferenceImporter` object instantiated using either of these
-two methods, and is stored in an `importer` variable.
 
-## Importing existing members
+## Importing existing metadata definitions
 
-Metadata members from external modules can be imported using the
-`ReferenceImporter` class using one of the following members:
-
-|Member type to import |Method to use   | Result type          |
-|----------------------|----------------| ---------------------|
-|`IResolutionScope`    |`ImportScope`   | `IResolutionScope`   |
-|`AssemblyReference`   |`ImportScope`   | `IResolutionScope`   |
-|`AssemblyDefinition`  |`ImportScope`   | `IResolutionScope`   |
-|`ModuleReference`     |`ImportScope`   | `IResolutionScope`   |
-|`ITypeDefOrRef`       |`ImportType`    | `ITypeDefOrRef`      |
-|`TypeDefinition`      |`ImportType`    | `ITypeDefOrRef`      |
-|`TypeReference`       |`ImportType`    | `ITypeDefOrRef`      |
-|`TypeSpecification`   |`ImportType`    | `ITypeDefOrRef`      |
-|`IMethodDefOrRef`     |`ImportMethod`  | `IMethodDefOrRef`    |
-|`MethodDefinition`    |`ImportMethod`  | `IMethodDefOrRef`    |
-|`MethodSpecification` |`ImportMethod`  | `IMethodDefOrRef`    |
-|`IFieldDescriptor`    |`ImportField`   | `IFieldDescriptor`   |
-|`FieldDefinition`     |`ImportField`   | `IFieldDescriptor`   |
+References to existing metadata definitions can also be automatically converted to their appropriate reference type using an importer.
 
 Below an example of how to import a type definition called `SomeType`:
 
@@ -60,8 +124,8 @@ TypeDefinition typeToImport = externalModule.TopLevelTypes.First(t => t.Name == 
 ITypeDefOrRef importedType = importer.ImportType(typeToImport);
 ```
 
-These types also implement the `IImportable` interface. This means you
-can also use the `member.ImportWith` method instead:
+Most metadata definitions also implement the `IImportable` interface.
+This means you can also use the `member.ImportWith` method instead:
 
 ``` csharp
 ModuleDefinition externalModule = ModuleDefinition.FromFile(...);
@@ -70,9 +134,10 @@ TypeDefinition typeToImport = externalModule.TopLevelTypes.First(t => t.Name == 
 ITypeDefOrRef importedType = typeToImport.ImportWith(importer);
 ```
 
+
 ## Importing existing type signatures
 
-Type signatures can also be imported using the `ReferenceImporter`
+Type signatures can also be imported using a reference importer.
 class, but these should be imported using the `ImportTypeSignature`
 method instead.
 
@@ -119,62 +184,6 @@ imported through reflection include:
 
 Instantiations of generic methods are also supported.
 
-## Creating new references
-
-Member references can also be created and imported without having direct
-access to its member definition or `System.Reflection` instance. It is
-possible to create new instances of `TypeReference` and
-`MemberReference` using the constructors, but the preferred way is to
-use the factory methods that allow for a more fluent syntax. Below is an
-example of how to create a fully imported reference to
-`void System.Console.WriteLine(string)`:
-
-``` csharp
-var factory = module.CorLibTypeFactory;
-var importedMethod = factory.CorLibScope
-    .CreateTypeReference("System", "Console")
-    .CreateMemberReference("WriteLine", MethodSignature.CreateStatic(
-        factory.Void, factory.String))
-    .ImportWith(importer);
-
-// importedMethod now references "void System.Console.WriteLine(string)"
-```
-
-Generic type instantiations can also be created using
-`MakeGenericInstanceType`:
-
-``` csharp
-ModuleDefinition module = ...
-
-var factory = module.CorLibTypeFactory;
-var importedMethod = factory.CorLibScope
-    .CreateTypeReference("System.Collections.Generic", "List`1")
-    .MakeGenericInstanceType(factory.Int32)
-    .ToTypeDefOrRef()
-    .CreateMemberReference("Add", MethodSignature.CreateInstance(
-        factory.Void,
-        new GenericParameterSignature(GenericParameterType.Type, 0)))
-    .ImportWith(importer);
-
-// importedMethod now references "System.Collections.Generic.List`1<System.Int32>.Add(!0)"
-```
-
-Similarly, generic method instantiations can be constructed using
-`MakeGenericInstanceMethod`:
-
-``` csharp
-ModuleDefinition module = ...
-
-var factory = module.CorLibTypeFactory;
-var importedMethod = factory.CorLibScope
-    .CreateTypeReference("System", "Array")
-    .CreateMemberReference("Empty", MethodSignature.CreateStatic(
-        new GenericParameterSignature(GenericParameterType.Method, 0).MakeSzArrayType(), 1))
-    .MakeGenericInstanceMethod(factory.String)
-    .ImportWith(importer);
-
-// importedMethod now references "!0[] System.Array.Empty<System.String>()"
-```
 
 ## Common Caveats using the Importer
 

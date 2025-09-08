@@ -32,10 +32,9 @@ namespace AsmResolver.DotNet.Signatures
         public override IEnumerable<ArrayDimension> GetDimensions() => SzDimensions;
 
         /// <inheritdoc />
-        public override TypeSignature? GetDirectBaseClass() => Module?.CorLibTypeFactory.CorLibScope
+        public override TypeSignature? GetDirectBaseClass() => ContextModule?.CorLibTypeFactory.CorLibScope
             .CreateTypeReference("System", "Array")
-            .ToTypeSignature(false)
-            .ImportWith(Module.DefaultImporter);
+            .ToTypeSignature(false);
 
 
         /// <inheritdoc />

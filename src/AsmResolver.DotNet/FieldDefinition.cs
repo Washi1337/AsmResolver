@@ -298,7 +298,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ModuleDefinition? Module => DeclaringType?.Module;
+        public ModuleDefinition? DeclaringModule => DeclaringType?.DeclaringModule;
+
+        ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <summary>
         /// Gets the type that defines the field.
@@ -383,11 +385,16 @@ namespace AsmResolver.DotNet
 
         FieldDefinition IFieldDescriptor.Resolve() => this;
 
+        FieldDefinition IFieldDescriptor.Resolve(ModuleDefinition context) => this;
+
+        IMemberDefinition IMemberDescriptor.Resolve() => this;
+
+        IMemberDefinition IMemberDescriptor.Resolve(ModuleDefinition context) => this;
+
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
-            return Module == module
-                   && (Signature?.IsImportedInModule(module) ?? false);
+            return DeclaringModule == module && (Signature?.IsImportedInModule(module) ?? false);
         }
 
         /// <summary>
@@ -399,8 +406,6 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
-
-        IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
@@ -422,7 +427,7 @@ namespace AsmResolver.DotNet
                 type1 = type1.DeclaringType;
             }
 
-            bool isInSameAssembly = SignatureComparer.Default.Equals(declaringType.Module, type.Module);
+            bool isInSameAssembly = SignatureComparer.Default.Equals(declaringType.DeclaringModule, type.DeclaringModule);
 
             // Assembly (internal in C#) fields are accessible by types in the same assembly.
             if (IsAssembly || IsFamilyOrAssembly)

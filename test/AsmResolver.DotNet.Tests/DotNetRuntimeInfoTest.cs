@@ -35,9 +35,9 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(".NETCoreApp,Version=v10.0", "System.Runtime, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
         public void DefaultCorLib(string name, string expectedCorLib)
         {
-            Assert.Equal(
+            Assert.Equal<AssemblyDescriptor>(
                 new ReflectionAssemblyDescriptor(new AssemblyName(expectedCorLib)),
-                (AssemblyDescriptor) DotNetRuntimeInfo.Parse(name).GetDefaultCorLib(),
+                DotNetRuntimeInfo.Parse(name).GetDefaultCorLib(),
                 SignatureComparer.Default
             );
         }

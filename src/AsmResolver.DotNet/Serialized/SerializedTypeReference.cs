@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Serialized
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
 
-            Module = context.ParentModule;
+            ContextModule = context.ParentModule;
         }
 
         /// <inheritdoc />

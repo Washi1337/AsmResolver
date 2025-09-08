@@ -3,7 +3,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents an accessible member defined in a metadata image.
     /// </summary>
-    public interface IMemberDefinition : IMemberDescriptor, IMetadataMember
+    public interface IMemberDefinition : IMetadataDefinition, IMemberDescriptor
     {
         /// <summary>
         /// Gets the type that declares the member (if available).

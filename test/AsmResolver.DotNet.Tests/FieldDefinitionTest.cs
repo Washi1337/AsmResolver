@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Tests
         private FieldDefinition RebuildAndLookup(FieldDefinition field)
         {
             var stream = new MemoryStream();
-            field.Module.Write(stream);
+            field.DeclaringModule.Write(stream);
 
             var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             return newModule

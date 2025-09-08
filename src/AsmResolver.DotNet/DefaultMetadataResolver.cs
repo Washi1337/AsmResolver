@@ -136,10 +136,6 @@ namespace AsmResolver.DotNet
             if (declaringType is null)
                 return null;
 
-            var name = field is MemberReference member
-                ? member.Name
-                : (Utf8String?) field.Name;
-
             for (int i = 0; i < declaringType.Fields.Count; i++)
             {
                 var candidate = declaringType.Fields[i];
@@ -168,7 +164,7 @@ namespace AsmResolver.DotNet
                 if (reference is null)
                     return null;
 
-                var scope = reference.Scope ?? reference.Module;
+                var scope = reference.Scope ?? reference.ContextModule;
                 if (reference.Name is null || scope is null || _scopeStack.Contains(scope))
                     return null;
                 _scopeStack.Push(scope);
@@ -176,11 +172,11 @@ namespace AsmResolver.DotNet
                 switch (scope.MetadataToken.Table)
                 {
                     case TableIndex.AssemblyRef:
-                        if (reference.Module?.Assembly is { } assembly)
+                        if (reference.ContextModule?.Assembly is { } assembly)
                         {
                             // Are we referencing the current assembly the reference was declared in?
                             if (SignatureComparer.Default.Equals(scope.GetAssembly(), assembly))
-                                return FindTypeInModule(reference.Module, reference.Namespace, reference.Name);
+                                return FindTypeInModule(reference.ContextModule, reference.Namespace, reference.Name);
                         }
 
                         var assemblyDefScope = _assemblyResolver.Resolve((AssemblyReference) scope);
@@ -218,7 +214,7 @@ namespace AsmResolver.DotNet
                             : null;
 
                     case TableIndex.File when !string.IsNullOrEmpty(implementation.Name):
-                        var module = FindModuleInAssembly(exportedType.Module!.Assembly!, implementation.Name!);
+                        var module = FindModuleInAssembly(exportedType.ContextModule!.Assembly!, implementation.Name!);
                         return module is not null
                             ? FindTypeInModule(module, exportedType.Namespace, exportedType.Name)
                             : null;

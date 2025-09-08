@@ -31,13 +31,13 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var property = new PropertyDefinition(
                 name,
                 PropertyAttributes.None,
-                PropertySignature.CreateStatic(dummyType.Module!.CorLibTypeFactory.Object)
+                PropertySignature.CreateStatic(dummyType.DeclaringModule!.CorLibTypeFactory.Object)
             );
 
             var getMethod = new MethodDefinition(
                 $"get_{property.Name}",
                 MethodAttributes.Public | MethodAttributes.Static,
-                MethodSignature.CreateStatic(dummyType.Module.CorLibTypeFactory.Object)
+                MethodSignature.CreateStatic(dummyType.DeclaringModule.CorLibTypeFactory.Object)
             );
 
             getMethod.CilMethodBody = new CilMethodBody

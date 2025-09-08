@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Dynamic
     {
         public static void ReadLocalVariables(CilMethodBody methodBody, MethodDefinition method, byte[] localSig)
         {
-            if (method.Module is not SerializedModuleDefinition module)
+            if (method.DeclaringModule is not SerializedModuleDefinition module)
                 throw new ArgumentException("Method body should reference a serialized module.");
 
             var reader = new BinaryStreamReader(localSig);

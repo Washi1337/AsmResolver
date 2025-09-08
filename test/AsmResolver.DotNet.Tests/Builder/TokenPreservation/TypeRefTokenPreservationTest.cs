@@ -106,12 +106,8 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var assembly = new AssemblyDefinition("Test", new Version(1, 0, 0, 0));
             assembly.Modules.Add(module);
 
-            var ref1 = (TypeReference) module.CorLibTypeFactory.CorLibScope
-                .CreateTypeReference("System", "Object")
-                .ImportWith(module.DefaultImporter);
-            var ref2 = (TypeReference) module.CorLibTypeFactory.CorLibScope
-                .CreateTypeReference("System", "Object")
-                .ImportWith(module.DefaultImporter);
+            var ref1 = module.CorLibTypeFactory.CorLibScope.CreateTypeReference("System", "Object");
+            var ref2 = module.CorLibTypeFactory.CorLibScope.CreateTypeReference("System", "Object");
 
             // Force assign new tokens to instruct builder that both type references need to be added.
             module.TokenAllocator.AssignNextAvailableToken(ref1);

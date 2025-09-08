@@ -28,8 +28,15 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <returns>The resolved field definition, or <c>null</c> if the field could not be resolved.</returns>
         /// <remarks>
-        /// This method can only be invoked if the reference was added to a module.
+        /// This method assumes the context module as the resolution context.
         /// </remarks>
         new FieldDefinition? Resolve();
+
+        /// <summary>
+        /// Resolves the reference to a field definition, assuming the provided module as resolution context.
+        /// </summary>
+        /// <param name="context">The module to assume as resolution context.</param>
+        /// <returns>The resolved field definition, or <c>null</c> if the field could not be resolved.</returns>
+        new FieldDefinition? Resolve(ModuleDefinition context);
     }
 }

@@ -13,8 +13,9 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class ManifestResource :
         MetadataMember,
-        INameProvider,
         IHasCustomAttribute,
+        IModuleProvider,
+        IMetadataDefinition,
         IOwnedCollectionElement<ModuleDefinition>
     {
         private readonly LazyVariable<ManifestResource, Utf8String?> _name;
@@ -141,17 +142,19 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the module that this manifest resource reference is stored in.
         /// </summary>
-        public ModuleDefinition? Module
+        public ModuleDefinition? DeclaringModule
         {
             get;
             private set;
         }
 
+        ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
+
         /// <inheritdoc />
         ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
-            get => Module;
-            set => Module = value;
+            get => DeclaringModule;
+            set => DeclaringModule = value;
         }
 
         /// <inheritdoc />

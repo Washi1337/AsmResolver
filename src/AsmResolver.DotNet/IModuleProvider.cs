@@ -9,10 +9,10 @@ namespace AsmResolver.DotNet
         /// Gets the module that defines the member definition or reference.
         /// </summary>
         /// <remarks>
-        /// For member references, this does not obtain the module definition that the member is defined in. 
+        /// For member references, this does not obtain the module definition that the member is defined in.
         /// Rather, it obtains the module definition that references this reference.
         /// </remarks>
-        ModuleDefinition? Module
+        ModuleDefinition? ContextModule
         {
             get;
         }

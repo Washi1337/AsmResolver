@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet.Dynamic
                     "Could not get the underlying method base in the provided dynamic method object.");
             }
 
-            Module = module;
+            DeclaringModule = module;
             Name = methodBase.Name;
             Attributes = (MethodAttributes)methodBase.Attributes;
             Signature = module.DefaultImporter.ImportMethodSignature(ResolveSig(methodBase, module));
@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Dynamic
         public static bool IsSupported => DynamicTypeSignatureResolver.IsSupported;
 
         /// <inheritdoc />
-        public override ModuleDefinition Module { get; }
+        public override ModuleDefinition DeclaringModule { get; }
 
         private MethodSignature ResolveSig(MethodBase methodBase, ModuleDefinition module)
         {
@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet.Dynamic
         /// <returns>The method body.</returns>
         private static CilMethodBody CreateDynamicMethodBody(DynamicMethodDefinition method, object dynamicMethodObj)
         {
-            if (method.Module is not SerializedModuleDefinition module)
+            if (method.DeclaringModule is not SerializedModuleDefinition module)
                 throw new ArgumentException("Method body should reference a serialized module.");
 
             var result = new CilMethodBody();

@@ -159,7 +159,7 @@ namespace AsmResolver.DotNet
         /// <returns>The constructed reference.</returns>
         public static TypeReference CreateTypeReference(this IResolutionScope scope, string? ns, string name)
         {
-            return new TypeReference(scope, ns, name);
+            return new TypeReference(scope.ContextModule, scope, ns, name);
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace AsmResolver.DotNet
         /// <returns>The constructed reference.</returns>
         public static TypeReference CreateTypeReference(this IResolutionScope scope, Utf8String? ns, Utf8String name)
         {
-            return new TypeReference(scope, ns, name);
+            return new TypeReference(scope.ContextModule, scope, ns, name);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace AsmResolver.DotNet
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            return new TypeReference(parent, null, nestedTypeName);
+            return new TypeReference(declaringType.ContextModule, parent, null, nestedTypeName);
         }
 
         /// <summary>
@@ -213,7 +213,7 @@ namespace AsmResolver.DotNet
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            return new TypeReference(parent, null, nestedTypeName);
+            return new TypeReference(declaringType.ContextModule, parent, null, nestedTypeName);
         }
 
         /// <summary>

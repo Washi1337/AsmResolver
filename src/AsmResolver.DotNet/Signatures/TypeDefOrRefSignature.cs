@@ -49,7 +49,7 @@ namespace AsmResolver.DotNet.Signatures
         public override ElementType ElementType => IsValueType ? ElementType.ValueType : ElementType.Class;
 
         /// <inheritdoc />
-        public override string Name => Type?.Name ?? NullTypeToString;
+        public override string Name => Type.Name ?? NullTypeToString;
 
         /// <inheritdoc />
         public override string? Namespace => Type.Namespace;
@@ -58,13 +58,13 @@ namespace AsmResolver.DotNet.Signatures
         public override IResolutionScope? Scope => Type.Scope;
 
         /// <inheritdoc />
-        public override ModuleDefinition? Module => Type.Module;
+        public override ModuleDefinition? ContextModule => Type.ContextModule;
 
         /// <inheritdoc />
         public override bool IsValueType => _isValueType;
 
         /// <inheritdoc />
-        public override TypeDefinition? Resolve() => Type.Resolve();
+        public override TypeDefinition? Resolve(ModuleDefinition context) => Type.Resolve(context);
 
         /// <inheritdoc />
         public override bool IsImportedInModule(ModuleDefinition module) => Type.IsImportedInModule(module);
@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet.Signatures
         public override ITypeDefOrRef ToTypeDefOrRef() => Type;
 
         /// <inheritdoc />
-        public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() => Type;
+        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => Type;
 
         /// <inheritdoc />
         public override TypeSignature GetUnderlyingType()
@@ -104,7 +104,7 @@ namespace AsmResolver.DotNet.Signatures
 
             // Interfaces have System.Object as direct base class.
             return type.IsInterface
-                ? Module!.CorLibTypeFactory.Object
+                ? ContextModule!.CorLibTypeFactory.Object
                 : type.BaseType!.ToTypeSignature(false).StripModifiers();
         }
 

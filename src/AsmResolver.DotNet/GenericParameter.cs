@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet
         INameProvider,
         IHasCustomAttribute,
         IModuleProvider,
+        IMetadataDefinition,
         IOwnedCollectionElement<IHasGenericParameters>
     {
         private readonly LazyVariable<GenericParameter, Utf8String?> _name;
@@ -171,7 +172,9 @@ namespace AsmResolver.DotNet
         public ushort Number => Owner is null ? (ushort) 0 : (ushort) Owner.GenericParameters.IndexOf(this);
 
         /// <inheritdoc />
-        public ModuleDefinition? Module => Owner?.Module;
+        public ModuleDefinition? DeclaringModule => Owner?.DeclaringModule;
+
+        ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <summary>
         /// Gets a collection of constraints put on the generic parameter.

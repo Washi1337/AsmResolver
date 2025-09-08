@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet.Tests
         public void PersistentConstants(string name)
         {
             var constant = GetFieldConstant(name);
-            var newConstant = RebuildAndLookup(constant.Parent.Module, name);
+            var newConstant = RebuildAndLookup(constant.Parent!.DeclaringModule, name);
             Assert.NotNull(newConstant);
             Assert.Equal(constant.Value.Data, newConstant.Value.Data);
         }

@@ -70,7 +70,7 @@ namespace AsmResolver.DotNet
         public string FullName => MemberNameGenerator.GetMethodFullName(this);
 
         /// <inheritdoc />
-        public ModuleDefinition? Module => Method?.Module;
+        public ModuleDefinition? ContextModule => Method?.ContextModule;
 
         /// <summary>
         /// Gets the declaring type of the method.
@@ -93,6 +93,13 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public MethodDefinition? Resolve() => Method?.Resolve();
 
+        IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
+
+        /// <inheritdoc />
+        public MethodDefinition? Resolve(ModuleDefinition context) => Method?.Resolve(context);
+
+        IMemberDefinition? IMemberDescriptor.Resolve(ModuleDefinition context) => Resolve(context);
+
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
@@ -109,9 +116,6 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
-
-        IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
-
         /// <summary>
         /// Obtains the instantiated method.
         /// </summary>

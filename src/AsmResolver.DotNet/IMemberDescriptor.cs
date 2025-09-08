@@ -18,8 +18,15 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <returns>The resolved member definition, or <c>null</c> if the member could not be resolved.</returns>
         /// <remarks>
-        /// This method can only be invoked if the reference was added to a module.
+        /// This method assumes the context module as the resolution context.
         /// </remarks>
         IMemberDefinition? Resolve();
+
+        /// <summary>
+        /// Resolves the reference to a member definition, assuming the provided module as resolution context.
+        /// </summary>
+        /// <param name="context">The module to assume as resolution context.</param>
+        /// <returns>The resolved member definition, or <c>null</c> if the member could not be resolved.</returns>
+        IMemberDefinition? Resolve(ModuleDefinition context);
     }
 }
