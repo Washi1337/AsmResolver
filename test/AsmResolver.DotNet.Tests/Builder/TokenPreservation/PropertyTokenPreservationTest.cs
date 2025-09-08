@@ -28,14 +28,25 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
         private static PropertyDefinition CreateDummyProperty(TypeDefinition dummyType, string name)
         {
-            var property = new PropertyDefinition(name, 0,
-                PropertySignature.CreateStatic(dummyType.Module.CorLibTypeFactory.Object));
+            var property = new PropertyDefinition(
+                name,
+                PropertyAttributes.None,
+                PropertySignature.CreateStatic(dummyType.DeclaringModule!.CorLibTypeFactory.Object)
+            );
 
-            var getMethod = new MethodDefinition($"get_{property.Name}", MethodAttributes.Public | MethodAttributes.Static,
-                MethodSignature.CreateStatic(dummyType.Module.CorLibTypeFactory.Object));
-            getMethod.CilMethodBody = new CilMethodBody(getMethod)
+            var getMethod = new MethodDefinition(
+                $"get_{property.Name}",
+                MethodAttributes.Public | MethodAttributes.Static,
+                MethodSignature.CreateStatic(dummyType.DeclaringModule.CorLibTypeFactory.Object)
+            );
+
+            getMethod.CilMethodBody = new CilMethodBody
             {
-                Instructions = {new CilInstruction(CilOpCodes.Ldnull), new CilInstruction(CilOpCodes.Ret)}
+                Instructions =
+                {
+                    CilOpCodes.Ldnull,
+                    CilOpCodes.Ret
+                }
             };
 
             dummyType.Methods.Add(getMethod);

@@ -24,7 +24,9 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<IEnumerable<TypeSignature>>
     {
         /// <inheritdoc />
-        public bool Equals(TypeSignature? x, TypeSignature? y)
+        public bool Equals(TypeSignature? x, TypeSignature? y) => Equals((ITypeDescriptor?)x, y);
+
+        private bool SignatureEquals(TypeSignature? x, TypeSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -179,14 +181,7 @@ namespace AsmResolver.DotNet.Signatures
             GetHashCode(obj as TypeSpecificationSignature);
 
         /// <inheritdoc />
-        public bool Equals(TypeDefOrRefSignature? x, TypeDefOrRefSignature? y)
-        {
-            if (ReferenceEquals(x, y))
-                return true;
-            if (x is null || y is null)
-                return false;
-            return SimpleTypeEquals(x.Type, y.Type);
-        }
+        public bool Equals(TypeDefOrRefSignature? x, TypeDefOrRefSignature? y) => Equals(x?.Type, y?.Type);
 
         /// <inheritdoc />
         public int GetHashCode(TypeDefOrRefSignature obj) => SimpleTypeHashCode(obj);

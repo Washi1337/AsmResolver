@@ -198,13 +198,21 @@ namespace AsmResolver.DotNet
             if (type.IsImportedInModule(TargetModule))
                 return type;
 
+            // If the TypeRef's scope is null, the runtime assumes it is a type in the current assembly.
+            IResolutionScope? impliedScope;
+            if (type.Scope is not null)
+                impliedScope = ImportScope(type.Scope);
+            else if (type.ContextModule?.Assembly is { } assembly)
+                impliedScope = ImportAssembly(assembly);
+            else
+                impliedScope = null;
+
             return new TypeReference(
                 TargetModule,
-                type.Scope is not null
-                    ? ImportScope(type.Scope)
-                    : null,
+                impliedScope,
                 type.Namespace,
-                type.Name);
+                type.Name
+            );
         }
 
         /// <summary>

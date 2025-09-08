@@ -55,7 +55,7 @@ namespace AsmResolver.DotNet.Tests
             var result = _importer.ImportType(type);
 
             Assert.Equal(type, result, Comparer);
-            Assert.Equal(_module, result.Module);
+            Assert.Equal(_module, result.ContextModule);
         }
 
         [Fact]
@@ -95,6 +95,20 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ImportTypeRefWithNullScopeShouldReturnTypeRefToContextAssembly()
+        {
+            var assembly = new AssemblyDefinition("OtherModule", new Version(1, 0, 0, 0));
+            var module = new ModuleDefinition("OtherModule.dll");
+            assembly.Modules.Add(module);
+
+            var reference = new TypeReference(module, null, "SomeNamespace", "SomeName");
+
+            Assert.Null(reference.Scope);
+            var importedType = _importer.ImportType(reference);
+            Assert.Equal(assembly, importedType.Scope?.GetAssembly(), SignatureComparer.Default);
+        }
+
+        [Fact]
         public void ImportNestedTypeShouldImportParentType()
         {
             var declaringType = new TypeReference(_dummyAssembly, "SomeNamespace", "SomeName");
@@ -103,8 +117,8 @@ namespace AsmResolver.DotNet.Tests
             var result = _importer.ImportType(nested);
 
             Assert.Equal(nested, result, Comparer);
-            Assert.Equal(_module, result.Module);
-            Assert.Equal(_module, result.DeclaringType?.Module);
+            Assert.Equal(_module, result.ContextModule);
+            Assert.Equal(_module, result.DeclaringType?.ContextModule);
         }
 
         [Fact]
@@ -134,8 +148,8 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.NotNull(reference.DeclaringType);
             Assert.Equal(declaringType, reference.DeclaringType, Comparer);
-            Assert.Equal(_module, reference.Module);
-            Assert.Equal(_module, reference.DeclaringType.Module);
+            Assert.Equal(_module, reference.ContextModule);
+            Assert.Equal(_module, reference.DeclaringType.ContextModule);
         }
 
         [Fact]
@@ -148,8 +162,8 @@ namespace AsmResolver.DotNet.Tests
             var result = _importer.ImportType(typeof(TopLevelClass1.Nested1));
 
             Assert.Equal(nested, result, Comparer);
-            Assert.Equal(_module, result.Module);
-            Assert.Equal(_module, result.DeclaringType?.Module);
+            Assert.Equal(_module, result.ContextModule);
+            Assert.Equal(_module, result.DeclaringType?.ContextModule);
         }
 
         [Fact]
@@ -218,7 +232,7 @@ namespace AsmResolver.DotNet.Tests
             var result = _importer.ImportMethod(method);
 
             Assert.Equal(method, result, Comparer);
-            Assert.Same(_module, result.Module);
+            Assert.Same(_module, result.ContextModule);
         }
 
         [Fact]
@@ -279,7 +293,7 @@ namespace AsmResolver.DotNet.Tests
             var result = _importer.ImportField(field);
 
             Assert.Equal(field, result, Comparer);
-            Assert.Same(_module, result.Module);
+            Assert.Same(_module, result.ContextModule);
         }
 
         [Fact]
@@ -315,20 +329,20 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportNonImportedTypeDefOrRefShouldResultInNewInstance()
         {
-            var signature = new TypeReference(_module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
+            var signature = new TypeReference(null, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
                 .ToTypeSignature();
 
             var imported = _importer.ImportTypeSignature(signature);
 
             Assert.NotSame(signature, imported);
             Assert.Equal(signature, imported, Comparer);
-            Assert.Equal(_module, imported.Module);
+            Assert.Equal(_module, imported.ContextModule);
         }
 
         [Fact]
         public void ImportTypeSpecWithNonImportedBaseTypeShouldResultInNewInstance()
         {
-            var signature = new TypeReference(_module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
+            var signature = new TypeReference(null, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream")
                 .ToTypeSignature()
                 .MakeSzArrayType();
 
@@ -336,7 +350,7 @@ namespace AsmResolver.DotNet.Tests
             var newInstance = Assert.IsAssignableFrom<SzArrayTypeSignature>(imported);
             Assert.NotSame(signature, newInstance);
             Assert.Equal(signature, newInstance, Comparer);
-            Assert.Equal(_module, newInstance.BaseType.Module);
+            Assert.Equal(_module, newInstance.BaseType.ContextModule);
         }
 
         [Fact]
@@ -371,15 +385,15 @@ namespace AsmResolver.DotNet.Tests
 
             var instance = genericType.MakeGenericInstanceType(
                 new TypeDefOrRefSignature(
-                    new TypeReference(_module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream"), false)
+                    new TypeReference(null, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream"), false)
             );
 
             var imported = _importer.ImportTypeSignature(instance);
 
             var newInstance = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(imported);
             Assert.NotSame(instance, newInstance);
-            Assert.Equal(_module, newInstance.Module);
-            Assert.Equal(_module, newInstance.TypeArguments[0].Module);
+            Assert.Equal(_module, newInstance.ContextModule);
+            Assert.Equal(_module, newInstance.TypeArguments[0].ContextModule);
         }
 
         [Fact]
@@ -413,8 +427,8 @@ namespace AsmResolver.DotNet.Tests
 
             var newInstance = Assert.IsAssignableFrom<CustomModifierTypeSignature>(imported);
             Assert.NotSame(signature, newInstance);
-            Assert.Equal(_module, newInstance.Module);
-            Assert.Equal(_module, newInstance.ModifierType.Module);
+            Assert.Equal(_module, newInstance.ContextModule);
+            Assert.Equal(_module, newInstance.ModifierType.ContextModule);
         }
 
         [Fact]
@@ -445,8 +459,8 @@ namespace AsmResolver.DotNet.Tests
             var newInstance = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(imported);
             Assert.NotSame(signature, newInstance);
             Assert.Equal(signature, newInstance, Comparer);
-            Assert.Equal(_module, newInstance.Module);
-            Assert.Equal(_module, newInstance.Signature.ParameterTypes[0].Module);
+            Assert.Equal(_module, newInstance.ContextModule);
+            Assert.Equal(_module, newInstance.Signature.ParameterTypes[0].ContextModule);
         }
 
         [Fact]
@@ -463,8 +477,8 @@ namespace AsmResolver.DotNet.Tests
             var newInstance = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(imported);
             Assert.NotSame(signature, newInstance);
             Assert.Equal(signature, newInstance, Comparer);
-            Assert.Equal(_module, newInstance.Module);
-            Assert.Equal(_module, newInstance.Signature.ReturnType.Module);
+            Assert.Equal(_module, newInstance.ContextModule);
+            Assert.Equal(_module, newInstance.Signature.ReturnType.ContextModule);
         }
 
         [Fact]

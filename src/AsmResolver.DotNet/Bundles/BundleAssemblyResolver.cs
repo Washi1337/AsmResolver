@@ -19,7 +19,7 @@ public class BundleAssemblyResolver : IAssemblyResolver
         _manifest = manifest;
 
         // Bundles are .NET core 3.1+ only -> we can always default to .NET Core assembly resolution.
-        _baseResolver = new DotNetCoreAssemblyResolver(readerParameters, manifest.GetTargetRuntime().Version);
+        _baseResolver = new DotNetCoreAssemblyResolver(manifest.GetTargetRuntime().Version, readerParameters);
     }
 
     /// <inheritdoc />

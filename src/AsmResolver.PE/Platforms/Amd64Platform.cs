@@ -28,33 +28,45 @@ namespace AsmResolver.PE.Platforms
         public override bool Is32Bit => false;
 
         /// <inheritdoc />
+        public override uint ThunkStubAlignment => 1;
+
+        /// <inheritdoc />
         public override RelocatableSegment CreateThunkStub(ISymbol entryPoint)
         {
-            var segment = new DataSegment(new byte[]
-                {
+            var segment = new DataSegment([
                     0x48, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // rex.w rex.b mov rax, [&symbol]
-                    0xFF, 0xE0 // jmp [rax]
-                })
+                    0xFF, 0xE0                                                  // jmp [rax]
+                ])
                 .AsPatchedSegment()
                 .Patch(2, AddressFixupType.Absolute64BitAddress, entryPoint);
 
-            return new RelocatableSegment(segment, new[]
-            {
+            return new RelocatableSegment(segment, [
                 new BaseRelocation(RelocationType.Dir64, segment.ToReference(2))
-            });
+            ]);
         }
 
         /// <inheritdoc />
         public override bool TryExtractThunkAddress(PEImage image, BinaryStreamReader reader, out uint rva)
         {
-            if (reader.ReadUInt16() != 0xA148)
+            ushort opcode = reader.ReadUInt16();
+            switch (opcode)
             {
-                rva = 0;
-                return false;
-            }
+                case 0xA148:
+                    // 0x48, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  ; rex.w rex.b mov rax, [&symbol]
+                    // 0xFF, 0xE0                                                  ; jmp [rax]
+                    rva = (uint) (reader.ReadUInt64() - image.ImageBase);
+                    return reader.ReadUInt16() == 0xE0FF;
 
-            rva = (uint) (reader.ReadUInt64() - image.ImageBase);
-            return reader.ReadUInt16() == 0xE0FF;
+                case 0x25FF:
+                    // 0xFF, 0x25, 0x00, 0x00, 0x00, 0x00   ; jmp [rip+rel(&symbol)]
+                    uint relative = reader.ReadUInt32();
+                    rva = reader.Rva + relative;
+                    return true;
+
+                default:
+                    rva = 0;
+                    return false;
+            }
         }
 
         /// <inheritdoc />
@@ -65,18 +77,21 @@ namespace AsmResolver.PE.Platforms
 
         private sealed class Amd64AddressTableInitializerStub : AddressTableInitializerStub
         {
-            private static readonly byte[] PrologueStub = {
+            private static readonly byte[] PrologueStub =
+            [
                 /* 00: */  0x48, 0x83, 0xFA, 0x01, //  cmp rdx,byte +0x1    ; dwReason == DLL_PROCESS_ATTACH
                 /* 04: */  0x74, 0x01,             //  jz 0x7
                 /* 06: */  0xC3                    //  ret
                 /* 07: */
-            };
+            ];
 
-            private static readonly byte[] EpilogueStub = {
+            private static readonly byte[] EpilogueStub =
+            [
                 /* 00: */  0xC3              // ret
-            };
+            ];
 
-            private static readonly byte[] SlotInitializerCode = {
+            private static readonly byte[] SlotInitializerCode =
+            [
                 /* 00: */  0x55,                                                         // push rbp
                 /* 01: */  0x48, 0x89, 0xE5,                                             // mov rbp,rsp
                 /* 04: */  0x48, 0x83, 0xEC, 0x40,                                       // sub rsp,byte +0x40
@@ -104,8 +119,8 @@ namespace AsmResolver.PE.Platforms
 
                 /* 56: */  0x48, 0x89, 0xEC,                                             // mov rsp,rbp
                 /* 59: */  0x5D,                                                         // pop rbp
-                /* 5A: */  0xC3,                                                         // ret
-            };
+                /* 5A: */  0xC3 // ret
+            ];
 
             public Amd64AddressTableInitializerStub(ISymbol virtualProtect)
                 : base(new DataSegment(PrologueStub), new DataSegment(EpilogueStub), CreateSlotInitializer(virtualProtect))
@@ -118,22 +133,20 @@ namespace AsmResolver.PE.Platforms
                     .Patch(0x25, AddressFixupType.Absolute64BitAddress, virtualProtect)
                     .Patch(0x4C, AddressFixupType.Absolute64BitAddress, virtualProtect);
 
-                return new RelocatableSegment(code, new BaseRelocation[]
-                {
+                return new RelocatableSegment(code, [
                     new(RelocationType.Dir64, code.ToReference(0x25)),
-                    new(RelocationType.Dir64, code.ToReference(0x4C)),
-                });
+                    new(RelocationType.Dir64, code.ToReference(0x4C))
+                ]);
             }
 
             public override void AddInitializer(ISymbol originalSlot, ISymbol newSlot)
             {
-                var code = new DataSegment(new byte[]
-                    {
+                var code = new DataSegment([
                         /* 00: */ 0x48, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // rex.w rex.b mov rax, [&VirtualProtect]
                         /* 0A: */ 0x48, 0x8B, 0xD0,                                           // mov rdx, rax
                         /* 0D: */ 0x48, 0xB9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // mov rcx, &dest
-                        /* 17: */ 0xE8, 0x00, 0x00, 0x00, 0x00,                               // call init_slot
-                    }).AsPatchedSegment()
+                        /* 17: */ 0xE8, 0x00, 0x00, 0x00, 0x00 // call init_slot
+                    ]).AsPatchedSegment()
                     .Patch(0x02, AddressFixupType.Absolute64BitAddress, newSlot)
                     .Patch(0x0F, AddressFixupType.Absolute64BitAddress, originalSlot)
                     .Patch(0x18, AddressFixupType.Relative32BitAddress, SlotInitializer);

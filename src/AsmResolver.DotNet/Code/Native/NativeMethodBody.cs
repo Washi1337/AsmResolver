@@ -15,9 +15,7 @@ namespace AsmResolver.DotNet.Code.Native
         /// <summary>
         /// Creates a new empty native method body.
         /// </summary>
-        /// <param name="owner">The method that owns the body.</param>
-        public NativeMethodBody(MethodDefinition owner)
-            : base(owner)
+        public NativeMethodBody()
         {
             Code = ArrayShim.Empty<byte>();
         }
@@ -25,10 +23,8 @@ namespace AsmResolver.DotNet.Code.Native
         /// <summary>
         /// Creates a new native method body with the provided raw code stream.
         /// </summary>
-        /// <param name="owner">The method that owns the body.</param>
         /// <param name="code">The raw code stream.</param>
-        public NativeMethodBody(MethodDefinition owner, byte[] code)
-            : base(owner)
+        public NativeMethodBody(byte[] code)
         {
             Code = code;
         }

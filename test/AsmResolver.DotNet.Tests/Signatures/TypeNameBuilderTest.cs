@@ -70,21 +70,12 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
-        public void CorLibWithoutFullScope()
-        {
-            var type = _module.CorLibTypeFactory.Object;
-            string name = TypeNameBuilder.GetAssemblyQualifiedName(type, true);
-            Assert.Contains(type.FullName, name);
-            Assert.DoesNotContain(type.Scope.Name, name);
-        }
-
-        [Fact]
         public void CorLibWithFullScope()
         {
             var type = _module.CorLibTypeFactory.Object;
-            string name = TypeNameBuilder.GetAssemblyQualifiedName(type, false);
+            string name = TypeNameBuilder.GetAssemblyQualifiedName(type);
             Assert.Contains(type.FullName, name);
-            Assert.Contains(type.Scope.Name, name);
+            Assert.Contains(type.Scope!.GetAssembly().FullName, name);
         }
 
         [Fact]
@@ -92,7 +83,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             // Order matters for Mono
             var type = _module.CorLibTypeFactory.Object;
-            string name = TypeNameBuilder.GetAssemblyQualifiedName(type, false);
+            string name = TypeNameBuilder.GetAssemblyQualifiedName(type);
             Assert.Equal("System.Object, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e", name);
         }
     }

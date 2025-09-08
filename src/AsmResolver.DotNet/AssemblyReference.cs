@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -81,7 +80,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ModuleDefinition? Module
+        public ModuleDefinition? ContextModule
         {
             get;
             private set;
@@ -90,8 +89,8 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
-            get => Module;
-            set => Module = value;
+            get => ContextModule;
+            set => ContextModule = value;
         }
 
         /// <summary>
@@ -159,14 +158,14 @@ namespace AsmResolver.DotNet
         protected virtual byte[]? GetHashValue() => null;
 
         /// <inheritdoc />
-        public override bool IsImportedInModule(ModuleDefinition module) => Module == module;
+        public override bool IsImportedInModule(ModuleDefinition module) => ContextModule == module;
 
         /// <inheritdoc />
         public override AssemblyReference ImportWith(ReferenceImporter importer) =>
             (AssemblyReference) importer.ImportScope(this);
 
         /// <inheritdoc />
-        public override AssemblyDefinition? Resolve() => Module?.MetadataResolver.AssemblyResolver.Resolve(this);
+        public override AssemblyDefinition? Resolve() => ContextModule?.MetadataResolver.AssemblyResolver.Resolve(this);
 
         AssemblyDescriptor IResolutionScope.GetAssembly() => this;
     }

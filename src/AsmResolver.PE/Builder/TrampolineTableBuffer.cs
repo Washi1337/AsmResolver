@@ -69,7 +69,7 @@ public class TrampolineTableBuffer : SegmentBase
     {
         var trampoline = new FunctionTrampoline(_platform, functionTableSlot, newSymbol);
         _trampolines.Add(trampoline);
-        _trampolineTable.Add(trampoline.TrampolineCode.Segment);
+        _trampolineTable.Add(trampoline.TrampolineCode.Segment, _platform.ThunkStubAlignment);
     }
 
     /// <summary>

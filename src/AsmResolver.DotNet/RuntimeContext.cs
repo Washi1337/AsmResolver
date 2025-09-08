@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="targetRuntime">The target runtime version.</param>
         public RuntimeContext(DotNetRuntimeInfo targetRuntime)
-            : this(targetRuntime, new ModuleReaderParameters(new ByteArrayFileService()))
+            : this(targetRuntime, null, null, null)
         {
         }
 
@@ -25,11 +25,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="targetRuntime">The target runtime version.</param>
         /// <param name="readerParameters">The parameters to use when reading modules in this context.</param>
-        public RuntimeContext(DotNetRuntimeInfo targetRuntime, ModuleReaderParameters readerParameters)
+        public RuntimeContext(DotNetRuntimeInfo targetRuntime, ModuleReaderParameters readerParameters) : this(targetRuntime, null, null, readerParameters)
         {
-            TargetRuntime = targetRuntime;
-            DefaultReaderParameters = new ModuleReaderParameters(readerParameters) {RuntimeContext = this};
-            AssemblyResolver = CreateAssemblyResolver(targetRuntime, DefaultReaderParameters);
         }
 
         /// <summary>
@@ -37,11 +34,26 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="targetRuntime">The target runtime version.</param>
         /// <param name="assemblyResolver">The assembly resolver to use when resolving assemblies into this context.</param>
-        public RuntimeContext(DotNetRuntimeInfo targetRuntime, IAssemblyResolver assemblyResolver)
+        public RuntimeContext(DotNetRuntimeInfo targetRuntime, IAssemblyResolver assemblyResolver) : this(targetRuntime, assemblyResolver, null, null)
         {
+        }
+
+        /// <summary>
+        /// Creates a new runtime context.
+        /// </summary>
+        /// <param name="targetRuntime">The target runtime version.</param>
+        /// <param name="assemblyResolver">The assembly resolver to use when resolving assemblies into this context, or the default resolver if null.</param>
+        /// <param name="corLibReference">The core library for this runtime context, or the assumed one from the version if null.</param>
+        /// <param name="readerParameters">The parameters to use when reading modules in this context, or the default ones if null.</param>
+        public RuntimeContext(DotNetRuntimeInfo targetRuntime, IAssemblyResolver? assemblyResolver, AssemblyDescriptor? corLibReference, ModuleReaderParameters? readerParameters)
+        {
+            DefaultReaderParameters = readerParameters is not null
+                ? new ModuleReaderParameters(readerParameters) { RuntimeContext = this }
+                : new ModuleReaderParameters(new ByteArrayFileService()) { RuntimeContext = this };
+
             TargetRuntime = targetRuntime;
-            DefaultReaderParameters = new ModuleReaderParameters(new ByteArrayFileService()) {RuntimeContext = this};
-            AssemblyResolver = assemblyResolver;
+            AssemblyResolver = assemblyResolver ?? CreateAssemblyResolver(targetRuntime, DefaultReaderParameters);
+            RuntimeCorLib = corLibReference ?? targetRuntime.GetAssumedImplCorLib();
         }
 
         /// <summary>
@@ -63,6 +75,9 @@ namespace AsmResolver.DotNet
             TargetRuntime = manifest.GetTargetRuntime();
             DefaultReaderParameters = new ModuleReaderParameters(readerParameters) {RuntimeContext = this};
             AssemblyResolver = new BundleAssemblyResolver(manifest, readerParameters);
+            RuntimeCorLib = AssemblyResolver.Resolve(TargetRuntime.GetDefaultCorLib())?
+                .ManifestModule?.CorLibTypeFactory.Object.Resolve()?
+                .DeclaringModule?.Assembly;
         }
 
         /// <summary>
@@ -89,6 +104,14 @@ namespace AsmResolver.DotNet
             get;
         }
 
+        /// <summary>
+        /// Gets the corlib for this runtime
+        /// </summary>
+        public AssemblyDescriptor? RuntimeCorLib
+        {
+            get;
+        }
+
         private static IAssemblyResolver CreateAssemblyResolver(
             DotNetRuntimeInfo runtime,
             ModuleReaderParameters readerParameters)
@@ -97,16 +120,16 @@ namespace AsmResolver.DotNet
             {
                 case DotNetRuntimeInfo.NetFramework:
                 case DotNetRuntimeInfo.NetStandard when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
-                    return new DotNetFrameworkAssemblyResolver(readerParameters);
+                    return new DotNetFrameworkAssemblyResolver(readerParameters, MonoPathProvider.Default);
 
                 case DotNetRuntimeInfo.NetStandard when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(runtime.Version, out var coreVersion):
-                    return new DotNetCoreAssemblyResolver(readerParameters, coreVersion);
+                    return new DotNetCoreAssemblyResolver(coreVersion, readerParameters);
 
                 case DotNetRuntimeInfo.NetCoreApp:
-                    return new DotNetCoreAssemblyResolver(readerParameters, runtime.Version);
+                    return new DotNetCoreAssemblyResolver(runtime.Version, readerParameters);
 
                 default:
-                    return new DotNetFrameworkAssemblyResolver(readerParameters);
+                    return new DotNetFrameworkAssemblyResolver(readerParameters, MonoPathProvider.Default);
             }
         }
     }

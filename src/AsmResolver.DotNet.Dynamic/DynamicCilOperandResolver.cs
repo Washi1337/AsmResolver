@@ -21,8 +21,12 @@ namespace AsmResolver.DotNet.Dynamic
         private readonly ReferenceImporter _importer;
 
         /// <inheritdoc />
-        public DynamicCilOperandResolver(SerializedModuleDefinition contextModule, CilMethodBody methodBody, IList<object?> tokens)
-            : base(contextModule, methodBody)
+        public DynamicCilOperandResolver(
+            SerializedModuleDefinition contextModule,
+            DynamicMethodDefinition method,
+            CilMethodBody methodBody,
+            IList<object?> tokens)
+            : base(contextModule, method, methodBody)
         {
             _tokens = tokens ?? throw new ArgumentNullException(nameof(tokens));
             _readerContext = contextModule.ReaderContext;

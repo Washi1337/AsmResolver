@@ -35,7 +35,7 @@ namespace AsmResolver.PE.Code
         /// <inheritdoc />
         public void Apply(in PatchContext context)
         {
-            context.Writer.Offset = context.Segment.Offset + Fixup.Offset;
+            context.Writer.Offset = context.WriterBase + Fixup.Offset;
             uint writerRva = context.Segment.Rva + Fixup.Offset;
             uint targetRva = Fixup.Symbol.GetReference()?.Rva ?? 0;
 

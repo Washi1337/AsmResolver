@@ -1,5 +1,3 @@
-using System;
-
 namespace AsmResolver.DotNet.TestCases.Fields
 {
     public class Constants
@@ -17,5 +15,6 @@ namespace AsmResolver.DotNet.TestCases.Fields
         public const double Double = 2.0d;
         public const char Char = 'a';
         public const string String = "Hello, world!";
+        public const string NullString = null;
     }
 }

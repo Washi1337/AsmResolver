@@ -315,6 +315,19 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void CorLibModuleHasModuleDefinitionCorLibScope()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/620
+
+            var assembly = new AssemblyDefinition("mscorlib", new Version(4, 0, 0, 0));
+            var module = new ModuleDefinition("mscorlib", null);
+            assembly.Modules.Add(module);
+
+            Assert.Same(module.CorLibTypeFactory.CorLibScope, module);
+            Assert.Empty(module.AssemblyReferences);
+        }
+
+        [Fact]
         public void CreateNewCorLibFactory()
         {
             var module = new ModuleDefinition("MySampleModule");
@@ -487,8 +500,8 @@ namespace AsmResolver.DotNet.Tests
         public void RewriteSystemPrivateCoreLib()
         {
             string runtimePath = DotNetCorePathProvider.Default
-                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
-                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
+                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(8, 0, 0))
+                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 8.0 is not installed.");
             var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Private.CoreLib.dll"), TestReaderParameters);
 
             using var stream = new MemoryStream();
@@ -499,8 +512,8 @@ namespace AsmResolver.DotNet.Tests
         public void RewriteSystemRuntime()
         {
             string runtimePath = DotNetCorePathProvider.Default
-                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
-                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
+                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(8, 0, 0))
+                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 8.0 is not installed.");
             var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Runtime.dll"), TestReaderParameters);
 
             using var stream = new MemoryStream();
@@ -511,8 +524,8 @@ namespace AsmResolver.DotNet.Tests
         public void RewriteSystemPrivateXml()
         {
             string runtimePath = DotNetCorePathProvider.Default
-                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
-                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
+                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(8, 0, 0))
+                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 8.0 is not installed.");
             var module = ModuleDefinition.FromFile(Path.Combine(runtimePath, "System.Private.Xml.dll"), TestReaderParameters);
 
             using var stream = new MemoryStream();
@@ -575,6 +588,14 @@ namespace AsmResolver.DotNet.Tests
             type = module.GetOrCreateModuleType();
             Assert.NotNull(type);
             Assert.Same(type, module.GetModuleType());
+        }
+
+        [Fact]
+        public void CreateModuleTypeShouldHaveFirstRid()
+        {
+            var module = new ModuleDefinition("SomeModule");
+            var type = module.GetOrCreateModuleType();
+            Assert.Equal(1u, type.MetadataToken.Rid);
         }
 
         [Theory]

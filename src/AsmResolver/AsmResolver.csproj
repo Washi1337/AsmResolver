@@ -4,20 +4,15 @@
     <Title>AsmResolver</Title>
     <Description>The base library for the AsmResolver executable file inspection toolsuite.</Description>
     <PackageTags>exe pe dotnet cil inspection manipulation assembly disassembly</PackageTags>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>bin\Debug\netstandard2.0\AsmResolver.xml</DocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>bin\Release\netstandard2.0\AsmResolver.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net35'">
+  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="MonoMod.Backports" Version="1.1.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462'">
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

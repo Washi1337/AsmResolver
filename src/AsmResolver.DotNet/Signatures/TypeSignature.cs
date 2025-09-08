@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public virtual ModuleDefinition? Module => Scope?.Module;
+        public virtual ModuleDefinition? ContextModule => Scope?.ContextModule;
 
         /// <inheritdoc />
         public ITypeDescriptor? DeclaringType => Scope as ITypeDescriptor;
@@ -200,7 +200,7 @@ namespace AsmResolver.DotNet.Signatures
             }
             else
             {
-                index = context.IndexProvider.GetTypeDefOrRefIndex(type);
+                index = context.IndexProvider.GetTypeDefOrRefIndex(type, context.DiagnosticSource);
             }
 
             context.Writer.WriteCompressedUInt32(index);
@@ -297,9 +297,16 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public abstract TypeDefinition? Resolve();
+        public TypeDefinition? Resolve() => ContextModule is not null
+            ? Resolve(ContextModule)
+            : null;
+
+        /// <inheritdoc />
+        public abstract TypeDefinition? Resolve(ModuleDefinition context);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
+
+        IMemberDefinition? IMemberDescriptor.Resolve(ModuleDefinition context) => Resolve(context);
 
         /// <inheritdoc />
         public virtual ITypeDefOrRef ToTypeDefOrRef() => new TypeSpecification(this);

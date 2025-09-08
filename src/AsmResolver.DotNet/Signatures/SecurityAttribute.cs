@@ -91,7 +91,9 @@ namespace AsmResolver.DotNet.Signatures
                 var subContext = new BlobSerializationContext(
                     new BinaryStreamWriter(subBlob),
                     context.IndexProvider,
-                    context.ErrorListener);
+                    context.ErrorListener,
+                    context.DiagnosticSource
+                );
 
                 subContext.Writer.WriteCompressedUInt32((uint) NamedArguments.Count);
                 foreach (var argument in NamedArguments)

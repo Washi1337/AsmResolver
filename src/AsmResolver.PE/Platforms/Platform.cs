@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.IO;
 using AsmResolver.PE.File;
@@ -11,6 +12,8 @@ namespace AsmResolver.PE.Platforms
     /// </summary>
     public abstract class Platform
     {
+        private static readonly ConcurrentDictionary<MachineType, GenericPlatform> GenericPlatforms = new();
+
         /// <summary>
         /// Gets a target platform by its machine type.
         /// </summary>
@@ -20,6 +23,16 @@ namespace AsmResolver.PE.Platforms
         public static Platform Get(MachineType machineType) => TryGet(machineType, out var platform)
             ? platform
             : throw new NotSupportedException($"Unsupported machine type {machineType}.");
+
+        /// <summary>
+        /// Gets a target platform by its machine type, and falls back to <see cref="GenericPlatform"/> if the
+        /// provided architecture is not officially supported.
+        /// </summary>
+        /// <param name="machineType">The machine type.</param>
+        /// <returns>The target platform.</returns>
+        public static Platform GetOrGeneric(MachineType machineType) => TryGet(machineType, out var platform)
+            ? platform
+            : GenericPlatforms.GetOrAdd(machineType, static machine => new GenericPlatform(machine));
 
         /// <summary>
         /// Gets a target platform by its machine type.
@@ -43,6 +56,18 @@ namespace AsmResolver.PE.Platforms
                     or MachineType.Amd64DotNetSun
                     or MachineType.Amd64DotNetFreeBsd
                     or MachineType.Amd64DotNetNetBsd => Amd64Platform.Instance,
+                MachineType.ArmNt
+                    or MachineType.ArmNtDotNetApple
+                    or MachineType.ArmNtDotNetLinux
+                    or MachineType.ArmNtDotNetSun
+                    or MachineType.ArmNtDotNetFreeBsd
+                    or MachineType.ArmNtDotNetNetBsd => Arm32Platform.Instance,
+                MachineType.Arm64
+                    or MachineType.Arm64DotNetApple
+                    or MachineType.Arm64DotNetLinux
+                    or MachineType.Arm64DotNetSun
+                    or MachineType.Arm64DotNetFreeBsd
+                    or MachineType.Arm64DotNetNetBsd => Arm64Platform.Instance,
                 _ => null
             };
 
@@ -82,6 +107,14 @@ namespace AsmResolver.PE.Platforms
         /// Gets a value indicating the size of a single pointer.
         /// </summary>
         public int PointerSize => Is32Bit ? sizeof(uint) : sizeof(ulong);
+
+        /// <summary>
+        /// Gets the default byte-boundary used in aligning thunk stubs in a PE file.
+        /// </summary>
+        public abstract uint ThunkStubAlignment
+        {
+            get;
+        }
 
         /// <summary>
         /// Creates a new thunk stub that transfers control to the provided symbol.

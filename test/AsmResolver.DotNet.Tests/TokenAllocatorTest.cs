@@ -122,14 +122,20 @@ namespace AsmResolver.DotNet.Tests
 
             var targetModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
-            var method = new MethodDefinition("test",
+            var method = new MethodDefinition(
+                "test",
                 MethodAttributes.Public | MethodAttributes.Static,
-                MethodSignature.CreateStatic(targetModule.CorLibTypeFactory.Boolean));
+                MethodSignature.CreateStatic(targetModule.CorLibTypeFactory.Boolean)
+            );
 
-            var body = new CilMethodBody(method);
-            body.Instructions.Add(CilOpCodes.Ldc_I4, 0);
-            body.Instructions.Add(CilOpCodes.Ret);
-            method.CilMethodBody = body;
+            method.CilMethodBody = new CilMethodBody
+            {
+                Instructions =
+                {
+                    {CilOpCodes.Ldc_I4, 0},
+                    CilOpCodes.Ret
+                }
+            };
 
             targetModule.TopLevelTypes.First().Methods.Add(method);
 

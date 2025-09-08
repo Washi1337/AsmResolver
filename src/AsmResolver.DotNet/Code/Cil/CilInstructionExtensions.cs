@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             return GetStackPopCount(instruction,
                 parent == null
-                || !(parent.Owner.Signature?.ReturnsValue ?? true));
+                || !(parent.Owner?.Signature?.ReturnsValue ?? true));
         }
 
         /// <summary>
@@ -174,6 +174,18 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <exception cref="ArgumentException">Occurs when the instruction is not using a variant of the ldloc or stloc opcodes.</exception>
         public static CilLocalVariable GetLocalVariable(this CilInstruction instruction, IList<CilLocalVariable> variables)
         {
+            return variables[instruction.GetLocalVariableIndex()];
+        }
+
+        /// <summary>
+        /// When this instruction is using a variant of the ldloc or stloc opcodes, gets the local variable that is
+        /// referenced by the instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction.</param>
+        /// <returns>The variable.</returns>
+        /// <exception cref="ArgumentException">Occurs when the instruction is not using a variant of the ldloc or stloc opcodes.</exception>
+        public static int GetLocalVariableIndex(this CilInstruction instruction)
+        {
             switch (instruction.OpCode.Code)
             {
                 case CilCode.Ldloc:
@@ -182,23 +194,29 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilCode.Stloc_S:
                 case CilCode.Ldloca:
                 case CilCode.Ldloca_S:
-                    return (CilLocalVariable) instruction.Operand!;
+                    return instruction.Operand switch
+                    {
+                        CilLocalVariable local => local.Index,
+                        ushort index => index,
+                        byte index => index,
+                        _ => throw new ArgumentException("Instruction does not have a variable or variable index operand.")
+                    };
 
                 case CilCode.Ldloc_0:
                 case CilCode.Stloc_0:
-                    return variables[0];
+                    return 0;
 
                 case CilCode.Ldloc_1:
                 case CilCode.Stloc_1:
-                    return variables[1];
+                    return 1;
 
                 case CilCode.Ldloc_2:
                 case CilCode.Stloc_2:
-                    return variables[2];
+                    return 2;
 
                 case CilCode.Ldloc_3:
                 case CilCode.Stloc_3:
-                    return variables[3];
+                    return 3;
 
                 default:
                     throw new ArgumentException("Instruction is not a ldloc or stloc instruction.");
@@ -215,6 +233,18 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <exception cref="ArgumentException">Occurs when the instruction is not using a variant of the ldarg or starg opcodes.</exception>
         public static Parameter GetParameter(this CilInstruction instruction, ParameterCollection parameters)
         {
+            return parameters.GetBySignatureIndex(instruction.GetParameterIndex());
+        }
+
+        /// <summary>
+        /// When this instruction is using a variant of the ldarg or starg opcodes, gets the parameter that is
+        /// referenced by the instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction.</param>
+        /// <returns>The parameter.</returns>
+        /// <exception cref="ArgumentException">Occurs when the instruction is not using a variant of the ldarg or starg opcodes.</exception>
+        public static int GetParameterIndex(this CilInstruction instruction)
+        {
             switch (instruction.OpCode.Code)
             {
                 case CilCode.Ldarg:
@@ -223,19 +253,25 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilCode.Ldarga_S:
                 case CilCode.Starg:
                 case CilCode.Starg_S:
-                    return (Parameter) instruction.Operand!;
+                    return instruction.Operand switch
+                    {
+                        Parameter parameter => parameter.MethodSignatureIndex,
+                        ushort index => index,
+                        byte index => index,
+                        _ => throw new ArgumentException("Instruction does not have a parameter or parameter index operand.")
+                    };
 
                 case CilCode.Ldarg_0:
-                    return parameters.GetBySignatureIndex(0);
+                    return 0;
 
                 case CilCode.Ldarg_1:
-                    return parameters.GetBySignatureIndex(1);
+                    return 1;
 
                 case CilCode.Ldarg_2:
-                    return parameters.GetBySignatureIndex(2);
+                    return 2;
 
                 case CilCode.Ldarg_3:
-                    return parameters.GetBySignatureIndex(3);
+                    return 3;
 
                 default:
                     throw new ArgumentException("Instruction is not a ldarg or starg instruction.");

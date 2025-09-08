@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Builder
             Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
             Resources = new DotNetResourcesDirectoryBuffer();
-            VTableFixups = new VTableFixupsBuffer(Platform.Get(module.MachineType), symbolsProvider);
+            VTableFixups = new VTableFixupsBuffer(Platform.GetOrGeneric(module.MachineType), symbolsProvider);
         }
 
         /// <summary>
@@ -110,14 +110,14 @@ namespace AsmResolver.DotNet.Builder
             get;
         }
 
-        private bool AssertIsImported([NotNullWhen(true)] IModuleProvider? member)
+        private bool AssertIsInSameModule([NotNullWhen(true)] IModuleProvider? member, object? diagnosticSource)
         {
             if (member is null)
                 return false;
 
-            if (member.Module != Module)
+            if (member.ContextModule != Module)
             {
-                ErrorListener.RegisterException(new MemberNotImportedException((IMetadataMember) member));
+                ErrorListener.RegisterException(new MemberNotImportedException((IMetadataMember) member, diagnosticSource));
                 return false;
             }
 
@@ -160,7 +160,7 @@ namespace AsmResolver.DotNet.Builder
             switch (Module.ManagedEntryPoint.MetadataToken.Table)
             {
                 case TableIndex.Method:
-                    entryPointToken = GetMethodDefinitionToken(Module.ManagedEntryPointMethod!);
+                    entryPointToken = GetMethodDefinitionToken(Module.ManagedEntryPointMethod!, Module);
                     break;
 
                 case TableIndex.File:
@@ -188,7 +188,7 @@ namespace AsmResolver.DotNet.Builder
 
             var row = new MethodSemanticsRow(
                 semantics.Attributes,
-                GetMethodDefinitionToken(semantics.Method).Rid,
+                GetMethodDefinitionToken(semantics.Method, semantics).Rid,
                 encoder.EncodeToken(ownerToken)
             );
 
@@ -204,7 +204,7 @@ namespace AsmResolver.DotNet.Builder
                 var implementation = interfaces[i];
                 var row = new InterfaceImplementationRow(
                     ownerToken.Rid,
-                    GetTypeDefOrRefIndex(implementation.Interface));
+                    GetTypeDefOrRefIndex(implementation.Interface, implementation));
 
                 table.Add(implementation, row);
             }
@@ -233,9 +233,6 @@ namespace AsmResolver.DotNet.Builder
 
         private void DefineGenericParameter(MetadataToken ownerToken, GenericParameter parameter)
         {
-            if (!AssertIsImported(parameter))
-                return;
-
             var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
 
@@ -277,7 +274,7 @@ namespace AsmResolver.DotNet.Builder
 
             var row = new GenericParameterConstraintRow(
                 ownerToken.Rid,
-                GetTypeDefOrRefIndex(constraint.Constraint));
+                GetTypeDefOrRefIndex(constraint.Constraint, constraint));
 
             var token = table.Add(row);
             _tokenMapping.Register(constraint, token);

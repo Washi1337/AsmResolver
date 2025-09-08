@@ -4,7 +4,7 @@ namespace AsmResolver.DotNet
     /// Represents a member that is either a reference to an external file, assembly or type, and can be referenced by
     /// an Implementation coded index.
     /// </summary>
-    public interface IImplementation : IFullNameProvider, IModuleProvider, IHasCustomAttribute, IImportable
+    public interface IImplementation : IFullNameProvider, IHasCustomAttribute, IImportable
     {
     }
 }

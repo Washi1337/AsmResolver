@@ -8,6 +8,11 @@ namespace AsmResolver.PE.Platforms
     /// <summary>
     /// Provides information and services for the I386 target platform.
     /// </summary>
+    /// <remarks>
+    /// Note that .NET AnyCPU binaries are also compiled as i386 binaries.
+    /// To distinguish between x86 and AnyCPU .NET binaries, refer to the .NET data directory's attributes to see if
+    /// <c>ILOnly</c> is set.
+    /// </remarks>
     public class I386Platform : Platform
     {
         /// <summary>
@@ -28,19 +33,20 @@ namespace AsmResolver.PE.Platforms
         public override bool Is32Bit => true;
 
         /// <inheritdoc />
+        public override uint ThunkStubAlignment => 1;
+
+        /// <inheritdoc />
         public override RelocatableSegment CreateThunkStub(ISymbol entryPoint)
         {
-            var segment = new DataSegment(new byte[]
-                {
+            var segment = new DataSegment([
                     0xFF, 0x25, 0x00, 0x00, 0x00, 0x00 // jmp [&symbol]
-                })
+                ])
                 .AsPatchedSegment()
                 .Patch(2, AddressFixupType.Absolute32BitAddress, entryPoint);
 
-            return new RelocatableSegment(segment, new[]
-            {
+            return new RelocatableSegment(segment, [
                 new BaseRelocation(RelocationType.HighLow, segment.ToReference(2))
-            });
+            ]);
         }
 
         /// <inheritdoc />
@@ -64,18 +70,21 @@ namespace AsmResolver.PE.Platforms
 
         private sealed class I386AddressTableInitializerStub : AddressTableInitializerStub
         {
-            private static readonly byte[] PrologueStub = {
+            private static readonly byte[] PrologueStub =
+            [
                 /* 00: */ 0x83, 0x7C, 0x24, 0x08, 0x01, // cmp dword [esp+0x8],byte +0x1   ; dwReason == DLL_PROCESS_ATTACH
                 /* 05: */ 0x74, 0x03,                   // jz 0xA
                 /* 07: */ 0xC2, 0x0C, 0x00              // ret 0xC
                 /* 0A: */
-            };
+            ];
 
-            private static readonly byte[] EpilogueStub = {
+            private static readonly byte[] EpilogueStub =
+            [
                 /* 00: */ 0xC2, 0x0C, 0x00              // ret 0xc
-            };
+            ];
 
-            private static readonly byte[] SlotInitializerCode = {
+            private static readonly byte[] SlotInitializerCode =
+            [
                 /* 00: */  0x55,                                  //   push ebp
                 /* 01: */  0x89, 0xE5,                            //   mov ebp,esp
                 /* 03: */  0x83, 0xEC, 0x04,                      //   sub esp, 4                   ; DWORD old;
@@ -101,7 +110,7 @@ namespace AsmResolver.PE.Platforms
                 /* 30: */  0x89, 0xEC,                            //   mov esp,ebp
                 /* 32: */  0x5D,                                  //   pop ebp
                 /* 33: */  0xC2, 0x08, 0x00                       //   ret 8
-            };
+            ];
 
             public I386AddressTableInitializerStub(ISymbol virtualProtect)
                 : base(new DataSegment(PrologueStub), new DataSegment(EpilogueStub), CreateSlotInitializer(virtualProtect))
@@ -114,30 +123,27 @@ namespace AsmResolver.PE.Platforms
                     .Patch(0x13, AddressFixupType.Absolute32BitAddress, virtualProtect)
                     .Patch(0x2C, AddressFixupType.Absolute32BitAddress, virtualProtect);
 
-                return new RelocatableSegment(code, new BaseRelocation[]
-                {
+                return new RelocatableSegment(code, [
                     new(RelocationType.HighLow, code.ToReference(0x13)),
-                    new(RelocationType.HighLow, code.ToReference(0x2C)),
-                });
+                    new(RelocationType.HighLow, code.ToReference(0x2C))
+                ]);
             }
 
             public override void AddInitializer(ISymbol originalSlot, ISymbol newSlot)
             {
-                var code = new DataSegment(new byte[]
-                    {
+                var code = new DataSegment([
                         /* 00: */ 0xFF, 0x35, 0x00, 0x00, 0x00, 0x00, // push dword [&src]
                         /* 06: */ 0x68, 0x00, 0x00, 0x00, 0x00,       // push dword &dest
-                        /* 0B: */ 0xE8, 0x00, 0x00, 0x00, 0x00,       // call init_slot
-                    }).AsPatchedSegment()
+                        /* 0B: */ 0xE8, 0x00, 0x00, 0x00, 0x00 // call init_slot
+                    ]).AsPatchedSegment()
                     .Patch(0x02, AddressFixupType.Absolute32BitAddress, newSlot)
                     .Patch(0x07, AddressFixupType.Absolute32BitAddress, originalSlot)
                     .Patch(0x0C, AddressFixupType.Relative32BitAddress, SlotInitializer);
 
-                Body.Add(new RelocatableSegment(code, new BaseRelocation[]
-                {
+                Body.Add(new RelocatableSegment(code, [
                     new(RelocationType.HighLow, code.ToReference(0x02)),
-                    new(RelocationType.HighLow, code.ToReference(0x07)),
-                }));
+                    new(RelocationType.HighLow, code.ToReference(0x07))
+                ]));
             }
         }
     }

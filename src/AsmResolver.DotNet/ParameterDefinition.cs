@@ -19,6 +19,7 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IHasConstant,
         IHasFieldMarshal,
+        IModuleProvider,
         IOwnedCollectionElement<MethodDefinition>
     {
         private readonly LazyVariable<ParameterDefinition, Utf8String?> _name;
@@ -172,7 +173,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ModuleDefinition? Module => Method?.Module;
+        public ModuleDefinition? DeclaringModule => Method?.DeclaringModule;
+
+        ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes

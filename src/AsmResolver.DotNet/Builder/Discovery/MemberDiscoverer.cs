@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private readonly TypeReference _eventHandlerTypeRef;
         private readonly TypeSignature _eventHandlerTypeSig;
 
-        private readonly Dictionary<TableIndex, IList<uint>> _freeRids = new()
+        private readonly Dictionary<TableIndex, List<uint>> _freeRids = new()
         {
             [TableIndex.TypeDef] = new List<uint>(),
             [TableIndex.Field] = new List<uint>(),
@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             [TableIndex.Event] = new List<uint>(),
         };
 
-        private readonly Dictionary<TableIndex, IList<IMetadataMember>> _floatingMembers = new()
+        private readonly Dictionary<TableIndex, List<IMetadataMember>> _floatingMembers = new()
         {
             [TableIndex.TypeDef] = new List<IMetadataMember>(),
             [TableIndex.Field] = new List<IMetadataMember>(),
@@ -154,7 +154,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 var token = new MetadataToken(tableIndex, rid);
                 var definition = (TMember) _module.LookupMember(token);
 
-                if (definition.Module == _module)
+                if (definition.ContextModule == _module)
                 {
                     // Member is still present in the module.
                     resultingList.Add(definition);
@@ -253,10 +253,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
 
                 // Check if the slot is available.
                 if (memberList[(int) member.MetadataToken.Rid - 1] is { } slot)
-                {
-                    throw new ArgumentException(
-                        $"{slot.SafeToString()} and {member.SafeToString()} are assigned the same RID {member.MetadataToken.Rid}.");
-                }
+                    throw new MetadataTokenConflictException(slot, member, member.MetadataToken.Rid);
 
                 memberList[(int) member.MetadataToken.Rid - 1] = member;
                 freeRids.Remove(member.MetadataToken.Rid);
@@ -415,8 +412,9 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // Define getter.
             var getMethod = new MethodDefinition(
                 $"get_{property.Name}",
-                MethodPlaceHolderAttributes | MethodAttributes.SpecialName,
-                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Object));
+                MethodPlaceHolderAttributes | MethodAttributes.SpecialName | MethodAttributes.Static,
+                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Object)
+            );
 
             // Add members.
             placeHolderType.Methods.Add(getMethod);
@@ -442,12 +440,14 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // Define add and remove methods.
             var addMethod = new MethodDefinition(
                 $"add_{@event.Name}",
-                MethodPlaceHolderAttributes | MethodAttributes.SpecialName,
-                signature);
+                MethodPlaceHolderAttributes | MethodAttributes.SpecialName | MethodAttributes.Static,
+                signature
+            );
             var removeMethod = new MethodDefinition(
                 $"remove_{@event.Name}",
-                MethodPlaceHolderAttributes | MethodAttributes.SpecialName,
-                signature);
+                MethodPlaceHolderAttributes | MethodAttributes.SpecialName | MethodAttributes.Static,
+                signature
+            );
 
             // Add members.
             placeHolderType.Methods.Add(addMethod);
@@ -489,7 +489,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 BaseType = module.CorLibTypeFactory.Object.Type;
 
                 // HACK: override the module containing this type:
-                ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = module;
+                ((IOwnedCollectionElement<ITypeOwner>) this).Owner = module;
             }
         }
 

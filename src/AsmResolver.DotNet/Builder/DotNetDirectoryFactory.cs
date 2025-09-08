@@ -94,7 +94,10 @@ namespace AsmResolver.DotNet.Builder
 
             // We need to define method definitions before member references, since member references can have method
             // definitions in their parent.
-            buffer.DefineMethods(discoveryResult.Methods);
+            buffer.DefineMethods(
+                discoveryResult.Methods,
+                (MetadataBuilderFlags & MetadataBuilderFlags.NoMemberSignatureVerification) == 0
+            );
             ImportMemberRefsIfSpecified(module, buffer);
 
             // Define all remaining members in the added types.

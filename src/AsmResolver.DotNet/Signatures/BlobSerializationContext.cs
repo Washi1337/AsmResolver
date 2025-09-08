@@ -14,11 +14,17 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="writer">The output stream to write the raw data to.</param>
         /// <param name="indexProvider">The object responsible for obtaining coded indices to types.</param>
         /// <param name="errorListener">The object responsible for collecting diagnostic information during the serialization process.</param>
-        public BlobSerializationContext(BinaryStreamWriter writer, ITypeCodedIndexProvider indexProvider, IErrorListener errorListener)
+        /// <param name="diagnosticSource">When available, the object that is reported in diagnostics when serialization of the blob fails.</param>
+        public BlobSerializationContext(
+            BinaryStreamWriter writer,
+            ITypeCodedIndexProvider indexProvider,
+            IErrorListener errorListener,
+            object? diagnosticSource)
         {
             Writer = writer ?? throw new ArgumentNullException(nameof(writer));
             IndexProvider = indexProvider ?? throw new ArgumentNullException(nameof(indexProvider));
             ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
+            DiagnosticSource = diagnosticSource;
         }
 
         /// <summary>
@@ -41,6 +47,14 @@ namespace AsmResolver.DotNet.Signatures
         /// Gets the bag used to collect diagnostic information during the serialization process.
         /// </summary>
         public IErrorListener ErrorListener
+        {
+            get;
+        }
+
+        /// <summary>
+        /// When available, gets the object that is reported in diagnostics when serialization of the blob fails.
+        /// </summary>
+        public object? DiagnosticSource
         {
             get;
         }

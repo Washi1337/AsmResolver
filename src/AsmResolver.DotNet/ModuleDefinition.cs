@@ -29,7 +29,8 @@ namespace AsmResolver.DotNet
         MetadataMember,
         IResolutionScope,
         IHasCustomAttribute,
-        IOwnedCollectionElement<AssemblyDefinition>
+        IOwnedCollectionElement<AssemblyDefinition>,
+        ITypeOwner
     {
         private readonly LazyVariable<ModuleDefinition, Utf8String?> _name;
         private readonly LazyVariable<ModuleDefinition, Guid> _mvid;
@@ -70,6 +71,25 @@ namespace AsmResolver.DotNet
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromBytes(byte[] buffer, ModuleReaderParameters readerParameters) =>
             FromImage(PEImage.FromBytes(buffer, readerParameters.PEReaderParameters), readerParameters);
+
+        /// <summary>
+        /// Reads a .NET module from the provided input stream.
+        /// </summary>
+        /// <param name="stream">The raw contents of the executable file to load.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromStream(Stream stream)
+            => FromStream(stream, new ModuleReaderParameters());
+
+        /// <summary>
+        /// Reads a .NET module from the provided input stream.
+        /// </summary>
+        /// <param name="stream">The raw contents of the executable file to load.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromStream(Stream stream, ModuleReaderParameters readerParameters)
+            => FromImage(PEImage.FromStream(stream, readerParameters.PEReaderParameters), readerParameters);
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -164,11 +184,14 @@ namespace AsmResolver.DotNet
         public static ModuleDefinition FromModule(Module module) => FromModule(module, new ModuleReaderParameters());
 
         /// <summary>
-        /// Opens a module from an instance of a <see cref="System.Reflection.Module"/>.
+        /// Opens a module from an instance of a <see cref="Module"/>.
         /// </summary>
         /// <param name="module">The reflection module to load.</param>
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
+#if NET8_0_OR_GREATER
+        [UnconditionalSuppressMessage("SingleFile", "IL3002", Justification = "We're explicitly checking for unmapped module names.")]
+#endif
         public static ModuleDefinition FromModule(Module module, ModuleReaderParameters readerParameters)
         {
             if (!ReflectionHacks.TryGetHINSTANCE(module, out var handle))
@@ -307,25 +330,44 @@ namespace AsmResolver.DotNet
             RuntimeContext = new RuntimeContext(OriginalTargetRuntime);
             MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
 
-            TopLevelTypes.Add(new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0));
+            CreateAndInsertModuleType();
         }
 
         /// <summary>
         /// Defines a new .NET module.
         /// </summary>
         /// <param name="name">The name of the module.</param>
-        /// <param name="corLib">The reference to the common object runtime (COR) library that this module will use.</param>
-        public ModuleDefinition(string? name, AssemblyReference corLib)
+        /// <param name="corLib">
+        /// The reference to the common object runtime (COR) library that this module will use.
+        /// If null, this module will be treated as a standalone core library.
+        /// </param>
+        /// <remarks>
+        /// This constructor co-exists with the Utf8String overload for backwards compatibility.
+        /// </remarks>
+        public ModuleDefinition(string? name, AssemblyReference? corLib)
+            : this((Utf8String?)name, corLib)
+        {
+        }
+
+        /// <summary>
+        /// Defines a new .NET module.
+        /// </summary>
+        /// <param name="name">The name of the module.</param>
+        /// <param name="corLib">
+        /// The reference to the common object runtime (COR) library that this module will use.
+        /// If null, this module will be treated as a standalone core library.
+        /// </param>
+        public ModuleDefinition(Utf8String? name, AssemblyReference? corLib)
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
 
-            CorLibTypeFactory = new CorLibTypeFactory(corLib.ImportWith(DefaultImporter));
+            CorLibTypeFactory = new CorLibTypeFactory((IResolutionScope?)corLib?.ImportWith(DefaultImporter) ?? this);
             OriginalTargetRuntime = DetectTargetRuntime();
             RuntimeContext = new RuntimeContext(OriginalTargetRuntime);
             MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
 
-            TopLevelTypes.Add(new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0));
+            CreateAndInsertModuleType();
         }
 
         /// <summary>
@@ -383,7 +425,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        ModuleDefinition IModuleProvider.Module => this;
+        ModuleDefinition IModuleProvider.ContextModule => this;
 
         /// <summary>
         /// Gets or sets the name of the module.
@@ -463,7 +505,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets an object responsible for assigning new <see cref="MetadataToken"/> to members
+        /// Gets an object responsible for assigning new metadata tokens to metadata members.
         /// </summary>
         public TokenAllocator TokenAllocator
         {
@@ -1041,12 +1083,27 @@ namespace AsmResolver.DotNet
         /// <returns>The module type.</returns>
         public TypeDefinition GetOrCreateModuleType()
         {
-            var moduleType = GetModuleType();
+            return GetModuleType() ?? CreateAndInsertModuleType();
+        }
 
-            if (moduleType is null)
+        private TypeDefinition CreateAndInsertModuleType()
+        {
+            var moduleType = new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0);
+            TopLevelTypes.Insert(0, moduleType);
+
+            // Check if we can assign RID 1 to the type using the token allocator. This avoids users accidentally
+            // overriding the module type later by using the token allocator.
+            var token = TokenAllocator.GetNextAvailableToken(TableIndex.TypeDef);
+            if (token.Rid == 1)
             {
-                moduleType = new TypeDefinition(null, TypeDefinition.ModuleTypeName, 0);
-                TopLevelTypes.Insert(0, moduleType);
+                TokenAllocator.AssignNextAvailableToken(moduleType);
+            }
+            else
+            {
+                // If RID 1 is not possible, we still want to assign RID 1 to the type explicitly, to have metadata
+                // builders configured to preserve RIDs deliberately crash on conflicting RIDs.
+
+                moduleType.MetadataToken = new MetadataToken(TableIndex.TypeDef, 1);
             }
 
             return moduleType;
@@ -1096,7 +1153,9 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="TopLevelTypes"/> property.
         /// </remarks>
         protected virtual IList<TypeDefinition> GetTopLevelTypes() =>
-            new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
+            new OwnedCollection<ITypeOwner, TypeDefinition>(this);
+
+        IList<TypeDefinition> ITypeOwner.OwnedTypes => TopLevelTypes;
 
         /// <summary>
         /// Obtains the list of references to .NET assemblies that the module uses.

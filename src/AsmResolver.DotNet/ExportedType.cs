@@ -96,7 +96,7 @@ namespace AsmResolver.DotNet
         public string FullName => MemberNameGenerator.GetTypeFullName(this);
 
         /// <inheritdoc />
-        public ModuleDefinition? Module
+        public ModuleDefinition? ContextModule
         {
             get;
             private set;
@@ -104,8 +104,8 @@ namespace AsmResolver.DotNet
 
         ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
         {
-            get => Module;
-            set => Module = value;
+            get => ContextModule;
+            set => ContextModule = value;
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace AsmResolver.DotNet
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <inheritdoc />
-        public IResolutionScope? Scope => Module;
+        public IResolutionScope? Scope => ContextModule;
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
@@ -142,13 +142,19 @@ namespace AsmResolver.DotNet
         public bool IsValueType => Resolve()?.IsValueType ?? false;
 
         /// <inheritdoc />
-        public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
+        public TypeDefinition? Resolve() => ContextModule is { } context ? Resolve(context) : null;
+
+        /// <inheritdoc />
+        public TypeDefinition? Resolve(ModuleDefinition context) => context.MetadataResolver.ResolveType(this);
+
+        IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
+
+        IMemberDefinition? IMemberDescriptor.Resolve(ModuleDefinition context) => Resolve(context);
 
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
-            return Module == module
-                   && (Implementation?.IsImportedInModule(module) ?? false);
+            return ContextModule == module && (Implementation?.IsImportedInModule(module) ?? false);
         }
 
         /// <summary>
@@ -161,10 +167,8 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
-        IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
-
         /// <inheritdoc />
-        public ITypeDefOrRef ToTypeDefOrRef() => new TypeReference(Module, Scope, Namespace, Name);
+        public ITypeDefOrRef ToTypeDefOrRef() => new TypeReference(ContextModule, Scope, Namespace, Name);
 
         /// <inheritdoc />
         public TypeSignature ToTypeSignature() => new TypeDefOrRefSignature(ToTypeDefOrRef());

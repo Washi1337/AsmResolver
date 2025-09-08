@@ -42,11 +42,11 @@ namespace AsmResolver.DotNet.Signatures
         public override bool IsValueType => true;
 
         /// <inheritdoc />
-        public override TypeDefinition? Resolve() => GetUnderlyingTypeDefOrRef()?.Resolve();
+        public override TypeDefinition? Resolve(ModuleDefinition context) => GetUnderlyingTypeDefOrRef()?.Resolve(context);
 
         /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() =>
-            Signature.ReturnType.Module?.CorLibTypeFactory.IntPtr.Type;
+            Signature.ReturnType.ContextModule?.CorLibTypeFactory.IntPtr.Type;
 
         /// <inheritdoc />
         public override bool IsImportedInModule(ModuleDefinition module) => Signature.IsImportedInModule(module);

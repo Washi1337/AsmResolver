@@ -28,6 +28,15 @@ namespace AsmResolver.IO
         /// <summary>
         /// Creates a new binary stream reader on the provided data source.
         /// </summary>
+        /// <param name="stream">The stream to read from.</param>
+        public BinaryStreamReader(Stream stream)
+            : this(new StreamDataSource(stream))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new binary stream reader on the provided data source.
+        /// </summary>
         /// <param name="dataSource">The object to get the data from.</param>
         public BinaryStreamReader(IDataSource dataSource)
             : this(dataSource, 0, 0, (uint) dataSource.Length)

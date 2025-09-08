@@ -45,7 +45,7 @@ public class SegmentPatch : IPatch
     /// <inheritdoc />
     public void Apply(in PatchContext context)
     {
-        context.Writer.Offset = Segment.Offset;
+        context.Writer.Offset = context.WriterBase + RelativeOffset;
         Segment.Write(context.Writer);
     }
 }

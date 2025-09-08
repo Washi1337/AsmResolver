@@ -59,6 +59,11 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         {
         }
 
+        [TestCase(typeof(List<int>.Enumerator))]
+        public void FixedGenericNestedTypeArgument()
+        {
+        }
+
         [TestCase(typeof(TestEnum))]
         public void FixedLocalTypeArgument()
         {

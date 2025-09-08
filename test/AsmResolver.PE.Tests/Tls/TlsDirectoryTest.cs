@@ -189,7 +189,7 @@ namespace AsmResolver.PE.Tests.Tls
             file.Write(s);
 
             // Read.
-            var image = PEImage.FromBytes(s.ToArray(), TestReaderParameters);
+            var image = PEImage.FromStream(s, TestReaderParameters);
             var newDirectory = image.TlsDirectory!;
             Assert.NotNull(newDirectory);
 

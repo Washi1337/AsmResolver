@@ -22,7 +22,7 @@ using AsmResolver.DotNet.Dynamic;
 ## Reading dynamic methods
 
 The following example demonstrates how to transform an instance of
-`DynamicMethod` into a `DynamicMethodDefinition`:
+`System.Reflection.Emit.DynamicMethod` into a `DynamicMethodDefinition`:
 
 ``` csharp
 DynamicMethod dynamicMethod = ...

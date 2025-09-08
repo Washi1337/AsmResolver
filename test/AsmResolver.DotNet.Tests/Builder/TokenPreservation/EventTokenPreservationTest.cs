@@ -45,25 +45,29 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
             // Create signature for add/remove methods.
             var signature = MethodSignature.CreateStatic(
-                eventHandlerTypeRef.Module.CorLibTypeFactory.Void,
-                eventHandlerTypeRef.Module.CorLibTypeFactory.Object,
+                eventHandlerTypeRef.ContextModule!.CorLibTypeFactory.Void,
+                eventHandlerTypeRef.ContextModule.CorLibTypeFactory.Object,
                 eventHandlerTypeSig);
 
             var methodAttributes = MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.SpecialName
                                    | MethodAttributes.HideBySig;
 
             // Define add.
-            var addMethod = new MethodDefinition($"add_{@event.Name}", methodAttributes, signature);
-            addMethod.CilMethodBody = new CilMethodBody(addMethod)
+            var addMethod = new MethodDefinition($"add_{@event.Name}", methodAttributes, signature)
             {
-                Instructions = {new CilInstruction(CilOpCodes.Ret)}
+                CilMethodBody = new CilMethodBody
+                {
+                    Instructions = { CilOpCodes.Ret }
+                }
             };
 
             // Define remove.
-            var removeMethod = new MethodDefinition($"remove_{@event.Name}", methodAttributes, signature);
-            removeMethod.CilMethodBody = new CilMethodBody(removeMethod)
+            var removeMethod = new MethodDefinition($"remove_{@event.Name}", methodAttributes, signature)
             {
-                Instructions = {new CilInstruction(CilOpCodes.Ret)}
+                CilMethodBody = new CilMethodBody
+                {
+                    Instructions = { CilOpCodes.Ret }
+                }
             };
 
             // Add members.

@@ -12,6 +12,6 @@ namespace AsmResolver.PE.Exceptions
         /// Gets a collection of functions defined by the exception handler directory.
         /// </summary>
         /// <returns>The functions.</returns>
-        IEnumerable<IRuntimeFunction> GetEntries();
+        IEnumerable<IRuntimeFunction> GetFunctions();
     }
 }

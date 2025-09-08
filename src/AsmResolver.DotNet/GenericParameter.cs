@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet
         INameProvider,
         IHasCustomAttribute,
         IModuleProvider,
+        IMetadataDefinition,
         IOwnedCollectionElement<IHasGenericParameters>
     {
         private readonly LazyVariable<GenericParameter, Utf8String?> _name;
@@ -156,12 +157,24 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this generic parameter has <see cref="GenericParameterAttributes.AllowByRefLike"/> enabled.
+        /// </summary>
+        public bool HasAllowByRefLike
+        {
+            get => (Attributes & GenericParameterAttributes.AllowByRefLike) != 0;
+            set => Attributes = (Attributes & ~GenericParameterAttributes.AllowByRefLike)
+                                | (value ? GenericParameterAttributes.AllowByRefLike : default);
+        }
+
+        /// <summary>
         /// Gets the index of this parameter within the list of generic parameters that the owner defines.
         /// </summary>
         public ushort Number => Owner is null ? (ushort) 0 : (ushort) Owner.GenericParameters.IndexOf(this);
 
         /// <inheritdoc />
-        public ModuleDefinition? Module => Owner?.Module;
+        public ModuleDefinition? DeclaringModule => Owner?.DeclaringModule;
+
+        ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <summary>
         /// Gets a collection of constraints put on the generic parameter.

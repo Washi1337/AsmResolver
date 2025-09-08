@@ -37,10 +37,14 @@ namespace AsmResolver.DotNet
         /// <param name="scope">The scope that defines the type.</param>
         /// <param name="ns">The namespace the type resides in.</param>
         /// <param name="name">The name of the type.</param>
+        /// <remarks>
+        /// The resulting type will inherit the context module from <paramref name="scope"/>.
+        /// </remarks>
         public TypeReference(IResolutionScope? scope, Utf8String? ns, Utf8String? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
             _scope.SetValue(scope);
+            ContextModule = scope?.ContextModule; // Assume the scope defines the module context.
             Namespace = ns;
             Name = name;
         }
@@ -48,15 +52,15 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Creates a new reference to a type.
         /// </summary>
-        /// <param name="module">The module that references the type.</param>
+        /// <param name="contextModule">The module that references the type.</param>
         /// <param name="scope">The scope that defines the type.</param>
         /// <param name="ns">The namespace the type resides in.</param>
         /// <param name="name">The name of the type.</param>
-        public TypeReference(ModuleDefinition? module, IResolutionScope? scope, Utf8String? ns, Utf8String? name)
+        public TypeReference(ModuleDefinition? contextModule, IResolutionScope? scope, Utf8String? ns, Utf8String? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
             _scope.SetValue(scope);
-            Module = module;
+            ContextModule = contextModule;
             Namespace = ns;
             Name = name;
         }
@@ -104,8 +108,11 @@ namespace AsmResolver.DotNet
         public bool IsValueType => Resolve()?.IsValueType ?? false;
 
         /// <inheritdoc />
-        public ModuleDefinition? Module
+        public ModuleDefinition? ContextModule
         {
+            // Note: We cannot make this a computed property that returns `Scope.ContextModule`, because a TypeRef's
+            // scope can be null and still be "valid" (albeit not according to spec). In such a case the runtime
+            // assumes it references a type in the current module. We therefore have to keep track of it separately.
             get;
             protected set;
         }
@@ -136,13 +143,13 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public TypeSignature ToTypeSignature(bool isValueType)
         {
-            return Module?.CorLibTypeFactory.FromType(this) as TypeSignature
+            return ContextModule?.CorLibTypeFactory.FromType(this) as TypeSignature
                    ?? new TypeDefOrRefSignature(this, isValueType);
         }
 
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module) =>
-            Module == module && (Scope?.IsImportedInModule(module) ?? false);
+            ContextModule == module && (Scope?.IsImportedInModule(module) ?? false);
 
         /// <summary>
         /// Imports the type reference using the provided reference importer object.
@@ -155,9 +162,14 @@ namespace AsmResolver.DotNet
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <inheritdoc />
-        public TypeDefinition? Resolve() => Module?.MetadataResolver.ResolveType(this);
+        public TypeDefinition? Resolve() => ContextModule is { } context ? Resolve(context) : null;
+
+        /// <inheritdoc />
+        public TypeDefinition? Resolve(ModuleDefinition context) => context.MetadataResolver.ResolveType(this);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
+
+        IMemberDefinition? IMemberDescriptor.Resolve(ModuleDefinition context) => Resolve(context);
 
         /// <summary>
         /// Obtains the name of the type reference.

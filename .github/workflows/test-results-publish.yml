@@ -1,10 +1,9 @@
-
 name: Publish Test Results
 
 on:
   workflow_run:
     workflows:
-    - Test and Publish NuGet
+    - Test and Publish
     types: [completed]
 permissions: {}
 
@@ -23,7 +22,7 @@ jobs:
       statuses: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Download and Publish Test Results
         uses: ./.github/actions/test-results-download-publish

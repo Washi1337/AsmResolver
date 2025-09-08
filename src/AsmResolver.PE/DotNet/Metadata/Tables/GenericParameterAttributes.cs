@@ -40,5 +40,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Specifies the generic parameter's type argument must have a public default constructor.
         /// </summary>
         DefaultConstructorConstraint = 0x0010,
+        /// <summary>
+        /// Specifies the generic parameter can be a ref struct type.
+        /// </summary>
+        AllowByRefLike = 0x0020,
     }
 }

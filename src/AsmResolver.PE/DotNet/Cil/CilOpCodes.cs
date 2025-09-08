@@ -28,7 +28,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Do nothing (No operation).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.nop?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.nop"/>
         /// </remarks>
         public static readonly CilOpCode Nop = new CilOpCode(
             (((ushort) CilCode.Nop & 0xFF) << ValueOffset)
@@ -43,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Inform a debugger that a breakpoint has been reached.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.break?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.break"/>
         /// </remarks>
         public static readonly CilOpCode Break = new CilOpCode(
             (((ushort) CilCode.Break & 0xFF) << ValueOffset)
@@ -58,7 +58,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument 0 onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_0?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_0"/>
         /// </remarks>
         public static readonly CilOpCode Ldarg_0 = new CilOpCode(
             (((ushort) CilCode.Ldarg_0 & 0xFF) << ValueOffset)
@@ -73,7 +73,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument 1 onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_1"/>
         /// </remarks>
         public static readonly CilOpCode Ldarg_1 = new CilOpCode(
             (((ushort) CilCode.Ldarg_1 & 0xFF) << ValueOffset)
@@ -88,7 +88,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument 2 onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_2"/>
         /// </remarks>
         public static readonly CilOpCode Ldarg_2 = new CilOpCode(
             (((ushort) CilCode.Ldarg_2 & 0xFF) << ValueOffset)
@@ -103,7 +103,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument 3 onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_3?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_3"/>
         /// </remarks>
         public static readonly CilOpCode Ldarg_3 = new CilOpCode(
             (((ushort) CilCode.Ldarg_3 & 0xFF) << ValueOffset)
@@ -118,7 +118,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable 0 onto stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_0?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_0"/>
         /// </remarks>
         public static readonly CilOpCode Ldloc_0 = new CilOpCode(
             (((ushort) CilCode.Ldloc_0 & 0xFF) << ValueOffset)
@@ -133,7 +133,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable 1 onto stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_1"/>
         /// </remarks>
         public static readonly CilOpCode Ldloc_1 = new CilOpCode(
             (((ushort) CilCode.Ldloc_1 & 0xFF) << ValueOffset)
@@ -148,7 +148,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable 2 onto stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_2"/>
         /// </remarks>
         public static readonly CilOpCode Ldloc_2 = new CilOpCode(
             (((ushort) CilCode.Ldloc_2 & 0xFF) << ValueOffset)
@@ -163,7 +163,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable 3 onto stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_3?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_3"/>
         /// </remarks>
         public static readonly CilOpCode Ldloc_3 = new CilOpCode(
             (((ushort) CilCode.Ldloc_3 & 0xFF) << ValueOffset)
@@ -178,7 +178,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_0?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_0"/>
         /// </remarks>
         public static readonly CilOpCode Stloc_0 = new CilOpCode(
             (((ushort) CilCode.Stloc_0 & 0xFF) << ValueOffset)
@@ -193,7 +193,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable 1.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_1"/>
         /// </remarks>
         public static readonly CilOpCode Stloc_1 = new CilOpCode(
             (((ushort) CilCode.Stloc_1 & 0xFF) << ValueOffset)
@@ -208,7 +208,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable 2.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_2"/>
         /// </remarks>
         public static readonly CilOpCode Stloc_2 = new CilOpCode(
             (((ushort) CilCode.Stloc_2 & 0xFF) << ValueOffset)
@@ -223,7 +223,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable 3.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_3?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_3"/>
         /// </remarks>
         public static readonly CilOpCode Stloc_3 = new CilOpCode(
             (((ushort) CilCode.Stloc_3 & 0xFF) << ValueOffset)
@@ -238,7 +238,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument onto the stack, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg_s"/>
         /// </remarks>
         public static readonly CilOpCode Ldarg_S = new CilOpCode(
             (((ushort) CilCode.Ldarg_S & 0xFF) << ValueOffset)
@@ -253,7 +253,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Fetch the address of argument, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarga_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarga_s"/>
         /// </remarks>
         public static readonly CilOpCode Ldarga_S = new CilOpCode(
             (((ushort) CilCode.Ldarga_S & 0xFF) << ValueOffset)
@@ -268,7 +268,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value to the argument numbered, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.starg_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.starg_s"/>
         /// </remarks>
         public static readonly CilOpCode Starg_S = new CilOpCode(
             (((ushort) CilCode.Starg_S & 0xFF) << ValueOffset)
@@ -283,7 +283,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable of index onto stack, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_s"/>
         /// </remarks>
         public static readonly CilOpCode Ldloc_S = new CilOpCode(
             (((ushort) CilCode.Ldloc_S & 0xFF) << ValueOffset)
@@ -298,7 +298,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load address of local variable with index, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloca_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloca_s"/>
         /// </remarks>
         public static readonly CilOpCode Ldloca_S = new CilOpCode(
             (((ushort) CilCode.Ldloca_S & 0xFF) << ValueOffset)
@@ -313,7 +313,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable with index, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_s"/>
         /// </remarks>
         public static readonly CilOpCode Stloc_S = new CilOpCode(
             (((ushort) CilCode.Stloc_S & 0xFF) << ValueOffset)
@@ -328,7 +328,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push a null reference on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldnull?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldnull"/>
         /// </remarks>
         public static readonly CilOpCode Ldnull = new CilOpCode(
             (((ushort) CilCode.Ldnull & 0xFF) << ValueOffset)
@@ -343,7 +343,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push -1 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_m1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_m1"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4_M1 = new CilOpCode(
             (((ushort) CilCode.Ldc_I4_M1 & 0xFF) << ValueOffset)
@@ -358,7 +358,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 0 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_0?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_0"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4_0 = new CilOpCode(
             (((ushort) CilCode.Ldc_I4_0 & 0xFF) << ValueOffset)
@@ -373,7 +373,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_1"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4_1 = new CilOpCode(
             (((ushort) CilCode.Ldc_I4_1 & 0xFF) << ValueOffset)
@@ -388,7 +388,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 2 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_2"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4_2 = new CilOpCode(
             (((ushort) CilCode.Ldc_I4_2 & 0xFF) << ValueOffset)
@@ -403,7 +403,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 3 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_3?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_3"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4_3 = new CilOpCode(
             (((ushort) CilCode.Ldc_I4_3 & 0xFF) << ValueOffset)
@@ -418,7 +418,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 4 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_4"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4_4 = new CilOpCode(
             (((ushort) CilCode.Ldc_I4_4 & 0xFF) << ValueOffset)
@@ -433,7 +433,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 5 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_5?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_5"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4_5 = new CilOpCode(
             (((ushort) CilCode.Ldc_I4_5 & 0xFF) << ValueOffset)
@@ -448,7 +448,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 6 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_6?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_6"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4_6 = new CilOpCode(
             (((ushort) CilCode.Ldc_I4_6 & 0xFF) << ValueOffset)
@@ -463,7 +463,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 7 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_7?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_7"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4_7 = new CilOpCode(
             (((ushort) CilCode.Ldc_I4_7 & 0xFF) << ValueOffset)
@@ -478,7 +478,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 8 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_8"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4_8 = new CilOpCode(
             (((ushort) CilCode.Ldc_I4_8 & 0xFF) << ValueOffset)
@@ -493,7 +493,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push num onto the stack as int32, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4_s"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4_S = new CilOpCode(
             (((ushort) CilCode.Ldc_I4_S & 0xFF) << ValueOffset)
@@ -508,7 +508,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push num of type int32 onto the stack as int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i4"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I4 = new CilOpCode(
             (((ushort) CilCode.Ldc_I4 & 0xFF) << ValueOffset)
@@ -523,7 +523,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push num of type int64 onto the stack as int64.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_i8"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_I8 = new CilOpCode(
             (((ushort) CilCode.Ldc_I8 & 0xFF) << ValueOffset)
@@ -538,7 +538,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push num of type float32 onto the stack as F.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_r4"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_R4 = new CilOpCode(
             (((ushort) CilCode.Ldc_R4 & 0xFF) << ValueOffset)
@@ -553,7 +553,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push num of type float64 onto the stack as F.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldc_r8"/>
         /// </remarks>
         public static readonly CilOpCode Ldc_R8 = new CilOpCode(
             (((ushort) CilCode.Ldc_R8 & 0xFF) << ValueOffset)
@@ -568,7 +568,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Duplicate the value on the top of the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.dup?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.dup"/>
         /// </remarks>
         public static readonly CilOpCode Dup = new CilOpCode(
             (((ushort) CilCode.Dup & 0xFF) << ValueOffset)
@@ -583,7 +583,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop value from the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.pop?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.pop"/>
         /// </remarks>
         public static readonly CilOpCode Pop = new CilOpCode(
             (((ushort) CilCode.Pop & 0xFF) << ValueOffset)
@@ -598,7 +598,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Exit current method and jump to the specified method.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.jmp?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.jmp"/>
         /// </remarks>
         public static readonly CilOpCode Jmp = new CilOpCode(
             (((ushort) CilCode.Jmp & 0xFF) << ValueOffset)
@@ -613,7 +613,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Call method described by method.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.call?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.call"/>
         /// </remarks>
         public static readonly CilOpCode Call = new CilOpCode(
             (((ushort) CilCode.Call & 0xFF) << ValueOffset)
@@ -628,7 +628,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Call method indicated on the stack with arguments described by a calling convention.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.calli?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.calli"/>
         /// </remarks>
         public static readonly CilOpCode Calli = new CilOpCode(
             (((ushort) CilCode.Calli & 0xFF) << ValueOffset)
@@ -643,7 +643,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Return from method, possibly with a value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ret?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ret"/>
         /// </remarks>
         public static readonly CilOpCode Ret = new CilOpCode(
             (((ushort) CilCode.Ret & 0xFF) << ValueOffset)
@@ -658,7 +658,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.br_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.br_s"/>
         /// </remarks>
         public static readonly CilOpCode Br_S = new CilOpCode(
             (((ushort) CilCode.Br_S & 0xFF) << ValueOffset)
@@ -673,7 +673,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if value is zero (false), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brfalse_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brfalse_s"/>
         /// </remarks>
         public static readonly CilOpCode Brfalse_S = new CilOpCode(
             (((ushort) CilCode.Brfalse_S & 0xFF) << ValueOffset)
@@ -688,7 +688,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if value is non-zero (true), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brtrue_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brtrue_s"/>
         /// </remarks>
         public static readonly CilOpCode Brtrue_S = new CilOpCode(
             (((ushort) CilCode.Brtrue_S & 0xFF) << ValueOffset)
@@ -703,7 +703,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if equal, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.beq_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.beq_s"/>
         /// </remarks>
         public static readonly CilOpCode Beq_S = new CilOpCode(
             (((ushort) CilCode.Beq_S & 0xFF) << ValueOffset)
@@ -718,7 +718,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than or equal to, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_s"/>
         /// </remarks>
         public static readonly CilOpCode Bge_S = new CilOpCode(
             (((ushort) CilCode.Bge_S & 0xFF) << ValueOffset)
@@ -733,7 +733,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_s"/>
         /// </remarks>
         public static readonly CilOpCode Bgt_S = new CilOpCode(
             (((ushort) CilCode.Bgt_S & 0xFF) << ValueOffset)
@@ -748,7 +748,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than or equal to, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_s"/>
         /// </remarks>
         public static readonly CilOpCode Ble_S = new CilOpCode(
             (((ushort) CilCode.Ble_S & 0xFF) << ValueOffset)
@@ -763,7 +763,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_s"/>
         /// </remarks>
         public static readonly CilOpCode Blt_S = new CilOpCode(
             (((ushort) CilCode.Blt_S & 0xFF) << ValueOffset)
@@ -778,7 +778,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if unequal or unordered, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bne_un_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bne_un_s"/>
         /// </remarks>
         public static readonly CilOpCode Bne_Un_S = new CilOpCode(
             (((ushort) CilCode.Bne_Un_S & 0xFF) << ValueOffset)
@@ -793,7 +793,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than or equal to (unsigned or unordered), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_un_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_un_s"/>
         /// </remarks>
         public static readonly CilOpCode Bge_Un_S = new CilOpCode(
             (((ushort) CilCode.Bge_Un_S & 0xFF) << ValueOffset)
@@ -808,7 +808,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than (unsigned or unordered), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_un_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_un_s"/>
         /// </remarks>
         public static readonly CilOpCode Bgt_Un_S = new CilOpCode(
             (((ushort) CilCode.Bgt_Un_S & 0xFF) << ValueOffset)
@@ -823,7 +823,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than or equal to (unsigned or unordered), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_un_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_un_s"/>
         /// </remarks>
         public static readonly CilOpCode Ble_Un_S = new CilOpCode(
             (((ushort) CilCode.Ble_Un_S & 0xFF) << ValueOffset)
@@ -838,7 +838,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than (unsigned or unordered), short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_un_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_un_s"/>
         /// </remarks>
         public static readonly CilOpCode Blt_Un_S = new CilOpCode(
             (((ushort) CilCode.Blt_Un_S & 0xFF) << ValueOffset)
@@ -853,7 +853,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.br?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.br"/>
         /// </remarks>
         public static readonly CilOpCode Br = new CilOpCode(
             (((ushort) CilCode.Br & 0xFF) << ValueOffset)
@@ -868,7 +868,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if value is zero (false).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brfalse?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brfalse"/>
         /// </remarks>
         public static readonly CilOpCode Brfalse = new CilOpCode(
             (((ushort) CilCode.Brfalse & 0xFF) << ValueOffset)
@@ -883,7 +883,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if value is non-zero (true).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brtrue?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brtrue"/>
         /// </remarks>
         public static readonly CilOpCode Brtrue = new CilOpCode(
             (((ushort) CilCode.Brtrue & 0xFF) << ValueOffset)
@@ -898,7 +898,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if equal.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.beq?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.beq"/>
         /// </remarks>
         public static readonly CilOpCode Beq = new CilOpCode(
             (((ushort) CilCode.Beq & 0xFF) << ValueOffset)
@@ -913,7 +913,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than or equal to.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge"/>
         /// </remarks>
         public static readonly CilOpCode Bge = new CilOpCode(
             (((ushort) CilCode.Bge & 0xFF) << ValueOffset)
@@ -928,7 +928,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt"/>
         /// </remarks>
         public static readonly CilOpCode Bgt = new CilOpCode(
             (((ushort) CilCode.Bgt & 0xFF) << ValueOffset)
@@ -943,7 +943,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than or equal to.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble"/>
         /// </remarks>
         public static readonly CilOpCode Ble = new CilOpCode(
             (((ushort) CilCode.Ble & 0xFF) << ValueOffset)
@@ -958,7 +958,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt"/>
         /// </remarks>
         public static readonly CilOpCode Blt = new CilOpCode(
             (((ushort) CilCode.Blt & 0xFF) << ValueOffset)
@@ -973,7 +973,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if unequal or unordered.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bne_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bne_un"/>
         /// </remarks>
         public static readonly CilOpCode Bne_Un = new CilOpCode(
             (((ushort) CilCode.Bne_Un & 0xFF) << ValueOffset)
@@ -988,7 +988,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than or equal to (unsigned or unordered).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_un"/>
         /// </remarks>
         public static readonly CilOpCode Bge_Un = new CilOpCode(
             (((ushort) CilCode.Bge_Un & 0xFF) << ValueOffset)
@@ -1003,7 +1003,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if greater than (unsigned or unordered).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_un"/>
         /// </remarks>
         public static readonly CilOpCode Bgt_Un = new CilOpCode(
             (((ushort) CilCode.Bgt_Un & 0xFF) << ValueOffset)
@@ -1018,7 +1018,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than or equal to (unsigned or unordered).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_un"/>
         /// </remarks>
         public static readonly CilOpCode Ble_Un = new CilOpCode(
             (((ushort) CilCode.Ble_Un & 0xFF) << ValueOffset)
@@ -1033,7 +1033,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Branch to target if less than (unsigned or unordered).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_un"/>
         /// </remarks>
         public static readonly CilOpCode Blt_Un = new CilOpCode(
             (((ushort) CilCode.Blt_Un & 0xFF) << ValueOffset)
@@ -1048,7 +1048,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Jump to one of n values.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.switch?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.switch"/>
         /// </remarks>
         public static readonly CilOpCode Switch = new CilOpCode(
             (((ushort) CilCode.Switch & 0xFF) << ValueOffset)
@@ -1063,7 +1063,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type int8 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i1"/>
         /// </remarks>
         public static readonly CilOpCode Ldind_I1 = new CilOpCode(
             (((ushort) CilCode.Ldind_I1 & 0xFF) << ValueOffset)
@@ -1078,7 +1078,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type unsigned int8 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u1"/>
         /// </remarks>
         public static readonly CilOpCode Ldind_U1 = new CilOpCode(
             (((ushort) CilCode.Ldind_U1 & 0xFF) << ValueOffset)
@@ -1093,7 +1093,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type int16 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i2"/>
         /// </remarks>
         public static readonly CilOpCode Ldind_I2 = new CilOpCode(
             (((ushort) CilCode.Ldind_I2 & 0xFF) << ValueOffset)
@@ -1108,7 +1108,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type unsigned int16 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u2"/>
         /// </remarks>
         public static readonly CilOpCode Ldind_U2 = new CilOpCode(
             (((ushort) CilCode.Ldind_U2 & 0xFF) << ValueOffset)
@@ -1123,7 +1123,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type int32 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i4"/>
         /// </remarks>
         public static readonly CilOpCode Ldind_I4 = new CilOpCode(
             (((ushort) CilCode.Ldind_I4 & 0xFF) << ValueOffset)
@@ -1138,7 +1138,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type unsigned int32 as int32 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_u4"/>
         /// </remarks>
         public static readonly CilOpCode Ldind_U4 = new CilOpCode(
             (((ushort) CilCode.Ldind_U4 & 0xFF) << ValueOffset)
@@ -1153,7 +1153,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type signed or unsigned int64 as signed int64 on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i8"/>
         /// </remarks>
         public static readonly CilOpCode Ldind_I8 = new CilOpCode(
             (((ushort) CilCode.Ldind_I8 & 0xFF) << ValueOffset)
@@ -1168,7 +1168,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type native int as native int on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_i"/>
         /// </remarks>
         public static readonly CilOpCode Ldind_I = new CilOpCode(
             (((ushort) CilCode.Ldind_I & 0xFF) << ValueOffset)
@@ -1183,7 +1183,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type float32 as F on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_r4"/>
         /// </remarks>
         public static readonly CilOpCode Ldind_R4 = new CilOpCode(
             (((ushort) CilCode.Ldind_R4 & 0xFF) << ValueOffset)
@@ -1198,7 +1198,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type float64 as F on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_r8"/>
         /// </remarks>
         public static readonly CilOpCode Ldind_R8 = new CilOpCode(
             (((ushort) CilCode.Ldind_R8 & 0xFF) << ValueOffset)
@@ -1213,7 +1213,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indirect load value of type object ref as O on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_ref?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldind_ref"/>
         /// </remarks>
         public static readonly CilOpCode Ldind_Ref = new CilOpCode(
             (((ushort) CilCode.Ldind_Ref & 0xFF) << ValueOffset)
@@ -1228,7 +1228,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type object ref (type O) into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_ref?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_ref"/>
         /// </remarks>
         public static readonly CilOpCode Stind_Ref = new CilOpCode(
             (((ushort) CilCode.Stind_Ref & 0xFF) << ValueOffset)
@@ -1243,7 +1243,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type int8 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i1"/>
         /// </remarks>
         public static readonly CilOpCode Stind_I1 = new CilOpCode(
             (((ushort) CilCode.Stind_I1 & 0xFF) << ValueOffset)
@@ -1258,7 +1258,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type int16 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i2"/>
         /// </remarks>
         public static readonly CilOpCode Stind_I2 = new CilOpCode(
             (((ushort) CilCode.Stind_I2 & 0xFF) << ValueOffset)
@@ -1273,7 +1273,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type int32 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i4"/>
         /// </remarks>
         public static readonly CilOpCode Stind_I4 = new CilOpCode(
             (((ushort) CilCode.Stind_I4 & 0xFF) << ValueOffset)
@@ -1288,7 +1288,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type int64 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i8"/>
         /// </remarks>
         public static readonly CilOpCode Stind_I8 = new CilOpCode(
             (((ushort) CilCode.Stind_I8 & 0xFF) << ValueOffset)
@@ -1303,7 +1303,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type float32 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_r4"/>
         /// </remarks>
         public static readonly CilOpCode Stind_R4 = new CilOpCode(
             (((ushort) CilCode.Stind_R4 & 0xFF) << ValueOffset)
@@ -1318,7 +1318,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type float64 into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_r8"/>
         /// </remarks>
         public static readonly CilOpCode Stind_R8 = new CilOpCode(
             (((ushort) CilCode.Stind_R8 & 0xFF) << ValueOffset)
@@ -1333,7 +1333,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Add two values, returning a new value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add"/>
         /// </remarks>
         public static readonly CilOpCode Add = new CilOpCode(
             (((ushort) CilCode.Add & 0xFF) << ValueOffset)
@@ -1348,7 +1348,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subtract value2 from value1, returning a new value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub"/>
         /// </remarks>
         public static readonly CilOpCode Sub = new CilOpCode(
             (((ushort) CilCode.Sub & 0xFF) << ValueOffset)
@@ -1363,7 +1363,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Multiply values.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul"/>
         /// </remarks>
         public static readonly CilOpCode Mul = new CilOpCode(
             (((ushort) CilCode.Mul & 0xFF) << ValueOffset)
@@ -1378,7 +1378,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Divide two values to return a quotient or floating-point result.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.div?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.div"/>
         /// </remarks>
         public static readonly CilOpCode Div = new CilOpCode(
             (((ushort) CilCode.Div & 0xFF) << ValueOffset)
@@ -1393,7 +1393,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Divide two values, unsigned, returning a quotient.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.div_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.div_un"/>
         /// </remarks>
         public static readonly CilOpCode Div_Un = new CilOpCode(
             (((ushort) CilCode.Div_Un & 0xFF) << ValueOffset)
@@ -1408,7 +1408,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Remainder when dividing one value by another.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rem?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rem"/>
         /// </remarks>
         public static readonly CilOpCode Rem = new CilOpCode(
             (((ushort) CilCode.Rem & 0xFF) << ValueOffset)
@@ -1423,7 +1423,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Remainder when dividing one unsigned value by another.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rem_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rem_un"/>
         /// </remarks>
         public static readonly CilOpCode Rem_Un = new CilOpCode(
             (((ushort) CilCode.Rem_Un & 0xFF) << ValueOffset)
@@ -1438,7 +1438,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Bitwise AND of two integral values, returns an integral value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.and?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.and"/>
         /// </remarks>
         public static readonly CilOpCode And = new CilOpCode(
             (((ushort) CilCode.And & 0xFF) << ValueOffset)
@@ -1453,7 +1453,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Bitwise OR of two integer values, returns an integer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.or?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.or"/>
         /// </remarks>
         public static readonly CilOpCode Or = new CilOpCode(
             (((ushort) CilCode.Or & 0xFF) << ValueOffset)
@@ -1468,7 +1468,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Bitwise XOR of integer values, returns an integer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.xor?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.xor"/>
         /// </remarks>
         public static readonly CilOpCode Xor = new CilOpCode(
             (((ushort) CilCode.Xor & 0xFF) << ValueOffset)
@@ -1483,7 +1483,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Shift an integer left (shifting in zeros), return an integer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shl?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shl"/>
         /// </remarks>
         public static readonly CilOpCode Shl = new CilOpCode(
             (((ushort) CilCode.Shl & 0xFF) << ValueOffset)
@@ -1498,7 +1498,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Shift an integer right (shift in sign), return an integer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shr?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shr"/>
         /// </remarks>
         public static readonly CilOpCode Shr = new CilOpCode(
             (((ushort) CilCode.Shr & 0xFF) << ValueOffset)
@@ -1513,7 +1513,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Shift an integer right (shift in zero), return an integer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shr_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.shr_un"/>
         /// </remarks>
         public static readonly CilOpCode Shr_Un = new CilOpCode(
             (((ushort) CilCode.Shr_Un & 0xFF) << ValueOffset)
@@ -1528,7 +1528,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Negate value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.neg?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.neg"/>
         /// </remarks>
         public static readonly CilOpCode Neg = new CilOpCode(
             (((ushort) CilCode.Neg & 0xFF) << ValueOffset)
@@ -1543,7 +1543,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Bitwise complement (logical not).
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.not?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.not"/>
         /// </remarks>
         public static readonly CilOpCode Not = new CilOpCode(
             (((ushort) CilCode.Not & 0xFF) << ValueOffset)
@@ -1558,7 +1558,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to int8, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i1"/>
         /// </remarks>
         public static readonly CilOpCode Conv_I1 = new CilOpCode(
             (((ushort) CilCode.Conv_I1 & 0xFF) << ValueOffset)
@@ -1573,7 +1573,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to int16, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i2"/>
         /// </remarks>
         public static readonly CilOpCode Conv_I2 = new CilOpCode(
             (((ushort) CilCode.Conv_I2 & 0xFF) << ValueOffset)
@@ -1588,7 +1588,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to int32, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i4"/>
         /// </remarks>
         public static readonly CilOpCode Conv_I4 = new CilOpCode(
             (((ushort) CilCode.Conv_I4 & 0xFF) << ValueOffset)
@@ -1603,7 +1603,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to int64, pushing int64 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i8"/>
         /// </remarks>
         public static readonly CilOpCode Conv_I8 = new CilOpCode(
             (((ushort) CilCode.Conv_I8 & 0xFF) << ValueOffset)
@@ -1618,7 +1618,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to float32, pushing F on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r4"/>
         /// </remarks>
         public static readonly CilOpCode Conv_R4 = new CilOpCode(
             (((ushort) CilCode.Conv_R4 & 0xFF) << ValueOffset)
@@ -1633,7 +1633,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to float64, pushing F on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r8"/>
         /// </remarks>
         public static readonly CilOpCode Conv_R8 = new CilOpCode(
             (((ushort) CilCode.Conv_R8 & 0xFF) << ValueOffset)
@@ -1648,7 +1648,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to unsigned int32, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u4"/>
         /// </remarks>
         public static readonly CilOpCode Conv_U4 = new CilOpCode(
             (((ushort) CilCode.Conv_U4 & 0xFF) << ValueOffset)
@@ -1663,7 +1663,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to unsigned int64, pushing int64 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u8"/>
         /// </remarks>
         public static readonly CilOpCode Conv_U8 = new CilOpCode(
             (((ushort) CilCode.Conv_U8 & 0xFF) << ValueOffset)
@@ -1678,7 +1678,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Call a method associated with an object.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.callvirt?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.callvirt"/>
         /// </remarks>
         public static readonly CilOpCode Callvirt = new CilOpCode(
             (((ushort) CilCode.Callvirt & 0xFF) << ValueOffset)
@@ -1693,7 +1693,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Copy a value type from src to dest.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cpobj?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cpobj"/>
         /// </remarks>
         public static readonly CilOpCode Cpobj = new CilOpCode(
             (((ushort) CilCode.Cpobj & 0xFF) << ValueOffset)
@@ -1708,7 +1708,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Copy the value stored at address src to the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldobj?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldobj"/>
         /// </remarks>
         public static readonly CilOpCode Ldobj = new CilOpCode(
             (((ushort) CilCode.Ldobj & 0xFF) << ValueOffset)
@@ -1723,7 +1723,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push a string object for the literal string.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldstr?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldstr"/>
         /// </remarks>
         public static readonly CilOpCode Ldstr = new CilOpCode(
             (((ushort) CilCode.Ldstr & 0xFF) << ValueOffset)
@@ -1738,7 +1738,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Allocate an uninitialized object or value type and call ctor.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.newobj?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.newobj"/>
         /// </remarks>
         public static readonly CilOpCode Newobj = new CilOpCode(
             (((ushort) CilCode.Newobj & 0xFF) << ValueOffset)
@@ -1753,7 +1753,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Cast obj to class.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.castclass?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.castclass"/>
         /// </remarks>
         public static readonly CilOpCode Castclass = new CilOpCode(
             (((ushort) CilCode.Castclass & 0xFF) << ValueOffset)
@@ -1768,7 +1768,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Test if obj is an instance of class, returning null or an instance of that class or interface.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.isinst?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.isinst"/>
         /// </remarks>
         public static readonly CilOpCode Isinst = new CilOpCode(
             (((ushort) CilCode.Isinst & 0xFF) << ValueOffset)
@@ -1783,7 +1783,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned integer to floating-point, pushing F on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_r_un"/>
         /// </remarks>
         public static readonly CilOpCode Conv_R_Un = new CilOpCode(
             (((ushort) CilCode.Conv_R_Un & 0xFF) << ValueOffset)
@@ -1798,7 +1798,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Extract a value-type from obj, its boxed representation, and push a controlled-mutability managed pointer to it to the top of the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unbox?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unbox"/>
         /// </remarks>
         public static readonly CilOpCode Unbox = new CilOpCode(
             (((ushort) CilCode.Unbox & 0xFF) << ValueOffset)
@@ -1813,7 +1813,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Throw an exception.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.throw?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.throw"/>
         /// </remarks>
         public static readonly CilOpCode Throw = new CilOpCode(
             (((ushort) CilCode.Throw & 0xFF) << ValueOffset)
@@ -1828,7 +1828,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the value of field of object (or value type) obj, onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldfld?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldfld"/>
         /// </remarks>
         public static readonly CilOpCode Ldfld = new CilOpCode(
             (((ushort) CilCode.Ldfld & 0xFF) << ValueOffset)
@@ -1843,7 +1843,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the address of field of object obj on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldflda?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldflda"/>
         /// </remarks>
         public static readonly CilOpCode Ldflda = new CilOpCode(
             (((ushort) CilCode.Ldflda & 0xFF) << ValueOffset)
@@ -1858,7 +1858,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace the value of field of the object obj with value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stfld?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stfld"/>
         /// </remarks>
         public static readonly CilOpCode Stfld = new CilOpCode(
             (((ushort) CilCode.Stfld & 0xFF) << ValueOffset)
@@ -1873,7 +1873,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the value of the static field on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldsfld?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldsfld"/>
         /// </remarks>
         public static readonly CilOpCode Ldsfld = new CilOpCode(
             (((ushort) CilCode.Ldsfld & 0xFF) << ValueOffset)
@@ -1888,7 +1888,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the address of the static field, field, on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldsflda?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldsflda"/>
         /// </remarks>
         public static readonly CilOpCode Ldsflda = new CilOpCode(
             (((ushort) CilCode.Ldsflda & 0xFF) << ValueOffset)
@@ -1903,7 +1903,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace the value of the static field.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stsfld?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stsfld"/>
         /// </remarks>
         public static readonly CilOpCode Stsfld = new CilOpCode(
             (((ushort) CilCode.Stsfld & 0xFF) << ValueOffset)
@@ -1918,7 +1918,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store a value at an address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stobj?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stobj"/>
         /// </remarks>
         public static readonly CilOpCode Stobj = new CilOpCode(
             (((ushort) CilCode.Stobj & 0xFF) << ValueOffset)
@@ -1933,7 +1933,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an int8 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i1_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i1_un"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_I1_Un = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_I1_Un & 0xFF) << ValueOffset)
@@ -1948,7 +1948,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an int16 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i2_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i2_un"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_I2_Un = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_I2_Un & 0xFF) << ValueOffset)
@@ -1963,7 +1963,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an int32 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i4_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i4_un"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_I4_Un = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_I4_Un & 0xFF) << ValueOffset)
@@ -1978,7 +1978,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an int64 (on the stack as int64) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i8_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i8_un"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_I8_Un = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_I8_Un & 0xFF) << ValueOffset)
@@ -1993,7 +1993,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an unsigned int8 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u1_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u1_un"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_U1_Un = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_U1_Un & 0xFF) << ValueOffset)
@@ -2008,7 +2008,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an unsigned int16 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u2_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u2_un"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_U2_Un = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_U2_Un & 0xFF) << ValueOffset)
@@ -2023,7 +2023,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an unsigned int32 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u4_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u4_un"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_U4_Un = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_U4_Un & 0xFF) << ValueOffset)
@@ -2038,7 +2038,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to an unsigned int64 (on the stack as int64) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u8_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u8_un"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_U8_Un = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_U8_Un & 0xFF) << ValueOffset)
@@ -2053,7 +2053,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to a native int (on the stack as native int) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i_un"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_I_Un = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_I_Un & 0xFF) << ValueOffset)
@@ -2068,7 +2068,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert unsigned to a native unsigned int (on the stack as native int) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u_un"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_U_Un = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_U_Un & 0xFF) << ValueOffset)
@@ -2083,7 +2083,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert a boxable value to its boxed form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.box?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.box"/>
         /// </remarks>
         public static readonly CilOpCode Box = new CilOpCode(
             (((ushort) CilCode.Box & 0xFF) << ValueOffset)
@@ -2098,7 +2098,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Create a new array with elements of type etype.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.newarr?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.newarr"/>
         /// </remarks>
         public static readonly CilOpCode Newarr = new CilOpCode(
             (((ushort) CilCode.Newarr & 0xFF) << ValueOffset)
@@ -2113,7 +2113,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the length (of type native unsigned int) of array on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldlen?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldlen"/>
         /// </remarks>
         public static readonly CilOpCode Ldlen = new CilOpCode(
             (((ushort) CilCode.Ldlen & 0xFF) << ValueOffset)
@@ -2128,7 +2128,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the address of element at index onto the top of the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelema?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelema"/>
         /// </remarks>
         public static readonly CilOpCode Ldelema = new CilOpCode(
             (((ushort) CilCode.Ldelema & 0xFF) << ValueOffset)
@@ -2143,7 +2143,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type int8 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i1"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem_I1 = new CilOpCode(
             (((ushort) CilCode.Ldelem_I1 & 0xFF) << ValueOffset)
@@ -2158,7 +2158,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type unsigned int8 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u1"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem_U1 = new CilOpCode(
             (((ushort) CilCode.Ldelem_U1 & 0xFF) << ValueOffset)
@@ -2173,7 +2173,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type int16 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i2"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem_I2 = new CilOpCode(
             (((ushort) CilCode.Ldelem_I2 & 0xFF) << ValueOffset)
@@ -2188,7 +2188,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type unsigned int16 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u2"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem_U2 = new CilOpCode(
             (((ushort) CilCode.Ldelem_U2 & 0xFF) << ValueOffset)
@@ -2203,7 +2203,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type int32 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i4"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem_I4 = new CilOpCode(
             (((ushort) CilCode.Ldelem_I4 & 0xFF) << ValueOffset)
@@ -2218,7 +2218,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type unsigned int32 at index onto the top of the stack as an int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_u4"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem_U4 = new CilOpCode(
             (((ushort) CilCode.Ldelem_U4 & 0xFF) << ValueOffset)
@@ -2233,7 +2233,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type signed or unsigned int64 at index onto the top of the stack as a signed int64.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i8"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem_I8 = new CilOpCode(
             (((ushort) CilCode.Ldelem_I8 & 0xFF) << ValueOffset)
@@ -2248,7 +2248,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type native int at index onto the top of the stack as a native int.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_i"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem_I = new CilOpCode(
             (((ushort) CilCode.Ldelem_I & 0xFF) << ValueOffset)
@@ -2263,7 +2263,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type float32 at index onto the top of the stack as an F.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_r4"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem_R4 = new CilOpCode(
             (((ushort) CilCode.Ldelem_R4 & 0xFF) << ValueOffset)
@@ -2278,7 +2278,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element with type float64 at index onto the top of the stack as an F.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_r8"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem_R8 = new CilOpCode(
             (((ushort) CilCode.Ldelem_R8 & 0xFF) << ValueOffset)
@@ -2293,7 +2293,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element at index onto the top of the stack as an O. The type of the O is the same as the element type of the array pushed on the CIL stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_ref?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem_ref"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem_Ref = new CilOpCode(
             (((ushort) CilCode.Ldelem_Ref & 0xFF) << ValueOffset)
@@ -2308,7 +2308,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the i value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i"/>
         /// </remarks>
         public static readonly CilOpCode Stelem_I = new CilOpCode(
             (((ushort) CilCode.Stelem_I & 0xFF) << ValueOffset)
@@ -2323,7 +2323,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the int8 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i1"/>
         /// </remarks>
         public static readonly CilOpCode Stelem_I1 = new CilOpCode(
             (((ushort) CilCode.Stelem_I1 & 0xFF) << ValueOffset)
@@ -2338,7 +2338,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the int16 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i2"/>
         /// </remarks>
         public static readonly CilOpCode Stelem_I2 = new CilOpCode(
             (((ushort) CilCode.Stelem_I2 & 0xFF) << ValueOffset)
@@ -2353,7 +2353,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the int32 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i4"/>
         /// </remarks>
         public static readonly CilOpCode Stelem_I4 = new CilOpCode(
             (((ushort) CilCode.Stelem_I4 & 0xFF) << ValueOffset)
@@ -2368,7 +2368,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the int64 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_i8"/>
         /// </remarks>
         public static readonly CilOpCode Stelem_I8 = new CilOpCode(
             (((ushort) CilCode.Stelem_I8 & 0xFF) << ValueOffset)
@@ -2383,7 +2383,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the float32 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_r4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_r4"/>
         /// </remarks>
         public static readonly CilOpCode Stelem_R4 = new CilOpCode(
             (((ushort) CilCode.Stelem_R4 & 0xFF) << ValueOffset)
@@ -2398,7 +2398,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the float64 value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_r8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_r8"/>
         /// </remarks>
         public static readonly CilOpCode Stelem_R8 = new CilOpCode(
             (((ushort) CilCode.Stelem_R8 & 0xFF) << ValueOffset)
@@ -2413,7 +2413,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the ref value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_ref?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem_ref"/>
         /// </remarks>
         public static readonly CilOpCode Stelem_Ref = new CilOpCode(
             (((ushort) CilCode.Stelem_Ref & 0xFF) << ValueOffset)
@@ -2428,7 +2428,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load the element at index onto the top of the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldelem"/>
         /// </remarks>
         public static readonly CilOpCode Ldelem = new CilOpCode(
             (((ushort) CilCode.Ldelem & 0xFF) << ValueOffset)
@@ -2443,7 +2443,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Replace array element at index with the value on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stelem"/>
         /// </remarks>
         public static readonly CilOpCode Stelem = new CilOpCode(
             (((ushort) CilCode.Stelem & 0xFF) << ValueOffset)
@@ -2458,7 +2458,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Extract a value-type from obj, its boxed representation, and copy to the top of the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unbox_any?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unbox_any"/>
         /// </remarks>
         public static readonly CilOpCode Unbox_Any = new CilOpCode(
             (((ushort) CilCode.Unbox_Any & 0xFF) << ValueOffset)
@@ -2473,7 +2473,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an int8 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i1"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_I1 = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_I1 & 0xFF) << ValueOffset)
@@ -2488,7 +2488,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an unsigned int8 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u1"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_U1 = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_U1 & 0xFF) << ValueOffset)
@@ -2503,7 +2503,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an int16 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i2"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_I2 = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_I2 & 0xFF) << ValueOffset)
@@ -2518,7 +2518,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an unsigned int16 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u2"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_U2 = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_U2 & 0xFF) << ValueOffset)
@@ -2533,7 +2533,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an int32 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i4"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_I4 = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_I4 & 0xFF) << ValueOffset)
@@ -2548,7 +2548,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an unsigned int32 (on the stack as int32) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u4"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_U4 = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_U4 & 0xFF) << ValueOffset)
@@ -2563,7 +2563,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an int64 (on the stack as int64) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i8"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_I8 = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_I8 & 0xFF) << ValueOffset)
@@ -2578,7 +2578,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to an unsigned int64 (on the stack as int64) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u8?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u8"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_U8 = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_U8 & 0xFF) << ValueOffset)
@@ -2593,7 +2593,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the address stored in a typed reference.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.refanyval?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.refanyval"/>
         /// </remarks>
         public static readonly CilOpCode Refanyval = new CilOpCode(
             (((ushort) CilCode.Refanyval & 0xFF) << ValueOffset)
@@ -2608,7 +2608,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Throw ArithmeticException if value is not a finite number.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ckfinite?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ckfinite"/>
         /// </remarks>
         public static readonly CilOpCode Ckfinite = new CilOpCode(
             (((ushort) CilCode.Ckfinite & 0xFF) << ValueOffset)
@@ -2623,7 +2623,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push a typed reference to ptr of type class onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mkrefany?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mkrefany"/>
         /// </remarks>
         public static readonly CilOpCode Mkrefany = new CilOpCode(
             (((ushort) CilCode.Mkrefany & 0xFF) << ValueOffset)
@@ -2638,7 +2638,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert metadata token to its runtime representation.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldtoken?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldtoken"/>
         /// </remarks>
         public static readonly CilOpCode Ldtoken = new CilOpCode(
             (((ushort) CilCode.Ldtoken & 0xFF) << ValueOffset)
@@ -2653,7 +2653,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to unsigned int16, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u2"/>
         /// </remarks>
         public static readonly CilOpCode Conv_U2 = new CilOpCode(
             (((ushort) CilCode.Conv_U2 & 0xFF) << ValueOffset)
@@ -2668,7 +2668,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to unsigned int8, pushing int32 on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u1"/>
         /// </remarks>
         public static readonly CilOpCode Conv_U1 = new CilOpCode(
             (((ushort) CilCode.Conv_U1 & 0xFF) << ValueOffset)
@@ -2683,7 +2683,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to native int, pushing native int on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_i"/>
         /// </remarks>
         public static readonly CilOpCode Conv_I = new CilOpCode(
             (((ushort) CilCode.Conv_I & 0xFF) << ValueOffset)
@@ -2698,7 +2698,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to a native int (on the stack as native int) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_i"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_I = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_I & 0xFF) << ValueOffset)
@@ -2713,7 +2713,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to a native unsigned int (on the stack as native int) and throw an exception on overflow.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_ovf_u"/>
         /// </remarks>
         public static readonly CilOpCode Conv_Ovf_U = new CilOpCode(
             (((ushort) CilCode.Conv_Ovf_U & 0xFF) << ValueOffset)
@@ -2728,7 +2728,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Add signed integer values with overflow check.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add_ovf?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add_ovf"/>
         /// </remarks>
         public static readonly CilOpCode Add_Ovf = new CilOpCode(
             (((ushort) CilCode.Add_Ovf & 0xFF) << ValueOffset)
@@ -2743,7 +2743,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Add unsigned integer values with overflow check.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add_ovf_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.add_ovf_un"/>
         /// </remarks>
         public static readonly CilOpCode Add_Ovf_Un = new CilOpCode(
             (((ushort) CilCode.Add_Ovf_Un & 0xFF) << ValueOffset)
@@ -2758,7 +2758,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Multiply signed integer values. Signed result shall fit in same size.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul_ovf?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul_ovf"/>
         /// </remarks>
         public static readonly CilOpCode Mul_Ovf = new CilOpCode(
             (((ushort) CilCode.Mul_Ovf & 0xFF) << ValueOffset)
@@ -2773,7 +2773,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Multiply unsigned integer values. Unsigned result shall fit in same size.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul_ovf_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.mul_ovf_un"/>
         /// </remarks>
         public static readonly CilOpCode Mul_Ovf_Un = new CilOpCode(
             (((ushort) CilCode.Mul_Ovf_Un & 0xFF) << ValueOffset)
@@ -2788,7 +2788,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subtract native int from a native int. Signed result shall fit in same size.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub_ovf?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub_ovf"/>
         /// </remarks>
         public static readonly CilOpCode Sub_Ovf = new CilOpCode(
             (((ushort) CilCode.Sub_Ovf & 0xFF) << ValueOffset)
@@ -2803,7 +2803,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subtract native unsigned int from a native unsigned int. Unsigned result shall fit in same size.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub_ovf_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sub_ovf_un"/>
         /// </remarks>
         public static readonly CilOpCode Sub_Ovf_Un = new CilOpCode(
             (((ushort) CilCode.Sub_Ovf_Un & 0xFF) << ValueOffset)
@@ -2818,7 +2818,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// End finally clause of an exception block.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.endfinally?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.endfinally"/>
         /// </remarks>
         public static readonly CilOpCode Endfinally = new CilOpCode(
             (((ushort) CilCode.Endfinally & 0xFF) << ValueOffset)
@@ -2833,7 +2833,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Exit a protected region of code.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.leave?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.leave"/>
         /// </remarks>
         public static readonly CilOpCode Leave = new CilOpCode(
             (((ushort) CilCode.Leave & 0xFF) << ValueOffset)
@@ -2848,7 +2848,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Exit a protected region of code, short form.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.leave_s?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.leave_s"/>
         /// </remarks>
         public static readonly CilOpCode Leave_S = new CilOpCode(
             (((ushort) CilCode.Leave_S & 0xFF) << ValueOffset)
@@ -2863,7 +2863,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value of type native int into memory at address.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stind_i"/>
         /// </remarks>
         public static readonly CilOpCode Stind_I = new CilOpCode(
             (((ushort) CilCode.Stind_I & 0xFF) << ValueOffset)
@@ -2878,7 +2878,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Convert to native unsigned int, pushing native int on stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.conv_u"/>
         /// </remarks>
         public static readonly CilOpCode Conv_U = new CilOpCode(
             (((ushort) CilCode.Conv_U & 0xFF) << ValueOffset)
@@ -2893,7 +2893,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix7?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix7"/>
         /// </remarks>
         public static readonly CilOpCode Prefix7 = new CilOpCode(
             (((ushort) CilCode.Prefix7 & 0xFF) << ValueOffset)
@@ -2908,7 +2908,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix6?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix6"/>
         /// </remarks>
         public static readonly CilOpCode Prefix6 = new CilOpCode(
             (((ushort) CilCode.Prefix6 & 0xFF) << ValueOffset)
@@ -2923,7 +2923,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix5?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix5"/>
         /// </remarks>
         public static readonly CilOpCode Prefix5 = new CilOpCode(
             (((ushort) CilCode.Prefix5 & 0xFF) << ValueOffset)
@@ -2938,7 +2938,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix4?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix4"/>
         /// </remarks>
         public static readonly CilOpCode Prefix4 = new CilOpCode(
             (((ushort) CilCode.Prefix4 & 0xFF) << ValueOffset)
@@ -2953,7 +2953,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix3?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix3"/>
         /// </remarks>
         public static readonly CilOpCode Prefix3 = new CilOpCode(
             (((ushort) CilCode.Prefix3 & 0xFF) << ValueOffset)
@@ -2968,7 +2968,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix2?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix2"/>
         /// </remarks>
         public static readonly CilOpCode Prefix2 = new CilOpCode(
             (((ushort) CilCode.Prefix2 & 0xFF) << ValueOffset)
@@ -2983,7 +2983,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix1?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefix1"/>
         /// </remarks>
         public static readonly CilOpCode Prefix1 = new CilOpCode(
             (((ushort) CilCode.Prefix1 & 0xFF) << ValueOffset)
@@ -2998,7 +2998,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// This prefix opcode is reserved and currently not implemented in the runtime
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefixref?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.prefixref"/>
         /// </remarks>
         public static readonly CilOpCode Prefixref = new CilOpCode(
             (((ushort) CilCode.Prefixref & 0xFF) << ValueOffset)
@@ -3013,7 +3013,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Return argument list handle for the current method.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.arglist?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.arglist"/>
         /// </remarks>
         public static readonly CilOpCode Arglist = new CilOpCode(
             (((ushort) CilCode.Arglist & 0xFF) << ValueOffset)
@@ -3028,7 +3028,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 (of type int32) if value1 equals value2, else push 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ceq?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ceq"/>
         /// </remarks>
         public static readonly CilOpCode Ceq = new CilOpCode(
             (((ushort) CilCode.Ceq & 0xFF) << ValueOffset)
@@ -3043,7 +3043,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 (of type int32) if value1 greater that value2, else push 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cgt?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cgt"/>
         /// </remarks>
         public static readonly CilOpCode Cgt = new CilOpCode(
             (((ushort) CilCode.Cgt & 0xFF) << ValueOffset)
@@ -3058,7 +3058,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 (of type int32) if value1 greater that value2, unsigned or unordered, else push 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cgt_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cgt_un"/>
         /// </remarks>
         public static readonly CilOpCode Cgt_Un = new CilOpCode(
             (((ushort) CilCode.Cgt_Un & 0xFF) << ValueOffset)
@@ -3073,7 +3073,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 (of type int32) if value1 lower than value2, else push 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.clt?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.clt"/>
         /// </remarks>
         public static readonly CilOpCode Clt = new CilOpCode(
             (((ushort) CilCode.Clt & 0xFF) << ValueOffset)
@@ -3088,7 +3088,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push 1 (of type int32) if value1 lower than value2, unsigned or unordered, else push 0.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.clt_un?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.clt_un"/>
         /// </remarks>
         public static readonly CilOpCode Clt_Un = new CilOpCode(
             (((ushort) CilCode.Clt_Un & 0xFF) << ValueOffset)
@@ -3103,7 +3103,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push a pointer to a method referenced by method, on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldftn?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldftn"/>
         /// </remarks>
         public static readonly CilOpCode Ldftn = new CilOpCode(
             (((ushort) CilCode.Ldftn & 0xFF) << ValueOffset)
@@ -3118,7 +3118,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push address of virtual method on the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldvirtftn?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldvirtftn"/>
         /// </remarks>
         public static readonly CilOpCode Ldvirtftn = new CilOpCode(
             (((ushort) CilCode.Ldvirtftn & 0xFF) << ValueOffset)
@@ -3133,7 +3133,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load argument onto the stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarg"/>
         /// </remarks>
         public static readonly CilOpCode Ldarg = new CilOpCode(
             (((ushort) CilCode.Ldarg & 0xFF) << ValueOffset)
@@ -3148,7 +3148,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Fetch the address of the argument indexed.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarga?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldarga"/>
         /// </remarks>
         public static readonly CilOpCode Ldarga = new CilOpCode(
             (((ushort) CilCode.Ldarga & 0xFF) << ValueOffset)
@@ -3163,7 +3163,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Store value to the argument.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.starg?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.starg"/>
         /// </remarks>
         public static readonly CilOpCode Starg = new CilOpCode(
             (((ushort) CilCode.Starg & 0xFF) << ValueOffset)
@@ -3178,7 +3178,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load local variable of index onto stack.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc"/>
         /// </remarks>
         public static readonly CilOpCode Ldloc = new CilOpCode(
             (((ushort) CilCode.Ldloc & 0xFF) << ValueOffset)
@@ -3193,7 +3193,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Load address of local variable with index index.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloca?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloca"/>
         /// </remarks>
         public static readonly CilOpCode Ldloca = new CilOpCode(
             (((ushort) CilCode.Ldloca & 0xFF) << ValueOffset)
@@ -3208,7 +3208,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Pop a value from stack into local variable index.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc"/>
         /// </remarks>
         public static readonly CilOpCode Stloc = new CilOpCode(
             (((ushort) CilCode.Stloc & 0xFF) << ValueOffset)
@@ -3223,7 +3223,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Allocate space from the local memory pool.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.localloc?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.localloc"/>
         /// </remarks>
         public static readonly CilOpCode Localloc = new CilOpCode(
             (((ushort) CilCode.Localloc & 0xFF) << ValueOffset)
@@ -3238,7 +3238,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// End an exception handling filter clause.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.endfilter?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.endfilter"/>
         /// </remarks>
         public static readonly CilOpCode Endfilter = new CilOpCode(
             (((ushort) CilCode.Endfilter & 0xFF) << ValueOffset)
@@ -3253,7 +3253,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subsequent pointer instruction might be unaligned.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unaligned?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unaligned"/>
         /// </remarks>
         public static readonly CilOpCode Unaligned = new CilOpCode(
             (((ushort) CilCode.Unaligned & 0xFF) << ValueOffset)
@@ -3268,7 +3268,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subsequent pointer reference is volatile.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.volatile?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.volatile"/>
         /// </remarks>
         public static readonly CilOpCode Volatile = new CilOpCode(
             (((ushort) CilCode.Volatile & 0xFF) << ValueOffset)
@@ -3283,7 +3283,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Subsequent call terminates current method.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.tailcall?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.tailcall"/>
         /// </remarks>
         public static readonly CilOpCode Tailcall = new CilOpCode(
             (((ushort) CilCode.Tailcall & 0xFF) << ValueOffset)
@@ -3298,7 +3298,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Initialize the value at address dest.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.initobj?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.initobj"/>
         /// </remarks>
         public static readonly CilOpCode Initobj = new CilOpCode(
             (((ushort) CilCode.Initobj & 0xFF) << ValueOffset)
@@ -3313,7 +3313,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Call a virtual method on a type constrained to be type T.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained"/>
         /// </remarks>
         public static readonly CilOpCode Constrained = new CilOpCode(
             (((ushort) CilCode.Constrained & 0xFF) << ValueOffset)
@@ -3328,7 +3328,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Copy data from memory to memory.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cpblk?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.cpblk"/>
         /// </remarks>
         public static readonly CilOpCode Cpblk = new CilOpCode(
             (((ushort) CilCode.Cpblk & 0xFF) << ValueOffset)
@@ -3343,7 +3343,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Set all bytes in a block of memory to a given byte value.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.initblk?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.initblk"/>
         /// </remarks>
         public static readonly CilOpCode Initblk = new CilOpCode(
             (((ushort) CilCode.Initblk & 0xFF) << ValueOffset)
@@ -3358,7 +3358,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Rethrow the current exception.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rethrow?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.rethrow"/>
         /// </remarks>
         public static readonly CilOpCode Rethrow = new CilOpCode(
             (((ushort) CilCode.Rethrow & 0xFF) << ValueOffset)
@@ -3373,7 +3373,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the size, in bytes, of a type as an unsigned int32.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sizeof?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.sizeof"/>
         /// </remarks>
         public static readonly CilOpCode Sizeof = new CilOpCode(
             (((ushort) CilCode.Sizeof & 0xFF) << ValueOffset)
@@ -3388,7 +3388,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Push the type token stored in a typed reference.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.refanytype?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.refanytype"/>
         /// </remarks>
         public static readonly CilOpCode Refanytype = new CilOpCode(
             (((ushort) CilCode.Refanytype & 0xFF) << ValueOffset)
@@ -3403,7 +3403,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Specify that the subsequent array address operation performs no type check at runtime, and that it returns a controlled-mutability managed pointer.
         /// </summary>
         /// <remarks>
-        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.readonly?view=net-6.0"/>
+        /// See also: <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.readonly"/>
         /// </remarks>
         public static readonly CilOpCode Readonly = new CilOpCode(
             (((ushort) CilCode.Readonly & 0xFF) << ValueOffset)

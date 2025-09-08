@@ -122,7 +122,7 @@ public class ManagedPEFileBuilder : PEFileBuilder
         }
 
         if (context.ClrBootstrapper.HasValue)
-            contents.Add(context.ClrBootstrapper.Value.Segment);
+            contents.Add(context.ClrBootstrapper.Value.Segment, context.Platform.ThunkStubAlignment);
 
         if (context.Image.Exports is { Entries: { Count: > 0 } entries })
         {
@@ -440,6 +440,7 @@ public class ManagedPEFileBuilder : PEFileBuilder
         for (uint rid = 1; rid <= fieldRvaTable.Count; rid++)
         {
             ref var row = ref fieldRvaTable.GetRowRef(rid);
+
             var data = reader.ResolveFieldData(
                 ErrorListener,
                 context.Platform,
@@ -450,7 +451,17 @@ public class ManagedPEFileBuilder : PEFileBuilder
             if (data is null)
                 continue;
 
-            table.Add(data);
+            uint requiredAlignment = TryGetRequiredFieldAlignment(context, row);
+
+            if (requiredAlignment != 0)
+            {
+                table.Add(data, requiredAlignment);
+            }
+            else
+            {
+                table.Add(data);
+            }
+
             row.Data = data.ToReference();
         }
     }

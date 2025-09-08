@@ -20,13 +20,36 @@ namespace AsmResolver.DotNet.Signatures
             if (x is null || y is null)
                 return false;
 
-            return x switch
+            x = Reduce(x);
+            y = Reduce(y);
+
+            return (x, y) switch
             {
-                InvalidTypeDefOrRef invalidType => Equals(invalidType, y as InvalidTypeDefOrRef),
-                TypeSpecification specification => Equals(specification, y as TypeSpecification),
-                TypeSignature signature => Equals(signature, y as TypeSignature),
-                _ => SimpleTypeEquals(x, y)
+                (null, null) => true,
+                (TypeSignature ts1, TypeSignature ts2) => SignatureEquals(ts1, ts2),
+                (InvalidTypeDefOrRef i1, InvalidTypeDefOrRef i2) => i1.Error == i2.Error,
+                (ITypeDefOrRef or ExportedType or CorLibTypeSignature, ITypeDefOrRef or ExportedType or CorLibTypeSignature) => SimpleTypeEquals(x, y),
+                _ => false,
             };
+
+            static ITypeDescriptor? Reduce(ITypeDescriptor? desc)
+            {
+                if (desc is TypeDefOrRefSignature tdors)
+                    desc = tdors.Type;
+
+                if (desc is TypeSpecification ts)
+                {
+                    if (ts.Signature is TypeDefOrRefSignature tdors2)
+                        desc = tdors2.Type;
+                    else
+                        desc = ts.Signature;
+                }
+
+                if ((desc?.ContextModule ?? desc?.Scope?.ContextModule)?.CorLibTypeFactory.FromType(desc!) is { } corLibType)
+                    desc = corLibType;
+
+                return desc;
+            }
         }
 
         /// <inheritdoc />
@@ -60,15 +83,10 @@ namespace AsmResolver.DotNet.Signatures
                 return true;
 
             // It can still be an exported type, we need to resolve the type then and check if the definitions match.
-            if (!Equals(x.Module, y.Module))
-            {
-                return x.Resolve() is { } definition1
-                       && y.Resolve() is { } definition2
-                       && Equals(definition1.Module!.Assembly, definition2.Module!.Assembly)
-                       && Equals(definition1.DeclaringType, definition2.DeclaringType);
-            }
-
-            return false;
+            return x.Resolve() is { } definition1
+                   && y.Resolve() is { } definition2
+                   && Equals(definition1.DeclaringModule!.Assembly, definition2.DeclaringModule!.Assembly)
+                   && Equals(definition1.DeclaringType, definition2.DeclaringType);
         }
 
         /// <inheritdoc />
@@ -99,7 +117,7 @@ namespace AsmResolver.DotNet.Signatures
             if (x is null || y is null)
                 return false;
 
-            return Equals(x.Signature, y.Signature);
+            return SignatureEquals(x.Signature, y.Signature);
         }
 
         /// <inheritdoc />

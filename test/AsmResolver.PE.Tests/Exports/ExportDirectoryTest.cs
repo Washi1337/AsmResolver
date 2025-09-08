@@ -261,7 +261,7 @@ namespace AsmResolver.PE.Tests.Exports
             file.Write(stream);
 
             // Verify new forwarder symbol is present.
-            var newExports = PEImage.FromBytes(stream.ToArray(), TestReaderParameters).Exports!;
+            var newExports = PEImage.FromStream(stream, TestReaderParameters).Exports!;
             var newBar = newExports.Entries.First(x => x.Name == "Bar");
             Assert.Equal("ActualDll.Bar", newBar.ForwarderName);
 

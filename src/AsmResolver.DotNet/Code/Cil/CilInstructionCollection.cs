@@ -246,8 +246,8 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilCode.Ldc_I4_8:
                 case CilCode.Ldc_I4_M1:
                 case CilCode.Ldc_I4_S:
-                    instruction.Operand = instruction.GetLdcI4Constant();
                     instruction.OpCode = CilOpCodes.Ldc_I4;
+                    instruction.Operand = instruction.GetLdcI4Constant();
                     break;
 
                 case CilCode.Ldarg_0:
@@ -255,38 +255,52 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilCode.Ldarg_2:
                 case CilCode.Ldarg_3:
                 case CilCode.Ldarg_S:
-                    instruction.Operand = instruction.GetParameter(Owner.Owner.Parameters);
                     instruction.OpCode = CilOpCodes.Ldarg;
+                    instruction.Operand = Owner.Owner?.Parameters is { } parameters
+                        ? instruction.GetParameter(parameters)
+                        : (ushort) instruction.GetParameterIndex();
                     break;
 
                 case CilCode.Ldarga_S:
+                {
                     instruction.OpCode = CilOpCodes.Ldarga;
+                    if (instruction.Operand is byte index)
+                        instruction.Operand = (ushort) index;
                     break;
+                }
 
                 case CilCode.Starg_S:
+                {
                     instruction.OpCode = CilOpCodes.Starg;
+                    if (instruction.Operand is byte index)
+                        instruction.Operand = (ushort) index;
                     break;
+                }
 
                 case CilCode.Ldloc_0:
                 case CilCode.Ldloc_1:
                 case CilCode.Ldloc_2:
                 case CilCode.Ldloc_3:
                 case CilCode.Ldloc_S:
-                    instruction.Operand = instruction.GetLocalVariable(Owner.LocalVariables);
                     instruction.OpCode = CilOpCodes.Ldloc;
+                    instruction.Operand = instruction.GetLocalVariable(Owner.LocalVariables);
                     break;
 
                 case CilCode.Ldloca_S:
+                {
                     instruction.OpCode = CilOpCodes.Ldloca;
+                    if (instruction.Operand is byte index)
+                        instruction.Operand = (ushort) index;
                     break;
+                }
 
                 case CilCode.Stloc_0:
                 case CilCode.Stloc_1:
                 case CilCode.Stloc_2:
                 case CilCode.Stloc_3:
                 case CilCode.Stloc_S:
-                    instruction.Operand = instruction.GetLocalVariable(Owner.LocalVariables);
                     instruction.OpCode = CilOpCodes.Stloc;
+                    instruction.Operand = instruction.GetLocalVariable(Owner.LocalVariables);
                     break;
 
                 case CilCode.Beq_S:
@@ -504,31 +518,35 @@ namespace AsmResolver.DotNet.Code.Cil
 
         private bool TryOptimizeArgument(CilInstruction instruction)
         {
-            var parameter = instruction.GetParameter(Owner.Owner.Parameters);
+            int index = instruction.GetParameterIndex();
 
             var code = instruction.OpCode;
             object? operand = instruction.Operand;
 
             if (instruction.IsLdarg())
             {
-                (code, operand) = parameter.MethodSignatureIndex switch
+                (code, operand) = index switch
                 {
                     0 => (CilOpCodes.Ldarg_0, null),
                     1 => (CilOpCodes.Ldarg_1, null),
                     2 => (CilOpCodes.Ldarg_2, null),
                     3 => (CilOpCodes.Ldarg_3, null),
-                    >= byte.MinValue and <= byte.MaxValue => (CilOpCodes.Ldarg_S, parameter),
-                    _ => (CilOpCodes.Ldarg, parameter),
+                    >= byte.MinValue and <= byte.MaxValue => Owner.Owner?.Parameters is { } p
+                        ? (CilOpCodes.Ldarg_S, p.GetBySignatureIndex(index))
+                        : (CilOpCodes.Ldarg_S, (object) (byte) index),
+                    _ => Owner.Owner?.Parameters is { } parameters
+                        ? (CilOpCodes.Ldarg, parameters.GetBySignatureIndex(index))
+                        : (CilOpCodes.Ldarg, (object) (ushort) index),
                 };
             }
             else if (instruction.IsStarg())
             {
-                if (parameter.MethodSignatureIndex <= byte.MaxValue)
+                if (index <= byte.MaxValue)
                     code = CilOpCodes.Starg_S;
             }
             else if (instruction.OpCode.Code == CilCode.Ldarga)
             {
-                if (parameter.Index is >= byte.MinValue and <= byte.MaxValue)
+                if (index is >= byte.MinValue and <= byte.MaxValue)
                     code = CilOpCodes.Ldarga_S;
             }
 

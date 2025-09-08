@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet.Tests
         private ImplementationMap RebuildAndLookup(ImplementationMap implementationMap)
         {
             using var stream = new MemoryStream();
-            implementationMap.MemberForwarded.Module.Write(stream);
+            implementationMap.MemberForwarded!.DeclaringModule!.Write(stream);
 
             var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             var t = newModule.TopLevelTypes.First(t => t.Name == nameof(PlatformInvoke));
@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Tests
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
 
             var newModule = new ModuleReference("SomeOtherDll.dll");
-            map.MemberForwarded.Module.ModuleReferences.Add(newModule);
+            map.MemberForwarded!.DeclaringModule!.ModuleReferences.Add(newModule);
             map.Scope = newModule;
 
             var newMap = RebuildAndLookup(map);
@@ -89,7 +89,7 @@ namespace AsmResolver.DotNet.Tests
         public void AddingAlreadyAddedMapToAnotherMemberShouldThrow()
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
-            var declaringType = (TypeDefinition) map.MemberForwarded.DeclaringType;
+            var declaringType = map.MemberForwarded.DeclaringType;
             var otherMethod = declaringType.Methods.First(m =>
                 m.Name == nameof(PlatformInvoke.NonImplementationMapMethod));
 

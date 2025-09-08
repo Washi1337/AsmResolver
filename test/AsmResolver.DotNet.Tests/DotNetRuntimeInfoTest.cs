@@ -15,6 +15,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(".NETStandard,Version=v2.0", DotNetRuntimeInfo.NetStandard, 2, 0)]
         [InlineData(".NETCoreApp,Version=v2.0", DotNetRuntimeInfo.NetCoreApp, 2, 0)]
         [InlineData(".NETCoreApp,Version=v5.0", DotNetRuntimeInfo.NetCoreApp, 5, 0)]
+        [InlineData(".NETCoreApp,Version=v10.0", DotNetRuntimeInfo.NetCoreApp, 10, 0)]
         public void Parse(string name, string expectedFramework, int major, int minor)
         {
             Assert.Equal(
@@ -31,11 +32,12 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(".NETStandard,Version=v2.0", "netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
         [InlineData(".NETCoreApp,Version=v2.0", "System.Runtime, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
         [InlineData(".NETCoreApp,Version=v5.0", "System.Runtime, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+        [InlineData(".NETCoreApp,Version=v10.0", "System.Runtime, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
         public void DefaultCorLib(string name, string expectedCorLib)
         {
-            Assert.Equal(
+            Assert.Equal<AssemblyDescriptor>(
                 new ReflectionAssemblyDescriptor(new AssemblyName(expectedCorLib)),
-                (AssemblyDescriptor) DotNetRuntimeInfo.Parse(name).GetDefaultCorLib(),
+                DotNetRuntimeInfo.Parse(name).GetDefaultCorLib(),
                 SignatureComparer.Default
             );
         }
@@ -50,6 +52,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData("netcoreapp2.1", DotNetRuntimeInfo.NetCoreApp, 2,1)]
         [InlineData("net5.0", DotNetRuntimeInfo.NetCoreApp, 5, 0)]
         [InlineData("net8.0", DotNetRuntimeInfo.NetCoreApp, 8, 0)]
+        [InlineData("net10.0", DotNetRuntimeInfo.NetCoreApp, 10, 0)]
         public void ParseMoniker(string tfm, string expectedFramework, int major, int minor)
         {
             Assert.Equal(

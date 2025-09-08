@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet
         IMemberDefinition,
         IOwnedCollectionElement<TypeDefinition>,
         IMemberRefParent,
-        ICustomAttributeType,
+        IMethodDefOrRef,
         IHasGenericParameters,
         IMemberForwarded,
         IHasSecurityDeclaration,
@@ -47,10 +47,16 @@ namespace AsmResolver.DotNet
         protected MethodDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<MethodDefinition, Utf8String?>(x => GetName());
-            _declaringType = new LazyVariable<MethodDefinition, TypeDefinition?>(x => GetDeclaringType());
+            _name = new LazyVariable<MethodDefinition, Utf8String?>(x => x.GetName());
+            _declaringType = new LazyVariable<MethodDefinition, TypeDefinition?>(x => x.GetDeclaringType());
             _signature = new LazyVariable<MethodDefinition, MethodSignature?>(x => x.GetSignature());
-            _methodBody = new LazyVariable<MethodDefinition, MethodBody?>(x => x.GetBody());
+            _methodBody = new LazyVariable<MethodDefinition, MethodBody?>(static x =>
+            {
+                var body = x.GetBody();
+                if (body is not null)
+                    body.Owner = x;
+                return body;
+            });
             _implementationMap = new LazyVariable<MethodDefinition, ImplementationMap?>(x => x.GetImplementationMap());
             _semantics = new LazyVariable<MethodDefinition, MethodSemantics?>(x => x.GetSemantics());
             _exportInfo = new LazyVariable<MethodDefinition, UnmanagedExportInfo?>(x => x.GetExportInfo());
@@ -68,11 +74,43 @@ namespace AsmResolver.DotNet
         /// <paramref name="attributes"/> and vice versa.
         /// </remarks>
         public MethodDefinition(Utf8String? name, MethodAttributes attributes, MethodSignature? signature)
+            : this(name, attributes, signature, true)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new method definition.
+        /// </summary>
+        /// <param name="name">The name of the method.</param>
+        /// <param name="attributes">The attributes.</param>
+        /// <param name="signature">The signature of the method</param>
+        /// <param name="verify">
+        /// Set to <c>true</c> if the value stored in <paramref name="attributes"/> and <paramref name="signature"/>
+        /// should be checked for consistency.
+        /// </param>
+        /// <remarks>
+        /// For a valid .NET image, if <see cref="CallingConventionSignature.HasThis"/> of the signature referenced by
+        /// <paramref name="signature"/> is set, the <see cref="MethodAttributes.Static"/> bit should be unset in
+        /// <paramref name="attributes"/> and vice versa.
+        /// </remarks>
+        /// <exception cref="ArgumentException">
+        /// Occurs when <paramref name="verify"/> is <c>true</c> and <paramref name="attributes"/> contains
+        /// a value that is inconsistent with the flags of <paramref name="signature"/>.
+        /// </exception>
+        public MethodDefinition(Utf8String? name, MethodAttributes attributes, MethodSignature? signature, bool verify)
             : this(new MetadataToken(TableIndex.Method, 0))
         {
             Name = name;
             Attributes = attributes;
             Signature = signature;
+
+            if (verify && signature is { HasThis: var hasThis } && IsStatic != !hasThis)
+            {
+                throw new ArgumentException(hasThis
+                    ? "A static method requires a signature with the HasThis flag unset."
+                    : "An instance method requires a signature with the HasThis flag set."
+                );
+            }
         }
 
         /// <summary>
@@ -513,7 +551,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public virtual ModuleDefinition? Module => DeclaringType?.Module;
+        public virtual ModuleDefinition? DeclaringModule => DeclaringType?.DeclaringModule;
+
+        ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <summary>
         /// Gets the type that defines the method.
@@ -526,7 +566,7 @@ namespace AsmResolver.DotNet
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
-        ITypeDefOrRef? IMethodDefOrRef.DeclaringType => DeclaringType;
+        ITypeDefOrRef? ICustomAttributeType.DeclaringType => DeclaringType;
 
         TypeDefinition? IOwnedCollectionElement<TypeDefinition>.Owner
         {
@@ -583,8 +623,28 @@ namespace AsmResolver.DotNet
         /// </remarks>
         public MethodBody? MethodBody
         {
-            get => _methodBody.GetValue(this);
-            set => _methodBody.SetValue(value);
+            get
+            {
+                // We don't need to lock here as GetValue already locks on the lazy variable when necessary.
+                // ReSharper disable once InconsistentlySynchronizedField
+                return _methodBody.GetValue(this);
+            }
+            set
+            {
+                lock (_methodBody)
+                {
+                    if (value is { Owner: { } originalOwner })
+                        throw new ArgumentException($"Method body is already assigned to method {originalOwner.SafeToString()}.");
+
+                    if (_methodBody.IsInitialized && _methodBody.GetValue(this) is { } originalBody)
+                        originalBody.Owner = null;
+
+                    _methodBody.SetValue(value);
+
+                    if (value is not null)
+                        value.Owner = this;
+                }
+            }
         }
 
         /// <summary>
@@ -746,10 +806,11 @@ namespace AsmResolver.DotNet
                 MethodAttributes.Private
                 | MethodAttributes.Static
                 | MethodAttributes.SpecialName
-                | MethodAttributes.RuntimeSpecialName,
+                | MethodAttributes.RuntimeSpecialName
+                | MethodAttributes.HideBySig,
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
 
-            cctor.CilMethodBody = new CilMethodBody(cctor);
+            cctor.CilMethodBody = new CilMethodBody();
             cctor.CilMethodBody.Instructions.Add(CilOpCodes.Ret);
 
             return cctor;
@@ -776,7 +837,7 @@ namespace AsmResolver.DotNet
             for (int i = 0; i < parameterTypes.Length; i++)
                 ctor.ParameterDefinitions.Add(new ParameterDefinition(null));
 
-            ctor.CilMethodBody = new CilMethodBody(ctor);
+            ctor.CilMethodBody = new CilMethodBody();
             ctor.CilMethodBody.Instructions.Add(CilOpCodes.Ret);
 
             return ctor;
@@ -784,11 +845,16 @@ namespace AsmResolver.DotNet
 
         MethodDefinition IMethodDescriptor.Resolve() => this;
 
+        MethodDefinition IMethodDescriptor.Resolve(ModuleDefinition context) => this;
+
+        IMemberDefinition IMemberDescriptor.Resolve() => this;
+
+        IMemberDefinition IMemberDescriptor.Resolve(ModuleDefinition context) => this;
+
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
-            return Module == module
-                   && (Signature?.IsImportedInModule(module) ?? false);
+            return DeclaringModule == module && (Signature?.IsImportedInModule(module) ?? false);
         }
 
         /// <summary>
@@ -800,8 +866,6 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
-
-        IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <summary>
         /// Determines whether the provided definition can be accessed by the method.
@@ -830,11 +894,16 @@ namespace AsmResolver.DotNet
             if (IsPublic)
                 return true;
 
-            // Types can always access their own methods.
-            if (SignatureComparer.Default.Equals(declaringType, type))
-                return true;
+            // Types can always access their own methods and any methods in their declaring types.
+            var type1 = type;
+            while (type1 is not null)
+            {
+                if (SignatureComparer.Default.Equals(declaringType, type1))
+                    return true;
+                type1 = type1.DeclaringType;
+            }
 
-            bool isInSameAssembly = SignatureComparer.Default.Equals(declaringType.Module, type.Module);
+            bool isInSameAssembly = SignatureComparer.Default.Equals(declaringType.DeclaringModule, type.DeclaringModule);
 
             // Assembly (internal in C#) methods are accessible by types in the same assembly.
             if (IsAssembly || IsFamilyOrAssembly)
@@ -952,6 +1021,62 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="ExportInfo"/> property.
         /// </remarks>
         protected virtual UnmanagedExportInfo? GetExportInfo() => null;
+
+        /// <summary>
+        /// Asserts whether the method's metadata is consistent with its signature.
+        /// </summary>
+        /// <exception cref="AggregateException">
+        /// Occurs when the method contains invalid or inconsistent metadata.
+        /// The inner exceptions stored in this aggregation are all individual diagnostics found.
+        /// </exception>
+        public void VerifyMetadata() => VerifyMetadata(ThrowErrorListener.Instance);
+
+        /// <summary>
+        /// Asserts whether the method's metadata is consistent with its signature.
+        /// </summary>
+        /// <param name="listener">The object to report the diagnostics to.</param>
+        public void VerifyMetadata(IErrorListener listener)
+        {
+            DiagnosticBag? bag = null;
+            DiagnosticBag GetBag() => bag ??= new DiagnosticBag();
+
+            if (Signature is null)
+            {
+                GetBag().MetadataBuilder($"Method has no signature assigned.");
+            }
+            else
+            {
+                if (IsStatic != !Signature.HasThis)
+                {
+                    GetBag().MetadataBuilder(IsStatic
+                        ? "Method is static but its signature has the HasThis flag set."
+                        : "Method is non-static but its signature has the HasThis flag unset."
+                    );
+                }
+
+                if (GenericParameters.Count > 0 && !Signature.IsGeneric)
+                {
+                    GetBag().MetadataBuilder(
+                        "Method defines generic parameters but its signature is not marked as generic."
+                    );
+                }
+
+                if (GenericParameters.Count != Signature.GenericParameterCount)
+                {
+                    GetBag().MetadataBuilder(
+                        $"Method defines {GenericParameters.Count} generic parameters but its signature defines {Signature.GenericParameterCount} parameters."
+                    );
+                }
+            }
+
+            if (bag is not null)
+            {
+                listener.RegisterException(new AggregateException(
+                    $"Method {this.SafeToString()} contains invalid or inconsistent metadata.",
+                    bag.Exceptions
+                ));
+            }
+        }
 
         /// <inheritdoc />
         public override string ToString() => FullName;

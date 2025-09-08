@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using AsmResolver.Collections;
@@ -72,6 +73,9 @@ namespace AsmResolver.DotNet
 #endif
         }
 
+#if NET8_0_OR_GREATER
+        [UnconditionalSuppressMessage("SingleFile", "IL3002", Justification = "Callers are explicitly checking for '-1'.")]
+#endif
         internal static bool TryGetHINSTANCE(Module m, out nint hinstance)
         {
 #if !NETSTANDARD2_0

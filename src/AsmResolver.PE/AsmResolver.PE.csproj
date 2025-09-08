@@ -6,14 +6,6 @@
     <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DocumentationFile>bin\Debug\AsmResolver.PE.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DocumentationFile>bin\Release\AsmResolver.PE.xml</DocumentationFile>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
   </ItemGroup>

@@ -1,4 +1,3 @@
-using System;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.Code;
 using AsmResolver.PE.DotNet;
@@ -7,6 +6,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
+using AsmResolver.Tests;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -14,8 +14,6 @@ namespace AsmResolver.PE.Tests.Builder
 {
     public class MixedModeAssemblyTest : IClassFixture<TemporaryDirectoryFixture>
     {
-        private const string Non64BitPlatform = "Test produces a 64-bit assembly which is not supported on 32-bit operating systems.";
-
         private readonly TemporaryDirectoryFixture _fixture;
 
         public MixedModeAssemblyTest(TemporaryDirectoryFixture fixture)
@@ -80,7 +78,7 @@ namespace AsmResolver.PE.Tests.Builder
         [SkippableFact]
         public void NativeBodyWithNoCalls()
         {
-            Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
+            XunitHelpers.SkipIfNotX64();
 
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx, TestReaderParameters);
@@ -104,7 +102,7 @@ namespace AsmResolver.PE.Tests.Builder
         [SkippableFact]
         public void NativeBodyWithCall()
         {
-            Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
+            XunitHelpers.SkipIfNotX64();
 
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx, TestReaderParameters);
@@ -148,9 +146,11 @@ namespace AsmResolver.PE.Tests.Builder
                 .RebuildAndRun(peFile, "TheAnswer", expectedOutput);
         }
 
-        [Fact]
+        [SkippableFact]
         public void NativeBodyWithCallX86()
         {
+            XunitHelpers.SkipIfNotX86OrX64();
+
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx, TestReaderParameters);
 

@@ -91,8 +91,19 @@ namespace AsmResolver.PE.DotNet.Metadata
                 }
                 if (name == TablesStream.UncompressedStreamName)
                     isEncMetadata = true;
-                else if (name == TablesStream.MinimalStreamName)
+            }
+
+            // The CLR performs a case-insensitive comparison for the names of the streams when ENC metadata is present.
+            var comparisonKind = isEncMetadata.GetValueOrDefault()
+                ? StringComparison.OrdinalIgnoreCase
+                : StringComparison.Ordinal;
+            for (int i = 0; i < numberOfStreams; i++)
+            {
+                if (string.Equals(_streamHeaders[i].Name, TablesStream.MinimalStreamName, comparisonKind))
+                {
                     _hasJtdStream = true;
+                    break;
+                }
             }
 
             IsEncMetadata = _isEncMetadata = isEncMetadata ?? false;

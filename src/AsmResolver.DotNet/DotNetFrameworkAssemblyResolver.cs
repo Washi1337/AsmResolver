@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.IO;
 using AsmResolver.Shims;
@@ -18,26 +17,17 @@ namespace AsmResolver.DotNet
         /// Creates a new default assembly resolver.
         /// </summary>
         public DotNetFrameworkAssemblyResolver()
-            : this(UncachedFileService.Instance)
+            : this(new ModuleReaderParameters(UncachedFileService.Instance), MonoPathProvider.Default)
         {
         }
 
         /// <summary>
         /// Creates a new default assembly resolver.
         /// </summary>
-        /// <param name="fileService">The service to use for reading files from the disk.</param>
-        public DotNetFrameworkAssemblyResolver(IFileService fileService)
-            : this(new ModuleReaderParameters(fileService))
-        {
-        }
-
-        /// <summary>
-        /// Creates a new default assembly resolver.
-        /// </summary>
-        public DotNetFrameworkAssemblyResolver(ModuleReaderParameters readerParameters)
+        public DotNetFrameworkAssemblyResolver(ModuleReaderParameters readerParameters, MonoPathProvider? monoPathProvider)
             : base(readerParameters)
         {
-            DetectGacDirectories();
+            DetectGacDirectories(monoPathProvider);
         }
 
         /// <summary>
@@ -67,15 +57,15 @@ namespace AsmResolver.DotNet
             get;
         } = new List<GacDirectory>();
 
-        private void DetectGacDirectories()
+        private void DetectGacDirectories(MonoPathProvider? monoPathProvider)
         {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            if (RuntimeInformationShim.IsRunningOnWindows)
             {
                 DetectWindowsGacDirectories();
             }
-            else if (Directory.Exists("/usr/lib/mono"))
+            else if (monoPathProvider is not null)
             {
-                DetectMonoGacDirectories();
+                DetectMonoGacDirectories(monoPathProvider);
             }
         }
 
@@ -92,24 +82,16 @@ namespace AsmResolver.DotNet
             AddGacDirectories(frameworkGac, "v4.0_");
         }
 
-        private void DetectMonoGacDirectories()
+        private void DetectMonoGacDirectories(MonoPathProvider monoPathProvider)
         {
-            if (Directory.Exists("/usr/lib/mono/gac"))
-                GacMsilDirectories.Add(new GacDirectory("/usr/lib/mono/gac"));
+            if (!string.IsNullOrEmpty(monoPathProvider.GacDirectory))
+                GacMsilDirectories.Add(new GacDirectory(monoPathProvider.GacDirectory!));
 
-            string? mostRecentMonoDirectory = Directory
-                .GetDirectories("/usr/lib/mono")
-                .Where(d => d.EndsWith("-api"))
-                .OrderByDescending(x => x)
-                .FirstOrDefault();
+            if (!string.IsNullOrEmpty(monoPathProvider.ApiDirectory))
+                SearchDirectories.Add(monoPathProvider.ApiDirectory!);
 
-            if (mostRecentMonoDirectory is not null)
-            {
-                SearchDirectories.Add(mostRecentMonoDirectory);
-                string facadesDirectory = Path.Combine(mostRecentMonoDirectory, "Facades");
-                if (Directory.Exists(facadesDirectory))
-                    SearchDirectories.Add(facadesDirectory);
-            }
+            if (!string.IsNullOrEmpty(monoPathProvider.FacadesDirectory))
+                SearchDirectories.Add(monoPathProvider.FacadesDirectory!);
         }
 
         private void AddGacDirectories(string windowsGac, string? prefix)
@@ -135,7 +117,7 @@ namespace AsmResolver.DotNet
             bool is32BitRequired;
 
             // Try infer from declaring module which GAC directory would be preferred.
-            if (assembly is IModuleProvider {Module: { } module})
+            if (assembly is IModuleProvider {ContextModule: { } module})
             {
                 is32BitPreferred = module.IsBit32Preferred;
                 is32BitRequired = module.IsBit32Required;

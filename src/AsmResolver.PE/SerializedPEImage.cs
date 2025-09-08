@@ -91,6 +91,7 @@ namespace AsmResolver.PE
             return ReaderContext.Platform.TargetMachine switch
             {
                 MachineType.Amd64 => new X64ExceptionDirectory(ReaderContext, reader),
+                MachineType.Arm64 => new Arm64ExceptionDirectory(ReaderContext, reader),
                 _ => ReaderContext.NotSupportedAndReturn<IExceptionDirectory>()
             };
         }

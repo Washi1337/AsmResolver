@@ -6,14 +6,6 @@
     <LangVersion>12</LangVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DocumentationFile>bin\Debug\AsmResolver.PE.Win32Resources.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DocumentationFile>bin\Release\AsmResolver.PE.Win32Resources.xml</DocumentationFile>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\AsmResolver.PE\AsmResolver.PE.csproj" />
     <ProjectReference Include="..\AsmResolver\AsmResolver.csproj" />

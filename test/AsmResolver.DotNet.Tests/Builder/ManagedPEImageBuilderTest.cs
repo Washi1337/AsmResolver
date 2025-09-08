@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Builder.Metadata;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -19,7 +21,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             module.Write(stream);
 
-            var image = PEImage.FromBytes(stream.ToArray());
+            var image = PEImage.FromStream(stream);
             var symbol = image
                 .Imports.FirstOrDefault(m => m.Name == "mscoree.dll")
                 ?.Symbols.FirstOrDefault(m => m.Name == "_CorExeMain");
@@ -37,7 +39,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             var module = ModuleDefinition.FromBytes(Properties.Resources.ForwarderLibrary, TestReaderParameters);
             module.Write(stream);
 
-            var image = PEImage.FromBytes(stream.ToArray());
+            var image = PEImage.FromStream(stream);
             var symbol = image
                 .Imports.FirstOrDefault(m => m.Name == "mscoree.dll")
                 ?.Symbols.FirstOrDefault(m => m.Name == "_CorDllMain");
@@ -82,6 +84,35 @@ namespace AsmResolver.DotNet.Tests.Builder
             var result = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveAll));
             var newModule = ModuleDefinition.FromImage(result, TestReaderParameters);
             Assert.Equal(module.Name, newModule.Name);
+        }
+
+        [Fact]
+        public void ConstructPEImageFromNewModuleWithNoMemberSignaturePreservation()
+        {
+            // Prepare module.
+            var module = new ModuleDefinition("Module");
+            var factory = module.CorLibTypeFactory;
+            var method = new MethodDefinition(
+                "Foo",
+                MethodAttributes.Public | MethodAttributes.Static,
+                MethodSignature.CreateStatic(factory.Void)
+            );
+            module.GetOrCreateModuleType().Methods.Add(method);
+            module.ManagedEntryPoint = method;
+
+            // Introduce inconsistency in method metadata.
+            method.IsStatic = false;
+
+            // Verify default behavior stops building.
+            Assert.ThrowsAny<AggregateException>(() => module.ToPEImage(new ManagedPEImageBuilder()));
+
+            // Disabling metadata verification should make the build succeed.
+            var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.NoMemberSignatureVerification));
+
+            var newModule = ModuleDefinition.FromImage(image, TestReaderParameters);
+            var newMethod = newModule.GetModuleType()!.Methods.First(m => m.Name == "Foo");
+            Assert.Equal(method.IsStatic, newMethod.IsStatic);
+            Assert.Equal(method.Signature!.HasThis, newMethod.Signature!.HasThis);
         }
 
         [Fact]
@@ -149,29 +180,6 @@ namespace AsmResolver.DotNet.Tests.Builder
             var newStream = Assert.IsAssignableFrom<CustomMetadataStream>(
                 newImage.DotNetDirectory!.Metadata!.GetStream("#Custom"));
             Assert.Equal(data, Assert.IsAssignableFrom<IReadableSegment>(newStream.Contents).ToArray());
-        }
-
-        [Fact]
-        public void BuildInvalidImageShouldRegisterDiagnostics()
-        {
-            // Prepare temp assembly.
-            var assembly = new AssemblyDefinition("Assembly", new Version(1, 0, 0, 0));
-            var module = new ModuleDefinition("Module");
-            assembly.Modules.Add(module);
-
-            // Add some field with an non-imported field type.
-            module.GetOrCreateModuleType().Fields.Add(new FieldDefinition(
-                "Field",
-                FieldAttributes.Static,
-                new TypeReference(null, "NonImportedNamespace", "NonImportedType").ToTypeSignature()));
-
-            // Build.
-            var bag = new DiagnosticBag();
-            var image = module.ToPEImage(new ManagedPEImageBuilder(bag), false);
-
-            // Verify diagnostics.
-            Assert.NotNull(image);
-            Assert.Contains(bag.Exceptions, x => x is MemberNotImportedException);
         }
 
         [Fact]

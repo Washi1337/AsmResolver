@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             var method = new MethodDefinition("Dummy", flags, signature);
 
-            var body = new CilMethodBody(method);
+            var body = new CilMethodBody();
             for (int i = 0; i < localCount; i++)
                 body.LocalVariables.Add(new CilLocalVariable(_module.CorLibTypeFactory.Object));
 
@@ -430,6 +430,18 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             Assert.All(offsets.Skip(1), offset => Assert.NotEqual(0, offset));
             instructions.CalculateOffsets();
             Assert.Equal(offsets, instructions.Select(i => i.Offset));
+        }
+
+        [Fact]
+        public void InsertInlineSigInstructionShouldOnlyAcceptWrappedMethodSignatures()
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+
+            instructions.Add(CilOpCodes.Calli, MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void).MakeStandAloneSignature());
+
+            Assert.ThrowsAny<InvalidCilInstructionException>(() =>
+                instructions.Add(CilOpCodes.Calli, new DataBlobSignature(new byte[] { 1, 2, 3 }).MakeStandAloneSignature())
+            );
         }
     }
 }

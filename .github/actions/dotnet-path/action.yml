@@ -1,0 +1,44 @@
+name: Get .NET Path
+description: Get .NET path for the architecture
+
+inputs:
+  architecture:
+    description: 'The architecture to use'
+    required: true
+
+outputs:
+  install-path:
+    description: 'The .NET path for the architecture'
+    value: ${{ steps.dotnet.outputs.install-path }}
+  exe-path:
+    description: 'The .NET path for the architecture'
+    value: ${{ steps.dotnet.outputs.exe-path }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get Program Files path for ${{inputs.architecture}}
+      id: program-files
+      run: |
+        if ('${{ inputs.architecture == 'x86'}}' -eq 'true') {
+          $path = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ProgramFilesX86);
+          "path=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Append;
+        } elseif ('${{ inputs.architecture == 'x64'}}' -eq 'true') {
+          $path = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ProgramFiles);
+          "path=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Append;
+        }
+      shell: pwsh
+
+    - name: Get .NET path for ${{inputs.architecture}}
+      id: dotnet
+      run: |
+        if ('${{runner.os == 'Windows'}}' -eq 'true') {
+          $install = "${{steps.program-files.outputs.path}}\dotnet";
+          $dotnet = "${{steps.program-files.outputs.path}}\dotnet\dotnet.exe";
+        } else {
+          $install = "";
+          $dotnet = 'dotnet';
+        }
+        "install-path=$install" | Out-File -FilePath $env:GITHUB_OUTPUT -Append;
+        "exe-path=$dotnet" | Out-File -FilePath $env:GITHUB_OUTPUT -Append;
+      shell: pwsh

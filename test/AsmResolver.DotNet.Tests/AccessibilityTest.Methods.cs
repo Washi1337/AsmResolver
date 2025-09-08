@@ -8,7 +8,7 @@ public partial class AccessibilityTest
 {
     private static MethodDefinition AddMethod(TypeDefinition declaringType, string name, MethodAttributes attributes)
     {
-        var method = new MethodDefinition(name, attributes, MethodSignature.CreateInstance(declaringType.Module!.CorLibTypeFactory.Void));
+        var method = new MethodDefinition(name, attributes, MethodSignature.CreateInstance(declaringType.DeclaringModule!.CorLibTypeFactory.Void));
         declaringType.Methods.Add(method);
         return method;
     }
@@ -143,7 +143,7 @@ public partial class AccessibilityTest
         var method = AddMethod(type1, "Method1", MethodAttributes.Private);
         var type2 = AddNestedType(type1, "Type2", TypeAttributes.NestedPrivate);
 
-        Assert.False(method.IsAccessibleFromType(type2));
+        Assert.True(method.IsAccessibleFromType(type2));
     }
 
 }

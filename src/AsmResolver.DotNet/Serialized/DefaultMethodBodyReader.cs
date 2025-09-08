@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Serialized
                 return result;
             }
 
-            return new UnresolvedMethodBody(owner, bodyReference);
+            return new UnresolvedMethodBody(bodyReference);
         }
     }
 }

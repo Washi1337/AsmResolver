@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to a method or a field in an (external) .NET assembly.
     /// </summary>
-    public class MemberReference : MetadataMember, ICustomAttributeType, IFieldDescriptor
+    public class MemberReference : MetadataMember, IMethodDefOrRef, IFieldDescriptor
     {
         private readonly LazyVariable<MemberReference, IMemberRefParent?> _parent;
         private readonly LazyVariable<MemberReference, Utf8String?> _name;
@@ -112,7 +112,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ModuleDefinition? Module => Parent?.Module;
+        public ModuleDefinition? ContextModule => Parent?.ContextModule;
 
         /// <summary>
         /// Gets the type that declares the referenced member, if available.
@@ -137,28 +137,27 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <inheritdoc />
+        public IMemberDefinition? Resolve() => ContextModule is { } context ? Resolve(context) : null;
+
         /// <summary>
         /// Resolves the reference to a member definition.
         /// </summary>
         /// <returns>The resolved member definition, or <c>null</c> if the member could not be resolved.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the member reference has an invalid signature.</exception>
-        /// <remarks>
-        /// This method can only be invoked if the reference was added to a module.
-        /// </remarks>
-        public IMemberDefinition? Resolve()
+        public IMemberDefinition? Resolve(ModuleDefinition context)
         {
             if (IsMethod)
-                return ((IMethodDescriptor) this).Resolve();
+                return ((IMethodDescriptor) this).Resolve(context);
             if (IsField)
-                return ((IFieldDescriptor) this).Resolve();
+                return ((IFieldDescriptor) this).Resolve(context);
             throw new ArgumentOutOfRangeException();
         }
 
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
-            return Module == module
-                   && (Signature?.IsImportedInModule(module) ?? false);
+            return ContextModule == module && (Signature?.IsImportedInModule(module) ?? false);
         }
 
         /// <summary>
@@ -173,18 +172,26 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
-        FieldDefinition? IFieldDescriptor.Resolve()
+        FieldDefinition? IFieldDescriptor.Resolve() => ContextModule is { } context
+            ? ((IFieldDescriptor) this).Resolve(context)
+            : null;
+
+        FieldDefinition? IFieldDescriptor.Resolve(ModuleDefinition context)
         {
-            if (!IsField)
-                throw new InvalidOperationException("Member reference must reference a field.");
-            return Module?.MetadataResolver.ResolveField(this);
+            return IsField
+                ? context.MetadataResolver.ResolveField(this)
+                : throw new InvalidOperationException("Member reference must reference a field.");
         }
 
-        MethodDefinition? IMethodDescriptor.Resolve()
+        MethodDefinition? IMethodDescriptor.Resolve() => ContextModule is { } context
+            ? ((IMethodDescriptor) this).Resolve(context)
+            : null;
+
+        MethodDefinition? IMethodDescriptor.Resolve(ModuleDefinition context)
         {
-            if (!IsMethod)
-                throw new InvalidOperationException("Member reference must reference a method.");
-            return Module?.MetadataResolver.ResolveMethod(this);
+            return IsMethod
+                ? context.MetadataResolver.ResolveMethod(this)
+                : throw new InvalidOperationException("Member reference must reference a method.");
         }
 
         /// <summary>

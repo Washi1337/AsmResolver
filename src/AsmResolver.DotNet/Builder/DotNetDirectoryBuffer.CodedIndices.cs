@@ -24,22 +24,22 @@ namespace AsmResolver.DotNet.Builder
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
             var row = new CustomAttributeRow(
                 encoder.EncodeToken(ownerToken),
-                AddCustomAttributeType(attribute.Constructor),
-                Metadata.BlobStream.GetBlobIndex(this, attribute.Signature, ErrorListener));
+                AddCustomAttributeType(attribute.Constructor, attribute),
+                Metadata.BlobStream.GetBlobIndex(this, attribute.Signature, ErrorListener, attribute));
 
             table.Add(attribute, row);
         }
 
-        private uint AddResolutionScope(IResolutionScope? scope, bool allowDuplicates, bool preserveRid)
+        private uint AddResolutionScope(IResolutionScope? scope, bool allowDuplicates, bool preserveRid, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(scope))
+            if (scope is null)
                 return 0;
 
             var token = scope.MetadataToken.Table switch
             {
-                TableIndex.AssemblyRef => AddAssemblyReference(scope as AssemblyReference, allowDuplicates, preserveRid),
+                TableIndex.AssemblyRef => AddAssemblyReference(scope as AssemblyReference, allowDuplicates, preserveRid, diagnosticSource),
                 TableIndex.TypeRef => AddTypeReference(scope as TypeReference, allowDuplicates, preserveRid),
-                TableIndex.ModuleRef => AddModuleReference(scope as ModuleReference, allowDuplicates, preserveRid),
+                TableIndex.ModuleRef => AddModuleReference(scope as ModuleReference, allowDuplicates, preserveRid, diagnosticSource),
                 TableIndex.Module => new MetadataToken(TableIndex.Module, 1),
                 _ => throw new ArgumentOutOfRangeException(nameof(scope))
             };
@@ -50,16 +50,16 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public uint GetTypeDefOrRefIndex(ITypeDefOrRef? type)
+        public uint GetTypeDefOrRefIndex(ITypeDefOrRef? type, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(type))
+            if (type is null)
                 return 0;
 
             var token = type.MetadataToken.Table switch
             {
-                TableIndex.TypeDef => GetTypeDefinitionToken(type as TypeDefinition),
-                TableIndex.TypeRef => GetTypeReferenceToken(type as TypeReference),
-                TableIndex.TypeSpec => GetTypeSpecificationToken(type as TypeSpecification),
+                TableIndex.TypeDef => GetTypeDefinitionToken(type as TypeDefinition, diagnosticSource),
+                TableIndex.TypeRef => GetTypeReferenceToken(type as TypeReference, diagnosticSource),
+                TableIndex.TypeSpec => GetTypeSpecificationToken(type as TypeSpecification, diagnosticSource),
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
 
@@ -68,18 +68,18 @@ namespace AsmResolver.DotNet.Builder
                 .EncodeToken(token);
         }
 
-        private uint AddMemberRefParent(IMemberRefParent? parent)
+        private uint AddMemberRefParent(IMemberRefParent? parent, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(parent))
+            if (parent is null)
                 return 0;
 
             var token = parent.MetadataToken.Table switch
             {
-                TableIndex.TypeDef => GetTypeDefinitionToken(parent as TypeDefinition),
-                TableIndex.TypeRef => GetTypeReferenceToken(parent as TypeReference),
-                TableIndex.TypeSpec => GetTypeSpecificationToken(parent as TypeSpecification),
-                TableIndex.Method => GetMethodDefinitionToken(parent as MethodDefinition),
-                TableIndex.ModuleRef => GetModuleReferenceToken(parent as ModuleReference),
+                TableIndex.TypeDef => GetTypeDefinitionToken(parent as TypeDefinition, diagnosticSource),
+                TableIndex.TypeRef => GetTypeReferenceToken(parent as TypeReference, diagnosticSource),
+                TableIndex.TypeSpec => GetTypeSpecificationToken(parent as TypeSpecification, diagnosticSource),
+                TableIndex.Method => GetMethodDefinitionToken(parent as MethodDefinition, diagnosticSource),
+                TableIndex.ModuleRef => GetModuleReferenceToken(parent as ModuleReference, diagnosticSource),
                 _ => throw new ArgumentOutOfRangeException(nameof(parent))
             };
 
@@ -88,15 +88,15 @@ namespace AsmResolver.DotNet.Builder
                 .EncodeToken(token);
         }
 
-        private uint AddMethodDefOrRef(IMethodDefOrRef? method)
+        private uint AddMethodDefOrRef(IMethodDefOrRef? method, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(method))
+            if (method is null)
                 return 0;
 
             var token = method.MetadataToken.Table switch
             {
-                TableIndex.Method => GetMethodDefinitionToken(method as MethodDefinition),
-                TableIndex.MemberRef => GetMemberReferenceToken(method as MemberReference),
+                TableIndex.Method => GetMethodDefinitionToken(method as MethodDefinition, diagnosticSource),
+                TableIndex.MemberRef => GetMemberReferenceToken(method as MemberReference, diagnosticSource),
                 _ => throw new ArgumentOutOfRangeException(nameof(method))
             };
 
@@ -105,15 +105,15 @@ namespace AsmResolver.DotNet.Builder
                 .EncodeToken(token);
         }
 
-        private uint AddCustomAttributeType(ICustomAttributeType? constructor)
+        private uint AddCustomAttributeType(ICustomAttributeType? constructor, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(constructor))
+            if (constructor is null)
                 return 0;
 
             var token = constructor.MetadataToken.Table switch
             {
-                TableIndex.Method => GetMethodDefinitionToken(constructor as MethodDefinition),
-                TableIndex.MemberRef => GetMemberReferenceToken(constructor as MemberReference),
+                TableIndex.Method => GetMethodDefinitionToken(constructor as MethodDefinition, diagnosticSource),
+                TableIndex.MemberRef => GetMemberReferenceToken(constructor as MemberReference, diagnosticSource),
                 _ => throw new ArgumentOutOfRangeException(nameof(constructor))
             };
 
@@ -133,7 +133,7 @@ namespace AsmResolver.DotNet.Builder
             var row = new ConstantRow(
                 constant.Type,
                 encoder.EncodeToken(ownerToken),
-                Metadata.BlobStream.GetBlobIndex(this, constant.Value, ErrorListener));
+                Metadata.BlobStream.GetBlobIndex(this, constant.Value, ErrorListener, constant));
 
             table.Add(constant, row);
         }
@@ -150,19 +150,19 @@ namespace AsmResolver.DotNet.Builder
                 implementationMap.Attributes,
                 encoder.EncodeToken(ownerToken),
                 Metadata.StringsStream.GetStringIndex(implementationMap.Name),
-                GetModuleReferenceToken(implementationMap.Scope).Rid);
+                GetModuleReferenceToken(implementationMap.Scope, implementationMap).Rid);
 
             table.Add(implementationMap, row);
         }
 
-        private uint AddImplementation(IImplementation? implementation)
+        private uint AddImplementation(IImplementation? implementation, object? diagnosticSource = null)
         {
             if (implementation is null)
                 return 0;
 
             var token = implementation switch
             {
-                AssemblyReference assemblyReference => GetAssemblyReferenceToken(assemblyReference),
+                AssemblyReference assemblyReference => GetAssemblyReferenceToken(assemblyReference, diagnosticSource),
                 ExportedType exportedType => AddExportedType(exportedType),
                 FileReference fileReference => AddFileReference(fileReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(implementation))
@@ -184,7 +184,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new SecurityDeclarationRow(
                     declaration.Action,
                     encoder.EncodeToken(ownerToken),
-                    Metadata.BlobStream.GetBlobIndex(this, declaration.PermissionSet, ErrorListener));
+                    Metadata.BlobStream.GetBlobIndex(this, declaration.PermissionSet, ErrorListener, declaration));
                 table.Add(declaration, row);
             }
         }
@@ -199,7 +199,7 @@ namespace AsmResolver.DotNet.Builder
 
             var row = new FieldMarshalRow(
                 encoder.EncodeToken(ownerToken),
-                Metadata.BlobStream.GetBlobIndex(this, owner.MarshalDescriptor, ErrorListener));
+                Metadata.BlobStream.GetBlobIndex(this, owner.MarshalDescriptor, ErrorListener, owner));
             table.Add(owner, row);
         }
 

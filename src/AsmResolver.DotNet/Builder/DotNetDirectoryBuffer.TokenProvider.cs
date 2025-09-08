@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Builder
         public uint GetUserStringIndex(string value) => Metadata.UserStringsStream.GetStringIndex(value);
 
         /// <inheritdoc />
-        public MetadataToken GetTypeReferenceToken(TypeReference? type)
+        public MetadataToken GetTypeReferenceToken(TypeReference? type, object? diagnosticSource = null)
         {
             return AddTypeReference(type, false, false);
         }
@@ -28,14 +28,15 @@ namespace AsmResolver.DotNet.Builder
         /// <returns>The newly assigned metadata token.</returns>
         public MetadataToken AddTypeReference(TypeReference? type, bool allowDuplicates, bool preserveRid)
         {
-            if (!AssertIsImported(type))
+            if (type is null)
                 return MetadataToken.Zero;
 
             var table = Metadata.TablesStream.GetDistinctTable<TypeReferenceRow>(TableIndex.TypeRef);
             var row = new TypeReferenceRow(
-                AddResolutionScope(type.Scope, allowDuplicates, preserveRid),
+                AddResolutionScope(type.Scope, allowDuplicates, preserveRid, type),
                 Metadata.StringsStream.GetStringIndex(type.Name),
-                Metadata.StringsStream.GetStringIndex(type.Namespace));
+                Metadata.StringsStream.GetStringIndex(type.Namespace)
+            );
 
             var token = preserveRid && type.MetadataToken.Rid != 0
                 ? table.Insert(type.MetadataToken.Rid, row, allowDuplicates)
@@ -47,25 +48,25 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetTypeDefinitionToken(TypeDefinition? type)
+        public MetadataToken GetTypeDefinitionToken(TypeDefinition? type, object? diagnosticSource = null)
         {
-            return AssertIsImported(type)
+            return AssertIsInSameModule(type, diagnosticSource)
                 ? _tokenMapping[type]
                 : MetadataToken.Zero;
         }
 
         /// <inheritdoc />
-        public MetadataToken GetFieldDefinitionToken(FieldDefinition? field)
+        public MetadataToken GetFieldDefinitionToken(FieldDefinition? field, object? diagnosticSource = null)
         {
-            return AssertIsImported(field)
+            return AssertIsInSameModule(field, diagnosticSource)
                 ? _tokenMapping[field]
                 : MetadataToken.Zero;
         }
 
         /// <inheritdoc />
-        public MetadataToken GetMethodDefinitionToken(MethodDefinition? method)
+        public MetadataToken GetMethodDefinitionToken(MethodDefinition? method, object? diagnosticSource = null)
         {
-            return AssertIsImported(method)
+            return AssertIsInSameModule(method, diagnosticSource)
                 ? _tokenMapping[method]
                 : MetadataToken.Zero;
         }
@@ -78,7 +79,7 @@ namespace AsmResolver.DotNet.Builder
         /// <returns>The metadata token of the added parameter definition.</returns>
         public MetadataToken GetParameterDefinitionToken(ParameterDefinition? parameter)
         {
-            return AssertIsImported(parameter)
+            return AssertIsInSameModule(parameter, parameter?.Method)
                 ? _tokenMapping[parameter]
                 : MetadataToken.Zero;
         }
@@ -90,7 +91,7 @@ namespace AsmResolver.DotNet.Builder
         /// <returns>The metadata token of the added property definition.</returns>
         public MetadataToken GetPropertyDefinitionToken(PropertyDefinition? property)
         {
-            return AssertIsImported(property)
+            return AssertIsInSameModule(property, property?.DeclaringType)
                 ? _tokenMapping[property]
                 : MetadataToken.Zero;
         }
@@ -102,15 +103,15 @@ namespace AsmResolver.DotNet.Builder
         /// <returns>The metadata token of the added event definition.</returns>
         public MetadataToken GetEventDefinitionToken(EventDefinition? @event)
         {
-            return AssertIsImported(@event)
+            return AssertIsInSameModule(@event, @event?.DeclaringType)
                 ? _tokenMapping[@event]
                 : MetadataToken.Zero;
         }
 
         /// <inheritdoc />
-        public MetadataToken GetMemberReferenceToken(MemberReference? member)
+        public MetadataToken GetMemberReferenceToken(MemberReference? member, object? diagnosticSource = null)
         {
-            return AddMemberReference(member, false);
+            return AddMemberReference(member, false, diagnosticSource);
         }
 
         /// <summary>
@@ -121,17 +122,19 @@ namespace AsmResolver.DotNet.Builder
         /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
         /// is supposed to be removed and the token of the original should be returned instead.
         /// </param>
+        /// <param name="diagnosticSource">The object that referenced the member.</param>
         /// <returns>The newly assigned metadata token.</returns>
-        public MetadataToken AddMemberReference(MemberReference? member, bool allowDuplicates)
+        public MetadataToken AddMemberReference(MemberReference? member, bool allowDuplicates, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(member))
+            if (member is null)
                 return MetadataToken.Zero;
 
             var table = Metadata.TablesStream.GetDistinctTable<MemberReferenceRow>(TableIndex.MemberRef);
             var row = new MemberReferenceRow(
-                AddMemberRefParent(member.Parent),
+                AddMemberRefParent(member.Parent, member),
                 Metadata.StringsStream.GetStringIndex(member.Name),
-                Metadata.BlobStream.GetBlobIndex(this, member.Signature, ErrorListener));
+                Metadata.BlobStream.GetBlobIndex(this, member.Signature, ErrorListener, diagnosticSource)
+            );
 
             var token = table.Add(row, allowDuplicates);
             _tokenMapping.Register(member, token);
@@ -140,9 +143,9 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetStandAloneSignatureToken(StandAloneSignature? signature)
+        public MetadataToken GetStandAloneSignatureToken(StandAloneSignature? signature, object? diagnosticSource = null)
         {
-            return AddStandAloneSignature(signature, false);
+            return AddStandAloneSignature(signature, false, diagnosticSource);
         }
 
         /// <summary>
@@ -153,15 +156,17 @@ namespace AsmResolver.DotNet.Builder
         /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
         /// is supposed to be removed and the token of the original should be returned instead.
         /// </param>
+        /// <param name="diagnosticSource">The object that referenced the standalone signature.</param>
         /// <returns>The newly assigned metadata token.</returns>
-        public MetadataToken AddStandAloneSignature(StandAloneSignature? signature, bool allowDuplicates)
+        public MetadataToken AddStandAloneSignature(StandAloneSignature? signature, bool allowDuplicates, object? diagnosticSource = null)
         {
             if (signature is null)
                 return MetadataToken.Zero;
 
             var table = Metadata.TablesStream.GetDistinctTable<StandAloneSignatureRow>(TableIndex.StandAloneSig);
             var row = new StandAloneSignatureRow(
-                Metadata.BlobStream.GetBlobIndex(this, signature.Signature, ErrorListener));
+                Metadata.BlobStream.GetBlobIndex(this, signature.Signature, ErrorListener, diagnosticSource)
+            );
 
             var token = table.Add(row, allowDuplicates);
             _tokenMapping.Register(signature, token);
@@ -170,9 +175,9 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetAssemblyReferenceToken(AssemblyReference? assembly)
+        public MetadataToken GetAssemblyReferenceToken(AssemblyReference? assembly, object? diagnosticSource = null)
         {
-            return AddAssemblyReference(assembly, false, false);
+            return AddAssemblyReference(assembly, false, false, diagnosticSource);
         }
 
         /// <summary>
@@ -186,15 +191,17 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="preserveRid">
         /// <c>true</c> if the metadata token of the assembly should be preserved, <c>false</c> otherwise.
         /// </param>
+        /// <param name="diagnosticSource">The object that referenced the assembly.</param>
         /// <returns>The newly assigned metadata token.</returns>
-        public MetadataToken AddAssemblyReference(AssemblyReference? assembly, bool allowDuplicates, bool preserveRid)
+        public MetadataToken AddAssemblyReference(AssemblyReference? assembly, bool allowDuplicates, bool preserveRid, object? diagnosticSource = null)
         {
-            if (assembly is null || !AssertIsImported(assembly))
+            if (assembly is null)
                 return MetadataToken.Zero;
 
             var table = Metadata.TablesStream.GetDistinctTable<AssemblyReferenceRow>(TableIndex.AssemblyRef);
 
-            var row = new AssemblyReferenceRow((ushort) assembly.Version.Major,
+            var row = new AssemblyReferenceRow(
+                (ushort) assembly.Version.Major,
                 (ushort) assembly.Version.Minor,
                 (ushort) assembly.Version.Build,
                 (ushort) assembly.Version.Revision,
@@ -202,7 +209,8 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.BlobStream.GetBlobIndex(assembly.PublicKeyOrToken),
                 Metadata.StringsStream.GetStringIndex(assembly.Name),
                 Metadata.StringsStream.GetStringIndex(assembly.Culture),
-                Metadata.BlobStream.GetBlobIndex(assembly.HashValue));
+                Metadata.BlobStream.GetBlobIndex(assembly.HashValue)
+            );
 
             var token = preserveRid && assembly.MetadataToken.Rid != 0
                 ? table.Insert(assembly.MetadataToken.Rid, row, allowDuplicates)
@@ -216,16 +224,17 @@ namespace AsmResolver.DotNet.Builder
         /// Adds a single module reference to the buffer.
         /// </summary>
         /// <param name="reference">The reference to add.</param>
+        /// <param name="diagnosticSource">The object that referenced the module.</param>
         /// <returns>The new metadata token assigned to the module reference.</returns>
-        public MetadataToken GetModuleReferenceToken(ModuleReference? reference)
+        public MetadataToken GetModuleReferenceToken(ModuleReference? reference, object? diagnosticSource = null)
         {
-            return AddModuleReference(reference, false, false);
+            return AddModuleReference(reference, false, false, diagnosticSource);
         }
 
         /// <summary>
         /// Adds a module reference to the buffer.
         /// </summary>
-        /// <param name="reference">The reference to add.</param>
+        /// <param name="module">The reference to add.</param>
         /// <param name="allowDuplicates">
         /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
         /// is supposed to be removed and the token of the original should be returned instead.
@@ -233,27 +242,28 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="preserveRid">
         /// <c>true</c> if the metadata token of the module should be preserved, <c>false</c> otherwise.
         /// </param>
+        /// <param name="diagnosticSource">The object that referenced the module.</param>
         /// <returns>The newly assigned metadata token.</returns>
-        public MetadataToken AddModuleReference(ModuleReference? reference, bool allowDuplicates, bool preserveRid)
+        public MetadataToken AddModuleReference(ModuleReference? module, bool allowDuplicates, bool preserveRid, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(reference))
+            if (module is null)
                 return MetadataToken.Zero;
 
             var table = Metadata.TablesStream.GetDistinctTable<ModuleReferenceRow>(TableIndex.ModuleRef);
 
-            var row = new ModuleReferenceRow(Metadata.StringsStream.GetStringIndex(reference.Name));
-            var token = preserveRid && reference.MetadataToken.Rid != 0
-                ? table.Insert(reference.MetadataToken.Rid, row, allowDuplicates)
+            var row = new ModuleReferenceRow(Metadata.StringsStream.GetStringIndex(module.Name));
+            var token = preserveRid && module.MetadataToken.Rid != 0
+                ? table.Insert(module.MetadataToken.Rid, row, allowDuplicates)
                 : table.Add(row, allowDuplicates);
 
-            AddCustomAttributes(token, reference);
+            AddCustomAttributes(token, module);
             return token;
         }
 
         /// <inheritdoc />
-        public MetadataToken GetTypeSpecificationToken(TypeSpecification? type)
+        public MetadataToken GetTypeSpecificationToken(TypeSpecification? type, object? diagnosticSource = null)
         {
-            return AddTypeSpecification(type, false);
+            return AddTypeSpecification(type, false, diagnosticSource);
         }
 
         /// <summary>
@@ -264,14 +274,17 @@ namespace AsmResolver.DotNet.Builder
         /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
         /// is supposed to be removed and the token of the original should be returned instead.
         /// </param>
+        /// <param name="diagnosticSource">The object that referenced the type specification.</param>
         /// <returns>The newly assigned metadata token.</returns>
-        public MetadataToken AddTypeSpecification(TypeSpecification? type, bool allowDuplicates)
+        public MetadataToken AddTypeSpecification(TypeSpecification? type, bool allowDuplicates, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(type))
+            if (type is null)
                 return MetadataToken.Zero;
 
             var table = Metadata.TablesStream.GetDistinctTable<TypeSpecificationRow>(TableIndex.TypeSpec);
-            var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(this, type.Signature, ErrorListener));
+            var row = new TypeSpecificationRow(
+                Metadata.BlobStream.GetBlobIndex(this, type.Signature, ErrorListener, diagnosticSource)
+            );
 
             var token = table.Add(row, allowDuplicates);
             _tokenMapping.Register(type, token);
@@ -280,9 +293,9 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public MetadataToken GetMethodSpecificationToken(MethodSpecification? method)
+        public MetadataToken GetMethodSpecificationToken(MethodSpecification? method, object? diagnosticSource = null)
         {
-            return AddMethodSpecification(method, false);
+            return AddMethodSpecification(method, false, diagnosticSource);
         }
 
         /// <summary>
@@ -293,16 +306,18 @@ namespace AsmResolver.DotNet.Builder
         /// <c>true</c> if the row is always to be added to the end of the buffer, <c>false</c> if a duplicated row
         /// is supposed to be removed and the token of the original should be returned instead.
         /// </param>
+        /// <param name="diagnosticSource">The object that referenced the method specification.</param>
         /// <returns>The newly assigned metadata token.</returns>
-        public MetadataToken AddMethodSpecification(MethodSpecification? method, bool allowDuplicates)
+        public MetadataToken AddMethodSpecification(MethodSpecification? method, bool allowDuplicates, object? diagnosticSource = null)
         {
-            if (!AssertIsImported(method))
+            if (method is null)
                 return MetadataToken.Zero;
 
             var table = Metadata.TablesStream.GetDistinctTable<MethodSpecificationRow>(TableIndex.MethodSpec);
             var row = new MethodSpecificationRow(
-                AddMethodDefOrRef(method.Method),
-                Metadata.BlobStream.GetBlobIndex(this, method.Signature, ErrorListener));
+                AddMethodDefOrRef(method.Method, method),
+                Metadata.BlobStream.GetBlobIndex(this, method.Signature, ErrorListener, diagnosticSource)
+            );
 
             var token = table.Add(row, allowDuplicates);
             _tokenMapping.Register(method, token);

@@ -69,29 +69,33 @@ method.ImpleAttributes |= MethodImplAttributes.Native | MethodImplAttributes.Unm
 
 ## The NativeMethodBody class
 
-The `MethodDefinition` class defines a property called
-`NativeMethodBody`, which exposes the unmanaged implementation of the
-method.
-
-Each `NativeMethodBody` is assigned to exactly one `MethodDefinition`.
-Upon instantiation of such a method body, it is therefore required to
-specify the owner of the body:
+The `MethodDefinition` class defines a property `NativeMethodBody`, which exposes the unmanaged implementation of the method.
 
 ``` csharp
 MethodDefinition method = ...
 
-var body = new NativeMethodBody(method);
+var body = new NativeMethodBody();
 method.NativeMethodBody = body;
 ```
 
-The `NativeMethodBody` class consists of the following basic building
-blocks:
+> [!NOTE]
+> Each method body can be assigned to exactly one method, and every method can only have one method body.
+> Assigning a method body to another method will result in an exception to be thrown.
+> To swap method bodies, you will first have to remove it from the existing method (e.g., by setting `MethodDefinition::NativeMethodBody` property to `null`).
+
+> [!NOTE]
+> Prior to AsmResolver v6.0.0, `NativeMethodBody` needs to be initialized with the owner explicitly set.
+> ```csharp
+> MethodDefinition method = ...
+> var body = new NativeMethodBody(owner: method);
+> ```
+
+The `NativeMethodBody` class consists of the following basic building blocks:
 
 -   `Code`: The raw code stream to be executed.
 -   `AddressFixups`: A collection of fixups that need to be applied
     within the code upon writing the code to the disk.
 
-In the following sections, we will briefly go over each of them.
 
 ## Writing native code
 

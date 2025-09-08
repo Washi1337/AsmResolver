@@ -23,11 +23,13 @@
     - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Channel 6.0 -InstallDir $env:DOTNET_INSTALL_DIR'
     - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Channel 7.0 -InstallDir $env:DOTNET_INSTALL_DIR'
     - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Channel 8.0 -InstallDir $env:DOTNET_INSTALL_DIR'
+    - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Channel 9.0 -InstallDir $env:DOTNET_INSTALL_DIR'
     - ps: $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
     - ps: dotnet --info
 
   before_build:
     - dotnet restore
+    - msbuild /t:Restore /p:RestorePackages=true /verbosity:minimal
 
   build:
     verbosity: minimal
@@ -67,11 +69,13 @@
     - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Channel 6.0 -InstallDir $env:DOTNET_INSTALL_DIR'
     - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Channel 7.0 -InstallDir $env:DOTNET_INSTALL_DIR'
     - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Channel 8.0 -InstallDir $env:DOTNET_INSTALL_DIR'
+    - ps: '& "$($env:DOTNET_INSTALL_DIR)/dotnet-install.ps1" -Channel 9.0 -InstallDir $env:DOTNET_INSTALL_DIR'
     - ps: $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
     - ps: dotnet --info
 
   before_build:
     - dotnet restore
+    - msbuild /t:Restore /p:RestorePackages=true /verbosity:minimal
 
   build:
     verbosity: minimal

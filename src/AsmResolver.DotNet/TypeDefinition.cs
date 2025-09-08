@@ -5,9 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
-using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.Shims;
 
@@ -19,11 +17,10 @@ namespace AsmResolver.DotNet
     public class TypeDefinition :
         MetadataMember,
         ITypeDefOrRef,
-        IMemberDefinition,
         IHasGenericParameters,
         IHasSecurityDeclaration,
-        IOwnedCollectionElement<ModuleDefinition>,
-        IOwnedCollectionElement<TypeDefinition>
+        IOwnedCollectionElement<ITypeOwner>,
+        ITypeOwner
     {
         internal static readonly Utf8String ModuleTypeName = "<Module>";
 
@@ -420,16 +417,39 @@ namespace AsmResolver.DotNet
             set => _baseType.SetValue(value);
         }
 
+        ITypeOwner? IOwnedCollectionElement<ITypeOwner>.Owner
+        {
+            get => DeclaringType is not null ? DeclaringType : _module;
+            set
+            {
+                switch (value)
+                {
+                    case ModuleDefinition module:
+                        DeclaringType = null;
+                        _module = module;
+                        break;
+                    case TypeDefinition type:
+                        DeclaringType = type;
+                        _module = null;
+                        break;
+                    case null:
+                        DeclaringType = null;
+                        _module = null;
+                        break;
+                    default:
+                        throw new NotSupportedException("The Owner of a TypeDefinition must be a ModuleDefinition or another TypeDefinition");
+                }
+            }
+        }
+
+        IList<TypeDefinition> ITypeOwner.OwnedTypes => NestedTypes;
+
         /// <summary>
         /// Gets the module that defines the type.
         /// </summary>
-        public ModuleDefinition? Module => DeclaringType is not null ? DeclaringType.Module : _module;
+        public ModuleDefinition? DeclaringModule => DeclaringType is not null ? DeclaringType.DeclaringModule : _module;
 
-        ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
-        {
-            get => Module;
-            set => _module = value;
-        }
+        ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <summary>
         /// When this type is nested, gets the enclosing type.
@@ -443,12 +463,6 @@ namespace AsmResolver.DotNet
         ITypeDefOrRef? ITypeDefOrRef.DeclaringType => DeclaringType;
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
-
-        TypeDefinition? IOwnedCollectionElement<TypeDefinition>.Owner
-        {
-            get => DeclaringType;
-            set => DeclaringType = value;
-        }
 
         /// <summary>
         /// Gets a value indicating whether the type is enclosed by another type.
@@ -473,7 +487,7 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         [MemberNotNullWhen(true, nameof(BaseType))]
-        public bool IsValueType => BaseType is {} && (BaseType.IsTypeOf("System", nameof(ValueType)) || IsEnum);
+        public bool IsValueType => !this.IsTypeOf("System", nameof(Enum)) && BaseType is { } && (BaseType.IsTypeOf("System", nameof(ValueType)) || IsEnum);
 
         /// <summary>
         /// Gets a value indicating whether the type defines an enumeration of discrete values.
@@ -502,15 +516,15 @@ namespace AsmResolver.DotNet
         /// <c>true</c> if this is the global (i.e., &lt;Module&gt;) type, otherwise <c>false</c>.
         /// </summary>
         /// <remarks>
-        /// If the global (i.e., &lt;Module&gt;) type was not added or does not exist yet in the <see cref="Module"/>,
+        /// If the global (i.e., &lt;Module&gt;) type was not added or does not exist yet in the <see cref="DeclaringModule"/>,
         /// this will return <c>false</c>.
         /// </remarks>
-        [MemberNotNullWhen(true, nameof(Module))]
+        [MemberNotNullWhen(true, nameof(DeclaringModule))]
         public bool IsModuleType
         {
             get
             {
-                var module = Module?.GetModuleType();
+                var module = DeclaringModule?.GetModuleType();
                 return module != null && module == this;
             }
         }
@@ -752,12 +766,12 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public TypeSignature ToTypeSignature(bool isValueType)
         {
-            return Module?.CorLibTypeFactory.FromType(this) as TypeSignature
+            return DeclaringModule?.CorLibTypeFactory.FromType(this) as TypeSignature
                    ?? new TypeDefOrRefSignature(this, isValueType);
         }
 
         /// <inheritdoc />
-        public bool IsImportedInModule(ModuleDefinition module) => Module == module;
+        public bool IsImportedInModule(ModuleDefinition module) => DeclaringModule == module;
 
         /// <summary>
         /// Imports the type definition using the provided reference importer object.
@@ -785,7 +799,7 @@ namespace AsmResolver.DotNet
             if (SignatureComparer.Default.Equals(this, type))
                 return true;
 
-            bool isInSameAssembly = SignatureComparer.Default.Equals(Module, type.Module);
+            bool isInSameAssembly = SignatureComparer.Default.Equals(DeclaringModule, type.DeclaringModule);
 
             // Most common case: A top-level types is accessible by all other types in the same assembly, or types in
             // a different assembly if this top-level type is public.
@@ -833,22 +847,23 @@ namespace AsmResolver.DotNet
         /// <returns>The type reference.</returns>
         public TypeReference ToTypeReference()
         {
-            var scope = DeclaringType?.ToTypeReference() ?? Module as IResolutionScope;
+            var scope = DeclaringType?.ToTypeReference() ?? DeclaringModule as IResolutionScope;
 
-            return new TypeReference(Module, scope, Namespace, Name);
+            return new TypeReference(DeclaringModule, scope, Namespace, Name);
         }
 
         private IResolutionScope? GetDeclaringScope()
         {
             if (DeclaringType is null)
-                return Module;
+                return DeclaringModule;
 
             return DeclaringType.ToTypeReference();
         }
 
         TypeDefinition ITypeDescriptor.Resolve() => this;
-
+        TypeDefinition ITypeDescriptor.Resolve(ModuleDefinition context) => this;
         IMemberDefinition IMemberDescriptor.Resolve() => this;
+        IMemberDefinition? IMemberDescriptor.Resolve(ModuleDefinition context) => this;
 
         /// <summary>
         /// When this type is an enum, extracts the underlying enum type.
@@ -865,7 +880,7 @@ namespace AsmResolver.DotNet
 
             foreach (var field in Fields)
             {
-                if (!field.IsLiteral && !field.IsStatic && field.Signature != null)
+                if (field is { IsLiteral: false, IsStatic: false, Signature: not null })
                     return field.Signature.FieldType;
             }
 
@@ -895,7 +910,7 @@ namespace AsmResolver.DotNet
         /// If the static constructor was not present in the type, it will be inserted as the first method in the type.
         /// This method can only be used when the type has already been added to the metadata image.
         /// </remarks>
-        public MethodDefinition GetOrCreateStaticConstructor() => GetOrCreateStaticConstructor(Module);
+        public MethodDefinition GetOrCreateStaticConstructor() => GetOrCreateStaticConstructor(DeclaringModule);
 
         /// <summary>
         /// Gets or creates the static constructor that is executed when the CLR loads this type.
@@ -1015,7 +1030,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="NestedTypes"/> property.
         /// </remarks>
         protected virtual IList<TypeDefinition> GetNestedTypes() =>
-            new OwnedCollection<TypeDefinition, TypeDefinition>(this);
+            new OwnedCollection<ITypeOwner, TypeDefinition>(this);
 
         /// <summary>
         /// Obtains the enclosing class of the type definition if available.

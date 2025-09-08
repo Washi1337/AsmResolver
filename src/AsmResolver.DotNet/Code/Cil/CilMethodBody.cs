@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
@@ -17,9 +16,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <summary>
         /// Creates a new method body.
         /// </summary>
-        /// <param name="owner">The method that owns the method body.</param>
-        public CilMethodBody(MethodDefinition owner)
-            : base(owner)
+        public CilMethodBody()
         {
             Instructions = new CilInstructionCollection(this);
         }
@@ -145,7 +142,7 @@ namespace AsmResolver.DotNet.Code.Cil
             CilRawMethodBody rawBody,
             ICilOperandResolver? operandResolver = null)
         {
-            var result = new CilMethodBody(method);
+            var result = new CilMethodBody();
 
             // Interpret body header.
             var fatBody = rawBody as CilRawFatMethodBody;
@@ -162,12 +159,12 @@ namespace AsmResolver.DotNet.Code.Cil
             }
 
             // Parse instructions.
-            operandResolver ??= new PhysicalCilOperandResolver(context.ParentModule, result);
+            operandResolver ??= new PhysicalCilOperandResolver(context.ParentModule, method, result);
             ReadInstructions(context, result, operandResolver, rawBody);
 
             // Read exception handlers.
             if (fatBody is not null)
-                ReadExceptionHandlers(context, fatBody, result);
+                ReadExceptionHandlers(context, fatBody, method, result);
 
             return result;
         }
@@ -218,6 +215,7 @@ namespace AsmResolver.DotNet.Code.Cil
         private static void ReadExceptionHandlers(
             ModuleReaderContext context,
             CilRawFatMethodBody fatBody,
+            MethodDefinition method,
             CilMethodBody result)
         {
             try
@@ -234,7 +232,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
                         while (reader.CanRead(size))
                         {
-                            var handler = CilExceptionHandler.FromReader(result, ref reader, section.IsFat);
+                            var handler = CilExceptionHandler.FromReader(method.DeclaringModule!, result, ref reader, section.IsFat);
                             result.ExceptionHandlers.Add(handler);
                         }
                     }

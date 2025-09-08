@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using AsmResolver.DotNet.Code;
-using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Builder
@@ -69,7 +67,7 @@ namespace AsmResolver.DotNet.Builder
 
             // Ensure reference to corlib is added.
             if (module.CorLibTypeFactory.CorLibScope is AssemblyReference corLibScope)
-                GetAssemblyReferenceToken(corLibScope);
+                GetAssemblyReferenceToken(corLibScope, module);
 
             AddFileReferencesInModule(module);
             AddExportedTypesInModule(module);
@@ -123,7 +121,8 @@ namespace AsmResolver.DotNet.Builder
                 offset,
                 resource.Attributes,
                 Metadata.StringsStream.GetStringIndex(resource.Name),
-                AddImplementation(resource.Implementation));
+                AddImplementation(resource.Implementation, resource)
+            );
 
             var token = table.Add(row);
             _tokenMapping.Register(resource, token);
@@ -142,7 +141,6 @@ namespace AsmResolver.DotNet.Builder
         public void DefineTypes(IEnumerable<TypeDefinition> types)
         {
             var typeDefTable = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
-            var nestedClassTable = Metadata.TablesStream.GetSortedTable<TypeDefinition, NestedClassRow>(TableIndex.NestedClass);
 
             if (types is ICollection<TypeDefinition> collection)
                 typeDefTable.EnsureCapacity(typeDefTable.Count + collection.Count);
@@ -162,26 +160,6 @@ namespace AsmResolver.DotNet.Builder
 
                 var token = typeDefTable.Add(row);
                 _tokenMapping.Register(type, token);
-
-                if (type.IsNested)
-                {
-                    // As per the ECMA-335; nested types should always follow their enclosing types in the TypeDef table.
-                    // Proper type def collections that are passed onto this function therefore should have been added
-                    // already to the buffer. If not, we have an invalid ordering of types.
-
-                    var enclosingTypeToken = GetTypeDefinitionToken(type.DeclaringType);
-                    if (enclosingTypeToken.Rid == 0)
-                    {
-                        ErrorListener.MetadataBuilder(
-                            $"Nested type {type.SafeToString()} is added before its enclosing class {type.DeclaringType.SafeToString()}.");
-                    }
-
-                    var nestedClassRow = new NestedClassRow(
-                        token.Rid,
-                        enclosingTypeToken.Rid);
-
-                    nestedClassTable.Add(type, nestedClassRow);
-                }
             }
         }
 
@@ -200,7 +178,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new FieldDefinitionRow(
                     field.Attributes,
                     Metadata.StringsStream.GetStringIndex(field.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, field.Signature, ErrorListener));
+                    Metadata.BlobStream.GetBlobIndex(this, field.Signature, ErrorListener, field));
 
                 var token = table.Add(row);
                 _tokenMapping.Register(field, token);
@@ -211,7 +189,8 @@ namespace AsmResolver.DotNet.Builder
         /// Allocates metadata rows for the provided method definitions in the buffer.
         /// </summary>
         /// <param name="methods">The methods to define.</param>
-        public void DefineMethods(IEnumerable<MethodDefinition> methods)
+        /// <param name="validateSignatures">Set to <c>true</c> if the signatures should be validated for consistency with what is defined in metadata.</param>
+        public void DefineMethods(IEnumerable<MethodDefinition> methods, bool validateSignatures = true)
         {
             var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
             if (methods is ICollection<MethodDefinition> collection)
@@ -227,7 +206,7 @@ namespace AsmResolver.DotNet.Builder
                     method.ImplAttributes,
                     method.Attributes,
                     Metadata.StringsStream.GetStringIndex(method.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, method.Signature, ErrorListener),
+                    Metadata.BlobStream.GetBlobIndex(this, method.Signature, ErrorListener, method),
                     0);
 
                 var token = table.Add(row);
@@ -236,6 +215,9 @@ namespace AsmResolver.DotNet.Builder
                 // If the method is supposed to be exported as an unmanaged symbol, register it.
                 if (method.ExportInfo.HasValue)
                     VTableFixups.MapTokenToExport(method.ExportInfo.Value, token);
+
+                if (validateSignatures)
+                    method.VerifyMetadata(ErrorListener);
             }
         }
 
@@ -276,7 +258,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new PropertyDefinitionRow(
                     property.Attributes,
                     Metadata.StringsStream.GetStringIndex(property.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, property.Signature, ErrorListener));
+                    Metadata.BlobStream.GetBlobIndex(this, property.Signature, ErrorListener, property));
 
                 var token = table.Add(row);
                 _tokenMapping.Register(property, token);
@@ -298,7 +280,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new EventDefinitionRow(
                     @event.Attributes,
                     Metadata.StringsStream.GetStringIndex(@event.Name),
-                    GetTypeDefOrRefIndex(@event.EventType));
+                    GetTypeDefOrRefIndex(@event.EventType, @event));
 
                 var token = table.Add(row);
                 _tokenMapping.Register(@event, token);
@@ -342,7 +324,7 @@ namespace AsmResolver.DotNet.Builder
 
                 // Update extends, field list and method list columns.
                 ref var typeRow = ref typeDefTable.GetRowRef(rid);
-                typeRow.Extends = GetTypeDefOrRefIndex(type.BaseType);
+                typeRow.Extends = GetTypeDefOrRefIndex(type.BaseType, type);
                 typeRow.FieldList = fieldList;
                 typeRow.MethodList = methodList;
 
@@ -360,7 +342,8 @@ namespace AsmResolver.DotNet.Builder
                 AddCustomAttributes(typeToken, type);
                 AddSecurityDeclarations(typeToken, type);
                 DefineInterfaces(typeToken, type.Interfaces);
-                AddMethodImplementations(typeToken, type.MethodImplementations);
+                AddNestedClassRow(type, rid);
+                AddMethodImplementations(type, typeToken, type.MethodImplementations);
                 DefineGenericParameters(typeToken, type);
                 AddClassLayout(typeToken, type.ClassLayout);
             }
@@ -388,7 +371,7 @@ namespace AsmResolver.DotNet.Builder
             {
                 var field = type.Fields[i];
 
-                var newToken = GetFieldDefinitionToken(field);
+                var newToken = GetFieldDefinitionToken(field, type);
                 if (newToken == MetadataToken.Zero)
                 {
                     ErrorListener.MetadataBuilder(
@@ -419,7 +402,7 @@ namespace AsmResolver.DotNet.Builder
             {
                 var method = type.Methods[i];
 
-                var newToken = GetMethodDefinitionToken(method);
+                var newToken = GetMethodDefinitionToken(method, type);
                 if (newToken == MetadataToken.Zero)
                 {
                     ErrorListener.MetadataBuilder(
@@ -572,7 +555,31 @@ namespace AsmResolver.DotNet.Builder
             eventList += (uint) type.Events.Count;
         }
 
-        private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> implementations)
+        private void AddNestedClassRow(TypeDefinition type, uint rid)
+        {
+            if (!type.IsNested)
+                return;
+
+            var table = Metadata.TablesStream.GetSortedTable<TypeDefinition, NestedClassRow>(TableIndex.NestedClass);
+
+            // As per the ECMA-335 II.2; nested types should always follow their enclosing types in the TypeDef table.
+            // However, from empirical testing, the runtime actually does not seem to mind unsorted TypeDefs.
+            // Hence, we still add the nested class even if the RID ordering was technically not correct.
+            // See also: https://github.com/Washi1337/AsmResolver/issues/545
+
+            var enclosingTypeToken = GetTypeDefinitionToken(type.DeclaringType);
+            if (enclosingTypeToken.Rid == 0 || enclosingTypeToken.Rid > rid)
+            {
+                ErrorListener.MetadataBuilder(
+                    $"Nested type {type.SafeToString()} is added before its enclosing class {type.DeclaringType.SafeToString()}."
+                );
+            }
+
+            var row = new NestedClassRow(rid, enclosingTypeToken.Rid);
+            table.Add(type, row);
+        }
+
+        private void AddMethodImplementations(TypeDefinition type, MetadataToken typeToken, IList<MethodImplementation> implementations)
         {
             var table = Metadata.TablesStream.GetSortedTable<MethodImplementation, MethodImplementationRow>(TableIndex.MethodImpl);
 
@@ -581,8 +588,9 @@ namespace AsmResolver.DotNet.Builder
                 var implementation = implementations[i];
                 var row = new MethodImplementationRow(
                     typeToken.Rid,
-                    AddMethodDefOrRef(implementation.Body),
-                    AddMethodDefOrRef(implementation.Declaration));
+                    AddMethodDefOrRef(implementation.Body, type),
+                    AddMethodDefOrRef(implementation.Declaration, type)
+                );
 
                 table.Add(implementation, row);
             }
@@ -633,7 +641,8 @@ namespace AsmResolver.DotNet.Builder
                 exportedType.TypeDefId,
                 Metadata.StringsStream.GetStringIndex(exportedType.Name),
                 Metadata.StringsStream.GetStringIndex(exportedType.Namespace),
-                AddImplementation(exportedType.Implementation));
+                AddImplementation(exportedType.Implementation, exportedType)
+            );
 
             var token = table.Add(row);
             _tokenMapping.Register(exportedType, token);

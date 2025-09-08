@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Tests
         private TypeDefinition RebuildAndLookup(TypeDefinition type)
         {
             var stream = new MemoryStream();
-            type.Module!.Write(stream);
+            type.DeclaringModule!.Write(stream);
 
             var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             return newModule.TopLevelTypes.FirstOrDefault(t => t.FullName == type.FullName);
@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             foreach (var type in module.TopLevelTypes)
-                Assert.Same(module, type.Module);
+                Assert.Same(module, type.DeclaringModule);
         }
 
         [Fact]
@@ -178,10 +178,10 @@ namespace AsmResolver.DotNet.Tests
             Assert.Same(class1, nested2.DeclaringType);
             Assert.Same(class2, nested3.DeclaringType);
             Assert.Same(class2, nested4.DeclaringType);
-            Assert.Same(module, nested1.Module);
-            Assert.Same(module, nested2.Module);
-            Assert.Same(module, nested3.Module);
-            Assert.Same(module, nested4.Module);
+            Assert.Same(module, nested1.DeclaringModule);
+            Assert.Same(module, nested2.DeclaringModule);
+            Assert.Same(module, nested3.DeclaringModule);
+            Assert.Same(module, nested4.DeclaringModule);
         }
 
         [Fact]
@@ -629,14 +629,14 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Same(scope, corlib.Object.Scope);
             var reference = Assert.IsAssignableFrom<AssemblyReference>(corlib.Object.Scope!.GetAssembly());
-            Assert.Same(module, reference.Module);
+            Assert.Same(module, reference.ContextModule);
         }
 
         [Fact]
         public void ReadIsByRefLike()
         {
-            var resolver = new DotNetCoreAssemblyResolver(new Version(5, 0));
-            var corLib = resolver.Resolve(KnownCorLibs.SystemPrivateCoreLib_v5_0_0_0)!;
+            var resolver = new DotNetCoreAssemblyResolver(new Version(8, 0));
+            var corLib = resolver.Resolve(KnownCorLibs.SystemPrivateCoreLib_v8_0_0_0)!;
 
             var intType = corLib.ManifestModule!.TopLevelTypes.First(t => t.Name == "Int32");
             var spanType = corLib.ManifestModule.TopLevelTypes.First(t => t.Name == "Span`1");
@@ -725,12 +725,21 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void SystemEnumShouldNotBeValueType()
+        {
+            var module = ModuleDefinition.FromFile(typeof(Enum).Assembly.Location, TestReaderParameters);
+            var type = module.LookupMember<TypeDefinition>(typeof(Enum).MetadataToken);
+
+            Assert.False(type.IsValueType);
+        }
+
+        [Fact]
         public void AddTypeToModuleShouldSetOwner()
         {
             var module = new ModuleDefinition("Dummy");
             var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public);
             module.TopLevelTypes.Add(type);
-            Assert.Same(module, type.Module);
+            Assert.Same(module, type.DeclaringModule);
         }
 
         [Fact]
@@ -742,7 +751,7 @@ namespace AsmResolver.DotNet.Tests
             module.TopLevelTypes.Add(type1);
             type1.NestedTypes.Add(type2);
             Assert.Same(type1, type2.DeclaringType);
-            Assert.Same(module, type2.Module);
+            Assert.Same(module, type2.DeclaringModule);
         }
 
         [Fact]
@@ -786,6 +795,17 @@ namespace AsmResolver.DotNet.Tests
             var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public);
             type.Namespace = string.Empty;
             Assert.Null(type.Namespace);
+        }
+
+        [Fact]
+        public void NestedTypeRemovedFromOwnerShouldHaveNoModule()
+        {
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
+            var nestedType = module.LookupMember<TypeDefinition>(typeof(TopLevelClass1.Nested1).MetadataToken);
+
+            nestedType.DeclaringType!.NestedTypes.Remove(nestedType);
+
+            Assert.Null(nestedType.DeclaringModule);
         }
     }
 }

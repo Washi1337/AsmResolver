@@ -59,6 +59,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
         
+        internal static byte[] HelloWorld_Arm64 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_Arm64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
         internal static byte[] HelloWorld_MaliciousWin32ResLoop {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_MaliciousWin32ResLoop", resourceCulture);
@@ -304,9 +311,16 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
         
-        internal static byte[] MixedModeHelloWorld {
+        internal static byte[] MixedModeHelloWorld_X64 {
             get {
-                object obj = ResourceManager.GetObject("MixedModeHelloWorld", resourceCulture);
+                object obj = ResourceManager.GetObject("MixedModeHelloWorld_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        internal static byte[] MixedModeHelloWorld_Arm64 {
+            get {
+                object obj = ResourceManager.GetObject("MixedModeHelloWorld_Arm64", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -332,6 +346,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
         
+        internal static byte[] NativeHelloWorldC_Arm64 {
+            get {
+                object obj = ResourceManager.GetObject("NativeHelloWorldC_Arm64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
         internal static byte[] NativeHelloWorldCpp_X86 {
             get {
                 object obj = ResourceManager.GetObject("NativeHelloWorldCpp_X86", resourceCulture);
@@ -342,6 +363,13 @@ namespace AsmResolver.PE.Tests.Properties {
         internal static byte[] NativeHelloWorldCpp_X64 {
             get {
                 object obj = ResourceManager.GetObject("NativeHelloWorldCpp_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        internal static byte[] NativeHelloWorldCpp_Arm64 {
+            get {
+                object obj = ResourceManager.GetObject("NativeHelloWorldCpp_Arm64", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -370,6 +398,13 @@ namespace AsmResolver.PE.Tests.Properties {
         internal static byte[] HelloWorld_JTDStream {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_JTDStream", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        internal static byte[] HelloWorld_LowercaseJTDStream {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_LowercaseJTDStream", resourceCulture);
                 return ((byte[])(obj));
             }
         }
