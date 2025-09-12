@@ -651,5 +651,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Null(signature.Scope);
             Assert.Same(module, signature.ContextModule);
         }
+
+        [Fact]
+        public void ResolveTypeDefSignatureShouldReturnSameInstance()
+        {
+            Assert.Same(_dummyType, _dummyType.ToTypeSignature(false).Resolve());
+        }
     }
 }
