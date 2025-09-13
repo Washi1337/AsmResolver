@@ -62,11 +62,11 @@ namespace AsmResolver.DotNet.TestCases.Methods
             {
                 Console.WriteLine("Try");
             }
-            catch (IOException ex)
+            catch (IOException)
             {
                 Console.WriteLine("IOException");
             }
-            catch (WebException ex)
+            catch (WebException)
             {
                 Console.WriteLine("WebException");
             }
