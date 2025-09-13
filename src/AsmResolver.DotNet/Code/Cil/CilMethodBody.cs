@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using AsmResolver.DotNet.Serialized;
-using AsmResolver.DotNet.Signatures;
-using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Code.Cil
 {
@@ -13,20 +12,27 @@ namespace AsmResolver.DotNet.Code.Cil
     /// </summary>
     public class CilMethodBody : MethodBody
     {
+        private CilInstructionCollection? _instructions;
+        private IList<CilExceptionHandler>? _exceptionHandlers;
+
         /// <summary>
-        /// Creates a new method body.
+        /// Gets a value indicating whether the method body has been fully decoded.
+        /// That is, all instructions and exception handlers are disassembled.
         /// </summary>
-        public CilMethodBody()
-        {
-            Instructions = new CilInstructionCollection(this);
-        }
+        [MemberNotNullWhen(true, nameof(_instructions))]
+        [MemberNotNullWhen(true, nameof(_exceptionHandlers))]
+        protected internal bool IsInitialized => _instructions is not null && _exceptionHandlers is not null;
 
         /// <summary>
         /// Gets a collection of instructions to be executed in the method.
         /// </summary>
         public CilInstructionCollection Instructions
         {
-            get;
+            get
+            {
+                EnsureIsInitialized();
+                return _instructions;
+            }
         }
 
         /// <summary>
@@ -58,7 +64,7 @@ namespace AsmResolver.DotNet.Code.Cil
         ///    <item><description>The method needs more than 8 values on the stack.</description></item>
         /// </list>
         /// </summary>
-        public bool IsFat
+        public virtual bool IsFat
         {
             get
             {
@@ -90,8 +96,12 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         public IList<CilExceptionHandler> ExceptionHandlers
         {
-            get;
-        } = new List<CilExceptionHandler>();
+            get
+            {
+                EnsureIsInitialized();
+                return _exceptionHandlers;
+            }
+        }
 
         /// <summary>
         /// Gets or sets flags that alter the behaviour of the method body serializer for this specific method body.
@@ -142,107 +152,40 @@ namespace AsmResolver.DotNet.Code.Cil
             CilRawMethodBody rawBody,
             ICilOperandResolver? operandResolver = null)
         {
-            var result = new CilMethodBody();
-
-            // Interpret body header.
-            var fatBody = rawBody as CilRawFatMethodBody;
-            if (fatBody is not null)
-            {
-                result.MaxStack = fatBody.MaxStack;
-                result.InitializeLocals = fatBody.InitLocals;
-                ReadLocalVariables(context, result, fatBody);
-            }
-            else
-            {
-                result.MaxStack = 8;
-                result.InitializeLocals = false;
-            }
-
-            // Parse instructions.
-            operandResolver ??= new PhysicalCilOperandResolver(context.ParentModule, method, result);
-            ReadInstructions(context, result, operandResolver, rawBody);
-
-            // Read exception handlers.
-            if (fatBody is not null)
-                ReadExceptionHandlers(context, fatBody, method, result);
-
-            return result;
+            return new SerializedCilMethodBody(context, method, rawBody, operandResolver);
         }
 
-        private static void ReadLocalVariables(
-            ModuleReaderContext context,
-            CilMethodBody result,
-            CilRawFatMethodBody fatBody)
+        /// <summary>
+        /// Ensures the instructions and exception handlers of this method body are fully initialized.
+        /// </summary>
+        [MemberNotNull(nameof(_instructions))]
+        [MemberNotNull(nameof(_exceptionHandlers))]
+        protected void EnsureIsInitialized()
         {
-            // Method bodies can have 0 tokens if there are no locals defined.
-            if (fatBody.LocalVarSigToken == MetadataToken.Zero)
+            if (IsInitialized)
                 return;
 
-            // If there is a non-zero token however, it needs to point to a stand-alone signature with a
-            // local variable signature stored in it.
-            if (!context.ParentModule.TryLookupMember(fatBody.LocalVarSigToken, out var member)
-                || member is not StandAloneSignature { Signature: LocalVariablesSignature localVariablesSignature })
-            {
-                context.BadImage($"Method body of {result.Owner.SafeToString()} contains an invalid local variable signature token.");
-                return;
-            }
+            var instructions = new CilInstructionCollection(this);
+            var exceptionHandlers = new List<CilExceptionHandler>();
 
-            // Copy over the local variable types from the signature into the method body.
-            var variableTypes = localVariablesSignature.VariableTypes;
-            for (int i = 0; i < variableTypes.Count; i++)
-                result.LocalVariables.Add(new CilLocalVariable(variableTypes[i]));
-        }
+            Initialize(instructions, exceptionHandlers);
 
-        private static void ReadInstructions(
-            ModuleReaderContext context,
-            CilMethodBody result,
-            ICilOperandResolver operandResolver,
-            CilRawMethodBody rawBody)
-        {
-            try
+            lock (this)
             {
-                var reader = rawBody.Code.CreateReader();
-                var disassembler = new CilDisassembler(reader, operandResolver);
-                result.Instructions.AddRange(disassembler.ReadInstructions());
-            }
-            catch (Exception ex)
-            {
-                context.RegisterException(new BadImageFormatException(
-                    $"Method body of {result.Owner.SafeToString()} contains an invalid CIL code stream.", ex));
+                if (IsInitialized)
+                    return;
+                _instructions = instructions;
+                _exceptionHandlers = exceptionHandlers;
             }
         }
 
-        private static void ReadExceptionHandlers(
-            ModuleReaderContext context,
-            CilRawFatMethodBody fatBody,
-            MethodDefinition method,
-            CilMethodBody result)
+        /// <summary>
+        /// Populates the provided instructions and exception handlers lists.
+        /// </summary>
+        protected virtual void Initialize(
+            CilInstructionCollection instructions,
+            List<CilExceptionHandler> exceptionHandlers)
         {
-            try
-            {
-                for (int i = 0; i < fatBody.ExtraSections.Count; i++)
-                {
-                    var section = fatBody.ExtraSections[i];
-                    if (section.IsEHTable)
-                    {
-                        var reader = new BinaryStreamReader(section.Data);
-                        uint size = section.IsFat
-                            ? CilExceptionHandler.FatExceptionHandlerSize
-                            : CilExceptionHandler.TinyExceptionHandlerSize;
-
-                        while (reader.CanRead(size))
-                        {
-                            var handler = CilExceptionHandler.FromReader(method.DeclaringModule!, result, ref reader, section.IsFat);
-                            result.ExceptionHandlers.Add(handler);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                context.RegisterException(new BadImageFormatException(
-                    $"Method body of {result.Owner.SafeToString()} contains invalid extra sections.", ex));
-            }
         }
 
         /// <summary>

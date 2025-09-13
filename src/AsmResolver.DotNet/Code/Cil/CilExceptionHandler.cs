@@ -23,12 +23,15 @@ namespace AsmResolver.DotNet.Code.Cil
         /// Reads a single exception handler from the provided input stream.
         /// </summary>
         /// <param name="module">The module the exception handler is defined in.</param>
-        /// <param name="body">The method body containing the exception handler.</param>
+        /// <param name="instructions">The instructions containing the exception handler.</param>
         /// <param name="reader">The input stream.</param>
         /// <param name="isFat"><c>true</c> if the fat format should be used, <c>false</c> otherwise.</param>
         /// <returns>The exception handler.</returns>
-        public static CilExceptionHandler FromReader(ModuleDefinition module, CilMethodBody body,
-            ref BinaryStreamReader reader, bool isFat)
+        public static CilExceptionHandler FromReader(
+            ModuleDefinition module,
+            CilInstructionCollection instructions,
+            ref BinaryStreamReader reader,
+            bool isFat)
         {
             CilExceptionHandlerType handlerType;
             int tryStartOffset;
@@ -60,10 +63,10 @@ namespace AsmResolver.DotNet.Code.Cil
             var handler = new CilExceptionHandler
             {
                 HandlerType = handlerType,
-                TryStart = body.Instructions.GetLabel(tryStartOffset),
-                TryEnd = body.Instructions.GetLabel(tryEndOffset),
-                HandlerStart = body.Instructions.GetLabel(handlerStartOffset),
-                HandlerEnd = body.Instructions.GetLabel(handlerEndOffset),
+                TryStart = instructions.GetLabel(tryStartOffset),
+                TryEnd = instructions.GetLabel(tryEndOffset),
+                HandlerStart = instructions.GetLabel(handlerStartOffset),
+                HandlerEnd = instructions.GetLabel(handlerEndOffset),
             };
 
             // Interpret last field.
@@ -73,7 +76,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     handler.ExceptionType = member as ITypeDefOrRef;
                     break;
                 case CilExceptionHandlerType.Filter:
-                    handler.FilterStart = body.Instructions.GetByOffset(exceptionTokenOrFilterStart)?.CreateLabel()
+                    handler.FilterStart = instructions.GetByOffset(exceptionTokenOrFilterStart)?.CreateLabel()
                                           ?? new CilOffsetLabel(exceptionTokenOrFilterStart);
                     break;
             }
