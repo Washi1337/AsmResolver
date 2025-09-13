@@ -86,7 +86,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 : operandBuilder.GetMemberToken(body.OperandResolver.ResolveMember(token));
 
             // Serialize code.
-            byte[] code = FastRewriteCodeStream(body.OriginalRawBody, tokenRewriter);
+            byte[] code = FastRewriteCodeStream(context, body, tokenRewriter);
 
             // If we're tiny then method just contains code.
             if (!body.IsFat)
@@ -103,50 +103,72 @@ namespace AsmResolver.DotNet.Code.Cil
             };
 
             // Rewrite sections if any.
-            if (body.OriginalRawBody is CilRawFatMethodBody { ExtraSections.Count: > 0 } fatBody)
+            if (body.OriginalRawBody is CilRawFatMethodBody { ExtraSections.Count: > 0 })
             {
                 result.HasSections = true;
-                FastRewriteExtraSections(fatBody, result, tokenRewriter);
+                FastRewriteExtraSections(context, body, result, tokenRewriter);
             }
 
             return result.ToReference();
         }
 
-        private byte[] FastRewriteCodeStream(CilRawMethodBody sourceBody, Func<MetadataToken, MetadataToken> tokenRewriter)
+        private byte[] FastRewriteCodeStream(
+            MethodBodySerializationContext context,
+            SerializedCilMethodBody sourceBody,
+            Func<MetadataToken, MetadataToken> tokenRewriter)
         {
-            var codeReader = sourceBody.Code.CreateReader();
+            try
+            {
+                var codeReader = sourceBody.OriginalRawBody.Code.CreateReader();
 
-            using var rentedWriter = _writerPool.Rent();
-            FastCilReassembler.RewriteCode(
-                ref codeReader,
-                rentedWriter.Writer,
-                tokenRewriter
-            );
+                using var rentedWriter = _writerPool.Rent();
+                FastCilReassembler.RewriteCode(
+                    ref codeReader,
+                    rentedWriter.Writer,
+                    tokenRewriter
+                );
 
-            return rentedWriter.GetData();
+                return rentedWriter.GetData();
+            }
+            catch (Exception ex)
+            {
+                context.ErrorListener.RegisterException(new BadImageFormatException(
+                    $"Method body of {sourceBody.OriginalOwner.SafeToString()} contains invalid extra sections.", ex));
+                return sourceBody.OriginalRawBody.Code.ToArray();
+            }
         }
 
         private void FastRewriteExtraSections(
-            CilRawFatMethodBody sourceBody,
+            MethodBodySerializationContext context,
+            SerializedCilMethodBody sourceBody,
             CilRawFatMethodBody destinationBody,
             Func<MetadataToken, MetadataToken> tokenRewriter)
         {
-            foreach (var section in sourceBody.ExtraSections)
+            var raw = (CilRawFatMethodBody) sourceBody.OriginalRawBody;
+            foreach (var section in raw.ExtraSections)
             {
                 byte[] sectionData = section.Data;
 
                 if (section.IsEHTable)
                 {
-                    var reader = new BinaryStreamReader(sectionData);
-                    using var rentedWriter = _writerPool.Rent();
-                    FastCilReassembler.RewriteExceptionHandlerSection(
-                        ref reader,
-                        rentedWriter.Writer,
-                        tokenRewriter,
-                        section.IsFat
-                    );
+                    try
+                    {
+                        var reader = new BinaryStreamReader(sectionData);
+                        using var rentedWriter = _writerPool.Rent();
+                        FastCilReassembler.RewriteExceptionHandlerSection(
+                            ref reader,
+                            rentedWriter.Writer,
+                            tokenRewriter,
+                            section.IsFat
+                        );
 
-                    sectionData = rentedWriter.GetData();
+                        sectionData = rentedWriter.GetData();
+                    }
+                    catch (Exception ex)
+                    {
+                        context.ErrorListener.RegisterException(new BadImageFormatException(
+                            $"Method body of {sourceBody.OriginalOwner.SafeToString()} contains an invalid CIL code stream.", ex));
+                    }
                 }
 
                 destinationBody.ExtraSections.Add(new CilExtraSection(section.Attributes, sectionData));

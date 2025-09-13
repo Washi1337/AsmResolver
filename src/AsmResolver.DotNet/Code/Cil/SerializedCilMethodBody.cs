@@ -11,7 +11,6 @@ namespace AsmResolver.DotNet.Code.Cil;
 internal sealed class SerializedCilMethodBody : CilMethodBody
 {
     private readonly ModuleReaderContext _context;
-    private readonly MethodDefinition _originalOwner;
 
     public SerializedCilMethodBody(
         ModuleReaderContext context,
@@ -20,7 +19,7 @@ internal sealed class SerializedCilMethodBody : CilMethodBody
         ICilOperandResolver? operandResolver)
     {
         _context = context;
-        _originalOwner = owner;
+        OriginalOwner = owner;
         OriginalRawBody = rawBody;
 
         // Interpret body header.
@@ -37,12 +36,17 @@ internal sealed class SerializedCilMethodBody : CilMethodBody
         }
 
         OperandResolver = operandResolver
-            ?? new PhysicalCilOperandResolver(context.ParentModule, _originalOwner, this);
+            ?? new PhysicalCilOperandResolver(context.ParentModule, OriginalOwner, this);
     }
 
     public CilRawMethodBody OriginalRawBody { get; }
 
     public ICilOperandResolver OperandResolver
+    {
+        get;
+    }
+
+    public MethodDefinition OriginalOwner
     {
         get;
     }
@@ -86,7 +90,7 @@ internal sealed class SerializedCilMethodBody : CilMethodBody
         catch (Exception ex)
         {
             _context.RegisterException(new BadImageFormatException(
-                $"Method body of {_originalOwner.SafeToString()} contains an invalid CIL code stream.", ex));
+                $"Method body of {OriginalOwner.SafeToString()} contains an invalid CIL code stream.", ex));
         }
     }
 
@@ -101,7 +105,7 @@ internal sealed class SerializedCilMethodBody : CilMethodBody
         if (!_context.ParentModule.TryLookupMember(fatBody.LocalVarSigToken, out var member)
             || member is not StandAloneSignature { Signature: LocalVariablesSignature localVariablesSignature })
         {
-            _context.BadImage($"Method body of {_originalOwner.SafeToString()} contains an invalid local variable signature token.");
+            _context.BadImage($"Method body of {OriginalOwner.SafeToString()} contains an invalid local variable signature token.");
             return;
         }
 
@@ -128,7 +132,7 @@ internal sealed class SerializedCilMethodBody : CilMethodBody
                     while (reader.CanRead(size))
                     {
                         result.Add(CilExceptionHandler.FromReader(
-                            _originalOwner.DeclaringModule!, instructions, ref reader,
+                            OriginalOwner.DeclaringModule!, instructions, ref reader,
                             section.IsFat
                         ));
                     }
@@ -138,7 +142,7 @@ internal sealed class SerializedCilMethodBody : CilMethodBody
         catch (Exception ex)
         {
             _context.RegisterException(new BadImageFormatException(
-                $"Method body of {_originalOwner.SafeToString()} contains invalid extra sections.", ex));
+                $"Method body of {OriginalOwner.SafeToString()} contains invalid extra sections.", ex));
         }
     }
 }
