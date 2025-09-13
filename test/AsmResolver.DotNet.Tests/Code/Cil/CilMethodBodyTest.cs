@@ -124,7 +124,19 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var body = ReadMethodBody(nameof(MethodBodyTypes.FatMethodWithFinally));
             Assert.True(body.IsFat);
-            Assert.Single(body.ExceptionHandlers);
+            Assert.Equal(CilExceptionHandlerType.Finally, Assert.Single(body.ExceptionHandlers).HandlerType);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PersistentFatMethodWithFinally(bool accessBeforeBuild)
+        {
+            var body = ReadMethodBody(nameof(MethodBodyTypes.FatMethodWithFinally));
+            var newBody = RebuildAndLookup(body, accessBeforeBuild);
+
+            Assert.True(newBody.IsFat);
+            Assert.Equal(CilExceptionHandlerType.Finally, Assert.Single(newBody.ExceptionHandlers).HandlerType);
         }
 
         [Fact]
@@ -138,7 +150,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void PersistentFatMethodWithExceptionHandler(bool accessBeforeBuild)
+        public void PersistentFatMethodWithMultipleCatchBlocks(bool accessBeforeBuild)
         {
             var body = ReadMethodBody(nameof(MethodBodyTypes.FatMethodWithCatch));
             var newBody = RebuildAndLookup(body, accessBeforeBuild);
@@ -147,6 +159,23 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             Assert.Equal(2, newBody.ExceptionHandlers.Count);
             Assert.Equal(newBody.ExceptionHandlers[0].ExceptionType!.FullName, newBody.ExceptionHandlers[0].ExceptionType!.FullName);
             Assert.Equal(newBody.ExceptionHandlers[1].ExceptionType!.FullName, newBody.ExceptionHandlers[1].ExceptionType!.FullName);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void AddLocalToExistingTinyBodyShouldPromoteToFat(bool accessBeforeBuild)
+        {
+            var body = ReadMethodBody(nameof(MethodBodyTypes.TinyMethod));
+
+            Assert.False(body.IsFat);
+            body.LocalVariables.Add(new CilLocalVariable(body.Owner!.DeclaringModule!.CorLibTypeFactory.Int32));
+            Assert.True(body.IsFat);
+
+            var newBody = RebuildAndLookup(body, accessBeforeBuild);
+
+            Assert.True(body.IsFat);
+            Assert.Equal(newBody.Owner!.DeclaringModule!.CorLibTypeFactory.Int32, Assert.Single(newBody.LocalVariables).VariableType);
         }
 
         private static CilMethodBody CreateDummyBody(bool isVoid)
