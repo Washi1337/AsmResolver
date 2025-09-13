@@ -81,9 +81,12 @@ namespace AsmResolver.DotNet.Code.Cil
         private ISegmentReference FastPatchMethodBody(MethodBodySerializationContext context, SerializedCilMethodBody body)
         {
             var operandBuilder = new CilOperandBuilder(context.TokenProvider, context.ErrorListener);
+            var tokenRewriter = (MetadataToken token) => token.Table == TableIndex.String
+                ? operandBuilder.GetStringToken(body.OperandResolver.ResolveString(token))
+                : operandBuilder.GetMemberToken(body.OperandResolver.ResolveMember(token));
 
             // Serialize code.
-            byte[] code = FastRewriteCodeStream(body.OriginalRawBody, body.OperandResolver, operandBuilder);
+            byte[] code = FastRewriteCodeStream(body.OriginalRawBody, tokenRewriter);
 
             // If we're tiny then method just contains code.
             if (!body.IsFat)
@@ -103,25 +106,21 @@ namespace AsmResolver.DotNet.Code.Cil
             if (body.OriginalRawBody is CilRawFatMethodBody { ExtraSections.Count: > 0 } fatBody)
             {
                 result.HasSections = true;
-                FastRewriteExtraSections(fatBody, operandBuilder, result, body.OperandResolver);
+                FastRewriteExtraSections(fatBody, result, tokenRewriter);
             }
 
             return result.ToReference();
         }
 
-        private byte[] FastRewriteCodeStream(
-            CilRawMethodBody sourceBody,
-            ICilOperandResolver operandResolver,
-            CilOperandBuilder operandBuilder)
+        private byte[] FastRewriteCodeStream(CilRawMethodBody sourceBody, Func<MetadataToken, MetadataToken> tokenRewriter)
         {
             var codeReader = sourceBody.Code.CreateReader();
 
             using var rentedWriter = _writerPool.Rent();
             FastCilReassembler.RewriteCode(
                 ref codeReader,
-                operandResolver,
                 rentedWriter.Writer,
-                operandBuilder
+                tokenRewriter
             );
 
             return rentedWriter.GetData();
@@ -129,9 +128,8 @@ namespace AsmResolver.DotNet.Code.Cil
 
         private void FastRewriteExtraSections(
             CilRawFatMethodBody sourceBody,
-            CilOperandBuilder operandBuilder,
             CilRawFatMethodBody destinationBody,
-            ICilOperandResolver operandResolver)
+            Func<MetadataToken, MetadataToken> tokenRewriter)
         {
             foreach (var section in sourceBody.ExtraSections)
             {
@@ -143,9 +141,8 @@ namespace AsmResolver.DotNet.Code.Cil
                     using var rentedWriter = _writerPool.Rent();
                     FastCilReassembler.RewriteExceptionHandlerSection(
                         ref reader,
-                        operandResolver,
                         rentedWriter.Writer,
-                        operandBuilder,
+                        tokenRewriter,
                         section.IsFat
                     );
 

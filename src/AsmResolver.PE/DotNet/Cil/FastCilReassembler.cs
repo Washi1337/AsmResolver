@@ -26,9 +26,8 @@ public static class FastCilReassembler
     /// <param name="operandBuilder">The operand builder to use for obtaining the new raw operands after they have been resolved.</param>
     public static void RewriteCode(
         ref BinaryStreamReader reader,
-        ICilOperandResolver operandResolver,
         BinaryStreamWriter writer,
-        ICilOperandBuilder operandBuilder)
+        Func<MetadataToken, MetadataToken> tokenRewriter)
     {
 #if NETSTANDARD2_0
         byte[] operandBuffer = new byte[8];
@@ -99,17 +98,9 @@ public static class FastCilReassembler
                 case CilOperandType.InlineTok:
                 case CilOperandType.InlineType:
                 case CilOperandType.InlineMethod:
-                    token = reader.ReadUInt32();
-                    if (operandResolver.ResolveMember(token) is { } member)
-                        token = operandBuilder.GetMemberToken(member);
-                    writer.WriteUInt32(token.ToUInt32());
-                    break;
-
                 case CilOperandType.InlineString:
                     token = reader.ReadUInt32();
-                    if (operandResolver.ResolveString(token) is { } s)
-                        token = operandBuilder.GetStringToken(s);
-                    writer.WriteUInt32(token.ToUInt32());
+                    writer.WriteUInt32(tokenRewriter(token).ToUInt32());
                     break;
 
                 default:
@@ -147,9 +138,8 @@ public static class FastCilReassembler
     /// <param name="fatFormat"></param>
     public static void RewriteExceptionHandlerSection(
         ref BinaryStreamReader reader,
-        ICilOperandResolver operandResolver,
         BinaryStreamWriter writer,
-        ICilOperandBuilder operandBuilder,
+        Func<MetadataToken, MetadataToken> tokenRewriter,
         bool fatFormat)
     {
         int entrySize = fatFormat
@@ -182,14 +172,12 @@ public static class FastCilReassembler
                     | rawEntry[entrySize - 1] << 24
                 );
 
-                if (operandResolver.ResolveMember(exceptionToken) is { } resolved)
-                {
-                    exceptionToken = operandBuilder.GetMemberToken(resolved).ToUInt32();
-                    rawEntry[entrySize - 4] = (byte) ((exceptionToken) & 0xFF);
-                    rawEntry[entrySize - 3] = (byte) ((exceptionToken >> 8) & 0xFF);
-                    rawEntry[entrySize - 2] = (byte) ((exceptionToken >> 16) & 0xFF);
-                    rawEntry[entrySize - 1] = (byte) ((exceptionToken >> 24) & 0xFF);
-                }
+                exceptionToken = tokenRewriter(exceptionToken).ToUInt32();
+
+                rawEntry[entrySize - 4] = (byte) ((exceptionToken) & 0xFF);
+                rawEntry[entrySize - 3] = (byte) ((exceptionToken >> 8) & 0xFF);
+                rawEntry[entrySize - 2] = (byte) ((exceptionToken >> 16) & 0xFF);
+                rawEntry[entrySize - 1] = (byte) ((exceptionToken >> 24) & 0xFF);
             }
 
             // Write back exception handler.

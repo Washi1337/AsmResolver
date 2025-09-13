@@ -12,6 +12,12 @@ public class FastCilReassemblerTest
 {
     private readonly MemoryStreamWriterPool _writerPool = new();
 
+    private static Func<MetadataToken, MetadataToken> CreateTokenRewriter(
+        Dictionary<MetadataToken, MetadataToken> tokens)
+    {
+        return token => tokens.GetValueOrDefault(token, token);
+    }
+
     [Fact]
     public void RewriteSingleByteOpCodeNoOperands()
     {
@@ -25,7 +31,7 @@ public class FastCilReassemblerTest
 
         var reader = new BinaryStreamReader(code);
         using var rentedWriter = _writerPool.Rent();
-        FastCilReassembler.RewriteCode(ref reader, new MockOperandResolver(), rentedWriter.Writer, new MockOperandBuilder());
+        FastCilReassembler.RewriteCode(ref reader, rentedWriter.Writer, CreateTokenRewriter(new()));
 
         Assert.Equal(code, rentedWriter.GetData());
     }
@@ -42,7 +48,7 @@ public class FastCilReassemblerTest
 
         var reader = new BinaryStreamReader(code);
         using var rentedWriter = _writerPool.Rent();
-        FastCilReassembler.RewriteCode(ref reader, new MockOperandResolver(), rentedWriter.Writer, new MockOperandBuilder());
+        FastCilReassembler.RewriteCode(ref reader, rentedWriter.Writer, CreateTokenRewriter(new()));
 
         Assert.Equal(code, rentedWriter.GetData());
     }
@@ -58,7 +64,7 @@ public class FastCilReassemblerTest
 
         var reader = new BinaryStreamReader(code);
         using var rentedWriter = _writerPool.Rent();
-        FastCilReassembler.RewriteCode(ref reader, new MockOperandResolver(), rentedWriter.Writer, new MockOperandBuilder());
+        FastCilReassembler.RewriteCode(ref reader, rentedWriter.Writer, CreateTokenRewriter(new()));
 
         Assert.Equal(code, rentedWriter.GetData());
     }
@@ -74,7 +80,7 @@ public class FastCilReassemblerTest
 
         var reader = new BinaryStreamReader(code);
         using var rentedWriter = _writerPool.Rent();
-        FastCilReassembler.RewriteCode(ref reader, new MockOperandResolver(), rentedWriter.Writer, new MockOperandBuilder());
+        FastCilReassembler.RewriteCode(ref reader, rentedWriter.Writer, CreateTokenRewriter(new()));
 
         Assert.Equal(code, rentedWriter.GetData());
     }
@@ -90,7 +96,7 @@ public class FastCilReassemblerTest
 
         var reader = new BinaryStreamReader(code);
         using var rentedWriter = _writerPool.Rent();
-        FastCilReassembler.RewriteCode(ref reader, new MockOperandResolver(), rentedWriter.Writer, new MockOperandBuilder());
+        FastCilReassembler.RewriteCode(ref reader, rentedWriter.Writer, CreateTokenRewriter(new()));
 
         Assert.Equal(code, rentedWriter.GetData());
     }
@@ -106,7 +112,7 @@ public class FastCilReassemblerTest
 
         var reader = new BinaryStreamReader(code);
         using var rentedWriter = _writerPool.Rent();
-        FastCilReassembler.RewriteCode(ref reader, new MockOperandResolver(), rentedWriter.Writer, new MockOperandBuilder());
+        FastCilReassembler.RewriteCode(ref reader, rentedWriter.Writer, CreateTokenRewriter(new()));
 
         Assert.Equal(code, rentedWriter.GetData());
     }
@@ -130,7 +136,7 @@ public class FastCilReassemblerTest
 
         var reader = new BinaryStreamReader(code);
         using var rentedWriter = _writerPool.Rent();
-        FastCilReassembler.RewriteCode(ref reader, new MockOperandResolver(), rentedWriter.Writer, new MockOperandBuilder());
+        FastCilReassembler.RewriteCode(ref reader, rentedWriter.Writer, CreateTokenRewriter(new()));
 
         Assert.Equal(code, rentedWriter.GetData());
     }
@@ -153,19 +159,14 @@ public class FastCilReassemblerTest
         using var rentedWriter = _writerPool.Rent();
         FastCilReassembler.RewriteCode(
             ref reader,
-            new MockOperandResolver
-            {
-                { new MetadataToken(TableIndex.String, 0x01), "Hello, world!" },
-                { new MetadataToken(TableIndex.String, 0x10), "Hello, mars!" },
-                { new MetadataToken(TableIndex.String, 0x20), "Hello, jupiter!" },
-            },
             rentedWriter.Writer,
-            new MockOperandBuilder
-            {
-                { "Hello, world!", new MetadataToken(TableIndex.String, 0x50) },
-                { "Hello, mars!", new MetadataToken(TableIndex.String, 0x80) },
-                { "Hello, jupiter!", new MetadataToken(TableIndex.String, 0xA0) },
-            }
+            CreateTokenRewriter(new()
+                {
+                    [new MetadataToken(TableIndex.String, 0x01)] = new MetadataToken(TableIndex.String, 0x50),
+                    [new MetadataToken(TableIndex.String, 0x10)] = new MetadataToken(TableIndex.String, 0x80),
+                    [new MetadataToken(TableIndex.String, 0x20)] = new MetadataToken(TableIndex.String, 0xA0),
+                }
+            )
         );
 
         Assert.Equal(
@@ -199,15 +200,12 @@ public class FastCilReassemblerTest
         using var rentedWriter = _writerPool.Rent();
         FastCilReassembler.RewriteExceptionHandlerSection(
             ref reader,
-            new MockOperandResolver
-            {
-                { new MetadataToken(TableIndex.TypeRef, 2), "SomeType" }
-            },
             rentedWriter.Writer,
-            new MockOperandBuilder
-            {
-                { "SomeType", new MetadataToken(TableIndex.TypeRef, 0x10) }
-            },
+            CreateTokenRewriter(new()
+                {
+                    [new MetadataToken(TableIndex.TypeRef, 0x02)] = new MetadataToken(TableIndex.TypeRef, 0x10),
+                }
+            ),
             false
         );
 
@@ -241,15 +239,12 @@ public class FastCilReassemblerTest
         using var rentedWriter = _writerPool.Rent();
         FastCilReassembler.RewriteExceptionHandlerSection(
             ref reader,
-            new MockOperandResolver
-            {
-                { new MetadataToken(TableIndex.TypeRef, 2), "SomeType" }
-            },
             rentedWriter.Writer,
-            new MockOperandBuilder
-            {
-                { "SomeType", new MetadataToken(TableIndex.TypeRef, 0x10) }
-            },
+            CreateTokenRewriter(new()
+                {
+                    [new MetadataToken(TableIndex.TypeRef, 0x02)] = new MetadataToken(TableIndex.TypeRef, 0x10),
+                }
+            ),
             true
         );
 
@@ -266,45 +261,4 @@ public class FastCilReassemblerTest
         );
     }
 
-    private sealed class MockOperandResolver : ICilOperandResolver, IEnumerable<KeyValuePair<MetadataToken, object>>
-    {
-        private readonly Dictionary<MetadataToken, object?> _operandTokens = new();
-
-        public void Add(MetadataToken token, object key) => _operandTokens.Add(token, key);
-
-        public object? ResolveMember(MetadataToken token)  => _operandTokens.GetValueOrDefault(token);
-
-        public object? ResolveString(MetadataToken token) => _operandTokens.GetValueOrDefault(token);
-
-        public object? ResolveLocalVariable(int index) => index;
-
-        public object? ResolveParameter(int index) => index;
-
-        public IEnumerator<KeyValuePair<MetadataToken, object>> GetEnumerator() => _operandTokens.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    }
-
-    private sealed class MockOperandBuilder : ICilOperandBuilder, IEnumerable<KeyValuePair<object, MetadataToken>>
-    {
-        private readonly Dictionary<object, MetadataToken> _newTokens = new();
-
-        public void Add(object key, MetadataToken token) => _newTokens.Add(key, token);
-
-        public int GetVariableIndex(object? operand) => Convert.ToInt32(operand);
-
-        public int GetArgumentIndex(object? operand) => Convert.ToInt32(operand);
-
-        public uint GetStringToken(object? operand) => operand is not null && _newTokens.TryGetValue(operand, out var token)
-                ? token.ToUInt32()
-                : 0;
-
-        public MetadataToken GetMemberToken(object? operand) => operand is not null && _newTokens.TryGetValue(operand, out var token)
-            ? token.ToUInt32()
-            : 0;
-
-        public IEnumerator<KeyValuePair<object, MetadataToken>> GetEnumerator() => _newTokens.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) _newTokens).GetEnumerator();
-    }
 }
