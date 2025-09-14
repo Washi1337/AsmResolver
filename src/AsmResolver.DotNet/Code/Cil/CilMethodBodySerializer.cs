@@ -59,6 +59,16 @@ namespace AsmResolver.DotNet.Code.Cil
             set;
         } = null;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether all method bodies should be fully verified and reassembled,
+        /// including previously serialized method bodies that have not been modified.
+        /// </summary>
+        public bool ForceFullReassemble
+        {
+            get;
+            set;
+        }
+
         /// <inheritdoc />
         public ISegmentReference SerializeMethodBody(MethodBodySerializationContext context, MethodDefinition method)
         {
@@ -67,7 +77,8 @@ namespace AsmResolver.DotNet.Code.Cil
 
             var body = method.CilMethodBody;
 
-            if (body is SerializedCilMethodBody { IsInitialized: false } serializedBody
+            if (!ForceFullReassemble
+                && body is SerializedCilMethodBody { IsInitialized: false } serializedBody
                 && serializedBody.IsFat == serializedBody.OriginalRawBody.IsFat)
             {
                 return FastPatchMethodBody(context, serializedBody);
