@@ -21,9 +21,8 @@ public static class FastCilReassembler
     /// Patches the provided code stream.
     /// </summary>
     /// <param name="reader">The input code stream to patch.</param>
-    /// <param name="operandResolver">The operand resolver to use for resolving raw operands.</param>
     /// <param name="writer">The output code stream to write to.</param>
-    /// <param name="operandBuilder">The operand builder to use for obtaining the new raw operands after they have been resolved.</param>
+    /// <param name="tokenRewriter">The function to use for translating old metadata tokens to new metadata tokens.</param>
     public static void RewriteCode(
         ref BinaryStreamReader reader,
         BinaryStreamWriter writer,
@@ -39,7 +38,6 @@ public static class FastCilReassembler
         {
             var code = ReadWriteOpCode(ref reader, writer);
 
-            MetadataToken token;
             switch (code.OperandType)
             {
                 case CilOperandType.InlineNone:
@@ -99,7 +97,7 @@ public static class FastCilReassembler
                 case CilOperandType.InlineType:
                 case CilOperandType.InlineMethod:
                 case CilOperandType.InlineString:
-                    token = reader.ReadUInt32();
+                    MetadataToken token = reader.ReadUInt32();
                     writer.WriteUInt32(tokenRewriter(token).ToUInt32());
                     break;
 
@@ -132,9 +130,8 @@ public static class FastCilReassembler
     /// Patches the provided raw extra section containing exception handlers.
     /// </summary>
     /// <param name="reader">The input extra section data to patch.</param>
-    /// <param name="operandResolver">The operand resolver to use for resolving any metadata tokens referenced in the handlers.</param>
     /// <param name="writer">The output code stream to write to.</param>
-    /// <param name="operandBuilder">The operand builder to use for obtaining the new metadata tokens after they have been resolved.</param>
+    /// <param name="tokenRewriter">The function to use for translating old metadata tokens to new metadata tokens.</param>
     /// <param name="fatFormat"></param>
     public static void RewriteExceptionHandlerSection(
         ref BinaryStreamReader reader,
