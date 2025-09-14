@@ -133,7 +133,10 @@ namespace AsmResolver.DotNet.Code.Cil
             catch (Exception ex)
             {
                 context.ErrorListener.RegisterException(new BadImageFormatException(
-                    $"Method body of {sourceBody.OriginalOwner.SafeToString()} contains invalid extra sections.", ex));
+                    $"Method body of {sourceBody.OriginalOwner.SafeToString()} contains an invalid CIL code stream.",
+                    ex
+                ));
+
                 return sourceBody.OriginalRawBody.Code.ToArray();
             }
         }
@@ -167,7 +170,9 @@ namespace AsmResolver.DotNet.Code.Cil
                     catch (Exception ex)
                     {
                         context.ErrorListener.RegisterException(new BadImageFormatException(
-                            $"Method body of {sourceBody.OriginalOwner.SafeToString()} contains an invalid CIL code stream.", ex));
+                            $"Method body of {sourceBody.OriginalOwner.SafeToString()} contains invalid extra sections.",
+                            ex
+                        ));
                     }
                 }
 
