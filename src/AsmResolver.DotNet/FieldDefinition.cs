@@ -68,7 +68,7 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the field.</param>
         /// <param name="attributes">The attributes.</param>
         /// <param name="fieldType">The type of values the field contains.</param>
-        public FieldDefinition(Utf8String name, FieldAttributes attributes, TypeSignature? fieldType)
+        public FieldDefinition(Utf8String? name, FieldAttributes attributes, TypeSignature? fieldType)
             : this(new MetadataToken(TableIndex.Field, 0))
         {
             Name = name;
