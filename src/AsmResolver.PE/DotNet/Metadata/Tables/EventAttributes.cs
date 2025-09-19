@@ -9,6 +9,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     public enum EventAttributes : ushort
     {
         /// <summary>
+        /// Specifies that the event has no attributes.
+        /// </summary>
+        None = 0x0000,
+        /// <summary>
         /// Specifies that the event is using a special name.
         /// </summary>
         SpecialName = 0x0200,
