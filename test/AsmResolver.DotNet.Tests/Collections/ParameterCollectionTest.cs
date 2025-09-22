@@ -241,6 +241,28 @@ namespace AsmResolver.DotNet.Tests.Collections
         }
 
         [Fact]
+        public void GetOrCreateDefinitionShouldInsertDefinitionsSequentially()
+        {
+            var dummyModule = new ModuleDefinition("TestModule");
+            var corLibTypesFactory = dummyModule.CorLibTypeFactory;
+            var method = new MethodDefinition("TestMethodNoParameterDefinitions",
+                MethodAttributes.Public | MethodAttributes.Static,
+                MethodSignature.CreateStatic(corLibTypesFactory.Int32, corLibTypesFactory.Int32, corLibTypesFactory.Int32));
+
+            Assert.Equal(2, method.Parameters.Count);
+
+            method.Parameters[1].GetOrCreateDefinition();
+            method.Parameters.ReturnParameter.GetOrCreateDefinition();
+            method.Parameters[0].GetOrCreateDefinition();
+
+            Assert.Equal(3, method.ParameterDefinitions.Count);
+
+            Assert.Equal(0, method.ParameterDefinitions[0].Sequence);
+            Assert.Equal(1, method.ParameterDefinitions[1].Sequence);
+            Assert.Equal(2, method.ParameterDefinitions[2].Sequence);
+        }
+
+        [Fact]
         public void GetOrCreateDefinitionShouldReturnExistingDefinition()
         {
             var method = ObtainStaticTestMethod(nameof(MultipleMethods.SingleParameterMethod));

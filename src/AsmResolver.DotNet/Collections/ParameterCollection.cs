@@ -161,8 +161,19 @@ namespace AsmResolver.DotNet.Collections
             if (parameter.Definition is not null)
                 return parameter.Definition;
 
+            // Insert the parameter definition, so that the list is always ordered by sequence.
+            // We use a reverse for loop, as parameters are more likely to be added at the end of the list.
             var parameterDefinition = new ParameterDefinition(parameter.Sequence, Utf8String.Empty, 0);
-            _owner.ParameterDefinitions.Add(parameterDefinition);
+            var parameterDefinitions = _owner.ParameterDefinitions;
+            for (int i = parameterDefinitions.Count - 1; i >= 0; i--)
+            {
+                if (parameterDefinitions[i].Sequence < parameterDefinition.Sequence)
+                {
+                    parameterDefinitions.Insert(i + 1, parameterDefinition);
+                    return parameterDefinition;
+                }
+            }
+            parameterDefinitions.Insert(0, parameterDefinition);
             return parameterDefinition;
         }
 
