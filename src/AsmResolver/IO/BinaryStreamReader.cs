@@ -1,9 +1,12 @@
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using AsmResolver.Shims;
+
+#if !NETSTANDARD2_0
+using System.Buffers;
+#endif
 
 namespace AsmResolver.IO
 {
@@ -795,7 +798,12 @@ namespace AsmResolver.IO
         /// <param name="writer">The output stream.</param>
         public void WriteToOutput(BinaryStreamWriter writer)
         {
+#if NETSTANDARD2_0
             byte[] buffer = new byte[4096];
+#else
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
+#endif
+
             while (RelativeOffset < Length)
             {
                 int blockSize = (int) Math.Min(buffer.Length, Length - RelativeOffset);
@@ -808,6 +816,10 @@ namespace AsmResolver.IO
 
                 writer.WriteBytes(buffer, 0, actualSize);
             }
+
+#if !NETSTANDARD2_0
+            ArrayPool<byte>.Shared.Return(buffer);
+#endif
         }
     }
 }
