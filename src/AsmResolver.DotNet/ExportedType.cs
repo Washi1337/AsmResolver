@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet
         /// <param name="implementation">The file containing the type.</param>
         /// <param name="ns">The namespace of the type.</param>
         /// <param name="name">The name of the type.</param>
-        public ExportedType(IImplementation? implementation, string? ns, string? name)
+        public ExportedType(IImplementation? implementation, Utf8String? ns, Utf8String? name)
             : this(new MetadataToken(TableIndex.ExportedType, 1))
         {
             Implementation = implementation;
