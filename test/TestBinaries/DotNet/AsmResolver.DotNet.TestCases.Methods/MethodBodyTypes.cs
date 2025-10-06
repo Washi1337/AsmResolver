@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Net;
 
 namespace AsmResolver.DotNet.TestCases.Methods
 {
@@ -11,7 +13,7 @@ namespace AsmResolver.DotNet.TestCases.Methods
         public static void FatMethodWithLocals()
         {
             int x = int.Parse(Console.ReadLine());
-            
+
             // HACK: We include some additional code to prevent Release mode optimizing away the local variable.
             if (x < 10)
                 Console.WriteLine(x);
@@ -42,7 +44,7 @@ namespace AsmResolver.DotNet.TestCases.Methods
             Console.WriteLine(v10);
         }
 
-        public static void FatMethodWithExceptionHandler()
+        public static void FatMethodWithFinally()
         {
             try
             {
@@ -51,6 +53,22 @@ namespace AsmResolver.DotNet.TestCases.Methods
             finally
             {
                 Console.WriteLine("Finally");
+            }
+        }
+
+        public static void FatMethodWithCatch()
+        {
+            try
+            {
+                Console.WriteLine("Try");
+            }
+            catch (IOException)
+            {
+                Console.WriteLine("IOException");
+            }
+            catch (WebException)
+            {
+                Console.WriteLine("WebException");
             }
         }
 

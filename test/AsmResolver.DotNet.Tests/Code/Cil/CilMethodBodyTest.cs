@@ -27,8 +27,11 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             return type.Methods.First(m => m.Name == name).CilMethodBody;
         }
 
-        private CilMethodBody RebuildAndLookup(CilMethodBody methodBody)
+        private CilMethodBody RebuildAndLookup(CilMethodBody methodBody, bool accessBeforeBuild)
         {
+            if (accessBeforeBuild)
+                _ = methodBody.Instructions;
+
             var module = methodBody.Owner!.DeclaringModule!;
 
             var stream = new MemoryStream();
@@ -45,11 +48,13 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             Assert.False(body.IsFat);
         }
 
-        [Fact]
-        public void PersistentTinyMethod()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PersistentTinyMethod(bool accessBeforeBuild)
         {
             var body = ReadMethodBody(nameof(MethodBodyTypes.TinyMethod));
-            var newBody = RebuildAndLookup(body);
+            var newBody = RebuildAndLookup(body, accessBeforeBuild);
 
             Assert.False(newBody.IsFat);
             Assert.Equal(body.Instructions.Count, newBody.Instructions.Count);
@@ -62,11 +67,13 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             Assert.True(body.IsFat);
         }
 
-        [Fact]
-        public void PersistentFatLongMethod()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PersistentFatLongMethod(bool accessBeforeBuild)
         {
             var body = ReadMethodBody(nameof(MethodBodyTypes.FatLongMethod));
-            var newBody = RebuildAndLookup(body);
+            var newBody = RebuildAndLookup(body, accessBeforeBuild);
 
             Assert.True(newBody.IsFat);
             Assert.Equal(body.Instructions.Count, newBody.Instructions.Count);
@@ -98,11 +105,13 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             }
         }
 
-        [Fact]
-        public void PersistentFatMethodWithLocals()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PersistentFatMethodWithLocals(bool accessBeforeBuild)
         {
             var body = ReadMethodBody(nameof(MethodBodyTypes.FatLongMethod));
-            var newBody = RebuildAndLookup(body);
+            var newBody = RebuildAndLookup(body, accessBeforeBuild);
 
             Assert.True(newBody.IsFat);
             Assert.Equal(
@@ -111,11 +120,62 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         }
 
         [Fact]
-        public void ReadFatMethodWithExceptionHandler()
+        public void ReadFatMethodWithFinally()
         {
-            var body = ReadMethodBody(nameof(MethodBodyTypes.FatMethodWithExceptionHandler));
+            var body = ReadMethodBody(nameof(MethodBodyTypes.FatMethodWithFinally));
             Assert.True(body.IsFat);
-            Assert.Single(body.ExceptionHandlers);
+            Assert.Equal(CilExceptionHandlerType.Finally, Assert.Single(body.ExceptionHandlers).HandlerType);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PersistentFatMethodWithFinally(bool accessBeforeBuild)
+        {
+            var body = ReadMethodBody(nameof(MethodBodyTypes.FatMethodWithFinally));
+            var newBody = RebuildAndLookup(body, accessBeforeBuild);
+
+            Assert.True(newBody.IsFat);
+            Assert.Equal(CilExceptionHandlerType.Finally, Assert.Single(newBody.ExceptionHandlers).HandlerType);
+        }
+
+        [Fact]
+        public void ReadFatMethodWithCatch()
+        {
+            var body = ReadMethodBody(nameof(MethodBodyTypes.FatMethodWithCatch));
+            Assert.True(body.IsFat);
+            Assert.Equal(2, body.ExceptionHandlers.Count);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PersistentFatMethodWithMultipleCatchBlocks(bool accessBeforeBuild)
+        {
+            var body = ReadMethodBody(nameof(MethodBodyTypes.FatMethodWithCatch));
+            var newBody = RebuildAndLookup(body, accessBeforeBuild);
+
+            Assert.True(newBody.IsFat);
+            Assert.Equal(2, newBody.ExceptionHandlers.Count);
+            Assert.Equal(newBody.ExceptionHandlers[0].ExceptionType!.FullName, newBody.ExceptionHandlers[0].ExceptionType!.FullName);
+            Assert.Equal(newBody.ExceptionHandlers[1].ExceptionType!.FullName, newBody.ExceptionHandlers[1].ExceptionType!.FullName);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void AddLocalToExistingTinyBodyShouldPromoteToFat(bool accessBeforeBuild)
+        {
+            var body = ReadMethodBody(nameof(MethodBodyTypes.TinyMethod));
+
+            Assert.False(body.IsFat);
+            body.LocalVariables.Add(new CilLocalVariable(body.Owner!.DeclaringModule!.CorLibTypeFactory.Int32));
+            Assert.True(body.IsFat);
+
+            var newBody = RebuildAndLookup(body, accessBeforeBuild);
+
+            Assert.True(body.IsFat);
+            Assert.Equal(newBody.Owner!.DeclaringModule!.CorLibTypeFactory.Int32, Assert.Single(newBody.LocalVariables).VariableType);
         }
 
         private static CilMethodBody CreateDummyBody(bool isVoid)

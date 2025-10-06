@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
@@ -61,6 +59,16 @@ namespace AsmResolver.DotNet.Code.Cil
             set;
         } = null;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether all method bodies should be fully verified and reassembled,
+        /// including previously serialized method bodies that have not been modified.
+        /// </summary>
+        public bool ForceFullReassemble
+        {
+            get;
+            set;
+        }
+
         /// <inheritdoc />
         public ISegmentReference SerializeMethodBody(MethodBodySerializationContext context, MethodDefinition method)
         {
@@ -69,6 +77,184 @@ namespace AsmResolver.DotNet.Code.Cil
 
             var body = method.CilMethodBody;
 
+            if (!ForceFullReassemble
+                && body is SerializedCilMethodBody { IsInitialized: false } serializedBody
+                && serializedBody.IsFat == serializedBody.OriginalRawBody.IsFat)
+            {
+                return FastPatchMethodBody(context, serializedBody);
+            }
+            else
+            {
+                return BuildMethodBody(context, body);
+            }
+        }
+
+        private ISegmentReference FastPatchMethodBody(MethodBodySerializationContext context, SerializedCilMethodBody body)
+        {
+            var operandBuilder = new CilOperandBuilder(context.TokenProvider, context.ErrorListener);
+            var tokenRewriter = (MetadataToken token) => token.Table == TableIndex.String
+                ? operandBuilder.GetStringToken(body.OperandResolver.ResolveString(token))
+                : operandBuilder.GetMemberToken(body.OperandResolver.ResolveMember(token));
+
+            // Serialize code.
+            byte[] code = FastRewriteCodeStream(context, body, tokenRewriter);
+
+            // If we're tiny then method just contains code.
+            if (!body.IsFat)
+                return new CilRawTinyMethodBody(code).ToReference();
+
+            // Serialize locals.
+            var localVarSigToken = BuildLocalVariablesSignatures(context, body);
+
+            // Build skeleton for new fat body.
+            var result = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, localVarSigToken,
+                new DataSegment(code))
+            {
+                InitLocals = body.InitializeLocals
+            };
+
+            // Rewrite sections if any.
+            if (body.OriginalRawBody is CilRawFatMethodBody { ExtraSections.Count: > 0 })
+            {
+                result.HasSections = true;
+                FastRewriteExtraSections(context, body, result, tokenRewriter);
+            }
+
+            return result.ToReference();
+        }
+
+        private byte[] FastRewriteCodeStream(
+            MethodBodySerializationContext context,
+            SerializedCilMethodBody sourceBody,
+            Func<MetadataToken, MetadataToken> tokenRewriter)
+        {
+            try
+            {
+                var codeReader = sourceBody.OriginalRawBody.Code.CreateReader();
+
+                using var rentedWriter = _writerPool.Rent();
+                FastCilReassembler.RewriteCode(
+                    ref codeReader,
+                    rentedWriter.Writer,
+                    tokenRewriter
+                );
+
+                return rentedWriter.GetData();
+            }
+            catch (Exception ex)
+            {
+                context.ErrorListener.RegisterException(new BadImageFormatException(
+                    $"Method body of {sourceBody.OriginalOwner.SafeToString()} contains an invalid CIL code stream.",
+                    ex
+                ));
+
+                return sourceBody.OriginalRawBody.Code.ToArray();
+            }
+        }
+
+        private void FastRewriteExtraSections(
+            MethodBodySerializationContext context,
+            SerializedCilMethodBody sourceBody,
+            CilRawFatMethodBody destinationBody,
+            Func<MetadataToken, MetadataToken> tokenRewriter)
+        {
+            var raw = (CilRawFatMethodBody) sourceBody.OriginalRawBody;
+            foreach (var section in raw.ExtraSections)
+            {
+                byte[] sectionData = section.Data;
+
+                if (section.IsEHTable)
+                {
+                    try
+                    {
+                        var reader = new BinaryStreamReader(sectionData);
+                        using var rentedWriter = _writerPool.Rent();
+                        FastCilReassembler.RewriteExceptionHandlerSection(
+                            ref reader,
+                            rentedWriter.Writer,
+                            tokenRewriter,
+                            section.IsFat
+                        );
+
+                        sectionData = rentedWriter.GetData();
+                    }
+                    catch (Exception ex)
+                    {
+                        context.ErrorListener.RegisterException(new BadImageFormatException(
+                            $"Method body of {sourceBody.OriginalOwner.SafeToString()} contains invalid extra sections.",
+                            ex
+                        ));
+                    }
+                }
+
+                destinationBody.ExtraSections.Add(new CilExtraSection(section.Attributes, sectionData));
+            }
+        }
+
+        private ISegmentReference BuildMethodBody(MethodBodySerializationContext context, CilMethodBody body)
+        {
+            // Serialize CIL stream.
+            byte[] code = BuildRawCodeStream(context, body);
+
+            // Build method body.
+            var rawBody = body.IsFat
+                ? BuildFatMethodBody(context, body, code)
+                : BuildTinyMethodBody(code);
+
+            return rawBody.ToReference();
+        }
+
+        private static CilRawMethodBody BuildTinyMethodBody(byte[] code) => new CilRawTinyMethodBody(code);
+
+        private CilRawMethodBody BuildFatMethodBody(MethodBodySerializationContext context, CilMethodBody body, byte[] code)
+        {
+            // Serialize local variables.
+            var localVarSigToken = BuildLocalVariablesSignatures(context, body);
+            var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, localVarSigToken, new DataSegment(code))
+            {
+                InitLocals = body.InitializeLocals
+            };
+
+            // Build up EH table section.
+            if (body.ExceptionHandlers.Count > 0)
+            {
+                fatBody.HasSections = true;
+                bool needsFatFormat = body.ExceptionHandlers.Any(e => e.IsFat);
+
+                var attributes = CilExtraSectionAttributes.EHTable;
+                if (needsFatFormat)
+                    attributes |= CilExtraSectionAttributes.FatFormat;
+
+                byte[] rawSectionData = SerializeExceptionHandlers(context, body, needsFatFormat);
+                var section = new CilExtraSection(attributes, rawSectionData);
+                fatBody.ExtraSections.Add(section);
+            }
+
+            return fatBody;
+        }
+
+        private static MetadataToken BuildLocalVariablesSignatures(MethodBodySerializationContext context, CilMethodBody body)
+        {
+            MetadataToken token;
+            if (body.LocalVariables.Count == 0)
+            {
+                token = MetadataToken.Zero;
+            }
+            else
+            {
+                var localVarSig = new LocalVariablesSignature();
+                for (int i = 0; i < body.LocalVariables.Count; i++)
+                    localVarSig.VariableTypes.Add(body.LocalVariables[i].VariableType);
+
+                var standAloneSig = new StandAloneSignature(localVarSig);
+                token = context.TokenProvider.GetStandAloneSignatureToken(standAloneSig, body.Owner);
+            }
+
+            return token;
+        }
+
+        private byte[] BuildRawCodeStream(MethodBodySerializationContext context, CilMethodBody body)
+        {
             body.Instructions.CalculateOffsets();
 
             try
@@ -89,60 +275,6 @@ namespace AsmResolver.DotNet.Code.Cil
                 context.ErrorListener.RegisterException(ex);
             }
 
-            // Serialize CIL stream.
-            byte[] code = BuildRawCodeStream(context, body);
-
-            // Build method body.
-            var rawBody = body.IsFat
-                ? BuildFatMethodBody(context, body, code)
-                : BuildTinyMethodBody(code);
-
-            return rawBody.ToReference();
-        }
-
-        private static CilRawMethodBody BuildTinyMethodBody(byte[] code) => new CilRawTinyMethodBody(code);
-
-        private CilRawMethodBody BuildFatMethodBody(MethodBodySerializationContext context, CilMethodBody body, byte[] code)
-        {
-            // Serialize local variables.
-            MetadataToken token;
-            if (body.LocalVariables.Count == 0)
-            {
-                token = MetadataToken.Zero;
-            }
-            else
-            {
-                var localVarSig = new LocalVariablesSignature();
-                for (int i = 0; i < body.LocalVariables.Count; i++)
-                    localVarSig.VariableTypes.Add(body.LocalVariables[i].VariableType);
-
-                var standAloneSig = new StandAloneSignature(localVarSig);
-                token = context.TokenProvider.GetStandAloneSignatureToken(standAloneSig, body.Owner);
-            }
-
-            var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, new DataSegment(code));
-            fatBody.InitLocals = body.InitializeLocals;
-
-            // Build up EH table section.
-            if (body.ExceptionHandlers.Count > 0)
-            {
-                fatBody.HasSections = true;
-                bool needsFatFormat = body.ExceptionHandlers.Any(e => e.IsFat);
-
-                var attributes = CilExtraSectionAttributes.EHTable;
-                if (needsFatFormat)
-                    attributes |= CilExtraSectionAttributes.FatFormat;
-
-                var rawSectionData = SerializeExceptionHandlers(context, body, needsFatFormat);
-                var section = new CilExtraSection(attributes, rawSectionData);
-                fatBody.ExtraSections.Add(section);
-            }
-
-            return fatBody;
-        }
-
-        private byte[] BuildRawCodeStream(MethodBodySerializationContext context, CilMethodBody body)
-        {
             var bag = context.ErrorListener;
 
             using var rentedWriter = _writerPool.Rent();
@@ -181,7 +313,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 throw new InvalidOperationException("Can only serialize fat exception handlers in fat format.");
 
             uint tryStart = (uint) (handler.TryStart?.Offset ?? 0);
-            uint tryEnd= (uint) (handler.TryEnd?.Offset ?? 0);
+            uint tryEnd = (uint) (handler.TryEnd?.Offset ?? 0);
             uint handlerStart = (uint) (handler.HandlerStart?.Offset ?? 0);
             uint handlerEnd = (uint) (handler.HandlerEnd?.Offset ?? 0);
 

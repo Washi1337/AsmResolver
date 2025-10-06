@@ -23,8 +23,8 @@ namespace AsmResolver.Benchmarks
         static ModuleReadWriteBenchmark()
         {
             string runtimePath = DotNetCorePathProvider.Default
-                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(3, 1, 0))
-                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 3.1 is not installed.");
+                .GetRuntimePathCandidates("Microsoft.NETCore.App", new Version(8, 0))
+                .FirstOrDefault() ?? throw new InvalidOperationException(".NET Core 8.0 is not installed.");
 
             var fs = new ByteArrayFileService();
             SystemPrivateCoreLib = fs.OpenFile(Path.Combine(runtimePath, "System.Private.CoreLib.dll"));
