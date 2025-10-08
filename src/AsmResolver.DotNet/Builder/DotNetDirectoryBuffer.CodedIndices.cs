@@ -8,6 +8,9 @@ namespace AsmResolver.DotNet.Builder
     {
         private void AddCustomAttributes(MetadataToken ownerToken, IHasCustomAttribute provider)
         {
+            if (!provider.HasCustomAttributes)
+                return;
+
             for (int i = 0; i < provider.CustomAttributes.Count; i++)
                 AddCustomAttribute(ownerToken, provider.CustomAttributes[i]);
         }

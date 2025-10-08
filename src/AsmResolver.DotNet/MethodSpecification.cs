@@ -13,7 +13,10 @@ namespace AsmResolver.DotNet
     {
         private readonly LazyVariable<MethodSpecification, IMethodDefOrRef?> _method;
         private readonly LazyVariable<MethodSpecification, GenericInstanceMethodSignature?> _signature;
-        private IList<CustomAttribute>? _customAttributes;
+
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Creates a new empty method specification.
@@ -80,13 +83,16 @@ namespace AsmResolver.DotNet
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributes.Count > 0;
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 

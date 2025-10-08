@@ -36,9 +36,12 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<MethodDefinition, UnmanagedExportInfo?> _exportInfo;
         private IList<ParameterDefinition>? _parameterDefinitions;
         private ParameterCollection? _parameters;
-        private IList<CustomAttribute>? _customAttributes;
         private IList<SecurityDeclaration>? _securityDeclarations;
         private IList<GenericParameter>? _genericParameters;
+
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes a new method definition.
@@ -705,13 +708,16 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributes.Count > 0;
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 

@@ -17,7 +17,10 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<TypeReference, Utf8String?> _name;
         private readonly LazyVariable<TypeReference, Utf8String?> _namespace;
         private readonly LazyVariable<TypeReference, IResolutionScope?> _scope;
-        private IList<CustomAttribute>? _customAttributes;
+
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes a new empty type reference.
@@ -125,13 +128,16 @@ namespace AsmResolver.DotNet
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributes.Count > 0;
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 

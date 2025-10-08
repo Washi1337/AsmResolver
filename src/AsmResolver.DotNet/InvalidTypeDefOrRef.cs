@@ -52,6 +52,9 @@ namespace AsmResolver.DotNet
         ITypeDefOrRef? ITypeDefOrRef.DeclaringType => null;
 
         /// <inheritdoc />
+        public bool HasCustomAttributes => false;
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get;

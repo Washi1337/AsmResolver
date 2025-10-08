@@ -16,6 +16,32 @@ namespace AsmResolver.DotNet.Tests
         private readonly SignatureComparer _comparer = new();
 
         [Fact]
+        public void HasAttributes()
+        {
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location, TestReaderParameters);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
+            Assert.True(type.HasCustomAttributes);
+        }
+
+        [Fact]
+        public void HasNoAttributes()
+        {
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location, TestReaderParameters);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(TestEnum));
+            Assert.False(type.HasCustomAttributes);
+        }
+
+        [Fact]
+        public void AddAttributes()
+        {
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location, TestReaderParameters);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(TestEnum));
+            Assert.False(type.HasCustomAttributes);
+            type.CustomAttributes.Add(new CustomAttribute(null));
+            Assert.True(type.HasCustomAttributes);
+        }
+
+        [Fact]
         public void ReadConstructor()
         {
             var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location, TestReaderParameters);

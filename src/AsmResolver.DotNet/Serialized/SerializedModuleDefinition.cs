@@ -125,6 +125,11 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
+        public override bool HasCustomAttributes => CustomAttributesInternal is null
+            ? HasNonEmptyCustomAttributes(this)
+            : CustomAttributes.Count > 0;
+
+        /// <inheritdoc />
         public override IMetadataMember LookupMember(MetadataToken token) =>
             !TryLookupMember(token, out var member)
                 ? throw new ArgumentException($"Cannot resolve metadata token {token}.")
