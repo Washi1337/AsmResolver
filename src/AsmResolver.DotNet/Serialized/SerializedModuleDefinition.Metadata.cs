@@ -324,12 +324,6 @@ namespace AsmResolver.DotNet.Serialized
             return _genericParameters.GetKey(parameterRid);
         }
 
-        internal bool HasNonEmptyGenericParameters(MetadataToken ownerToken)
-        {
-            EnsureGenericParametersInitialized();
-            return _genericParameters.GetValues(ownerToken).Count > 0;
-        }
-
         internal OneToManyRelation<MetadataToken, uint>.ValueSet GetGenericParameters(MetadataToken ownerToken)
         {
             EnsureGenericParametersInitialized();

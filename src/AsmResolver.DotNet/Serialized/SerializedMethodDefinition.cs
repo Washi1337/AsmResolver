@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         public override bool HasGenericParameters => GenericParametersInternal is null
-            ? _context.ParentModule.HasNonEmptyGenericParameters(MetadataToken)
+            ? _context.ParentModule.GetGenericParameters(MetadataToken).Count > 0
             : GenericParametersInternal.Count > 0;
 
         /// <inheritdoc />

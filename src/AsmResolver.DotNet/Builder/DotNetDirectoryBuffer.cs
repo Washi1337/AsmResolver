@@ -195,8 +195,12 @@ namespace AsmResolver.DotNet.Builder
             table.Add(semantics, row);
         }
 
-        private void DefineInterfaces(MetadataToken ownerToken, IList<InterfaceImplementation> interfaces)
+        private void DefineInterfaces(MetadataToken ownerToken, TypeDefinition owner)
         {
+            if (!owner.HasInterfaces)
+                return;
+
+            var interfaces = owner.Interfaces;
             var table = Metadata.TablesStream.GetSortedTable<InterfaceImplementation, InterfaceImplementationRow>(TableIndex.InterfaceImpl);
 
             for (int i = 0; i < interfaces.Count; i++)

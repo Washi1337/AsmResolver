@@ -56,8 +56,13 @@ namespace AsmResolver.DotNet
         /// <remarks> This value may not be initialized. Use <see cref="GenericParameters"/> instead.</remarks>
         protected IList<GenericParameter>? GenericParametersInternal;
 
-        private IList<InterfaceImplementation>? _interfaces;
-        private IList<MethodImplementation>? _methodImplementations;
+        /// <summary> The internal interfaces list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Interfaces"/> instead.</remarks>
+        protected IList<InterfaceImplementation>? InterfacesInternal;
+
+        /// <summary> The internal method implementations list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="MethodImplementations"/> instead.</remarks>
+        protected IList<MethodImplementation>? MethodImplementationsInternal;
 
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
@@ -682,17 +687,27 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a value indicating whether the type implements interfaces.
+        /// </summary>
+        public virtual bool HasInterfaces => InterfacesInternal is { Count: > 0 };
+
+        /// <summary>
         /// Gets a collection of interfaces that are implemented by the type.
         /// </summary>
         public IList<InterfaceImplementation> Interfaces
         {
             get
             {
-                if (_interfaces is null)
-                    Interlocked.CompareExchange(ref _interfaces, GetInterfaces(), null);
-                return _interfaces;
+                if (InterfacesInternal is null)
+                    Interlocked.CompareExchange(ref InterfacesInternal, GetInterfaces(), null);
+                return InterfacesInternal;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the type explicitly implements interface methods.
+        /// </summary>
+        public virtual bool HasMethodImplementations => MethodImplementationsInternal is { Count: > 0 };
 
         /// <summary>
         /// Gets a collection of methods that are explicitly implemented by the type.
@@ -701,9 +716,9 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_methodImplementations is null)
-                    Interlocked.CompareExchange(ref _methodImplementations, GetMethodImplementations(), null);
-                return _methodImplementations;
+                if (MethodImplementationsInternal is null)
+                    Interlocked.CompareExchange(ref MethodImplementationsInternal, GetMethodImplementations(), null);
+                return MethodImplementationsInternal;
             }
         }
 

@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         public override bool HasGenericParameters => GenericParametersInternal is null
-            ? _context.ParentModule.HasNonEmptyGenericParameters(MetadataToken)
+            ? _context.ParentModule.GetGenericParameters(MetadataToken).Count > 0
             : GenericParametersInternal.Count > 0;
 
         /// <inheritdoc />
@@ -66,6 +66,16 @@ namespace AsmResolver.DotNet.Serialized
         public override bool HasEvents => EventsInternal is null
             ? !_context.ParentModule.GetEventRange(MetadataToken.Rid).IsEmpty
             : EventsInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasInterfaces => InterfacesInternal is null
+            ?  _context.ParentModule.GetInterfaceImplementationRids(MetadataToken).Count > 0
+            : InterfacesInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasMethodImplementations => MethodImplementationsInternal is null
+            ?  _context.ParentModule.GetMethodImplementationRids(MetadataToken).Count > 0
+            : MethodImplementationsInternal.Count > 0;
 
         /// <inheritdoc />
         protected override Utf8String? GetNamespace() => _context.StringsStream?.GetStringByIndex(_row.Namespace);
