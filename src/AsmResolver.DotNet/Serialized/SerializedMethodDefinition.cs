@@ -38,6 +38,11 @@ namespace AsmResolver.DotNet.Serialized
             : CustomAttributesInternal.Count > 0;
 
         /// <inheritdoc />
+        public override bool HasParameterDefinitions => ParameterDefinitionsInternal is null
+            ? !_context.ParentModule.GetParameterRange(MetadataToken.Rid).IsEmpty
+            : ParameterDefinitionsInternal.Count > 0;
+
+        /// <inheritdoc />
         public override bool HasGenericParameters => GenericParametersInternal is null
             ? _context.ParentModule.GetGenericParameters(MetadataToken).Count > 0
             : GenericParametersInternal.Count > 0;

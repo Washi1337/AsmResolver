@@ -34,8 +34,11 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<MethodDefinition, ImplementationMap?> _implementationMap;
         private readonly LazyVariable<MethodDefinition, MethodSemantics?> _semantics;
         private readonly LazyVariable<MethodDefinition, UnmanagedExportInfo?> _exportInfo;
-        private IList<ParameterDefinition>? _parameterDefinitions;
         private ParameterCollection? _parameters;
+
+        /// <summary> The internal parameter definitions list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="ParameterDefinitions"/> instead.</remarks>
+        protected IList<ParameterDefinition>? ParameterDefinitionsInternal;
 
         /// <summary> The internal security declarations list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="SecurityDeclarations"/> instead.</remarks>
@@ -584,6 +587,16 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a value indicating whether the method defines parameter definitions.
+        /// </summary>
+        /// <remarks>
+        /// This property might not reflect the list of actual parameters that the method defines and uses according
+        /// to the method signature. This property only reflects the list that is inferred from the ParamList column
+        /// in the metadata row. For the actual list of parameters, use the <see cref="Parameters"/> property instead.
+        /// </remarks>
+        public virtual bool HasParameterDefinitions => ParameterDefinitionsInternal is { Count: > 0 };
+
+        /// <summary>
         /// Gets a collection of parameter definitions that this method defines.
         /// </summary>
         /// <remarks>
@@ -595,9 +608,9 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_parameterDefinitions is null)
-                    Interlocked.CompareExchange(ref _parameterDefinitions, GetParameterDefinitions(), null);
-                return _parameterDefinitions;
+                if (ParameterDefinitionsInternal is null)
+                    Interlocked.CompareExchange(ref ParameterDefinitionsInternal, GetParameterDefinitions(), null);
+                return ParameterDefinitionsInternal;
             }
         }
 

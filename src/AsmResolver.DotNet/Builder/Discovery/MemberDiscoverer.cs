@@ -193,8 +193,11 @@ namespace AsmResolver.DotNet.Builder.Discovery
                         InsertOrAppendIfNew(method, true);
 
                         // Try find new parameters.
-                        for (int j = 0; j < method.ParameterDefinitions.Count; j++)
-                            InsertOrAppendIfNew(method.ParameterDefinitions[j], true);
+                        if (method.HasParameterDefinitions)
+                        {
+                            for (int j = 0; j < method.ParameterDefinitions.Count; j++)
+                                InsertOrAppendIfNew(method.ParameterDefinitions[j], true);
+                        }
                     }
                 }
 
