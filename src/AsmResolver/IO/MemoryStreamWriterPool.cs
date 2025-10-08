@@ -68,8 +68,19 @@ namespace AsmResolver.IO
             /// <summary>
             /// Gets the data that was written to the temporary stream.
             /// </summary>
-            /// <returns></returns>
+            /// <returns>The data</returns>
             public byte[] GetData() => ((MemoryStream) Writer.BaseStream).ToArray();
+
+#if NET9_0_OR_GREATER
+            /// <summary>
+            /// Gets the span of the underlying buffer that was written to the temporary stream.
+            /// </summary>
+            /// <returns>The span</returns>
+            public ReadOnlySpan<byte> GetSpan()
+            {
+                return ((MemoryStream) Writer.BaseStream).GetBuffer().AsSpan(0, (int) Writer.Length);
+            }
+#endif
 
             /// <summary>
             /// Returns the stream writer to the pool.

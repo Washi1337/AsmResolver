@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
         /// <param name="data">The data to append.</param>
         /// <returns>The index to the start of the data.</returns>
         /// <remarks>
-        /// This method does not index the blob data. Calling <see cref="AppendRawData"/> or <see cref="GetBlobIndex(byte[])"/>
+        /// This method does not index the blob data. Calling <see cref="AppendRawData(byte[])"/> or <see cref="GetBlobIndex(byte[])"/>
         /// on the same data will append the data a second time.
         /// </remarks>
         public uint AppendRawData(byte[] data)
@@ -74,6 +74,24 @@ namespace AsmResolver.DotNet.Builder.Metadata
             _writer.WriteBytes(data, 0, data.Length);
             return offset;
         }
+
+#if NET9_0_OR_GREATER
+        /// <summary>
+        /// Appends raw data to the stream.
+        /// </summary>
+        /// <param name="data">The data to append.</param>
+        /// <returns>The index to the start of the data.</returns>
+        /// <remarks>
+        /// This method does not index the blob data. Calling <see cref="AppendRawData(byte[])"/> or <see cref="GetBlobIndex(byte[])"/>
+        /// on the same data will append the data a second time.
+        /// </remarks>
+        public uint AppendRawData(ReadOnlySpan<byte> data)
+        {
+            uint offset = (uint) _rawStream.Length;
+            _writer.WriteBytes(data);
+            return offset;
+        }
+#endif
 
         private uint AppendBlob(byte[] blob)
         {
@@ -103,6 +121,30 @@ namespace AsmResolver.DotNet.Builder.Metadata
             return offset;
         }
 
+#if NET9_0_OR_GREATER
+        /// <summary>
+        /// Gets the index to the provided blob. If the blob is not present in the buffer, it will be appended to the end
+        /// of the stream.
+        /// </summary>
+        /// <param name="blob">The blob to lookup or add.</param>
+        /// <returns>The index of the blob.</returns>
+        public uint GetBlobIndex(ReadOnlySpan<byte> blob)
+        {
+            if (blob.Length == 0)
+                return 0;
+
+            var lookup = _blobs.GetAlternateLookup<ReadOnlySpan<byte>>();
+            if (!lookup.TryGetValue(blob, out uint offset))
+            {
+                byte[] concretized = blob.ToArray();
+                offset = AppendBlob(concretized);
+                _blobs.Add(concretized, offset);
+            }
+
+            return offset;
+        }
+#endif
+
         /// <summary>
         /// Gets the index to the provided blob signature. If the signature is not present in the buffer, it will be
         /// appended to the end of the stream.
@@ -122,7 +164,11 @@ namespace AsmResolver.DotNet.Builder.Metadata
             using var rentedWriter = _blobWriterPool.Rent();
             signature.Write(new BlobSerializationContext(rentedWriter.Writer, provider, errorListener, diagnosticSource));
 
+#if NET9_0_OR_GREATER
+            return GetBlobIndex(rentedWriter.GetSpan());
+#else
             return GetBlobIndex(rentedWriter.GetData());
+#endif
         }
 
         /// <summary>
