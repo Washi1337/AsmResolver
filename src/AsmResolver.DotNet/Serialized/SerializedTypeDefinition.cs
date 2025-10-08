@@ -78,6 +78,11 @@ namespace AsmResolver.DotNet.Serialized
             : MethodImplementationsInternal.Count > 0;
 
         /// <inheritdoc />
+        public override bool HasNestedTypes => NestedTypesInternal is null
+            ?  _context.ParentModule.GetNestedTypeRids(MetadataToken.Rid).Count > 0
+            : NestedTypesInternal.Count > 0;
+
+        /// <inheritdoc />
         protected override Utf8String? GetNamespace() => _context.StringsStream?.GetStringByIndex(_row.Namespace);
 
         /// <inheritdoc />

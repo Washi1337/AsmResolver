@@ -29,7 +29,6 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<TypeDefinition, ITypeDefOrRef?> _baseType;
         private readonly LazyVariable<TypeDefinition, TypeDefinition?> _declaringType;
         private readonly LazyVariable<TypeDefinition, ClassLayout?> _classLayout;
-        private IList<TypeDefinition>? _nestedTypes;
         private ModuleDefinition? _module;
 
         /// <summary> The internal fields list. </summary>
@@ -67,6 +66,10 @@ namespace AsmResolver.DotNet
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
         protected IList<CustomAttribute>? CustomAttributesInternal;
+
+        /// <summary> The internal nested types list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="NestedTypes"/> instead.</remarks>
+        protected IList<TypeDefinition>? NestedTypesInternal;
 
         /// <summary>
         /// Initializes a new type definition.
@@ -498,15 +501,20 @@ namespace AsmResolver.DotNet
         public bool IsNested => DeclaringType != null;
 
         /// <summary>
+        /// Gets a value indicating whether the type defines nested types.
+        /// </summary>
+        public virtual bool HasNestedTypes => NestedTypesInternal is { Count: > 0 };
+
+        /// <summary>
         /// Gets a collection of nested types that this type defines.
         /// </summary>
         public IList<TypeDefinition> NestedTypes
         {
             get
             {
-                if (_nestedTypes is null)
-                    Interlocked.CompareExchange(ref _nestedTypes, GetNestedTypes(), null);
-                return _nestedTypes;
+                if (NestedTypesInternal is null)
+                    Interlocked.CompareExchange(ref NestedTypesInternal, GetNestedTypes(), null);
+                return NestedTypesInternal;
             }
         }
 

@@ -1015,8 +1015,11 @@ namespace AsmResolver.DotNet
                 var currentType = agenda.Dequeue();
                 yield return currentType;
 
-                foreach (var nestedType in currentType.NestedTypes)
-                    agenda.Enqueue(nestedType);
+                if (currentType.HasNestedTypes)
+                {
+                    foreach (var nestedType in currentType.NestedTypes)
+                        agenda.Enqueue(nestedType);
+                }
             }
         }
 
