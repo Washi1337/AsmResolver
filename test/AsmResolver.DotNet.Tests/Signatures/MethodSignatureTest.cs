@@ -16,6 +16,40 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
+        public void HasParameterTypes()
+        {
+            var method = _module
+                .TopLevelTypes.First(t => t.Name == "Program")
+                .Methods.First(m => m.Name == "Main");
+            Assert.True(method.Signature!.HasParameterTypes);
+            Assert.Equal(
+                _module.CorLibTypeFactory.String.MakeSzArrayType(),
+                method.Signature!.ParameterTypes[0],
+                SignatureComparer.Default
+            );
+        }
+
+        [Fact]
+        public void HasNoParameterTypes()
+        {
+            var method = _module
+                .TopLevelTypes.First(t => t.Name == "Program")
+                .GetConstructor()!;
+            Assert.False(method.Signature!.HasParameterTypes);
+        }
+
+        [Fact]
+        public void AddParameterType()
+        {
+            var method = _module
+                .TopLevelTypes.First(t => t.Name == "Program")
+                .GetConstructor()!;
+            Assert.False(method.Signature!.HasParameterTypes);
+            method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Int32);
+            Assert.True(method.Signature!.HasParameterTypes);
+        }
+
+        [Fact]
         public void MakeInstanceShouldHaveHasThisFlagSet()
         {
             var signature = MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void);
