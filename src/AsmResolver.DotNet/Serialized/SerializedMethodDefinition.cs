@@ -35,12 +35,17 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         public override bool HasCustomAttributes => CustomAttributesInternal is null
             ? _context.ParentModule.HasNonEmptyCustomAttributes(this)
-            : CustomAttributes.Count > 0;
+            : CustomAttributesInternal.Count > 0;
 
         /// <inheritdoc />
         public override bool HasGenericParameters => GenericParametersInternal is null
             ? _context.ParentModule.HasNonEmptyGenericParameters(MetadataToken)
             : GenericParametersInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasSecurityDeclarations => SecurityDeclarationsInternal is null
+            ? _context.ParentModule.HasNonEmptySecurityDeclarations(this)
+            : SecurityDeclarationsInternal.Count > 0;
 
         /// <inheritdoc />
         protected override Utf8String? GetName() => _context.StringsStream?.GetStringByIndex(_row.Name);

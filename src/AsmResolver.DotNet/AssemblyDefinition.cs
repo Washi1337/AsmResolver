@@ -20,9 +20,10 @@ namespace AsmResolver.DotNet
     public class AssemblyDefinition : AssemblyDescriptor, IModuleProvider, IHasSecurityDeclaration
     {
         private IList<ModuleDefinition>? _modules;
-        private IList<SecurityDeclaration>? _securityDeclarations;
         private readonly LazyVariable<AssemblyDefinition, byte[]?> _publicKey;
         private byte[]? _publicKeyToken;
+
+        internal IList<SecurityDeclaration>? SecurityDeclarationsInternal;
 
         /// <summary>
         /// Reads a .NET assembly from the provided input buffer.
@@ -206,13 +207,16 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public virtual bool HasSecurityDeclarations => SecurityDeclarationsInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<SecurityDeclaration> SecurityDeclarations
         {
             get
             {
-                if (_securityDeclarations is null)
-                    Interlocked.CompareExchange(ref _securityDeclarations, GetSecurityDeclarations(), null);
-                return _securityDeclarations;
+                if (SecurityDeclarationsInternal is null)
+                    Interlocked.CompareExchange(ref SecurityDeclarationsInternal, GetSecurityDeclarations(), null);
+                return SecurityDeclarationsInternal;
             }
         }
 

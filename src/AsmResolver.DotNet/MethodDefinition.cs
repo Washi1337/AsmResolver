@@ -36,7 +36,10 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<MethodDefinition, UnmanagedExportInfo?> _exportInfo;
         private IList<ParameterDefinition>? _parameterDefinitions;
         private ParameterCollection? _parameters;
-        private IList<SecurityDeclaration>? _securityDeclarations;
+
+        /// <summary> The internal security declarations list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="SecurityDeclarations"/> instead.</remarks>
+        protected IList<SecurityDeclaration>? SecurityDeclarationsInternal;
 
         /// <summary> The internal generic parameter list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="GenericParameters"/> instead.</remarks>
@@ -725,13 +728,16 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public virtual bool HasSecurityDeclarations => SecurityDeclarationsInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<SecurityDeclaration> SecurityDeclarations
         {
             get
             {
-                if (_securityDeclarations is null)
-                    Interlocked.CompareExchange(ref _securityDeclarations, GetSecurityDeclarations(), null);
-                return _securityDeclarations;
+                if (SecurityDeclarationsInternal is null)
+                    Interlocked.CompareExchange(ref SecurityDeclarationsInternal, GetSecurityDeclarations(), null);
+                return SecurityDeclarationsInternal;
             }
         }
 

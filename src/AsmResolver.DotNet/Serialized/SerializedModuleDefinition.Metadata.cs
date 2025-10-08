@@ -273,6 +273,12 @@ namespace AsmResolver.DotNet.Serialized
             return _securityDeclarations.GetKey(attributeRid);
         }
 
+        internal bool HasNonEmptySecurityDeclarations(IHasSecurityDeclaration owner)
+        {
+            EnsureSecurityDeclarationsInitialized();
+            return _securityDeclarations.GetValues(owner.MetadataToken).Count > 0;
+        }
+
         internal IList<SecurityDeclaration> GetSecurityDeclarationCollection(IHasSecurityDeclaration owner)
         {
             EnsureSecurityDeclarationsInitialized();

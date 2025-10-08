@@ -35,7 +35,10 @@ namespace AsmResolver.DotNet
         private IList<MethodDefinition>? _methods;
         private IList<PropertyDefinition>? _properties;
         private IList<EventDefinition>? _events;
-        private IList<SecurityDeclaration>? _securityDeclarations;
+
+        /// <summary> The internal security declarations list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="SecurityDeclarations"/> instead.</remarks>
+        protected IList<SecurityDeclaration>? SecurityDeclarationsInternal;
 
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
@@ -619,13 +622,16 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public virtual bool HasSecurityDeclarations => SecurityDeclarationsInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<SecurityDeclaration> SecurityDeclarations
         {
             get
             {
-                if (_securityDeclarations is null)
-                    Interlocked.CompareExchange(ref _securityDeclarations, GetSecurityDeclarations(), null);
-                return _securityDeclarations;
+                if (SecurityDeclarationsInternal is null)
+                    Interlocked.CompareExchange(ref SecurityDeclarationsInternal, GetSecurityDeclarations(), null);
+                return SecurityDeclarationsInternal;
             }
         }
 
