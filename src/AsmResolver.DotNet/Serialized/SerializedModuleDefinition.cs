@@ -321,7 +321,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private AssemblyDefinition? FindParentAssembly()
         {
-            var assemblyTable = ReaderContext.TablesStream.GetTable<AssemblyDefinitionRow>();
+            var assemblyTable = ReaderContext.TablesStream.GetTable<AssemblyDefinitionRow>(TableIndex.Assembly);
 
             if (assemblyTable.Count > 0)
             {

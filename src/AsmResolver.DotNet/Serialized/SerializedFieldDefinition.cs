@@ -105,7 +105,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             uint rid = _context.ParentModule.GetFieldLayoutRid(MetadataToken);
             bool result = _context.TablesStream
-                .GetTable<FieldLayoutRow>()
+                .GetTable<FieldLayoutRow>(TableIndex.FieldLayout)
                 .TryGetByRid(rid, out var fieldLayoutRow);
 
             if (!result)
