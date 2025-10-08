@@ -1026,6 +1026,12 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(this);
 
         /// <summary>
+        /// Measures the number of generic parameters defined by this method.
+        /// </summary>
+        /// <returns>The number of generic parameters.</returns>
+        protected virtual int GetGenericParameterCount() => GenericParameters.Count;
+
+        /// <summary>
         /// Obtains the list of generic parameters this member declares.
         /// </summary>
         /// <returns>The generic parameters</returns>
@@ -1085,17 +1091,18 @@ namespace AsmResolver.DotNet
                     );
                 }
 
-                if (GenericParameters.Count > 0 && !Signature.IsGeneric)
+                int count = GetGenericParameterCount();
+                if (count > 0 && !Signature.IsGeneric)
                 {
                     GetBag().MetadataBuilder(
                         "Method defines generic parameters but its signature is not marked as generic."
                     );
                 }
 
-                if (GenericParameters.Count != Signature.GenericParameterCount)
+                if (count != Signature.GenericParameterCount)
                 {
                     GetBag().MetadataBuilder(
-                        $"Method defines {GenericParameters.Count} generic parameters but its signature defines {Signature.GenericParameterCount} parameters."
+                        $"Method defines {count} generic parameters but its signature defines {Signature.GenericParameterCount} parameters."
                     );
                 }
             }

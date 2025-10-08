@@ -116,6 +116,10 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
+        protected override int GetGenericParameterCount()
+            => GenericParametersInternal?.Count ?? _context.ParentModule.GetGenericParameters(MetadataToken).Count;
+
+        /// <inheritdoc />
         protected override IList<GenericParameter> GetGenericParameters()
         {
             var rids = _context.ParentModule.GetGenericParameters(MetadataToken);
