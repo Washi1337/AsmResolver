@@ -18,7 +18,10 @@ namespace AsmResolver.DotNet
     {
         private readonly LazyVariable<GenericParameter, Utf8String?> _name;
         private readonly LazyVariable<GenericParameter, IHasGenericParameters?> _owner;
-        private IList<GenericParameterConstraint>? _constraints;
+
+        /// <summary> The internal constraints list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Constraints"/> instead.</remarks>
+        protected IList<GenericParameterConstraint>? ConstraintsInternal;
 
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
@@ -180,15 +183,20 @@ namespace AsmResolver.DotNet
         ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <summary>
+        /// Gets a value indicating whether the generic parameter defines additional constraints.
+        /// </summary>
+        public virtual bool HasConstraints => ConstraintsInternal is { Count: > 0 };
+
+        /// <summary>
         /// Gets a collection of constraints put on the generic parameter.
         /// </summary>
         public IList<GenericParameterConstraint> Constraints
         {
             get
             {
-                if (_constraints is null)
-                    Interlocked.CompareExchange(ref _constraints, GetConstraints(), null);
-                return _constraints;
+                if (ConstraintsInternal is null)
+                    Interlocked.CompareExchange(ref ConstraintsInternal, GetConstraints(), null);
+                return ConstraintsInternal;
             }
         }
 

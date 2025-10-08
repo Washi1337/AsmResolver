@@ -266,8 +266,11 @@ namespace AsmResolver.DotNet.Builder
                 _tokenMapping.Register(member, token);
                 AddCustomAttributes(token, member);
 
-                foreach (var constraint in member.Constraints)
-                    AddGenericParameterConstraint(token, constraint);
+                if (member.HasConstraints)
+                {
+                    foreach (var constraint in member.Constraints)
+                        AddGenericParameterConstraint(token, constraint);
+                }
             }
         }
 

@@ -35,6 +35,11 @@ namespace AsmResolver.DotNet.Serialized
             : CustomAttributes.Count > 0;
 
         /// <inheritdoc />
+        public override bool HasConstraints => ConstraintsInternal is null
+            ? _context.ParentModule.GetGenericParameterConstraints(MetadataToken).Count > 0
+            : ConstraintsInternal.Count > 0;
+
+        /// <inheritdoc />
         protected override Utf8String? GetName() => _context.StringsStream?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
