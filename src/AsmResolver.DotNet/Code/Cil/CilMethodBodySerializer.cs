@@ -91,7 +91,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
         private ISegmentReference FastPatchMethodBody(MethodBodySerializationContext context, SerializedCilMethodBody body)
         {
-            var operandBuilder = new CilOperandBuilder(context.TokenProvider, context.ErrorListener);
+            var operandBuilder = new CilOperandBuilder(context.TokenProvider, context.ErrorListener, body.Owner);
             var tokenRewriter = (MetadataToken token) => token.Table == TableIndex.String
                 ? operandBuilder.GetStringToken(body.OperandResolver.ResolveString(token))
                 : operandBuilder.GetMemberToken(body.OperandResolver.ResolveMember(token));
