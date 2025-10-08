@@ -227,6 +227,9 @@ namespace AsmResolver.DotNet.Builder
 
         private void DefineGenericParameters(MetadataToken ownerToken, IHasGenericParameters provider)
         {
+            if (!provider.HasGenericParameters)
+                return;
+
             for (int i = 0; i < provider.GenericParameters.Count; i++)
                 DefineGenericParameter(ownerToken, provider.GenericParameters[i]);
         }

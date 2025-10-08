@@ -38,6 +38,11 @@ namespace AsmResolver.DotNet.Serialized
             : CustomAttributes.Count > 0;
 
         /// <inheritdoc />
+        public override bool HasGenericParameters => GenericParametersInternal is null
+            ? _context.ParentModule.HasNonEmptyGenericParameters(MetadataToken)
+            : GenericParametersInternal.Count > 0;
+
+        /// <inheritdoc />
         protected override Utf8String? GetNamespace() => _context.StringsStream?.GetStringByIndex(_row.Namespace);
 
         /// <inheritdoc />

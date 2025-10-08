@@ -37,7 +37,10 @@ namespace AsmResolver.DotNet
         private IList<ParameterDefinition>? _parameterDefinitions;
         private ParameterCollection? _parameters;
         private IList<SecurityDeclaration>? _securityDeclarations;
-        private IList<GenericParameter>? _genericParameters;
+
+        /// <summary> The internal generic parameter list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="GenericParameters"/> instead.</remarks>
+        protected IList<GenericParameter>? GenericParametersInternal;
 
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
@@ -733,13 +736,16 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public virtual bool HasGenericParameters => GenericParametersInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<GenericParameter> GenericParameters
         {
             get
             {
-                if (_genericParameters is null)
-                    Interlocked.CompareExchange(ref _genericParameters, GetGenericParameters(), null);
-                return _genericParameters;
+                if (GenericParametersInternal is null)
+                    Interlocked.CompareExchange(ref GenericParametersInternal, GetGenericParameters(), null);
+                return GenericParametersInternal;
             }
         }
 
