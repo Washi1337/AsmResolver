@@ -48,6 +48,26 @@ namespace AsmResolver.DotNet.Serialized
             : SecurityDeclarationsInternal.Count > 0;
 
         /// <inheritdoc />
+        public override bool HasFields => FieldsInternal is null
+            ? !_context.ParentModule.GetFieldRange(MetadataToken.Rid).IsEmpty
+            : FieldsInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasMethods => MethodsInternal is null
+            ? !_context.ParentModule.GetMethodRange(MetadataToken.Rid).IsEmpty
+            : MethodsInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasProperties => PropertiesInternal is null
+            ? !_context.ParentModule.GetPropertyRange(MetadataToken.Rid).IsEmpty
+            : PropertiesInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasEvents => EventsInternal is null
+            ? !_context.ParentModule.GetEventRange(MetadataToken.Rid).IsEmpty
+            : EventsInternal.Count > 0;
+
+        /// <inheritdoc />
         protected override Utf8String? GetNamespace() => _context.StringsStream?.GetStringByIndex(_row.Namespace);
 
         /// <inheritdoc />

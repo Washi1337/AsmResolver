@@ -31,17 +31,29 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<TypeDefinition, ClassLayout?> _classLayout;
         private IList<TypeDefinition>? _nestedTypes;
         private ModuleDefinition? _module;
-        private IList<FieldDefinition>? _fields;
-        private IList<MethodDefinition>? _methods;
-        private IList<PropertyDefinition>? _properties;
-        private IList<EventDefinition>? _events;
+
+        /// <summary> The internal fields list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Fields"/> instead.</remarks>
+        protected IList<FieldDefinition>? FieldsInternal;
+
+        /// <summary> The internal methods list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Methods"/> instead.</remarks>
+        protected IList<MethodDefinition>? MethodsInternal;
+
+        /// <summary> The internal properties list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Properties"/> instead.</remarks>
+        protected IList<PropertyDefinition>? PropertiesInternal;
+
+        /// <summary> The internal events list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Events"/> instead.</remarks>
+        protected IList<EventDefinition>? EventsInternal;
 
         /// <summary> The internal security declarations list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="SecurityDeclarations"/> instead.</remarks>
         protected IList<SecurityDeclaration>? SecurityDeclarationsInternal;
 
         /// <summary> The internal custom attribute list. </summary>
-        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        /// <remarks> This value may not be initialized. Use <see cref="GenericParameters"/> instead.</remarks>
         protected IList<GenericParameter>? GenericParametersInternal;
 
         private IList<InterfaceImplementation>? _interfaces;
@@ -556,17 +568,27 @@ namespace AsmResolver.DotNet
             && this.HasCustomAttribute("System.Runtime.CompilerServices", "IsByRefLikeAttribute");
 
         /// <summary>
+        /// Gets a value indicating whether the type defines fields.
+        /// </summary>
+        public virtual bool HasFields => FieldsInternal is { Count: > 0 };
+
+        /// <summary>
         /// Gets a collection of fields defined in the type.
         /// </summary>
         public IList<FieldDefinition> Fields
         {
             get
             {
-                if (_fields is null)
-                    Interlocked.CompareExchange(ref _fields, GetFields(), null);
-                return _fields;
+                if (FieldsInternal is null)
+                    Interlocked.CompareExchange(ref FieldsInternal, GetFields(), null);
+                return FieldsInternal;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the type defines methods.
+        /// </summary>
+        public virtual bool HasMethods => MethodsInternal is { Count: > 0 };
 
         /// <summary>
         /// Gets a collection of methods defined in the type.
@@ -575,11 +597,16 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_methods is null)
-                    Interlocked.CompareExchange(ref _methods, GetMethods(), null);
-                return _methods;
+                if (MethodsInternal is null)
+                    Interlocked.CompareExchange(ref MethodsInternal, GetMethods(), null);
+                return MethodsInternal;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the type defines properties.
+        /// </summary>
+        public virtual bool HasProperties => PropertiesInternal is { Count: > 0 };
 
         /// <summary>
         /// Gets a collection of properties defined in the type.
@@ -588,11 +615,16 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_properties is null)
-                    Interlocked.CompareExchange(ref _properties, GetProperties(), null);
-                return _properties;
+                if (PropertiesInternal is null)
+                    Interlocked.CompareExchange(ref PropertiesInternal, GetProperties(), null);
+                return PropertiesInternal;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the type defines events.
+        /// </summary>
+        public virtual bool HasEvents => EventsInternal is { Count: > 0 };
 
         /// <summary>
         /// Gets a collection of events defined in the type.
@@ -601,9 +633,9 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_events is null)
-                    Interlocked.CompareExchange(ref _events, GetEvents(), null);
-                return _events;
+                if (EventsInternal is null)
+                    Interlocked.CompareExchange(ref EventsInternal, GetEvents(), null);
+                return EventsInternal;
             }
         }
 
