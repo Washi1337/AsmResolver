@@ -112,7 +112,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public virtual bool HasCustomAttributes => CustomAttributes.Count > 0;
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
