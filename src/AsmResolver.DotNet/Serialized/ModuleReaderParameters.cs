@@ -18,6 +18,7 @@ namespace AsmResolver.DotNet.Serialized
             ModuleResolver = new DefaultNetModuleResolver(this);
             FieldRvaDataReader = AsmResolver.PE.DotNet.Metadata.FieldRvaDataReader.Instance;
             PEReaderParameters = new PEReaderParameters();
+            PdbMetadataResolver = DefaultPdbMetadataResolver.Instance;
         }
 
         /// <summary>
@@ -74,6 +75,7 @@ namespace AsmResolver.DotNet.Serialized
             ModuleResolver = new DefaultNetModuleResolver(this);
             FieldRvaDataReader = AsmResolver.PE.DotNet.Metadata.FieldRvaDataReader.Instance;
             PEReaderParameters = readerParameters;
+            PdbMetadataResolver = DefaultPdbMetadataResolver.Instance;
         }
 
         /// <summary>
@@ -87,6 +89,7 @@ namespace AsmResolver.DotNet.Serialized
             MethodBodyReader = readerParameters.MethodBodyReader;
             FieldRvaDataReader = readerParameters.FieldRvaDataReader;
             PEReaderParameters = readerParameters.PEReaderParameters;
+            PdbMetadataResolver = readerParameters.PdbMetadataResolver;
         }
 
         /// <summary>
@@ -136,5 +139,7 @@ namespace AsmResolver.DotNet.Serialized
             get;
             init;
         }
+
+        public IPdbMetadataResolver PdbMetadataResolver { get; set; }
     }
 }

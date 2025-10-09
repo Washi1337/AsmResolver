@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.PortablePdbs;
+using AsmResolver.DotNet.PortablePdbs.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
 using AsmResolver.PE.Debug;
@@ -98,6 +100,14 @@ namespace AsmResolver.DotNet.Serialized
         {
             get;
         }
+
+        [LazyProperty]
+        public partial PdbReaderContext? PdbReaderContext
+        {
+            get;
+        }
+
+        private PdbReaderContext? GetPdbReaderContext() => ReaderContext.Parameters.PdbMetadataResolver.ResolvePortablePdb(this);
 
         /// <inheritdoc />
         public override bool HasCustomAttributes => CustomAttributesInternal is null
@@ -298,6 +308,8 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReaderContext.Image.DebugData);
+
+        protected override PortablePdb? GetPortablePdb() => PdbReaderContext?.Pdb;
 
         private AssemblyDefinition? FindParentAssembly()
         {

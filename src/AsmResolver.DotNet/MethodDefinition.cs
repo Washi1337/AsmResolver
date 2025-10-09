@@ -7,6 +7,7 @@ using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.PortablePdbs;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -795,6 +796,16 @@ namespace AsmResolver.DotNet
             set;
         }
 
+        [LazyProperty]
+        public partial MethodDebugInformation? MethodDebugInformation
+        {
+            get;
+            set;
+        }
+
+        [LazyProperty]
+        public partial IList<LocalScope> LocalScopes { get; }
+
         /// <summary>
         /// Creates a new private static constructor for a type that is executed when its declaring type is loaded by the CLR.
         /// </summary>
@@ -1050,6 +1061,10 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="ExportInfo"/> property.
         /// </remarks>
         protected virtual UnmanagedExportInfo? GetExportInfo() => null;
+
+        protected virtual MethodDebugInformation? GetMethodDebugInformation() => null;
+
+        protected virtual IList<LocalScope> GetLocalScopes() => new OwnedCollection<MethodDefinition, LocalScope>(this);
 
         /// <summary>
         /// Asserts whether the method's metadata is consistent with its signature.

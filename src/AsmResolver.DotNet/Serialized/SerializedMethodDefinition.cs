@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.PortablePdbs;
+using AsmResolver.DotNet.PortablePdbs.Serialized;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Serialized
@@ -148,5 +152,22 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         protected override UnmanagedExportInfo? GetExportInfo() => _context.ParentModule.GetExportInfo(MetadataToken);
+
+        protected override MethodDebugInformation? GetMethodDebugInformation() => _context.ParentModule.PortablePdb?.TryLookupMember(new MetadataToken(TableIndex.MethodDebugInformation, MetadataToken.Rid), out MethodDebugInformation? mdi) ?? false ? mdi : null;
+
+        protected override IList<LocalScope> GetLocalScopes()
+        {
+            var rids = _context.ParentModule.PdbReaderContext?.Pdb.GetLocalScopes(MetadataToken.Rid);
+            var scopes = new MemberCollection<MethodDefinition, LocalScope>(this, rids?.Count ?? 0);
+            foreach (var localScope in rids.AsEnumerable() ?? [])
+            {
+                if (_context.ParentModule.PdbReaderContext!.Pdb.TryLookupMember<LocalScope>(
+                        new MetadataToken(TableIndex.LocalScope, localScope), out var member))
+                {
+                    scopes.AddNoOwnerCheck(member);
+                }
+            }
+            return scopes;
+        }
     }
 }

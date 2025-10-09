@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.PortablePdbs;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
@@ -810,6 +811,9 @@ namespace AsmResolver.DotNet
             set;
         }
 
+        [LazyProperty]
+        public partial PortablePdb? PortablePdb { get; set; }
+
         /// <summary>
         /// Gets the default importer instance for this module.
         /// </summary>
@@ -1249,6 +1253,8 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="DefaultImporter"/> property.
         /// </remarks>
         protected virtual ReferenceImporter GetDefaultImporter() => new(this);
+
+        protected virtual PortablePdb? GetPortablePdb() => null;
 
         /// <summary>
         /// Detects the runtime that this module targets.
