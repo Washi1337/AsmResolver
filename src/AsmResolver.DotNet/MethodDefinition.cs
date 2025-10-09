@@ -7,6 +7,7 @@ using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.PortablePdbs;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -34,6 +35,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<MethodDefinition, ImplementationMap?> _implementationMap;
         private readonly LazyVariable<MethodDefinition, MethodSemantics?> _semantics;
         private readonly LazyVariable<MethodDefinition, UnmanagedExportInfo?> _exportInfo;
+        private readonly LazyVariable<MethodDefinition, MethodDebugInformation> _methodDebugInformation;
         private IList<ParameterDefinition>? _parameterDefinitions;
         private ParameterCollection? _parameters;
         private IList<CustomAttribute>? _customAttributes;
@@ -60,6 +62,12 @@ namespace AsmResolver.DotNet
             _implementationMap = new LazyVariable<MethodDefinition, ImplementationMap?>(x => x.GetImplementationMap());
             _semantics = new LazyVariable<MethodDefinition, MethodSemantics?>(x => x.GetSemantics());
             _exportInfo = new LazyVariable<MethodDefinition, UnmanagedExportInfo?>(x => x.GetExportInfo());
+            _methodDebugInformation = new LazyVariable<MethodDefinition, MethodDebugInformation>(x =>
+            {
+                MethodDebugInformation? mdi = null;
+                _ = x.DeclaringModule?.PortablePdb?.TryLookupMember(new MetadataToken(TableIndex.MethodDebugInformation, x.MetadataToken.Rid), out mdi);
+                return mdi ?? new MethodDebugInformation(new MetadataToken(TableIndex.MethodDebugInformation, x.MetadataToken.Rid));
+            });
         }
 
         /// <summary>
@@ -790,6 +798,12 @@ namespace AsmResolver.DotNet
         {
             get => _exportInfo.GetValue(this);
             set => _exportInfo.SetValue(value);
+        }
+
+        public MethodDebugInformation MethodDebugInformation
+        {
+            get => _methodDebugInformation.GetValue(this);
+            set => _methodDebugInformation.SetValue(value);
         }
 
         /// <summary>

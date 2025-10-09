@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.PortablePdbs;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
@@ -52,6 +53,8 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<ModuleDefinition, ResourceDirectory?> _nativeResources;
         private IList<DebugDataEntry>? _debugData;
         private ReferenceImporter? _defaultImporter;
+
+        private readonly LazyVariable<ModuleDefinition, PortablePdb?> _portablePdb;
 
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
@@ -299,6 +302,7 @@ namespace AsmResolver.DotNet
             _managedEntryPoint = new LazyVariable<ModuleDefinition, IManagedEntryPoint?>(x => x.GetManagedEntryPoint());
             _runtimeVersion = new LazyVariable<ModuleDefinition, string>(x => x.GetRuntimeVersion());
             _nativeResources = new LazyVariable<ModuleDefinition, ResourceDirectory?>(x => x.GetNativeResources());
+            _portablePdb = new LazyVariable<ModuleDefinition, PortablePdb?>(x => x.GetPortablePdb());
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
 
@@ -361,6 +365,12 @@ namespace AsmResolver.DotNet
         {
             get;
         } = null;
+
+        public PortablePdb? PortablePdb
+        {
+            get => _portablePdb.GetValue(this);
+            set => _portablePdb.SetValue(value);
+        }
 
         /// <summary>
         /// Gets the object describing the current active runtime context the module is loaded in.
@@ -1188,6 +1198,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
+
+        protected virtual PortablePdb? GetPortablePdb() => null;
 
         AssemblyDescriptor? IResolutionScope.GetAssembly() => Assembly;
 

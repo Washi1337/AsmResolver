@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.PortablePdbs;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
 using AsmResolver.PE.Debug;
@@ -318,6 +319,8 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReaderContext.Image.DebugData);
+
+        protected override PortablePdb? GetPortablePdb() => ReaderContext.Parameters.PdbMetadataResolver.ResolvePortablePdb(this);
 
         private AssemblyDefinition? FindParentAssembly()
         {
