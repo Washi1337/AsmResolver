@@ -126,6 +126,12 @@ namespace AsmResolver.DotNet
         public MethodSpecification ImportWith(ReferenceImporter importer) => importer.ImportMethod(this);
 
         /// <inheritdoc />
+        IMethodDescriptor IMethodDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
+        IMemberDescriptor IMemberDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <summary>
