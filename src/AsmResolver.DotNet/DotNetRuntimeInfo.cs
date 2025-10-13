@@ -11,9 +11,17 @@ namespace AsmResolver.DotNet
     public readonly struct DotNetRuntimeInfo : IEquatable<DotNetRuntimeInfo>
     {
         /// <summary>
-        /// The target framework name used by applications targeting .NET and .NET Core.
+        /// The target framework name used by applications targeting .NET or .NET Core.
         /// </summary>
         public const string NetCoreApp = ".NETCoreApp";
+
+        /// <summary>
+        /// A target framework name used in some legacy architectures.
+        /// </summary>
+        /// <remarks>
+        /// This should not be confused with <see cref="NetCoreApp"/>, which is the correct name for applications targeting .NET or .NET Core.
+        /// </remarks>
+        public const string NetCore = ".NETCore";
 
         /// <summary>
         /// The target framework name used by libraries targeting .NET Standard.
@@ -66,6 +74,14 @@ namespace AsmResolver.DotNet
         /// Gets a value indicating whether the application targets the .NET or .NET Core runtime or not.
         /// </summary>
         public bool IsNetCoreApp => Name == NetCoreApp;
+
+        /// <summary>
+        /// Gets a value indicating whether or not the application is targeting a legacy architecture that uses <see cref="NetCore"/>.
+        /// </summary>
+        /// <remarks>
+        /// This should not be confused with <see cref="IsNetCoreApp"/>, which is the correct property for whether or not an application is targeting .NET or .NET Core.
+        /// </remarks>
+        public bool IsNetCore => Name == NetCore;
 
         /// <summary>
         /// Gets a value indicating whether the application targets the .NET Framework runtime or not.

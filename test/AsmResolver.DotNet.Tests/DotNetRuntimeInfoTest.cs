@@ -16,6 +16,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(".NETCoreApp,Version=v2.0", DotNetRuntimeInfo.NetCoreApp, 2, 0)]
         [InlineData(".NETCoreApp,Version=v5.0", DotNetRuntimeInfo.NetCoreApp, 5, 0)]
         [InlineData(".NETCoreApp,Version=v10.0", DotNetRuntimeInfo.NetCoreApp, 10, 0)]
+        [InlineData(".NETCore,Version=v4.5", DotNetRuntimeInfo.NetCore, 4, 5)]
         public void Parse(string name, string expectedFramework, int major, int minor)
         {
             Assert.Equal(
@@ -59,6 +60,28 @@ namespace AsmResolver.DotNet.Tests
                 new DotNetRuntimeInfo(expectedFramework, new Version(major, minor)),
                 DotNetRuntimeInfo.ParseMoniker(tfm)
             );
+        }
+
+        [Theory]
+        [InlineData(".NETFramework,Version=v2.0")]
+        [InlineData(".NETFramework,Version=v3.5")]
+        [InlineData(".NETFramework,Version=v4.0")]
+        [InlineData(".NETStandard,Version=v1.0")]
+        [InlineData(".NETStandard,Version=v2.0")]
+        [InlineData(".NETCoreApp,Version=v2.0")]
+        [InlineData(".NETCoreApp,Version=v5.0")]
+        [InlineData(".NETCoreApp,Version=v10.0")]
+        [InlineData(".NETCore,Version=v4.5")]
+        public void GetAssumedImplCorLibDoesNotThrow(string name)
+        {
+            try
+            {
+                DotNetRuntimeInfo.Parse(name).GetAssumedImplCorLib();
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail(ex.ToString());
+            }
         }
     }
 }
