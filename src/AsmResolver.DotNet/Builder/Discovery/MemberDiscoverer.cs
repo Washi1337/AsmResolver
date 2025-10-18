@@ -178,27 +178,42 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 InsertOrAppendIfNew(type, true);
 
                 // Try find new fields.
-                for (int i = 0; i < type.Fields.Count; i++)
-                    InsertOrAppendIfNew(type.Fields[i], true);
+                if (type.HasFields)
+                {
+                    for (int i = 0; i < type.Fields.Count; i++)
+                        InsertOrAppendIfNew(type.Fields[i], true);
+                }
 
                 // Try find new methods.
-                for (int i = 0; i < type.Methods.Count; i++)
+                if (type.HasMethods)
                 {
-                    var method = type.Methods[i];
-                    InsertOrAppendIfNew(method, true);
+                    for (int i = 0; i < type.Methods.Count; i++)
+                    {
+                        var method = type.Methods[i];
+                        InsertOrAppendIfNew(method, true);
 
-                    // Try find new parameters.
-                    for (int j = 0; j < method.ParameterDefinitions.Count; j++)
-                        InsertOrAppendIfNew(method.ParameterDefinitions[j], true);
+                        // Try find new parameters.
+                        if (method.HasParameterDefinitions)
+                        {
+                            for (int j = 0; j < method.ParameterDefinitions.Count; j++)
+                                InsertOrAppendIfNew(method.ParameterDefinitions[j], true);
+                        }
+                    }
                 }
 
                 // Try find new properties.
-                for (int i = 0; i < type.Properties.Count; i++)
-                    InsertOrAppendIfNew(type.Properties[i], true);
+                if (type.HasProperties)
+                {
+                    for (int i = 0; i < type.Properties.Count; i++)
+                        InsertOrAppendIfNew(type.Properties[i], true);
+                }
 
                 // Try find new events.
-                for (int i = 0; i < type.Events.Count; i++)
-                    InsertOrAppendIfNew(type.Events[i], true);
+                if (type.HasEvents)
+                {
+                    for (int i = 0; i < type.Events.Count; i++)
+                        InsertOrAppendIfNew(type.Events[i], true);
+                }
             }
         }
 

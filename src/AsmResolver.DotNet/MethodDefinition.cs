@@ -34,11 +34,23 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<MethodDefinition, ImplementationMap?> _implementationMap;
         private readonly LazyVariable<MethodDefinition, MethodSemantics?> _semantics;
         private readonly LazyVariable<MethodDefinition, UnmanagedExportInfo?> _exportInfo;
-        private IList<ParameterDefinition>? _parameterDefinitions;
         private ParameterCollection? _parameters;
-        private IList<CustomAttribute>? _customAttributes;
-        private IList<SecurityDeclaration>? _securityDeclarations;
-        private IList<GenericParameter>? _genericParameters;
+
+        /// <summary> The internal parameter definitions list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="ParameterDefinitions"/> instead.</remarks>
+        protected IList<ParameterDefinition>? ParameterDefinitionsInternal;
+
+        /// <summary> The internal security declarations list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="SecurityDeclarations"/> instead.</remarks>
+        protected IList<SecurityDeclaration>? SecurityDeclarationsInternal;
+
+        /// <summary> The internal generic parameter list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="GenericParameters"/> instead.</remarks>
+        protected IList<GenericParameter>? GenericParametersInternal;
+
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes a new method definition.
@@ -575,6 +587,16 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a value indicating whether the method defines parameter definitions.
+        /// </summary>
+        /// <remarks>
+        /// This property might not reflect the list of actual parameters that the method defines and uses according
+        /// to the method signature. This property only reflects the list that is inferred from the ParamList column
+        /// in the metadata row. For the actual list of parameters, use the <see cref="Parameters"/> property instead.
+        /// </remarks>
+        public virtual bool HasParameterDefinitions => ParameterDefinitionsInternal is { Count: > 0 };
+
+        /// <summary>
         /// Gets a collection of parameter definitions that this method defines.
         /// </summary>
         /// <remarks>
@@ -586,9 +608,9 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_parameterDefinitions is null)
-                    Interlocked.CompareExchange(ref _parameterDefinitions, GetParameterDefinitions(), null);
-                return _parameterDefinitions;
+                if (ParameterDefinitionsInternal is null)
+                    Interlocked.CompareExchange(ref ParameterDefinitionsInternal, GetParameterDefinitions(), null);
+                return ParameterDefinitionsInternal;
             }
         }
 
@@ -705,35 +727,44 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
+
+        /// <inheritdoc />
+        public virtual bool HasSecurityDeclarations => SecurityDeclarationsInternal is { Count: > 0 };
 
         /// <inheritdoc />
         public IList<SecurityDeclaration> SecurityDeclarations
         {
             get
             {
-                if (_securityDeclarations is null)
-                    Interlocked.CompareExchange(ref _securityDeclarations, GetSecurityDeclarations(), null);
-                return _securityDeclarations;
+                if (SecurityDeclarationsInternal is null)
+                    Interlocked.CompareExchange(ref SecurityDeclarationsInternal, GetSecurityDeclarations(), null);
+                return SecurityDeclarationsInternal;
             }
         }
+
+        /// <inheritdoc />
+        public virtual bool HasGenericParameters => GenericParametersInternal is { Count: > 0 };
 
         /// <inheritdoc />
         public IList<GenericParameter> GenericParameters
         {
             get
             {
-                if (_genericParameters is null)
-                    Interlocked.CompareExchange(ref _genericParameters, GetGenericParameters(), null);
-                return _genericParameters;
+                if (GenericParametersInternal is null)
+                    Interlocked.CompareExchange(ref GenericParametersInternal, GetGenericParameters(), null);
+                return GenericParametersInternal;
             }
         }
 
@@ -995,6 +1026,12 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(this);
 
         /// <summary>
+        /// Measures the number of generic parameters defined by this method.
+        /// </summary>
+        /// <returns>The number of generic parameters.</returns>
+        protected virtual int GetGenericParameterCount() => GenericParameters.Count;
+
+        /// <summary>
         /// Obtains the list of generic parameters this member declares.
         /// </summary>
         /// <returns>The generic parameters</returns>
@@ -1054,17 +1091,18 @@ namespace AsmResolver.DotNet
                     );
                 }
 
-                if (GenericParameters.Count > 0 && !Signature.IsGeneric)
+                int count = GetGenericParameterCount();
+                if (count > 0 && !Signature.IsGeneric)
                 {
                     GetBag().MetadataBuilder(
                         "Method defines generic parameters but its signature is not marked as generic."
                     );
                 }
 
-                if (GenericParameters.Count != Signature.GenericParameterCount)
+                if (count != Signature.GenericParameterCount)
                 {
                     GetBag().MetadataBuilder(
-                        $"Method defines {GenericParameters.Count} generic parameters but its signature defines {Signature.GenericParameterCount} parameters."
+                        $"Method defines {count} generic parameters but its signature defines {Signature.GenericParameterCount} parameters."
                     );
                 }
             }

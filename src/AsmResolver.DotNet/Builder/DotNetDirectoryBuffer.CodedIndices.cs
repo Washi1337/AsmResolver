@@ -8,6 +8,9 @@ namespace AsmResolver.DotNet.Builder
     {
         private void AddCustomAttributes(MetadataToken ownerToken, IHasCustomAttribute provider)
         {
+            if (!provider.HasCustomAttributes)
+                return;
+
             for (int i = 0; i < provider.CustomAttributes.Count; i++)
                 AddCustomAttribute(ownerToken, provider.CustomAttributes[i]);
         }
@@ -175,6 +178,9 @@ namespace AsmResolver.DotNet.Builder
 
         private void AddSecurityDeclarations(MetadataToken ownerToken, IHasSecurityDeclaration provider)
         {
+            if (!provider.HasSecurityDeclarations)
+                return;
+
             var table = Metadata.TablesStream.GetSortedTable<SecurityDeclaration, SecurityDeclarationRow>(TableIndex.DeclSecurity);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasDeclSecurity);
 

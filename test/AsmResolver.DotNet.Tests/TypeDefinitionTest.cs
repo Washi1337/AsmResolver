@@ -477,7 +477,27 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == typeof(GenericType<,,>).Name);
+            Assert.True(type.HasGenericParameters);
             Assert.Equal(3, type.GenericParameters.Count);
+        }
+
+        [Fact]
+        public void ReadNoGenericParameters()
+        {
+            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NonGenericType));
+            Assert.False(type.HasGenericParameters);
+            Assert.Empty(type.GenericParameters);
+        }
+
+        [Fact]
+        public void AddGenericParameter()
+        {
+            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NonGenericType));
+            Assert.False(type.HasGenericParameters);
+            type.GenericParameters.Add(new GenericParameter("T"));
+            Assert.True(type.HasGenericParameters);
         }
 
         [Fact]

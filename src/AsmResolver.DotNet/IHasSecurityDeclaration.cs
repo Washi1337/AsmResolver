@@ -9,6 +9,14 @@ namespace AsmResolver.DotNet
     public interface IHasSecurityDeclaration : IMetadataDefinition
     {
         /// <summary>
+        /// Gets a value indicating whether the member is assigned security declarations.
+        /// </summary>
+        bool HasSecurityDeclarations
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets a collection of security declarations assigned to the member.
         /// </summary>
         IList<SecurityDeclaration> SecurityDeclarations

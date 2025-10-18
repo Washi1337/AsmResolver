@@ -195,8 +195,12 @@ namespace AsmResolver.DotNet.Builder
             table.Add(semantics, row);
         }
 
-        private void DefineInterfaces(MetadataToken ownerToken, IList<InterfaceImplementation> interfaces)
+        private void DefineInterfaces(MetadataToken ownerToken, TypeDefinition owner)
         {
+            if (!owner.HasInterfaces)
+                return;
+
+            var interfaces = owner.Interfaces;
             var table = Metadata.TablesStream.GetSortedTable<InterfaceImplementation, InterfaceImplementationRow>(TableIndex.InterfaceImpl);
 
             for (int i = 0; i < interfaces.Count; i++)
@@ -227,6 +231,9 @@ namespace AsmResolver.DotNet.Builder
 
         private void DefineGenericParameters(MetadataToken ownerToken, IHasGenericParameters provider)
         {
+            if (!provider.HasGenericParameters)
+                return;
+
             for (int i = 0; i < provider.GenericParameters.Count; i++)
                 DefineGenericParameter(ownerToken, provider.GenericParameters[i]);
         }
@@ -259,8 +266,11 @@ namespace AsmResolver.DotNet.Builder
                 _tokenMapping.Register(member, token);
                 AddCustomAttributes(token, member);
 
-                foreach (var constraint in member.Constraints)
-                    AddGenericParameterConstraint(token, constraint);
+                if (member.HasConstraints)
+                {
+                    foreach (var constraint in member.Constraints)
+                        AddGenericParameterConstraint(token, constraint);
+                }
             }
         }
 

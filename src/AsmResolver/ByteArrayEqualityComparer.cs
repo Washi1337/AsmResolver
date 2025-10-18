@@ -6,7 +6,12 @@ namespace AsmResolver
     /// <summary>
     /// Provides an implementation to compare byte arrays for equality.
     /// </summary>
-    public class ByteArrayEqualityComparer : IEqualityComparer<byte[]>, IComparer<byte[]>
+    public class ByteArrayEqualityComparer
+        : IEqualityComparer<byte[]>
+        , IComparer<byte[]>
+#if NET9_0_OR_GREATER
+        , IAlternateEqualityComparer<ReadOnlySpan<byte>, byte[]>
+#endif
     {
         /// <summary>
         /// Gets the singleton instance of this comparer.
@@ -103,5 +108,25 @@ namespace AsmResolver
 
             return x.Length.CompareTo(y.Length);
         }
+
+#if NET9_0_OR_GREATER
+        /// <inheritdoc />
+        public bool Equals(ReadOnlySpan<byte> alternate, byte[] other) => alternate.SequenceEqual(other);
+
+        /// <inheritdoc />
+        public int GetHashCode(ReadOnlySpan<byte> alternate)
+        {
+            unchecked
+            {
+                int result = 0;
+                foreach (byte b in alternate)
+                    result = (result * 31) ^ b;
+                return result;
+            }
+        }
+
+        /// <inheritdoc />
+        public byte[] Create(ReadOnlySpan<byte> alternate) => alternate.ToArray();
+#endif
     }
 }

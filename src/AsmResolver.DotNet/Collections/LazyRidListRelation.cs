@@ -78,6 +78,10 @@ namespace AsmResolver.DotNet.Collections
                     uint ownerRid = _getOwnerRid(associationRid, associationTable[i]);
                     var memberRange = _getMemberRange(associationRid);
 
+                    // Avoid initializing/resizing the dictionary if there's nothing to process.
+                    if (memberRange.IsEmpty)
+                        continue;
+
                     memberRanges[ownerRid] = memberRange;
                     foreach (var memberToken in memberRange)
                         memberOwnerRids[memberToken.Rid - 1] = ownerRid;

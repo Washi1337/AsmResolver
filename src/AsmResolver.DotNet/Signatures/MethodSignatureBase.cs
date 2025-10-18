@@ -9,7 +9,8 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public abstract class MethodSignatureBase : MemberSignature
     {
-        private readonly List<TypeSignature> _parameterTypes;
+        private List<TypeSignature>? _parameterTypes;
+        private List<TypeSignature>? _sentinelTypes;
 
         /// <summary>
         /// Initializes the base of a method signature.
@@ -20,16 +21,19 @@ namespace AsmResolver.DotNet.Signatures
         protected MethodSignatureBase(
             CallingConventionAttributes attributes,
             TypeSignature memberReturnType,
-            IEnumerable<TypeSignature> parameterTypes)
+            IEnumerable<TypeSignature>? parameterTypes)
             : base(attributes, memberReturnType)
         {
-            _parameterTypes = new List<TypeSignature>(parameterTypes);
+            if (parameterTypes is not null)
+                _parameterTypes = new List<TypeSignature>(parameterTypes);
         }
+
+        public bool HasParameterTypes => _parameterTypes is { Count: > 0 };
 
         /// <summary>
         /// Gets an ordered list of types indicating the types of the parameters that this member defines.
         /// </summary>
-        public IList<TypeSignature> ParameterTypes => _parameterTypes;
+        public IList<TypeSignature> ParameterTypes => _parameterTypes ??= [];
 
         /// <summary>
         /// Gets or sets the type of the value that this member returns.
@@ -64,6 +68,8 @@ namespace AsmResolver.DotNet.Signatures
             }
         }
 
+        public bool HasSentinelParameterTypes => _sentinelTypes is { Count: > 0 };
+
         /// <summary>
         /// Gets an ordered list of types indicating the types of the sentinel parameters that this member defines.
         /// </summary>
@@ -71,10 +77,7 @@ namespace AsmResolver.DotNet.Signatures
         /// For any of the sentinel parameter types to be emitted to the output module, the <see cref="IncludeSentinel"/>
         /// must be set to <c>true</c>.
         /// </remarks>
-        public IList<TypeSignature> SentinelParameterTypes
-        {
-            get;
-        } = new List<TypeSignature>();
+        public IList<TypeSignature> SentinelParameterTypes => _sentinelTypes ??= [];
 
         /// <inheritdoc />
         public override bool IsImportedInModule(ModuleDefinition module)
@@ -118,24 +121,28 @@ namespace AsmResolver.DotNet.Signatures
             ReturnType = TypeSignature.FromReader(ref context, ref reader);
 
             // Parameter types.
-            _parameterTypes.Capacity = (int) parameterCount;
-            IncludeSentinel = false;
-            for (int i = 0; i < parameterCount; i++)
+            if (parameterCount > 0)
             {
-                var parameterType = TypeSignature.FromReader(ref context, ref reader);
+                _parameterTypes = new List<TypeSignature>((int) parameterCount);
+                IncludeSentinel = false;
+                for (int i = 0; i < parameterCount; i++)
+                {
+                    var parameterType = TypeSignature.FromReader(ref context, ref reader);
 
-                if (parameterType.ElementType == ElementType.Sentinel)
-                {
-                    IncludeSentinel = true;
-                    i--;
-                }
-                else if (IncludeSentinel)
-                {
-                    SentinelParameterTypes.Add(parameterType);
-                }
-                else
-                {
-                    ParameterTypes.Add(parameterType);
+                    if (parameterType.ElementType == ElementType.Sentinel)
+                    {
+                        IncludeSentinel = true;
+                        i--;
+                        _sentinelTypes = new List<TypeSignature>((int) parameterCount - _parameterTypes.Count);
+                    }
+                    else if (IncludeSentinel)
+                    {
+                        _sentinelTypes!.Add(parameterType);
+                    }
+                    else
+                    {
+                        _parameterTypes.Add(parameterType);
+                    }
                 }
             }
         }
@@ -145,22 +152,31 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         protected void WriteParametersAndReturnType(BlobSerializationContext context)
         {
-            uint totalCount = (uint) ParameterTypes.Count;
-            if (IncludeSentinel)
+            uint totalCount = 0;
+            if (HasParameterTypes)
+                totalCount += (uint) ParameterTypes.Count;
+            if (IncludeSentinel && HasSentinelParameterTypes)
                 totalCount += (uint) SentinelParameterTypes.Count;
 
             context.Writer.WriteCompressedUInt32(totalCount);
 
             ReturnType.Write(context);
 
-            for (int i = 0; i < ParameterTypes.Count; i++)
-                ParameterTypes[i].Write(context);
+            if (HasParameterTypes)
+            {
+                for (int i = 0; i < ParameterTypes.Count; i++)
+                    ParameterTypes[i].Write(context);
+            }
 
             if (IncludeSentinel)
             {
                 context.Writer.WriteByte((byte) ElementType.Sentinel);
-                for (int i = 0; i < SentinelParameterTypes.Count; i++)
-                    SentinelParameterTypes[i].Write(context);
+
+                if (HasSentinelParameterTypes)
+                {
+                    for (int i = 0; i < SentinelParameterTypes.Count; i++)
+                        SentinelParameterTypes[i].Write(context);
+                }
             }
         }
 

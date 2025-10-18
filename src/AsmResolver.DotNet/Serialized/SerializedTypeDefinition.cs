@@ -33,6 +33,56 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
+        public override bool HasCustomAttributes => CustomAttributesInternal is null
+            ? _context.ParentModule.HasNonEmptyCustomAttributes(this)
+            : CustomAttributesInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasGenericParameters => GenericParametersInternal is null
+            ? _context.ParentModule.GetGenericParameters(MetadataToken).Count > 0
+            : GenericParametersInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasSecurityDeclarations => SecurityDeclarationsInternal is null
+            ? _context.ParentModule.HasNonEmptySecurityDeclarations(this)
+            : SecurityDeclarationsInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasFields => FieldsInternal is null
+            ? !_context.ParentModule.GetFieldRange(MetadataToken.Rid).IsEmpty
+            : FieldsInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasMethods => MethodsInternal is null
+            ? !_context.ParentModule.GetMethodRange(MetadataToken.Rid).IsEmpty
+            : MethodsInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasProperties => PropertiesInternal is null
+            ? !_context.ParentModule.GetPropertyRange(MetadataToken.Rid).IsEmpty
+            : PropertiesInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasEvents => EventsInternal is null
+            ? !_context.ParentModule.GetEventRange(MetadataToken.Rid).IsEmpty
+            : EventsInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasInterfaces => InterfacesInternal is null
+            ?  _context.ParentModule.GetInterfaceImplementationRids(MetadataToken).Count > 0
+            : InterfacesInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasMethodImplementations => MethodImplementationsInternal is null
+            ?  _context.ParentModule.GetMethodImplementationRids(MetadataToken).Count > 0
+            : MethodImplementationsInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasNestedTypes => NestedTypesInternal is null
+            ?  _context.ParentModule.GetNestedTypeRids(MetadataToken.Rid).Count > 0
+            : NestedTypesInternal.Count > 0;
+
+        /// <inheritdoc />
         protected override Utf8String? GetNamespace() => _context.StringsStream?.GetStringByIndex(_row.Namespace);
 
         /// <inheritdoc />

@@ -91,7 +91,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
         private ISegmentReference FastPatchMethodBody(MethodBodySerializationContext context, SerializedCilMethodBody body)
         {
-            var operandBuilder = new CilOperandBuilder(context.TokenProvider, context.ErrorListener);
+            var operandBuilder = new CilOperandBuilder(context.TokenProvider, context.ErrorListener, body.Owner);
             var tokenRewriter = (MetadataToken token) => token.Table == TableIndex.String
                 ? operandBuilder.GetStringToken(body.OperandResolver.ResolveString(token))
                 : operandBuilder.GetMemberToken(body.OperandResolver.ResolveMember(token));
@@ -242,7 +242,7 @@ namespace AsmResolver.DotNet.Code.Cil
             }
             else
             {
-                var localVarSig = new LocalVariablesSignature();
+                var localVarSig = new LocalVariablesSignature(body.LocalVariables.Count);
                 for (int i = 0; i < body.LocalVariables.Count; i++)
                     localVarSig.VariableTypes.Add(body.LocalVariables[i].VariableType);
 

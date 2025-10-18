@@ -29,7 +29,8 @@ namespace AsmResolver.DotNet.Signatures
             var result = new PropertySignature(
                 attributes,
                 context.ReaderContext.ParentModule.CorLibTypeFactory.Object,
-                Enumerable.Empty<TypeSignature>());
+                null
+            );
 
             result.ReadParametersAndReturnType(ref context, ref reader);
             return result;
@@ -93,7 +94,10 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="attributes">The attributes.</param>
         /// <param name="propertyType">The property type.</param>
         /// <param name="parameterTypes">The parameter types.</param>
-        public PropertySignature(CallingConventionAttributes attributes, TypeSignature propertyType, IEnumerable<TypeSignature> parameterTypes)
+        public PropertySignature(
+            CallingConventionAttributes attributes,
+            TypeSignature propertyType,
+            IEnumerable<TypeSignature>? parameterTypes)
             : base(attributes | CallingConventionAttributes.Property, propertyType, parameterTypes)
         {
         }
