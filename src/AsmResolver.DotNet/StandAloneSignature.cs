@@ -13,9 +13,9 @@ namespace AsmResolver.DotNet
     /// Stand-alone signatures are often used by the runtime for referencing local variable signatures, or serve
     /// as an operand for calli instructions.
     /// </remarks>
-    public class StandAloneSignature : MetadataMember, IHasCustomAttribute
+    public partial class StandAloneSignature : MetadataMember, IHasCustomAttribute
     {
-        private readonly LazyVariable<StandAloneSignature, BlobSignature?> _signature;
+        private readonly object _lock = new();
 
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
@@ -28,7 +28,6 @@ namespace AsmResolver.DotNet
         protected StandAloneSignature(MetadataToken token)
             : base(token)
         {
-            _signature = new LazyVariable<StandAloneSignature, BlobSignature?>(x => x.GetSignature());
         }
 
         /// <summary>
@@ -44,10 +43,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the signature that was referenced by this metadata member.
         /// </summary>
-        public BlobSignature? Signature
+        [LazyProperty]
+        public partial BlobSignature? Signature
         {
-            get => _signature.GetValue(this);
-            set => _signature.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />

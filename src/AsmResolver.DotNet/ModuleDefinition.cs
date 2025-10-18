@@ -25,17 +25,14 @@ namespace AsmResolver.DotNet
     /// Represents a single module in a .NET assembly. A module definition is the root object of any .NET module and
     /// defines types, as well as any resources and referenced assemblies.
     /// </summary>
-    public class ModuleDefinition :
+    public partial class ModuleDefinition :
         MetadataMember,
         IResolutionScope,
         IHasCustomAttribute,
         IOwnedCollectionElement<AssemblyDefinition>,
         ITypeOwner
     {
-        private readonly LazyVariable<ModuleDefinition, Utf8String?> _name;
-        private readonly LazyVariable<ModuleDefinition, Guid> _mvid;
-        private readonly LazyVariable<ModuleDefinition, Guid> _encId;
-        private readonly LazyVariable<ModuleDefinition, Guid> _encBaseId;
+        private readonly object _lock = new();
 
         private IList<TypeDefinition>? _topLevelTypes;
         private IList<AssemblyReference>? _assemblyReferences;
@@ -44,15 +41,12 @@ namespace AsmResolver.DotNet
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
         protected IList<CustomAttribute>? CustomAttributesInternal;
 
-        private readonly LazyVariable<ModuleDefinition, IManagedEntryPoint?> _managedEntryPoint;
         private IList<ModuleReference>? _moduleReferences;
         private IList<FileReference>? _fileReferences;
         private IList<ManifestResource>? _resources;
         private IList<ExportedType>? _exportedTypes;
         private TokenAllocator? _tokenAllocator;
 
-        private readonly LazyVariable<ModuleDefinition, string> _runtimeVersion;
-        private readonly LazyVariable<ModuleDefinition, ResourceDirectory?> _nativeResources;
         private IList<DebugDataEntry>? _debugData;
         private ReferenceImporter? _defaultImporter;
 
@@ -295,13 +289,6 @@ namespace AsmResolver.DotNet
         protected ModuleDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<ModuleDefinition, Utf8String?>(x => x.GetName());
-            _mvid = new LazyVariable<ModuleDefinition, Guid>(x => x.GetMvid());
-            _encId = new LazyVariable<ModuleDefinition, Guid>(x => x.GetEncId());
-            _encBaseId = new LazyVariable<ModuleDefinition, Guid>(x => x.GetEncBaseId());
-            _managedEntryPoint = new LazyVariable<ModuleDefinition, IManagedEntryPoint?>(x => x.GetManagedEntryPoint());
-            _runtimeVersion = new LazyVariable<ModuleDefinition, string>(x => x.GetRuntimeVersion());
-            _nativeResources = new LazyVariable<ModuleDefinition, ResourceDirectory?>(x => x.GetNativeResources());
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
 
@@ -408,10 +395,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the module definition table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -440,10 +428,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the MVID column in the module definition table.
         /// </remarks>
-        public Guid Mvid
+        [LazyProperty]
+        public partial Guid Mvid
         {
-            get => _mvid.GetValue(this);
-            set => _mvid.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -452,10 +441,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the EncId column in the module definition table.
         /// </remarks>
-        public Guid EncId
+        [LazyProperty]
+        public partial Guid EncId
         {
-            get => _encId.GetValue(this);
-            set => _encId.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -464,10 +454,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the EncBaseId column in the module definition table.
         /// </remarks>
-        public Guid EncBaseId
+        [LazyProperty]
+        public partial Guid EncBaseId
         {
-            get => _encBaseId.GetValue(this);
-            set => _encBaseId.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -659,20 +650,22 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the runtime version string
         /// </summary>
-        public string RuntimeVersion
+        [LazyProperty]
+        public partial string RuntimeVersion
         {
-            get => _runtimeVersion.GetValue(this);
-            set => _runtimeVersion.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the contents of the native Win32 resources data directory of the underlying
         /// portable executable (PE) file.
         /// </summary>
-        public ResourceDirectory? NativeResourceDirectory
+        [LazyProperty]
+        public partial ResourceDirectory? NativeResourceDirectory
         {
-            get => _nativeResources.GetValue(this);
-            set => _nativeResources.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -799,10 +792,11 @@ namespace AsmResolver.DotNet
         /// Gets or sets the managed entry point that is invoked when the .NET module is initialized. This is either a
         /// method, or a reference to a secondary module containing the entry point method.
         /// </summary>
-        public IManagedEntryPoint? ManagedEntryPoint
+        [LazyProperty]
+        public partial IManagedEntryPoint? ManagedEntryPoint
         {
-            get => _managedEntryPoint.GetValue(this);
-            set => _managedEntryPoint.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -1225,7 +1219,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="NativeResourceDirectory"/> property.
         /// </remarks>
-        protected virtual ResourceDirectory? GetNativeResources() => null;
+        protected virtual ResourceDirectory? GetNativeResourceDirectory() => null;
 
         /// <summary>
         /// Obtains the native debug data directory of the underlying PE image (if available).

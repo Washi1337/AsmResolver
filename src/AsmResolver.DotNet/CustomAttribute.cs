@@ -7,11 +7,9 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a custom attribute that is associated to a member in a .NET module.
     /// </summary>
-    public class CustomAttribute : MetadataMember, IOwnedCollectionElement<IHasCustomAttribute>
+    public partial class CustomAttribute : MetadataMember, IOwnedCollectionElement<IHasCustomAttribute>
     {
-        private readonly LazyVariable<CustomAttribute, IHasCustomAttribute?> _parent;
-        private readonly LazyVariable<CustomAttribute, ICustomAttributeType?> _constructor;
-        private readonly LazyVariable<CustomAttribute, CustomAttributeSignature?> _signature;
+        private readonly object _lock = new();
 
         /// <summary>
         /// Initializes an empty custom attribute.
@@ -20,9 +18,6 @@ namespace AsmResolver.DotNet
         protected CustomAttribute(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<CustomAttribute, IHasCustomAttribute?>(x => x.GetParent());
-            _constructor = new LazyVariable<CustomAttribute, ICustomAttributeType?>(x => x.GetConstructor());
-            _signature = new LazyVariable<CustomAttribute, CustomAttributeSignature?>(x => x.GetSignature());
         }
 
         /// <summary>
@@ -51,10 +46,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the member that this custom attribute is assigned to.
         /// </summary>
-        public IHasCustomAttribute? Parent
+        [LazyProperty]
+        public partial IHasCustomAttribute? Parent
         {
-            get => _parent.GetValue(this);
-            private set => _parent.SetValue(value);
+            get;
+            private set;
         }
 
         IHasCustomAttribute? IOwnedCollectionElement<IHasCustomAttribute>.Owner
@@ -66,19 +62,21 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the constructor that is invoked upon initializing the attribute.
         /// </summary>
-        public ICustomAttributeType? Constructor
+        [LazyProperty]
+        public partial ICustomAttributeType? Constructor
         {
-            get => _constructor.GetValue(this);
-            set => _constructor.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the signature containing the arguments passed onto the attribute's constructor.
         /// </summary>
-        public CustomAttributeSignature? Signature
+        [LazyProperty]
+        public partial CustomAttributeSignature? Signature
         {
-            get => _signature.GetValue(this);
-            set => _signature.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

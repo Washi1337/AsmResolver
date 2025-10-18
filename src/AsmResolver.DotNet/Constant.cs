@@ -6,10 +6,9 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a literal value that is assigned to a field, parameter or property.
     /// </summary>
-    public class Constant : MetadataMember
+    public partial class Constant : MetadataMember
     {
-        private readonly LazyVariable<Constant, IHasConstant?> _parent;
-        private readonly LazyVariable<Constant, DataBlobSignature?> _value;
+        private readonly object _lock = new();
 
         /// <summary>
         /// Initializes the constant with a metadata token.
@@ -18,8 +17,6 @@ namespace AsmResolver.DotNet
         protected Constant(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<Constant, IHasConstant?>(x => x.GetParent());
-            _value = new LazyVariable<Constant, DataBlobSignature?>(x => x.GetValue());
         }
 
         /// <summary>
@@ -47,19 +44,21 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the member that is assigned a constant.
         /// </summary>
-        public IHasConstant? Parent
+        [LazyProperty]
+        public partial IHasConstant? Parent
         {
-            get => _parent.GetValue(this);
-            internal set => _parent.SetValue(value);
+            get;
+            internal set;
         }
 
         /// <summary>
         /// Gets or sets the serialized literal value.
         /// </summary>
-        public DataBlobSignature? Value
+        [LazyProperty]
+        public partial DataBlobSignature? Value
         {
-            get => _value.GetValue(this);
-            set => _value.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

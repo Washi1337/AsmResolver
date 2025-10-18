@@ -6,10 +6,9 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a function pointer or procedure type.
 /// </summary>
-public class ProcedureTypeRecord : CodeViewTypeRecord
+public partial class ProcedureTypeRecord : CodeViewTypeRecord
 {
-    private readonly LazyVariable<ProcedureTypeRecord, CodeViewTypeRecord?> _returnType;
-    private readonly LazyVariable<ProcedureTypeRecord, ArgumentListLeaf?> _argumentList;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty procedure type.
@@ -18,8 +17,6 @@ public class ProcedureTypeRecord : CodeViewTypeRecord
     protected ProcedureTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _returnType = new LazyVariable<ProcedureTypeRecord, CodeViewTypeRecord?>(x => x.GetReturnType());
-        _argumentList = new LazyVariable<ProcedureTypeRecord, ArgumentListLeaf?>(x => x.GetArguments());
     }
 
     /// <summary>
@@ -32,8 +29,8 @@ public class ProcedureTypeRecord : CodeViewTypeRecord
         : base(0)
     {
         CallingConvention = callingConvention;
-        _returnType = new LazyVariable<ProcedureTypeRecord, CodeViewTypeRecord?>(returnType);
-        _argumentList = new LazyVariable<ProcedureTypeRecord, ArgumentListLeaf?>(arguments);
+        ReturnType = returnType;
+        Arguments = arguments;
     }
 
     /// <inheritdoc />
@@ -42,10 +39,11 @@ public class ProcedureTypeRecord : CodeViewTypeRecord
     /// <summary>
     /// Gets or sets the return type of the function.
     /// </summary>
-    public CodeViewTypeRecord? ReturnType
+    [LazyProperty]
+    public partial CodeViewTypeRecord? ReturnType
     {
-        get => _returnType.GetValue(this);
-        set => _returnType.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -69,10 +67,11 @@ public class ProcedureTypeRecord : CodeViewTypeRecord
     /// <summary>
     /// Gets or sets the list of types of the parameters that this function defines.
     /// </summary>
-    public ArgumentListLeaf? Arguments
+    [LazyProperty]
+    public partial ArgumentListLeaf? Arguments
     {
-        get => _argumentList.GetValue(this);
-        set => _argumentList.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -85,7 +84,7 @@ public class ProcedureTypeRecord : CodeViewTypeRecord
     protected virtual CodeViewTypeRecord? GetReturnType() => null;
 
     /// <summary>
-    /// Obtains the argument types of the procedure..
+    /// Obtains the argument types of the procedure.
     /// </summary>
     /// <returns>The argument types.</returns>
     /// <remarks>

@@ -3,9 +3,9 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a type that is annotated with extra modifiers.
 /// </summary>
-public class ModifierTypeRecord : CodeViewTypeRecord
+public partial class ModifierTypeRecord : CodeViewTypeRecord
 {
-    private readonly LazyVariable<ModifierTypeRecord, CodeViewTypeRecord> _baseType;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes a new empty modifier type.
@@ -14,7 +14,6 @@ public class ModifierTypeRecord : CodeViewTypeRecord
     protected ModifierTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _baseType = new LazyVariable<ModifierTypeRecord, CodeViewTypeRecord>(x => x.GetBaseType());
     }
 
     /// <summary>
@@ -25,7 +24,7 @@ public class ModifierTypeRecord : CodeViewTypeRecord
     public ModifierTypeRecord(CodeViewTypeRecord type, ModifierAttributes attributes)
         : base(0)
     {
-        _baseType = new LazyVariable<ModifierTypeRecord, CodeViewTypeRecord>(type);
+        BaseType = type;
         Attributes = attributes;
     }
 
@@ -35,10 +34,11 @@ public class ModifierTypeRecord : CodeViewTypeRecord
     /// <summary>
     /// Gets or sets the type that is annotated.
     /// </summary>
-    public CodeViewTypeRecord BaseType
+    [LazyProperty]
+    public partial CodeViewTypeRecord BaseType
     {
-        get => _baseType.GetValue(this);
-        set => _baseType.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

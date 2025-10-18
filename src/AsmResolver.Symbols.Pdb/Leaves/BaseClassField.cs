@@ -3,9 +3,9 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a reference to a base class object in a structure.
 /// </summary>
-public class BaseClassField : CodeViewField
+public partial class BaseClassField : CodeViewField
 {
-    private readonly LazyVariable<BaseClassField, CodeViewTypeRecord?> _type;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty base class.
@@ -14,17 +14,16 @@ public class BaseClassField : CodeViewField
     protected BaseClassField(uint typeIndex)
         : base(typeIndex)
     {
-        _type = new LazyVariable<BaseClassField, CodeViewTypeRecord?>(x => x.GetBaseType());
     }
 
     /// <summary>
     /// Creates a new base class field.
     /// </summary>
-    /// <param name="type">The base type to reference.</param>
-    public BaseClassField(CodeViewTypeRecord type)
+    /// <param name="baseType">The base type to reference.</param>
+    public BaseClassField(CodeViewTypeRecord baseType)
         : base(0)
     {
-        _type = new LazyVariable<BaseClassField, CodeViewTypeRecord?>(type);
+        BaseType = baseType;
     }
 
     /// <inheritdoc />
@@ -33,10 +32,11 @@ public class BaseClassField : CodeViewField
     /// <summary>
     /// Gets or sets the base type that this base class is referencing.
     /// </summary>
-    public CodeViewTypeRecord? Type
+    [LazyProperty]
+    public partial CodeViewTypeRecord? BaseType
     {
-        get => _type.GetValue(this);
-        set => _type.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -53,10 +53,10 @@ public class BaseClassField : CodeViewField
     /// </summary>
     /// <returns>The base type.</returns>
     /// <remarks>
-    /// This method is called upon initialization of the <see cref="Type"/> property.
+    /// This method is called upon initialization of the <see cref="BaseType"/> property.
     /// </remarks>
     protected virtual CodeViewTypeRecord? GetBaseType() => null;
 
     /// <inheritdoc />
-    public override string ToString() => Type?.ToString() ?? "<<<?>>>";
+    public override string ToString() => BaseType?.ToString() ?? "<<<?>>>";
 }

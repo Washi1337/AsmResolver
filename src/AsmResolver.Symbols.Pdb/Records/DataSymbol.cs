@@ -5,18 +5,15 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a global or local data symbol.
 /// </summary>
-public class DataSymbol : CodeViewSymbol, IVariableSymbol
+public partial class DataSymbol : CodeViewSymbol, IVariableSymbol
 {
-    private readonly LazyVariable<DataSymbol, Utf8String?> _name;
-    private readonly LazyVariable<DataSymbol, CodeViewTypeRecord?> _variableType;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty data symbol.
     /// </summary>
     protected DataSymbol()
     {
-        _name = new LazyVariable<DataSymbol, Utf8String?>(x => x.GetName());
-        _variableType = new LazyVariable<DataSymbol, CodeViewTypeRecord?>(x => x.GetVariableType());
     }
 
     /// <summary>
@@ -26,8 +23,8 @@ public class DataSymbol : CodeViewSymbol, IVariableSymbol
     /// <param name="variableType">The data type of the symbol.</param>
     public DataSymbol(Utf8String name, CodeViewTypeRecord variableType)
     {
-        _name = new LazyVariable<DataSymbol, Utf8String?>(name);
-        _variableType = new LazyVariable<DataSymbol, CodeViewTypeRecord?>(variableType);
+        Name = name;
+        VariableType = variableType;
     }
 
     /// <inheritdoc />
@@ -72,17 +69,19 @@ public class DataSymbol : CodeViewSymbol, IVariableSymbol
     }
 
     /// <inheritdoc />
-    public Utf8String? Name
+    [LazyProperty]
+    public partial Utf8String? Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <inheritdoc />
-    public CodeViewTypeRecord? VariableType
+    [LazyProperty]
+    public partial CodeViewTypeRecord? VariableType
     {
-        get => _variableType.GetValue(this);
-        set => _variableType.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

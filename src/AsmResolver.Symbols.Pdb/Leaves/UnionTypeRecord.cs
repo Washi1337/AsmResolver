@@ -3,9 +3,9 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a type of a value that may have several representations or formats within the same position of memory.
 /// </summary>
-public class UnionTypeRecord : CodeViewCompositeTypeRecord
+public partial class UnionTypeRecord : CodeViewCompositeTypeRecord
 {
-    private readonly LazyVariable<UnionTypeRecord, Utf8String> _uniqueName;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty union type.
@@ -14,7 +14,6 @@ public class UnionTypeRecord : CodeViewCompositeTypeRecord
     protected UnionTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _uniqueName = new LazyVariable<UnionTypeRecord, Utf8String>(x => x.GetUniqueName());
     }
 
     /// <summary>
@@ -24,7 +23,7 @@ public class UnionTypeRecord : CodeViewCompositeTypeRecord
     public UnionTypeRecord(ulong size)
         : base(0)
     {
-        _uniqueName = new LazyVariable<UnionTypeRecord, Utf8String>(Utf8String.Empty);
+        UniqueName = Utf8String.Empty;
         Size = size;
     }
 
@@ -43,10 +42,11 @@ public class UnionTypeRecord : CodeViewCompositeTypeRecord
     /// <summary>
     /// Gets or sets the uniquely identifiable name for this type.
     /// </summary>
-    public Utf8String UniqueName
+    [LazyProperty]
+    public partial Utf8String UniqueName
     {
-        get => _uniqueName.GetValue(this);
-        set => _uniqueName.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

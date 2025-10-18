@@ -70,7 +70,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override DotNetResourcesDirectory? GetResources()
+        protected override DotNetResourcesDirectory? GetDotNetResources()
         {
             if (!_resourcesDirectory.IsPresentInPE)
                 return null;

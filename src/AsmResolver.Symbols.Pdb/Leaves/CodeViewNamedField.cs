@@ -3,9 +3,9 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a single record in a field list that is assigned a name.
 /// </summary>
-public abstract class CodeViewNamedField : CodeViewField
+public abstract partial class CodeViewNamedField : CodeViewField
 {
-    private readonly LazyVariable<CodeViewNamedField, Utf8String> _name;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty CodeView field leaf.
@@ -14,16 +14,16 @@ public abstract class CodeViewNamedField : CodeViewField
     protected CodeViewNamedField(uint typeIndex)
         : base(typeIndex)
     {
-        _name = new LazyVariable<CodeViewNamedField, Utf8String>(x => x.GetName());
     }
 
     /// <summary>
     /// Gets or sets the name of the field.
     /// </summary>
-    public Utf8String Name
+    [LazyProperty]
+    public partial Utf8String Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

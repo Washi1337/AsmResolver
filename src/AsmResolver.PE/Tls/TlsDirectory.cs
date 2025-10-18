@@ -9,9 +9,9 @@ namespace AsmResolver.PE.Tls
     /// <summary>
     /// Represents the data directory containing Thread-Local Storage (TLS) data.
     /// </summary>
-    public class TlsDirectory : SegmentBase
+    public partial class TlsDirectory : SegmentBase
     {
-        private readonly LazyVariable<TlsDirectory, IReadableSegment?> _templateData;
+        private readonly object _lock = new();
         private ReferenceTable? _callbackFunctions;
         private ulong _imageBase = 0x00400000;
         private bool _is32Bit = true;
@@ -21,7 +21,6 @@ namespace AsmResolver.PE.Tls
         /// </summary>
         public TlsDirectory()
         {
-            _templateData = new LazyVariable<TlsDirectory, IReadableSegment?>(x => x.GetTemplateData());
             Index = SegmentReference.Null;
         }
 
@@ -29,10 +28,11 @@ namespace AsmResolver.PE.Tls
         /// Gets or sets the block of data that is used as a template to initialize TLS data.  The system copies all
         /// of this data each time a thread is created.
         /// </summary>
-        public IReadableSegment? TemplateData
+        [LazyProperty]
+        public partial IReadableSegment? TemplateData
         {
-            get => _templateData.GetValue(this);
-            set => _templateData.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

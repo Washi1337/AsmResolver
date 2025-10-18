@@ -3,9 +3,9 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a single enumerate field leaf in a field list.
 /// </summary>
-public class EnumerateField : CodeViewNamedField
+public partial class EnumerateField : CodeViewNamedField
 {
-    private readonly LazyVariable<EnumerateField, object> _value;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty enumerate field leaf.
@@ -14,7 +14,6 @@ public class EnumerateField : CodeViewNamedField
     protected EnumerateField(uint typeIndex)
         : base(typeIndex)
     {
-        _value = new LazyVariable<EnumerateField, object>(x => x.GetValue());
     }
 
     /// <summary>
@@ -27,7 +26,7 @@ public class EnumerateField : CodeViewNamedField
         : base(0)
     {
         Name = name;
-        _value = new LazyVariable<EnumerateField, object>(value);
+        Value = value;
         Attributes = attributes;
     }
 
@@ -37,10 +36,11 @@ public class EnumerateField : CodeViewNamedField
     /// <summary>
     /// Gets or sets the constant value assigned to the field.
     /// </summary>
-    public object Value
+    [LazyProperty]
+    public partial object Value
     {
-        get => _value.GetValue(this);
-        set => _value.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

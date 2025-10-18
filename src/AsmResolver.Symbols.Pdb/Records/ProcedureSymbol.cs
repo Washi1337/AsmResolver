@@ -7,10 +7,9 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents either a local or a global procedure symbol in a PDB file.
 /// </summary>
-public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
+public partial class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
 {
-    private readonly LazyVariable<ProcedureSymbol, Utf8String?> _name;
-    private readonly LazyVariable<ProcedureSymbol, CodeViewLeaf?> _type;
+    private readonly object _lock = new();
 
     private IList<ICodeViewSymbol>? _symbols;
 
@@ -19,8 +18,6 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     protected ProcedureSymbol()
     {
-        _name = new LazyVariable<ProcedureSymbol, Utf8String?>(x => x.GetName());
-        _type = new LazyVariable<ProcedureSymbol, CodeViewLeaf?>(x => x.GetFunctionType());
     }
 
     /// <summary>
@@ -30,8 +27,8 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <param name="id">The function identifier of the procedure.</param>
     public ProcedureSymbol(Utf8String name, FunctionIdentifier id)
     {
-        _name = new LazyVariable<ProcedureSymbol, Utf8String?>(name);
-        _type = new LazyVariable<ProcedureSymbol, CodeViewLeaf?>(id);
+        Name = name;
+        FunctionType = id;
     }
 
     /// <summary>
@@ -41,8 +38,8 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <param name="type">The type describing the shape of the procedure.</param>
     public ProcedureSymbol(Utf8String name, ProcedureTypeRecord type)
     {
-        _name = new LazyVariable<ProcedureSymbol, Utf8String?>(name);
-        _type = new LazyVariable<ProcedureSymbol, CodeViewLeaf?>(type);
+        Name = name;
+        FunctionType = type;
     }
 
     /// <inheritdoc />
@@ -122,10 +119,11 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <summary>
     /// Gets or sets the type or identifier leaf describing the identifier or shape of the function.
     /// </summary>
-    public CodeViewLeaf? Type
+    [LazyProperty]
+    public partial CodeViewLeaf? FunctionType
     {
-        get => _type.GetValue(this);
-        set => _type.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -133,8 +131,8 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     public FunctionIdentifier? FunctionId
     {
-        get => Type as FunctionIdentifier;
-        set => Type = value;
+        get => FunctionType as FunctionIdentifier;
+        set => FunctionType = value;
     }
 
     /// <summary>
@@ -142,8 +140,8 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     public ProcedureTypeRecord? ProcedureType
     {
-        get => Type as ProcedureTypeRecord;
-        set => Type = value;
+        get => FunctionType as ProcedureTypeRecord;
+        set => FunctionType = value;
     }
 
     /// <summary>
@@ -176,10 +174,11 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <summary>
     /// Gets or sets the name of the procedure.
     /// </summary>
-    public Utf8String? Name
+    [LazyProperty]
+    public partial Utf8String? Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -196,7 +195,7 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     /// <returns>The function type.</returns>
     /// <remarks>
-    /// This method is called upon initialization of the <see cref="Type"/> property.
+    /// This method is called upon initialization of the <see cref="FunctionType"/> property.
     /// </remarks>
     protected virtual CodeViewLeaf? GetFunctionType() => null;
 
@@ -213,6 +212,6 @@ public class ProcedureSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     public override string ToString()
     {
         string prefix = CodeViewSymbolType.ToString().ToUpper();
-        return $"S_{prefix}: [{SegmentIndex:X4}:{Offset:X8}] {Name} ({Type})";
+        return $"S_{prefix}: [{SegmentIndex:X4}:{Offset:X8}] {Name} ({FunctionType})";
     }
 }

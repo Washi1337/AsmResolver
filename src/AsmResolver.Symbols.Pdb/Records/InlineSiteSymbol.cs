@@ -7,9 +7,9 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Provides information about an inlined call site.
 /// </summary>
-public class InlineSiteSymbol : CodeViewSymbol, IScopeCodeViewSymbol
+public partial class InlineSiteSymbol : CodeViewSymbol, IScopeCodeViewSymbol
 {
-    private readonly LazyVariable<InlineSiteSymbol, FunctionIdentifier?> _inlinee;
+    private readonly object _lock = new();
 
     private IList<ICodeViewSymbol>? _symbols;
     private IList<BinaryAnnotation>? _annotations;
@@ -19,7 +19,6 @@ public class InlineSiteSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// </summary>
     protected InlineSiteSymbol()
     {
-        _inlinee = new LazyVariable<InlineSiteSymbol, FunctionIdentifier?>(x => x.GetInlinee());
     }
 
     /// <summary>
@@ -28,7 +27,7 @@ public class InlineSiteSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <param name="inlinee">The function that is being inlined.</param>
     public InlineSiteSymbol(FunctionIdentifier inlinee)
     {
-        _inlinee = new LazyVariable<InlineSiteSymbol, FunctionIdentifier?>(inlinee);
+        Inlinee = inlinee;
     }
 
     /// <inheritdoc />
@@ -48,10 +47,11 @@ public class InlineSiteSymbol : CodeViewSymbol, IScopeCodeViewSymbol
     /// <summary>
     /// Gets or sets the identifier of the function that is being inlined.
     /// </summary>
-    public FunctionIdentifier? Inlinee
+    [LazyProperty]
+    public partial FunctionIdentifier? Inlinee
     {
-        get => _inlinee.GetValue(this);
-        set => _inlinee.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

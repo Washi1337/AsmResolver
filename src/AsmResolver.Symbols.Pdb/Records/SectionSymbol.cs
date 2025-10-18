@@ -5,16 +5,15 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Provides information about a section within a PE file.
 /// </summary>
-public class SectionSymbol : CodeViewSymbol
+public partial class SectionSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<SectionSymbol, Utf8String?> _name;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty section symbol.
     /// </summary>
     protected SectionSymbol()
     {
-        _name = new LazyVariable<SectionSymbol, Utf8String?>(x => x.GetName());
     }
 
     /// <summary>
@@ -23,7 +22,7 @@ public class SectionSymbol : CodeViewSymbol
     /// <param name="name">The name of the section.</param>
     public SectionSymbol(Utf8String name)
     {
-        _name = new LazyVariable<SectionSymbol, Utf8String?>(name);
+        Name = name;
     }
 
     /// <inheritdoc />
@@ -80,10 +79,11 @@ public class SectionSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the name of the section.
     /// </summary>
-    public Utf8String? Name
+    [LazyProperty]
+    public partial Utf8String? Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

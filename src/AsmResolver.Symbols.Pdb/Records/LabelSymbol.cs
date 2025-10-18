@@ -3,16 +3,15 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a named label within an instruction stream.
 /// </summary>
-public class LabelSymbol : CodeViewSymbol
+public partial class LabelSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<LabelSymbol, Utf8String?> _name;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty label symbol.
     /// </summary>
     protected LabelSymbol()
     {
-        _name = new LazyVariable<LabelSymbol, Utf8String?>(x => x.GetName());
     }
 
     /// <summary>
@@ -24,7 +23,7 @@ public class LabelSymbol : CodeViewSymbol
     /// <param name="attributes">The attributes describing the label.</param>
     public LabelSymbol(Utf8String name, ushort segmentIndex, uint offset, ProcedureAttributes attributes)
     {
-        _name = new LazyVariable<LabelSymbol, Utf8String?>(name);
+        Name = name;
         SegmentIndex = segmentIndex;
         Offset = offset;
         Attributes = attributes;
@@ -63,10 +62,11 @@ public class LabelSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the name of the label.
     /// </summary>
-    public Utf8String? Name
+    [LazyProperty]
+    public partial Utf8String? Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

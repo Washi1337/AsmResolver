@@ -33,7 +33,7 @@ public class SerializedIconEntry : IconEntry
     }
 
     /// <inheritdoc />
-    protected override ISegment? GetData()
+    protected override ISegment? GetPixelData()
     {
         if (!_iconsDirectory.TryGetDirectory(_originalId, out var directory))
             return null;

@@ -9,9 +9,9 @@ namespace AsmResolver.DotNet.Bundles
     /// <summary>
     /// Represents a single file in a .NET bundle manifest.
     /// </summary>
-    public class BundleFile : IOwnedCollectionElement<BundleManifest>
+    public partial class BundleFile : IOwnedCollectionElement<BundleManifest>
     {
-        private readonly LazyVariable<BundleFile, ISegment> _contents;
+        private readonly object _lock = new();
 
         /// <summary>
         /// Creates a new empty bundle file.
@@ -20,7 +20,6 @@ namespace AsmResolver.DotNet.Bundles
         public BundleFile(string relativePath)
         {
             RelativePath = relativePath;
-            _contents = new LazyVariable<BundleFile, ISegment>(x => x.GetContents());
         }
 
         /// <summary>
@@ -44,7 +43,7 @@ namespace AsmResolver.DotNet.Bundles
         {
             RelativePath = relativePath;
             Type = type;
-            _contents = new LazyVariable<BundleFile, ISegment>(contents);
+            Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
         /// <summary>
@@ -100,10 +99,11 @@ namespace AsmResolver.DotNet.Bundles
         /// <summary>
         /// Gets or sets the raw contents of the file.
         /// </summary>
-        public ISegment Contents
+        [LazyProperty]
+        public partial ISegment Contents
         {
-            get => _contents.GetValue(this);
-            set => _contents.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

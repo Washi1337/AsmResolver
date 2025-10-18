@@ -23,7 +23,7 @@ public class ConstantTypeTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void Type()
     {
-        Assert.Equal(CodeViewLeafKind.Enum, _fixture.SimplePdb.Symbols.OfType<ConstantSymbol>().First().Type.LeafKind);
+        Assert.Equal(CodeViewLeafKind.Enum, _fixture.SimplePdb.Symbols.OfType<ConstantSymbol>().First().ConstantType.LeafKind);
     }
 
     [Fact]

@@ -9,28 +9,15 @@ namespace AsmResolver.PE.DotNet
     /// <summary>
     /// Represents a data directory containing the CLR 2.0 header and data directories of a .NET binary.
     /// </summary>
-    public class DotNetDirectory : SegmentBase
+    public partial class DotNetDirectory : SegmentBase
     {
-        private readonly LazyVariable<DotNetDirectory, MetadataDirectory?> _metadata;
-        private readonly LazyVariable<DotNetDirectory, DotNetResourcesDirectory?> _resources;
-        private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _strongName;
-        private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _codeManagerTable;
-        private readonly LazyVariable<DotNetDirectory, IReadableSegment?> _exportAddressTable;
-        private readonly LazyVariable<DotNetDirectory, VTableFixupsDirectory?> _vtableFixups;
-        private readonly LazyVariable<DotNetDirectory, IManagedNativeHeader?> _managedNativeHeader;
+        private readonly object _lock = new();
 
         /// <summary>
         /// Creates a new .NET data directory.
         /// </summary>
         public DotNetDirectory()
         {
-            _metadata = new LazyVariable<DotNetDirectory, MetadataDirectory?>(x => x.GetMetadata());
-            _resources = new LazyVariable<DotNetDirectory, DotNetResourcesDirectory?>(x => x.GetResources());
-            _strongName = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetStrongName());
-            _codeManagerTable = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetCodeManagerTable());
-            _exportAddressTable = new LazyVariable<DotNetDirectory, IReadableSegment?>(x => x.GetExportAddressTable());
-            _vtableFixups = new LazyVariable<DotNetDirectory, VTableFixupsDirectory?>(x => x.GetVTableFixups());
-            _managedNativeHeader = new LazyVariable<DotNetDirectory, IManagedNativeHeader?>(x => x.GetManagedNativeHeader());
         }
 
         /// <summary>
@@ -60,10 +47,11 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the metadata of the .NET binary.
         /// </summary>
-        public MetadataDirectory? Metadata
+        [LazyProperty]
+        public partial MetadataDirectory? Metadata
         {
-            get => _metadata.GetValue(this);
-            set => _metadata.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -93,57 +81,63 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the embedded resources data of the .NET binary (if available).
         /// </summary>
-        public DotNetResourcesDirectory? DotNetResources
+        [LazyProperty]
+        public partial DotNetResourcesDirectory? DotNetResources
         {
-            get => _resources.GetValue(this);
-            set => _resources.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the data directory containing the strong name signature of the .NET binary (if available).
         /// </summary>
-        public IReadableSegment? StrongName
+        [LazyProperty]
+        public partial IReadableSegment? StrongName
         {
-            get => _strongName.GetValue(this);
-            set => _strongName.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the data directory containing the code manager table of the .NET binary (if available).
         /// </summary>
-        public IReadableSegment? CodeManagerTable
+        [LazyProperty]
+        public partial IReadableSegment? CodeManagerTable
         {
-            get => _codeManagerTable.GetValue(this);
-            set => _codeManagerTable.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the data directory containing the VTable fixups that need to be applied when executing mixed
         /// mode applications (if available).
         /// </summary>
-        public VTableFixupsDirectory? VTableFixups
+        [LazyProperty]
+        public partial VTableFixupsDirectory? VTableFixups
         {
-            get => _vtableFixups.GetValue(this);
-            set => _vtableFixups.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the data directory containing the addresses to native stubs of exports defined in the
         /// .NET binary (if available).
         /// </summary>
-        public IReadableSegment? ExportAddressTable
+        [LazyProperty]
+        public partial IReadableSegment? ExportAddressTable
         {
-            get => _exportAddressTable.GetValue(this);
-            set => _exportAddressTable.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the data directory containing the managed native header of a mixed mode application (if available).
         /// </summary>
-        public IManagedNativeHeader? ManagedNativeHeader
+        [LazyProperty]
+        public partial IManagedNativeHeader? ManagedNativeHeader
         {
-            get => _managedNativeHeader.GetValue(this);
-            set => _managedNativeHeader.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -188,7 +182,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="DotNetResources"/> property
         /// </remarks>
-        protected virtual DotNetResourcesDirectory? GetResources() => null;
+        protected virtual DotNetResourcesDirectory? GetDotNetResources() => null;
 
         /// <summary>
         /// Obtains the data directory containing the strong name signature of the .NET binary.

@@ -3,9 +3,9 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a single method in a type.
 /// </summary>
-public class NonOverloadedMethod : CodeViewNamedField
+public partial class NonOverloadedMethod : CodeViewNamedField
 {
-    private readonly LazyVariable<NonOverloadedMethod, MemberFunctionLeaf?> _function;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty non-overloaded method.
@@ -14,7 +14,6 @@ public class NonOverloadedMethod : CodeViewNamedField
     protected NonOverloadedMethod(uint typeIndex)
         : base(typeIndex)
     {
-        _function = new LazyVariable<NonOverloadedMethod, MemberFunctionLeaf?>(x => x.GetFunction());
     }
 
     /// <summary>
@@ -26,7 +25,7 @@ public class NonOverloadedMethod : CodeViewNamedField
     public NonOverloadedMethod(Utf8String name, CodeViewFieldAttributes attributes, MemberFunctionLeaf function)
         : base(0)
     {
-        _function = new LazyVariable<NonOverloadedMethod, MemberFunctionLeaf?>(function);
+        Function = function;
         Attributes = attributes;
         Name = name;
     }
@@ -41,7 +40,7 @@ public class NonOverloadedMethod : CodeViewNamedField
     public NonOverloadedMethod(Utf8String name, CodeViewFieldAttributes attributes, uint vTableOffset, MemberFunctionLeaf function)
         : base(0)
     {
-        _function = new LazyVariable<NonOverloadedMethod, MemberFunctionLeaf?>(function);
+        Function = function;
         Attributes = attributes;
         Name = name;
         VTableOffset = vTableOffset;
@@ -53,10 +52,11 @@ public class NonOverloadedMethod : CodeViewNamedField
     /// <summary>
     /// Gets or sets the function that is referenced by this method.
     /// </summary>
-    public MemberFunctionLeaf? Function
+    [LazyProperty]
+    public partial MemberFunctionLeaf? Function
     {
-        get => _function.GetValue(this);
-        set => _function.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

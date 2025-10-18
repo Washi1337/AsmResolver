@@ -3,16 +3,15 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a using directive that allows for types to be used without specifying its declaring namespace.
 /// </summary>
-public class UsingNamespaceSymbol : CodeViewSymbol
+public partial class UsingNamespaceSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<UsingNamespaceSymbol, Utf8String> _name;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes a new empty using namespace.
     /// </summary>
     protected UsingNamespaceSymbol()
     {
-        _name = new LazyVariable<UsingNamespaceSymbol, Utf8String>(x => x.GetName());
     }
 
     /// <summary>
@@ -21,7 +20,7 @@ public class UsingNamespaceSymbol : CodeViewSymbol
     /// <param name="name">The namespace to use.</param>
     public UsingNamespaceSymbol(Utf8String name)
     {
-        _name = new LazyVariable<UsingNamespaceSymbol, Utf8String>(name);
+        Name = name;
     }
 
     /// <inheritdoc />
@@ -30,10 +29,11 @@ public class UsingNamespaceSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the name of the namespace that is being used.
     /// </summary>
-    public Utf8String Name
+    [LazyProperty]
+    public partial Utf8String Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

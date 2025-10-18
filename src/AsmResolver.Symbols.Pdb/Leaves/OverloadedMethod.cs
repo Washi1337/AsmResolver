@@ -3,9 +3,9 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a method that is overloaded by one or more functions.
 /// </summary>
-public class OverloadedMethod : CodeViewNamedField
+public partial class OverloadedMethod : CodeViewNamedField
 {
-    private readonly LazyVariable<OverloadedMethod, MethodListLeaf?> _methods;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty overloaded method.
@@ -14,7 +14,6 @@ public class OverloadedMethod : CodeViewNamedField
     protected OverloadedMethod(uint typeIndex)
         : base(typeIndex)
     {
-        _methods = new LazyVariable<OverloadedMethod, MethodListLeaf?>(x => x.GetMethods());
     }
 
     /// <summary>
@@ -23,7 +22,7 @@ public class OverloadedMethod : CodeViewNamedField
     public OverloadedMethod()
         : base(0)
     {
-        _methods = new LazyVariable<OverloadedMethod, MethodListLeaf?>(new MethodListLeaf());
+        Methods = new MethodListLeaf();
     }
 
     /// <summary>
@@ -32,7 +31,7 @@ public class OverloadedMethod : CodeViewNamedField
     public OverloadedMethod(MethodListLeaf methods)
         : base(0)
     {
-        _methods = new LazyVariable<OverloadedMethod, MethodListLeaf?>(methods);
+        Methods = methods;
     }
 
     /// <summary>
@@ -41,7 +40,7 @@ public class OverloadedMethod : CodeViewNamedField
     public OverloadedMethod(params MethodListEntry[] methods)
         : base(0)
     {
-        _methods = new LazyVariable<OverloadedMethod, MethodListLeaf?>(new MethodListLeaf(methods));
+        Methods = new MethodListLeaf(methods);
     }
 
     /// <inheritdoc />
@@ -50,10 +49,11 @@ public class OverloadedMethod : CodeViewNamedField
     /// <summary>
     /// Gets or sets a list of methods that were overloaded.
     /// </summary>
-    public MethodListLeaf? Methods
+    [LazyProperty]
+    public partial MethodListLeaf? Methods
     {
-        get => _methods.GetValue(this);
-        set => _methods.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

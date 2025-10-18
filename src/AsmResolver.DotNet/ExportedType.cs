@@ -9,15 +9,13 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type definition that was exported to another external .NET module.
     /// </summary>
-    public class ExportedType :
+    public partial class ExportedType :
         MetadataMember,
         IImplementation,
         ITypeDescriptor,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<ExportedType, Utf8String?> _name;
-        private readonly LazyVariable<ExportedType, Utf8String?> _namespace;
-        private readonly LazyVariable<ExportedType, IImplementation?> _implementation;
+        private readonly object _lock = new();
 
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
@@ -30,9 +28,6 @@ namespace AsmResolver.DotNet
         protected ExportedType(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<ExportedType, Utf8String?>(x => x.GetName());
-            _namespace = new LazyVariable<ExportedType, Utf8String?>(x => x.GetNamespace());
-            _implementation = new LazyVariable<ExportedType, IImplementation?>(x => x.GetImplementation());
         }
 
         /// <summary>
@@ -73,10 +68,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the exported type table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -87,10 +83,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Namespace column in the exported type table.
         /// </remarks>
-        public Utf8String? Namespace
+        [LazyProperty]
+        public partial Utf8String? Namespace
         {
-            get => _namespace.GetValue(this);
-            set => _namespace.SetValue(value);
+            get;
+            set;
         }
 
         string? ITypeDescriptor.Namespace => Namespace;
@@ -114,10 +111,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the new location this type is exported to.
         /// </summary>
-        public IImplementation? Implementation
+        [LazyProperty]
+        public partial IImplementation? Implementation
         {
-            get => _implementation.GetValue(this);
-            set => _implementation.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

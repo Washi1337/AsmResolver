@@ -3,9 +3,9 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a field in a type that references a nested type definition.
 /// </summary>
-public class NestedTypeField : CodeViewNamedField
+public partial class NestedTypeField : CodeViewNamedField
 {
-    private readonly LazyVariable<NestedTypeField, CodeViewTypeRecord?> _type;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty nested type.
@@ -14,18 +14,17 @@ public class NestedTypeField : CodeViewNamedField
     protected NestedTypeField(uint typeIndex)
         : base(typeIndex)
     {
-        _type = new LazyVariable<NestedTypeField, CodeViewTypeRecord?>(x => x.GetNestedType());
     }
 
     /// <summary>
     /// Creates a new nested type field.
     /// </summary>
-    /// <param name="type">The definition of the nested type</param>
+    /// <param name="nestedType">The definition of the nested type</param>
     /// <param name="name">The name of the nested type.</param>
-    public NestedTypeField(CodeViewTypeRecord type, Utf8String name)
+    public NestedTypeField(CodeViewTypeRecord nestedType, Utf8String name)
         : base(0)
     {
-        _type = new LazyVariable<NestedTypeField, CodeViewTypeRecord?>(type);
+        NestedType = nestedType;
         Name = name;
         Attributes = 0;
     }
@@ -33,13 +32,13 @@ public class NestedTypeField : CodeViewNamedField
     /// <summary>
     /// Creates a new nested type (extended) field.
     /// </summary>
-    /// <param name="type">The definition of the nested type</param>
+    /// <param name="nestedType">The definition of the nested type</param>
     /// <param name="name">The name of the nested type.</param>
     /// <param name="attributes">The attributes assigned to the type.</param>
-    public NestedTypeField(CodeViewTypeRecord type, Utf8String name, CodeViewFieldAttributes attributes)
+    public NestedTypeField(CodeViewTypeRecord nestedType, Utf8String name, CodeViewFieldAttributes attributes)
         : base(0)
     {
-        _type = new LazyVariable<NestedTypeField, CodeViewTypeRecord?>(type);
+        NestedType = nestedType;
         Name = name;
         Attributes = attributes;
     }
@@ -52,10 +51,11 @@ public class NestedTypeField : CodeViewNamedField
     /// <summary>
     /// Gets or sets the definition of the referenced nested type.
     /// </summary>
-    public CodeViewTypeRecord? Type
+    [LazyProperty]
+    public partial CodeViewTypeRecord? NestedType
     {
-        get => _type.GetValue(this);
-        set => _type.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -63,7 +63,7 @@ public class NestedTypeField : CodeViewNamedField
     /// </summary>
     /// <returns>The type</returns>
     /// <remarks>
-    /// This method is called upon initialization of the <see cref="Type"/> property.
+    /// This method is called upon initialization of the <see cref="NestedType"/> property.
     /// </remarks>
     protected virtual CodeViewTypeRecord? GetNestedType() => null;
 }

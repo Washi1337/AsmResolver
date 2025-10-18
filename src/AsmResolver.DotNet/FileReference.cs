@@ -8,14 +8,13 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to an external file that a .NET module depends on.
     /// </summary>
-    public class FileReference :
+    public partial class FileReference :
         MetadataMember,
         IImplementation,
         IManagedEntryPoint,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<FileReference, Utf8String?> _name;
-        private readonly LazyVariable<FileReference, byte[]?> _hashValue;
+        private readonly object _lock = new();
 
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
@@ -28,8 +27,6 @@ namespace AsmResolver.DotNet
         protected FileReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<FileReference, Utf8String?>(x => x.GetName());
-            _hashValue = new LazyVariable<FileReference, byte[]?>(x => x.GetHashValue());
         }
 
         /// <summary>
@@ -78,10 +75,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the file table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -105,10 +103,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the checksum of the referenced file.
         /// </summary>
-        public byte[]? HashValue
+        [LazyProperty]
+        public partial byte[]? HashValue
         {
-            get => _hashValue.GetValue(this);
-            set => _hashValue.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />

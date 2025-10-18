@@ -5,16 +5,15 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a single Common Object File Format (COFF) group symbol.
 /// </summary>
-public class CoffGroupSymbol : CodeViewSymbol
+public partial class CoffGroupSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<CoffGroupSymbol, Utf8String?> _name;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty COFF group symbol.
     /// </summary>
     protected CoffGroupSymbol()
     {
-        _name = new LazyVariable<CoffGroupSymbol, Utf8String?>(x => x.GetName());
     }
 
     /// <summary>
@@ -27,7 +26,7 @@ public class CoffGroupSymbol : CodeViewSymbol
     /// <param name="characteristics">The characteristics describing the group.</param>
     public CoffGroupSymbol(Utf8String name, ushort segmentIndex, uint offset, uint size, SectionFlags characteristics)
     {
-        _name = new LazyVariable<CoffGroupSymbol, Utf8String?>(name);
+        Name = name;
         SegmentIndex = segmentIndex;
         Offset = offset;
         Size = size;
@@ -76,10 +75,11 @@ public class CoffGroupSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the name of the group.
     /// </summary>
-    public Utf8String? Name
+    [LazyProperty]
+    public partial Utf8String? Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

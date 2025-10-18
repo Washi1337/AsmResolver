@@ -6,11 +6,9 @@ namespace AsmResolver.DotNet
     /// Represents a mapping that maps a method or field defined in a .NET module to an unmanaged function or
     /// global field defined in an external module through Platform Invoke (P/Invoke).
     /// </summary>
-    public class ImplementationMap : MetadataMember, IFullNameProvider
+    public partial class ImplementationMap : MetadataMember, IFullNameProvider
     {
-        private readonly LazyVariable<ImplementationMap, Utf8String?> _name;
-        private readonly LazyVariable<ImplementationMap, ModuleReference?> _scope;
-        private readonly LazyVariable<ImplementationMap, IMemberForwarded?> _memberForwarded;
+        private readonly object _lock = new();
 
         /// <summary>
         /// Initializes the <see cref="ImplementationMap"/> with a metadata token.
@@ -19,9 +17,6 @@ namespace AsmResolver.DotNet
         protected ImplementationMap(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<ImplementationMap, Utf8String?>(x => x.GetName());
-            _scope = new LazyVariable<ImplementationMap, ModuleReference?>(x => x.GetScope());
-            _memberForwarded = new LazyVariable<ImplementationMap, IMemberForwarded?>(x => x.GetMemberForwarded());
         }
 
         /// <summary>
@@ -50,10 +45,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the member that this P/Invoke implementation mapping is assigned to.
         /// </summary>
-        public IMemberForwarded? MemberForwarded
+        [LazyProperty]
+        public partial IMemberForwarded? MemberForwarded
         {
-            get => _memberForwarded.GetValue(this);
-            internal set => _memberForwarded.SetValue(value);
+            get;
+            internal set;
         }
 
         /// <summary>
@@ -62,10 +58,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the implementation map table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -78,10 +75,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the module that contains the external member.
         /// </summary>
-        public ModuleReference? Scope
+        [LazyProperty]
+        public partial ModuleReference? Scope
         {
-            get => _scope.GetValue(this);
-            set => _scope.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

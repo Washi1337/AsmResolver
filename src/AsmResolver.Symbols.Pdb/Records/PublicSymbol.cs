@@ -3,16 +3,15 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a public symbol stored in a PDB symbol stream.
 /// </summary>
-public class PublicSymbol : CodeViewSymbol
+public partial class PublicSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<PublicSymbol, Utf8String> _name;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes a new empty public symbol.
     /// </summary>
     protected PublicSymbol()
     {
-        _name = new LazyVariable<PublicSymbol, Utf8String>(x => x.GetName());
     }
 
     /// <summary>
@@ -26,7 +25,7 @@ public class PublicSymbol : CodeViewSymbol
     {
         SegmentIndex = segmentIndex;
         Offset = offset;
-        _name = new LazyVariable<PublicSymbol, Utf8String>(name);
+        Name = name;
         Attributes = attributes;
     }
 
@@ -103,10 +102,11 @@ public class PublicSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the name of the symbol.
     /// </summary>
-    public Utf8String Name
+    [LazyProperty]
+    public partial Utf8String Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

@@ -10,18 +10,17 @@ namespace AsmResolver.Symbols.Pdb.Metadata.Dbi;
 /// <summary>
 /// Represents the DBI Stream (also known as the Debug Information stream).
 /// </summary>
-public class DbiStream : SegmentBase
+public partial class DbiStream : SegmentBase
 {
     /// <summary>
     /// Gets the default fixed MSF stream index for the DBI stream.
     /// </summary>
     public const int StreamIndex = 3;
 
+    private readonly object _lock = new();
     private IList<ModuleDescriptor>? _modules;
     private IList<SectionContribution>? _sectionContributions;
     private IList<SectionMap>? _sectionMaps;
-    private readonly LazyVariable<DbiStream, ISegment?> _typeServerMapStream;
-    private readonly LazyVariable<DbiStream, ISegment?> _ecStream;
     private IList<SourceFileCollection>? _sourceFiles;
     private IList<ushort>? _extraStreamIndices;
 
@@ -30,8 +29,6 @@ public class DbiStream : SegmentBase
     /// </summary>
     public DbiStream()
     {
-        _typeServerMapStream = new LazyVariable<DbiStream, ISegment?>(x => x.GetTypeServerMapStream());
-        _ecStream = new LazyVariable<DbiStream, ISegment?>(x => x.GetECStream());
         IsNewVersionFormat = true;
     }
 
@@ -226,10 +223,11 @@ public class DbiStream : SegmentBase
     /// The exact purpose and layout of this sub stream is unknown, hence this property exposes the stream as
     /// a raw segment.
     /// </remarks>
-    public ISegment? TypeServerMapStream
+    [LazyProperty]
+    public partial ISegment? TypeServerMapStream
     {
-        get => _typeServerMapStream.GetValue(this);
-        set => _typeServerMapStream.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -239,10 +237,11 @@ public class DbiStream : SegmentBase
     /// The exact purpose and layout of this sub stream is unknown, hence this property exposes the stream as
     /// a raw segment.
     /// </remarks>
-    public ISegment? ECStream
+    [LazyProperty]
+    public partial ISegment? ECStream
     {
-        get => _ecStream.GetValue(this);
-        set => _ecStream.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

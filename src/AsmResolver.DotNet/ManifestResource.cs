@@ -11,16 +11,14 @@ namespace AsmResolver.DotNet
     /// Represents a single manifest resource file either embedded into the .NET assembly, or put into a separate file.
     /// In this case, it contains also a reference to the file the resource is located in.
     /// </summary>
-    public class ManifestResource :
+    public partial class ManifestResource :
         MetadataMember,
         IHasCustomAttribute,
         IModuleProvider,
         IMetadataDefinition,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<ManifestResource, Utf8String?> _name;
-        private readonly LazyVariable<ManifestResource, IImplementation?> _implementation;
-        private readonly LazyVariable<ManifestResource, ISegment?> _embeddedData;
+        private readonly object _lock = new();
 
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
@@ -33,9 +31,6 @@ namespace AsmResolver.DotNet
         protected ManifestResource(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<ManifestResource, Utf8String?>(x => x.GetName());
-            _implementation = new LazyVariable<ManifestResource, IImplementation?>(x => x.GetImplementation());
-            _embeddedData = new LazyVariable<ManifestResource, ISegment?>(x => x.GetEmbeddedDataSegment());
         }
 
         /// <summary>
@@ -111,10 +106,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the manifest resource table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -122,10 +118,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the implementation indicating the file containing the resource data.
         /// </summary>
-        public IImplementation? Implementation
+        [LazyProperty]
+        public partial IImplementation? Implementation
         {
-            get => _implementation.GetValue(this);
-            set => _implementation.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -136,10 +133,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// When this resource is embedded into the current module, gets or sets the embedded resource data.
         /// </summary>
-        public ISegment? EmbeddedDataSegment
+        [LazyProperty]
+        public partial ISegment? EmbeddedDataSegment
         {
-            get => _embeddedData.GetValue(this);
-            set => _embeddedData.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

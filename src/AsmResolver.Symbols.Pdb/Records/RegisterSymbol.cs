@@ -5,18 +5,15 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a symbol describing a register variable in a function or method.
 /// </summary>
-public class RegisterSymbol : CodeViewSymbol, IVariableSymbol
+public partial class RegisterSymbol : CodeViewSymbol, IVariableSymbol
 {
-    private readonly LazyVariable<RegisterSymbol, CodeViewTypeRecord?> _variableType;
-    private readonly LazyVariable<RegisterSymbol, Utf8String?> _name;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Initializes an empty register variable symbol.
     /// </summary>
     protected RegisterSymbol()
     {
-        _variableType = new LazyVariable<RegisterSymbol, CodeViewTypeRecord?>(x => x.GetVariableType());
-        _name = new LazyVariable<RegisterSymbol, Utf8String?>(x => x.GetName());
     }
 
     /// <summary>
@@ -28,8 +25,8 @@ public class RegisterSymbol : CodeViewSymbol, IVariableSymbol
     public RegisterSymbol(Utf8String? name, CodeViewTypeRecord? variableType, ushort register)
     {
         Register = register;
-        _variableType = new LazyVariable<RegisterSymbol, CodeViewTypeRecord?>(variableType);
-        _name = new LazyVariable<RegisterSymbol, Utf8String?>(name);
+        VariableType = variableType;
+        Name = name;
     }
 
     /// <inheritdoc />
@@ -45,17 +42,19 @@ public class RegisterSymbol : CodeViewSymbol, IVariableSymbol
     }
 
     /// <inheritdoc />
-    public Utf8String? Name
+    [LazyProperty]
+    public partial Utf8String? Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <inheritdoc />
-    public CodeViewTypeRecord? VariableType
+    [LazyProperty]
+    public partial CodeViewTypeRecord? VariableType
     {
-        get => _variableType.GetValue(this);
-        set => _variableType.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

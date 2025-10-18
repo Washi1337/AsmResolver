@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single field in a type definition of a .NET module.
     /// </summary>
-    public class FieldDefinition :
+    public partial class FieldDefinition :
         MetadataMember,
         IMemberDefinition,
         IFieldDescriptor,
@@ -20,14 +20,8 @@ namespace AsmResolver.DotNet
         IHasFieldMarshal,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<FieldDefinition, Utf8String?> _name;
-        private readonly LazyVariable<FieldDefinition, FieldSignature?> _signature;
-        private readonly LazyVariable<FieldDefinition, TypeDefinition?> _declaringType;
-        private readonly LazyVariable<FieldDefinition, Constant?> _constant;
-        private readonly LazyVariable<FieldDefinition, MarshalDescriptor?> _marshalDescriptor;
+        private readonly object _lock = new();
         private readonly LazyVariable<FieldDefinition, ImplementationMap?> _implementationMap;
-        private readonly LazyVariable<FieldDefinition, ISegment?> _fieldRva;
-        private readonly LazyVariable<FieldDefinition, int?> _fieldOffset;
 
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
@@ -40,14 +34,7 @@ namespace AsmResolver.DotNet
         protected FieldDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<FieldDefinition, Utf8String?>(x => x.GetName());
-            _signature = new LazyVariable<FieldDefinition, FieldSignature?>(x => x.GetSignature());
-            _declaringType = new LazyVariable<FieldDefinition, TypeDefinition?>(x => x.GetDeclaringType());
-            _constant = new LazyVariable<FieldDefinition, Constant?>(x => x.GetConstant());
-            _marshalDescriptor = new LazyVariable<FieldDefinition, MarshalDescriptor?>(x => x.GetMarshalDescriptor());
             _implementationMap = new LazyVariable<FieldDefinition, ImplementationMap?>(x => x.GetImplementationMap());
-            _fieldRva = new LazyVariable<FieldDefinition, ISegment?>(x => x.GetFieldRva());
-            _fieldOffset = new LazyVariable<FieldDefinition, int?>(x => x.GetFieldOffset());
         }
 
         /// <summary>
@@ -86,10 +73,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the field table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -97,10 +85,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the signature of the field. This includes the field type.
         /// </summary>
-        public FieldSignature? Signature
+        [LazyProperty]
+        public partial FieldSignature? Signature
         {
-            get => _signature.GetValue(this);
-            set => _signature.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -307,10 +296,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the type that defines the field.
         /// </summary>
-        public TypeDefinition? DeclaringType
+        [LazyProperty]
+        public partial TypeDefinition? DeclaringType
         {
-            get => _declaringType.GetValue(this);
-            private set => _declaringType.SetValue(value);
+            get;
+            private set;
         }
 
         TypeDefinition? IOwnedCollectionElement<TypeDefinition>.Owner
@@ -336,17 +326,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public Constant? Constant
+        [LazyProperty]
+        public partial Constant? Constant
         {
-            get => _constant.GetValue(this);
-            set => _constant.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
-        public MarshalDescriptor? MarshalDescriptor
+        [LazyProperty]
+        public partial MarshalDescriptor? MarshalDescriptor
         {
-            get => _marshalDescriptor.GetValue(this);
-            set => _marshalDescriptor.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -373,19 +365,21 @@ namespace AsmResolver.DotNet
         /// value of <see cref="HasFieldRva"/> reflect whether the field has initialization data or not. Well-formed
         /// .NET binaries should always set the <see cref="HasFieldRva"/> flag to <c>true</c> if this property is non-null.
         /// </remarks>
-        public ISegment? FieldRva
+        [LazyProperty]
+        public partial ISegment? FieldRva
         {
-            get => _fieldRva.GetValue(this);
-            set => _fieldRva.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the explicit offset of the field, relative to the starting address of the object (if available).
         /// </summary>
-        public int? FieldOffset
+        [LazyProperty]
+        public partial int? FieldOffset
         {
-            get => _fieldOffset.GetValue(this);
-            set => _fieldOffset.SetValue(value);
+            get;
+            set;
         }
 
         FieldDefinition IFieldDescriptor.Resolve() => this;

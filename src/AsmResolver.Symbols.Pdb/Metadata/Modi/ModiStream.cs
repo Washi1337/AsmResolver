@@ -6,22 +6,15 @@ namespace AsmResolver.Symbols.Pdb.Metadata.Modi;
 /// <summary>
 /// Represents a single Module Info (MoDi) stream in a PDB image.
 /// </summary>
-public class ModiStream : SegmentBase
+public partial class ModiStream : SegmentBase
 {
-    private readonly LazyVariable<ModiStream, IReadableSegment?> _symbols;
-    private readonly LazyVariable<ModiStream, IReadableSegment?> _c11LineInfo;
-    private readonly LazyVariable<ModiStream, IReadableSegment?> _c13LineInfo;
-    private readonly LazyVariable<ModiStream, IReadableSegment?> _globalReferences;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Creates a new empty module info stream.
     /// </summary>
     public ModiStream()
     {
-        _symbols = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetSymbols());
-        _c11LineInfo = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetC11LineInfo());
-        _c13LineInfo = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetC13LineInfo());
-        _globalReferences = new LazyVariable<ModiStream, IReadableSegment?>(x => x.GetGlobalReferences());
     }
 
     /// <summary>
@@ -39,28 +32,31 @@ public class ModiStream : SegmentBase
     /// <summary>
     /// Gets or sets the sub-stream containing the CodeView symbol records defined in this module.
     /// </summary>
-    public IReadableSegment? Symbols
+    [LazyProperty]
+    public partial IReadableSegment? Symbols
     {
-        get => _symbols.GetValue(this);
-        set => _symbols.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
     /// Gets or sets the sub-stream containing the C11-style line information.
     /// </summary>
-    public IReadableSegment? C11LineInfo
+    [LazyProperty]
+    public partial IReadableSegment? C11LineInfo
     {
-        get => _c11LineInfo.GetValue(this);
-        set => _c11LineInfo.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
     /// Gets or sets the sub-stream containing the C13-style line information.
     /// </summary>
-    public IReadableSegment? C13LineInfo
+    [LazyProperty]
+    public partial IReadableSegment? C13LineInfo
     {
-        get => _c13LineInfo.GetValue(this);
-        set => _c13LineInfo.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -69,10 +65,11 @@ public class ModiStream : SegmentBase
     /// <remarks>
     /// The exact meaning of this sub-stream is not well understood.
     /// </remarks>
-    public IReadableSegment? GlobalReferences
+    [LazyProperty]
+    public partial IReadableSegment? GlobalReferences
     {
-        get => _globalReferences.GetValue(this);
-        set => _globalReferences.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

@@ -20,17 +20,13 @@ namespace AsmResolver.PE
     /// <summary>
     /// Represents an image of a portable executable (PE) file, exposing high level mutable structures.
     /// </summary>
-    public class PEImage
+    public partial class PEImage
     {
         private IList<ImportedModule>? _imports;
-        private readonly LazyVariable<PEImage, ExportDirectory?> _exports;
-        private readonly LazyVariable<PEImage, ResourceDirectory?> _resources;
-        private readonly LazyVariable<PEImage, IExceptionDirectory?> _exceptions;
         private IList<BaseRelocation>? _relocations;
-        private readonly LazyVariable<PEImage, DotNetDirectory?> _dotNetDirectory;
         private IList<DebugDataEntry>? _debugData;
-        private readonly LazyVariable<PEImage, TlsDirectory?> _tlsDirectory;
         private CertificateCollection? _certificates;
+        private readonly object _lock = new();
 
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
@@ -200,11 +196,6 @@ namespace AsmResolver.PE
         /// </summary>
         public PEImage()
         {
-            _exports = new LazyVariable<PEImage, ExportDirectory?>(x => x.GetExports());
-            _resources = new LazyVariable<PEImage, ResourceDirectory?>(x => x.GetResources());
-            _exceptions = new LazyVariable<PEImage, IExceptionDirectory?>(x => x.GetExceptions());
-            _dotNetDirectory = new LazyVariable<PEImage, DotNetDirectory?>(x => x.GetDotNetDirectory());
-            _tlsDirectory = new LazyVariable<PEImage, TlsDirectory?>(x => x.GetTlsDirectory());
         }
 
         /// <summary>
@@ -334,28 +325,31 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets or sets the exports directory in the PE, if available.
         /// </summary>
-        public ExportDirectory? Exports
+        [LazyProperty]
+        public partial ExportDirectory? Exports
         {
-            get => _exports.GetValue(this);
-            set => _exports.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the root resource directory in the PE, if available.
         /// </summary>
-        public ResourceDirectory? Resources
+        [LazyProperty]
+        public partial ResourceDirectory? Resources
         {
-            get => _resources.GetValue(this);
-            set => _resources.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the exceptions directory in the PE, if available.
         /// </summary>
-        public IExceptionDirectory? Exceptions
+        [LazyProperty]
+        public partial IExceptionDirectory? Exceptions
         {
-            get => _exceptions.GetValue(this);
-            set => _exceptions.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -374,10 +368,11 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets or sets the data directory containing the CLR 2.0 header of a .NET binary (if available).
         /// </summary>
-        public DotNetDirectory? DotNetDirectory
+        [LazyProperty]
+        public partial DotNetDirectory? DotNetDirectory
         {
-            get => _dotNetDirectory.GetValue(this);
-            set => _dotNetDirectory.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -396,10 +391,11 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets or sets the data directory containing the Thread-Local Storage (TLS) data.
         /// </summary>
-        public TlsDirectory? TlsDirectory
+        [LazyProperty]
+        public partial TlsDirectory? TlsDirectory
         {
-            get => _tlsDirectory.GetValue(this);
-            set => _tlsDirectory.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
