@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class BitFieldTypeRecord : CodeViewTypeRecord
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty bit field record.
     /// </summary>

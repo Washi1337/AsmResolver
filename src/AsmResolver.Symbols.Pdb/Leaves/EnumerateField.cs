@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class EnumerateField : CodeViewNamedField
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty enumerate field leaf.
     /// </summary>

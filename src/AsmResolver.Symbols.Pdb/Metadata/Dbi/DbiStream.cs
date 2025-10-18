@@ -17,7 +17,6 @@ public partial class DbiStream : SegmentBase
     /// </summary>
     public const int StreamIndex = 3;
 
-    private readonly object _lock = new();
     private IList<ModuleDescriptor>? _modules;
     private IList<SectionContribution>? _sectionContributions;
     private IList<SectionMap>? _sectionMaps;

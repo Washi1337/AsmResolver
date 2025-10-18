@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class NonOverloadedMethod : CodeViewNamedField
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty non-overloaded method.
     /// </summary>

@@ -10,7 +10,6 @@ namespace AsmResolver.Symbols.Pdb;
 /// </summary>
 public partial class PdbModule : ICodeViewSymbolProvider
 {
-    private readonly object _lock = new();
     private IList<PdbSourceFile>? _sourceFiles;
     private IList<ICodeViewSymbol>? _symbols;
 

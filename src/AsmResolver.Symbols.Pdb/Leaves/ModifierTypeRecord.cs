@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class ModifierTypeRecord : CodeViewTypeRecord
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes a new empty modifier type.
     /// </summary>

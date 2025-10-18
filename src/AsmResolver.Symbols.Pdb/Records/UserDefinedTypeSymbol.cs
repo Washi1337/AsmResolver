@@ -7,8 +7,6 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public partial class UserDefinedTypeSymbol : CodeViewSymbol
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes a new empty user-defined type symbol.
     /// </summary>

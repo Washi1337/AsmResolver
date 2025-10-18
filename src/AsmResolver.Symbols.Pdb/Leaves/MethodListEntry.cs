@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class MethodListEntry
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty method list entry.
     /// </summary>

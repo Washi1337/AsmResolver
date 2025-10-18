@@ -7,8 +7,6 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public partial class RegisterSymbol : CodeViewSymbol, IVariableSymbol
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty register variable symbol.
     /// </summary>

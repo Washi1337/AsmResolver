@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class StringIdentifier : CodeViewLeaf, IIpiLeaf
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty String ID entry.
     /// </summary>

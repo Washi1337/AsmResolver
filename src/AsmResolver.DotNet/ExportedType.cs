@@ -15,8 +15,6 @@ namespace AsmResolver.DotNet
         ITypeDescriptor,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly object _lock = new();
-
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
         protected IList<CustomAttribute>? CustomAttributesInternal;

@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class ArrayTypeRecord : CodeViewTypeRecord
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes a new empty array type.
     /// </summary>

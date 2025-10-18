@@ -21,8 +21,6 @@ namespace AsmResolver.PE.Debug
                 + sizeof(uint) // PointerToRawData
             ;
 
-        private readonly object _lock = new();
-
         /// <summary>
         /// Initializes an empty <see cref="DebugDataEntry"/> instance.
         /// </summary>

@@ -11,8 +11,6 @@ namespace AsmResolver.DotNet
         MetadataMember,
         IOwnedCollectionElement<IHasSecurityDeclaration>
     {
-        private readonly object _lock = new();
-
         /// <summary>
         /// Initializes the <see cref="SecurityDeclaration"/> with a metadata token.
         /// </summary>

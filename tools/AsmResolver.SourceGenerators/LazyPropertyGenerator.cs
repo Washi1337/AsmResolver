@@ -107,6 +107,9 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                 writer.WriteLine($"partial class {typeName}");
                 writer.OpenBrace();
 
+                writer.WriteLine("private readonly object _lock = new();");
+                writer.WriteLine();
+
                 foreach (var entry in group)
                 {
                     switch (entry)

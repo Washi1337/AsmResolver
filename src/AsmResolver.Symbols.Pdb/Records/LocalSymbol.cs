@@ -7,8 +7,6 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public partial class LocalSymbol : CodeViewSymbol, IVariableSymbol
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty local variable symbol.
     /// </summary>

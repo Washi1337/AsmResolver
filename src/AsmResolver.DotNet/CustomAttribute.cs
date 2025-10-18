@@ -9,8 +9,6 @@ namespace AsmResolver.DotNet
     /// </summary>
     public partial class CustomAttribute : MetadataMember, IOwnedCollectionElement<IHasCustomAttribute>
     {
-        private readonly object _lock = new();
-
         /// <summary>
         /// Initializes an empty custom attribute.
         /// </summary>

@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public abstract partial class CodeViewCompositeTypeRecord : CodeViewTypeRecord
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes a new empty composite type.
     /// </summary>

@@ -5,7 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public partial class ProcedureReferenceSymbol : CodeViewSymbol
 {
-    private readonly object _lock = new();
     private readonly bool _local;
 
     /// <summary>

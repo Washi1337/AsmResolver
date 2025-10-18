@@ -16,8 +16,6 @@ namespace AsmResolver.DotNet
         IMetadataDefinition,
         IOwnedCollectionElement<IHasGenericParameters>
     {
-        private readonly object _lock = new();
-
         /// <summary> The internal constraints list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="Constraints"/> instead.</remarks>
         protected IList<GenericParameterConstraint>? ConstraintsInternal;

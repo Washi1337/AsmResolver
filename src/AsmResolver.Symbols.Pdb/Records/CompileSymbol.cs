@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public abstract partial class CompileSymbol : CodeViewSymbol
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty compile symbol.
     /// </summary>

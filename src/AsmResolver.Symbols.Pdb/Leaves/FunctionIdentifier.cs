@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty function identifier leaf.
     /// </summary>

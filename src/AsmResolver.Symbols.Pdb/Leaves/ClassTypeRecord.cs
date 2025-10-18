@@ -7,8 +7,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class ClassTypeRecord : CodeViewDerivedTypeRecord
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty class type.
     /// </summary>

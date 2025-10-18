@@ -7,8 +7,6 @@ namespace AsmResolver.DotNet
     /// </summary>
     public partial class ClassLayout : MetadataMember
     {
-        private readonly object _lock = new();
-
         /// <summary>
         /// Initializes the class layout with a metadata token.
         /// </summary>

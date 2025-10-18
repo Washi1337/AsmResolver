@@ -10,8 +10,6 @@ namespace AsmResolver.PE.Win32Resources
     /// </summary>
     public partial class ResourceData : IResourceEntry
     {
-        private readonly object _lock = new();
-
         /// <summary>
         /// Initializes a new resource data entry.
         /// </summary>

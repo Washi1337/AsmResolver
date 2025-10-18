@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class VBaseClassField : CodeViewField
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes a new empty virtual base class field.
     /// </summary>

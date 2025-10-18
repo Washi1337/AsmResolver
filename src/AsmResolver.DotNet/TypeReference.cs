@@ -14,7 +14,6 @@ namespace AsmResolver.DotNet
         ITypeDefOrRef,
         IResolutionScope
     {
-        private readonly object _lock = new();
         private readonly LazyVariable<TypeReference, Utf8String?> _namespace;
 
         /// <summary> The internal custom attribute list. </summary>

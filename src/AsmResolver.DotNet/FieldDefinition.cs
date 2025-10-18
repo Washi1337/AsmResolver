@@ -20,7 +20,6 @@ namespace AsmResolver.DotNet
         IHasFieldMarshal,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly object _lock = new();
         private readonly LazyVariable<FieldDefinition, ImplementationMap?> _implementationMap;
 
         /// <summary> The internal custom attribute list. </summary>

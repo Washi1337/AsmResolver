@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class PointerTypeRecord : CodeViewTypeRecord
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes a new empty pointer type.
     /// </summary>

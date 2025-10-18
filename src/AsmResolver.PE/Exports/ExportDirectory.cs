@@ -11,7 +11,6 @@ namespace AsmResolver.PE.Exports
     public partial class ExportDirectory
     {
         private IList<ExportedSymbol>? _exports;
-        private readonly object _lock = new();
 
         /// <summary>
         /// Initializes a new empty symbol export directory.

@@ -8,8 +8,6 @@ namespace AsmResolver.DotNet.Resources
     /// </summary>
     public partial class ResourceSetEntry
     {
-        private readonly object _lock = new();
-
         /// <summary>
         /// Creates a new empty resource set entry.
         /// </summary>

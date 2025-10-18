@@ -9,8 +9,6 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public partial class InlineSiteSymbol : CodeViewSymbol, IScopeCodeViewSymbol
 {
-    private readonly object _lock = new();
-
     private IList<ICodeViewSymbol>? _symbols;
     private IList<BinaryAnnotation>? _annotations;
 

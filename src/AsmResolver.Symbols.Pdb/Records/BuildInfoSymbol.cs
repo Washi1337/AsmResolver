@@ -7,8 +7,6 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public partial class BuildInfoSymbol : CodeViewSymbol
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty build information symbol.
     /// </summary>

@@ -27,8 +27,6 @@ namespace AsmResolver.DotNet
         IHasSecurityDeclaration,
         IManagedEntryPoint
     {
-        private readonly object _lock = new();
-
         private readonly LazyVariable<MethodDefinition, MethodBody?> _methodBody;
         private readonly LazyVariable<MethodDefinition, ImplementationMap?> _implementationMap;
         private ParameterCollection? _parameters;

@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public partial class PublicSymbol : CodeViewSymbol
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes a new empty public symbol.
     /// </summary>

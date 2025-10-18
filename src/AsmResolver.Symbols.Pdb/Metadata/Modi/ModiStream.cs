@@ -8,8 +8,6 @@ namespace AsmResolver.Symbols.Pdb.Metadata.Modi;
 /// </summary>
 public partial class ModiStream : SegmentBase
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Creates a new empty module info stream.
     /// </summary>

@@ -8,8 +8,6 @@ namespace AsmResolver.PE.Win32Resources.Icon;
 /// </summary>
 public partial class IconEntry
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty icon entry.
     /// </summary>

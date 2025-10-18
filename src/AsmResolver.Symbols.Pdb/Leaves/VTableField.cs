@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class VTableField : CodeViewField
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty virtual function table field.
     /// </summary>

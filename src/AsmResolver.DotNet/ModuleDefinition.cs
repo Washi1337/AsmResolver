@@ -32,8 +32,6 @@ namespace AsmResolver.DotNet
         IOwnedCollectionElement<AssemblyDefinition>,
         ITypeOwner
     {
-        private readonly object _lock = new();
-
         private IList<TypeDefinition>? _topLevelTypes;
         private IList<AssemblyReference>? _assemblyReferences;
 

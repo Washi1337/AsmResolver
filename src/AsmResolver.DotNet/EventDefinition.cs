@@ -17,7 +17,6 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly object _lock = new();
         private IList<MethodSemantics>? _semantics;
 
         /// <summary> The internal custom attribute list. </summary>

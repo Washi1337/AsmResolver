@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public abstract partial class CodeViewDerivedTypeRecord : CodeViewCompositeTypeRecord
 {
-    private readonly object _lock = new();
-
     /// <inheritdoc />
     protected CodeViewDerivedTypeRecord(uint typeIndex)
         : base(typeIndex)

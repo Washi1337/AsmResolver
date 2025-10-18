@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public partial class UsingNamespaceSymbol : CodeViewSymbol
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes a new empty using namespace.
     /// </summary>

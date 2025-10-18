@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public partial class ObjectNameSymbol : CodeViewSymbol
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty object name symbol.
     /// </summary>

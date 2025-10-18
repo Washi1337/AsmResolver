@@ -11,8 +11,6 @@ namespace AsmResolver.PE.DotNet
     /// </summary>
     public partial class DotNetDirectory : SegmentBase
     {
-        private readonly object _lock = new();
-
         /// <summary>
         /// Creates a new .NET data directory.
         /// </summary>

@@ -8,8 +8,6 @@ namespace AsmResolver.DotNet
     /// </summary>
     public partial class ImplementationMap : MetadataMember, IFullNameProvider
     {
-        private readonly object _lock = new();
-
         /// <summary>
         /// Initializes the <see cref="ImplementationMap"/> with a metadata token.
         /// </summary>

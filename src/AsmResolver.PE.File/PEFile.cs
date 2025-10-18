@@ -19,7 +19,6 @@ namespace AsmResolver.PE.File
         /// </summary>
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
 
-        private readonly object _lock = new();
         private IList<PESection>? _sections;
 
         /// <summary>

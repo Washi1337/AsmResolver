@@ -9,8 +9,6 @@ namespace AsmResolver.DotNet
     /// </summary>
     public partial class MethodSemantics : MetadataMember, IOwnedCollectionElement<IHasSemantics>
     {
-        private readonly object _lock = new();
-
         /// <summary>
         /// Initializes an empty method semantics object.
         /// </summary>

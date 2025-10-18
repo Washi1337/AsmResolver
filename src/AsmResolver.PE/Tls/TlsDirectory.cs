@@ -11,7 +11,6 @@ namespace AsmResolver.PE.Tls
     /// </summary>
     public partial class TlsDirectory : SegmentBase
     {
-        private readonly object _lock = new();
         private ReferenceTable? _callbackFunctions;
         private ulong _imageBase = 0x00400000;
         private bool _is32Bit = true;

@@ -33,9 +33,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         public const string UncompressedStreamName = "#Schema";
 
         private readonly Dictionary<CodedIndex, IndexEncoder> _indexEncoders;
-        private readonly object _lock = new();
-
-        /// <summary>
+                /// <summary>
         /// Creates a new, empty tables stream.
         /// </summary>
         public TablesStream()

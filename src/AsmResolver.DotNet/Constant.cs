@@ -8,8 +8,6 @@ namespace AsmResolver.DotNet
     /// </summary>
     public partial class Constant : MetadataMember
     {
-        private readonly object _lock = new();
-
         /// <summary>
         /// Initializes the constant with a metadata token.
         /// </summary>

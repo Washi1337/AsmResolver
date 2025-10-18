@@ -24,7 +24,6 @@ namespace AsmResolver.DotNet
     {
         internal static readonly Utf8String ModuleTypeName = "<Module>";
 
-        private readonly object _lock = new();
         private readonly LazyVariable<TypeDefinition, Utf8String?> _namespace;
         private ModuleDefinition? _module;
 

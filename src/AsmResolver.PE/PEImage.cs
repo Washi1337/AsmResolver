@@ -26,7 +26,6 @@ namespace AsmResolver.PE
         private IList<BaseRelocation>? _relocations;
         private IList<DebugDataEntry>? _debugData;
         private CertificateCollection? _certificates;
-        private readonly object _lock = new();
 
         /// <summary>
         /// Opens a PE image from a specific file on the disk.

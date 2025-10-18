@@ -7,8 +7,6 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// </summary>
 public partial class BasePointerRelativeSymbol : CodeViewSymbol, IRegisterRelativeSymbol
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty base-pointer relative symbol.
     /// </summary>

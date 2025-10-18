@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public abstract partial class CodeViewDataField : CodeViewNamedField
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty instance data member.
     /// </summary>

@@ -8,8 +8,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class MemberFunctionLeaf : CodeViewLeaf, ITpiLeaf
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty member function.
     /// </summary>

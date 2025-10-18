@@ -5,8 +5,6 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// </summary>
 public partial class UnionTypeRecord : CodeViewCompositeTypeRecord
 {
-    private readonly object _lock = new();
-
     /// <summary>
     /// Initializes an empty union type.
     /// </summary>

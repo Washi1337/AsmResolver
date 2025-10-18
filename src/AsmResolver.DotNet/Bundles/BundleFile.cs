@@ -11,8 +11,6 @@ namespace AsmResolver.DotNet.Bundles
     /// </summary>
     public partial class BundleFile : IOwnedCollectionElement<BundleManifest>
     {
-        private readonly object _lock = new();
-
         /// <summary>
         /// Creates a new empty bundle file.
         /// </summary>
