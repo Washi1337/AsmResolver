@@ -330,6 +330,9 @@ namespace AsmResolver.DotNet
             if (runtimeInfo.IsNetCoreApp)
                 return SelectNetCoreImplCorLib(runtimeInfo.Version);
 
+            if (runtimeInfo.IsNetCore)
+                return null;
+
             throw new ArgumentException($"Invalid or unsupported runtime version {runtimeInfo}.");
         }
 
