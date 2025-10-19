@@ -2,12 +2,12 @@ using Microsoft.CodeAnalysis;
 
 namespace AsmResolver.SourceGenerators;
 
-public class LazyPropertyDiagnostics
+public static class LazyPropertyDiagnostics
 {
-    public static readonly DiagnosticDescriptor PropertyMustBePartial = new(
+    public static readonly DiagnosticDescriptor LazyPropertyMustBePartial = new(
         "AR0001",
-        "Lazy property needs to be marked partial",
-        "Property {0} is marked with LazyAttribute but is not marked with the partial modifier",
+        "Lazy property requires a non-abstract and partial property",
+        "Property {0} is marked as lazily initialized but is not a non-abstract partial property",
         "LazyGenerator",
         DiagnosticSeverity.Error,
         true

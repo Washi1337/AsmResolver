@@ -1,9 +1,11 @@
 using System;
 using System.CodeDom.Compiler;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace AsmResolver.SourceGenerators;
 
-internal static class IndentedTextWriterExtensions
+internal static class Extensions
 {
     public static void OpenBrace(this IndentedTextWriter self)
     {
@@ -22,4 +24,8 @@ internal static class IndentedTextWriterExtensions
         foreach (string line in s.Split(["\r\n", "\r", "\n"], StringSplitOptions.None))
             self.WriteLine(line);
     }
+
+    public static EquatableArray<T> ToEquatableArray<T>(this ImmutableArray<T> self) => new(self);
+
+    public static EquatableArray<T> ToEquatableArray<T>(this IEnumerable<T> self) => self.ToImmutableArray().ToEquatableArray();
 }
