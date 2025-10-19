@@ -23,6 +23,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
     {
         context.RegisterPostInitializationOutput(static ctx =>
         {
+            // ctx.AddEmbeddedAttributeDefinition();
             ctx.AddSource("LazyPropertyAttribute.g.cs", LazyPropertyAttribute);
         });
 
@@ -245,7 +246,11 @@ public class LazyPropertyGenerator : IIncrementalGenerator
             writer.WriteLine($"partial class {TypeName}");
             writer.OpenBrace();
 
+            writer.WriteLine("#if NET9_0_OR_GREATER");
+            writer.WriteLine("private readonly global::System.Threading.Lock _lock = new();");
+            writer.WriteLine("#else");
             writer.WriteLine("private readonly object _lock = new();");
+            writer.WriteLine("#endif");
             writer.WriteLine();
 
             foreach (var entry in Entries)
