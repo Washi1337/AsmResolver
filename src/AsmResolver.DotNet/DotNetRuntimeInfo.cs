@@ -33,6 +33,11 @@ namespace AsmResolver.DotNet
         /// </summary>
         public const string NetFramework = ".NETFramework";
 
+        /// <summary>
+        /// The target framework name used by applications targeting legacy .NET Portable.
+        /// </summary>
+        public const string NetPortable = ".NETPortable";
+
         private static readonly Regex FormatRegex = new(@"([a-zA-Z.]+)\s*,\s*Version=v(\d+\.\d+)");
 
         private static readonly Regex NetFxMonikerRegex = new(@"net(\d)(\d)(\d?)");
@@ -92,6 +97,11 @@ namespace AsmResolver.DotNet
         /// Gets a value indicating whether the application targets the .NET standard specification or not.
         /// </summary>
         public bool IsNetStandard => Name == NetStandard;
+
+        /// <summary>
+        /// Gets a value indicating whether the application targets the .NET Portable runtime or not.
+        /// </summary>
+        public bool IsNetPortable => Name == NetPortable;
 
         /// <summary>
         /// Parses the framework name as provided in a <c>System.Runtime.Versioning.TargetFrameworkAttribute</c> attribute.
