@@ -175,7 +175,7 @@ jobs:
 
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: build-artifacts
           path: artifacts/
@@ -231,7 +231,7 @@ jobs:
       uses: actions/setup-dotnet@v5
 
     - name: Download Build Artifacts
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build-artifacts
         path: artifacts/
