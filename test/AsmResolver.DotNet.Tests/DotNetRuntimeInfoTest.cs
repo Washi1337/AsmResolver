@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(".NETCoreApp,Version=v5.0", DotNetRuntimeInfo.NetCoreApp, 5, 0)]
         [InlineData(".NETCoreApp,Version=v10.0", DotNetRuntimeInfo.NetCoreApp, 10, 0)]
         [InlineData(".NETCore,Version=v4.5", DotNetRuntimeInfo.NetCore, 4, 5)]
+        [InlineData(".NETPortable,Version=v4.6", DotNetRuntimeInfo.NetPortable, 4, 6)]
         public void Parse(string name, string expectedFramework, int major, int minor)
         {
             Assert.Equal(
@@ -72,6 +73,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(".NETCoreApp,Version=v5.0")]
         [InlineData(".NETCoreApp,Version=v10.0")]
         [InlineData(".NETCore,Version=v4.5")]
+        [InlineData(".NETPortable,Version=v4.6")]
         public void GetAssumedImplCorLibDoesNotThrow(string name)
         {
             try
