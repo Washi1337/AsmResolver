@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Upload event file
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-event-file
           path: ${{ github.event_path }}
@@ -105,7 +105,7 @@ jobs:
             --property:CheckEolTargetFramework=false
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-artifacts
           path: artifacts/
@@ -208,7 +208,7 @@ jobs:
 
       # Collect all trx files and upload them.
       - name: Upload Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: test-results-${{matrix.runner.image}}-${{matrix.runner.arch}}
