@@ -5,6 +5,9 @@
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <Nullable>enable</Nullable>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+
+        <!-- Disable analyzer version tracking as we're not shipping this analyzer anyway. -->
+        <NoWarn>RS2008</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
