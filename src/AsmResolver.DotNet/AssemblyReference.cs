@@ -7,14 +7,13 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to an external .NET assembly, hosted by a common language runtime (CLR).
     /// </summary>
-    public class AssemblyReference :
+    public partial class AssemblyReference :
         AssemblyDescriptor,
         IResolutionScope,
         IOwnedCollectionElement<ModuleDefinition>,
         IImplementation
     {
         private readonly LazyVariable<AssemblyReference, byte[]?> _publicKeyOrToken;
-        private readonly LazyVariable<AssemblyReference, byte[]?> _hashValue;
         private byte[]? _publicKeyToken;
 
         /// <summary>
@@ -25,7 +24,6 @@ namespace AsmResolver.DotNet
             : base(token)
         {
             _publicKeyOrToken = new LazyVariable<AssemblyReference, byte[]?>(x => x.GetPublicKeyOrToken());
-            _hashValue = new LazyVariable<AssemblyReference, byte[]?>(x => x.GetHashValue());
         }
 
         /// <summary>
@@ -112,10 +110,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the hash value of the assembly reference.
         /// </summary>
-        public byte[]? HashValue
+        [LazyProperty]
+        public partial byte[]? HashValue
         {
-            get => _hashValue.GetValue(this);
-            set => _hashValue.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
