@@ -11,7 +11,7 @@ internal readonly record struct EquatableArray<T>(ImmutableArray<T> Array) : IRe
 
     public T this[int index] => Array[index];
 
-    public bool Equals(EquatableArray<T>? other) => other is { Array: var elements } && Array.SequenceEqual(elements);
+    public bool Equals(EquatableArray<T> other) => other is { Array: var elements } && Array.SequenceEqual(elements);
 
     public override int GetHashCode()
     {
