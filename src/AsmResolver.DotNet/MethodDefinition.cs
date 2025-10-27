@@ -27,8 +27,6 @@ namespace AsmResolver.DotNet
         IHasSecurityDeclaration,
         IManagedEntryPoint
     {
-        private readonly LazyVariable<MethodDefinition, MethodBody?> _methodBody;
-        private readonly LazyVariable<MethodDefinition, ImplementationMap?> _implementationMap;
         private ParameterCollection? _parameters;
 
         /// <summary> The internal parameter definitions list. </summary>
@@ -54,14 +52,6 @@ namespace AsmResolver.DotNet
         protected MethodDefinition(MetadataToken token)
             : base(token)
         {
-            _methodBody = new LazyVariable<MethodDefinition, MethodBody?>(static x =>
-            {
-                var body = x.GetBody();
-                if (body is not null)
-                    body.Owner = x;
-                return body;
-            });
-            _implementationMap = new LazyVariable<MethodDefinition, ImplementationMap?>(x => x.GetImplementationMap());
         }
 
         /// <summary>
@@ -636,30 +626,11 @@ namespace AsmResolver.DotNet
         /// <see cref="ImplAttributes"/>.
         /// </para>
         /// </remarks>
-        public MethodBody? MethodBody
+        [LazyProperty(OwnerProperty = nameof(MethodBody.Owner))]
+        public partial MethodBody? MethodBody
         {
-            get
-            {
-                // We don't need to lock here as GetValue already locks on the lazy variable when necessary.
-                // ReSharper disable once InconsistentlySynchronizedField
-                return _methodBody.GetValue(this);
-            }
-            set
-            {
-                lock (_methodBody)
-                {
-                    if (value is { Owner: { } originalOwner })
-                        throw new ArgumentException($"Method body is already assigned to method {originalOwner.SafeToString()}.");
-
-                    if (_methodBody.IsInitialized && _methodBody.GetValue(this) is { } originalBody)
-                        originalBody.Owner = null;
-
-                    _methodBody.SetValue(value);
-
-                    if (value is not null)
-                        value.Owner = this;
-                }
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -704,19 +675,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ImplementationMap? ImplementationMap
+        [LazyProperty(OwnerProperty = nameof(ImplementationMap.MemberForwarded))]
+        public partial ImplementationMap? ImplementationMap
         {
-            get => _implementationMap.GetValue(this);
-            set
-            {
-                if (value?.MemberForwarded is not null)
-                    throw new ArgumentException("Cannot add an implementation map that was already added to another member.");
-                if (_implementationMap.GetValue(this) is { } map)
-                    map.MemberForwarded = null;
-                _implementationMap.SetValue(value);
-                if (value is not null)
-                    value.MemberForwarded = this;
-            }
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -989,7 +952,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="MethodBody"/> property.
         /// </remarks>
-        protected virtual MethodBody? GetBody() => null;
+        protected virtual MethodBody? GetMethodBody() => null;
 
         /// <summary>
         /// Obtains the platform invoke information assigned to the method.

@@ -15,7 +15,10 @@ public class LazyPropertyGenerator : IIncrementalGenerator
         namespace AsmResolver
         {
             [global::System.AttributeUsage(global::System.AttributeTargets.Property)]
-            internal sealed class LazyPropertyAttribute : global::System.Attribute { }
+            internal sealed class LazyPropertyAttribute : global::System.Attribute
+            {
+                public string? OwnerProperty { get; set; }
+            }
         }
         """;
 
@@ -23,7 +26,6 @@ public class LazyPropertyGenerator : IIncrementalGenerator
     {
         context.RegisterPostInitializationOutput(static ctx =>
         {
-            // ctx.AddEmbeddedAttributeDefinition();
             ctx.AddSource("LazyPropertyAttribute.g.cs", LazyPropertyAttribute);
         });
 
@@ -54,6 +56,11 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                         );
                     }
 
+                    // Should this property generate exclusive ownership code?
+                    string? ownerProperty = syntaxContext.Attributes[0]
+                        .NamedArguments.FirstOrDefault(x => x.Key == "OwnerProperty")
+                        .Value.Value?.ToString();
+
                     // Wrap all info in an equatable instance.
                     return new LazyPropertyInfo(
                         Namespace: ns,
@@ -62,6 +69,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                         PropertyType: propertySymbol.Type.ToDisplayString(),
                         RequiresNullableSpecifier: propertySymbol.Type.IsReferenceType && propertySymbol.Type.NullableAnnotation != NullableAnnotation.Annotated,
                         PropertyName: propertySymbol.Name,
+                        OwnerPropertyName: ownerProperty,
                         Getter: GetAccessor(propertySyntax, false),
                         Setter: GetAccessor(propertySyntax, true)
                     );
@@ -131,6 +139,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
         string PropertyType,
         bool RequiresNullableSpecifier,
         string PropertyName,
+        string? OwnerPropertyName,
         PropertyAccessor? Getter,
         PropertyAccessor? Setter) : Entry(Namespace, TypeName)
     {
@@ -155,22 +164,44 @@ public class LazyPropertyGenerator : IIncrementalGenerator
             writer.OpenBrace();
 
             if (Getter is { } getter)
-            {
-                if (!string.IsNullOrEmpty(getter.Modifiers))
-                {
-                    writer.Write(getter.Modifiers);
-                    writer.Write(' ');
-                }
+                GenerateGetterCode(writer, getter, fieldName, initializedFieldName, factoryName);
 
-                // We use a separate local function for InitializeValue to allow for better inlining by the JIT.
+            if (Setter is { } setter)
+                GenerateSetterCode(writer, setter, fieldName, initializedFieldName);
+
+            // Close property
+            writer.CloseBrace();
+        }
+
+        private void GenerateGetterCode(
+            IndentedTextWriter writer,
+            PropertyAccessor getter,
+            string fieldName,
+            string initializedFieldName,
+            string factoryName)
+        {
+            if (!string.IsNullOrEmpty(getter.Modifiers))
+            {
+                writer.Write(getter.Modifiers);
+                writer.Write(' ');
+            }
+
+            // We use a separate local function for InitializeValue to allow for better inlining by the JIT.
+            writer.WriteLines(
+                $$"""
+                  get
+                  {
+                      if (!{{initializedFieldName}})
+                          InitializeValue();
+                      return {{fieldName}}!;
+
+                  """
+            );
+
+            if (string.IsNullOrEmpty(OwnerPropertyName))
+            {
                 writer.WriteLines(
                     $$"""
-                      get
-                      {
-                          if (!{{initializedFieldName}})
-                              InitializeValue();
-                          return {{fieldName}}!;
-
                           void InitializeValue()
                           {
                               lock (_lock)
@@ -182,19 +213,47 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                                   }
                               }
                           }
-                      }
+                      """
+                );
+            }
+            else
+            {
+                writer.WriteLines(
+                    $$"""
+                          void InitializeValue()
+                          {
+                              lock (_lock)
+                              {
+                                  if (!{{initializedFieldName}})
+                                  {
+                                      {{fieldName}} = {{factoryName}}();
+                                      if ({{fieldName}} is not null)
+                                          {{fieldName}}.{{OwnerPropertyName}} = this;
+                                      {{initializedFieldName}} = true;
+                                  }
+                              }
+                          }
                       """
                 );
             }
 
-            if (Setter is { } setter)
-            {
-                if (!string.IsNullOrEmpty(setter.Modifiers))
-                {
-                    writer.Write(setter.Modifiers);
-                    writer.Write(' ');
-                }
+            writer.WriteLine('}');
+        }
 
+        private void GenerateSetterCode(
+            IndentedTextWriter writer,
+            PropertyAccessor setter,
+            string fieldName,
+            string initializedFieldName)
+        {
+            if (!string.IsNullOrEmpty(setter.Modifiers))
+            {
+                writer.Write(setter.Modifiers);
+                writer.Write(' ');
+            }
+
+            if (string.IsNullOrEmpty(OwnerPropertyName))
+            {
                 writer.WriteLines(
                     $$"""
                       set
@@ -208,9 +267,31 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                       """
                 );
             }
+            else
+            {
+                writer.WriteLines(
+                    $$"""
+                      set
+                      {
+                          lock (_lock)
+                          {
+                              if (value is { {{OwnerPropertyName}}: { } originalOwner })
+                                  throw new global::System.ArgumentException($"{{PropertyName}} is already assigned to {originalOwner.SafeToString()}.");
 
-            // Close property
-            writer.CloseBrace();
+                              if ({{initializedFieldName}} && {{fieldName}} is { } originalBody)
+                                  originalBody.{{OwnerPropertyName}} = null;
+
+                              {{fieldName}} = value;
+
+                              if (value is not null)
+                                  value.{{OwnerPropertyName}} = this;
+
+                              {{initializedFieldName}} = true;
+                          }
+                      }
+                      """
+                );
+            }
         }
 
         public string GetFieldName() => GetFieldName(PropertyName);
