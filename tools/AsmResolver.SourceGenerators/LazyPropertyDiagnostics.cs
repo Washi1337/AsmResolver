@@ -12,4 +12,13 @@ public static class LazyPropertyDiagnostics
         DiagnosticSeverity.Error,
         true
     );
+
+    public static readonly DiagnosticDescriptor TooManyLazyProperties = new(
+        "AR0002",
+        "Classes can define up to 32 lazy properties",
+        "Lazy initialized class {0} can only define 32 lazy properties but {1} were defined",
+        "LazyGenerator",
+        DiagnosticSeverity.Error,
+        true
+    );
 }

@@ -12,6 +12,8 @@ public class LazyPropertyGenerator : IIncrementalGenerator
 {
     public const string LazyPropertyAttribute =
         """
+        #nullable enable
+
         namespace AsmResolver
         {
             [global::System.AttributeUsage(global::System.AttributeTargets.Property)]
@@ -143,10 +145,9 @@ public class LazyPropertyGenerator : IIncrementalGenerator
         PropertyAccessor? Getter,
         PropertyAccessor? Setter) : Entry(Namespace, TypeName)
     {
-        public void GenerateSourceCode(IndentedTextWriter writer)
+        public void GenerateSourceCode(IndentedTextWriter writer, int index)
         {
             string fieldName = GetFieldName();
-            string initializedFieldName = $"{fieldName}Initialized";
             string factoryName = GetFactoryName();
 
             // Backing storage field
@@ -155,19 +156,17 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                 : $"private {PropertyType} {fieldName};"
             );
 
-            // IsInitialized field
-            writer.WriteLine($"private bool {initializedFieldName};");
-            writer.WriteLine();
+            writer.WriteLine($"private const int {PropertyName}InitMask = 1 << {index};");
 
             // Property
             writer.WriteLine($"{Modifiers} {PropertyType} {PropertyName}");
             writer.OpenBrace();
 
             if (Getter is { } getter)
-                GenerateGetterCode(writer, getter, fieldName, initializedFieldName, factoryName);
+                GenerateGetterCode(writer, getter, fieldName, factoryName);
 
             if (Setter is { } setter)
-                GenerateSetterCode(writer, setter, fieldName, initializedFieldName);
+                GenerateSetterCode(writer, setter, fieldName);
 
             // Close property
             writer.CloseBrace();
@@ -177,7 +176,6 @@ public class LazyPropertyGenerator : IIncrementalGenerator
             IndentedTextWriter writer,
             PropertyAccessor getter,
             string fieldName,
-            string initializedFieldName,
             string factoryName)
         {
             if (!string.IsNullOrEmpty(getter.Modifiers))
@@ -191,7 +189,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                 $$"""
                   get
                   {
-                      if (!{{initializedFieldName}})
+                      if (!_initialized[{{PropertyName}}InitMask])
                           InitializeValue();
                       return {{fieldName}}!;
 
@@ -206,10 +204,10 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                           {
                               lock (_lock)
                               {
-                                  if (!{{initializedFieldName}})
+                                  if (!_initialized[{{PropertyName}}InitMask])
                                   {
                                       {{fieldName}} = {{factoryName}}();
-                                      {{initializedFieldName}} = true;
+                                      _initialized[{{PropertyName}}InitMask] = true;
                                   }
                               }
                           }
@@ -224,12 +222,12 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                           {
                               lock (_lock)
                               {
-                                  if (!{{initializedFieldName}})
+                                  if (!_initialized[{{PropertyName}}InitMask])
                                   {
                                       {{fieldName}} = {{factoryName}}();
                                       if ({{fieldName}} is not null)
                                           {{fieldName}}.{{OwnerPropertyName}} = this;
-                                      {{initializedFieldName}} = true;
+                                      _initialized[{{PropertyName}}InitMask] = true;
                                   }
                               }
                           }
@@ -243,8 +241,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
         private void GenerateSetterCode(
             IndentedTextWriter writer,
             PropertyAccessor setter,
-            string fieldName,
-            string initializedFieldName)
+            string fieldName)
         {
             if (!string.IsNullOrEmpty(setter.Modifiers))
             {
@@ -261,7 +258,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                           lock (_lock)
                           {
                               {{fieldName}} = value;
-                              {{initializedFieldName}} = true;
+                              _initialized[{{PropertyName}}InitMask] = true;
                           }
                       }
                       """
@@ -278,7 +275,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                               if (value is { {{OwnerPropertyName}}: { } originalOwner })
                                   throw new global::System.ArgumentException($"{{PropertyName}} is already assigned to {originalOwner.SafeToString()}.");
 
-                              if ({{initializedFieldName}} && {{fieldName}} is { } originalBody)
+                              if (_initialized[{{PropertyName}}InitMask] && {{fieldName}} is { } originalBody)
                                   originalBody.{{OwnerPropertyName}} = null;
 
                               {{fieldName}} = value;
@@ -286,7 +283,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                               if (value is not null)
                                   value.{{OwnerPropertyName}} = this;
 
-                              {{initializedFieldName}} = true;
+                              _initialized[{{PropertyName}}InitMask] = true;
                           }
                       }
                       """
@@ -311,6 +308,17 @@ public class LazyPropertyGenerator : IIncrementalGenerator
     {
         public void GenerateSourceCode(SourceProductionContext productionContext, IndentedTextWriter writer)
         {
+            int count = Entries.OfType<LazyPropertyInfo>().Count();
+            if (count > 32)
+            {
+                productionContext.ReportDiagnostic(Diagnostic.Create(
+                    LazyPropertyDiagnostics.TooManyLazyProperties,
+                    null,
+                    [TypeName, count]
+                ));
+                return;
+            }
+
             // File header
             writer.WriteLine("// This file was auto-generated by AsmResolver.SourceGenerators");
             writer.WriteLine();
@@ -332,8 +340,10 @@ public class LazyPropertyGenerator : IIncrementalGenerator
             writer.WriteLine("#else");
             writer.WriteLine("private readonly object _lock = new();");
             writer.WriteLine("#endif");
+            writer.WriteLine("private global::System.Collections.Specialized.BitVector32 _initialized = new();");
             writer.WriteLine();
 
+            int index = 0;
             foreach (var entry in Entries)
             {
                 switch (entry)
@@ -343,7 +353,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                         break;
 
                     case LazyPropertyInfo property:
-                        property.GenerateSourceCode(writer);
+                        property.GenerateSourceCode(writer, index++);
                         writer.WriteLine();
                         break;
                 }

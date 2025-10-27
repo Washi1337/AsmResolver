@@ -551,7 +551,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <returns>The column size.</returns>
         protected virtual uint GetColumnSize(ColumnType columnType)
         {
-            if (_tableLayoutsInitialized)
+            if (_initialized[TableLayoutsInitMask])
             {
                 switch (columnType)
                 {
