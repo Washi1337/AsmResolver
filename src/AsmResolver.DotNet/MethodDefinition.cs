@@ -562,6 +562,20 @@ namespace AsmResolver.DotNet
                 | (value ? MethodImplAttributes.SecurityMitigations : 0);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this method utilizes runtime async.
+        /// </summary>
+        /// <remarks>
+        /// This feature is in preview for .NET 10.
+        /// See https://github.com/dotnet/runtime/issues/109632
+        /// </remarks>
+        public bool IsRuntimeAsync
+        {
+            get => (ImplAttributes & MethodImplAttributes.Async) != 0;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.Async)
+                | (value ? MethodImplAttributes.Async : 0);
+        }
+
         /// <inheritdoc />
         public virtual ModuleDefinition? DeclaringModule => DeclaringType?.DeclaringModule;
 
