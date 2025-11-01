@@ -16,9 +16,27 @@ public class LazyPropertyGenerator : IIncrementalGenerator
 
         namespace AsmResolver
         {
+            /// <summary>
+            /// Specifies an auto property is lazily initialized and that this implementation is provided by a source generator
+            /// </summary>
+            /// <remarks>
+            /// The source generator generates for every property <c>X</c> marked with this attribute the following:
+            /// <list type="bullet">
+            ///    <item><description>A private field <c>_x</c> to store the value of the property</description></item>
+            ///    <item><description>A private constant <c>XMask</c> specifying the bit mask within the initialization vector <c>_initialized</c></description></item>
+            ///    <item><description>A call to a parameterless method <c>GetX()</c></description></item>
+            /// </list>
+            /// In case <see cref="LazyPropertyAttribute.OwnerProperty" /> is set, the source generator will also generate code to automatically test and update exclusive ownership of the property's value.
+            /// </remarks>
             [global::System.AttributeUsage(global::System.AttributeTargets.Property)]
             internal sealed class LazyPropertyAttribute : global::System.Attribute
             {
+                /// <summary>
+                /// When non-null, gets the name of the property that reflects the owner of the marked property's value.
+                /// </summary>
+                /// <remarks>
+                /// Use this to indicate the value of the property is exclusively owned by at most one instance of the enclosing class.
+                /// </remarks>
                 public string? OwnerProperty { get; set; }
             }
         }
