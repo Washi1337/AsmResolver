@@ -1082,6 +1082,46 @@ namespace AsmResolver.DotNet
         /// </exception>
         public void VerifyMetadata() => VerifyMetadata(ThrowErrorListener.Instance);
 
+        private sealed class IsByRefLikeVisitor : ITypeSignatureVisitor<MethodDefinition, bool>
+        {
+            public static IsByRefLikeVisitor Instance { get; } = new();
+
+            private IsByRefLikeVisitor() { }
+
+            public bool VisitArrayType(ArrayTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitBoxedType(BoxedTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitByReferenceType(ByReferenceTypeSignature signature, MethodDefinition state) => true;
+
+            public bool VisitCorLibType(CorLibTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitCustomModifierType(CustomModifierTypeSignature signature, MethodDefinition state) => signature.BaseType.AcceptVisitor(this, state);
+
+            public bool VisitGenericInstanceType(GenericInstanceTypeSignature signature, MethodDefinition state) => signature.GenericType.Resolve()?.IsByRefLike ?? false;
+
+            public bool VisitGenericParameter(GenericParameterSignature signature, MethodDefinition state)
+            {
+                var parameter = signature.ParameterType == GenericParameterType.Type
+                    ? state.DeclaringType!.GenericParameters[signature.Index]
+                    : state.GenericParameters[signature.Index];
+
+                return parameter.HasAllowByRefLike;
+            }
+
+            public bool VisitPinnedType(PinnedTypeSignature signature, MethodDefinition state) => signature.BaseType.AcceptVisitor(this, state);
+
+            public bool VisitPointerType(PointerTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitSentinelType(SentinelTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitSzArrayType(SzArrayTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitTypeDefOrRef(TypeDefOrRefSignature signature, MethodDefinition state) => signature.Type.Resolve()?.IsByRefLike ?? false;
+
+            public bool VisitFunctionPointerType(FunctionPointerTypeSignature signature, MethodDefinition state) => false;
+        }
+
         /// <summary>
         /// Asserts whether the method's metadata is consistent with its signature.
         /// </summary>
@@ -1118,6 +1158,25 @@ namespace AsmResolver.DotNet
                     GetBag().MetadataBuilder(
                         $"Method defines {count} generic parameters but its signature defines {Signature.GenericParameterCount} parameters."
                     );
+                }
+
+                // https://github.com/dotnet/runtime/blob/0ad494ba0eb84ada521d259c7d24dd0892c7a54d/docs/design/specs/runtime-async.md
+                if (IsRuntimeAsync)
+                {
+                    if (IsSynchronized)
+                    {
+                        GetBag().MetadataBuilder("Method cannot be both Async and Synchronized.");
+                    }
+
+                    if (Signature.ReturnType.AcceptVisitor(IsByRefLikeVisitor.Instance, this))
+                    {
+                        GetBag().MetadataBuilder("Method is Async but has a byref or byref-like return type.");
+                    }
+
+                    if ((Signature.CallingConvention & CallingConventionAttributes.VarArg) == CallingConventionAttributes.VarArg)
+                    {
+                        GetBag().MetadataBuilder("Method is Async but has a VarArg signature.");
+                    }
                 }
             }
 
