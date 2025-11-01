@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
@@ -20,8 +19,6 @@ namespace AsmResolver.DotNet
         IHasFieldMarshal,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<FieldDefinition, ImplementationMap?> _implementationMap;
-
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
         protected IList<CustomAttribute>? CustomAttributesInternal;
@@ -33,7 +30,6 @@ namespace AsmResolver.DotNet
         protected FieldDefinition(MetadataToken token)
             : base(token)
         {
-            _implementationMap = new LazyVariable<FieldDefinition, ImplementationMap?>(x => x.GetImplementationMap());
         }
 
         /// <summary>
@@ -341,19 +337,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ImplementationMap? ImplementationMap
+        [LazyProperty(OwnerProperty = nameof(ImplementationMap.MemberForwarded))]
+        public partial ImplementationMap? ImplementationMap
         {
-            get => _implementationMap.GetValue(this);
-            set
-            {
-                if (value?.MemberForwarded is not null)
-                    throw new ArgumentException("Cannot add an implementation map that was already added to another member.");
-                if (_implementationMap.GetValue(this) is { } map)
-                    map.MemberForwarded = null;
-                _implementationMap.SetValue(value);
-                if (value is not null)
-                    value.MemberForwarded = this;
-            }
+            get;
+            set;
         }
 
         /// <summary>
