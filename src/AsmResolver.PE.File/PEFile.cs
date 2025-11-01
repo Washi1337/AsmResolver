@@ -12,15 +12,13 @@ namespace AsmResolver.PE.File
     /// Models a file using the portable executable (PE) file format. It provides access to various PE headers, as well
     /// as the raw contents of each section present in the file.
     /// </summary>
-    public class PEFile : ISegmentReferenceFactory, IOffsetConverter
+    public partial class PEFile : ISegmentReferenceFactory, IOffsetConverter
     {
         /// <summary>
         /// Indicates a valid NT header signature.
         /// </summary>
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
 
-        private readonly LazyVariable<PEFile, ISegment?> _extraSectionData;
-        private readonly LazyVariable<PEFile, ISegment?> _eofData;
         private IList<PESection>? _sections;
 
         /// <summary>
@@ -42,8 +40,6 @@ namespace AsmResolver.PE.File
             DosHeader = dosHeader ?? throw new ArgumentNullException(nameof(dosHeader));
             FileHeader = fileHeader ?? throw new ArgumentNullException(nameof(fileHeader));
             OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
-            _extraSectionData = new LazyVariable<PEFile, ISegment?>(x =>x.GetExtraSectionData());
-            _eofData = new LazyVariable<PEFile, ISegment?>(x =>x.GetEofData());
             MappingMode = PEMappingMode.Unmapped;
         }
 
@@ -110,19 +106,21 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets or sets the padding data in between the last section header and the first section.
         /// </summary>
-        public ISegment? ExtraSectionData
+        [LazyProperty]
+        public partial ISegment? ExtraSectionData
         {
-            get => _extraSectionData.GetValue(this);
-            set => _extraSectionData.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the data appended to the end of the file (EoF), if available.
         /// </summary>
-        public ISegment? EofData
+        [LazyProperty]
+        public partial ISegment? EofData
         {
-            get => _eofData.GetValue(this);
-            set => _eofData.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

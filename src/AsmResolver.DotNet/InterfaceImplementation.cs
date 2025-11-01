@@ -8,15 +8,12 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents extra metadata added to a type indicating the type is implementing a particular interface.
     /// </summary>
-    public class InterfaceImplementation :
+    public partial class InterfaceImplementation :
         MetadataMember,
         IModuleProvider,
         IOwnedCollectionElement<TypeDefinition>,
         IHasCustomAttribute
     {
-        private readonly LazyVariable<InterfaceImplementation, TypeDefinition?> _class;
-        private readonly LazyVariable<InterfaceImplementation, ITypeDefOrRef?> _interface;
-
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
         protected IList<CustomAttribute>? CustomAttributesInternal;
@@ -28,8 +25,6 @@ namespace AsmResolver.DotNet
         protected InterfaceImplementation(MetadataToken token)
             : base(token)
         {
-            _class = new LazyVariable<InterfaceImplementation, TypeDefinition?>(x => x.GetClass());
-            _interface = new LazyVariable<InterfaceImplementation, ITypeDefOrRef?>(x => x.GetInterface());
         }
 
         /// <summary>
@@ -45,10 +40,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the type that implements the interface.
         /// </summary>
-        public TypeDefinition? Class
+        [LazyProperty]
+        public partial TypeDefinition? Class
         {
-            get => _class.GetValue(this);
-            private set => _class.SetValue(value);
+            get;
+            private set;
         }
 
         /// <inheritdoc />
@@ -61,10 +57,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the interface type that was implemented.
         /// </summary>
-        public ITypeDefOrRef? Interface
+        [LazyProperty]
+        public partial ITypeDefOrRef? Interface
         {
-            get => _interface.GetValue(this);
-            set => _interface.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />

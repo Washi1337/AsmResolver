@@ -3,10 +3,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a data member in a class or structure type.
 /// </summary>
-public abstract class CodeViewDataField : CodeViewNamedField
+public abstract partial class CodeViewDataField : CodeViewNamedField
 {
-    private readonly LazyVariable<CodeViewDataField, CodeViewTypeRecord> _dataType;
-
     /// <summary>
     /// Initializes an empty instance data member.
     /// </summary>
@@ -14,7 +12,6 @@ public abstract class CodeViewDataField : CodeViewNamedField
     protected CodeViewDataField(uint typeIndex)
         : base(typeIndex)
     {
-        _dataType = new LazyVariable<CodeViewDataField, CodeViewTypeRecord>(x => x.GetDataType());
     }
 
     /// <summary>
@@ -25,17 +22,18 @@ public abstract class CodeViewDataField : CodeViewNamedField
     protected CodeViewDataField(CodeViewTypeRecord dataType, Utf8String name)
         : base(0)
     {
-        _dataType = new LazyVariable<CodeViewDataField, CodeViewTypeRecord>(dataType);
+        DataType = dataType;
         Name = name;
     }
 
     /// <summary>
     /// Gets or sets the data type of the member.
     /// </summary>
-    public CodeViewTypeRecord DataType
+    [LazyProperty]
+    public partial CodeViewTypeRecord DataType
     {
-        get => _dataType.GetValue(this);
-        set => _dataType.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

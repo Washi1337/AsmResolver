@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single method in a type definition of a .NET module.
     /// </summary>
-    public class MethodDefinition :
+    public partial class MethodDefinition :
         MetadataMember,
         IMemberDefinition,
         IOwnedCollectionElement<TypeDefinition>,
@@ -27,13 +27,6 @@ namespace AsmResolver.DotNet
         IHasSecurityDeclaration,
         IManagedEntryPoint
     {
-        private readonly LazyVariable<MethodDefinition, Utf8String?> _name;
-        private readonly LazyVariable<MethodDefinition, TypeDefinition?> _declaringType;
-        private readonly LazyVariable<MethodDefinition, MethodSignature?> _signature;
-        private readonly LazyVariable<MethodDefinition, MethodBody?> _methodBody;
-        private readonly LazyVariable<MethodDefinition, ImplementationMap?> _implementationMap;
-        private readonly LazyVariable<MethodDefinition, MethodSemantics?> _semantics;
-        private readonly LazyVariable<MethodDefinition, UnmanagedExportInfo?> _exportInfo;
         private ParameterCollection? _parameters;
 
         /// <summary> The internal parameter definitions list. </summary>
@@ -59,19 +52,6 @@ namespace AsmResolver.DotNet
         protected MethodDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<MethodDefinition, Utf8String?>(x => x.GetName());
-            _declaringType = new LazyVariable<MethodDefinition, TypeDefinition?>(x => x.GetDeclaringType());
-            _signature = new LazyVariable<MethodDefinition, MethodSignature?>(x => x.GetSignature());
-            _methodBody = new LazyVariable<MethodDefinition, MethodBody?>(static x =>
-            {
-                var body = x.GetBody();
-                if (body is not null)
-                    body.Owner = x;
-                return body;
-            });
-            _implementationMap = new LazyVariable<MethodDefinition, ImplementationMap?>(x => x.GetImplementationMap());
-            _semantics = new LazyVariable<MethodDefinition, MethodSemantics?>(x => x.GetSemantics());
-            _exportInfo = new LazyVariable<MethodDefinition, UnmanagedExportInfo?>(x => x.GetExportInfo());
         }
 
         /// <summary>
@@ -131,10 +111,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the method definition table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -143,10 +124,11 @@ namespace AsmResolver.DotNet
         /// Gets or sets the signature of the method This includes the return type, as well as the types of the
         /// parameters that this method defines.
         /// </summary>
-        public MethodSignature? Signature
+        [LazyProperty]
+        public partial MethodSignature? Signature
         {
-            get => _signature.GetValue(this);
-            set => _signature.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -570,10 +552,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the type that defines the method.
         /// </summary>
-        public TypeDefinition? DeclaringType
+        [LazyProperty]
+        public partial TypeDefinition? DeclaringType
         {
-            get => _declaringType.GetValue(this);
-            set => _declaringType.SetValue(value);
+            get;
+            set;
         }
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
@@ -643,30 +626,11 @@ namespace AsmResolver.DotNet
         /// <see cref="ImplAttributes"/>.
         /// </para>
         /// </remarks>
-        public MethodBody? MethodBody
+        [LazyProperty(OwnerProperty = nameof(MethodBody.Owner))]
+        public partial MethodBody? MethodBody
         {
-            get
-            {
-                // We don't need to lock here as GetValue already locks on the lazy variable when necessary.
-                // ReSharper disable once InconsistentlySynchronizedField
-                return _methodBody.GetValue(this);
-            }
-            set
-            {
-                lock (_methodBody)
-                {
-                    if (value is { Owner: { } originalOwner })
-                        throw new ArgumentException($"Method body is already assigned to method {originalOwner.SafeToString()}.");
-
-                    if (_methodBody.IsInitialized && _methodBody.GetValue(this) is { } originalBody)
-                        originalBody.Owner = null;
-
-                    _methodBody.SetValue(value);
-
-                    if (value is not null)
-                        value.Owner = this;
-                }
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -711,19 +675,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ImplementationMap? ImplementationMap
+        [LazyProperty(OwnerProperty = nameof(ImplementationMap.MemberForwarded))]
+        public partial ImplementationMap? ImplementationMap
         {
-            get => _implementationMap.GetValue(this);
-            set
-            {
-                if (value?.MemberForwarded is not null)
-                    throw new ArgumentException("Cannot add an implementation map that was already added to another member.");
-                if (_implementationMap.GetValue(this) is { } map)
-                    map.MemberForwarded = null;
-                _implementationMap.SetValue(value);
-                if (value is not null)
-                    value.MemberForwarded = this;
-            }
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -771,10 +727,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the semantics associated to this method (if available).
         /// </summary>
-        public MethodSemantics? Semantics
+        [LazyProperty]
+        public partial MethodSemantics? Semantics
         {
-            get => _semantics.GetValue(this);
-            set => _semantics.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -817,10 +774,11 @@ namespace AsmResolver.DotNet
         /// Gets or sets the unmanaged export info assigned to this method (if available). This can be used to indicate
         /// that a method needs to be exported in the final PE file as an unmanaged symbol.
         /// </summary>
-        public UnmanagedExportInfo? ExportInfo
+        [LazyProperty]
+        public partial UnmanagedExportInfo? ExportInfo
         {
-            get => _exportInfo.GetValue(this);
-            set => _exportInfo.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -994,7 +952,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="MethodBody"/> property.
         /// </remarks>
-        protected virtual MethodBody? GetBody() => null;
+        protected virtual MethodBody? GetMethodBody() => null;
 
         /// <summary>
         /// Obtains the platform invoke information assigned to the method.

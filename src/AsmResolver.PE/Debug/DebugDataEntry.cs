@@ -5,7 +5,7 @@ namespace AsmResolver.PE.Debug
     /// <summary>
     /// Represents a single entry in the debug data directory.
     /// </summary>
-    public class DebugDataEntry : SegmentBase
+    public partial class DebugDataEntry : SegmentBase
     {
         /// <summary>
         /// Gets the static size of a single debug data entry header.
@@ -21,14 +21,11 @@ namespace AsmResolver.PE.Debug
                 + sizeof(uint) // PointerToRawData
             ;
 
-        private readonly LazyVariable<DebugDataEntry, IDebugDataSegment?> _contents;
-
         /// <summary>
         /// Initializes an empty <see cref="DebugDataEntry"/> instance.
         /// </summary>
         protected DebugDataEntry()
         {
-            _contents = new LazyVariable<DebugDataEntry, IDebugDataSegment?>(x => x.GetContents());
         }
 
         /// <summary>
@@ -37,7 +34,7 @@ namespace AsmResolver.PE.Debug
         /// <param name="contents">The contents.</param>
         public DebugDataEntry(IDebugDataSegment contents)
         {
-            _contents = new LazyVariable<DebugDataEntry, IDebugDataSegment?>(contents);
+            Contents = contents;
         }
 
         /// <summary>
@@ -79,10 +76,11 @@ namespace AsmResolver.PE.Debug
         /// <summary>
         /// Gets or sets the raw contents of the debug data entry.
         /// </summary>
-        public IDebugDataSegment? Contents
+        [LazyProperty]
+        public partial IDebugDataSegment? Contents
         {
-            get => _contents.GetValue(this);
-            set => _contents.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

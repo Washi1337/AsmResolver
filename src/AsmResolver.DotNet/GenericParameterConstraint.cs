@@ -8,15 +8,12 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents an object that constrains a generic parameter to only be instantiated with a specific type.
     /// </summary>
-    public class GenericParameterConstraint :
+    public partial class GenericParameterConstraint :
         MetadataMember,
         IHasCustomAttribute,
         IModuleProvider,
         IOwnedCollectionElement<GenericParameter>
     {
-        private readonly LazyVariable<GenericParameterConstraint, GenericParameter?> _owner;
-        private readonly LazyVariable<GenericParameterConstraint, ITypeDefOrRef?> _constraint;
-
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
         protected IList<CustomAttribute>? CustomAttributesInternal;
@@ -28,8 +25,6 @@ namespace AsmResolver.DotNet
         protected GenericParameterConstraint(MetadataToken token)
             : base(token)
         {
-            _owner = new LazyVariable<GenericParameterConstraint, GenericParameter?>(x => x.GetOwner());
-            _constraint = new LazyVariable<GenericParameterConstraint, ITypeDefOrRef?>(x => x.GetConstraint());
         }
 
         /// <summary>
@@ -45,10 +40,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the generic parameter that was constrained.
         /// </summary>
-        public GenericParameter? Owner
+        [LazyProperty]
+        public partial GenericParameter? Owner
         {
-            get => _owner.GetValue(this);
-            private set => _owner.SetValue(value);
+            get;
+            private set;
         }
 
         /// <inheritdoc />
@@ -61,10 +57,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the type that the generic parameter was constrained to.
         /// </summary>
-        public ITypeDefOrRef? Constraint
+        [LazyProperty]
+        public partial ITypeDefOrRef? Constraint
         {
-            get => _constraint.GetValue(this);
-            set => _constraint.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />

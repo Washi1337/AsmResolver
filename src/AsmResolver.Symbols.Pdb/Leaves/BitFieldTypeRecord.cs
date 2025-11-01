@@ -3,10 +3,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a bit field type.
 /// </summary>
-public class BitFieldTypeRecord : CodeViewTypeRecord
+public partial class BitFieldTypeRecord : CodeViewTypeRecord
 {
-    private readonly LazyVariable<BitFieldTypeRecord, CodeViewTypeRecord?> _type;
-
     /// <summary>
     /// Initializes an empty bit field record.
     /// </summary>
@@ -14,19 +12,18 @@ public class BitFieldTypeRecord : CodeViewTypeRecord
     protected BitFieldTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _type = new LazyVariable<BitFieldTypeRecord, CodeViewTypeRecord?>(x => x.GetBaseType());
     }
 
     /// <summary>
     /// Creates a new bit field record.
     /// </summary>
-    /// <param name="type">The type of the bit field.</param>
+    /// <param name="baseType">The type of the bit field.</param>
     /// <param name="position">The bit index the bit field starts at.</param>
     /// <param name="length">The number of bits the bit field spans.</param>
-    public BitFieldTypeRecord(CodeViewTypeRecord type, byte position, byte length)
+    public BitFieldTypeRecord(CodeViewTypeRecord baseType, byte position, byte length)
         : base(0)
     {
-        _type = new LazyVariable<BitFieldTypeRecord, CodeViewTypeRecord?>(type);
+        BaseType = baseType;
         Position = position;
         Length = length;
     }
@@ -37,10 +34,11 @@ public class BitFieldTypeRecord : CodeViewTypeRecord
     /// <summary>
     /// Gets or sets the base type that this bit field is referencing.
     /// </summary>
-    public CodeViewTypeRecord? Type
+    [LazyProperty]
+    public partial CodeViewTypeRecord? BaseType
     {
-        get => _type.GetValue(this);
-        set => _type.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -66,10 +64,10 @@ public class BitFieldTypeRecord : CodeViewTypeRecord
     /// </summary>
     /// <returns>The base type.</returns>
     /// <remarks>
-    /// This method is called upon initialization of the <see cref="Type"/> property.
+    /// This method is called upon initialization of the <see cref="BaseType"/> property.
     /// </remarks>
     protected virtual CodeViewTypeRecord? GetBaseType() => null;
 
     /// <inheritdoc />
-    public override string ToString() => $"{Type} : {Length}";
+    public override string ToString() => $"{BaseType} : {Length}";
 }

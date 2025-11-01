@@ -3,12 +3,17 @@
   <PropertyGroup>
     <Title>AsmResolver.PE.Win32Resources</Title>
     <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
-    <LangVersion>12</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AsmResolver.PE\AsmResolver.PE.csproj" />
     <ProjectReference Include="..\AsmResolver\AsmResolver.csproj" />
+    <ProjectReference
+      Include="..\..\tools\AsmResolver.SourceGenerators\AsmResolver.SourceGenerators.csproj"
+      ReferenceOutputAssembly="false"
+      OutputItemType="Analyzer"
+      SetTargetFramework="TargetFramework=netstandard2.0"
+    />
   </ItemGroup>
 
 </Project>

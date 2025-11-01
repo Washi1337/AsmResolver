@@ -37,6 +37,6 @@ namespace AsmResolver.DotNet.Bundles
         }
 
         /// <inheritdoc />
-        protected override ISegment GetContents() => _contentsReader.ReadSegment(_contentsReader.Length);
+        protected override ISegment GetContents() => _contentsReader.Fork().ReadSegment(_contentsReader.Length);
     }
 }

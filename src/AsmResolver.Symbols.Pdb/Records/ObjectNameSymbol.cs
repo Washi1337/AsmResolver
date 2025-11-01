@@ -3,16 +3,13 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents an object name symbol in a PDB module.
 /// </summary>
-public class ObjectNameSymbol : CodeViewSymbol
+public partial class ObjectNameSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<ObjectNameSymbol, Utf8String> _name;
-
     /// <summary>
     /// Initializes an empty object name symbol.
     /// </summary>
     protected ObjectNameSymbol()
     {
-        _name = new LazyVariable<ObjectNameSymbol, Utf8String>(x => x.GetName());
     }
 
     /// <summary>
@@ -23,7 +20,7 @@ public class ObjectNameSymbol : CodeViewSymbol
     public ObjectNameSymbol(uint signature, Utf8String name)
     {
         Signature = signature;
-        _name = new LazyVariable<ObjectNameSymbol, Utf8String>(name);
+        Name = name;
     }
 
     /// <inheritdoc />
@@ -41,10 +38,11 @@ public class ObjectNameSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the name of the object.
     /// </summary>
-    public Utf8String Name
+    [LazyProperty]
+    public partial Utf8String Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

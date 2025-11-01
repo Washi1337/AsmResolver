@@ -3,16 +3,13 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents one single entry in a list of overloaded methods.
 /// </summary>
-public class MethodListEntry
+public partial class MethodListEntry
 {
-    private readonly LazyVariable<MethodListEntry, MemberFunctionLeaf?> _function;
-
     /// <summary>
     /// Initializes an empty method list entry.
     /// </summary>
     protected MethodListEntry()
     {
-        _function = new LazyVariable<MethodListEntry, MemberFunctionLeaf?>(x => x.GetFunction());
     }
 
     /// <summary>
@@ -23,7 +20,7 @@ public class MethodListEntry
     public MethodListEntry(CodeViewFieldAttributes attributes, MemberFunctionLeaf function)
     {
         Attributes = attributes;
-        _function = new LazyVariable<MethodListEntry, MemberFunctionLeaf?>(function);
+        Function = function;
         VTableOffset = 0;
     }
 
@@ -36,7 +33,7 @@ public class MethodListEntry
     public MethodListEntry(CodeViewFieldAttributes attributes, MemberFunctionLeaf function, uint vTableOffset)
     {
         Attributes = attributes;
-        _function = new LazyVariable<MethodListEntry, MemberFunctionLeaf?>(function);
+        Function = function;
         VTableOffset = vTableOffset;
     }
 
@@ -52,10 +49,11 @@ public class MethodListEntry
     /// <summary>
     /// Gets or sets the function that is referenced by this method.
     /// </summary>
-    public MemberFunctionLeaf? Function
+    [LazyProperty]
+    public partial MemberFunctionLeaf? Function
     {
-        get => _function.GetValue(this);
-        set => _function.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

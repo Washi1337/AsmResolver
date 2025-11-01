@@ -3,9 +3,8 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a procedure reference symbol stored in a PDB symbol stream.
 /// </summary>
-public class ProcedureReferenceSymbol : CodeViewSymbol
+public partial class ProcedureReferenceSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<ProcedureReferenceSymbol, Utf8String> _name;
     private readonly bool _local;
 
     /// <summary>
@@ -14,7 +13,6 @@ public class ProcedureReferenceSymbol : CodeViewSymbol
     /// <param name="local">If true, this represents a local procedure reference.</param>
     protected ProcedureReferenceSymbol(bool local)
     {
-        _name = new LazyVariable<ProcedureReferenceSymbol, Utf8String>(x => x.GetName());
         _local = local;
     }
 
@@ -31,7 +29,7 @@ public class ProcedureReferenceSymbol : CodeViewSymbol
         Checksum = checksum;
         Offset = offset;
         Module = module;
-        _name = new LazyVariable<ProcedureReferenceSymbol, Utf8String>(name);
+        Name = name;
         _local = local;
     }
 
@@ -77,10 +75,11 @@ public class ProcedureReferenceSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the name of the symbol.
     /// </summary>
-    public Utf8String Name
+    [LazyProperty]
+    public partial Utf8String Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

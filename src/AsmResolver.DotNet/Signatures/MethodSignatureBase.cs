@@ -28,6 +28,9 @@ namespace AsmResolver.DotNet.Signatures
                 _parameterTypes = new List<TypeSignature>(parameterTypes);
         }
 
+        /// <summary>
+        /// Gets a value indicating whether there are any fixed parameters present in this signature.
+        /// </summary>
         public bool HasParameterTypes => _parameterTypes is { Count: > 0 };
 
         /// <summary>
@@ -68,6 +71,9 @@ namespace AsmResolver.DotNet.Signatures
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether there are any sentinel parameters present in this signature.
+        /// </summary>
         public bool HasSentinelParameterTypes => _sentinelTypes is { Count: > 0 };
 
         /// <summary>

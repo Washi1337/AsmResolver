@@ -5,16 +5,13 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a symbol containing build information for a file in a PDB image.
 /// </summary>
-public class BuildInfoSymbol : CodeViewSymbol
+public partial class BuildInfoSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<BuildInfoSymbol, BuildInfoLeaf?> _info;
-
     /// <summary>
     /// Initializes an empty build information symbol.
     /// </summary>
     protected BuildInfoSymbol()
     {
-        _info = new LazyVariable<BuildInfoSymbol, BuildInfoLeaf?>(x => x.GetInfo());
     }
 
     /// <summary>
@@ -23,7 +20,7 @@ public class BuildInfoSymbol : CodeViewSymbol
     /// <param name="info">The information to wrap.</param>
     public BuildInfoSymbol(BuildInfoLeaf info)
     {
-        _info = new LazyVariable<BuildInfoSymbol, BuildInfoLeaf?>(info);
+        Info = info;
     }
 
     /// <inheritdoc />
@@ -32,10 +29,11 @@ public class BuildInfoSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the information that is wrapped into a symbol.
     /// </summary>
-    public BuildInfoLeaf? Info
+    [LazyProperty]
+    public partial BuildInfoLeaf? Info
     {
-        get => _info.GetValue(this);
-        set => _info.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

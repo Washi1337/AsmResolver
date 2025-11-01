@@ -11,12 +11,8 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to a method or a field in an (external) .NET assembly.
     /// </summary>
-    public class MemberReference : MetadataMember, IMethodDefOrRef, IFieldDescriptor
+    public partial class MemberReference : MetadataMember, IMethodDefOrRef, IFieldDescriptor
     {
-        private readonly LazyVariable<MemberReference, IMemberRefParent?> _parent;
-        private readonly LazyVariable<MemberReference, Utf8String?> _name;
-        private readonly LazyVariable<MemberReference, CallingConventionSignature?> _signature;
-
         /// <summary> The internal custom attribute list. </summary>
         /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
         protected IList<CustomAttribute>? CustomAttributesInternal;
@@ -28,9 +24,6 @@ namespace AsmResolver.DotNet
         protected MemberReference(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<MemberReference, IMemberRefParent?>(x => x.GetParent());
-            _name = new LazyVariable<MemberReference, Utf8String?>(x => x.GetName());
-            _signature = new LazyVariable<MemberReference, CallingConventionSignature?>(x => x.GetSignature());
         }
 
         /// <summary>
@@ -51,10 +44,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the member that declares the referenced member.
         /// </summary>
-        public IMemberRefParent? Parent
+        [LazyProperty]
+        public partial IMemberRefParent? Parent
         {
-            get => _parent.GetValue(this);
-            set => _parent.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -63,10 +57,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the member reference table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -78,10 +73,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property dictates whether the referenced member is a field or a method.
         /// </remarks>
-        public CallingConventionSignature? Signature
+        [LazyProperty]
+        public partial CallingConventionSignature? Signature
         {
-            get => _signature.GetValue(this);
-            set => _signature.SetValue(value);
+            get;
+            set;
         }
 
         MethodSignature? IMethodDescriptor.Signature => Signature as MethodSignature;

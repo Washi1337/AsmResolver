@@ -8,13 +8,9 @@ namespace AsmResolver.Symbols.Pdb;
 /// <summary>
 /// Represents a single module stored in a PDB image.
 /// </summary>
-public class PdbModule : ICodeViewSymbolProvider
+public partial class PdbModule : ICodeViewSymbolProvider
 {
-    private readonly LazyVariable<PdbModule, Utf8String?> _name;
-    private readonly LazyVariable<PdbModule, Utf8String?> _objectFileName;
     private IList<PdbSourceFile>? _sourceFiles;
-    private readonly LazyVariable<PdbModule, SectionContribution> _sectionContribution;
-
     private IList<ICodeViewSymbol>? _symbols;
 
     /// <summary>
@@ -22,9 +18,6 @@ public class PdbModule : ICodeViewSymbolProvider
     /// </summary>
     protected PdbModule()
     {
-        _name = new LazyVariable<PdbModule, Utf8String?>(x => x.GetName());
-        _objectFileName = new LazyVariable<PdbModule, Utf8String?>(x => x.GetObjectFileName());
-        _sectionContribution = new LazyVariable<PdbModule, SectionContribution>(x => x.GetSectionContribution());
     }
 
     /// <summary>
@@ -43,9 +36,9 @@ public class PdbModule : ICodeViewSymbolProvider
     /// <param name="objectFileName">The path to the object file.</param>
     public PdbModule(Utf8String name, Utf8String objectFileName)
     {
-        _name = new LazyVariable<PdbModule, Utf8String?>(name);
-        _objectFileName = new LazyVariable<PdbModule, Utf8String?>(objectFileName);
-        _sectionContribution = new LazyVariable<PdbModule, SectionContribution>(new SectionContribution());
+        Name = name;
+        ObjectFileName = objectFileName;
+        SectionContribution = new SectionContribution();
     }
 
     /// <summary>
@@ -55,10 +48,11 @@ public class PdbModule : ICodeViewSymbolProvider
     /// This is often a full path to the object file that was passed into <c>link.exe</c> directly, or a string in the
     /// form of <c>Import:dll_name</c>
     /// </remarks>
-    public Utf8String? Name
+    [LazyProperty]
+    public partial Utf8String? Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -68,10 +62,11 @@ public class PdbModule : ICodeViewSymbolProvider
     /// In the case this module is linked directly passed to <c>link.exe</c>, this is the same as <see cref="Name"/>.
     /// If the module comes from an archive, this is the full path to that archive.
     /// </remarks>
-    public Utf8String? ObjectFileName
+    [LazyProperty]
+    public partial Utf8String? ObjectFileName
     {
-        get => _objectFileName.GetValue(this);
-        set => _objectFileName.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -91,10 +86,11 @@ public class PdbModule : ICodeViewSymbolProvider
     /// Gets or sets a description of the section within the final binary which contains code
     /// and/or data from this module.
     /// </summary>
-    public SectionContribution SectionContribution
+    [LazyProperty]
+    public partial SectionContribution SectionContribution
     {
-        get => _sectionContribution.GetValue(this);
-        set => _sectionContribution.SetValue(value);
+        get;
+        set;
     }
 
     /// <inheritdoc />

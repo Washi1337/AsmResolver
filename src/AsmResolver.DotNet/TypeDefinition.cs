@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type (a class, interface or structure) defined in a .NET module.
     /// </summary>
-    public class TypeDefinition :
+    public partial class TypeDefinition :
         MetadataMember,
         ITypeDefOrRef,
         IHasGenericParameters,
@@ -25,10 +25,6 @@ namespace AsmResolver.DotNet
         internal static readonly Utf8String ModuleTypeName = "<Module>";
 
         private readonly LazyVariable<TypeDefinition, Utf8String?> _namespace;
-        private readonly LazyVariable<TypeDefinition, Utf8String?> _name;
-        private readonly LazyVariable<TypeDefinition, ITypeDefOrRef?> _baseType;
-        private readonly LazyVariable<TypeDefinition, TypeDefinition?> _declaringType;
-        private readonly LazyVariable<TypeDefinition, ClassLayout?> _classLayout;
         private ModuleDefinition? _module;
 
         /// <summary> The internal fields list. </summary>
@@ -79,10 +75,7 @@ namespace AsmResolver.DotNet
             : base(token)
         {
             _namespace = new LazyVariable<TypeDefinition, Utf8String?>(x => x.GetNamespace());
-            _name = new LazyVariable<TypeDefinition, Utf8String?>(x => x.GetName());
-            _baseType = new LazyVariable<TypeDefinition, ITypeDefOrRef?>(x => x.GetBaseType());
-            _declaringType = new LazyVariable<TypeDefinition, TypeDefinition?>(x => x.GetDeclaringType());
-            _classLayout = new LazyVariable<TypeDefinition, ClassLayout?>(x => x.GetClassLayout());
+
         }
 
         /// <summary>
@@ -133,10 +126,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the type definition table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -441,10 +435,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the super class that this type extends.
         /// </summary>
-        public ITypeDefOrRef? BaseType
+        [LazyProperty]
+        public partial ITypeDefOrRef? BaseType
         {
-            get => _baseType.GetValue(this);
-            set => _baseType.SetValue(value);
+            get;
+            set;
         }
 
         ITypeOwner? IOwnedCollectionElement<ITypeOwner>.Owner
@@ -484,10 +479,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// When this type is nested, gets the enclosing type.
         /// </summary>
-        public TypeDefinition? DeclaringType
+        [LazyProperty]
+        public partial TypeDefinition? DeclaringType
         {
-            get => _declaringType.GetValue(this);
-            private set => _declaringType.SetValue(value);
+            get;
+            private set;
         }
 
         ITypeDefOrRef? ITypeDefOrRef.DeclaringType => DeclaringType;
@@ -736,10 +732,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// When this property is set to <c>null</c>, the runtime decides the layout of the class.
         /// </remarks>
-        public ClassLayout? ClassLayout
+        [LazyProperty]
+        public partial ClassLayout? ClassLayout
         {
-            get => _classLayout.GetValue(this);
-            set => _classLayout.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

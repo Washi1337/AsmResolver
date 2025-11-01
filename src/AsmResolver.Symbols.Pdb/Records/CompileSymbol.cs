@@ -3,16 +3,13 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a symbol that describes information about the compiler that was used to compile the file.
 /// </summary>
-public abstract class CompileSymbol : CodeViewSymbol
+public abstract partial class CompileSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<CompileSymbol, Utf8String> _compilerVersion;
-
     /// <summary>
     /// Initializes an empty compile symbol.
     /// </summary>
     protected CompileSymbol()
     {
-        _compilerVersion = new LazyVariable<CompileSymbol, Utf8String>(x => x.GetCompilerVersion());
     }
 
     /// <summary>
@@ -99,10 +96,11 @@ public abstract class CompileSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the version of the compiler that was used to compile the file.
     /// </summary>
-    public Utf8String CompilerVersion
+    [LazyProperty]
+    public partial Utf8String CompilerVersion
     {
-        get => _compilerVersion.GetValue(this);
-        set => _compilerVersion.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

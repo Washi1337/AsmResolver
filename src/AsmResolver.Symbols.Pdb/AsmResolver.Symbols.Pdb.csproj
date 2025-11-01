@@ -9,6 +9,12 @@
   <ItemGroup>
     <ProjectReference Include="..\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
     <ProjectReference Include="..\AsmResolver\AsmResolver.csproj" />
+    <ProjectReference
+      Include="..\..\tools\AsmResolver.SourceGenerators\AsmResolver.SourceGenerators.csproj"
+      ReferenceOutputAssembly="false"
+      OutputItemType="Analyzer"
+      SetTargetFramework="TargetFramework=netstandard2.0"
+    />
   </ItemGroup>
 
 </Project>

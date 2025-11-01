@@ -5,10 +5,8 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Describes the explicit layout of a type, including its total and packing size.
     /// </summary>
-    public class ClassLayout : MetadataMember
+    public partial class ClassLayout : MetadataMember
     {
-        private readonly LazyVariable<ClassLayout, TypeDefinition?> _parent;
-
         /// <summary>
         /// Initializes the class layout with a metadata token.
         /// </summary>
@@ -16,7 +14,6 @@ namespace AsmResolver.DotNet
         protected ClassLayout(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<ClassLayout, TypeDefinition?>(x => x.GetParent());
         }
 
         /// <summary>
@@ -56,10 +53,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the type that this layout is assigned to.
         /// </summary>
-        public TypeDefinition? Parent
+        [LazyProperty]
+        public partial TypeDefinition? Parent
         {
-            get => _parent.GetValue(this);
-            internal set => _parent.SetValue(value);
+            get;
+            internal set;
         }
 
         /// <summary>

@@ -103,7 +103,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override MethodBody? GetBody() =>
+        protected override MethodBody? GetMethodBody() =>
             _context.Parameters.MethodBodyReader.ReadMethodBody(_context, this, _row);
 
         /// <inheritdoc />

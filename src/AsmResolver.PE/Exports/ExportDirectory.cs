@@ -8,9 +8,8 @@ namespace AsmResolver.PE.Exports
     /// <summary>
     /// Represents the data directory containing exported symbols that other images can access through dynamic linking.
     /// </summary>
-    public class ExportDirectory
+    public partial class ExportDirectory
     {
-        private readonly LazyVariable<ExportDirectory, string?> _name;
         private IList<ExportedSymbol>? _exports;
 
         /// <summary>
@@ -18,7 +17,6 @@ namespace AsmResolver.PE.Exports
         /// </summary>
         protected ExportDirectory()
         {
-            _name = new LazyVariable<ExportDirectory, string?>(x => x.GetName());
         }
 
         /// <summary>
@@ -27,7 +25,7 @@ namespace AsmResolver.PE.Exports
         /// <param name="name">The name of the library exporting the symbols.</param>
         public ExportDirectory(string name)
         {
-            _name = new LazyVariable<ExportDirectory, string?>(name ?? throw new ArgumentNullException(nameof(name)));
+            Name = name;
         }
 
         /// <summary>
@@ -72,10 +70,11 @@ namespace AsmResolver.PE.Exports
         /// <summary>
         /// Gets or sets the name of the exports directory.
         /// </summary>
-        public string? Name
+        [LazyProperty]
+        public partial string? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
