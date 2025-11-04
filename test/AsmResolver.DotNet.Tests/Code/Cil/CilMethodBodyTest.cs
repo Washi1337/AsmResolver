@@ -837,5 +837,25 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             Assert.NotNull(body);
         }
+
+        [Fact]
+        public void AsyncTaskMethodAllowsEmptyStackReturn()
+        {
+            var module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemRuntime_v9_0_0_0);
+            var method = new MethodDefinition("DummyMethod", MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.CorLibScope.CreateTypeReference("System.Threading.Tasks", "Task").ToTypeSignature(false)))
+            {
+                IsRuntimeAsync = true,
+            };
+
+            module.GetOrCreateModuleType().Methods.Add(method);
+            var body = method.CilMethodBody = new CilMethodBody();
+
+            body.Instructions.Add(CilOpCodes.Ret);
+            body.ComputeMaxStack();
+
+            body.Instructions.Insert(0, CilOpCodes.Ldc_I4_0);
+            Assert.Throws<StackImbalanceException>(() => body.ComputeMaxStack());
+        }
     }
 }
