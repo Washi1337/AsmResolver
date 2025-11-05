@@ -159,7 +159,8 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
-            return ContextModule == module && (Signature?.IsImportedInModule(module) ?? false);
+            // the parent will check that their ContextModule is correct for us
+            return (Parent?.IsImportedInModule(module) ?? false) && (Signature?.IsImportedInModule(module) ?? false);
         }
 
         /// <summary>
