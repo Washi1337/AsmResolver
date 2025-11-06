@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(IResolutionScope? x, IResolutionScope? y)
+        public virtual bool Equals(IResolutionScope? x, IResolutionScope? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -52,7 +52,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(IResolutionScope obj) => obj switch
+        public virtual int GetHashCode(IResolutionScope obj) => obj switch
         {
             AssemblyDescriptor assembly => GetHashCode(assembly),
             ModuleDefinition module => module.Assembly is not null ? GetHashCode(module.Assembly) : 0,
@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Signatures
         };
 
         /// <inheritdoc />
-        public bool Equals(AssemblyDescriptor? x, AssemblyDescriptor? y)
+        public virtual bool Equals(AssemblyDescriptor? x, AssemblyDescriptor? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -85,7 +85,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(AssemblyDescriptor obj)
+        public virtual int GetHashCode(AssemblyDescriptor obj)
         {
             unchecked
             {
@@ -103,7 +103,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(AssemblyReference? x, AssemblyReference? y)
+        public virtual bool Equals(AssemblyReference? x, AssemblyReference? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -114,6 +114,6 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(AssemblyReference obj) => GetHashCode((AssemblyDescriptor)obj);
+        public virtual int GetHashCode(AssemblyReference obj) => GetHashCode((AssemblyDescriptor)obj);
     }
 }

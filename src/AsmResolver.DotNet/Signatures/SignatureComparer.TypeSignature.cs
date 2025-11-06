@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<IEnumerable<TypeSignature>>
     {
         /// <inheritdoc />
-        public bool Equals(TypeSignature? x, TypeSignature? y) => Equals((ITypeDescriptor?)x, y);
+        public virtual bool Equals(TypeSignature? x, TypeSignature? y) => Equals((ITypeDescriptor?)x, y);
 
         private bool SignatureEquals(TypeSignature? x, TypeSignature? y)
         {
@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(TypeSignature obj)
+        public virtual int GetHashCode(TypeSignature obj)
         {
             switch (obj.ElementType)
             {
@@ -113,7 +113,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(CorLibTypeSignature? x, CorLibTypeSignature? y)
+        public virtual bool Equals(CorLibTypeSignature? x, CorLibTypeSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -123,11 +123,11 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(CorLibTypeSignature obj) =>
+        public virtual int GetHashCode(CorLibTypeSignature obj) =>
             (int) obj.ElementType << ElementTypeOffset;
 
         /// <inheritdoc />
-        public bool Equals(SentinelTypeSignature? x, SentinelTypeSignature? y)
+        public virtual bool Equals(SentinelTypeSignature? x, SentinelTypeSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -137,57 +137,57 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(SentinelTypeSignature obj) =>
+        public virtual int GetHashCode(SentinelTypeSignature obj) =>
             (int) obj.ElementType << ElementTypeOffset;
 
         /// <inheritdoc />
-        public bool Equals(ByReferenceTypeSignature? x, ByReferenceTypeSignature? y) =>
+        public virtual bool Equals(ByReferenceTypeSignature? x, ByReferenceTypeSignature? y) =>
             Equals(x as TypeSpecificationSignature, y);
 
         /// <inheritdoc />
-        public int GetHashCode(ByReferenceTypeSignature obj) =>
+        public virtual int GetHashCode(ByReferenceTypeSignature obj) =>
             GetHashCode(obj as TypeSpecificationSignature);
 
         /// <inheritdoc />
-        public bool Equals(PointerTypeSignature? x, PointerTypeSignature? y) =>
+        public virtual bool Equals(PointerTypeSignature? x, PointerTypeSignature? y) =>
             Equals(x as TypeSpecificationSignature, y);
 
         /// <inheritdoc />
-        public int GetHashCode(PointerTypeSignature obj) =>
+        public virtual int GetHashCode(PointerTypeSignature obj) =>
             GetHashCode(obj as TypeSpecificationSignature);
 
         /// <inheritdoc />
-        public bool Equals(SzArrayTypeSignature? x, SzArrayTypeSignature? y) =>
+        public virtual bool Equals(SzArrayTypeSignature? x, SzArrayTypeSignature? y) =>
             Equals(x as TypeSpecificationSignature, y);
 
         /// <inheritdoc />
-        public int GetHashCode(SzArrayTypeSignature obj) =>
+        public virtual int GetHashCode(SzArrayTypeSignature obj) =>
             GetHashCode(obj as TypeSpecificationSignature);
 
         /// <inheritdoc />
-        public bool Equals(PinnedTypeSignature? x, PinnedTypeSignature? y) =>
+        public virtual bool Equals(PinnedTypeSignature? x, PinnedTypeSignature? y) =>
             Equals(x as TypeSpecificationSignature, y);
 
         /// <inheritdoc />
-        public int GetHashCode(PinnedTypeSignature obj) =>
+        public virtual int GetHashCode(PinnedTypeSignature obj) =>
             GetHashCode(obj as TypeSpecificationSignature);
 
         /// <inheritdoc />
-        public bool Equals(BoxedTypeSignature? x, BoxedTypeSignature? y) =>
+        public virtual bool Equals(BoxedTypeSignature? x, BoxedTypeSignature? y) =>
             Equals(x as TypeSpecificationSignature, y);
 
         /// <inheritdoc />
-        public int GetHashCode(BoxedTypeSignature obj) =>
+        public virtual int GetHashCode(BoxedTypeSignature obj) =>
             GetHashCode(obj as TypeSpecificationSignature);
 
         /// <inheritdoc />
-        public bool Equals(TypeDefOrRefSignature? x, TypeDefOrRefSignature? y) => Equals(x?.Type, y?.Type);
+        public virtual bool Equals(TypeDefOrRefSignature? x, TypeDefOrRefSignature? y) => Equals(x?.Type, y?.Type);
 
         /// <inheritdoc />
-        public int GetHashCode(TypeDefOrRefSignature obj) => SimpleTypeHashCode(obj);
+        public virtual int GetHashCode(TypeDefOrRefSignature obj) => SimpleTypeHashCode(obj);
 
         /// <inheritdoc />
-        public bool Equals(CustomModifierTypeSignature? x, CustomModifierTypeSignature? y)
+        public virtual bool Equals(CustomModifierTypeSignature? x, CustomModifierTypeSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -200,7 +200,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(CustomModifierTypeSignature obj)
+        public virtual int GetHashCode(CustomModifierTypeSignature obj)
         {
             unchecked
             {
@@ -212,7 +212,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(GenericInstanceTypeSignature? x, GenericInstanceTypeSignature? y)
+        public virtual bool Equals(GenericInstanceTypeSignature? x, GenericInstanceTypeSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -225,7 +225,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(GenericInstanceTypeSignature obj)
+        public virtual int GetHashCode(GenericInstanceTypeSignature obj)
         {
             unchecked
             {
@@ -237,7 +237,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(GenericParameterSignature? x, GenericParameterSignature? y)
+        public virtual bool Equals(GenericParameterSignature? x, GenericParameterSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -249,7 +249,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(GenericParameterSignature obj) =>
+        public virtual int GetHashCode(GenericParameterSignature obj) =>
             (int) obj.ElementType << ElementTypeOffset | obj.Index;
 
         private bool Equals(TypeSpecificationSignature? x, TypeSpecificationSignature? y)
@@ -269,7 +269,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(ArrayTypeSignature? x, ArrayTypeSignature? y)
+        public virtual bool Equals(ArrayTypeSignature? x, ArrayTypeSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -289,7 +289,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(ArrayTypeSignature obj)
+        public virtual int GetHashCode(ArrayTypeSignature obj)
         {
             unchecked
             {
@@ -303,7 +303,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(FunctionPointerTypeSignature? x, FunctionPointerTypeSignature? y)
+        public virtual bool Equals(FunctionPointerTypeSignature? x, FunctionPointerTypeSignature? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -313,13 +313,13 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(FunctionPointerTypeSignature obj)
+        public virtual int GetHashCode(FunctionPointerTypeSignature obj)
         {
             return (int) obj.ElementType << ElementTypeOffset ^ GetHashCode(obj.Signature);
         }
 
         /// <inheritdoc />
-        public bool Equals(IList<TypeSignature>? x, IList<TypeSignature>? y)
+        public virtual bool Equals(IList<TypeSignature>? x, IList<TypeSignature>? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -336,7 +336,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(IList<TypeSignature> obj)
+        public virtual int GetHashCode(IList<TypeSignature> obj)
         {
             int checksum = 0;
             for (int i = 0; i < obj.Count; i++)
@@ -345,7 +345,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(IEnumerable<TypeSignature>? x, IEnumerable<TypeSignature>? y)
+        public virtual bool Equals(IEnumerable<TypeSignature>? x, IEnumerable<TypeSignature>? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -356,7 +356,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(IEnumerable<TypeSignature> obj)
+        public virtual int GetHashCode(IEnumerable<TypeSignature> obj)
         {
             int checksum = 0;
             foreach (var type in obj)
