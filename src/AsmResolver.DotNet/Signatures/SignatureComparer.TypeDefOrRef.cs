@@ -61,7 +61,16 @@ namespace AsmResolver.DotNet.Signatures
             _ => SimpleTypeHashCode(obj)
         };
 
-        private int SimpleTypeHashCode(ITypeDescriptor obj)
+        /// <summary>
+        /// Gets the hashcode of a <see cref="ITypeDescriptor"/> without specializing for unusual kinds of descriptors.
+        /// </summary>
+        /// <remarks>
+        /// This is called by <see cref="GetHashCode(ITypeDefOrRef)"/> for non-<see cref="TypeSignature"/>s. Overrides of
+        /// this method should, as much as possible, compare <paramref name="obj"/> directly.
+        /// </remarks>
+        /// <param name="obj">The <see cref="ITypeDescriptor"/> to get the hashcode of</param>
+        /// <returns>The computed hashcode</returns>
+        protected virtual int SimpleTypeHashCode(ITypeDescriptor obj)
         {
             unchecked
             {
@@ -72,7 +81,17 @@ namespace AsmResolver.DotNet.Signatures
             }
         }
 
-        private bool SimpleTypeEquals(ITypeDescriptor x, ITypeDescriptor y)
+        /// <summary>
+        /// Compares two <see cref="ITypeDescriptor"/>s without specializing for unusual kinds of descriptors.
+        /// </summary>
+        /// <remarks>
+        /// This is called by <see cref="Equals(ITypeDefOrRef, ITypeDefOrRef)"/> for non-<see cref="TypeSignature"/>s. Overrides of
+        /// this method should, as much as possible, compare <paramref name="x"/> and <paramref name="y"/> directly.
+        /// </remarks>
+        /// <param name="x">The first <see cref="ITypeDescriptor"/> to compare</param>
+        /// <param name="y">The second <see cref="ITypeDescriptor"/> to compare</param>
+        /// <returns><see langword="true"/> if <paramref name="x"/> and <paramref name="y"/> are equal; <see langword="false"/> otherwise</returns>
+        protected virtual bool SimpleTypeEquals(ITypeDescriptor x, ITypeDescriptor y)
         {
             // Check the basic properties first.
             if (!x.IsTypeOf(y.Namespace, y.Name))
