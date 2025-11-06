@@ -83,10 +83,10 @@ namespace AsmResolver.DotNet.Code.Cil
         private MetadataToken GetMemberToken(IMetadataMember member) => member.MetadataToken.Table switch
         {
             TableIndex.TypeRef => _provider.GetTypeReferenceToken((TypeReference) member, _diagnosticSource),
-            TableIndex.TypeDef => _provider.GetTypeDefinitionToken((TypeDefinition) member, _diagnosticSource),
+            TableIndex.TypeDef => _provider.GetTypeDefinitionTokenOrImport((TypeDefinition) member, _diagnosticSource),
             TableIndex.TypeSpec => _provider.GetTypeSpecificationToken((TypeSpecification) member, _diagnosticSource),
-            TableIndex.Field => _provider.GetFieldDefinitionToken((FieldDefinition) member, _diagnosticSource),
-            TableIndex.Method => _provider.GetMethodDefinitionToken((MethodDefinition) member, _diagnosticSource),
+            TableIndex.Field => _provider.GetFieldDefinitionTokenOrImport((FieldDefinition) member, _diagnosticSource),
+            TableIndex.Method => _provider.GetMethodDefinitionTokenOrImport((MethodDefinition) member, _diagnosticSource),
             TableIndex.MethodSpec => _provider.GetMethodSpecificationToken((MethodSpecification) member, _diagnosticSource),
             TableIndex.MemberRef => _provider.GetMemberReferenceToken((MemberReference) member, _diagnosticSource),
             TableIndex.StandAloneSig => _provider.GetStandAloneSignatureToken((StandAloneSignature) member, _diagnosticSource),

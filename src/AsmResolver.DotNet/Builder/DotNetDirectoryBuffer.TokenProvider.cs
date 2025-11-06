@@ -56,6 +56,14 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
+        public MetadataToken GetTypeDefinitionTokenOrImport(TypeDefinition? type, object? diagnosticSource = null)
+        {
+            return IsInSameModule(type)
+                ? _tokenMapping[type]
+                : GetTypeReferenceToken(type?.ToTypeReference(), diagnosticSource);
+        }
+
+        /// <inheritdoc />
         public MetadataToken GetFieldDefinitionToken(FieldDefinition? field, object? diagnosticSource = null)
         {
             return AssertIsInSameModule(field, diagnosticSource)
@@ -64,11 +72,35 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
+        public MetadataToken GetFieldDefinitionTokenOrImport(FieldDefinition? field, object? diagnosticSource = null)
+        {
+            return IsInSameModule(field)
+                ? _tokenMapping[field]
+                : GetMemberReferenceToken(
+                    field is null
+                        ? null
+                        : new MemberReference(field.DeclaringType, field.Name, field.Signature),
+                    diagnosticSource);
+        }
+
+        /// <inheritdoc />
         public MetadataToken GetMethodDefinitionToken(MethodDefinition? method, object? diagnosticSource = null)
         {
             return AssertIsInSameModule(method, diagnosticSource)
                 ? _tokenMapping[method]
                 : MetadataToken.Zero;
+        }
+
+        /// <inheritdoc />
+        public MetadataToken GetMethodDefinitionTokenOrImport(MethodDefinition? method, object? diagnosticSource = null)
+        {
+            return IsInSameModule(method)
+                ? _tokenMapping[method]
+                : GetMemberReferenceToken(
+                    method is null
+                        ? null
+                        : new MemberReference(method.DeclaringType, method.Name, method.Signature),
+                    diagnosticSource);
         }
 
         /// <summary>

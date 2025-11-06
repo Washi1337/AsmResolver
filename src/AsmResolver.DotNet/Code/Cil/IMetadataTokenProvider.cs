@@ -24,6 +24,14 @@ public interface IMetadataTokenProvider
     MetadataToken GetTypeDefinitionToken(TypeDefinition type, object? diagnosticSource = null);
 
     /// <summary>
+    /// Gets the newly assigned metadata token of a type definition stored in a tables stream or tables stream buffer, or automatically imports it as a TypeReference if supported.
+    /// </summary>
+    /// <param name="type">The reference to the type to add.</param>
+    /// <param name="diagnosticSource">When available, the object that is reported in diagnostics when obtaining the token fails.</param>
+    /// <returns>The metadata token of the added type definition.</returns>
+    MetadataToken GetTypeDefinitionTokenOrImport(TypeDefinition type, object? diagnosticSource = null);
+
+    /// <summary>
     /// Gets the newly assigned metadata token of a type definition stored in a tables stream or tables stream buffer.
     /// </summary>
     /// <param name="field">The reference to the field to add.</param>
@@ -32,12 +40,28 @@ public interface IMetadataTokenProvider
     MetadataToken GetFieldDefinitionToken(FieldDefinition field, object? diagnosticSource = null);
 
     /// <summary>
+    /// Gets the newly assigned metadata token of a type definition stored in a tables stream or tables stream buffer, or automatically imports it as a MemberReference if supported.
+    /// </summary>
+    /// <param name="field">The reference to the field to add.</param>
+    /// <param name="diagnosticSource">When available, the object that is reported in diagnostics when obtaining the token fails.</param>
+    /// <returns>The metadata token of the added field definition.</returns>
+    MetadataToken GetFieldDefinitionTokenOrImport(FieldDefinition field, object? diagnosticSource = null);
+
+    /// <summary>
     /// Gets the newly assigned metadata token of a method definition stored in a tables stream or tables stream buffer.
     /// </summary>
     /// <param name="method">The reference to the method to add.</param>
     /// <param name="diagnosticSource">When available, the object that is reported in diagnostics when obtaining the token fails.</param>
     /// <returns>The metadata token of the added method definition.</returns>
     MetadataToken GetMethodDefinitionToken(MethodDefinition method, object? diagnosticSource = null);
+
+    /// <summary>
+    /// Gets the newly assigned metadata token of a method definition stored in a tables stream or tables stream buffer, or automatically imports it as a MemberReference if supported.
+    /// </summary>
+    /// <param name="method">The reference to the method to add.</param>
+    /// <param name="diagnosticSource">When available, the object that is reported in diagnostics when obtaining the token fails.</param>
+    /// <returns>The metadata token of the added method definition.</returns>
+    MetadataToken GetMethodDefinitionTokenOrImport(MethodDefinition method, object? diagnosticSource = null);
 
     /// <summary>
     /// Gets the newly assigned metadata token of a member reference stored in a tables stream or tables stream buffer.

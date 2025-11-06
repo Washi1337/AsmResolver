@@ -124,6 +124,11 @@ namespace AsmResolver.DotNet.Builder
             return true;
         }
 
+        private bool IsInSameModule([NotNullWhen(true)] IModuleProvider? member)
+        {
+            return member is not null && member.ContextModule == Module;
+        }
+
         /// <summary>
         /// Builds the .NET data directory from the buffer.
         /// </summary>

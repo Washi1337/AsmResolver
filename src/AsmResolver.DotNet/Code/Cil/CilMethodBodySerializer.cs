@@ -345,7 +345,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     var token = handler.ExceptionType switch
                     {
                         TypeReference typeReference => provider.GetTypeReferenceToken(typeReference, body.Owner),
-                        TypeDefinition typeDefinition => provider.GetTypeDefinitionToken(typeDefinition, body.Owner),
+                        TypeDefinition typeDefinition => provider.GetTypeDefinitionTokenOrImport(typeDefinition, body.Owner),
                         TypeSpecification typeSpecification => provider.GetTypeSpecificationToken(typeSpecification, body.Owner),
                         _ => context.ErrorListener.RegisterExceptionAndReturnDefault<MetadataToken>(
                             new ArgumentOutOfRangeException($"Invalid or unsupported exception type ({handler.ExceptionType.SafeToString()})")
