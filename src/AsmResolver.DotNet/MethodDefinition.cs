@@ -1173,7 +1173,7 @@ namespace AsmResolver.DotNet
                         GetBag().MetadataBuilder("Method is Async but has a byref or byref-like return type.");
                     }
 
-                    if ((Signature.CallingConvention & CallingConventionAttributes.VarArg) == CallingConventionAttributes.VarArg)
+                    if (Signature.CallingConvention == CallingConventionAttributes.VarArg)
                     {
                         GetBag().MetadataBuilder("Method is Async but has a VarArg signature.");
                     }
