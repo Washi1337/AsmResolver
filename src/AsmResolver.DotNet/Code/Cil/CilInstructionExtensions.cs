@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
@@ -22,20 +22,31 @@ namespace AsmResolver.DotNet.Code.Cil
         /// invalid stack behaviour.</exception>
         public static int GetStackPopCount(this CilInstruction instruction, CilMethodBody? parent)
         {
-            return GetStackPopCount(instruction,
-                parent == null
-                || !(parent.Owner?.Signature?.ReturnsValue ?? true));
+            bool isVoidOrRuntimeAsyncTask = true;
+            // skip all of this extra processing if this isn't a Ret
+            if (instruction.OpCode.Code == CilCode.Ret && parent?.Owner?.Signature is MethodSignature sig)
+            {
+                if (parent.Owner.IsRuntimeAsync)
+                {
+                    isVoidOrRuntimeAsyncTask = sig.ReturnType.IsTypeOf("System.Threading.Tasks", "Task") || sig.ReturnType.IsTypeOf("System.Threading.Tasks", "ValueTask");
+                }
+                else
+                {
+                    isVoidOrRuntimeAsyncTask = !sig.ReturnsValue;
+                }
+            }
+            return GetStackPopCount(instruction, isVoidOrRuntimeAsyncTask);
         }
 
         /// <summary>
         /// Determines the number of values that are popped from the stack by this instruction.
         /// </summary>
         /// <param name="instruction">The instruction.</param>
-        /// <param name="isVoid">A value indicating whether the enclosing method is returning System.Void or not.</param>
+        /// <param name="isVoidOrRuntimeAsyncTask">A value indicating whether the enclosing method is a sync method returning System.Void or is an async method and returning Task/ValueTask (non-generic).</param>
         /// <returns>The number of values popped from the stack.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the instruction's operation code provides an
         /// invalid stack behaviour.</exception>
-        public static int GetStackPopCount(this CilInstruction instruction, bool isVoid)
+        public static int GetStackPopCount(this CilInstruction instruction, bool isVoidOrRuntimeAsyncTask)
         {
             switch (instruction.OpCode.StackBehaviourPop)
             {
@@ -67,7 +78,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     return 3;
 
                 case CilStackBehaviour.VarPop:
-                    return DetermineVarPopCount(instruction, isVoid);
+                    return DetermineVarPopCount(instruction, isVoidOrRuntimeAsyncTask);
 
                 case CilStackBehaviour.PopAll:
                     return -1;
@@ -77,7 +88,7 @@ namespace AsmResolver.DotNet.Code.Cil
             }
         }
 
-        private static int DetermineVarPopCount(CilInstruction instruction, bool isVoid)
+        private static int DetermineVarPopCount(CilInstruction instruction, bool isVoidOrRuntimeAsyncTask)
         {
             var opCode = instruction.OpCode;
             var signature = instruction.Operand switch
@@ -90,7 +101,7 @@ namespace AsmResolver.DotNet.Code.Cil
             if (signature == null)
             {
                 if (opCode.Code == CilCode.Ret)
-                    return isVoid ? 0 : 1;
+                    return isVoidOrRuntimeAsyncTask ? 0 : 1;
             }
             else
             {

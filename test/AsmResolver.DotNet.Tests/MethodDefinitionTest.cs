@@ -711,5 +711,32 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.ThrowsAny<ArgumentException>(() => method1.MethodBody = method2.MethodBody);
         }
+
+        [Fact]
+        public void VerifyAsyncMethodSignature()
+        {
+            var module = new ModuleDefinition("Module", KnownCorLibs.SystemRuntime_v9_0_0_0);
+            var factory = module.CorLibTypeFactory;
+
+            var method = new MethodDefinition("Method", MethodAttributes.Static, MethodSignature.CreateStatic(factory.Void))
+            {
+                IsRuntimeAsync = true
+            };
+            method.VerifyMetadata();
+
+            method.IsSynchronized = true;
+            Assert.Throws<AggregateException>(() => method.VerifyMetadata());
+            method.IsSynchronized = false;
+
+            method.Signature.Attributes |= CallingConventionAttributes.VarArg;
+            Assert.Throws<AggregateException>(() => method.VerifyMetadata());
+            method.Signature.Attributes &= ~CallingConventionAttributes.VarArg;
+
+            method.Signature.ReturnType = factory.Int32.MakeByReferenceType();
+            Assert.Throws<AggregateException>(() => method.VerifyMetadata());
+
+            method.Signature.ReturnType = factory.CorLibScope.CreateTypeReference("System", "Span`1").MakeGenericInstanceType(factory.Int32);
+            Assert.Throws<AggregateException>(() => method.VerifyMetadata());
+        }
     }
 }
