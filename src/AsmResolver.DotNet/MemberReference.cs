@@ -159,7 +159,10 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public bool IsImportedInModule(ModuleDefinition module)
         {
-            return ContextModule == module && (Signature?.IsImportedInModule(module) ?? false);
+            // the parent will check that their ContextModule is correct for us
+            // this needs an explicit check on the parent in the case that it is a TypeSpec
+            // where the TypeSpec is unimported in some way (like generic arguments, or a CustomMod modifier type)
+            return (Parent?.IsImportedInModule(module) ?? false) && (Signature?.IsImportedInModule(module) ?? false);
         }
 
         /// <summary>
