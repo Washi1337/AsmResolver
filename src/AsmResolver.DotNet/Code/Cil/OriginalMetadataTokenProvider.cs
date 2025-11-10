@@ -41,24 +41,24 @@ public class OriginalMetadataTokenProvider : IMetadataTokenProvider
         => GetToken(type, diagnosticSource);
 
     /// <inheritdoc />
-    public MetadataToken GetTypeDefinitionTokenOrImport(TypeDefinition type, object? diagnosticSource = null)
-        => GetTypeDefinitionToken(type, diagnosticSource);
+    public MetadataToken GetOrImportTypeDefinitionToken(TypeDefinition type, object? diagnosticSource = null)
+        => GetToken(type, diagnosticSource);
 
     /// <inheritdoc />
     public MetadataToken GetFieldDefinitionToken(FieldDefinition field, object? diagnosticSource = null)
         => GetToken(field, diagnosticSource);
 
     /// <inheritdoc />
-    public MetadataToken GetFieldDefinitionTokenOrImport(FieldDefinition field, object? diagnosticSource = null)
-        => GetFieldDefinitionToken(field, diagnosticSource);
+    public MetadataToken GetOrImportFieldDefinitionToken(FieldDefinition field, object? diagnosticSource = null)
+        => GetToken(field, diagnosticSource);
 
     /// <inheritdoc />
     public MetadataToken GetMethodDefinitionToken(MethodDefinition method, object? diagnosticSource = null)
         => GetToken(method, diagnosticSource);
 
     /// <inheritdoc />
-    public MetadataToken GetMethodDefinitionTokenOrImport(MethodDefinition method, object? diagnosticSource = null)
-        => GetMethodDefinitionToken(method, diagnosticSource);
+    public MetadataToken GetOrImportMethodDefinitionToken(MethodDefinition method, object? diagnosticSource = null)
+        => GetToken(method, diagnosticSource);
 
     /// <inheritdoc />
     public MetadataToken GetMemberReferenceToken(MemberReference member, object? diagnosticSource = null)
