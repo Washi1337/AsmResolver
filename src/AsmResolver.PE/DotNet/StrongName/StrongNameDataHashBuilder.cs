@@ -74,14 +74,14 @@ namespace AsmResolver.PE.DotNet.StrongName
                 while ((ulong) _imageStream.Position < range.End)
                 {
                     int chunkLength = Math.Min(buffer.Length, (int) (range.End - (ulong) _imageStream.Position));
+                    int readAmount = _imageStream.Read(buffer, 0, chunkLength);
+
                     var currentRange = new OffsetRange(
                         (uint) _imageStream.Position,
-                        (uint) (_imageStream.Position + chunkLength));
-
-                    _imageStream.Read(buffer, 0, chunkLength);
+                        (uint) (_imageStream.Position + readAmount));
 
                     ZeroRangesIfApplicable(buffer, currentRange);
-                    algorithm.TransformBlock(buffer, 0, chunkLength, buffer, 0);
+                    algorithm.TransformBlock(buffer, 0, readAmount, buffer, 0);
                 }
             }
 
