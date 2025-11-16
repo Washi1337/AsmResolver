@@ -19,13 +19,32 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="assemblyResolver">The resolver to use for resolving external assemblies.</param>
         public DefaultMetadataResolver(IAssemblyResolver assemblyResolver)
+            : this(assemblyResolver, null)
         {
+        }
+
+        /// <summary>
+        /// Creates a new metadata resolver.
+        /// </summary>
+        /// <param name="assemblyResolver">The resolver to use for resolving external assemblies.</param>
+        /// <param name="contextModule">The module the resolver is associated with.</param>
+        public DefaultMetadataResolver(IAssemblyResolver assemblyResolver, ModuleDefinition? contextModule)
+        {
+            ContextModule = contextModule;
             AssemblyResolver = assemblyResolver ?? throw new ArgumentNullException(nameof(assemblyResolver));
             _typeCache = new ConcurrentDictionary<ITypeDescriptor, TypeDefinition>();
         }
 
         /// <inheritdoc />
         public IAssemblyResolver AssemblyResolver
+        {
+            get;
+        }
+
+        /// <summary>
+        /// When available, gets the module the resolver is associated with.
+        /// </summary>
+        public ModuleDefinition? ContextModule
         {
             get;
         }
@@ -66,7 +85,7 @@ namespace AsmResolver.DotNet
             if (resolvedType is not null)
                 return resolvedType;
 
-            var resolution = new TypeResolution(AssemblyResolver);
+            var resolution = new TypeResolution(this);
             resolvedType = resolution.ResolveTypeReference(reference);
             if (resolvedType is not null)
                 _typeCache[reference] = resolvedType;
@@ -83,7 +102,7 @@ namespace AsmResolver.DotNet
             if (resolvedType is not null)
                 return resolvedType;
 
-            var resolution = new TypeResolution(AssemblyResolver);
+            var resolution = new TypeResolution(this);
             resolvedType = resolution.ResolveExportedType(exportedType);
             if (resolvedType is not null)
                 _typeCache[exportedType] = resolvedType;
@@ -146,15 +165,15 @@ namespace AsmResolver.DotNet
             return null;
         }
 
-        private readonly struct TypeResolution
+        private struct TypeResolution
         {
-            private readonly IAssemblyResolver _assemblyResolver;
+            private readonly DefaultMetadataResolver _resolver;
             private readonly Stack<IResolutionScope> _scopeStack;
             private readonly Stack<IImplementation> _implementationStack;
 
-            public TypeResolution(IAssemblyResolver resolver)
+            public TypeResolution(DefaultMetadataResolver resolver)
             {
-                _assemblyResolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+                _resolver = resolver;
                 _scopeStack = new Stack<IResolutionScope>();
                 _implementationStack = new Stack<IImplementation>();
             }
@@ -172,14 +191,24 @@ namespace AsmResolver.DotNet
                 switch (scope.MetadataToken.Table)
                 {
                     case TableIndex.AssemblyRef:
-                        if (reference.ContextModule?.Assembly is { } assembly)
+                        var assemblyRefScope = scope.GetAssembly();
+
+                        // Are we referencing the current assembly the reference was declared in?
+                        if (reference.ContextModule?.Assembly is { } referenceAssembly
+                            && SignatureComparer.Default.Equals(assemblyRefScope, referenceAssembly))
                         {
-                            // Are we referencing the current assembly the reference was declared in?
-                            if (SignatureComparer.Default.Equals(scope.GetAssembly(), assembly))
-                                return FindTypeInModule(reference.ContextModule, reference.Namespace, reference.Name);
+                            return FindTypeInModule(reference.ContextModule, reference.Namespace, reference.Name);
                         }
 
-                        var assemblyDefScope = _assemblyResolver.Resolve((AssemblyReference) scope);
+                        // Are we referencing the current assembly of the resolver itself?
+                        if (_resolver.ContextModule?.Assembly is { } resolverAssembly
+                            && SignatureComparer.Default.Equals(assemblyRefScope, resolverAssembly))
+                        {
+                            return FindTypeInModule(_resolver.ContextModule, reference.Namespace, reference.Name);
+                        }
+
+                        // Otherwise, resolve the assembly first.
+                        var assemblyDefScope = _resolver.AssemblyResolver.Resolve((AssemblyReference) scope);
                         return assemblyDefScope is not null
                             ? FindTypeInAssembly(assemblyDefScope, reference.Namespace, reference.Name)
                             : null;
@@ -208,7 +237,7 @@ namespace AsmResolver.DotNet
                 switch (implementation.MetadataToken.Table)
                 {
                     case TableIndex.AssemblyRef:
-                        var assembly = _assemblyResolver.Resolve((AssemblyReference) implementation);
+                        var assembly = _resolver.AssemblyResolver.Resolve((AssemblyReference) implementation);
                         return assembly is not null
                             ? FindTypeInAssembly(assembly, exportedType.Namespace, exportedType.Name)
                             : null;

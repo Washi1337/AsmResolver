@@ -304,7 +304,7 @@ namespace AsmResolver.DotNet
             CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory(this);
             OriginalTargetRuntime = DetectTargetRuntime();
             RuntimeContext = new RuntimeContext(OriginalTargetRuntime);
-            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
+            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver, this);
 
             CreateAndInsertModuleType();
         }

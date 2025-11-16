@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet.Serialized
                 }
             }
 
-            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
+            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver, this);
 
             // Prepare lazy RID lists.
             _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.Field, TableIndex.TypeDef,
