@@ -58,6 +58,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         ExplicitLayout = 0x00000010,
         /// <summary>
+        /// Layout is supplied via a System.Runtime.InteropServices.ExtendedLayoutAttribute
+        /// </summary>
+        ExtendedLayout = 0x00000018,
+        /// <summary>
         /// Provides a bitmask for obtaining flags related to the layout of the type.
         /// </summary>
         LayoutMask = 0x00000018,

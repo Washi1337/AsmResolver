@@ -269,7 +269,7 @@ namespace AsmResolver.DotNet
         {
             get => (Attributes & TypeAttributes.LayoutMask) == TypeAttributes.SequentialLayout;
             set => Attributes = (Attributes & ~TypeAttributes.LayoutMask)
-                                | (value ? TypeAttributes.SequentialLayout : 0);
+                | (value ? TypeAttributes.SequentialLayout : 0);
         }
 
         /// <summary>
@@ -279,7 +279,21 @@ namespace AsmResolver.DotNet
         {
             get => (Attributes & TypeAttributes.LayoutMask) == TypeAttributes.ExplicitLayout;
             set => Attributes = (Attributes & ~TypeAttributes.LayoutMask)
-                                | (value ? TypeAttributes.ExplicitLayout : 0);
+                | (value ? TypeAttributes.ExplicitLayout : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the layout of the type is supplied via a
+        /// <c>System.Runtime.InteropServices.ExtendedLayoutAttribute</c>
+        /// </summary>
+        /// <remarks>
+        /// Reference: https://github.com/dotnet/runtime/blob/0b9d2ccbd5e2ddbcb95fb8d7126755d160b81f64/docs/design/specs/Ecma-335-Augments.md#extended-layout
+        /// </remarks>
+        public bool IsExtendedLayout
+        {
+            get => (Attributes & TypeAttributes.LayoutMask) == TypeAttributes.ExtendedLayout;
+            set => Attributes = (Attributes & ~TypeAttributes.LayoutMask)
+                | (value ? TypeAttributes.ExtendedLayout : 0);
         }
 
         /// <summary>
