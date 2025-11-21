@@ -44,7 +44,7 @@ jobs:
       version_suffix: ${{ steps.set-vars.outputs.version_suffix }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - id: git-vars
         name: Get git branch information
@@ -77,7 +77,7 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -133,7 +133,7 @@ jobs:
     runs-on: ${{ matrix.runner.image }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Get .NET Installation Path
         uses: ./.github/actions/dotnet-path
@@ -225,7 +225,7 @@ jobs:
     if: ${{github.ref == 'refs/heads/development' || github.ref == 'refs/heads/master'}}
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
