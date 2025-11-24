@@ -1,7 +1,8 @@
 # AsmResolver
 
- [![Master branch build status](https://img.shields.io/appveyor/ci/Washi1337/AsmResolver/master.svg)](https://ci.appveyor.com/project/Washi1337/asmresolver/branch/master)
- [![Nuget feed](https://img.shields.io/nuget/v/AsmResolver.svg)](https://www.nuget.org/packages/AsmResolver/)
+ [![Test and Publish](https://github.com/Washi1337/AsmResolver/actions/workflows/test-and-publish.yml/badge.svg)](https://github.com/Washi1337/AsmResolver/actions/workflows/test-and-publish.yml)
+ [![Nuget feed](https://img.shields.io/nuget/v/AsmResolver)](https://www.nuget.org/packages/AsmResolver/)
+ [![Nuget feed](https://img.shields.io/nuget/vpre/AsmResolver)](https://www.nuget.org/packages/AsmResolver/)
  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
  [![Discord](https://img.shields.io/discord/961647807591243796.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/Y7DTBkbhJJ)
 
@@ -25,6 +26,7 @@ AsmResolver has a lot of features. Below is a non-exhaustive list of the highlig
   - [x] Managed resource file serializers and deserializers.
   - [x] Support for AppHost / SingleFileHost bundles.
   - [x] Support for ReadyToRun (R2R) binaries.
+- [x] Build to be robust against malformed/obfuscated binaries.
 - [x] Rich read support for PDB and PortablePdb symbols.
   - [x] Fully managed cross-platform API (No DIA or similar required).
 - [x] .NET 3.5 compatible.
@@ -54,18 +56,16 @@ Stable Builds:
 
 Nightly Builds:
 
-- [AppVeyor](https://ci.appveyor.com/project/Washi1337/asmresolver/build/artifacts)
-- [Nightly Nuget Feed](https://nuget.washi.dev/)
+- [Nightly Nuget Feed](https://nuget.washi.dev/) (https://nuget.washi.dev/v3/index.json)
 
 | Branch | Build status |
 |--------|--------|
-| master | [![Master branch build status](https://img.shields.io/appveyor/ci/Washi1337/AsmResolver/master.svg)](https://ci.appveyor.com/project/Washi1337/asmresolver/branch/master) |
-| development | [![Development branch build status](https://img.shields.io/appveyor/ci/Washi1337/AsmResolver/development.svg)](https://ci.appveyor.com/project/Washi1337/asmresolver/branch/development)
-
+| master | [![Test and Publish](https://github.com/Washi1337/AsmResolver/actions/workflows/test-and-publish.yml/badge.svg?branch=master)](https://github.com/Washi1337/AsmResolver/actions/workflows/test-and-publish.yml) |
+| development | [![Test and Publish](https://github.com/Washi1337/AsmResolver/actions/workflows/test-and-publish.yml/badge.svg?branch=development)](https://github.com/Washi1337/AsmResolver/actions/workflows/test-and-publish.yml) |
 
 ## Compiling
 
-The solution can be built using the .NET SDK or an IDE that works with it (e.g., Visual Studio and JetBrains Rider). The main packages target LTS versions of various .NET runtimes (.NET 3.5, .NET Standard 2.0, .NET Standard 2.1, .NET Core 3.1, .NET 6.0, .NET 8.0).
+The solution can be built using the .NET SDK or an IDE that works with it (e.g., Visual Studio and JetBrains Rider). The main packages target LTS versions of various .NET runtimes (.NET 3.5, .NET Standard 2.0, .NET Standard 2.1, .NET Core 3.1, .NET 6.0, .NET 8.0, .NET 9.0, .NET 10.0).
 
 To build the project from the command line, use:
 ```bash
@@ -76,7 +76,7 @@ To run all tests, use:
 ```bash
 $ dotnet test
 ```
-For running the tests successfully, you will need to have additional versions of .NET installed (including STS versions or versions declared EOL), as the unit tests verify reading binaries targeting various .NET runtimes.
+For running the tests successfully, you will need to have additional versions of the .NET _runtime_ installed (including STS versions or versions declared EOL), as the unit tests verify reading binaries targeting various .NET runtimes.
 To run the tests successfully on MacOS and Linux, `mono` and `wine` are expected to be installed as well.
 
 
