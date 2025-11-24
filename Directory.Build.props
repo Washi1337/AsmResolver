@@ -12,6 +12,7 @@
         <VersionSuffix>beta.4</VersionSuffix>
         <Deterministic>true</Deterministic>
         <UseArtifactsOutput>true</UseArtifactsOutput>
+        <CheckEolTargetFramework>false</CheckEolTargetFramework>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">

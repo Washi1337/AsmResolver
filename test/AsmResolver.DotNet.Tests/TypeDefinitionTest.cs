@@ -827,5 +827,21 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Null(nestedType.DeclaringModule);
         }
+
+        [Fact]
+        public void ExternalTypeDefAsBaseTypeShouldAutoConvertToTypeRef()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
+            var sourceType = sourceModule.LookupMember<TypeDefinition>(typeof(TopLevelClass1).MetadataToken);
+
+            var targetModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var type = new TypeDefinition("Namespace", "Name", TypeAttributes.Class, sourceType);
+            targetModule.TopLevelTypes.Add(type);
+
+            var newType = RebuildAndLookup(type);
+
+            Assert.IsAssignableFrom<TypeReference>(newType.BaseType);
+            Assert.Equal(type.BaseType, newType.BaseType, Comparer);
+        }
     }
 }

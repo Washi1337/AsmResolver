@@ -4,6 +4,7 @@ using System.Linq;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Fields;
+using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.DotNet.TestCases.Types.Structs;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -13,14 +14,14 @@ namespace AsmResolver.DotNet.Tests
 {
     public class FieldDefinitionTest
     {
-        private FieldDefinition RebuildAndLookup(FieldDefinition field)
+        private static FieldDefinition RebuildAndLookup(FieldDefinition field)
         {
             var stream = new MemoryStream();
-            field.DeclaringModule.Write(stream);
+            field.DeclaringModule!.Write(stream);
 
             var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             return newModule
-                .TopLevelTypes.First(t => t.FullName == field.DeclaringType.FullName)
+                .TopLevelTypes.First(t => t.FullName == field.DeclaringType!.FullName)
                 .Fields.First(f => f.Name == field.Name);
         }
 
@@ -218,6 +219,43 @@ namespace AsmResolver.DotNet.Tests
             var type2 = new TypeDefinition("SomeNamespace", "SomeType2", TypeAttributes.Public);
             type1.Fields.Add(field);
             Assert.Throws<ArgumentException>(() => type2.Fields.Add(field));
+        }
+
+        [Fact]
+        public void ExternalTypeDefAsFieldTypeShouldAutoConvertToTypeRef()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
+            var sourceType = sourceModule.LookupMember<TypeDefinition>(typeof(TopLevelClass1).MetadataToken);
+
+            var targetModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var field = new FieldDefinition("Field", FieldAttributes.Static, sourceType.ToTypeSignature());
+            targetModule.GetOrCreateModuleType().Fields.Add(field);
+
+            var newField = RebuildAndLookup(field);
+
+            var newType = Assert.IsAssignableFrom<TypeReference>(newField.Signature?.FieldType.GetUnderlyingTypeDefOrRef());
+            Assert.Equal<ITypeDefOrRef>(sourceType, newType, SignatureComparer.Default);
+        }
+
+        [Fact]
+        public void ExternalTypeDefAsGenericFieldTypeArgumentShouldAutoConvertToTypeRef()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
+            var sourceType = sourceModule.LookupMember<TypeDefinition>(typeof(TopLevelClass1).MetadataToken);
+
+            var targetModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var field = new FieldDefinition("Field", FieldAttributes.Static,
+                targetModule.CorLibTypeFactory.CorLibScope
+                    .CreateTypeReference("System", "Action`1")
+                    .MakeGenericInstanceType(sourceType.ToTypeSignature())
+            );
+            targetModule.GetOrCreateModuleType().Fields.Add(field);
+
+            var newField = RebuildAndLookup(field);
+
+            var newGenericType = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(newField.Signature?.FieldType);
+            var newType = Assert.IsAssignableFrom<TypeReference>(newGenericType.TypeArguments[0].GetUnderlyingTypeDefOrRef());
+            Assert.Equal<ITypeDefOrRef>(sourceType, newType, SignatureComparer.Default);
         }
     }
 }

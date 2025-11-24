@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Builder
 
             var token = type.MetadataToken.Table switch
             {
-                TableIndex.TypeDef => GetTypeDefinitionToken(type as TypeDefinition, diagnosticSource),
+                TableIndex.TypeDef => GetOrImportTypeDefinitionToken(type as TypeDefinition, diagnosticSource),
                 TableIndex.TypeRef => GetTypeReferenceToken(type as TypeReference, diagnosticSource),
                 TableIndex.TypeSpec => GetTypeSpecificationToken(type as TypeSpecification, diagnosticSource),
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
@@ -78,10 +78,10 @@ namespace AsmResolver.DotNet.Builder
 
             var token = parent.MetadataToken.Table switch
             {
-                TableIndex.TypeDef => GetTypeDefinitionToken(parent as TypeDefinition, diagnosticSource),
+                TableIndex.TypeDef => GetOrImportTypeDefinitionToken(parent as TypeDefinition, diagnosticSource),
                 TableIndex.TypeRef => GetTypeReferenceToken(parent as TypeReference, diagnosticSource),
                 TableIndex.TypeSpec => GetTypeSpecificationToken(parent as TypeSpecification, diagnosticSource),
-                TableIndex.Method => GetMethodDefinitionToken(parent as MethodDefinition, diagnosticSource),
+                TableIndex.Method => GetOrImportMethodDefinitionToken(parent as MethodDefinition, diagnosticSource),
                 TableIndex.ModuleRef => GetModuleReferenceToken(parent as ModuleReference, diagnosticSource),
                 _ => throw new ArgumentOutOfRangeException(nameof(parent))
             };
@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet.Builder
 
             var token = method.MetadataToken.Table switch
             {
-                TableIndex.Method => GetMethodDefinitionToken(method as MethodDefinition, diagnosticSource),
+                TableIndex.Method => GetOrImportMethodDefinitionToken(method as MethodDefinition, diagnosticSource),
                 TableIndex.MemberRef => GetMemberReferenceToken(method as MemberReference, diagnosticSource),
                 _ => throw new ArgumentOutOfRangeException(nameof(method))
             };
@@ -115,7 +115,7 @@ namespace AsmResolver.DotNet.Builder
 
             var token = constructor.MetadataToken.Table switch
             {
-                TableIndex.Method => GetMethodDefinitionToken(constructor as MethodDefinition, diagnosticSource),
+                TableIndex.Method => GetOrImportMethodDefinitionToken(constructor as MethodDefinition, diagnosticSource),
                 TableIndex.MemberRef => GetMemberReferenceToken(constructor as MemberReference, diagnosticSource),
                 _ => throw new ArgumentOutOfRangeException(nameof(constructor))
             };
