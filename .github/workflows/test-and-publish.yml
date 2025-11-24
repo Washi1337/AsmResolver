@@ -176,6 +176,15 @@ jobs:
         if: ${{runner.os == 'Linux'}}
         run: wine --version
 
+      # We need mono on linux as many tests build and run netfx PE files.
+      - name: Setup Mono
+        if: ${{runner.os == 'Linux'}}
+        uses: codebeltnet/install-mono@v1
+
+      - name: Get Installed Mono Information
+        if: ${{runner.os == 'Linux'}}
+        run: mono --version
+
 
       - name: Download Build Artifacts
         uses: actions/download-artifact@v6
