@@ -8,15 +8,16 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to an external module. This module can be managed or unmanaged.
     /// </summary>
-    public class ModuleReference :
+    public partial class ModuleReference :
         MetadataMember,
         IResolutionScope,
         IMemberRefParent,
         IHasCustomAttribute,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<ModuleReference, Utf8String?> _name;
-        private IList<CustomAttribute>? _customAttributes;
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes the module reference with a metadata token.
@@ -25,7 +26,6 @@ namespace AsmResolver.DotNet
         protected ModuleReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<ModuleReference, Utf8String?>(x => x.GetName());
         }
 
         /// <summary>
@@ -44,10 +44,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the module definition table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -66,13 +67,16 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 

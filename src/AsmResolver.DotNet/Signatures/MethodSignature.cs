@@ -21,7 +21,8 @@ namespace AsmResolver.DotNet.Signatures
             var result = new MethodSignature(
                 (CallingConventionAttributes) reader.ReadByte(),
                 context.ReaderContext.ParentModule.CorLibTypeFactory.Void,
-                Enumerable.Empty<TypeSignature>());
+                Enumerable.Empty<TypeSignature>()
+            );
 
             // Generic parameter count.
             if (result.IsGeneric)
@@ -165,7 +166,10 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="attributes">The attributes.</param>
         /// <param name="returnType">The return type of the method.</param>
         /// <param name="parameterTypes">The types of the parameter the method defines.</param>
-        public MethodSignature(CallingConventionAttributes attributes, TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes)
+        public MethodSignature(
+            CallingConventionAttributes attributes,
+            TypeSignature returnType,
+            IEnumerable<TypeSignature>? parameterTypes)
             : base(attributes, returnType, parameterTypes)
         {
         }

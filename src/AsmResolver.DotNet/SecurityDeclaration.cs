@@ -7,13 +7,10 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides a set of security attributes assigned to a metadata member.
     /// </summary>
-    public class SecurityDeclaration :
+    public partial class SecurityDeclaration :
         MetadataMember,
         IOwnedCollectionElement<IHasSecurityDeclaration>
     {
-        private readonly LazyVariable<SecurityDeclaration, IHasSecurityDeclaration?> _parent;
-        private readonly LazyVariable<SecurityDeclaration, PermissionSetSignature?> _permissionSet;
-
         /// <summary>
         /// Initializes the <see cref="SecurityDeclaration"/> with a metadata token.
         /// </summary>
@@ -21,8 +18,6 @@ namespace AsmResolver.DotNet
         protected SecurityDeclaration(MetadataToken token)
             : base(token)
         {
-            _parent = new LazyVariable<SecurityDeclaration, IHasSecurityDeclaration?>(x => x.GetParent());
-            _permissionSet = new LazyVariable<SecurityDeclaration, PermissionSetSignature?>(x => x.GetPermissionSet());
         }
 
         /// <summary>
@@ -49,10 +44,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the member that is assigned the permission set.
         /// </summary>
-        public IHasSecurityDeclaration? Parent
+        [LazyProperty]
+        public partial IHasSecurityDeclaration? Parent
         {
-            get => _parent.GetValue(this);
-            private set => _parent.SetValue(value);
+            get;
+            private set;
         }
 
         /// <inheritdoc />
@@ -65,10 +61,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the collection of security attributes.
         /// </summary>
-        public PermissionSetSignature? PermissionSet
+        [LazyProperty]
+        public partial PermissionSetSignature? PermissionSet
         {
-            get => _permissionSet.GetValue(this);
-            set => _permissionSet.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

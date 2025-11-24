@@ -42,9 +42,6 @@ namespace AsmResolver.DotNet.Signatures
         public override bool IsValueType => true;
 
         /// <inheritdoc />
-        public override TypeDefinition? Resolve(ModuleDefinition context) => GetUnderlyingTypeDefOrRef()?.Resolve(context);
-
-        /// <inheritdoc />
         public override ITypeDefOrRef? GetUnderlyingTypeDefOrRef() =>
             Signature.ReturnType.ContextModule?.CorLibTypeFactory.IntPtr.Type;
 

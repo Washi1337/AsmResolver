@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public override AssemblyReference ImportWith(ReferenceImporter importer) =>
-            (AssemblyReference) importer.ImportScope(new AssemblyReference(this));
+            (AssemblyReference) importer.ImportScope(ToAssemblyReference());
 
         /// <inheritdoc />
         public override bool IsCorLib => Name is not null && KnownCorLibs.KnownCorLibNames.Contains(Name);

@@ -222,6 +222,12 @@ namespace AsmResolver.DotNet.Serialized
             return _customAttributes.GetKey(attributeRid);
         }
 
+        internal bool HasNonEmptyCustomAttributes(IHasCustomAttribute owner)
+        {
+            EnsureCustomAttributesInitialized();
+            return _customAttributes.GetValues(owner.MetadataToken).Count > 0;
+        }
+
         internal IList<CustomAttribute> GetCustomAttributeCollection(IHasCustomAttribute owner)
         {
             EnsureCustomAttributesInitialized();
@@ -265,6 +271,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureSecurityDeclarationsInitialized();
             return _securityDeclarations.GetKey(attributeRid);
+        }
+
+        internal bool HasNonEmptySecurityDeclarations(IHasSecurityDeclaration owner)
+        {
+            EnsureSecurityDeclarationsInitialized();
+            return _securityDeclarations.GetValues(owner.MetadataToken).Count > 0;
         }
 
         internal IList<SecurityDeclaration> GetSecurityDeclarationCollection(IHasSecurityDeclaration owner)

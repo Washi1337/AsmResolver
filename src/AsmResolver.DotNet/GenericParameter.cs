@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type parameter that a generic method or type in a .NET module defines.
     /// </summary>
-    public class GenericParameter :
+    public partial class GenericParameter :
         MetadataMember,
         INameProvider,
         IHasCustomAttribute,
@@ -16,10 +16,13 @@ namespace AsmResolver.DotNet
         IMetadataDefinition,
         IOwnedCollectionElement<IHasGenericParameters>
     {
-        private readonly LazyVariable<GenericParameter, Utf8String?> _name;
-        private readonly LazyVariable<GenericParameter, IHasGenericParameters?> _owner;
-        private IList<GenericParameterConstraint>? _constraints;
-        private IList<CustomAttribute>? _customAttributes;
+        /// <summary> The internal constraints list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Constraints"/> instead.</remarks>
+        protected IList<GenericParameterConstraint>? ConstraintsInternal;
+
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes a new empty generic parameter.
@@ -28,8 +31,6 @@ namespace AsmResolver.DotNet
         protected GenericParameter(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<GenericParameter, Utf8String?>(x => x.GetName());
-            _owner = new LazyVariable<GenericParameter, IHasGenericParameters?>(x => x.GetOwner());
         }
 
         /// <summary>
@@ -57,10 +58,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the member that defines this generic parameter.
         /// </summary>
-        public IHasGenericParameters? Owner
+        [LazyProperty]
+        public partial IHasGenericParameters? Owner
         {
-            get => _owner.GetValue(this);
-            private set => _owner.SetValue(value);
+            get;
+            private set;
         }
 
         IHasGenericParameters? IOwnedCollectionElement<IHasGenericParameters>.Owner
@@ -75,10 +77,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the generic parameter table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -177,26 +180,34 @@ namespace AsmResolver.DotNet
         ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <summary>
+        /// Gets a value indicating whether the generic parameter defines additional constraints.
+        /// </summary>
+        public virtual bool HasConstraints => ConstraintsInternal is { Count: > 0 };
+
+        /// <summary>
         /// Gets a collection of constraints put on the generic parameter.
         /// </summary>
         public IList<GenericParameterConstraint> Constraints
         {
             get
             {
-                if (_constraints is null)
-                    Interlocked.CompareExchange(ref _constraints, GetConstraints(), null);
-                return _constraints;
+                if (ConstraintsInternal is null)
+                    Interlocked.CompareExchange(ref ConstraintsInternal, GetConstraints(), null);
+                return ConstraintsInternal;
             }
         }
+
+        /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 

@@ -341,9 +341,9 @@ namespace AsmResolver.DotNet.Builder
                 // Add remaining metadata:
                 AddCustomAttributes(typeToken, type);
                 AddSecurityDeclarations(typeToken, type);
-                DefineInterfaces(typeToken, type.Interfaces);
+                DefineInterfaces(typeToken, type);
                 AddNestedClassRow(type, rid);
-                AddMethodImplementations(type, typeToken, type.MethodImplementations);
+                AddMethodImplementations(typeToken, type);
                 DefineGenericParameters(typeToken, type);
                 AddClassLayout(typeToken, type.ClassLayout);
             }
@@ -579,8 +579,12 @@ namespace AsmResolver.DotNet.Builder
             table.Add(type, row);
         }
 
-        private void AddMethodImplementations(TypeDefinition type, MetadataToken typeToken, IList<MethodImplementation> implementations)
+        private void AddMethodImplementations(MetadataToken typeToken, TypeDefinition type)
         {
+            if (!type.HasMethodImplementations)
+                return;
+
+            var implementations = type.MethodImplementations;
             var table = Metadata.TablesStream.GetSortedTable<MethodImplementation, MethodImplementationRow>(TableIndex.MethodImpl);
 
             for (int i = 0; i < implementations.Count; i++)

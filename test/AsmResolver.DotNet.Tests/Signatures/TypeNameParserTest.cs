@@ -128,7 +128,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             const string nestedTypeName = "Enumerator";
 
             var corlib = KnownCorLibs.NetStandard_v2_0_0_0;
-            var expected = new TypeReference(_module, corlib, ns, name)
+            var expected = corlib.CreateTypeReference(ns, name)
                 .CreateTypeReference(nestedTypeName)
                 .ToTypeSignature(true)
                 .ImportWith(_module.DefaultImporter);

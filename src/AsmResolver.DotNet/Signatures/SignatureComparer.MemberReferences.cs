@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<MethodSpecification>
     {
         /// <inheritdoc />
-        public bool Equals(MemberReference? x, MemberReference? y)
+        public virtual bool Equals(MemberReference? x, MemberReference? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(MemberReference obj)
+        public virtual int GetHashCode(MemberReference obj)
         {
             if (obj.IsMethod)
                 return GetHashCode((IMethodDescriptor) obj);
@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(IMethodDescriptor? x, IMethodDescriptor? y)
+        public virtual bool Equals(IMethodDescriptor? x, IMethodDescriptor? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(IMethodDescriptor obj)
+        public virtual int GetHashCode(IMethodDescriptor obj)
         {
             unchecked
             {
@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(IFieldDescriptor? x, IFieldDescriptor? y)
+        public virtual bool Equals(IFieldDescriptor? x, IFieldDescriptor? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(IFieldDescriptor obj)
+        public virtual int GetHashCode(IFieldDescriptor obj)
         {
             unchecked
             {
@@ -90,7 +90,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(MethodSpecification? x, MethodSpecification? y)
+        public virtual bool Equals(MethodSpecification? x, MethodSpecification? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -102,7 +102,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(MethodSpecification obj)
+        public virtual int GetHashCode(MethodSpecification obj)
         {
             unchecked
             {

@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type (a class, interface or structure) defined in a .NET module.
     /// </summary>
-    public class TypeDefinition :
+    public partial class TypeDefinition :
         MetadataMember,
         ITypeDefOrRef,
         IHasGenericParameters,
@@ -25,21 +25,47 @@ namespace AsmResolver.DotNet
         internal static readonly Utf8String ModuleTypeName = "<Module>";
 
         private readonly LazyVariable<TypeDefinition, Utf8String?> _namespace;
-        private readonly LazyVariable<TypeDefinition, Utf8String?> _name;
-        private readonly LazyVariable<TypeDefinition, ITypeDefOrRef?> _baseType;
-        private readonly LazyVariable<TypeDefinition, TypeDefinition?> _declaringType;
-        private readonly LazyVariable<TypeDefinition, ClassLayout?> _classLayout;
-        private IList<TypeDefinition>? _nestedTypes;
         private ModuleDefinition? _module;
-        private IList<FieldDefinition>? _fields;
-        private IList<MethodDefinition>? _methods;
-        private IList<PropertyDefinition>? _properties;
-        private IList<EventDefinition>? _events;
-        private IList<CustomAttribute>? _customAttributes;
-        private IList<SecurityDeclaration>? _securityDeclarations;
-        private IList<GenericParameter>? _genericParameters;
-        private IList<InterfaceImplementation>? _interfaces;
-        private IList<MethodImplementation>? _methodImplementations;
+
+        /// <summary> The internal fields list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Fields"/> instead.</remarks>
+        protected IList<FieldDefinition>? FieldsInternal;
+
+        /// <summary> The internal methods list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Methods"/> instead.</remarks>
+        protected IList<MethodDefinition>? MethodsInternal;
+
+        /// <summary> The internal properties list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Properties"/> instead.</remarks>
+        protected IList<PropertyDefinition>? PropertiesInternal;
+
+        /// <summary> The internal events list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Events"/> instead.</remarks>
+        protected IList<EventDefinition>? EventsInternal;
+
+        /// <summary> The internal security declarations list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="SecurityDeclarations"/> instead.</remarks>
+        protected IList<SecurityDeclaration>? SecurityDeclarationsInternal;
+
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="GenericParameters"/> instead.</remarks>
+        protected IList<GenericParameter>? GenericParametersInternal;
+
+        /// <summary> The internal interfaces list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="Interfaces"/> instead.</remarks>
+        protected IList<InterfaceImplementation>? InterfacesInternal;
+
+        /// <summary> The internal method implementations list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="MethodImplementations"/> instead.</remarks>
+        protected IList<MethodImplementation>? MethodImplementationsInternal;
+
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
+
+        /// <summary> The internal nested types list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="NestedTypes"/> instead.</remarks>
+        protected IList<TypeDefinition>? NestedTypesInternal;
 
         /// <summary>
         /// Initializes a new type definition.
@@ -49,10 +75,7 @@ namespace AsmResolver.DotNet
             : base(token)
         {
             _namespace = new LazyVariable<TypeDefinition, Utf8String?>(x => x.GetNamespace());
-            _name = new LazyVariable<TypeDefinition, Utf8String?>(x => x.GetName());
-            _baseType = new LazyVariable<TypeDefinition, ITypeDefOrRef?>(x => x.GetBaseType());
-            _declaringType = new LazyVariable<TypeDefinition, TypeDefinition?>(x => x.GetDeclaringType());
-            _classLayout = new LazyVariable<TypeDefinition, ClassLayout?>(x => x.GetClassLayout());
+
         }
 
         /// <summary>
@@ -103,10 +126,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the type definition table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -245,7 +269,7 @@ namespace AsmResolver.DotNet
         {
             get => (Attributes & TypeAttributes.LayoutMask) == TypeAttributes.SequentialLayout;
             set => Attributes = (Attributes & ~TypeAttributes.LayoutMask)
-                                | (value ? TypeAttributes.SequentialLayout : 0);
+                | (value ? TypeAttributes.SequentialLayout : 0);
         }
 
         /// <summary>
@@ -255,7 +279,21 @@ namespace AsmResolver.DotNet
         {
             get => (Attributes & TypeAttributes.LayoutMask) == TypeAttributes.ExplicitLayout;
             set => Attributes = (Attributes & ~TypeAttributes.LayoutMask)
-                                | (value ? TypeAttributes.ExplicitLayout : 0);
+                | (value ? TypeAttributes.ExplicitLayout : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the layout of the type is supplied via a
+        /// <c>System.Runtime.InteropServices.ExtendedLayoutAttribute</c>
+        /// </summary>
+        /// <remarks>
+        /// Reference: https://github.com/dotnet/runtime/blob/0b9d2ccbd5e2ddbcb95fb8d7126755d160b81f64/docs/design/specs/Ecma-335-Augments.md#extended-layout
+        /// </remarks>
+        public bool IsExtendedLayout
+        {
+            get => (Attributes & TypeAttributes.LayoutMask) == TypeAttributes.ExtendedLayout;
+            set => Attributes = (Attributes & ~TypeAttributes.LayoutMask)
+                | (value ? TypeAttributes.ExtendedLayout : 0);
         }
 
         /// <summary>
@@ -411,10 +449,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the super class that this type extends.
         /// </summary>
-        public ITypeDefOrRef? BaseType
+        [LazyProperty]
+        public partial ITypeDefOrRef? BaseType
         {
-            get => _baseType.GetValue(this);
-            set => _baseType.SetValue(value);
+            get;
+            set;
         }
 
         ITypeOwner? IOwnedCollectionElement<ITypeOwner>.Owner
@@ -454,10 +493,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// When this type is nested, gets the enclosing type.
         /// </summary>
-        public TypeDefinition? DeclaringType
+        [LazyProperty]
+        public partial TypeDefinition? DeclaringType
         {
-            get => _declaringType.GetValue(this);
-            private set => _declaringType.SetValue(value);
+            get;
+            private set;
         }
 
         ITypeDefOrRef? ITypeDefOrRef.DeclaringType => DeclaringType;
@@ -471,15 +511,20 @@ namespace AsmResolver.DotNet
         public bool IsNested => DeclaringType != null;
 
         /// <summary>
+        /// Gets a value indicating whether the type defines nested types.
+        /// </summary>
+        public virtual bool HasNestedTypes => NestedTypesInternal is { Count: > 0 };
+
+        /// <summary>
         /// Gets a collection of nested types that this type defines.
         /// </summary>
         public IList<TypeDefinition> NestedTypes
         {
             get
             {
-                if (_nestedTypes is null)
-                    Interlocked.CompareExchange(ref _nestedTypes, GetNestedTypes(), null);
-                return _nestedTypes;
+                if (NestedTypesInternal is null)
+                    Interlocked.CompareExchange(ref NestedTypesInternal, GetNestedTypes(), null);
+                return NestedTypesInternal;
             }
         }
 
@@ -546,17 +591,27 @@ namespace AsmResolver.DotNet
             && this.HasCustomAttribute("System.Runtime.CompilerServices", "IsByRefLikeAttribute");
 
         /// <summary>
+        /// Gets a value indicating whether the type defines fields.
+        /// </summary>
+        public virtual bool HasFields => FieldsInternal is { Count: > 0 };
+
+        /// <summary>
         /// Gets a collection of fields defined in the type.
         /// </summary>
         public IList<FieldDefinition> Fields
         {
             get
             {
-                if (_fields is null)
-                    Interlocked.CompareExchange(ref _fields, GetFields(), null);
-                return _fields;
+                if (FieldsInternal is null)
+                    Interlocked.CompareExchange(ref FieldsInternal, GetFields(), null);
+                return FieldsInternal;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the type defines methods.
+        /// </summary>
+        public virtual bool HasMethods => MethodsInternal is { Count: > 0 };
 
         /// <summary>
         /// Gets a collection of methods defined in the type.
@@ -565,11 +620,16 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_methods is null)
-                    Interlocked.CompareExchange(ref _methods, GetMethods(), null);
-                return _methods;
+                if (MethodsInternal is null)
+                    Interlocked.CompareExchange(ref MethodsInternal, GetMethods(), null);
+                return MethodsInternal;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the type defines properties.
+        /// </summary>
+        public virtual bool HasProperties => PropertiesInternal is { Count: > 0 };
 
         /// <summary>
         /// Gets a collection of properties defined in the type.
@@ -578,11 +638,16 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_properties is null)
-                    Interlocked.CompareExchange(ref _properties, GetProperties(), null);
-                return _properties;
+                if (PropertiesInternal is null)
+                    Interlocked.CompareExchange(ref PropertiesInternal, GetProperties(), null);
+                return PropertiesInternal;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the type defines events.
+        /// </summary>
+        public virtual bool HasEvents => EventsInternal is { Count: > 0 };
 
         /// <summary>
         /// Gets a collection of events defined in the type.
@@ -591,44 +656,58 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_events is null)
-                    Interlocked.CompareExchange(ref _events, GetEvents(), null);
-                return _events;
+                if (EventsInternal is null)
+                    Interlocked.CompareExchange(ref EventsInternal, GetEvents(), null);
+                return EventsInternal;
             }
         }
+
+        /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
+
+        /// <inheritdoc />
+        public virtual bool HasSecurityDeclarations => SecurityDeclarationsInternal is { Count: > 0 };
 
         /// <inheritdoc />
         public IList<SecurityDeclaration> SecurityDeclarations
         {
             get
             {
-                if (_securityDeclarations is null)
-                    Interlocked.CompareExchange(ref _securityDeclarations, GetSecurityDeclarations(), null);
-                return _securityDeclarations;
+                if (SecurityDeclarationsInternal is null)
+                    Interlocked.CompareExchange(ref SecurityDeclarationsInternal, GetSecurityDeclarations(), null);
+                return SecurityDeclarationsInternal;
             }
         }
+
+        /// <inheritdoc />
+        public virtual bool HasGenericParameters => GenericParametersInternal is { Count: > 0 };
 
         /// <inheritdoc />
         public IList<GenericParameter> GenericParameters
         {
             get
             {
-                if (_genericParameters is null)
-                    Interlocked.CompareExchange(ref _genericParameters, GetGenericParameters(), null);
-                return _genericParameters;
+                if (GenericParametersInternal is null)
+                    Interlocked.CompareExchange(ref GenericParametersInternal, GetGenericParameters(), null);
+                return GenericParametersInternal;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the type implements interfaces.
+        /// </summary>
+        public virtual bool HasInterfaces => InterfacesInternal is { Count: > 0 };
 
         /// <summary>
         /// Gets a collection of interfaces that are implemented by the type.
@@ -637,11 +716,16 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_interfaces is null)
-                    Interlocked.CompareExchange(ref _interfaces, GetInterfaces(), null);
-                return _interfaces;
+                if (InterfacesInternal is null)
+                    Interlocked.CompareExchange(ref InterfacesInternal, GetInterfaces(), null);
+                return InterfacesInternal;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the type explicitly implements interface methods.
+        /// </summary>
+        public virtual bool HasMethodImplementations => MethodImplementationsInternal is { Count: > 0 };
 
         /// <summary>
         /// Gets a collection of methods that are explicitly implemented by the type.
@@ -650,9 +734,9 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_methodImplementations is null)
-                    Interlocked.CompareExchange(ref _methodImplementations, GetMethodImplementations(), null);
-                return _methodImplementations;
+                if (MethodImplementationsInternal is null)
+                    Interlocked.CompareExchange(ref MethodImplementationsInternal, GetMethodImplementations(), null);
+                return MethodImplementationsInternal;
             }
         }
 
@@ -662,10 +746,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// When this property is set to <c>null</c>, the runtime decides the layout of the class.
         /// </remarks>
-        public ClassLayout? ClassLayout
+        [LazyProperty]
+        public partial ClassLayout? ClassLayout
         {
-            get => _classLayout.GetValue(this);
-            set => _classLayout.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -1060,7 +1145,6 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<MethodDefinition> GetMethods() =>
             new OwnedCollection<TypeDefinition, MethodDefinition>(this);
-
 
         /// <summary>
         /// Obtains the collection of properties that this type defines.

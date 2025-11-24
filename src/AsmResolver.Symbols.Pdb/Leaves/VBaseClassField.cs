@@ -3,11 +3,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a direct or indirect reference to a virtual base class object in a structure.
 /// </summary>
-public class VBaseClassField : CodeViewField
+public partial class VBaseClassField : CodeViewField
 {
-    private readonly LazyVariable<VBaseClassField, CodeViewTypeRecord?> _baseType;
-    private readonly LazyVariable<VBaseClassField, CodeViewTypeRecord?> _basePointerType;
-
     /// <summary>
     /// Initializes a new empty virtual base class field.
     /// </summary>
@@ -15,8 +12,6 @@ public class VBaseClassField : CodeViewField
     protected VBaseClassField(uint typeIndex)
         : base(typeIndex)
     {
-        _baseType = new LazyVariable<VBaseClassField, CodeViewTypeRecord?>(x => x.GetBaseType());
-        _basePointerType = new LazyVariable<VBaseClassField, CodeViewTypeRecord?>(x => x.GetBasePointerType());
     }
 
     /// <summary>
@@ -35,8 +30,8 @@ public class VBaseClassField : CodeViewField
         bool isIndirect)
         : base(0)
     {
-        _baseType = new LazyVariable<VBaseClassField, CodeViewTypeRecord?>(baseType);
-        _basePointerType = new LazyVariable<VBaseClassField, CodeViewTypeRecord?>(pointerType);
+        BaseType = baseType;
+        BasePointerType = pointerType;
         PointerOffset = pointerOffset;
         TableOffset = tableOffset;
         IsIndirect = isIndirect;
@@ -59,19 +54,21 @@ public class VBaseClassField : CodeViewField
     /// <summary>
     /// Gets or sets the base type that this base class is referencing.
     /// </summary>
-    public CodeViewTypeRecord? Type
+    [LazyProperty]
+    public partial CodeViewTypeRecord? BaseType
     {
-        get => _baseType.GetValue(this);
-        set => _baseType.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
     /// Gets or sets the type of the base pointer that this base class uses.
     /// </summary>
-    public CodeViewTypeRecord? PointerType
+    [LazyProperty]
+    public partial CodeViewTypeRecord? BasePointerType
     {
-        get => _basePointerType.GetValue(this);
-        set => _basePointerType.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -97,7 +94,7 @@ public class VBaseClassField : CodeViewField
     /// </summary>
     /// <returns>The base type.</returns>
     /// <remarks>
-    /// This method is called upon initialization of the <see cref="Type"/> property.
+    /// This method is called upon initialization of the <see cref="BaseType"/> property.
     /// </remarks>
     protected virtual CodeViewTypeRecord? GetBaseType() => null;
 
@@ -106,10 +103,10 @@ public class VBaseClassField : CodeViewField
     /// </summary>
     /// <returns>The base pointer type.</returns>
     /// <remarks>
-    /// This method is called upon initialization of the <see cref="PointerType"/> property.
+    /// This method is called upon initialization of the <see cref="BasePointerType"/> property.
     /// </remarks>
     protected virtual CodeViewTypeRecord? GetBasePointerType() => null;
 
     /// <inheritdoc />
-    public override string ToString() => Type?.ToString() ?? "<<<?>>>";
+    public override string ToString() => BaseType?.ToString() ?? "<<<?>>>";
 }

@@ -5,18 +5,13 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a single constant symbol.
 /// </summary>
-public class ConstantSymbol : CodeViewSymbol
+public partial class ConstantSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<ConstantSymbol, Utf8String> _name;
-    private readonly LazyVariable<ConstantSymbol, CodeViewTypeRecord> _type;
-
     /// <summary>
     /// Initializes a named constant
     /// </summary>
     protected ConstantSymbol()
     {
-        _name = new LazyVariable<ConstantSymbol, Utf8String>(x => x.GetName());
-        _type = new LazyVariable<ConstantSymbol, CodeViewTypeRecord>(x => x.GetConstantType());
     }
 
     /// <summary>
@@ -27,8 +22,8 @@ public class ConstantSymbol : CodeViewSymbol
     /// <param name="value">The value to assign to the constant.</param>
     public ConstantSymbol(Utf8String name, CodeViewTypeRecord type, ushort value)
     {
-        _name = new LazyVariable<ConstantSymbol, Utf8String>(name);
-        _type = new LazyVariable<ConstantSymbol, CodeViewTypeRecord>(type);
+        Name = name;
+        ConstantType = type;
         Value = value;
     }
 
@@ -38,10 +33,11 @@ public class ConstantSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the value type of the constant.
     /// </summary>
-    public CodeViewTypeRecord Type
+    [LazyProperty]
+    public partial CodeViewTypeRecord ConstantType
     {
-        get => _type.GetValue(this);
-        set => _type.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -56,10 +52,11 @@ public class ConstantSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the name of the constant.
     /// </summary>
-    public Utf8String Name
+    [LazyProperty]
+    public partial Utf8String Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -76,10 +73,10 @@ public class ConstantSymbol : CodeViewSymbol
     /// </summary>
     /// <returns>The name.</returns>
     /// <remarks>
-    /// This method is called upon initialization of the <see cref="Type"/> property.
+    /// This method is called upon initialization of the <see cref="ConstantType"/> property.
     /// </remarks>
     protected virtual CodeViewTypeRecord? GetConstantType() => null;
 
     /// <inheritdoc />
-    public override string ToString() => $"S_CONSTANT: {Type} {Name} = {Value}";
+    public override string ToString() => $"S_CONSTANT: {ConstantType} {Name} = {Value}";
 }

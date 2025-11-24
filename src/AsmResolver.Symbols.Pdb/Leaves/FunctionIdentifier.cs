@@ -3,11 +3,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a function identifier, consisting of its name and its signature.
 /// </summary>
-public class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
+public partial class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
 {
-    private readonly LazyVariable<FunctionIdentifier, Utf8String?> _name;
-    private readonly LazyVariable<FunctionIdentifier, CodeViewTypeRecord?> _functionType;
-
     /// <summary>
     /// Initializes an empty function identifier leaf.
     /// </summary>
@@ -15,8 +12,6 @@ public class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
     protected FunctionIdentifier(uint typeIndex)
         : base(typeIndex)
     {
-        _name = new LazyVariable<FunctionIdentifier, Utf8String?>(x => x.GetName());
-        _functionType = new LazyVariable<FunctionIdentifier, CodeViewTypeRecord?>(x => x.GetFunctionType());
     }
 
     /// <summary>
@@ -29,8 +24,8 @@ public class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
         : base(0)
     {
         ScopeId = scopeId;
-        _name = new LazyVariable<FunctionIdentifier, Utf8String?>(name);
-        _functionType = new LazyVariable<FunctionIdentifier, CodeViewTypeRecord?>(functionType);
+        Name = name;
+        FunctionType = functionType;
     }
 
     /// <inheritdoc />
@@ -48,19 +43,21 @@ public class FunctionIdentifier : CodeViewLeaf, IIpiLeaf
     /// <summary>
     /// Gets or sets the name of the function.
     /// </summary>
-    public Utf8String? Name
+    [LazyProperty]
+    public partial Utf8String? Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
     /// Gets or sets the type describing the shape of the function.
     /// </summary>
-    public CodeViewTypeRecord? FunctionType
+    [LazyProperty]
+    public partial CodeViewTypeRecord? FunctionType
     {
-        get => _functionType.GetValue(this);
-        set => _functionType.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

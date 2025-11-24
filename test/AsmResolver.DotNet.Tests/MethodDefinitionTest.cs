@@ -8,6 +8,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
+using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Cil;
@@ -29,6 +30,17 @@ namespace AsmResolver.DotNet.Tests
         public MethodDefinitionTest(TemporaryDirectoryFixture fixture)
         {
             _fixture = fixture;
+        }
+
+        private static MethodDefinition RebuildAndLookup(MethodDefinition method)
+        {
+            var stream = new MemoryStream();
+            method.DeclaringModule!.Write(stream);
+
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
+            return newModule
+                .TopLevelTypes.First(t => t.FullName == method.DeclaringType!.FullName)
+                .Methods.First(f => f.Name == method.Name);
         }
 
         [Fact]
@@ -710,6 +722,67 @@ namespace AsmResolver.DotNet.Tests
             );
 
             Assert.ThrowsAny<ArgumentException>(() => method1.MethodBody = method2.MethodBody);
+        }
+
+        [Fact]
+        public void VerifyAsyncMethodSignature()
+        {
+            var module = new ModuleDefinition("Module", KnownCorLibs.SystemRuntime_v9_0_0_0);
+            var factory = module.CorLibTypeFactory;
+
+            var method = new MethodDefinition("Method", MethodAttributes.Static, MethodSignature.CreateStatic(factory.Void))
+            {
+                IsRuntimeAsync = true
+            };
+            method.VerifyMetadata();
+
+            method.IsSynchronized = true;
+            Assert.Throws<AggregateException>(() => method.VerifyMetadata());
+            method.IsSynchronized = false;
+
+            method.Signature.Attributes |= CallingConventionAttributes.VarArg;
+            Assert.Throws<AggregateException>(() => method.VerifyMetadata());
+            method.Signature.Attributes &= ~CallingConventionAttributes.VarArg;
+
+            method.Signature.ReturnType = factory.Int32.MakeByReferenceType();
+            Assert.Throws<AggregateException>(() => method.VerifyMetadata());
+
+            method.Signature.ReturnType = factory.CorLibScope.CreateTypeReference("System", "Span`1").MakeGenericInstanceType(factory.Int32);
+            Assert.Throws<AggregateException>(() => method.VerifyMetadata());
+        }
+
+        [Fact]
+        public void ExternalTypeDefAsReturnTypeShouldAutoConvertToTypeRef()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
+            var sourceType = sourceModule.LookupMember<TypeDefinition>(typeof(TopLevelClass1).MetadataToken);
+
+            var targetModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var method = new MethodDefinition("Method", MethodAttributes.Static, MethodSignature.CreateStatic(sourceType.ToTypeSignature()));
+            targetModule.GetOrCreateModuleType().Methods.Add(method);
+
+            var newMethod = RebuildAndLookup(method);
+
+            var newType = Assert.IsAssignableFrom<TypeReference>(newMethod.Signature?.ReturnType.GetUnderlyingTypeDefOrRef());
+            Assert.Equal<ITypeDefOrRef>(sourceType, newType, SignatureComparer.Default);
+        }
+
+        [Fact]
+        public void ExternalTypeDefAsParameterTypeShouldAutoConvertToTypeRef()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
+            var sourceType = sourceModule.LookupMember<TypeDefinition>(typeof(TopLevelClass1).MetadataToken);
+
+            var targetModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var method = new MethodDefinition("Method", MethodAttributes.Static,
+                MethodSignature.CreateStatic(targetModule.CorLibTypeFactory.Void, sourceType.ToTypeSignature())
+            );
+            targetModule.GetOrCreateModuleType().Methods.Add(method);
+
+            var newMethod = RebuildAndLookup(method);
+
+            var newType = Assert.IsAssignableFrom<TypeReference>(newMethod.Signature?.ParameterTypes[0].GetUnderlyingTypeDefOrRef());
+            Assert.Equal<ITypeDefOrRef>(sourceType, newType, SignatureComparer.Default);
         }
     }
 }

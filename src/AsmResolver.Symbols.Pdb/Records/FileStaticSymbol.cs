@@ -5,18 +5,13 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a file static variable symbol.
 /// </summary>
-public class FileStaticSymbol : CodeViewSymbol, IVariableSymbol
+public partial class FileStaticSymbol : CodeViewSymbol, IVariableSymbol
 {
-    private readonly LazyVariable<FileStaticSymbol, Utf8String?> _name;
-    private readonly LazyVariable<FileStaticSymbol, CodeViewTypeRecord?> _variableType;
-
     /// <summary>
     /// Initializes an empty file static symbol.
     /// </summary>
     protected FileStaticSymbol()
     {
-        _name = new LazyVariable<FileStaticSymbol, Utf8String?>(x => x.GetName());
-        _variableType = new LazyVariable<FileStaticSymbol, CodeViewTypeRecord?>(x => x.GetVariableType());
     }
 
     /// <summary>
@@ -28,8 +23,8 @@ public class FileStaticSymbol : CodeViewSymbol, IVariableSymbol
     public FileStaticSymbol(Utf8String name, CodeViewTypeRecord variableType, LocalAttributes attributes)
     {
         Attributes = attributes;
-        _name = new LazyVariable<FileStaticSymbol, Utf8String?>(name);
-        _variableType = new LazyVariable<FileStaticSymbol, CodeViewTypeRecord?>(variableType);
+        Name = name;
+        VariableType = variableType;
     }
 
     /// <inheritdoc />
@@ -54,17 +49,19 @@ public class FileStaticSymbol : CodeViewSymbol, IVariableSymbol
     }
 
     /// <inheritdoc />
-    public Utf8String? Name
+    [LazyProperty]
+    public partial Utf8String? Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <inheritdoc />
-    public CodeViewTypeRecord? VariableType
+    [LazyProperty]
+    public partial CodeViewTypeRecord? VariableType
     {
-        get => _variableType.GetValue(this);
-        set => _variableType.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

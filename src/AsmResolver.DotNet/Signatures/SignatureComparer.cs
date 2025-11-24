@@ -40,9 +40,9 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(byte[]? x, byte[]? y) => ByteArrayEqualityComparer.Instance.Equals(x, y);
+        public virtual bool Equals(byte[]? x, byte[]? y) => ByteArrayEqualityComparer.Instance.Equals(x, y);
 
         /// <inheritdoc />
-        public int GetHashCode(byte[] obj) => ByteArrayEqualityComparer.Instance.GetHashCode(obj);
+        public virtual int GetHashCode(byte[] obj) => ByteArrayEqualityComparer.Instance.GetHashCode(obj);
     }
 }

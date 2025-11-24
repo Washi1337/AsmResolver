@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet
     /// signature. Parameter definitions only provide additional information, such as a name, attributes or a default
     /// value.
     /// </remarks>
-    public class ParameterDefinition :
+    public partial class ParameterDefinition :
         MetadataMember,
         IHasCustomAttribute,
         IHasConstant,
@@ -22,11 +22,9 @@ namespace AsmResolver.DotNet
         IModuleProvider,
         IOwnedCollectionElement<MethodDefinition>
     {
-        private readonly LazyVariable<ParameterDefinition, Utf8String?> _name;
-        private readonly LazyVariable<ParameterDefinition, MethodDefinition?> _method;
-        private readonly LazyVariable<ParameterDefinition, Constant?> _constant;
-        private readonly LazyVariable<ParameterDefinition, MarshalDescriptor?> _marshalDescriptor;
-        private IList<CustomAttribute>? _customAttributes;
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes a new parameter definition.
@@ -35,10 +33,6 @@ namespace AsmResolver.DotNet
         protected ParameterDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<ParameterDefinition, Utf8String?>(x => x.GetName());
-            _method = new LazyVariable<ParameterDefinition, MethodDefinition?>(x => x.GetMethod());
-            _constant = new LazyVariable<ParameterDefinition, Constant?>(x => x.GetConstant());
-            _marshalDescriptor = new LazyVariable<ParameterDefinition, MarshalDescriptor?>(x => x.GetMarshalDescriptor());
         }
 
         /// <summary>
@@ -71,10 +65,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the parameter definition table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -160,10 +155,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the method that defines the parameter.
         /// </summary>
-        public MethodDefinition? Method
+        [LazyProperty]
+        public partial MethodDefinition? Method
         {
-            get => _method.GetValue(this);
-            private set => _method.SetValue(value);
+            get;
+            private set;
         }
 
         MethodDefinition? IOwnedCollectionElement<MethodDefinition>.Owner
@@ -178,13 +174,16 @@ namespace AsmResolver.DotNet
         ModuleDefinition? IModuleProvider.ContextModule => DeclaringModule;
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 
@@ -194,10 +193,11 @@ namespace AsmResolver.DotNet
         /// flag should be set. However, assigning a new value to this property does not automatically update the value
         /// of the <see cref="HasDefault"/> property.
         /// </remarks>
-        public Constant? Constant
+        [LazyProperty]
+        public partial Constant? Constant
         {
-            get => _constant.GetValue(this);
-            set => _constant.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -206,10 +206,11 @@ namespace AsmResolver.DotNet
         /// flag should be set. However, assigning a new value to this property does not automatically update the value
         /// of the <see cref="HasFieldMarshal"/> property.
         /// </remarks>
-        public MarshalDescriptor? MarshalDescriptor
+        [LazyProperty]
+        public partial MarshalDescriptor? MarshalDescriptor
         {
-            get => _marshalDescriptor.GetValue(this);
-            set => _marshalDescriptor.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

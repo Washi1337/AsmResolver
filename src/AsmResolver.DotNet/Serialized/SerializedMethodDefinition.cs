@@ -33,6 +33,26 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
+        public override bool HasCustomAttributes => CustomAttributesInternal is null
+            ? _context.ParentModule.HasNonEmptyCustomAttributes(this)
+            : CustomAttributesInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasParameterDefinitions => ParameterDefinitionsInternal is null
+            ? !_context.ParentModule.GetParameterRange(MetadataToken.Rid).IsEmpty
+            : ParameterDefinitionsInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasGenericParameters => GenericParametersInternal is null
+            ? _context.ParentModule.GetGenericParameters(MetadataToken).Count > 0
+            : GenericParametersInternal.Count > 0;
+
+        /// <inheritdoc />
+        public override bool HasSecurityDeclarations => SecurityDeclarationsInternal is null
+            ? _context.ParentModule.HasNonEmptySecurityDeclarations(this)
+            : SecurityDeclarationsInternal.Count > 0;
+
+        /// <inheritdoc />
         protected override Utf8String? GetName() => _context.StringsStream?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
@@ -83,7 +103,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override MethodBody? GetBody() =>
+        protected override MethodBody? GetMethodBody() =>
             _context.Parameters.MethodBodyReader.ReadMethodBody(_context, this, _row);
 
         /// <inheritdoc />
@@ -94,6 +114,10 @@ namespace AsmResolver.DotNet.Serialized
                 ? member as ImplementationMap
                 : null;
         }
+
+        /// <inheritdoc />
+        protected override int GetGenericParameterCount()
+            => GenericParametersInternal?.Count ?? _context.ParentModule.GetGenericParameters(MetadataToken).Count;
 
         /// <inheritdoc />
         protected override IList<GenericParameter> GetGenericParameters()

@@ -11,17 +11,17 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single event in a type definition of a .NET module.
     /// </summary>
-    public class EventDefinition :
+    public partial class EventDefinition :
         MetadataMember,
         IHasSemantics,
         IHasCustomAttribute,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<EventDefinition, Utf8String?> _name;
-        private readonly LazyVariable<EventDefinition, TypeDefinition?> _declaringType;
-        private readonly LazyVariable<EventDefinition, ITypeDefOrRef?> _eventType;
         private IList<MethodSemantics>? _semantics;
-        private IList<CustomAttribute>? _customAttributes;
+
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes a new property definition.
@@ -30,9 +30,6 @@ namespace AsmResolver.DotNet
         protected EventDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<EventDefinition, Utf8String?>(x => x.GetName());
-            _eventType = new LazyVariable<EventDefinition, ITypeDefOrRef?>(x => x.GetEventType());
-            _declaringType = new LazyVariable<EventDefinition, TypeDefinition?>(x => x.GetDeclaringType());
         }
 
         /// <summary>
@@ -84,10 +81,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the event table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -98,10 +96,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the delegate type of the event.
         /// </summary>
-        public ITypeDefOrRef? EventType
+        [LazyProperty]
+        public partial ITypeDefOrRef? EventType
         {
-            get => _eventType.GetValue(this);
-            set => _eventType.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -112,10 +111,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the type that defines the property.
         /// </summary>
-        public TypeDefinition? DeclaringType
+        [LazyProperty]
+        public partial TypeDefinition? DeclaringType
         {
-            get => _declaringType.GetValue(this);
-            private set => _declaringType.SetValue(value);
+            get;
+            private set;
         }
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
@@ -165,13 +165,16 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
@@ -9,16 +9,15 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type definition that was exported to another external .NET module.
     /// </summary>
-    public class ExportedType :
+    public partial class ExportedType :
         MetadataMember,
         IImplementation,
         ITypeDescriptor,
         IOwnedCollectionElement<ModuleDefinition>
     {
-        private readonly LazyVariable<ExportedType, Utf8String?> _name;
-        private readonly LazyVariable<ExportedType, Utf8String?> _namespace;
-        private readonly LazyVariable<ExportedType, IImplementation?> _implementation;
-        private IList<CustomAttribute>? _customAttributes;
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes an exported type with a metadata token.
@@ -27,9 +26,6 @@ namespace AsmResolver.DotNet
         protected ExportedType(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<ExportedType, Utf8String?>(x => x.GetName());
-            _namespace = new LazyVariable<ExportedType, Utf8String?>(x => x.GetNamespace());
-            _implementation = new LazyVariable<ExportedType, IImplementation?>(x => x.GetImplementation());
         }
 
         /// <summary>
@@ -38,7 +34,7 @@ namespace AsmResolver.DotNet
         /// <param name="implementation">The file containing the type.</param>
         /// <param name="ns">The namespace of the type.</param>
         /// <param name="name">The name of the type.</param>
-        public ExportedType(IImplementation? implementation, string? ns, string? name)
+        public ExportedType(IImplementation? implementation, Utf8String? ns, Utf8String? name)
             : this(new MetadataToken(TableIndex.ExportedType, 1))
         {
             Implementation = implementation;
@@ -70,10 +66,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the exported type table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -84,10 +81,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Namespace column in the exported type table.
         /// </remarks>
-        public Utf8String? Namespace
+        [LazyProperty]
+        public partial Utf8String? Namespace
         {
-            get => _namespace.GetValue(this);
-            set => _namespace.SetValue(value);
+            get;
+            set;
         }
 
         string? ITypeDescriptor.Namespace => Namespace;
@@ -111,10 +109,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the new location this type is exported to.
         /// </summary>
-        public IImplementation? Implementation
+        [LazyProperty]
+        public partial IImplementation? Implementation
         {
-            get => _implementation.GetValue(this);
-            set => _implementation.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -128,13 +127,16 @@ namespace AsmResolver.DotNet
         public IResolutionScope? Scope => ContextModule;
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 

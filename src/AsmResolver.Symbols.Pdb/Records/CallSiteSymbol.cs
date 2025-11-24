@@ -5,16 +5,13 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Provides information about the signature of an indirect call.
 /// </summary>
-public class CallSiteSymbol : CodeViewSymbol
+public partial class CallSiteSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<CallSiteSymbol, CodeViewTypeRecord?> _functionType;
-
     /// <summary>
     /// Initializes an empty call site symbol.
     /// </summary>
     protected CallSiteSymbol()
     {
-        _functionType = new LazyVariable<CallSiteSymbol, CodeViewTypeRecord?>(x => x.GetFunctionType());
     }
 
     /// <summary>
@@ -27,7 +24,7 @@ public class CallSiteSymbol : CodeViewSymbol
     {
         SectionIndex = sectionIndex;
         Offset = offset;
-        _functionType = new LazyVariable<CallSiteSymbol, CodeViewTypeRecord?>(functionType);
+        FunctionType = functionType;
     }
 
     /// <inheritdoc />
@@ -54,10 +51,11 @@ public class CallSiteSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the type describing the shape of the function that is called.
     /// </summary>
-    public CodeViewTypeRecord? FunctionType
+    [LazyProperty]
+    public partial CodeViewTypeRecord? FunctionType
     {
-        get => _functionType.GetValue(this);
-        set => _functionType.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

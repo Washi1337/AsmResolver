@@ -8,16 +8,13 @@ namespace AsmResolver.PE.Win32Resources
     /// <summary>
     /// Represents a single data entry in a Win32 resource directory.
     /// </summary>
-    public class ResourceData : IResourceEntry
+    public partial class ResourceData : IResourceEntry
     {
-        private readonly LazyVariable<ResourceData, ISegment?> _contents;
-
         /// <summary>
         /// Initializes a new resource data entry.
         /// </summary>
         protected ResourceData()
         {
-            _contents = new LazyVariable<ResourceData, ISegment?>(x => x.GetContents());
         }
 
         /// <summary>
@@ -80,10 +77,11 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Gets or sets the raw contents of the data entry.
         /// </summary>
-        public ISegment? Contents
+        [LazyProperty]
+        public partial ISegment? Contents
         {
-            get => _contents.GetValue(this);
-            set => _contents.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

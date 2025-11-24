@@ -142,6 +142,30 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ResolveTypeWithSelfAssemblyScope()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var original = module.TopLevelTypes.First(t => t.Name == "Program");
+            var reference = module.TopLevelTypes.First(t => t.Name == "Program").ToTypeReference();
+
+            var definition = reference.Resolve();
+
+            Assert.Same(original, definition);
+        }
+
+        [Fact]
+        public void ResolveTypeWithSelfAssemblyScopeNoContext()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var original = module.TopLevelTypes.First(t => t.Name == "Program");
+            var reference = new TypeReference(module.Assembly!.ToAssemblyReference(), original.Namespace, original.Name);
+
+            var definition = reference.Resolve(module);
+
+            Assert.Same(original, definition);
+        }
+
+        [Fact]
         public void ResolveTypeWithModuleScope()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.TypeRefModuleScope, TestReaderParameters);
@@ -305,5 +329,6 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal(definitions, resolved, new SignatureComparer());
         }
+
     }
 }

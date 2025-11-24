@@ -12,19 +12,18 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single property in a type definition of a .NET module.
     /// </summary>
-    public class PropertyDefinition :
+    public partial class PropertyDefinition :
         MetadataMember,
         IHasSemantics,
         IHasCustomAttribute,
         IHasConstant,
         IOwnedCollectionElement<TypeDefinition>
     {
-        private readonly LazyVariable<PropertyDefinition, Utf8String?> _name;
-        private readonly LazyVariable<PropertyDefinition, TypeDefinition?> _declaringType;
-        private readonly LazyVariable<PropertyDefinition, PropertySignature?> _signature;
-        private readonly LazyVariable<PropertyDefinition, Constant?> _constant;
         private IList<MethodSemantics>? _semantics;
-        private IList<CustomAttribute>? _customAttributes;
+
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes a new property definition.
@@ -33,10 +32,6 @@ namespace AsmResolver.DotNet
         protected PropertyDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<PropertyDefinition, Utf8String?>(x => x.GetName());
-            _signature = new LazyVariable<PropertyDefinition, PropertySignature?>(x => x.GetSignature());
-            _declaringType = new LazyVariable<PropertyDefinition, TypeDefinition?>(x => x.GetDeclaringType());
-            _constant = new LazyVariable<PropertyDefinition, Constant?>(x => x.GetConstant());
         }
 
         /// <summary>
@@ -99,10 +94,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the property definition table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -114,10 +110,11 @@ namespace AsmResolver.DotNet
         /// Gets or sets the signature of the property. This includes the property type, as well as any parameters the
         /// property might define.
         /// </summary>
-        public PropertySignature? Signature
+        [LazyProperty]
+        public partial PropertySignature? Signature
         {
-            get => _signature.GetValue(this);
-            set => _signature.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -128,10 +125,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the type that defines the property.
         /// </summary>
-        public TypeDefinition? DeclaringType
+        [LazyProperty]
+        public partial TypeDefinition? DeclaringType
         {
-            get => _declaringType.GetValue(this);
-            private set => _declaringType.SetValue(value);
+            get;
+            private set;
         }
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
@@ -154,21 +152,25 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 
         /// <inheritdoc />
-        public Constant? Constant
+        [LazyProperty]
+        public partial Constant? Constant
         {
-            get => _constant.GetValue(this);
-            set => _constant.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>

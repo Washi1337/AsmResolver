@@ -297,12 +297,10 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public TypeDefinition? Resolve() => ContextModule is not null
-            ? Resolve(ContextModule)
-            : null;
+        public TypeDefinition? Resolve() => GetUnderlyingTypeDefOrRef()?.Resolve();
 
         /// <inheritdoc />
-        public abstract TypeDefinition? Resolve(ModuleDefinition context);
+        public TypeDefinition? Resolve(ModuleDefinition context) => GetUnderlyingTypeDefOrRef()?.Resolve(context);
 
         IMemberDefinition? IMemberDescriptor.Resolve() => Resolve();
 

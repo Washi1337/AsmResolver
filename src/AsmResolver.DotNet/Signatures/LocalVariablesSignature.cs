@@ -42,6 +42,15 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
+        /// Creates a new empty local variables signature.
+        /// </summary>
+        public LocalVariablesSignature(int capacity)
+            : base(CallingConventionAttributes.Local)
+        {
+            VariableTypes = new List<TypeSignature>(capacity);
+        }
+
+        /// <summary>
         /// Creates a new local variables signature with the provided variable types.
         /// </summary>
         /// <param name="variableTypes">The types of the variables.</param>

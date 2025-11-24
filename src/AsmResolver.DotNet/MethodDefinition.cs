@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single method in a type definition of a .NET module.
     /// </summary>
-    public class MethodDefinition :
+    public partial class MethodDefinition :
         MetadataMember,
         IMemberDefinition,
         IOwnedCollectionElement<TypeDefinition>,
@@ -27,18 +27,23 @@ namespace AsmResolver.DotNet
         IHasSecurityDeclaration,
         IManagedEntryPoint
     {
-        private readonly LazyVariable<MethodDefinition, Utf8String?> _name;
-        private readonly LazyVariable<MethodDefinition, TypeDefinition?> _declaringType;
-        private readonly LazyVariable<MethodDefinition, MethodSignature?> _signature;
-        private readonly LazyVariable<MethodDefinition, MethodBody?> _methodBody;
-        private readonly LazyVariable<MethodDefinition, ImplementationMap?> _implementationMap;
-        private readonly LazyVariable<MethodDefinition, MethodSemantics?> _semantics;
-        private readonly LazyVariable<MethodDefinition, UnmanagedExportInfo?> _exportInfo;
-        private IList<ParameterDefinition>? _parameterDefinitions;
         private ParameterCollection? _parameters;
-        private IList<CustomAttribute>? _customAttributes;
-        private IList<SecurityDeclaration>? _securityDeclarations;
-        private IList<GenericParameter>? _genericParameters;
+
+        /// <summary> The internal parameter definitions list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="ParameterDefinitions"/> instead.</remarks>
+        protected IList<ParameterDefinition>? ParameterDefinitionsInternal;
+
+        /// <summary> The internal security declarations list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="SecurityDeclarations"/> instead.</remarks>
+        protected IList<SecurityDeclaration>? SecurityDeclarationsInternal;
+
+        /// <summary> The internal generic parameter list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="GenericParameters"/> instead.</remarks>
+        protected IList<GenericParameter>? GenericParametersInternal;
+
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes a new method definition.
@@ -47,19 +52,6 @@ namespace AsmResolver.DotNet
         protected MethodDefinition(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<MethodDefinition, Utf8String?>(x => x.GetName());
-            _declaringType = new LazyVariable<MethodDefinition, TypeDefinition?>(x => x.GetDeclaringType());
-            _signature = new LazyVariable<MethodDefinition, MethodSignature?>(x => x.GetSignature());
-            _methodBody = new LazyVariable<MethodDefinition, MethodBody?>(static x =>
-            {
-                var body = x.GetBody();
-                if (body is not null)
-                    body.Owner = x;
-                return body;
-            });
-            _implementationMap = new LazyVariable<MethodDefinition, ImplementationMap?>(x => x.GetImplementationMap());
-            _semantics = new LazyVariable<MethodDefinition, MethodSemantics?>(x => x.GetSemantics());
-            _exportInfo = new LazyVariable<MethodDefinition, UnmanagedExportInfo?>(x => x.GetExportInfo());
         }
 
         /// <summary>
@@ -119,10 +111,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the method definition table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -131,10 +124,11 @@ namespace AsmResolver.DotNet
         /// Gets or sets the signature of the method This includes the return type, as well as the types of the
         /// parameters that this method defines.
         /// </summary>
-        public MethodSignature? Signature
+        [LazyProperty]
+        public partial MethodSignature? Signature
         {
-            get => _signature.GetValue(this);
-            set => _signature.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -550,6 +544,20 @@ namespace AsmResolver.DotNet
                 | (value ? MethodImplAttributes.SecurityMitigations : 0);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this method utilizes runtime async.
+        /// </summary>
+        /// <remarks>
+        /// This feature is in preview for .NET 10.
+        /// See https://github.com/dotnet/runtime/issues/109632
+        /// </remarks>
+        public bool IsRuntimeAsync
+        {
+            get => (ImplAttributes & MethodImplAttributes.Async) != 0;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.Async)
+                | (value ? MethodImplAttributes.Async : 0);
+        }
+
         /// <inheritdoc />
         public virtual ModuleDefinition? DeclaringModule => DeclaringType?.DeclaringModule;
 
@@ -558,10 +566,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the type that defines the method.
         /// </summary>
-        public TypeDefinition? DeclaringType
+        [LazyProperty]
+        public partial TypeDefinition? DeclaringType
         {
-            get => _declaringType.GetValue(this);
-            set => _declaringType.SetValue(value);
+            get;
+            set;
         }
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
@@ -575,6 +584,16 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a value indicating whether the method defines parameter definitions.
+        /// </summary>
+        /// <remarks>
+        /// This property might not reflect the list of actual parameters that the method defines and uses according
+        /// to the method signature. This property only reflects the list that is inferred from the ParamList column
+        /// in the metadata row. For the actual list of parameters, use the <see cref="Parameters"/> property instead.
+        /// </remarks>
+        public virtual bool HasParameterDefinitions => ParameterDefinitionsInternal is { Count: > 0 };
+
+        /// <summary>
         /// Gets a collection of parameter definitions that this method defines.
         /// </summary>
         /// <remarks>
@@ -586,9 +605,9 @@ namespace AsmResolver.DotNet
         {
             get
             {
-                if (_parameterDefinitions is null)
-                    Interlocked.CompareExchange(ref _parameterDefinitions, GetParameterDefinitions(), null);
-                return _parameterDefinitions;
+                if (ParameterDefinitionsInternal is null)
+                    Interlocked.CompareExchange(ref ParameterDefinitionsInternal, GetParameterDefinitions(), null);
+                return ParameterDefinitionsInternal;
             }
         }
 
@@ -621,30 +640,11 @@ namespace AsmResolver.DotNet
         /// <see cref="ImplAttributes"/>.
         /// </para>
         /// </remarks>
-        public MethodBody? MethodBody
+        [LazyProperty(OwnerProperty = nameof(MethodBody.Owner))]
+        public partial MethodBody? MethodBody
         {
-            get
-            {
-                // We don't need to lock here as GetValue already locks on the lazy variable when necessary.
-                // ReSharper disable once InconsistentlySynchronizedField
-                return _methodBody.GetValue(this);
-            }
-            set
-            {
-                lock (_methodBody)
-                {
-                    if (value is { Owner: { } originalOwner })
-                        throw new ArgumentException($"Method body is already assigned to method {originalOwner.SafeToString()}.");
-
-                    if (_methodBody.IsInitialized && _methodBody.GetValue(this) is { } originalBody)
-                        originalBody.Owner = null;
-
-                    _methodBody.SetValue(value);
-
-                    if (value is not null)
-                        value.Owner = this;
-                }
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -689,61 +689,63 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ImplementationMap? ImplementationMap
+        [LazyProperty(OwnerProperty = nameof(ImplementationMap.MemberForwarded))]
+        public partial ImplementationMap? ImplementationMap
         {
-            get => _implementationMap.GetValue(this);
-            set
-            {
-                if (value?.MemberForwarded is not null)
-                    throw new ArgumentException("Cannot add an implementation map that was already added to another member.");
-                if (_implementationMap.GetValue(this) is { } map)
-                    map.MemberForwarded = null;
-                _implementationMap.SetValue(value);
-                if (value is not null)
-                    value.MemberForwarded = this;
-            }
+            get;
+            set;
         }
+
+        /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
+
+        /// <inheritdoc />
+        public virtual bool HasSecurityDeclarations => SecurityDeclarationsInternal is { Count: > 0 };
 
         /// <inheritdoc />
         public IList<SecurityDeclaration> SecurityDeclarations
         {
             get
             {
-                if (_securityDeclarations is null)
-                    Interlocked.CompareExchange(ref _securityDeclarations, GetSecurityDeclarations(), null);
-                return _securityDeclarations;
+                if (SecurityDeclarationsInternal is null)
+                    Interlocked.CompareExchange(ref SecurityDeclarationsInternal, GetSecurityDeclarations(), null);
+                return SecurityDeclarationsInternal;
             }
         }
+
+        /// <inheritdoc />
+        public virtual bool HasGenericParameters => GenericParametersInternal is { Count: > 0 };
 
         /// <inheritdoc />
         public IList<GenericParameter> GenericParameters
         {
             get
             {
-                if (_genericParameters is null)
-                    Interlocked.CompareExchange(ref _genericParameters, GetGenericParameters(), null);
-                return _genericParameters;
+                if (GenericParametersInternal is null)
+                    Interlocked.CompareExchange(ref GenericParametersInternal, GetGenericParameters(), null);
+                return GenericParametersInternal;
             }
         }
 
         /// <summary>
         /// Gets the semantics associated to this method (if available).
         /// </summary>
-        public MethodSemantics? Semantics
+        [LazyProperty]
+        public partial MethodSemantics? Semantics
         {
-            get => _semantics.GetValue(this);
-            set => _semantics.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -786,10 +788,11 @@ namespace AsmResolver.DotNet
         /// Gets or sets the unmanaged export info assigned to this method (if available). This can be used to indicate
         /// that a method needs to be exported in the final PE file as an unmanaged symbol.
         /// </summary>
-        public UnmanagedExportInfo? ExportInfo
+        [LazyProperty]
+        public partial UnmanagedExportInfo? ExportInfo
         {
-            get => _exportInfo.GetValue(this);
-            set => _exportInfo.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -963,7 +966,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="MethodBody"/> property.
         /// </remarks>
-        protected virtual MethodBody? GetBody() => null;
+        protected virtual MethodBody? GetMethodBody() => null;
 
         /// <summary>
         /// Obtains the platform invoke information assigned to the method.
@@ -993,6 +996,12 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<SecurityDeclaration> GetSecurityDeclarations() =>
             new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(this);
+
+        /// <summary>
+        /// Measures the number of generic parameters defined by this method.
+        /// </summary>
+        /// <returns>The number of generic parameters.</returns>
+        protected virtual int GetGenericParameterCount() => GenericParameters.Count;
 
         /// <summary>
         /// Obtains the list of generic parameters this member declares.
@@ -1031,6 +1040,46 @@ namespace AsmResolver.DotNet
         /// </exception>
         public void VerifyMetadata() => VerifyMetadata(ThrowErrorListener.Instance);
 
+        private sealed class IsByRefLikeVisitor : ITypeSignatureVisitor<MethodDefinition, bool>
+        {
+            public static IsByRefLikeVisitor Instance { get; } = new();
+
+            private IsByRefLikeVisitor() { }
+
+            public bool VisitArrayType(ArrayTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitBoxedType(BoxedTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitByReferenceType(ByReferenceTypeSignature signature, MethodDefinition state) => true;
+
+            public bool VisitCorLibType(CorLibTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitCustomModifierType(CustomModifierTypeSignature signature, MethodDefinition state) => signature.BaseType.AcceptVisitor(this, state);
+
+            public bool VisitGenericInstanceType(GenericInstanceTypeSignature signature, MethodDefinition state) => signature.GenericType.Resolve()?.IsByRefLike ?? false;
+
+            public bool VisitGenericParameter(GenericParameterSignature signature, MethodDefinition state)
+            {
+                var parameter = signature.ParameterType == GenericParameterType.Type
+                    ? state.DeclaringType!.GenericParameters[signature.Index]
+                    : state.GenericParameters[signature.Index];
+
+                return parameter.HasAllowByRefLike;
+            }
+
+            public bool VisitPinnedType(PinnedTypeSignature signature, MethodDefinition state) => signature.BaseType.AcceptVisitor(this, state);
+
+            public bool VisitPointerType(PointerTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitSentinelType(SentinelTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitSzArrayType(SzArrayTypeSignature signature, MethodDefinition state) => false;
+
+            public bool VisitTypeDefOrRef(TypeDefOrRefSignature signature, MethodDefinition state) => signature.Type.Resolve()?.IsByRefLike ?? false;
+
+            public bool VisitFunctionPointerType(FunctionPointerTypeSignature signature, MethodDefinition state) => false;
+        }
+
         /// <summary>
         /// Asserts whether the method's metadata is consistent with its signature.
         /// </summary>
@@ -1054,18 +1103,38 @@ namespace AsmResolver.DotNet
                     );
                 }
 
-                if (GenericParameters.Count > 0 && !Signature.IsGeneric)
+                int count = GetGenericParameterCount();
+                if (count > 0 && !Signature.IsGeneric)
                 {
                     GetBag().MetadataBuilder(
                         "Method defines generic parameters but its signature is not marked as generic."
                     );
                 }
 
-                if (GenericParameters.Count != Signature.GenericParameterCount)
+                if (count != Signature.GenericParameterCount)
                 {
                     GetBag().MetadataBuilder(
-                        $"Method defines {GenericParameters.Count} generic parameters but its signature defines {Signature.GenericParameterCount} parameters."
+                        $"Method defines {count} generic parameters but its signature defines {Signature.GenericParameterCount} parameters."
                     );
+                }
+
+                // https://github.com/dotnet/runtime/blob/0ad494ba0eb84ada521d259c7d24dd0892c7a54d/docs/design/specs/runtime-async.md
+                if (IsRuntimeAsync)
+                {
+                    if (IsSynchronized)
+                    {
+                        GetBag().MetadataBuilder("Method cannot be both Async and Synchronized.");
+                    }
+
+                    if (Signature.ReturnType.AcceptVisitor(IsByRefLikeVisitor.Instance, this))
+                    {
+                        GetBag().MetadataBuilder("Method is Async but has a byref or byref-like return type.");
+                    }
+
+                    if (Signature.CallingConvention == CallingConventionAttributes.VarArg)
+                    {
+                        GetBag().MetadataBuilder("Method is Async but has a VarArg signature.");
+                    }
                 }
             }
 

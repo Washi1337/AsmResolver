@@ -3,10 +3,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a pointer type in a TPI or IPI stream.
 /// </summary>
-public class PointerTypeRecord : CodeViewTypeRecord
+public partial class PointerTypeRecord : CodeViewTypeRecord
 {
-    private readonly LazyVariable<PointerTypeRecord, CodeViewTypeRecord> _baseType;
-
     /// <summary>
     /// Initializes a new empty pointer type.
     /// </summary>
@@ -14,7 +12,6 @@ public class PointerTypeRecord : CodeViewTypeRecord
     protected PointerTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _baseType = new LazyVariable<PointerTypeRecord, CodeViewTypeRecord>(x => x.GetBaseType());
     }
 
     /// <summary>
@@ -25,7 +22,7 @@ public class PointerTypeRecord : CodeViewTypeRecord
     public PointerTypeRecord(CodeViewTypeRecord type, PointerAttributes attributes)
         : base(0)
     {
-        _baseType = new LazyVariable<PointerTypeRecord, CodeViewTypeRecord>(type);
+        BaseType = type;
         Attributes = attributes;
     }
 
@@ -38,7 +35,7 @@ public class PointerTypeRecord : CodeViewTypeRecord
     public PointerTypeRecord(CodeViewTypeRecord type, PointerAttributes attributes, byte size)
         : base(0)
     {
-        _baseType = new LazyVariable<PointerTypeRecord, CodeViewTypeRecord>(type);
+        BaseType = type;
         Attributes = attributes;
         Size = size;
     }
@@ -49,10 +46,11 @@ public class PointerTypeRecord : CodeViewTypeRecord
     /// <summary>
     /// Gets or sets the referent type of the pointer.
     /// </summary>
-    public CodeViewTypeRecord BaseType
+    [LazyProperty]
+    public partial CodeViewTypeRecord BaseType
     {
-        get => _baseType.GetValue(this);
-        set => _baseType.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

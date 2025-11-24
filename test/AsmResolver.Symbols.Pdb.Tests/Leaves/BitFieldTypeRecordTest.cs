@@ -16,7 +16,7 @@ public class BitFieldTypeRecordTest : IClassFixture<MockPdbFixture>
     public void ReadBaseType()
     {
         var type = (BitFieldTypeRecord) _fixture.MyTestApplication.GetLeafRecord(0x1060);
-        Assert.Equal(SimpleTypeKind.UInt32Long, Assert.IsAssignableFrom<SimpleTypeRecord>(type.Type).Kind);
+        Assert.Equal(SimpleTypeKind.UInt32Long, Assert.IsAssignableFrom<SimpleTypeRecord>(type.BaseType).Kind);
     }
 
     [Fact]

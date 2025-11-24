@@ -13,13 +13,13 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides a base implementation for describing a self-describing .NET assembly hosted by a common language runtime (CLR).
     /// </summary>
-    public abstract class AssemblyDescriptor : MetadataMember, IHasCustomAttribute, IFullNameProvider, IImportable
+    public abstract partial class AssemblyDescriptor : MetadataMember, IHasCustomAttribute, IFullNameProvider, IImportable
     {
         private const int PublicKeyTokenLength = 8;
 
-        private readonly LazyVariable<AssemblyDescriptor, Utf8String?> _name;
-        private readonly LazyVariable<AssemblyDescriptor, Utf8String?> _culture;
-        private IList<CustomAttribute>? _customAttributes;
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes a new empty assembly descriptor.
@@ -28,8 +28,6 @@ namespace AsmResolver.DotNet
         protected AssemblyDescriptor(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<AssemblyDescriptor, Utf8String?>(x => x.GetName());
-            _culture = new LazyVariable<AssemblyDescriptor, Utf8String?>(x => x.GetCulture());
             Version = new Version(0, 0, 0, 0);
         }
 
@@ -39,10 +37,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the assembly table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -148,13 +147,16 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 
@@ -175,10 +177,11 @@ namespace AsmResolver.DotNet
         /// <para>If this value is set to <c>null</c>, the default locale will be used</para>
         /// <para>This property corresponds to the Culture column in the assembly table.</para>
         /// </remarks>
-        public Utf8String? Culture
+        [LazyProperty]
+        public partial Utf8String? Culture
         {
-            get => _culture.GetValue(this);
-            set => _culture.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -260,5 +263,11 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <returns>The assembly definition, or <c>null</c> if the resolution failed.</returns>
         public abstract AssemblyDefinition? Resolve();
+
+        /// <summary>
+        /// Constructs a new assembly reference based on the descriptor.
+        /// </summary>
+        /// <returns>The reference.</returns>
+        public AssemblyReference ToAssemblyReference() => new(this);
     }
 }

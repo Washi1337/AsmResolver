@@ -3,11 +3,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Provides a base for all code view types that can define one or more fields.
 /// </summary>
-public abstract class CodeViewCompositeTypeRecord : CodeViewTypeRecord
+public abstract partial class CodeViewCompositeTypeRecord : CodeViewTypeRecord
 {
-    private readonly LazyVariable<CodeViewCompositeTypeRecord, Utf8String> _name;
-    private readonly LazyVariable<CodeViewCompositeTypeRecord, FieldListLeaf?> _fields;
-
     /// <summary>
     /// Initializes a new empty composite type.
     /// </summary>
@@ -15,8 +12,6 @@ public abstract class CodeViewCompositeTypeRecord : CodeViewTypeRecord
     protected CodeViewCompositeTypeRecord(uint typeIndex)
         : base(typeIndex)
     {
-        _name = new LazyVariable<CodeViewCompositeTypeRecord, Utf8String>(x => x.GetName());
-        _fields = new LazyVariable<CodeViewCompositeTypeRecord, FieldListLeaf?>(x => x.GetFields());
     }
 
     /// <summary>
@@ -31,19 +26,21 @@ public abstract class CodeViewCompositeTypeRecord : CodeViewTypeRecord
     /// <summary>
     /// Gets or sets the name of the type.
     /// </summary>
-    public Utf8String Name
+    [LazyProperty]
+    public partial Utf8String Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
     /// Gets a collection of fields that are defined in the enum.
     /// </summary>
-    public FieldListLeaf? Fields
+    [LazyProperty]
+    public partial FieldListLeaf? Fields
     {
-        get => _fields.GetValue(this);
-        set => _fields.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

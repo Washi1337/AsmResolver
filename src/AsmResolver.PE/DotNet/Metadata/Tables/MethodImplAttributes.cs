@@ -99,5 +99,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Documentation removal: https://github.com/dotnet/dotnet-api-docs/pull/4652
         /// </remarks>
         SecurityMitigations,
+
+        /// <summary>
+        /// Method is an Async Method.
+        /// </summary>
+        /// <remarks>
+        /// This feature is in preview for .NET 10.
+        /// See https://github.com/dotnet/runtime/issues/109632
+        /// </remarks>
+        Async = 0x2000,
     }
 }

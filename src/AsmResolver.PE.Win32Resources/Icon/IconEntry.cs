@@ -6,16 +6,13 @@ namespace AsmResolver.PE.Win32Resources.Icon;
 /// <summary>
 /// Represents a single icon entry in an icon group.
 /// </summary>
-public class IconEntry
+public partial class IconEntry
 {
-    private readonly LazyVariable<IconEntry, ISegment?> _pixelData;
-
     /// <summary>
     /// Initializes an empty icon entry.
     /// </summary>
     protected IconEntry()
     {
-        _pixelData = new LazyVariable<IconEntry, ISegment?>(x => x.GetData());
     }
 
     /// <summary>
@@ -109,10 +106,11 @@ public class IconEntry
     /// <summary>
     /// Gets or sets the raw pixel data of the icon.
     /// </summary>
-    public ISegment? PixelData
+    [LazyProperty]
+    public partial ISegment? PixelData
     {
-        get => _pixelData.GetValue(this);
-        set => _pixelData.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -122,7 +120,7 @@ public class IconEntry
     /// <remarks>
     /// This method is called upon initialization of the <see cref="PixelData"/> property.
     /// </remarks>
-    protected virtual ISegment? GetData() => null;
+    protected virtual ISegment? GetPixelData() => null;
 
     /// <summary>
     /// Serializes the icon entry to the provided output stream and inserts the icon pixel data into the provided

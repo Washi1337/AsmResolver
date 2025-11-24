@@ -477,7 +477,27 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == typeof(GenericType<,,>).Name);
+            Assert.True(type.HasGenericParameters);
             Assert.Equal(3, type.GenericParameters.Count);
+        }
+
+        [Fact]
+        public void ReadNoGenericParameters()
+        {
+            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NonGenericType));
+            Assert.False(type.HasGenericParameters);
+            Assert.Empty(type.GenericParameters);
+        }
+
+        [Fact]
+        public void AddGenericParameter()
+        {
+            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NonGenericType));
+            Assert.False(type.HasGenericParameters);
+            type.GenericParameters.Add(new GenericParameter("T"));
+            Assert.True(type.HasGenericParameters);
         }
 
         [Fact]
@@ -806,6 +826,22 @@ namespace AsmResolver.DotNet.Tests
             nestedType.DeclaringType!.NestedTypes.Remove(nestedType);
 
             Assert.Null(nestedType.DeclaringModule);
+        }
+
+        [Fact]
+        public void ExternalTypeDefAsBaseTypeShouldAutoConvertToTypeRef()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
+            var sourceType = sourceModule.LookupMember<TypeDefinition>(typeof(TopLevelClass1).MetadataToken);
+
+            var targetModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+            var type = new TypeDefinition("Namespace", "Name", TypeAttributes.Class, sourceType);
+            targetModule.TopLevelTypes.Add(type);
+
+            var newType = RebuildAndLookup(type);
+
+            Assert.IsAssignableFrom<TypeReference>(newType.BaseType);
+            Assert.Equal(type.BaseType, newType.BaseType, Comparer);
         }
     }
 }

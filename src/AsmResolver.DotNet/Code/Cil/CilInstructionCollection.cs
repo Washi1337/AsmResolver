@@ -233,6 +233,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
         private void ExpandMacro(CilInstruction instruction)
         {
+            // operand changes must come before opcode changes to not overwrite needed data
             switch (instruction.OpCode.Code)
             {
                 case CilCode.Ldc_I4_0:
@@ -246,8 +247,8 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilCode.Ldc_I4_8:
                 case CilCode.Ldc_I4_M1:
                 case CilCode.Ldc_I4_S:
-                    instruction.OpCode = CilOpCodes.Ldc_I4;
                     instruction.Operand = instruction.GetLdcI4Constant();
+                    instruction.OpCode = CilOpCodes.Ldc_I4;
                     break;
 
                 case CilCode.Ldarg_0:
@@ -255,25 +256,25 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilCode.Ldarg_2:
                 case CilCode.Ldarg_3:
                 case CilCode.Ldarg_S:
-                    instruction.OpCode = CilOpCodes.Ldarg;
                     instruction.Operand = Owner.Owner?.Parameters is { } parameters
                         ? instruction.GetParameter(parameters)
                         : (ushort) instruction.GetParameterIndex();
+                    instruction.OpCode = CilOpCodes.Ldarg;
                     break;
 
                 case CilCode.Ldarga_S:
                 {
-                    instruction.OpCode = CilOpCodes.Ldarga;
                     if (instruction.Operand is byte index)
                         instruction.Operand = (ushort) index;
+                    instruction.OpCode = CilOpCodes.Ldarga;
                     break;
                 }
 
                 case CilCode.Starg_S:
                 {
-                    instruction.OpCode = CilOpCodes.Starg;
                     if (instruction.Operand is byte index)
                         instruction.Operand = (ushort) index;
+                    instruction.OpCode = CilOpCodes.Starg;
                     break;
                 }
 
@@ -282,15 +283,15 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilCode.Ldloc_2:
                 case CilCode.Ldloc_3:
                 case CilCode.Ldloc_S:
-                    instruction.OpCode = CilOpCodes.Ldloc;
                     instruction.Operand = instruction.GetLocalVariable(Owner.LocalVariables);
+                    instruction.OpCode = CilOpCodes.Ldloc;
                     break;
 
                 case CilCode.Ldloca_S:
                 {
-                    instruction.OpCode = CilOpCodes.Ldloca;
                     if (instruction.Operand is byte index)
                         instruction.Operand = (ushort) index;
+                    instruction.OpCode = CilOpCodes.Ldloca;
                     break;
                 }
 
@@ -299,8 +300,8 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilCode.Stloc_2:
                 case CilCode.Stloc_3:
                 case CilCode.Stloc_S:
-                    instruction.OpCode = CilOpCodes.Stloc;
                     instruction.Operand = instruction.GetLocalVariable(Owner.LocalVariables);
+                    instruction.OpCode = CilOpCodes.Stloc;
                     break;
 
                 case CilCode.Beq_S:

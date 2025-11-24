@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet.Serialized
                 }
             }
 
-            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver);
+            MetadataResolver = new DefaultMetadataResolver(RuntimeContext.AssemblyResolver, this);
 
             // Prepare lazy RID lists.
             _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.Field, TableIndex.TypeDef,
@@ -123,6 +123,11 @@ namespace AsmResolver.DotNet.Serialized
         {
             get;
         }
+
+        /// <inheritdoc />
+        public override bool HasCustomAttributes => CustomAttributesInternal is null
+            ? HasNonEmptyCustomAttributes(this)
+            : CustomAttributes.Count > 0;
 
         /// <inheritdoc />
         public override IMetadataMember LookupMember(MetadataToken token) =>
@@ -314,14 +319,14 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override ResourceDirectory? GetNativeResources() => ReaderContext.Image.Resources;
+        protected override ResourceDirectory? GetNativeResourceDirectory() => ReaderContext.Image.Resources;
 
         /// <inheritdoc />
         protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReaderContext.Image.DebugData);
 
         private AssemblyDefinition? FindParentAssembly()
         {
-            var assemblyTable = ReaderContext.TablesStream.GetTable<AssemblyDefinitionRow>();
+            var assemblyTable = ReaderContext.TablesStream.GetTable<AssemblyDefinitionRow>(TableIndex.Assembly);
 
             if (assemblyTable.Count > 0)
             {

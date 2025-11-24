@@ -16,6 +16,33 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(@event);
         }
 
+        [Fact]
+        public void VerifyEventAttributes_None()
+        {
+            var @event = new EventDefinition("MyEvent"u8, EventAttributes.None, eventType: null);
+            Assert.Equal(EventAttributes.None, @event.Attributes);
+            Assert.False(@event.IsSpecialName);
+            Assert.False(@event.IsRuntimeSpecialName);
+        }
+
+        [Fact]
+        public void VerifyEventAttributes_SpecialName()
+        {
+            var @event = new EventDefinition("MyEvent"u8, EventAttributes.SpecialName, eventType: null);
+            Assert.Equal(EventAttributes.SpecialName, @event.Attributes);
+            Assert.True(@event.IsSpecialName);
+            Assert.False(@event.IsRuntimeSpecialName);
+        }
+
+        [Fact]
+        public void VerifyEventAttributes_RuntimeSpecialName()
+        {
+            var @event = new EventDefinition("MyEvent"u8, EventAttributes.RtSpecialName, eventType: null);
+            Assert.Equal(EventAttributes.RtSpecialName, @event.Attributes);
+            Assert.False(@event.IsSpecialName);
+            Assert.True(@event.IsRuntimeSpecialName);
+        }
+
         [Theory]
         [InlineData(nameof(MultipleEvents.Event1), "System.EventHandler")]
         [InlineData(nameof(MultipleEvents.Event2), "System.AssemblyLoadEventHandler")]

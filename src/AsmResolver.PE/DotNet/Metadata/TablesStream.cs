@@ -33,16 +33,11 @@ namespace AsmResolver.PE.DotNet.Metadata
         public const string UncompressedStreamName = "#Schema";
 
         private readonly Dictionary<CodedIndex, IndexEncoder> _indexEncoders;
-        private readonly LazyVariable<TablesStream, IList<IMetadataTable?>> _tables;
-        private readonly LazyVariable<TablesStream, IList<TableLayout>> _layouts;
-
-        /// <summary>
+                /// <summary>
         /// Creates a new, empty tables stream.
         /// </summary>
         public TablesStream()
         {
-            _layouts = new LazyVariable<TablesStream, IList<TableLayout>>(x => x.GetTableLayouts());
-            _tables = new LazyVariable<TablesStream, IList<IMetadataTable?>>(x => x.GetTables());
             _indexEncoders = CreateIndexEncoders();
         }
 
@@ -236,12 +231,20 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// This collection always contains all tables, in the same order as <see cref="TableIndex"/> defines, regardless
         /// of whether a table actually has elements or not.
         /// </remarks>
-        protected IList<IMetadataTable?> Tables => _tables.GetValue(this);
+        [LazyProperty]
+        protected partial IList<IMetadataTable?> Tables
+        {
+            get;
+        }
 
         /// <summary>
         /// Gets the layout of all tables in the stream.
         /// </summary>
-        protected IList<TableLayout> TableLayouts => _layouts.GetValue(this);
+        [LazyProperty]
+        protected partial IList<TableLayout> TableLayouts
+        {
+            get;
+        }
 
         /// <inheritdoc />
         public virtual BinaryStreamReader CreateReader() => throw new NotSupportedException();
@@ -548,7 +551,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <returns>The column size.</returns>
         protected virtual uint GetColumnSize(ColumnType columnType)
         {
-            if (_layouts.IsInitialized)
+            if (_initialized[TableLayoutsInitMask])
             {
                 switch (columnType)
                 {

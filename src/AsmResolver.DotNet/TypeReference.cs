@@ -9,15 +9,16 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to a type defined in a .NET assembly.
     /// </summary>
-    public class TypeReference :
+    public partial class TypeReference :
         MetadataMember,
         ITypeDefOrRef,
         IResolutionScope
     {
-        private readonly LazyVariable<TypeReference, Utf8String?> _name;
         private readonly LazyVariable<TypeReference, Utf8String?> _namespace;
-        private readonly LazyVariable<TypeReference, IResolutionScope?> _scope;
-        private IList<CustomAttribute>? _customAttributes;
+
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes a new empty type reference.
@@ -26,9 +27,7 @@ namespace AsmResolver.DotNet
         protected TypeReference(MetadataToken token)
             : base(token)
         {
-            _name = new LazyVariable<TypeReference, Utf8String?>(x => x.GetName());
             _namespace = new LazyVariable<TypeReference, Utf8String?>(x => x.GetNamespace());
-            _scope = new LazyVariable<TypeReference, IResolutionScope?>(x => x.GetScope());
         }
 
         /// <summary>
@@ -43,7 +42,7 @@ namespace AsmResolver.DotNet
         public TypeReference(IResolutionScope? scope, Utf8String? ns, Utf8String? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
-            _scope.SetValue(scope);
+            Scope = scope;
             ContextModule = scope?.ContextModule; // Assume the scope defines the module context.
             Namespace = ns;
             Name = name;
@@ -59,7 +58,7 @@ namespace AsmResolver.DotNet
         public TypeReference(ModuleDefinition? contextModule, IResolutionScope? scope, Utf8String? ns, Utf8String? name)
             : this(new MetadataToken(TableIndex.TypeRef, 0))
         {
-            _scope.SetValue(scope);
+            Scope = scope;
             ContextModule = contextModule;
             Namespace = ns;
             Name = name;
@@ -71,10 +70,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the type reference table.
         /// </remarks>
-        public Utf8String? Name
+        [LazyProperty]
+        public partial Utf8String? Name
         {
-            get => _name.GetValue(this);
-            set => _name.SetValue(value);
+            get;
+            set;
         }
 
         string? INameProvider.Name => Name;
@@ -98,10 +98,11 @@ namespace AsmResolver.DotNet
         public string FullName => MemberNameGenerator.GetTypeFullName(this);
 
         /// <inheritdoc />
-        public IResolutionScope? Scope
+        [LazyProperty]
+        public partial IResolutionScope? Scope
         {
-            get => _scope.GetValue(this);
-            set => _scope.SetValue(value);
+            get;
+            set;
         }
 
         /// <inheritdoc />
@@ -125,13 +126,16 @@ namespace AsmResolver.DotNet
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 

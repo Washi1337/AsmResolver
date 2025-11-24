@@ -10,12 +10,13 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type that allows for assigning metadata tokens to type signatures stored in the blob stream.
     /// </summary>
-    public class TypeSpecification :
+    public partial class TypeSpecification :
         MetadataMember,
         ITypeDefOrRef
     {
-        private readonly LazyVariable<TypeSpecification, TypeSignature?> _signature;
-        private IList<CustomAttribute>? _customAttributes;
+        /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Initializes an empty type specification.
@@ -24,7 +25,6 @@ namespace AsmResolver.DotNet
         protected TypeSpecification(MetadataToken token)
             : base(token)
         {
-            _signature = new LazyVariable<TypeSpecification, TypeSignature?>(x => x.GetSignature());
         }
 
         /// <summary>
@@ -40,10 +40,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the type signature that this type specification is referencing.
         /// </summary>
-        public TypeSignature? Signature
+        [LazyProperty]
+        public partial TypeSignature? Signature
         {
-            get => _signature.GetValue(this);
-            set => _signature.SetValue(value);
+            get;
+            set;
         }
 
         /// <summary>
@@ -79,13 +80,16 @@ namespace AsmResolver.DotNet
         public bool IsValueType => Signature?.IsValueType ?? false;
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 

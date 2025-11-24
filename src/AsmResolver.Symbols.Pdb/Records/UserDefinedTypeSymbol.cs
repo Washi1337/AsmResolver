@@ -5,18 +5,13 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a user-defined type symbol in a PDB symbol stream, mapping a symbol to a type in the TPI stream.
 /// </summary>
-public class UserDefinedTypeSymbol : CodeViewSymbol
+public partial class UserDefinedTypeSymbol : CodeViewSymbol
 {
-    private readonly LazyVariable<UserDefinedTypeSymbol, Utf8String> _name;
-    private readonly LazyVariable<UserDefinedTypeSymbol, CodeViewTypeRecord> _type;
-
     /// <summary>
     /// Initializes a new empty user-defined type symbol.
     /// </summary>
     protected UserDefinedTypeSymbol()
     {
-        _name = new LazyVariable<UserDefinedTypeSymbol, Utf8String>(x => x.GetName());
-        _type = new LazyVariable<UserDefinedTypeSymbol, CodeViewTypeRecord>(x => x.GetSymbolType());
     }
 
     /// <summary>
@@ -26,8 +21,8 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     /// <param name="type">The type.</param>
     public UserDefinedTypeSymbol(Utf8String name, CodeViewTypeRecord type)
     {
-        _name = new LazyVariable<UserDefinedTypeSymbol, Utf8String>(name);
-        _type = new LazyVariable<UserDefinedTypeSymbol, CodeViewTypeRecord>(type);
+        Name = name;
+        SymbolType = type;
     }
 
     /// <inheritdoc />
@@ -36,19 +31,21 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     /// <summary>
     /// Gets or sets the name of the type.
     /// </summary>
-    public Utf8String Name
+    [LazyProperty]
+    public partial Utf8String Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
     /// Gets or sets the index associated to the type.
     /// </summary>
-    public CodeViewTypeRecord Type
+    [LazyProperty]
+    public partial CodeViewTypeRecord SymbolType
     {
-        get => _type.GetValue(this);
-        set => _type.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
@@ -65,10 +62,10 @@ public class UserDefinedTypeSymbol : CodeViewSymbol
     /// </summary>
     /// <returns>The type.</returns>
     /// <remarks>
-    /// This method is called upon initialization of the <see cref="Type"/> property.
+    /// This method is called upon initialization of the <see cref="SymbolType"/> property.
     /// </remarks>
     protected virtual CodeViewTypeRecord? GetSymbolType() => null;
 
     /// <inheritdoc />
-    public override string ToString() => $"S_UDT: {Type} {Name}";
+    public override string ToString() => $"S_UDT: {SymbolType} {Name}";
 }

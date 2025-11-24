@@ -3,11 +3,8 @@ namespace AsmResolver.Symbols.Pdb.Leaves;
 /// <summary>
 /// Represents a String ID entry within the IPI stream of a PDB image.
 /// </summary>
-public class StringIdentifier : CodeViewLeaf, IIpiLeaf
+public partial class StringIdentifier : CodeViewLeaf, IIpiLeaf
 {
-    private readonly LazyVariable<StringIdentifier, Utf8String> _value;
-    private readonly LazyVariable<StringIdentifier, SubStringListLeaf?> _subStrings;
-
     /// <summary>
     /// Initializes an empty String ID entry.
     /// </summary>
@@ -15,8 +12,6 @@ public class StringIdentifier : CodeViewLeaf, IIpiLeaf
     protected StringIdentifier(uint typeIndex)
         : base(typeIndex)
     {
-        _value = new LazyVariable<StringIdentifier, Utf8String>(x =>x .GetValue());
-        _subStrings = new LazyVariable<StringIdentifier, SubStringListLeaf?>(x =>x .GetSubStrings());
     }
 
     /// <summary>
@@ -36,8 +31,8 @@ public class StringIdentifier : CodeViewLeaf, IIpiLeaf
     public StringIdentifier(Utf8String value, SubStringListLeaf? subStrings)
         : base(0)
     {
-        _value = new LazyVariable<StringIdentifier, Utf8String>(value);
-        _subStrings = new LazyVariable<StringIdentifier, SubStringListLeaf?>(subStrings);
+        Value = value;
+        SubStrings = subStrings;
     }
 
     /// <inheritdoc />
@@ -46,19 +41,21 @@ public class StringIdentifier : CodeViewLeaf, IIpiLeaf
     /// <summary>
     /// Gets or sets the wrapped string.
     /// </summary>
-    public Utf8String Value
+    [LazyProperty]
+    public partial Utf8String Value
     {
-        get => _value.GetValue(this);
-        set => _value.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
     /// Gets or sets a list of sub strings associated to the entry (if available).
     /// </summary>
-    public SubStringListLeaf? SubStrings
+    [LazyProperty]
+    public partial SubStringListLeaf? SubStrings
     {
-        get => _subStrings.GetValue(this);
-        set => _subStrings.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>

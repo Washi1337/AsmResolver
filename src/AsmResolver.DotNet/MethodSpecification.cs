@@ -9,11 +9,11 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to a generic method that is instantiated with type arguments.
     /// </summary>
-    public class MethodSpecification : MetadataMember, IMethodDescriptor, IHasCustomAttribute
+    public partial class MethodSpecification : MetadataMember, IMethodDescriptor, IHasCustomAttribute
     {
-        private readonly LazyVariable<MethodSpecification, IMethodDefOrRef?> _method;
-        private readonly LazyVariable<MethodSpecification, GenericInstanceMethodSignature?> _signature;
-        private IList<CustomAttribute>? _customAttributes;
+                /// <summary> The internal custom attribute list. </summary>
+        /// <remarks> This value may not be initialized. Use <see cref="CustomAttributes"/> instead.</remarks>
+        protected IList<CustomAttribute>? CustomAttributesInternal;
 
         /// <summary>
         /// Creates a new empty method specification.
@@ -22,8 +22,6 @@ namespace AsmResolver.DotNet
         protected MethodSpecification(MetadataToken token)
             : base(token)
         {
-            _method = new LazyVariable<MethodSpecification, IMethodDefOrRef?>(x => x.GetMethod());
-            _signature = new LazyVariable<MethodSpecification, GenericInstanceMethodSignature?>(x => x.GetSignature());
         }
 
         /// <summary>
@@ -41,10 +39,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the method that was instantiated.
         /// </summary>
-        public IMethodDefOrRef? Method
+        [LazyProperty]
+        public partial IMethodDefOrRef? Method
         {
-            get => _method.GetValue(this);
-            set => _method.SetValue(value);
+            get;
+            set;
         }
 
         MethodSignature? IMethodDescriptor.Signature => Method?.Signature;
@@ -52,12 +51,12 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the generic instantiation of the method.
         /// </summary>
-        public GenericInstanceMethodSignature? Signature
+        [LazyProperty]
+        public partial GenericInstanceMethodSignature? Signature
         {
-            get => _signature.GetValue(this);
-            set => _signature.SetValue(value);
+            get;
+            set;
         }
-
 
         /// <summary>
         /// Gets or sets the name of the method specification.
@@ -80,13 +79,16 @@ namespace AsmResolver.DotNet
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <inheritdoc />
+        public virtual bool HasCustomAttributes => CustomAttributesInternal is { Count: > 0 };
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
             {
-                if (_customAttributes is null)
-                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
-                return _customAttributes;
+                if (CustomAttributesInternal is null)
+                    Interlocked.CompareExchange(ref CustomAttributesInternal, GetCustomAttributes(), null);
+                return CustomAttributesInternal;
             }
         }
 

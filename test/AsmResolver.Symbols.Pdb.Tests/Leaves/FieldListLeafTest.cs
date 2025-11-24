@@ -60,7 +60,7 @@ public class FieldListLeafTest : IClassFixture<MockPdbFixture>
         var list = (FieldListLeaf) _fixture.SimplePdb.GetLeafRecord(0x239d);
 
         Assert.Equal("std::exception", Assert.IsAssignableFrom<ClassTypeRecord>(
-            Assert.IsAssignableFrom<BaseClassField>(list.Entries[0]).Type).Name);
+            Assert.IsAssignableFrom<BaseClassField>(list.Entries[0]).BaseType).Name);
         Assert.Equal("bad_cast", Assert.IsAssignableFrom<OverloadedMethod>(list.Entries[1]).Name);
         Assert.Equal("__construct_from_string_literal", Assert.IsAssignableFrom<NonOverloadedMethod>(list.Entries[2]).Name);
         Assert.Equal("~bad_cast", Assert.IsAssignableFrom<NonOverloadedMethod>(list.Entries[3]).Name);
@@ -75,9 +75,9 @@ public class FieldListLeafTest : IClassFixture<MockPdbFixture>
         var list = (FieldListLeaf) _fixture.SimplePdb.GetLeafRecord(0x1854);
 
         Assert.Equal("_LDT_ENTRY::<unnamed-type-HighWord>::<unnamed-type-Bytes>",
-            Assert.IsAssignableFrom<ClassTypeRecord>(Assert.IsAssignableFrom<NestedTypeField>(list.Entries[0]).Type).Name);
+            Assert.IsAssignableFrom<ClassTypeRecord>(Assert.IsAssignableFrom<NestedTypeField>(list.Entries[0]).NestedType).Name);
         Assert.Equal("_LDT_ENTRY::<unnamed-type-HighWord>::<unnamed-type-Bits>",
-            Assert.IsAssignableFrom<ClassTypeRecord>(Assert.IsAssignableFrom<NestedTypeField>(list.Entries[2]).Type).Name);
+            Assert.IsAssignableFrom<ClassTypeRecord>(Assert.IsAssignableFrom<NestedTypeField>(list.Entries[2]).NestedType).Name);
     }
 
     [Fact]
@@ -87,8 +87,8 @@ public class FieldListLeafTest : IClassFixture<MockPdbFixture>
         var baseClass = Assert.IsAssignableFrom<VBaseClassField>(list.Entries[0]);
 
         Assert.Equal("std::basic_ios<char,std::char_traits<char> >",
-            Assert.IsAssignableFrom<ClassTypeRecord>(baseClass.Type).Name);
-        Assert.True(Assert.IsAssignableFrom<PointerTypeRecord>(baseClass.PointerType).IsNear64);
+            Assert.IsAssignableFrom<ClassTypeRecord>(baseClass.BaseType).Name);
+        Assert.True(Assert.IsAssignableFrom<PointerTypeRecord>(baseClass.BasePointerType).IsNear64);
         Assert.False(baseClass.IsIndirect);
         Assert.Equal(0ul, baseClass.PointerOffset);
         Assert.Equal(1ul, baseClass.TableOffset);
@@ -101,8 +101,8 @@ public class FieldListLeafTest : IClassFixture<MockPdbFixture>
         var baseClass = Assert.IsAssignableFrom<VBaseClassField>(list.Entries[2]);
 
         Assert.Equal("std::basic_ios<char,std::char_traits<char> >",
-            Assert.IsAssignableFrom<ClassTypeRecord>(baseClass.Type).Name);
-        Assert.True(Assert.IsAssignableFrom<PointerTypeRecord>(baseClass.PointerType).IsNear64);
+            Assert.IsAssignableFrom<ClassTypeRecord>(baseClass.BaseType).Name);
+        Assert.True(Assert.IsAssignableFrom<PointerTypeRecord>(baseClass.BasePointerType).IsNear64);
         Assert.True(baseClass.IsIndirect);
         Assert.Equal(0ul, baseClass.PointerOffset);
         Assert.Equal(1ul, baseClass.TableOffset);

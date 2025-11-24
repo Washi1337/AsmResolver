@@ -5,18 +5,13 @@ namespace AsmResolver.Symbols.Pdb.Records;
 /// <summary>
 /// Represents a symbol that is defined by a register+offset pair.
 /// </summary>
-public class RegisterRelativeSymbol : CodeViewSymbol, IRegisterRelativeSymbol
+public partial class RegisterRelativeSymbol : CodeViewSymbol, IRegisterRelativeSymbol
 {
-    private readonly LazyVariable<RegisterRelativeSymbol, CodeViewTypeRecord?> _variableType;
-    private readonly LazyVariable<RegisterRelativeSymbol, Utf8String?> _name;
-
     /// <summary>
     /// Initializes an empty relative register symbol.
     /// </summary>
     protected RegisterRelativeSymbol()
     {
-        _variableType = new LazyVariable<RegisterRelativeSymbol, CodeViewTypeRecord?>(x => x.GetVariableType());
-        _name = new LazyVariable<RegisterRelativeSymbol, Utf8String?>(x => x.GetName());
     }
 
     /// <summary>
@@ -28,10 +23,10 @@ public class RegisterRelativeSymbol : CodeViewSymbol, IRegisterRelativeSymbol
     /// <param name="variableType">The type of variable the register+offset pair stores.</param>
     public RegisterRelativeSymbol(Utf8String name, ushort baseRegister, int offset, CodeViewTypeRecord variableType)
     {
-        _name = new LazyVariable<RegisterRelativeSymbol, Utf8String?>(name);
+        Name = name;
         BaseRegister = baseRegister;
         Offset = offset;
-        _variableType = new LazyVariable<RegisterRelativeSymbol, CodeViewTypeRecord?>(variableType);
+        VariableType = variableType;
     }
 
     /// <inheritdoc />
@@ -56,17 +51,19 @@ public class RegisterRelativeSymbol : CodeViewSymbol, IRegisterRelativeSymbol
     }
 
     /// <inheritdoc />
-    public CodeViewTypeRecord? VariableType
+    [LazyProperty]
+    public partial CodeViewTypeRecord? VariableType
     {
-        get => _variableType.GetValue(this);
-        set => _variableType.SetValue(value);
+        get;
+        set;
     }
 
     /// <inheritdoc />
-    public Utf8String? Name
+    [LazyProperty]
+    public partial Utf8String? Name
     {
-        get => _name.GetValue(this);
-        set => _name.SetValue(value);
+        get;
+        set;
     }
 
     /// <summary>
