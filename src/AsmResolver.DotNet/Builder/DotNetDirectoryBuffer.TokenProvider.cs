@@ -1,4 +1,5 @@
-﻿using AsmResolver.DotNet.Code.Cil;
+﻿using AsmResolver.DotNet.Builder.Metadata;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -29,7 +30,7 @@ namespace AsmResolver.DotNet.Builder
         /// <returns>The newly assigned metadata token.</returns>
         public MetadataToken AddTypeReference(TypeReference? type, bool allowDuplicates, bool preserveRid)
         {
-            return AddTypeReferenceCore(type, allowDuplicates, preserveRid, true);
+            return AddTypeReferenceCore(type, allowDuplicates, preserveRid);
         }
 
         /// <inheritdoc />
@@ -44,23 +45,39 @@ namespace AsmResolver.DotNet.Builder
         public MetadataToken GetOrImportTypeDefinitionToken(TypeDefinition? type, object? diagnosticSource = null)
         {
             if (type is null)
-            {
                 return MetadataToken.Zero;
-            }
+
+            // If we're in the same module, we can just return the assigned md token.
             if (IsInSameModule(type))
-            {
                 return _tokenMapping[type];
+
+            // Otherwise, we need to treat this as a typeref.
+            uint scope;
+            if (type.DeclaringType is { } declaringType)
+            {
+                scope = Metadata.TablesStream
+                    .GetIndexEncoder(CodedIndex.ResolutionScope)
+                    .EncodeToken(GetOrImportTypeDefinitionToken(declaringType, diagnosticSource));
+            }
+            else if (type.DeclaringModule is { } declaringModule)
+            {
+                scope = declaringModule.Assembly is { } assembly
+                    ? AddResolutionScope(assembly.ToAssemblyReference(), false, false, diagnosticSource)
+                    : ErrorListener.RegisterExceptionAndReturnDefault<uint>(new MetadataBuilderException(
+                        $"Type {type.SafeToString()} was not added to a module with an assembly manifest."
+                    ));
+            }
+            else
+            {
+                // Type does not have a well-defined scope (i.e., not added to a module or assembly
+                ErrorListener.RegisterException(new MemberNotImportedException(type, diagnosticSource));
+                scope = 0;
             }
 
-            uint scope = type.DeclaringModule is { } mod
-                ? AddResolutionScope(mod, false, false, diagnosticSource)
-                : Metadata.TablesStream.GetIndexEncoder(CodedIndex.ResolutionScope).EncodeToken(
-                    GetOrImportTypeDefinitionToken(type.DeclaringType, diagnosticSource)
-                );
-            return AddTypeReferenceCore(type, false, false, false, scope);
+            return AddTypeReferenceCore(type, false, false, scope);
         }
 
-        private MetadataToken AddTypeReferenceCore(ITypeDefOrRef? type, bool allowDuplicates, bool preserveRid, bool addCustomAttributes, uint? scope = null)
+        private MetadataToken AddTypeReferenceCore(ITypeDefOrRef? type, bool allowDuplicates, bool preserveRid, uint? scope = null)
         {
             if (type is null)
                 return MetadataToken.Zero;
@@ -76,9 +93,12 @@ namespace AsmResolver.DotNet.Builder
                 ? table.Insert(type.MetadataToken.Rid, row, allowDuplicates)
                 : table.Add(row, allowDuplicates);
 
-            _tokenMapping.Register(type, token);
-            if (addCustomAttributes)
+            if (type is TypeReference reference)
+            {
+                _tokenMapping.Register(reference, token);
                 AddCustomAttributes(token, type);
+            }
+
             return token;
         }
 
@@ -94,15 +114,21 @@ namespace AsmResolver.DotNet.Builder
         public MetadataToken GetOrImportFieldDefinitionToken(FieldDefinition? field, object? diagnosticSource = null)
         {
             if (field is null)
-            {
                 return MetadataToken.Zero;
-            }
-            if (IsInSameModule(field))
-            {
-                return _tokenMapping[field];
-            }
 
-            return AddMemberReferenceCore(field.DeclaringType, field.Name, field.Signature, false, false, field, diagnosticSource);
+            // If this field is in the same module, we can just use the assigned md token.
+            if (IsInSameModule(field))
+                return _tokenMapping[field];
+
+            // Otherwise, we must treat this as a field reference.
+            return AddMemberReferenceCore(
+                field.DeclaringType,
+                field.Name,
+                field.Signature,
+                false,
+                field,
+                diagnosticSource
+            );
         }
 
         /// <inheritdoc />
@@ -117,15 +143,21 @@ namespace AsmResolver.DotNet.Builder
         public MetadataToken GetOrImportMethodDefinitionToken(MethodDefinition? method, object? diagnosticSource = null)
         {
             if (method is null)
-            {
                 return MetadataToken.Zero;
-            }
-            if (IsInSameModule(method))
-            {
-                return _tokenMapping[method];
-            }
 
-            return AddMemberReferenceCore(method.DeclaringType, method.Name, method.Signature, false, false, method, diagnosticSource);
+            // If this method is in the same module, we can just use the assigned md token.
+            if (IsInSameModule(method))
+                return _tokenMapping[method];
+
+            // Otherwise, we must treat this as a method reference.
+            return AddMemberReferenceCore(
+                method.DeclaringType,
+                method.Name,
+                method.Signature,
+                false,
+                method,
+                diagnosticSource
+            );
         }
 
         /// <summary>
@@ -186,10 +218,23 @@ namespace AsmResolver.DotNet.Builder
             if (member is null)
                 return MetadataToken.Zero;
 
-            return AddMemberReferenceCore(member.Parent, member.Name, member.Signature, allowDuplicates, true, member, diagnosticSource);
+            return AddMemberReferenceCore(
+                member.Parent,
+                member.Name,
+                member.Signature,
+                allowDuplicates,
+                member,
+                diagnosticSource
+            );
         }
 
-        private MetadataToken AddMemberReferenceCore(IMemberRefParent? parent, Utf8String? name, CallingConventionSignature? signature, bool allowDuplicates, bool addCustomAttributes, IHasCustomAttribute memberSource, object? diagnosticSource)
+        private MetadataToken AddMemberReferenceCore(
+            IMemberRefParent? parent,
+            Utf8String? name,
+            CallingConventionSignature? signature,
+            bool allowDuplicates,
+            IHasCustomAttribute memberSource,
+            object? diagnosticSource)
         {
             var table = Metadata.TablesStream.GetDistinctTable<MemberReferenceRow>(TableIndex.MemberRef);
             var row = new MemberReferenceRow(
@@ -199,9 +244,12 @@ namespace AsmResolver.DotNet.Builder
             );
 
             var token = table.Add(row, allowDuplicates);
-            _tokenMapping.Register(memberSource, token);
-            if (addCustomAttributes)
+            if (memberSource is MemberReference)
+            {
+                _tokenMapping.Register(memberSource, token);
                 AddCustomAttributes(token, memberSource);
+            }
+
             return token;
         }
 
