@@ -1,6 +1,10 @@
 using System;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.TestCases.Fields;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
@@ -146,6 +150,76 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             // Assert that nested type relation is preserved.
             var newType2 = newModule.TopLevelTypes.First(t => t.Name == type2.Name);
             Assert.Contains(newType2.NestedTypes, t => t.Name == type1.Name);
+        }
+
+        [Fact]
+        public void DontPreserveBaseTypeAsTypeDefTokenIfExternal()
+        {
+            // Prepare external module.
+            var externalAssembly = new AssemblyDefinition("SomeAssembly", new Version(1, 0, 0, 0));
+            var externalModule = new ModuleDefinition("SomeModule", KnownCorLibs.SystemRuntime_v8_0_0_0);
+            externalModule.TopLevelTypes.Add(new TypeDefinition(null, "Type1", TypeAttributes.Public));
+            externalAssembly.Modules.Add(externalModule);
+            externalModule = RebuildAndReloadModule(externalModule, MetadataBuilderFlags.None);
+            var externalType = externalModule.TopLevelTypes[1];
+
+            // Prepare new module.
+            var module = new ModuleDefinition("SomeModule", KnownCorLibs.SystemRuntime_v8_0_0_0);
+            module.TopLevelTypes.Add(new TypeDefinition(null, "Type1", TypeAttributes.Public));
+            module = RebuildAndReloadModule(module, MetadataBuilderFlags.None);
+
+            // Set external typedef as base type
+            module.TopLevelTypes.Add(new TypeDefinition(null, "Type2", TypeAttributes.Class, externalType));
+
+            // Rebuild
+            var bag = new DiagnosticBag();
+            var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveTypeDefinitionIndices, bag);
+
+            // Validate we turned the typedef into a typeref.
+            var newType = Assert.IsAssignableFrom<TypeReference>(newModule.TopLevelTypes[2].BaseType);
+            Assert.Equal<ITypeDefOrRef>(newType, externalType, Comparer);
+        }
+
+        [Fact]
+        public void DontPreserveOperandAsTypeDefTokenIfExternal()
+        {
+            // Prepare external module.
+            var externalAssembly = new AssemblyDefinition("SomeAssembly", new Version(1, 0, 0, 0));
+            var externalModule = new ModuleDefinition("SomeModule", KnownCorLibs.SystemRuntime_v8_0_0_0);
+            externalModule.TopLevelTypes.Add(new TypeDefinition(null, "Type1", TypeAttributes.Public));
+            externalAssembly.Modules.Add(externalModule);
+            externalModule = RebuildAndReloadModule(externalModule, MetadataBuilderFlags.None);
+            var externalType = externalModule.TopLevelTypes[1];
+
+            // Prepare new module.
+            var module = new ModuleDefinition("SomeModule", KnownCorLibs.SystemRuntime_v8_0_0_0);
+            module.TopLevelTypes.Add(new TypeDefinition(null, "Type1", TypeAttributes.Public));
+            module = RebuildAndReloadModule(module, MetadataBuilderFlags.None);
+
+            // Set external typedef as an operand.
+            module.GetOrCreateModuleType().Methods.Add(
+                new MethodDefinition("Foo", MethodAttributes.Static, MethodSignature.CreateStatic(module.CorLibTypeFactory.Void))
+                {
+                    CilMethodBody = new CilMethodBody
+                    {
+                        Instructions =
+                        {
+                            { CilOpCodes.Ldtoken, externalType },
+                            CilOpCodes.Pop,
+                            CilOpCodes.Ret
+                        }
+                    }
+                }
+            );
+
+            // Rebuild
+            var bag = new DiagnosticBag();
+            var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveTypeDefinitionIndices, bag);
+            var newMethod = newModule.GetModuleType()!.Methods.First(m => m.Name == "Foo");
+
+            // Validate we turned the typedef into a typeref.
+            var newType = Assert.IsAssignableFrom<TypeReference>(newMethod.CilMethodBody!.Instructions[0].Operand);
+            Assert.Equal<ITypeDefOrRef>(newType, externalType, Comparer);
         }
     }
 }

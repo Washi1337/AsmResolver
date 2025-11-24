@@ -5,7 +5,9 @@ using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Methods;
+using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -27,7 +29,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             return type.Methods.First(m => m.Name == name).CilMethodBody;
         }
 
-        private CilMethodBody RebuildAndLookup(CilMethodBody methodBody, bool accessBeforeBuild)
+        private static CilMethodBody RebuildAndLookup(CilMethodBody methodBody, bool accessBeforeBuild)
         {
             if (accessBeforeBuild)
                 _ = methodBody.Instructions;
@@ -38,7 +40,8 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             module.Write(stream);
 
             var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
-            return GetMethodBodyInModule(newModule, methodBody.Owner.Name);
+            var type = newModule.TopLevelTypes.First(t => t.Name == methodBody.Owner.DeclaringType!.Name);
+            return type.Methods.First(m => m.Name == methodBody.Owner.Name).CilMethodBody;
         }
 
         [Fact]
@@ -856,6 +859,90 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             body.Instructions.Insert(0, CilOpCodes.Ldc_I4_0);
             Assert.Throws<StackImbalanceException>(() => body.ComputeMaxStack());
+        }
+
+        [Fact]
+        public void ExternalTypeDefOperandShouldAutoConvertToTypeRef()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
+            var sourceType = sourceModule.LookupMember<TypeDefinition>(typeof(TopLevelClass1).MetadataToken);
+
+            var module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemRuntime_v8_0_0_0);
+            var method = new MethodDefinition("DummyMethod", MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void))
+            {
+                CilMethodBody = new CilMethodBody
+                {
+                    Instructions =
+                    {
+                        { CilOpCodes.Ldtoken, sourceType },
+                        CilOpCodes.Pop,
+                        CilOpCodes.Ret
+                    }
+                }
+            };
+            module.GetOrCreateModuleType().Methods.Add(method);
+
+            var newBody = RebuildAndLookup(method.CilMethodBody, false);
+            var newType = Assert.IsAssignableFrom<TypeReference>(newBody.Instructions[0].Operand);
+            Assert.Equal<ITypeDefOrRef>(sourceType, newType, SignatureComparer.Default);
+        }
+
+        [Fact]
+        public void ExternalFieldDefOperandShouldAutoConvertToMemberRef()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(InitialValues).Assembly.Location, TestReaderParameters);
+            var sourceField = sourceModule.LookupMember<TypeDefinition>(typeof(InitialValues).MetadataToken)
+                .Fields.First(f => f.Name == nameof(InitialValues.ByteArray));
+
+            var module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemRuntime_v8_0_0_0);
+            var method = new MethodDefinition("DummyMethod", MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void))
+            {
+                CilMethodBody = new CilMethodBody
+                {
+                    Instructions =
+                    {
+                        { CilOpCodes.Ldsfld, sourceField },
+                        CilOpCodes.Pop,
+                        CilOpCodes.Ret
+                    }
+                }
+            };
+            module.GetOrCreateModuleType().Methods.Add(method);
+
+            var newBody = RebuildAndLookup(method.CilMethodBody, false);
+            var newField = Assert.IsAssignableFrom<MemberReference>(newBody.Instructions[0].Operand);
+            Assert.True(newField.IsField);
+            Assert.Equal<IFieldDescriptor>(sourceField, newField, SignatureComparer.Default);
+        }
+
+        [Fact]
+        public void ExternalMethodDefOperandShouldAutoConvertToMemberRef()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location, TestReaderParameters);
+            var sourceMethod = sourceModule.LookupMember<TypeDefinition>(typeof(SingleMethod).MetadataToken)
+                .Methods.First(f => f.Name == nameof(SingleMethod.VoidParameterlessMethod));
+
+            var module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemRuntime_v8_0_0_0);
+            var method = new MethodDefinition("DummyMethod", MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void))
+            {
+                CilMethodBody = new CilMethodBody
+                {
+                    Instructions =
+                    {
+                        { CilOpCodes.Call, sourceMethod },
+                        CilOpCodes.Ret
+                    }
+                }
+            };
+            module.GetOrCreateModuleType().Methods.Add(method);
+
+            var newBody = RebuildAndLookup(method.CilMethodBody, false);
+            var newField = Assert.IsAssignableFrom<MemberReference>(newBody.Instructions[0].Operand);
+            Assert.True(newField.IsMethod);
+            Assert.Equal<IMethodDescriptor>(sourceMethod, newField, SignatureComparer.Default);
         }
     }
 }
