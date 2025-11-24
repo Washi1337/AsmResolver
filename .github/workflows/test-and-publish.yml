@@ -27,7 +27,7 @@ env:
 jobs:
   upload-event-file:
     name: Upload Event File
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Upload event file
         uses: actions/upload-artifact@v5
@@ -39,7 +39,7 @@ jobs:
   # Construct a version suffix including the branch name, build number and commit hash (e.g., "development.58+abcdef12").
   get-version:
     name: Calculating Version Suffix
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       version_suffix: ${{ steps.set-vars.outputs.version_suffix }}
 
@@ -57,7 +57,7 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            let runNumber = "${{ github.run_number }}"; 
+            let runNumber = "${{ github.run_number }}";
             let gitHash = "${{ steps.git-vars.outputs.git_hash }}";
             let rawGitRef = "${{ steps.git-vars.outputs.git_branch }}";
             console.log("rawGitRef: " + rawGitRef);
@@ -72,7 +72,7 @@ jobs:
   # Main build job for compiling all csprojs.
   build:
     name: Build
-    runs-on: windows-2022
+    runs-on: windows-2025
     needs: [get-version]
     timeout-minutes: 10
 
@@ -81,6 +81,8 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
 
       # Master branch is just a normal build.
       - name: Build on master branch
@@ -119,14 +121,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [ 
-          { image: 'windows-2022', arch: 'x64' },
-          { image: 'ubuntu-22.04', arch: 'x64' },
+        runner: [
+          { image: 'windows-2025', arch: 'x64' },
+          { image: 'ubuntu-24.04', arch: 'x64' },
 
-          # TODO: We disable x86 tests for now due to it being too unstable. 
-          # In particular, x86 tests often fail on spawning the xunit's test host process (cannot load hostpolicy.dll, 
-          # as if dotnet x86 is not installed/loaded properly). This should be addressed in the future, as dynamic 
-          # features that load metadata from live processes (as happens in e.g., AsmResolver.DotNet.Dynamic) should be 
+          # TODO: We disable x86 tests for now due to it being too unstable.
+          # In particular, x86 tests often fail on spawning the xunit's test host process (cannot load hostpolicy.dll,
+          # as if dotnet x86 is not installed/loaded properly). This should be addressed in the future, as dynamic
+          # features that load metadata from live processes (as happens in e.g., AsmResolver.DotNet.Dynamic) should be
           # properly covered by CI across architectures as well.
           # { image: 'windows-2022', arch: 'x86' },
         ]
@@ -156,6 +158,7 @@ jobs:
             6.0.x
             8.0.x
             9.0.x
+            10.0.x
         env:
           DOTNET_INSTALL_DIR: ${{steps.dotnet-path.outputs.install-path}}
 
@@ -220,7 +223,7 @@ jobs:
   # Job to publish to nuget feeds.
   publish:
     name: Publish NuGet Packages
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [test]
     if: ${{github.ref == 'refs/heads/development' || github.ref == 'refs/heads/master'}}
 
@@ -229,6 +232,8 @@ jobs:
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.0.x
 
     - name: Download Build Artifacts
       uses: actions/download-artifact@v6

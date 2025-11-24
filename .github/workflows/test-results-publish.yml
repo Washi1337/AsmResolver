@@ -10,7 +10,7 @@ permissions: {}
 jobs:
   publish-test-results:
     if: github.event.workflow_run.conclusion != 'skipped' && github.event.workflow_run.conclusion != 'cancelled'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: Publish Test Results
 
     permissions:
@@ -24,13 +24,34 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download and Publish Test Results
-        uses: ./.github/actions/test-results-download-publish
+      - name: Download Event File
+        uses: actions/download-artifact@v4
         with:
-          workflow_run: ${{toJSON(github.event.workflow_run)}}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          name: test-event-file
+          merge-multiple: false
 
-      - name: Download and Publish Test Results (Experimental)
-        uses: ./.github/actions/test-results-download-publish
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
         with:
-          workflow_run: ${{toJSON(github.event.workflow_run)}}
-          experimental: true
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          pattern: $test-results-*
+          path: test-results
+          merge-multiple: false
+
+      - name: Publish Test Results
+        uses: nike4613/actions-test-results@v3
+        with:
+          check_name: Test Results
+          files: test-results/**/*.trx
+          fail_on: 'test failures'
+          comment_mode: 'always'
+          use_emojis: true
+
+          commit: ${{ github.event.workflow_run.head_sha }}
+          event_file: event.json
+          event_name: ${{ github.event.workflow_run.event }}
+
+          comment_on_commit: true
