@@ -37,7 +37,7 @@ jobs:
         with:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
-          pattern: $test-results-*
+          pattern: test-results-*
           path: test-results
           merge-multiple: false
 
