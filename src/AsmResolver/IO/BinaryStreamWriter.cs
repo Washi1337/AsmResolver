@@ -6,6 +6,10 @@ using System.Text;
 using System.Buffers.Binary;
 #endif
 
+#if NET10_0_OR_GREATER
+using System.Runtime.CompilerServices;
+#endif
+
 namespace AsmResolver.IO
 {
     /// <summary>
@@ -18,7 +22,11 @@ namespace AsmResolver.IO
 
         // Buffer to reduce individual IO ops.
         // Initialize this buffer in reverse order to prevent JIT emitting range checks for every byte.
+#if NET10_0_OR_GREATER
+        private InlineArray8<byte> _buffer;
+#else
         private readonly byte[] _buffer = new byte[8];
+#endif
 
         /// <summary>
         /// Creates a new binary stream writer using the provided output stream.
@@ -100,7 +108,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..2]);
+#else
             BaseStream.Write(_buffer, 0, 2);
+#endif
         }
 
         /// <summary>
@@ -117,7 +129,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..4]);
+#else
             BaseStream.Write(_buffer, 0, 4);
+#endif
         }
 
         /// <summary>
@@ -138,7 +154,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..8]);
+#else
             BaseStream.Write(_buffer, 0, 8);
+#endif
         }
 
         /// <summary>
@@ -162,7 +182,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..2]);
+#else
             BaseStream.Write(_buffer, 0, 2);
+#endif
         }
 
         /// <summary>
@@ -179,7 +203,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..4]);
+#else
             BaseStream.Write(_buffer, 0, 4);
+#endif
         }
 
         /// <summary>
@@ -200,7 +228,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..8]);
+#else
             BaseStream.Write(_buffer, 0, 8);
+#endif
         }
 
         /// <summary>
@@ -337,7 +369,11 @@ namespace AsmResolver.IO
                 case < 0x4000:
                     _buffer[1] = (byte) value;
                     _buffer[0] = (byte) (0x80 | value >> 8);
+#if NET10_0_OR_GREATER
+                    BaseStream.Write(_buffer[..2]);
+#else
                     BaseStream.Write(_buffer, 0, 2);
+#endif
                     break;
 
                 default:
@@ -345,7 +381,11 @@ namespace AsmResolver.IO
                     _buffer[2] = (byte) (value >> 0x08);
                     _buffer[1] = (byte) (value >> 0x10);
                     _buffer[0] = (byte) (0x80 | 0x40 | value >> 0x18);
+#if NET10_0_OR_GREATER
+                    BaseStream.Write(_buffer[..4]);
+#else
                     BaseStream.Write(_buffer, 0, 4);
+#endif
                     break;
             }
         }
@@ -370,7 +410,11 @@ namespace AsmResolver.IO
                     rotated = ((uint) (value & 0x1FFF) << 1) | sign;
                     _buffer[1] = (byte) rotated;
                     _buffer[0] = (byte) (0x80 | rotated >> 8);
+#if NET10_0_OR_GREATER
+                    BaseStream.Write(_buffer[..2]);
+#else
                     BaseStream.Write(_buffer, 0, 2);
+#endif
                     break;
 
                 default:
@@ -379,7 +423,11 @@ namespace AsmResolver.IO
                     _buffer[2] = (byte) (rotated >> 0x08);
                     _buffer[1] = (byte) (rotated >> 0x10);
                     _buffer[0] = (byte)(0x80 | 0x40 | rotated >> 0x18);
+#if NET10_0_OR_GREATER
+                    BaseStream.Write(_buffer[..4]);
+#else
                     BaseStream.Write(_buffer, 0, 4);
+#endif
                     break;
             }
         }
