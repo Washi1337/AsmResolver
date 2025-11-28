@@ -3,7 +3,12 @@ using System.IO;
 using System.Text;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+using System.Buffers;
 using System.Buffers.Binary;
+#endif
+
+#if NET10_0_OR_GREATER
+using System.Runtime.CompilerServices;
 #endif
 
 namespace AsmResolver.IO
@@ -18,7 +23,11 @@ namespace AsmResolver.IO
 
         // Buffer to reduce individual IO ops.
         // Initialize this buffer in reverse order to prevent JIT emitting range checks for every byte.
+#if NET10_0_OR_GREATER
+        private InlineArray8<byte> _buffer;
+#else
         private readonly byte[] _buffer = new byte[8];
+#endif
 
         /// <summary>
         /// Creates a new binary stream writer using the provided output stream.
@@ -100,7 +109,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..2]);
+#else
             BaseStream.Write(_buffer, 0, 2);
+#endif
         }
 
         /// <summary>
@@ -117,7 +130,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..4]);
+#else
             BaseStream.Write(_buffer, 0, 4);
+#endif
         }
 
         /// <summary>
@@ -138,7 +155,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..8]);
+#else
             BaseStream.Write(_buffer, 0, 8);
+#endif
         }
 
         /// <summary>
@@ -162,7 +183,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..2]);
+#else
             BaseStream.Write(_buffer, 0, 2);
+#endif
         }
 
         /// <summary>
@@ -179,7 +204,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..4]);
+#else
             BaseStream.Write(_buffer, 0, 4);
+#endif
         }
 
         /// <summary>
@@ -200,7 +229,11 @@ namespace AsmResolver.IO
             _buffer[1] = (byte) ((value >> 8) & 0xFF);
             _buffer[0] = (byte) (value & 0xFF);
 #endif
+#if NET10_0_OR_GREATER
+            BaseStream.Write(_buffer[..8]);
+#else
             BaseStream.Write(_buffer, 0, 8);
+#endif
         }
 
         /// <summary>
@@ -337,7 +370,11 @@ namespace AsmResolver.IO
                 case < 0x4000:
                     _buffer[1] = (byte) value;
                     _buffer[0] = (byte) (0x80 | value >> 8);
+#if NET10_0_OR_GREATER
+                    BaseStream.Write(_buffer[..2]);
+#else
                     BaseStream.Write(_buffer, 0, 2);
+#endif
                     break;
 
                 default:
@@ -345,7 +382,11 @@ namespace AsmResolver.IO
                     _buffer[2] = (byte) (value >> 0x08);
                     _buffer[1] = (byte) (value >> 0x10);
                     _buffer[0] = (byte) (0x80 | 0x40 | value >> 0x18);
+#if NET10_0_OR_GREATER
+                    BaseStream.Write(_buffer[..4]);
+#else
                     BaseStream.Write(_buffer, 0, 4);
+#endif
                     break;
             }
         }
@@ -370,7 +411,11 @@ namespace AsmResolver.IO
                     rotated = ((uint) (value & 0x1FFF) << 1) | sign;
                     _buffer[1] = (byte) rotated;
                     _buffer[0] = (byte) (0x80 | rotated >> 8);
+#if NET10_0_OR_GREATER
+                    BaseStream.Write(_buffer[..2]);
+#else
                     BaseStream.Write(_buffer, 0, 2);
+#endif
                     break;
 
                 default:
@@ -379,7 +424,11 @@ namespace AsmResolver.IO
                     _buffer[2] = (byte) (rotated >> 0x08);
                     _buffer[1] = (byte) (rotated >> 0x10);
                     _buffer[0] = (byte)(0x80 | 0x40 | rotated >> 0x18);
+#if NET10_0_OR_GREATER
+                    BaseStream.Write(_buffer[..4]);
+#else
                     BaseStream.Write(_buffer, 0, 4);
+#endif
                     break;
             }
         }
@@ -407,6 +456,9 @@ namespace AsmResolver.IO
         /// Writes an UTF8 string to the stream.
         /// </summary>
         /// <param name="value">The string to write.</param>
+#if NET10_0_OR_GREATER
+        [SkipLocalsInit]
+#endif
         public void WriteSerString(string? value)
         {
             if (value is null)
@@ -415,9 +467,26 @@ namespace AsmResolver.IO
                 return;
             }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            int maxByteCount = Encoding.UTF8.GetMaxByteCount(value.Length);
+            byte[]? utf8Array = null;
+            Span<byte> utf8Span = maxByteCount <= 256
+                ? stackalloc byte[maxByteCount]
+                : (utf8Array = ArrayPool<byte>.Shared.Rent(maxByteCount));
+            int bytesWritten = Encoding.UTF8.GetBytes(value, utf8Span);
+
+            WriteCompressedUInt32((uint)bytesWritten);
+            WriteBytes(utf8Span[..bytesWritten]);
+
+            if (utf8Array is not null)
+            {
+                ArrayPool<byte>.Shared.Return(utf8Array);
+            }
+#else
             byte[] bytes = Encoding.UTF8.GetBytes(value);
             WriteCompressedUInt32((uint)bytes.Length);
             WriteBytes(bytes);
+#endif
         }
 
         /// <summary>
@@ -431,11 +500,31 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="value">The string to write.</param>
         /// <param name="encoding">The encoding to use.</param>
+#if NET10_0_OR_GREATER
+        [SkipLocalsInit]
+#endif
         public void WriteBinaryFormatterString(string value, Encoding encoding)
         {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            int maxByteCount = encoding.GetMaxByteCount(value.Length);
+            byte[]? byteArray = null;
+            Span<byte> byteSpan = maxByteCount <= 256
+                ? stackalloc byte[maxByteCount]
+                : (byteArray = ArrayPool<byte>.Shared.Rent(maxByteCount));
+            int bytesWritten = encoding.GetBytes(value, byteSpan);
+
+            Write7BitEncodedInt32(bytesWritten);
+            WriteBytes(byteSpan[..bytesWritten]);
+
+            if (byteArray is not null)
+            {
+                ArrayPool<byte>.Shared.Return(byteArray);
+            }
+#else
             byte[] data = encoding.GetBytes(value);
             Write7BitEncodedInt32(data.Length);
             WriteBytes(data);
+#endif
         }
 
         /// <summary>
