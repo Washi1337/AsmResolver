@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -9,7 +10,7 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
 {
     public partial class SerializedPortablePdb : PortablePdb
     {
-        public SerializedPortablePdb(MetadataDirectory metadata, ModuleDefinition? owningModule) : base(owningModule)
+        public SerializedPortablePdb(MetadataDirectory metadata, SerializedModuleDefinition owningModule) : base(owningModule)
         {
             PdbReaderContext = new PdbReaderContext(this, metadata, owningModule);
             _factory = new CachedSerializedPdbMemberFactory(PdbReaderContext);
@@ -17,6 +18,9 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
             var pdbStream = PdbReaderContext.PdbStream;
 
             Array.Copy(pdbStream.Id, PdbId, 20);
+
+            _localVariableLists = new LazyRidListRelation<LocalScopeRow>(PdbReaderContext.Metadata, TableIndex.LocalVariable, TableIndex.LocalScope,
+                (rid, _) => rid, PdbReaderContext.TablesStream.GetLocalVariableRange);
         }
 
         public PdbReaderContext PdbReaderContext { get; }

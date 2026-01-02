@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.PE.DotNet.Metadata;
 
 namespace AsmResolver.DotNet.PortablePdbs.Serialized
@@ -7,12 +8,12 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
     /// Provides a context in which a .NET module parser exists in. This includes the original PE image, as well as the
     /// module reader parameters.
     /// </summary>
-    public class PdbReaderContext
+    public class PdbReaderContext : IErrorListener
     {
         /// <summary>
         /// Creates a new instance of the <see cref="PdbReaderContext"/> class.
         /// </summary>
-        public PdbReaderContext(SerializedPortablePdb pdb, MetadataDirectory metadata, ModuleDefinition owningModule)
+        public PdbReaderContext(SerializedPortablePdb pdb, MetadataDirectory metadata, SerializedModuleDefinition owningModule)
         {
             Pdb = pdb ?? throw new ArgumentNullException(nameof(pdb));
             Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
@@ -72,7 +73,7 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
         /// <summary>
         /// Gets the root module object that is being read.
         /// </summary>
-        public ModuleDefinition OwningModule
+        public SerializedModuleDefinition OwningModule
         {
             get;
         }
@@ -177,5 +178,9 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
         {
             get;
         } = -1;
+
+        public void MarkAsFatal() => OwningModule.ReaderContext.MarkAsFatal();
+
+        public void RegisterException(Exception exception) => OwningModule.ReaderContext.RegisterException(exception);
     }
 }

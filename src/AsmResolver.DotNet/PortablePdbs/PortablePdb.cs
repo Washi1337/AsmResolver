@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.PortablePdbs.Serialized;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -13,7 +14,7 @@ namespace AsmResolver.DotNet.PortablePdbs
             Owner = ownerModule;
         }
 
-        public static bool TryFromFile(string path, ModuleDefinition ownerModule, [NotNullWhen(true)] out SerializedPortablePdb? pdb)
+        public static bool TryFromFile(string path, SerializedModuleDefinition ownerModule, [NotNullWhen(true)] out SerializedPortablePdb? pdb)
         {
             MetadataDirectory metadata;
             try
@@ -33,7 +34,7 @@ namespace AsmResolver.DotNet.PortablePdbs
             return true;
         }
 
-        public static bool TryFromBytes(byte[] bytes, ModuleDefinition ownerModule, [NotNullWhen(true)] out SerializedPortablePdb? pdb)
+        public static bool TryFromBytes(byte[] bytes, SerializedModuleDefinition ownerModule, [NotNullWhen(true)] out SerializedPortablePdb? pdb)
         {
             MetadataDirectory metadata;
             try
@@ -49,7 +50,7 @@ namespace AsmResolver.DotNet.PortablePdbs
             return TryFromMetadata(metadata, ownerModule, out pdb);
         }
 
-        public static bool TryFromMetadata(MetadataDirectory metadata, ModuleDefinition ownerModule, [NotNullWhen(true)] out SerializedPortablePdb? pdb)
+        public static bool TryFromMetadata(MetadataDirectory metadata, SerializedModuleDefinition ownerModule, [NotNullWhen(true)] out SerializedPortablePdb? pdb)
         {
             if (!metadata.TryGetStream<PdbStream>(out var stream))
             {

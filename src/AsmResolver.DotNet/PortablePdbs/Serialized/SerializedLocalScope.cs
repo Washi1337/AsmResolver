@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.PortablePdbs.Serialized
@@ -15,5 +17,23 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
         }
 
         protected override MethodDefinition? GetOwner() => _context.OwningModule.TryLookupMember<MethodDefinition>(_row.Method, out var method) ? method : null;
+
+        protected override IList<LocalVariable> GetLocalVariables()
+        {
+            var range = _context.Pdb.GetLocalVariableRange(MetadataToken.Rid);
+            var localVariables = new MemberCollection<LocalScope, LocalVariable>(this, range.Count);
+
+            foreach (var token in range)
+            {
+                if (_context.Pdb.TryLookupMember<LocalVariable>(token, out var variable))
+                {
+                    localVariables.AddNoOwnerCheck(variable);
+                }
+            }
+
+            return localVariables;
+        }
+
+        protected override ImportScope? GetImportScope() => _context.Pdb.TryLookupMember<ImportScope>(new MetadataToken(TableIndex.ImportScope, _row.ImportScope), out var importScope) ? importScope : null;
     }
 }

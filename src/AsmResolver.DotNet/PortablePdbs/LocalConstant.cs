@@ -16,5 +16,7 @@ namespace AsmResolver.DotNet.PortablePdbs
             get;
             set;
         }
+
+        protected virtual LocalScope? GetOwner() => null;
     }
 }

@@ -14,6 +14,8 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
         private Document?[]? _documents;
         private MethodDebugInformation?[]? _methodDebugInformations;
         private LocalScope?[]? _localScopes;
+        private LocalVariable?[]? _localVariables;
+        private ImportScope?[]? _importScopes;
 
         internal CachedSerializedPdbMemberFactory(PdbReaderContext context)
         {
@@ -28,6 +30,8 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
                 TableIndex.Document => LookupDocument(token),
                 TableIndex.MethodDebugInformation => LookupMethodDebugInformation(token),
                 TableIndex.LocalScope => LookupLocalScope(token),
+                TableIndex.LocalVariable => LookupLocalVariable(token),
+                TableIndex.ImportScope => LookupImportScope(token),
                 _ => null,
             };
 
@@ -50,6 +54,18 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
         {
             return LookupOrCreateMember<LocalScope, LocalScopeRow>(ref _localScopes, token,
                 (c, t, r) => new SerializedLocalScope(c, t, r));
+        }
+
+        internal LocalVariable? LookupLocalVariable(MetadataToken token)
+        {
+            return LookupOrCreateMember<LocalVariable, LocalVariableRow>(ref _localVariables, token,
+                (c, t, r) => new SerializedLocalVariable(c, t, r));
+        }
+
+        internal ImportScope? LookupImportScope(MetadataToken token)
+        {
+            return LookupOrCreateMember<ImportScope, ImportScopeRow>(ref _importScopes, token,
+                (c, t, r) => new SerializedImportScope(c, t, r));
         }
 
         internal TMember? LookupOrCreateMember<TMember, TRow>(ref TMember?[]? cache, MetadataToken token,

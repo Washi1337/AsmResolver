@@ -3,8 +3,10 @@ using AsmResolver.IO;
 
 namespace AsmResolver.PE.Debug
 {
-    public class PortablePdbDataSegment : IDebugDataSegment, IReadableSegment
+    public class PortablePdbDataSegment : SegmentBase, IDebugDataSegment
     {
+        public const uint MAGIC = 0x4244504d;
+
         /// <summary>
         /// Creates a new instance of the <see cref="CustomDebugDataSegment"/> class.
         /// </summary>
@@ -30,38 +32,21 @@ namespace AsmResolver.PE.Debug
             set;
         }
 
-        /// <inheritdoc />
-        public ulong Offset => CompressedContents.Offset;
+        public override uint GetPhysicalSize() => sizeof(uint) + sizeof(int) + CompressedContents.GetPhysicalSize();
+
+        public override void UpdateOffsets(in RelocationParameters parameters) => CompressedContents.UpdateOffsets(parameters.WithAdvance(sizeof(uint) + sizeof(int)));
 
         /// <inheritdoc />
-        public uint Rva => CompressedContents.Rva;
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => CompressedContents?.CanUpdateOffsets ?? false;
-
-        /// <inheritdoc />
-        public void UpdateOffsets(in RelocationParameters parameters) => CompressedContents.UpdateOffsets(parameters);
-
-        /// <inheritdoc />
-        public BinaryStreamReader CreateReader(ulong fileOffset, uint size) => CompressedContents.CreateReader(fileOffset, size);
-
-        /// <inheritdoc />
-        public uint GetPhysicalSize() => CompressedContents.GetPhysicalSize();
-
-        /// <inheritdoc />
-        public uint GetVirtualSize() => CompressedContents.GetPhysicalSize();
-
-        /// <inheritdoc />
-        public void Write(BinaryStreamWriter writer)
+        public override void Write(BinaryStreamWriter writer)
         {
-            writer.WriteUInt32(0x4244504d);
+            writer.WriteUInt32(MAGIC);
             writer.WriteInt32(UncompressedSize);
             CompressedContents.Write(writer);
         }
 
         public static PortablePdbDataSegment FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
-            if (reader.ReadUInt32() != 0x4244504d)
+            if (reader.ReadUInt32() != MAGIC)
             {
                 throw new BadImageFormatException("Embedded PDB section without correct magic");
             }

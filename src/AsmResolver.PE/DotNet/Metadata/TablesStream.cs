@@ -626,12 +626,16 @@ namespace AsmResolver.PE.DotNet.Metadata
             GetMemberRange<EventMapRow>(TableIndex.EventMap, eventMapRid, 1,
                 TableIndex.Event, TableIndex.EventPtr);
 
+        public MetadataRange GetLocalVariableRange(uint localScopeRid) =>
+            GetMemberRange<LocalScopeRow>(TableIndex.LocalScope, localScopeRid, 2,
+                TableIndex.LocalVariable, null);
+
         private MetadataRange GetMemberRange<TOwnerRow>(
             TableIndex ownerTableIndex,
             uint ownerRid,
             int ownerColumnIndex,
             TableIndex memberTableIndex,
-            TableIndex redirectTableIndex)
+            TableIndex? redirectTableIndex)
             where TOwnerRow : struct, IMetadataRow
         {
             int index = (int) (ownerRid - 1);
@@ -648,9 +652,12 @@ namespace AsmResolver.PE.DotNet.Metadata
                 : (uint) GetTable(memberTableIndex).Count + 1;
 
             // Check if redirect table is present.
-            var redirectTable = GetTable(redirectTableIndex);
-            if (redirectTable.Count > 0)
-                return new MetadataRange(redirectTable, memberTableIndex, startRid, endRid);
+            if (redirectTableIndex.HasValue)
+            {
+                var redirectTable = GetTable(redirectTableIndex.Value);
+                if (redirectTable.Count > 0)
+                    return new MetadataRange(redirectTable, memberTableIndex, startRid, endRid);
+            }
 
             // If not, its a simple range.
             return new MetadataRange(memberTableIndex, startRid, endRid);

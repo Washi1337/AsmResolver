@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Linq;
 using AsmResolver.DotNet.PortablePdbs;
 using AsmResolver.DotNet.PortablePdbs.Serialized;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.PE.Debug;
 
 namespace AsmResolver.DotNet;
@@ -11,7 +12,7 @@ public class DefaultPdbMetadataResolver : IPdbMetadataResolver
 {
     public static DefaultPdbMetadataResolver Instance { get; } = new();
 
-    public PdbReaderContext? ResolvePortablePdb(ModuleDefinition module)
+    public PdbReaderContext? ResolvePortablePdb(SerializedModuleDefinition module)
     {
         if (module.DotNetDirectory?.Metadata is { } metadata && PortablePdb.TryFromMetadata(metadata, module, out var pdb))
         {

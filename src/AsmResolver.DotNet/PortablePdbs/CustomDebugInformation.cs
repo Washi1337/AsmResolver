@@ -1,5 +1,4 @@
-﻿using System;
-using AsmResolver.Collections;
+﻿using AsmResolver.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.PortablePdbs.CustomRecords
@@ -18,6 +17,6 @@ namespace AsmResolver.DotNet.PortablePdbs.CustomRecords
             set;
         }
 
-
+        protected virtual IHasCustomDebugInformation? GetOwner() => null;
     }
 }
