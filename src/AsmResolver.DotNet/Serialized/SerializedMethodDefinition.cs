@@ -169,5 +169,27 @@ namespace AsmResolver.DotNet.Serialized
             }
             return scopes;
         }
+
+        protected override MethodDefinition? GetKickoffMethodInternal()
+        {
+            if (_context.ParentModule.PdbReaderContext?.Pdb.GetKickoffMethod(MetadataToken.Rid) is { } kickoffMethodRid)
+            {
+                return _context.ParentModule.TryLookupMember<MethodDefinition>(new MetadataToken(TableIndex.Method, kickoffMethodRid), out var kickoffMethod)
+                    ? kickoffMethod
+                    : _context.BadImageAndReturn<MethodDefinition>($"Invalid kickoff method rid {kickoffMethodRid}");
+            }
+            return null;
+        }
+
+        protected override MethodDefinition? GetMoveNextMethodInternal()
+        {
+            if (_context.ParentModule.PdbReaderContext?.Pdb.GetMoveNextMethod(MetadataToken.Rid) is { } moveNextMethodRid)
+            {
+                return _context.ParentModule.TryLookupMember<MethodDefinition>(new MetadataToken(TableIndex.Method, moveNextMethodRid), out var moveNextMethod)
+                    ? moveNextMethod
+                    : _context.BadImageAndReturn<MethodDefinition>($"Invalid kickoff method rid {moveNextMethodRid}");
+            }
+            return null;
+        }
     }
 }

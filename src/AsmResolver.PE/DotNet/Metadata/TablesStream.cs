@@ -630,6 +630,10 @@ namespace AsmResolver.PE.DotNet.Metadata
             GetMemberRange<LocalScopeRow>(TableIndex.LocalScope, localScopeRid, 2,
                 TableIndex.LocalVariable, null);
 
+        public MetadataRange GetLocalConstantRange(uint localScopeRid) =>
+            GetMemberRange<LocalScopeRow>(TableIndex.LocalScope, localScopeRid, 3,
+                TableIndex.LocalConstant, null);
+
         private MetadataRange GetMemberRange<TOwnerRow>(
             TableIndex ownerTableIndex,
             uint ownerRid,

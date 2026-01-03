@@ -35,5 +35,21 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
         }
 
         protected override ImportScope? GetImportScope() => _context.Pdb.TryLookupMember<ImportScope>(new MetadataToken(TableIndex.ImportScope, _row.ImportScope), out var importScope) ? importScope : null;
+
+        protected override IList<LocalConstant> GetLocalConstants()
+        {
+            var range = _context.Pdb.GetLocalConstantRange(MetadataToken.Rid);
+            var localConstants = new MemberCollection<LocalScope, LocalConstant>(this, range.Count);
+
+            foreach (var token in range)
+            {
+                if (_context.Pdb.TryLookupMember<LocalConstant>(token, out var variable))
+                {
+                    localConstants.AddNoOwnerCheck(variable);
+                }
+            }
+
+            return localConstants;
+        }
     }
 }

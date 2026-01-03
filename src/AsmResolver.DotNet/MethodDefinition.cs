@@ -806,6 +806,46 @@ namespace AsmResolver.DotNet
         [LazyProperty]
         public partial IList<LocalScope> LocalScopes { get; }
 
+        [LazyProperty]
+        private partial MethodDefinition? KickoffMethodInternal { get; set; }
+
+        [LazyProperty]
+        private partial MethodDefinition? MoveNextMethodInternal { get; set; }
+
+        public MethodDefinition? KickoffMethod
+        {
+            get => KickoffMethodInternal;
+            set
+            {
+                if (KickoffMethodInternal is not null)
+                {
+                    KickoffMethodInternal.MoveNextMethodInternal = null;
+                }
+                KickoffMethodInternal = value;
+                if (value is not null)
+                {
+                    value.MoveNextMethodInternal = this;
+                }
+            }
+        }
+
+        public MethodDefinition? MoveNextMethod
+        {
+            get => MoveNextMethodInternal;
+            set
+            {
+                if (MoveNextMethodInternal is not null)
+                {
+                    MoveNextMethodInternal.KickoffMethodInternal = null;
+                }
+                MoveNextMethodInternal = value;
+                if (value is not null)
+                {
+                    value.KickoffMethodInternal = this;
+                }
+            }
+        }
+
         /// <summary>
         /// Creates a new private static constructor for a type that is executed when its declaring type is loaded by the CLR.
         /// </summary>
@@ -1065,6 +1105,10 @@ namespace AsmResolver.DotNet
         protected virtual MethodDebugInformation? GetMethodDebugInformation() => null;
 
         protected virtual IList<LocalScope> GetLocalScopes() => new OwnedCollection<MethodDefinition, LocalScope>(this);
+
+        protected virtual MethodDefinition? GetKickoffMethodInternal() => null;
+
+        protected virtual MethodDefinition? GetMoveNextMethodInternal() => null;
 
         /// <summary>
         /// Asserts whether the method's metadata is consistent with its signature.

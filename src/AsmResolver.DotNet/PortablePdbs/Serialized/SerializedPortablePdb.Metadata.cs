@@ -10,9 +10,11 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
     {
         private readonly CachedSerializedPdbMemberFactory _factory;
         private readonly LazyRidListRelation<LocalScopeRow> _localVariableLists;
+        private readonly LazyRidListRelation<LocalScopeRow> _localConstantLists;
 
         private OneToManyRelation<uint, uint>? _localScopes;
         private OneToManyRelation<uint, uint>? _importScopeChildren;
+        private OneToOneRelation<uint, uint>? _kickoffMethodToStateMachineMethod;
 
         [MemberNotNull(nameof(_localScopes))]
         private void EnsureLocalScopesInitialized()
@@ -79,5 +81,42 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
         internal MetadataRange GetLocalVariableRange(uint localScopeRid) => _localVariableLists.GetMemberRange(localScopeRid);
 
         internal uint GetLocalVariableOwner(uint localVariableRid) => _localVariableLists.GetMemberOwner(localVariableRid);
+
+        internal MetadataRange GetLocalConstantRange(uint localScopeRid) => _localConstantLists.GetMemberRange(localScopeRid);
+
+        internal uint GetLocalConstantOwner(uint localConstantRid) => _localConstantLists.GetMemberOwner(localConstantRid);
+
+        [MemberNotNull(nameof(_kickoffMethodToStateMachineMethod))]
+        private void EnsureKickoffMethodToStateMachineMethodInitialized()
+        {
+            if (_kickoffMethodToStateMachineMethod == null)
+                Interlocked.CompareExchange(ref _kickoffMethodToStateMachineMethod, InitializeKickoffMethodToStateMachineMethod(), null);
+        }
+
+        private OneToOneRelation<uint, uint> InitializeKickoffMethodToStateMachineMethod()
+        {
+            var tablesStream = PdbReaderContext.TablesStream;
+            var stateMachineTable = tablesStream.GetTable<StateMachineMethodRow>();
+
+            var stateMachines = new OneToOneRelation<uint, uint>(stateMachineTable.Count);
+            foreach (var row in stateMachineTable)
+            {
+                stateMachines.Add(row.KickoffMethod, row.MoveNextMethod);
+            }
+
+            return stateMachines;
+        }
+
+        internal uint GetKickoffMethod(uint moveNextMethod)
+        {
+            EnsureKickoffMethodToStateMachineMethodInitialized();
+            return _kickoffMethodToStateMachineMethod.GetKey(moveNextMethod);
+        }
+
+        internal uint GetMoveNextMethod(uint kickoffMethod)
+        {
+            EnsureKickoffMethodToStateMachineMethodInitialized();
+            return _kickoffMethodToStateMachineMethod.GetValue(kickoffMethod);
+        }
     }
 }

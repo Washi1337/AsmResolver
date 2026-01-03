@@ -21,6 +21,8 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
 
             _localVariableLists = new LazyRidListRelation<LocalScopeRow>(PdbReaderContext.Metadata, TableIndex.LocalVariable, TableIndex.LocalScope,
                 (rid, _) => rid, PdbReaderContext.TablesStream.GetLocalVariableRange);
+            _localConstantLists = new LazyRidListRelation<LocalScopeRow>(PdbReaderContext.Metadata, TableIndex.LocalConstant, TableIndex.LocalScope,
+                (rid, _) => rid, PdbReaderContext.TablesStream.GetLocalConstantRange);
         }
 
         public PdbReaderContext PdbReaderContext { get; }

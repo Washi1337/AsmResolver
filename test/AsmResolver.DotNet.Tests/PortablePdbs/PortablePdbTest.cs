@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.PortablePdbs
@@ -9,7 +11,8 @@ namespace AsmResolver.DotNet.Tests.PortablePdbs
         {
             var mod = ModuleDefinition.FromFile(typeof(PortablePdbTest).Assembly.Location);
             var method = mod.LookupMember<MethodDefinition>(typeof(PortablePdbTest).GetMethod("Test").MetadataToken);
-            var scopes = method.LocalScopes;
+            var scope = method.LocalScopes[0].LocalConstants[0].Signature;
+            const decimal someT = 12.5m;
         }
     }
 }

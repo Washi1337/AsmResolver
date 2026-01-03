@@ -5,6 +5,11 @@ namespace AsmResolver.DotNet.PortablePdbs
 {
     public partial class LocalConstant : IMetadataMember, IOwnedCollectionElement<LocalScope>
     {
+        public LocalConstant(MetadataToken token)
+        {
+            MetadataToken = token;
+        }
+
         public MetadataToken MetadataToken
         {
             get;
@@ -17,6 +22,15 @@ namespace AsmResolver.DotNet.PortablePdbs
             set;
         }
 
+        [LazyProperty]
+        public partial LocalConstantSignature? Signature
+        {
+            get;
+            set;
+        }
+
         protected virtual LocalScope? GetOwner() => null;
+
+        protected virtual LocalConstantSignature? GetSignature() => null;
     }
 }
