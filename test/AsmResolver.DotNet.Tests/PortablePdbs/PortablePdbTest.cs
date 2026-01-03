@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
@@ -10,13 +10,10 @@ namespace AsmResolver.DotNet.Tests.PortablePdbs
         public void Test()
         {
             var mod = ModuleDefinition.FromFile(typeof(PortablePdbTest).Assembly.Location);
-            var method = mod.LookupMember<MethodDefinition>(typeof(PortablePdbTest).GetMethod("Test").MetadataToken);
-            foreach (var c in method.LocalScopes[0].LocalConstants)
-            {
-                _ = c.Signature;
-            }
-            const string s = "\u00ff";
-            const string nullS = null;
+            var m1 = new MethodDefinition(null, MethodAttributes.Static, MethodSignature.CreateStatic(mod.CorLibTypeFactory.Void));
+            var m2 = new MethodDefinition(null, MethodAttributes.Static, MethodSignature.CreateStatic(mod.CorLibTypeFactory.Void));
+
+            m1.MoveNextMethod = m2;
         }
     }
 }

@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using AsmResolver.DotNet.PortablePdbs.CustomRecords;
 
-namespace AsmResolver.DotNet.PortablePdbs
+namespace AsmResolver.DotNet.PortablePdbs;
+
+public interface IHasCustomDebugInformation : IMetadataMember
 {
-    public interface IHasCustomDebugInformation : IMetadataMember
+    IList<CustomDebugInformation> CustomDebugInformations
     {
-        IList<CustomDebugInformation> CustomDebugInformations
-        {
-            get;
-        }
+        get;
     }
 }

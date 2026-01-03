@@ -806,45 +806,11 @@ namespace AsmResolver.DotNet
         [LazyProperty]
         public partial IList<LocalScope> LocalScopes { get; }
 
-        [LazyProperty]
-        private partial MethodDefinition? KickoffMethodInternal { get; set; }
+        [LazyProperty(OwnerProperty = nameof(MoveNextMethod))]
+        public partial MethodDefinition? KickoffMethod { get; set; }
 
-        [LazyProperty]
-        private partial MethodDefinition? MoveNextMethodInternal { get; set; }
-
-        public MethodDefinition? KickoffMethod
-        {
-            get => KickoffMethodInternal;
-            set
-            {
-                if (KickoffMethodInternal is not null)
-                {
-                    KickoffMethodInternal.MoveNextMethodInternal = null;
-                }
-                KickoffMethodInternal = value;
-                if (value is not null)
-                {
-                    value.MoveNextMethodInternal = this;
-                }
-            }
-        }
-
-        public MethodDefinition? MoveNextMethod
-        {
-            get => MoveNextMethodInternal;
-            set
-            {
-                if (MoveNextMethodInternal is not null)
-                {
-                    MoveNextMethodInternal.KickoffMethodInternal = null;
-                }
-                MoveNextMethodInternal = value;
-                if (value is not null)
-                {
-                    value.KickoffMethodInternal = this;
-                }
-            }
-        }
+        [LazyProperty(OwnerProperty = nameof(KickoffMethod))]
+        public partial MethodDefinition? MoveNextMethod { get; set; }
 
         /// <summary>
         /// Creates a new private static constructor for a type that is executed when its declaring type is loaded by the CLR.
@@ -1106,9 +1072,9 @@ namespace AsmResolver.DotNet
 
         protected virtual IList<LocalScope> GetLocalScopes() => new OwnedCollection<MethodDefinition, LocalScope>(this);
 
-        protected virtual MethodDefinition? GetKickoffMethodInternal() => null;
+        protected virtual MethodDefinition? GetKickoffMethod() => null;
 
-        protected virtual MethodDefinition? GetMoveNextMethodInternal() => null;
+        protected virtual MethodDefinition? GetMoveNextMethod() => null;
 
         /// <summary>
         /// Asserts whether the method's metadata is consistent with its signature.

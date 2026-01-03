@@ -290,7 +290,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                       {
                           lock (_lock)
                           {
-                              if (value is { {{OwnerPropertyName}}: { } originalOwner })
+                              if (value is { {{OwnerPropertyName}}: { } originalOwner } && originalOwner != this)
                                   throw new global::System.ArgumentException($"{{PropertyName}} is already assigned to {originalOwner.SafeToString()}.");
 
                               if (_initialized[{{PropertyName}}InitMask] && {{fieldName}} is { } originalBody)
@@ -298,7 +298,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
 
                               {{fieldName}} = value;
 
-                              if (value is not null)
+                              if (value is not null && value.{{OwnerPropertyName}} != this)
                                   value.{{OwnerPropertyName}} = this;
 
                               _initialized[{{PropertyName}}InitMask] = true;

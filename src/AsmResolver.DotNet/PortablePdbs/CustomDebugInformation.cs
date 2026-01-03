@@ -1,22 +1,21 @@
 ﻿using AsmResolver.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
-namespace AsmResolver.DotNet.PortablePdbs.CustomRecords
+namespace AsmResolver.DotNet.PortablePdbs.CustomRecords;
+
+public partial class CustomDebugInformation : IMetadataMember, IOwnedCollectionElement<IHasCustomDebugInformation>
 {
-    public partial class CustomDebugInformation : IMetadataMember, IOwnedCollectionElement<IHasCustomDebugInformation>
+    public MetadataToken MetadataToken
     {
-        public MetadataToken MetadataToken
-        {
-            get;
-        }
-
-        [LazyProperty]
-        public partial IHasCustomDebugInformation? Owner
-        {
-            get;
-            set;
-        }
-
-        protected virtual IHasCustomDebugInformation? GetOwner() => null;
+        get;
     }
+
+    [LazyProperty]
+    public partial IHasCustomDebugInformation? Owner
+    {
+        get;
+        set;
+    }
+
+    protected virtual IHasCustomDebugInformation? GetOwner() => null;
 }

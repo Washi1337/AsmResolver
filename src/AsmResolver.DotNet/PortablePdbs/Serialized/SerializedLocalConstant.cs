@@ -1,33 +1,31 @@
-using System;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
-namespace AsmResolver.DotNet.PortablePdbs.Serialized
+namespace AsmResolver.DotNet.PortablePdbs.Serialized;
+
+public class SerializedLocalConstant : LocalConstant
 {
-    public class SerializedLocalConstant : LocalConstant
+    private readonly PdbReaderContext _context;
+    private readonly LocalConstantRow _row;
+
+    public SerializedLocalConstant(PdbReaderContext context, MetadataToken token, in LocalConstantRow row)
+        : base(token)
     {
-        private readonly PdbReaderContext _context;
-        private readonly LocalConstantRow _row;
+        _context = context;
+        _row = row;
+    }
 
-        public SerializedLocalConstant(PdbReaderContext context, MetadataToken token, in LocalConstantRow row)
-            : base(token)
+    protected override LocalScope? GetOwner() => _context.Pdb.TryLookupMember<LocalScope>(new MetadataToken(TableIndex.LocalScope, _context.Pdb.GetLocalConstantOwner(MetadataToken.Rid)), out var scope) ? scope : null;
+
+    protected override Utf8String? GetName() => _context.StringsStream!.GetStringByIndex(_row.Name);
+
+    protected override LocalConstantSignature? GetSignature()
+    {
+        if (_context.BlobStream?.TryGetBlobReaderByIndex(_row.Signature, out var reader) ?? false)
         {
-            _context = context;
-            _row = row;
+            var context = new BlobReaderContext(_context.OwningModule.ReaderContext);
+            return LocalConstantSignature.FromReader(ref context, ref reader);
         }
-
-        protected override LocalScope? GetOwner() => _context.Pdb.TryLookupMember<LocalScope>(new MetadataToken(TableIndex.LocalScope, _context.Pdb.GetLocalConstantOwner(MetadataToken.Rid)), out var scope) ? scope : null;
-
-        protected override Utf8String? GetName() => _context.StringsStream!.GetStringByIndex(_row.Name);
-
-        protected override LocalConstantSignature? GetSignature()
-        {
-            if (_context.BlobStream?.TryGetBlobReaderByIndex(_row.Signature, out var reader) ?? false)
-            {
-                var context = new BlobReaderContext(_context.OwningModule.ReaderContext);
-                return LocalConstantSignature.FromReader(ref context, ref reader);
-            }
-            return null;
-        }
+        return null;
     }
 }

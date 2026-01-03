@@ -170,7 +170,7 @@ namespace AsmResolver.DotNet.Serialized
             return scopes;
         }
 
-        protected override MethodDefinition? GetKickoffMethodInternal()
+        protected override MethodDefinition? GetKickoffMethod()
         {
             if (_context.ParentModule.PdbReaderContext?.Pdb.GetKickoffMethod(MetadataToken.Rid) is { } kickoffMethodRid)
             {
@@ -181,7 +181,7 @@ namespace AsmResolver.DotNet.Serialized
             return null;
         }
 
-        protected override MethodDefinition? GetMoveNextMethodInternal()
+        protected override MethodDefinition? GetMoveNextMethod()
         {
             if (_context.ParentModule.PdbReaderContext?.Pdb.GetMoveNextMethod(MetadataToken.Rid) is { } moveNextMethodRid)
             {
