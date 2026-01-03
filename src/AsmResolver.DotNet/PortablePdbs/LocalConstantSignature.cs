@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.Text;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -54,7 +56,7 @@ public class LocalConstantSignature : ExtendableBlobSignature
             ElementType.U8 => (typeFactory.UInt64, reader.ReadUInt64()),
             ElementType.R4 => (typeFactory.Single, reader.ReadSingle()),
             ElementType.R8 => (typeFactory.Double, reader.ReadDouble()),
-            ElementType.String => (typeFactory.String, reader.PeekByte() == 0xff ? null : reader.ReadUnicodeString()),
+            ElementType.String => (typeFactory.String, ReadString(ref reader)),
             ElementType.Class => ReadGeneralConstant(isValueType: false, ref context, ref reader),
             ElementType.ValueType => ReadGeneralConstant(isValueType: true, ref context, ref reader),
             ElementType.Object => (typeFactory.Object, null),
@@ -74,6 +76,20 @@ public class LocalConstantSignature : ExtendableBlobSignature
             var modifierType = ReadType(ref context, ref reader);
             var result = FromReaderCore(ref context, ref reader);
             return result with { Type = result.Type.MakeModifierType(modifierType, isRequired) };
+        }
+        string? ReadString(ref BinaryStreamReader reader)
+        {
+            if (reader.Length - reader.RelativeOffset == 1 && reader.PeekByte() == 0xFF)
+            {
+                reader.Offset += 1;
+                return null;
+            }
+            var buffer = new char[(int)(reader.Length - reader.RelativeOffset) / 2];
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = (char)reader.ReadUInt16();
+            }
+            return new string(buffer);
         }
         (TypeSignature, object?) ReadGeneralConstant(bool isValueType, ref BlobReaderContext context, ref BinaryStreamReader reader)
         {

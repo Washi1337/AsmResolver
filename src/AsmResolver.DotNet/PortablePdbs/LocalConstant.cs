@@ -23,6 +23,13 @@ namespace AsmResolver.DotNet.PortablePdbs
         }
 
         [LazyProperty]
+        public partial Utf8String? Name
+        {
+            get;
+            set;
+        }
+
+        [LazyProperty]
         public partial LocalConstantSignature? Signature
         {
             get;
@@ -30,6 +37,8 @@ namespace AsmResolver.DotNet.PortablePdbs
         }
 
         protected virtual LocalScope? GetOwner() => null;
+
+        protected virtual Utf8String? GetName() => null;
 
         protected virtual LocalConstantSignature? GetSignature() => null;
     }

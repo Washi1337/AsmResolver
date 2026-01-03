@@ -11,8 +11,12 @@ namespace AsmResolver.DotNet.Tests.PortablePdbs
         {
             var mod = ModuleDefinition.FromFile(typeof(PortablePdbTest).Assembly.Location);
             var method = mod.LookupMember<MethodDefinition>(typeof(PortablePdbTest).GetMethod("Test").MetadataToken);
-            var scope = method.LocalScopes[0].LocalConstants[0].Signature;
-            const decimal someT = 12.5m;
+            foreach (var c in method.LocalScopes[0].LocalConstants)
+            {
+                _ = c.Signature;
+            }
+            const string s = "\u00ff";
+            const string nullS = null;
         }
     }
 }

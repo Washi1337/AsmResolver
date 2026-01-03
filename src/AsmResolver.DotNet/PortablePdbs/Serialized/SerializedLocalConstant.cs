@@ -16,7 +16,9 @@ namespace AsmResolver.DotNet.PortablePdbs.Serialized
             _row = row;
         }
 
-        protected override LocalScope? GetOwner() => throw new NotImplementedException();
+        protected override LocalScope? GetOwner() => _context.Pdb.TryLookupMember<LocalScope>(new MetadataToken(TableIndex.LocalScope, _context.Pdb.GetLocalConstantOwner(MetadataToken.Rid)), out var scope) ? scope : null;
+
+        protected override Utf8String? GetName() => _context.StringsStream!.GetStringByIndex(_row.Name);
 
         protected override LocalConstantSignature? GetSignature()
         {
