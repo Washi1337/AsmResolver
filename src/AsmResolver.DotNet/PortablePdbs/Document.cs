@@ -1,12 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using AsmResolver.Collections;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.PortablePdbs;
 
 [DebuggerDisplay("{Name}")]
-public partial class Document : IMetadataMember, IOwnedCollectionElement<PortablePdb>
+public partial class Document : IMetadataMember, IOwnedCollectionElement<ModuleDefinition>, IHasCustomDebugInformation
 {
     public Document() : this(new MetadataToken(TableIndex.Document, 0)) { }
 
@@ -17,10 +19,17 @@ public partial class Document : IMetadataMember, IOwnedCollectionElement<Portabl
 
     public MetadataToken MetadataToken { get; }
 
-    public PortablePdb? Owner
+    [LazyProperty]
+    public partial ModuleDefinition? Owner
     {
         get;
-        set;
+        private set;
+    }
+
+    ModuleDefinition? IOwnedCollectionElement<ModuleDefinition>.Owner
+    {
+        get => Owner;
+        set => Owner = value;
     }
 
     [LazyProperty]
@@ -51,6 +60,14 @@ public partial class Document : IMetadataMember, IOwnedCollectionElement<Portabl
         set;
     }
 
+    [LazyProperty]
+    public partial IList<CustomDebugInformation> CustomDebugInformations
+    {
+        get;
+    }
+
+    protected virtual ModuleDefinition? GetOwner() => null;
+
     protected virtual Utf8String? GetName() => null;
 
     protected virtual Guid GetHashAlgorithm() => Guid.Empty;
@@ -58,4 +75,6 @@ public partial class Document : IMetadataMember, IOwnedCollectionElement<Portabl
     protected virtual byte[]? GetHash() => null;
 
     protected virtual Guid GetLanguage() => Guid.Empty;
+
+    protected virtual IList<CustomDebugInformation> GetCustomDebugInformations() => new MemberCollection<IHasCustomDebugInformation, CustomDebugInformation>(this);
 }

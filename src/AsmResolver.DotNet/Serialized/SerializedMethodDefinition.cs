@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.PortablePdbs;
-using AsmResolver.DotNet.PortablePdbs.Serialized;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Serialized
@@ -191,5 +189,7 @@ namespace AsmResolver.DotNet.Serialized
             }
             return null;
         }
+
+        protected override IList<CustomDebugInformation> GetCustomDebugInformations() => _context.ParentModule.PdbReaderContext?.Pdb.GetCustomDebugInformations(this) ?? base.GetCustomDebugInformations();
     }
 }

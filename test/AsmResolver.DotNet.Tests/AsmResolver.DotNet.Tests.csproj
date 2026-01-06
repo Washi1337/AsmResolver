@@ -8,6 +8,8 @@
         <Nullable>disable</Nullable>
 
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <EmbedAllSources>true</EmbedAllSources>
     </PropertyGroup>
 
     <ItemGroup>

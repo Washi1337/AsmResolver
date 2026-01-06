@@ -17,6 +17,7 @@ internal sealed class CachedSerializedPdbMemberFactory
     private LocalVariable?[]? _localVariables;
     private LocalConstant?[]? _localConstants;
     private ImportScope?[]? _importScopes;
+    private CustomDebugInformation?[]? _customDebugInformations;
 
     internal CachedSerializedPdbMemberFactory(PdbReaderContext context)
     {
@@ -34,6 +35,7 @@ internal sealed class CachedSerializedPdbMemberFactory
             TableIndex.LocalVariable => LookupLocalVariable(token),
             TableIndex.LocalConstant => LookupLocalConstant(token),
             TableIndex.ImportScope => LookupImportScope(token),
+            TableIndex.CustomDebugInformation => LookupCustomDebugInformation(token),
             _ => null,
         };
 
@@ -74,6 +76,12 @@ internal sealed class CachedSerializedPdbMemberFactory
     {
         return LookupOrCreateMember<ImportScope, ImportScopeRow>(ref _importScopes, token,
             (c, t, r) => new SerializedImportScope(c, t, r));
+    }
+
+    internal CustomDebugInformation? LookupCustomDebugInformation(MetadataToken token)
+    {
+        return LookupOrCreateMember<CustomDebugInformation, CustomDebugInformationRow>(ref _customDebugInformations, token,
+            (c, t, r) => new SerializedCustomDebugInformation(c, t, r));
     }
 
     internal TMember? LookupOrCreateMember<TMember, TRow>(ref TMember?[]? cache, MetadataToken token,

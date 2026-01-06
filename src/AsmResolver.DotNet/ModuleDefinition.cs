@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.PortablePdbs;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
@@ -814,6 +815,9 @@ namespace AsmResolver.DotNet
         [LazyProperty]
         public partial PortablePdb? PortablePdb { get; set; }
 
+        [LazyProperty]
+        public partial IList<Document> Documents { get; }
+
         /// <summary>
         /// Gets the default importer instance for this module.
         /// </summary>
@@ -1255,6 +1259,8 @@ namespace AsmResolver.DotNet
         protected virtual ReferenceImporter GetDefaultImporter() => new(this);
 
         protected virtual PortablePdb? GetPortablePdb() => null;
+
+        protected virtual IList<Document> GetDocuments() => new MemberCollection<ModuleDefinition, Document>(this);
 
         /// <summary>
         /// Detects the runtime that this module targets.

@@ -26,7 +26,8 @@ namespace AsmResolver.DotNet
         IHasGenericParameters,
         IMemberForwarded,
         IHasSecurityDeclaration,
-        IManagedEntryPoint
+        IManagedEntryPoint,
+        IHasCustomDebugInformation
     {
         private ParameterCollection? _parameters;
 
@@ -812,6 +813,9 @@ namespace AsmResolver.DotNet
         [LazyProperty(OwnerProperty = nameof(KickoffMethod))]
         public partial MethodDefinition? MoveNextMethod { get; set; }
 
+        [LazyProperty]
+        public partial IList<CustomDebugInformation> CustomDebugInformations { get; }
+
         /// <summary>
         /// Creates a new private static constructor for a type that is executed when its declaring type is loaded by the CLR.
         /// </summary>
@@ -1070,11 +1074,13 @@ namespace AsmResolver.DotNet
 
         protected virtual MethodDebugInformation? GetMethodDebugInformation() => null;
 
-        protected virtual IList<LocalScope> GetLocalScopes() => new OwnedCollection<MethodDefinition, LocalScope>(this);
+        protected virtual IList<LocalScope> GetLocalScopes() => new MemberCollection<MethodDefinition, LocalScope>(this);
 
         protected virtual MethodDefinition? GetKickoffMethod() => null;
 
         protected virtual MethodDefinition? GetMoveNextMethod() => null;
+
+        protected virtual IList<CustomDebugInformation> GetCustomDebugInformations() => new MemberCollection<IHasCustomDebugInformation, CustomDebugInformation>(this);
 
         /// <summary>
         /// Asserts whether the method's metadata is consistent with its signature.

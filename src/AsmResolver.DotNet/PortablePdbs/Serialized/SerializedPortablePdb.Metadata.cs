@@ -15,6 +15,7 @@ public partial class SerializedPortablePdb
     private OneToManyRelation<uint, uint>? _localScopes;
     private OneToManyRelation<uint, uint>? _importScopeChildren;
     private OneToOneRelation<uint, uint>? _kickoffMethodToStateMachineMethod;
+    private OneToManyRelation<MetadataToken, uint>? _customDebugInformations;
 
     [MemberNotNull(nameof(_localScopes))]
     private void EnsureLocalScopesInitialized()
@@ -117,5 +118,40 @@ public partial class SerializedPortablePdb
     {
         EnsureKickoffMethodToStateMachineMethodInitialized();
         return _kickoffMethodToStateMachineMethod.GetValue(kickoffMethod);
+    }
+
+    [MemberNotNull(nameof(_customDebugInformations))]
+    private void EnsureCustomDebugInformationsInitialized()
+    {
+        if (_customDebugInformations == null)
+            Interlocked.CompareExchange(ref _customDebugInformations, InitializeCustomDebugInformations(), null);
+    }
+
+    private OneToManyRelation<MetadataToken, uint> InitializeCustomDebugInformations()
+    {
+        var tablesStream = PdbReaderContext.TablesStream;
+        var debugInfoTable = tablesStream.GetTable<CustomDebugInformationRow>();
+        var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasCustomDebugInformation);
+
+        var customDebugInformations = new OneToManyRelation<MetadataToken, uint>(debugInfoTable.Count);
+        for (int i = 0; i < debugInfoTable.Count; i++)
+        {
+            var rid = (uint) (i + 1);
+            customDebugInformations.Add(encoder.DecodeIndex(debugInfoTable[i].Parent), rid);
+        }
+
+        return customDebugInformations;
+    }
+
+    public MetadataToken GetCustomDebugInformationOwner(uint rid)
+    {
+        EnsureCustomDebugInformationsInitialized();
+        return _customDebugInformations.GetKey(rid);
+    }
+
+    public OneToManyRelation<MetadataToken, uint>.ValueSet GetCustomDebugInformations(MetadataToken owner)
+    {
+        EnsureCustomDebugInformationsInitialized();
+        return _customDebugInformations.GetValues(owner);
     }
 }

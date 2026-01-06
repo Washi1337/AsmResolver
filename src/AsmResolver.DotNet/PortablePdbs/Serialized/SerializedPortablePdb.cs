@@ -27,26 +27,6 @@ public partial class SerializedPortablePdb : PortablePdb
 
     public PdbReaderContext PdbReaderContext { get; }
 
-    protected override IList<Document> GetDocuments()
-    {
-        var documentsTable = PdbReaderContext.TablesStream.GetTable<DocumentRow>(TableIndex.Document);
-
-        var documents = new MemberCollection<PortablePdb, Document>(this, documentsTable.Count);
-
-        for (int i = 0; i < documentsTable.Count; i++)
-        {
-            var rid = (uint)i + 1;
-            documents.AddNoOwnerCheck(_factory.LookupDocument(new MetadataToken(TableIndex.Document, rid))!);
-        }
-
-        return documents;
-    }
-
-    public Document LookupDocument(MetadataToken token)
-    {
-        return _factory.LookupDocument(token)!;
-    }
-
     public override bool TryLookupMember<T>(MetadataToken token, [MaybeNullWhen(false)] out T member) where T : class
     {
         if (_factory.TryLookupMember(token, out var metadataMember))
@@ -57,5 +37,19 @@ public partial class SerializedPortablePdb : PortablePdb
 
         member = null;
         return false;
+    }
+
+    public IList<CustomDebugInformation> GetCustomDebugInformations(IHasCustomDebugInformation owner)
+    {
+        var rids = GetCustomDebugInformations(owner.MetadataToken);
+        var customDebugInformations = new MemberCollection<IHasCustomDebugInformation, CustomDebugInformation>(owner, rids.Count);
+        foreach (var rid in rids)
+        {
+            if (TryLookupMember<CustomDebugInformation>(new MetadataToken(TableIndex.CustomDebugInformation, rid), out var debugInfo))
+            {
+                customDebugInformations.AddNoOwnerCheck(debugInfo);
+            }
+        }
+        return customDebugInformations;
     }
 }

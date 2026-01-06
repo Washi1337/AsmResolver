@@ -15,6 +15,8 @@ public class SerializedDocument : Document
         _row = row;
     }
 
+    protected override ModuleDefinition GetOwner() => _context.OwningModule;
+
     protected override Utf8String GetName()
     {
         var blobStream = _context.BlobStream!;
@@ -58,4 +60,6 @@ public class SerializedDocument : Document
     protected override byte[]? GetHash() => _context.BlobStream!.GetBlobByIndex(_row.Hash);
 
     protected override Guid GetLanguage() => _context.GuidStream!.GetGuidByIndex(_row.Language);
+
+    protected override IList<CustomDebugInformation> GetCustomDebugInformations() => _context.Pdb.GetCustomDebugInformations(this);
 }

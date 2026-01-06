@@ -68,17 +68,9 @@ public partial class PortablePdb
 
     public string? FilePath { get; set; }
 
-    [LazyProperty]
-    public partial IList<Document> Documents
-    {
-        get;
-    }
-
     public virtual bool TryLookupMember<T>(MetadataToken token, [NotNullWhen(true)] out T? member) where T : class, IMetadataMember
     {
         member = null;
         return false;
     }
-
-    protected virtual IList<Document> GetDocuments() => [];
 }

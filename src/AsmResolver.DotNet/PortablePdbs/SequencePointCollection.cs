@@ -34,7 +34,7 @@ public class SequencePointCollection : IList<SequencePoint>, IReadOnlyList<Seque
         Document? document = null;
         if (debugInfo.Document is null)
         {
-            document = context.Pdb.LookupDocument(new MetadataToken(TableIndex.Document, reader.ReadCompressedUInt32()));
+            context.Pdb.TryLookupMember<Document>(new MetadataToken(TableIndex.Document, reader.ReadCompressedUInt32()), out document);
         }
 
         var points = new SequencePointCollection(debugInfo);
@@ -53,7 +53,7 @@ public class SequencePointCollection : IList<SequencePoint>, IReadOnlyList<Seque
 
             if (lastDocumentHandle != -1)
             {
-                document = context.Pdb.LookupDocument(new MetadataToken(TableIndex.Document, (uint)lastDocumentHandle));
+                context.Pdb.TryLookupMember<Document>(new MetadataToken(TableIndex.Document, (uint)lastDocumentHandle), out document);
             }
 
             offset += (int)offsetDelta;

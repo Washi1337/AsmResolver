@@ -16,7 +16,7 @@ public class SerializedMethodDebugInformation : MethodDebugInformation
     protected override MethodDefinition GetOwner() =>
         _context.OwningModule.LookupMember<MethodDefinition>(new MetadataToken(TableIndex.Method, MetadataToken.Rid));
 
-    protected override Document GetDocument() => _context.Pdb.LookupDocument(new MetadataToken(TableIndex.Document, _row.Document));
+    protected override Document? GetDocument() => _context.Pdb.TryLookupMember<Document>(new MetadataToken(TableIndex.Document, _row.Document), out var doc) ? doc : null;
 
     protected override SequencePointCollection GetSequencePoints()
     {

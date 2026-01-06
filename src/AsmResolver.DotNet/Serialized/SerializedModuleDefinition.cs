@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.PortablePdbs;
 using AsmResolver.DotNet.PortablePdbs.Serialized;
@@ -310,6 +311,21 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReaderContext.Image.DebugData);
 
         protected override PortablePdb? GetPortablePdb() => PdbReaderContext?.Pdb;
+
+        protected override IList<Document> GetDocuments()
+        {
+            var documentTable = PdbReaderContext?.TablesStream.GetTable<DocumentRow>();
+            var count = documentTable?.Count ?? 0;
+            var documents = new MemberCollection<ModuleDefinition, Document>(this, count);
+
+            for (uint rid = 1; rid <= count; rid++)
+            {
+                if (PdbReaderContext!.Pdb.TryLookupMember<Document>(new MetadataToken(TableIndex.Document, rid), out var member))
+                    documents.AddNoOwnerCheck(member);
+            }
+
+            return documents;
+        }
 
         private AssemblyDefinition? FindParentAssembly()
         {
