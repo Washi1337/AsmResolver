@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Collections;
@@ -151,45 +150,31 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override UnmanagedExportInfo? GetExportInfo() => _context.ParentModule.GetExportInfo(MetadataToken);
 
-        protected override MethodDebugInformation? GetMethodDebugInformation() => _context.ParentModule.PortablePdb?.TryLookupMember(new MetadataToken(TableIndex.MethodDebugInformation, MetadataToken.Rid), out MethodDebugInformation? mdi) ?? false ? mdi : null;
+        protected override MethodDebugInformation? GetMethodDebugInformation() => _context.SymbolReader.GetMethodDebugInformation(this);
 
         protected override IList<LocalScope> GetLocalScopes()
         {
-            var rids = _context.ParentModule.PdbReaderContext?.Pdb.GetLocalScopes(MetadataToken.Rid);
-            var scopes = new MemberCollection<MethodDefinition, LocalScope>(this, rids?.Count ?? 0);
-            foreach (var localScope in rids.AsEnumerable() ?? [])
+            var scopes = new MemberCollection<MethodDefinition, LocalScope>(this);
+            foreach (var localScope in _context.SymbolReader.GetLocalScopes(this))
             {
-                if (_context.ParentModule.PdbReaderContext!.Pdb.TryLookupMember<LocalScope>(
-                        new MetadataToken(TableIndex.LocalScope, localScope), out var member))
-                {
-                    scopes.AddNoOwnerCheck(member);
-                }
+                scopes.AddNoOwnerCheck(localScope);
             }
             return scopes;
         }
 
-        protected override MethodDefinition? GetKickoffMethod()
-        {
-            if (_context.ParentModule.PdbReaderContext?.Pdb.GetKickoffMethod(MetadataToken.Rid) is { } kickoffMethodRid)
-            {
-                return _context.ParentModule.TryLookupMember<MethodDefinition>(new MetadataToken(TableIndex.Method, kickoffMethodRid), out var kickoffMethod)
-                    ? kickoffMethod
-                    : _context.BadImageAndReturn<MethodDefinition>($"Invalid kickoff method rid {kickoffMethodRid}");
-            }
-            return null;
-        }
+        protected override MethodDefinition? GetKickoffMethod() => _context.SymbolReader.GetKickoffMethod(this);
 
-        protected override MethodDefinition? GetMoveNextMethod()
-        {
-            if (_context.ParentModule.PdbReaderContext?.Pdb.GetMoveNextMethod(MetadataToken.Rid) is { } moveNextMethodRid)
-            {
-                return _context.ParentModule.TryLookupMember<MethodDefinition>(new MetadataToken(TableIndex.Method, moveNextMethodRid), out var moveNextMethod)
-                    ? moveNextMethod
-                    : _context.BadImageAndReturn<MethodDefinition>($"Invalid kickoff method rid {moveNextMethodRid}");
-            }
-            return null;
-        }
+        protected override MethodDefinition? GetMoveNextMethod() => _context.SymbolReader.GetMoveNextMethod(this);
 
-        protected override IList<CustomDebugInformation> GetCustomDebugInformations() => _context.ParentModule.PdbReaderContext?.Pdb.GetCustomDebugInformations(this) ?? base.GetCustomDebugInformations();
+        protected override IList<CustomDebugInformation> GetCustomDebugInformations()
+        {
+            var cdis = _context.SymbolReader.GetCustomDebugInformations(this);
+            var result = new MemberCollection<IHasCustomDebugInformation, CustomDebugInformation>(this);
+            foreach (var cdi in cdis)
+            {
+                result.AddNoOwnerCheck(cdi);
+            }
+            return result;
+        }
     }
 }

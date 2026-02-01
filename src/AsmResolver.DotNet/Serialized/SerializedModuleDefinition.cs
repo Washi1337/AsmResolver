@@ -103,12 +103,12 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         [LazyProperty]
-        public partial PdbReaderContext? PdbReaderContext
+        public partial ISymbolReader SymbolReader
         {
             get;
         }
 
-        private PdbReaderContext? GetPdbReaderContext() => ReaderContext.Parameters.PdbMetadataResolver.ResolvePortablePdb(this);
+        private ISymbolReader GetSymbolReader() => ReaderContext.Parameters.SymbolReaderFactory.CreateSymbolReader(this);
 
         /// <inheritdoc />
         public override bool HasCustomAttributes => CustomAttributesInternal is null
@@ -310,21 +310,17 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReaderContext.Image.DebugData);
 
-        protected override PortablePdb? GetPortablePdb() => PdbReaderContext?.Pdb;
-
         protected override IList<Document> GetDocuments()
         {
-            var documentTable = PdbReaderContext?.TablesStream.GetTable<DocumentRow>();
-            var count = documentTable?.Count ?? 0;
-            var documents = new MemberCollection<ModuleDefinition, Document>(this, count);
+            var documents = SymbolReader?.GetDocuments();
+            var ownedDocuments = new MemberCollection<ModuleDefinition, Document>(this);
 
-            for (uint rid = 1; rid <= count; rid++)
+            foreach (var document in documents ?? [])
             {
-                if (PdbReaderContext!.Pdb.TryLookupMember<Document>(new MetadataToken(TableIndex.Document, rid), out var member))
-                    documents.AddNoOwnerCheck(member);
+                ownedDocuments.AddNoOwnerCheck(document);
             }
 
-            return documents;
+            return ownedDocuments;
         }
 
         private AssemblyDefinition? FindParentAssembly()

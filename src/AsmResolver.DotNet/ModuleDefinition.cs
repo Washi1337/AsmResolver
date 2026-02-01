@@ -813,9 +813,6 @@ namespace AsmResolver.DotNet
         }
 
         [LazyProperty]
-        public partial PortablePdb? PortablePdb { get; set; }
-
-        [LazyProperty]
         public partial IList<Document> Documents { get; }
 
         /// <summary>
@@ -1257,8 +1254,6 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="DefaultImporter"/> property.
         /// </remarks>
         protected virtual ReferenceImporter GetDefaultImporter() => new(this);
-
-        protected virtual PortablePdb? GetPortablePdb() => null;
 
         protected virtual IList<Document> GetDocuments() => new MemberCollection<ModuleDefinition, Document>(this);
 

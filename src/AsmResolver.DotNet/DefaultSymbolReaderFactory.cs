@@ -8,21 +8,21 @@ using AsmResolver.PE.Debug;
 
 namespace AsmResolver.DotNet;
 
-public class DefaultPdbMetadataResolver : IPdbMetadataResolver
+public class DefaultSymbolReaderFactory : ISymbolReaderFactory
 {
-    public static DefaultPdbMetadataResolver Instance { get; } = new();
+    public static DefaultSymbolReaderFactory Instance { get; } = new();
 
-    public PdbReaderContext? ResolvePortablePdb(SerializedModuleDefinition module)
+    private static SerializedPortablePdb? GetPdb(SerializedModuleDefinition module)
     {
-        if (module.DotNetDirectory?.Metadata is { } metadata && PortablePdb.TryFromMetadata(metadata, module, out var pdb))
+        if (module.DotNetDirectory.Metadata is { } metadata && PortablePdb.TryFromMetadata(metadata, module, out var pdb))
         {
-            return pdb.PdbReaderContext;
+            return pdb;
         }
 
         // System.Reflection.Metadata tries reading from a file first, so we will as well
         if (module.FilePath is { } path && PortablePdb.TryFromFile(Path.ChangeExtension(path, ".pdb"), module, out pdb))
         {
-            return pdb.PdbReaderContext;
+            return pdb;
         }
 
         var pdbSection = module.DebugData.Select(dd => dd.Contents).OfType<PortablePdbDataSegment>().FirstOrDefault();
@@ -35,10 +35,15 @@ public class DefaultPdbMetadataResolver : IPdbMetadataResolver
             decompressStream.CopyTo(resultStream);
             if (PortablePdb.TryFromBytes(pdbData, module, out pdb))
             {
-                return pdb.PdbReaderContext;
+                return pdb;
             }
         }
 
         return null;
+    }
+
+    public ISymbolReader CreateSymbolReader(SerializedModuleDefinition module)
+    {
+        return GetPdb(module) is { } pdb ? new PortablePdbSymbolReader(pdb) : NullSymbolReader.Instance;
     }
 }
