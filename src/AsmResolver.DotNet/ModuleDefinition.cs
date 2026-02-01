@@ -32,7 +32,8 @@ namespace AsmResolver.DotNet
         IResolutionScope,
         IHasCustomAttribute,
         IOwnedCollectionElement<AssemblyDefinition>,
-        ITypeOwner
+        ITypeOwner,
+        IHasCustomDebugInformation
     {
         private IList<TypeDefinition>? _topLevelTypes;
         private IList<AssemblyReference>? _assemblyReferences;
@@ -815,6 +816,9 @@ namespace AsmResolver.DotNet
         [LazyProperty]
         public partial IList<Document> Documents { get; }
 
+        [LazyProperty]
+        public partial IList<CustomDebugInformation> CustomDebugInformations { get; }
+
         /// <summary>
         /// Gets the default importer instance for this module.
         /// </summary>
@@ -1256,6 +1260,8 @@ namespace AsmResolver.DotNet
         protected virtual ReferenceImporter GetDefaultImporter() => new(this);
 
         protected virtual IList<Document> GetDocuments() => new MemberCollection<ModuleDefinition, Document>(this);
+
+        protected virtual IList<CustomDebugInformation> GetCustomDebugInformations() => new MemberCollection<IHasCustomDebugInformation, CustomDebugInformation>(this);
 
         /// <summary>
         /// Detects the runtime that this module targets.

@@ -312,15 +312,26 @@ namespace AsmResolver.DotNet.Serialized
 
         protected override IList<Document> GetDocuments()
         {
-            var documents = SymbolReader?.GetDocuments();
+            var documents = SymbolReader.GetDocuments();
             var ownedDocuments = new MemberCollection<ModuleDefinition, Document>(this);
 
-            foreach (var document in documents ?? [])
+            foreach (var document in documents)
             {
                 ownedDocuments.AddNoOwnerCheck(document);
             }
 
             return ownedDocuments;
+        }
+
+        protected override IList<CustomDebugInformation> GetCustomDebugInformations()
+        {
+            var cdis = SymbolReader.GetCustomDebugInformations(this);
+            var result = new MemberCollection<IHasCustomDebugInformation, CustomDebugInformation>(this);
+            foreach (var cdi in cdis)
+            {
+                result.AddNoOwnerCheck(cdi);
+            }
+            return result;
         }
 
         private AssemblyDefinition? FindParentAssembly()

@@ -22,6 +22,7 @@ public abstract class CustomDebugRecord : ExtendableBlobSignature
         var kind = context.GuidStream!.GetGuidByIndex(row.Kind);
         var blobReaderContext = new BlobReaderContext(context.OwningModule.ReaderContext);
         var hasBlob = context.BlobStream!.TryGetBlobReaderByIndex(row.Value, out var reader);
+
         if (kind == PrimaryConstructorInformationRecord.KnownKind)
         {
             return new PrimaryConstructorInformationRecord();
@@ -29,6 +30,10 @@ public abstract class CustomDebugRecord : ExtendableBlobSignature
         else if (kind == EmbeddedSourceRecord.KnownKind)
         {
             return EmbeddedSourceRecord.FromReader(blobReaderContext, ref reader);
+        }
+        else if (kind == SourceLinkRecord.KnownKind)
+        {
+            return SourceLinkRecord.FromReader(blobReaderContext, ref reader);
         }
 
         if (hasBlob)
