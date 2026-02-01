@@ -35,6 +35,14 @@ public abstract class CustomDebugRecord : ExtendableBlobSignature
         {
             return SourceLinkRecord.FromReader(blobReaderContext, ref reader);
         }
+        else if (kind == DefaultNamespaceRecord.KnownKind)
+        {
+            return DefaultNamespaceRecord.FromReader(blobReaderContext, ref reader);
+        }
+        else if (kind == DynamicLocalVariablesRecord.KnownKind)
+        {
+            return DynamicLocalVariablesRecord.FromReader(blobReaderContext, ref reader);
+        }
 
         if (hasBlob)
         {

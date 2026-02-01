@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -28,4 +29,6 @@ public class SerializedLocalConstant : LocalConstant
         }
         return null;
     }
+
+    protected override IList<CustomDebugInformation> GetCustomDebugInformations() => _context.Pdb.GetCustomDebugInformations(this);
 }

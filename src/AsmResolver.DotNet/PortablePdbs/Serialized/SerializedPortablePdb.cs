@@ -39,7 +39,18 @@ public partial class SerializedPortablePdb : PortablePdb
         return false;
     }
 
-    public IList<CustomDebugInformation> GetCustomDebugInformations(IHasCustomDebugInformation owner)
+    public IEnumerable<IMetadataMember> EnumerateTableMembers(TableIndex tableIndex)
+    {
+        var table = PdbReaderContext.TablesStream.GetTable(tableIndex);
+
+        for (uint rid = 1; rid <= table.Count; rid++)
+        {
+            if (TryLookupMember<IMetadataMember>(new MetadataToken(tableIndex, rid), out var member))
+                yield return member;
+        }
+    }
+
+    internal IList<CustomDebugInformation> GetCustomDebugInformations(IHasCustomDebugInformation owner)
     {
         var rids = GetCustomDebugInformations(owner.MetadataToken);
         var customDebugInformations = new MemberCollection<IHasCustomDebugInformation, CustomDebugInformation>(owner, rids.Count);
