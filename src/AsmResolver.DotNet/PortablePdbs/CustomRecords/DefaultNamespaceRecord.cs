@@ -18,7 +18,7 @@ public class DefaultNamespaceRecord : CustomDebugRecord
     {
         return new DefaultNamespaceRecord
         {
-            Namespace = new Utf8String(reader.ReadToEnd()),
+            Namespace = Utf8String.CreateUnsafe(reader.ReadToEnd()),
         };
     }
 

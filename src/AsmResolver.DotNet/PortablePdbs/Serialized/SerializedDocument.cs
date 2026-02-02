@@ -52,7 +52,7 @@ public class SerializedDocument : Document
             name.AddRange(part);
         }
 
-        return new Utf8String(name.ToArray());
+        return Utf8String.CreateUnsafe(name.ToArray());
     }
 
     protected override Guid GetHashAlgorithm() => _context.GuidStream!.GetGuidByIndex(_row.HashAlgorithm);

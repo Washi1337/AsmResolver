@@ -18,7 +18,7 @@ public class SourceLinkRecord : CustomDebugRecord
     {
         return new SourceLinkRecord
         {
-            SourceLinkJson = new Utf8String(reader.ReadToEnd()),
+            SourceLinkJson = Utf8String.CreateUnsafe(reader.ReadToEnd()),
         };
     }
 
