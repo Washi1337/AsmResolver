@@ -65,7 +65,7 @@ public class PortablePdbSymbolReader : ISymbolReader
 
     public IEnumerable<CustomDebugInformation> GetCustomDebugInformations(IHasCustomDebugInformation member)
     {
-        var rids = Pdb.GetCustomDebugInformations(member.MetadataToken.Rid);
+        var rids = Pdb.GetCustomDebugInformations(member.MetadataToken);
         foreach (var rid in rids)
         {
             if (Pdb.TryLookupMember<CustomDebugInformation>(new MetadataToken(TableIndex.CustomDebugInformation, rid), out var cdi))

@@ -43,6 +43,18 @@ public abstract class CustomDebugRecord : ExtendableBlobSignature
         {
             return DynamicLocalVariablesRecord.FromReader(blobReaderContext, ref reader);
         }
+        else if (kind == EnCLocalSlotMapRecord.KnownKind)
+        {
+            return EnCLocalSlotMapRecord.FromReader(blobReaderContext, ref reader);
+        }
+        else if (kind == EnCLambdaClosureMapRecord.KnownKind)
+        {
+            return EnCLambdaClosureMapRecord.FromReader(blobReaderContext, ref reader);
+        }
+        else if (kind == TupleElementNamesRecord.KnownGuid)
+        {
+            return TupleElementNamesRecord.FromReader(blobReaderContext, ref reader);
+        }
 
         if (hasBlob)
         {

@@ -12,7 +12,7 @@ public class DefaultSymbolReaderFactory : ISymbolReaderFactory
 {
     public static DefaultSymbolReaderFactory Instance { get; } = new();
 
-    private static SerializedPortablePdb? GetPdb(SerializedModuleDefinition module)
+    public static SerializedPortablePdb? GetPdb(SerializedModuleDefinition module)
     {
         if (module.DotNetDirectory.Metadata is { } metadata && PortablePdb.TryFromMetadata(metadata, module, out var pdb))
         {
