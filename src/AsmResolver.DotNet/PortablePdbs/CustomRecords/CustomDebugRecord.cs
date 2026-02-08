@@ -66,6 +66,18 @@ public abstract class CustomDebugRecord : ExtendableBlobSignature
         {
             return TypeDefinitionDocumentRecord.FromReader(context, ref reader);
         }
+        else if (kind == StateMachineHoistedLocalScopesRecord.KnownKind)
+        {
+            return StateMachineHoistedLocalScopesRecord.FromReader(context, ref reader);
+        }
+        else if (kind == AsyncMethodSteppingInformationRecord.KnownKind)
+        {
+            return AsyncMethodSteppingInformationRecord.FromReader(context, ref reader);
+        }
+        else if (kind == EnCStateMachineStateMapRecord.KnownKind)
+        {
+            return EnCStateMachineStateMapRecord.FromReader(context, ref reader);
+        }
 
         if (hasBlob)
         {

@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AsmResolver.DotNet.PortablePdbs;
+using AsmResolver.DotNet.PortablePdbs.CustomRecords;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
@@ -19,7 +21,7 @@ public class PortablePdbTest
         var thisMethod = mod.LookupMember<MethodDefinition>(typeof(PortablePdbTest).GetMethod("Test").MetadataToken);
         var stateMachineMethod = mod.LookupMember<MethodDefinition>(typeof(PortablePdbTest).GetMethod("TestStateMachine").MetadataToken);
         var asyncMethod = mod.LookupMember<MethodDefinition>(typeof(PortablePdbTest).GetMethod("TestAsyncMethod").MetadataToken);
-        var records = pdb.EnumerateTableMembers(TableIndex.CustomDebugInformation).Cast<CustomDebugInformation>().Select(x => x.Value).ToArray();
+        var records = pdb.EnumerateTableMembers(TableIndex.CustomDebugInformation).Cast<CustomDebugInformation>().ToArray();
     }
 
     public static IEnumerable<int> TestStateMachine()
@@ -31,7 +33,15 @@ public class PortablePdbTest
     public static async Task<int> TestAsyncMethod()
     {
         var a = 1;
-        await Task.Yield();
+        try
+        {
+            await Task.Yield();
+        }
+        catch (ArgumentException e)
+        {
+            await Task.Yield();
+            Console.WriteLine(e);
+        }
         return a;
     }
 }
