@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.PortablePdbs.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 
@@ -19,7 +20,7 @@ public class EnCLambdaClosureMapRecord : CustomDebugRecord
 
     public Lambda[]? Lambdas { get; set; }
 
-    public static EnCLambdaClosureMapRecord FromReader(in BlobReaderContext context, ref BinaryStreamReader reader)
+    public static EnCLambdaClosureMapRecord FromReader(PdbReaderContext context, ref BinaryStreamReader reader)
     {
         uint methodOrdinal = reader.ReadCompressedUInt32();
         int offsetBaseline = Math.Min(-(int)reader.ReadCompressedUInt32(), -1);

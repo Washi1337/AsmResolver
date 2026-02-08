@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.PortablePdbs.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 
@@ -14,7 +15,7 @@ public class SourceLinkRecord : CustomDebugRecord
 
     public Utf8String? SourceLinkJson { get; set; }
 
-    public static SourceLinkRecord FromReader(in BlobReaderContext context, ref BinaryStreamReader reader)
+    public static SourceLinkRecord FromReader(PdbReaderContext context, ref BinaryStreamReader reader)
     {
         return new SourceLinkRecord
         {

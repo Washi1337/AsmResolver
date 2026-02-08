@@ -20,7 +20,6 @@ public abstract class CustomDebugRecord : ExtendableBlobSignature
     public static CustomDebugRecord FromRow(PdbReaderContext context, in CustomDebugInformationRow row)
     {
         var kind = context.GuidStream!.GetGuidByIndex(row.Kind);
-        var blobReaderContext = new BlobReaderContext(context.OwningModule.ReaderContext);
         var hasBlob = context.BlobStream!.TryGetBlobReaderByIndex(row.Value, out var reader);
 
         if (kind == PrimaryConstructorInformationRecord.KnownKind)
@@ -29,31 +28,43 @@ public abstract class CustomDebugRecord : ExtendableBlobSignature
         }
         else if (kind == EmbeddedSourceRecord.KnownKind)
         {
-            return EmbeddedSourceRecord.FromReader(blobReaderContext, ref reader);
+            return EmbeddedSourceRecord.FromReader(context, ref reader);
         }
         else if (kind == SourceLinkRecord.KnownKind)
         {
-            return SourceLinkRecord.FromReader(blobReaderContext, ref reader);
+            return SourceLinkRecord.FromReader(context, ref reader);
         }
         else if (kind == DefaultNamespaceRecord.KnownKind)
         {
-            return DefaultNamespaceRecord.FromReader(blobReaderContext, ref reader);
+            return DefaultNamespaceRecord.FromReader(context, ref reader);
         }
         else if (kind == DynamicLocalVariablesRecord.KnownKind)
         {
-            return DynamicLocalVariablesRecord.FromReader(blobReaderContext, ref reader);
+            return DynamicLocalVariablesRecord.FromReader(context, ref reader);
         }
         else if (kind == EnCLocalSlotMapRecord.KnownKind)
         {
-            return EnCLocalSlotMapRecord.FromReader(blobReaderContext, ref reader);
+            return EnCLocalSlotMapRecord.FromReader(context, ref reader);
         }
         else if (kind == EnCLambdaClosureMapRecord.KnownKind)
         {
-            return EnCLambdaClosureMapRecord.FromReader(blobReaderContext, ref reader);
+            return EnCLambdaClosureMapRecord.FromReader(context, ref reader);
         }
         else if (kind == TupleElementNamesRecord.KnownGuid)
         {
-            return TupleElementNamesRecord.FromReader(blobReaderContext, ref reader);
+            return TupleElementNamesRecord.FromReader(context, ref reader);
+        }
+        else if (kind == CompilationOptionsRecord.KnownKind)
+        {
+            return CompilationOptionsRecord.FromReader(context, ref reader);
+        }
+        else if (kind == CompilationMetadataReferencesRecord.KnownKind)
+        {
+            return CompilationMetadataReferencesRecord.FromReader(context, ref reader);
+        }
+        else if (kind == TypeDefinitionDocumentRecord.KnownKind)
+        {
+            return TypeDefinitionDocumentRecord.FromReader(context, ref reader);
         }
 
         if (hasBlob)

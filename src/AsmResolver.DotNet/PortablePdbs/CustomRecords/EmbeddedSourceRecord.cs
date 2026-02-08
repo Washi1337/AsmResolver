@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using AsmResolver.DotNet.PortablePdbs.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 
@@ -22,7 +23,7 @@ public class EmbeddedSourceRecord : CustomDebugRecord
 
     public byte[]? Source { get; set; }
 
-    public static EmbeddedSourceRecord FromReader(in BlobReaderContext context, ref BinaryStreamReader reader)
+    public static EmbeddedSourceRecord FromReader(PdbReaderContext context, ref BinaryStreamReader reader)
     {
         var uncompressedSize = reader.ReadInt32();
         var data = reader.ReadToEnd();

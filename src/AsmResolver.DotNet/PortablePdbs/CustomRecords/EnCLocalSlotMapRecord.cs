@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.PortablePdbs.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 
@@ -15,7 +16,7 @@ public class EnCLocalSlotMapRecord : CustomDebugRecord
 
     public Slot[]? Slots { get; set; }
 
-    public static EnCLocalSlotMapRecord FromReader(in BlobReaderContext context, ref BinaryStreamReader reader)
+    public static EnCLocalSlotMapRecord FromReader(PdbReaderContext context, ref BinaryStreamReader reader)
     {
         int offsetBaseline = -1;
         if (reader.CanRead(1) && reader.PeekByte() == 0xff)
@@ -29,9 +30,11 @@ public class EnCLocalSlotMapRecord : CustomDebugRecord
         {
             byte kindByte = reader.ReadByte();
             bool hasOrdinal = (kindByte & 0x80) != 0;
-            byte kind = (byte) (kindByte & 0xff);
+            byte kind = (byte) (kindByte & 0x7f);
 
-            int syntaxOffset = (int) reader.ReadCompressedUInt32() + offsetBaseline;
+            // syntax offsets are not supposed to be optional, but roslyn skips emitting them when it gives a kind of 0 anyway
+            // https://github.com/dotnet/roslyn/blob/e768d1f09e9a1cab9f02e7828b344ea8f7ae1e5d/src/Compilers/Core/Portable/Emit/EditAndContinueMethodDebugInformation.cs#L162-L190
+            int syntaxOffset = kindByte != 0 ? (int) reader.ReadCompressedUInt32() + offsetBaseline : 0;
             uint? ordinal = hasOrdinal ? reader.ReadCompressedUInt32() : null;
 
             slotList.Add(new Slot

@@ -243,9 +243,9 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                                   if (!_initialized[{{PropertyName}}InitMask])
                                   {
                                       {{fieldName}} = {{factoryName}}();
+                                      _initialized[{{PropertyName}}InitMask] = true;
                                       if ({{fieldName}} is not null)
                                           {{fieldName}}.{{OwnerPropertyName}} = this;
-                                      _initialized[{{PropertyName}}InitMask] = true;
                                   }
                               }
                           }
@@ -298,10 +298,10 @@ public class LazyPropertyGenerator : IIncrementalGenerator
 
                               {{fieldName}} = value;
 
+                              _initialized[{{PropertyName}}InitMask] = true;
+
                               if (value is not null && value.{{OwnerPropertyName}} != this)
                                   value.{{OwnerPropertyName}} = this;
-
-                              _initialized[{{PropertyName}}InitMask] = true;
                           }
                       }
                       """

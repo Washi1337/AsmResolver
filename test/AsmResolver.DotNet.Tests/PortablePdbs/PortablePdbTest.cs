@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AsmResolver.DotNet.PortablePdbs;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -16,6 +17,21 @@ public class PortablePdbTest
         var mod = ModuleDefinition.FromFile(typeof(PortablePdbTest).Assembly.Location);
         var pdb = ((PortablePdbSymbolReader)((SerializedModuleDefinition)mod).SymbolReader).Pdb;
         var thisMethod = mod.LookupMember<MethodDefinition>(typeof(PortablePdbTest).GetMethod("Test").MetadataToken);
-        var m = pdb.EnumerateTableMembers(TableIndex.CustomDebugInformation).Cast<CustomDebugInformation>().Where(x => x.Owner is MethodDefinition { Name.Value: "Test" }).ToArray();
+        var stateMachineMethod = mod.LookupMember<MethodDefinition>(typeof(PortablePdbTest).GetMethod("TestStateMachine").MetadataToken);
+        var asyncMethod = mod.LookupMember<MethodDefinition>(typeof(PortablePdbTest).GetMethod("TestAsyncMethod").MetadataToken);
+        var records = pdb.EnumerateTableMembers(TableIndex.CustomDebugInformation).Cast<CustomDebugInformation>().Select(x => x.Value).ToArray();
+    }
+
+    public static IEnumerable<int> TestStateMachine()
+    {
+        var a = 1;
+        yield return a;
+    }
+
+    public static async Task<int> TestAsyncMethod()
+    {
+        var a = 1;
+        await Task.Yield();
+        return a;
     }
 }

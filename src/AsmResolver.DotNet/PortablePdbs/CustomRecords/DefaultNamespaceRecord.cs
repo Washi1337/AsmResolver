@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.PortablePdbs.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 
@@ -14,7 +15,7 @@ public class DefaultNamespaceRecord : CustomDebugRecord
 
     public Utf8String? Namespace { get; set; }
 
-    public static DefaultNamespaceRecord FromReader(in BlobReaderContext context, ref BinaryStreamReader reader)
+    public static DefaultNamespaceRecord FromReader(PdbReaderContext context, ref BinaryStreamReader reader)
     {
         return new DefaultNamespaceRecord
         {

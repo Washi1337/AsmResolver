@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using AsmResolver.DotNet.PortablePdbs.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -16,7 +17,7 @@ public class DynamicLocalVariablesRecord : CustomDebugRecord
 
     public BitArray? BitSequence { get; set; }
 
-    public static DynamicLocalVariablesRecord FromReader(in BlobReaderContext context, ref BinaryStreamReader reader)
+    public static DynamicLocalVariablesRecord FromReader(PdbReaderContext context, ref BinaryStreamReader reader)
     {
         return new DynamicLocalVariablesRecord
         {

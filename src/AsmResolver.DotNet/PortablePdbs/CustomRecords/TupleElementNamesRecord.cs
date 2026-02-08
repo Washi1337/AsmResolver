@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.PortablePdbs.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 
@@ -15,7 +16,7 @@ public class TupleElementNamesRecord : CustomDebugRecord
 
     public Utf8String[]? ElementNames { get; set; }
 
-    public static TupleElementNamesRecord FromReader(in BlobReaderContext context, ref BinaryStreamReader reader)
+    public static TupleElementNamesRecord FromReader(PdbReaderContext context, ref BinaryStreamReader reader)
     {
         var nameList = new List<Utf8String>();
         while (reader.CanRead(1))
