@@ -39,7 +39,7 @@ public class LocalConstantSignature : ExtendableBlobSignature
     private static (TypeSignature Type, object? Value) FromReaderCore(ref BlobReaderContext context, ref BinaryStreamReader reader)
     {
         var typeFactory = context.ReaderContext.ParentModule.CorLibTypeFactory;
-        var encoder = context.ReaderContext.TablesStream.GetIndexEncoder(CodedIndex.TypeDefOrRef);
+        var encoder = context.ReaderContext.Streams.TablesStream!.GetIndexEncoder(CodedIndex.TypeDefOrRef);
         var (type, value) = (ElementType)reader.ReadByte() switch
         {
             ElementType.CModOpt => ReadModifedType(isRequired: false, ref context, ref reader),
