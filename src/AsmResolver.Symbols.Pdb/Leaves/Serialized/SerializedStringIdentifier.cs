@@ -34,9 +34,6 @@ public class SerializedStringIdentifier : StringIdentifier
         if (_subStringsIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetIdLeafRecord(_subStringsIndex, out SubStringListLeaf? list)
-            ? list
-            : _context.Parameters.ErrorListener.BadImageAndReturn<SubStringListLeaf>(
-                $"String ID {TypeIndex:X8} contains an invalid substrings type index {_subStringsIndex:X8}.");
+        return _context.ParentImage.GetIdLeafRecord<SubStringListLeaf>(_subStringsIndex);
     }
 }

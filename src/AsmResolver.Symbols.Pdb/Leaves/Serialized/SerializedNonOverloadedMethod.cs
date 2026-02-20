@@ -35,9 +35,6 @@ public class SerializedNonOverloadedMethod : NonOverloadedMethod
     /// <inheritdoc />
     protected override MemberFunctionLeaf? GetFunction()
     {
-        return _context.ParentImage.TryGetLeafRecord(_functionIndex, out MemberFunctionLeaf? function)
-            ? function
-            : _context.Parameters.ErrorListener.BadImageAndReturn<MemberFunctionLeaf>(
-                $"Method {TypeIndex:X8} contains an invalid function type index {_functionIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<MemberFunctionLeaf>(_functionIndex);
     }
 }

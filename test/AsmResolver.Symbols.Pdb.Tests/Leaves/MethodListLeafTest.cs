@@ -17,7 +17,7 @@ public class MethodListLeafTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void ReadNonIntroVirtualEntries()
     {
-        var list = (MethodListLeaf) _fixture.SimplePdb.GetLeafRecord(0x2394);
+        var list = (MethodListLeaf) _fixture.SimplePdb.GetLeafRecord(0x2394)!;
         var entries = list.Entries;
 
         Assert.Equal(new[]
