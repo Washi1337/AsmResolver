@@ -431,5 +431,17 @@ namespace AsmResolver.DotNet.Tests
                 );
             }
         }
+
+        [Fact]
+        public void ResolveUsingNullResolver()
+        {
+            var assemblyRef = KnownCorLibs.SystemPrivateCoreLib_v10_0_0_0;
+
+            var defaultResolver = new DotNetCoreAssemblyResolver(new Version(10, 0));
+            var nullResolver = NullAssemblyResolver.Instance;
+
+            Assert.Equal(ResolutionStatus.Success, defaultResolver.Resolve(assemblyRef, null, out _));
+            Assert.Equal(ResolutionStatus.AssemblyNotFound, nullResolver.Resolve(assemblyRef, null, out _));
+        }
     }
 }
