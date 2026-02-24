@@ -153,9 +153,17 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The corlib type, or <c>null</c> if none was found.</returns>
         public CorLibTypeSignature? FromType(ITypeDescriptor type)
         {
-            return type is CorLibTypeSignature typeSig
-                ? FromElementType(typeSig.ElementType)
-                : FromName(type.Namespace, type.Name);
+            if (type is CorLibTypeSignature typeSig)
+                return FromElementType(typeSig.ElementType);
+
+            // Corlib types are always encoded as TypeDefOrRefSignature (ValueType/Class).
+            // Other TypeSignatures are structural types (arrays, pointers, byrefs, etc.) that can
+            // never match. Skip them to avoid allocating a string from their Name property
+            // (e.g. $"{BaseType.Name}[]") when it's unnecessary.
+            if (type is TypeSignature { ElementType: not (ElementType.ValueType or ElementType.Class) })
+                return null;
+
+            return FromName(type.Namespace, type.Name);
         }
 
         /// <summary>
