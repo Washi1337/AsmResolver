@@ -443,5 +443,35 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(ResolutionStatus.Success, defaultResolver.Resolve(assemblyRef, null, out _));
             Assert.Equal(ResolutionStatus.AssemblyNotFound, nullResolver.Resolve(assemblyRef, null, out _));
         }
+
+        [Theory]
+        [InlineData(new[] { "Hello.exe", "Hello.dll" }, "Hello", "Hello.dll")]
+        [InlineData(new[] { "Hello.exe" }, "Hello", "Hello.exe")]
+        [InlineData(new[] { "case.DLL", "Case.dll" }, "Case", "case.DLL")]
+        public void ResolveUsingReferencePathResolver(string[] fileNames, string reference, string resolvedFileName)
+        {
+            string basePath = _fixture.GetRunner<CorePERunner>().GetTestDirectory();
+
+            var referencePaths = new string[fileNames.Length];
+            for (var i = 0; i < fileNames.Length; i++)
+            {
+                var path = referencePaths[i] = Path.Combine(basePath, fileNames[i]);
+                WriteAssembly(path);
+            }
+
+            var resolver = new PathAssemblyResolver(referencePaths);
+            var status = resolver.Resolve(new AssemblyReference(reference, new Version()), null, out var assemblyDef);
+
+            Assert.Equal(ResolutionStatus.Success, status);
+            Assert.Equal(resolvedFileName, Path.GetFileName(assemblyDef!.ManifestModule!.FilePath));
+
+            static void WriteAssembly(string path)
+            {
+                var assembly = new AssemblyDefinition(Path.GetFileNameWithoutExtension(path), new Version(1, 0, 0, 0));
+                var module = new ModuleDefinition(Path.GetFileName(path), KnownCorLibs.SystemRuntime_v10_0_0_0);
+                assembly.Modules.Add(module);
+                assembly.Write(path);
+            }
+        }
     }
 }
