@@ -24,11 +24,7 @@ public static class TargetRuntimeProber
         if (image.DotNetDirectory?.Metadata is not { } metadata)
             return false;
 
-        var streams = metadata.GetImpliedStreamSelection();
-        if (streams is not { TablesStream: not null, StringsStream: not null })
-            return false;
-
-        return TryGetLikelyTargetRuntime(in streams, out targetRuntime);
+        return TryGetLikelyTargetRuntime(metadata.GetImpliedStreamSelection(), out targetRuntime);
     }
 
     /// <summary>
@@ -41,6 +37,10 @@ public static class TargetRuntimeProber
     public static bool TryGetLikelyTargetRuntime(in MetadataStreamSelection streams, out DotNetRuntimeInfo targetRuntime)
     {
         targetRuntime = default;
+
+        // We need at least access to tables and strings (i.e., for finding matching corlib assembly defs and refs).
+        if (streams is not { TablesStream: not null, StringsStream: not null })
+            return false;
 
         // Check if we're corlib ourselves, then we can infer it directly from the definition.
         if (TraverseAssemblyDefinitions(in streams, ref targetRuntime))
@@ -74,14 +74,17 @@ public static class TargetRuntimeProber
             row.RevisionNumber
         );
 
-        if (bestMatch.Version >= newMatch.Version)
+        // We need to explicitly check for `null`, because Version::`operator <` throws on .NET FX when one of the
+        // operands is `null`. See also https://github.com/Washi1337/AsmResolver/issues/723
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (bestMatch.Version is not null && bestMatch.Version >= newMatch.Version)
             return false;
 
         bestMatch = newMatch;
         return true;
     }
 
-    private static bool TraverseAssemblyReferences(in MetadataStreamSelection streams, ref DotNetRuntimeInfo dotNetRuntimeInfo)
+    private static bool TraverseAssemblyReferences(in MetadataStreamSelection streams, ref DotNetRuntimeInfo bestMatch)
     {
         bool updated = false;
 
@@ -105,9 +108,12 @@ public static class TargetRuntimeProber
                 row.RevisionNumber
             );
 
-            if (dotNetRuntimeInfo.Version < newMatch.Version)
+            // We need to explicitly check for `null`, because Version::`operator <` throws on .NET FX when one of the
+            // operands is `null`. See also https://github.com/Washi1337/AsmResolver/issues/723
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (bestMatch.Version is null || bestMatch.Version < newMatch.Version)
             {
-                dotNetRuntimeInfo = newMatch;
+                bestMatch = newMatch;
                 updated = true;
             }
         }
@@ -181,10 +187,13 @@ public static class TargetRuntimeProber
             // Read first argument (target runtime string).
             var element = reader.ReadSerString();
 
-            // Check if it is a newer version (only update if runtime name is the same as previously found best match)
+            // Check if it is a newer version (only update if runtime name is the same as previously found best match).
+            // We need to explicitly check for `null`, because Version::`operator <` throws on .NET FX when one of the
+            // operands is `null`. See also https://github.com/Washi1337/AsmResolver/issues/723
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (!Utf8String.IsNullOrEmpty(element)
                 && DotNetRuntimeInfo.TryParse(element, out var info)
-                && bestMatch.Name == info.Name && info.Version > bestMatch.Version)
+                && (bestMatch.Version is null || bestMatch.Name == info.Name && info.Version > bestMatch.Version))
             {
                 bestMatch = info;
                 updated = true;
@@ -220,6 +229,7 @@ public static class TargetRuntimeProber
 
     private static DotNetRuntimeInfo ToDotNetRuntimeInfo(string name, int major, int minor, int build, int revision)
     {
+        // .NETCoreApp uses 1:1 version correspondence of corlib since .NET 5.
         if (major >= 5)
             return DotNetRuntimeInfo.NetCoreApp(major, minor);
 
@@ -227,7 +237,7 @@ public static class TargetRuntimeProber
         {
             "mscorlib" => DotNetRuntimeInfo.NetFramework(major, minor),
             "netstandard" => DotNetRuntimeInfo.NetStandard(major, minor),
-            "System.Private.CoreLib" => DotNetRuntimeInfo.NetCoreApp(1, 0),
+            "System.Private.CoreLib" => DotNetRuntimeInfo.NetCoreApp(1, 0), // SPC is v4.0.0.0 for all .NETCoreApp <3.1 -> best guess is 1.0
             "System.Runtime" => (major, minor, build, revision) switch
             {
                 (4, 0, 0, 0) => DotNetRuntimeInfo.NetStandard(1, 0),
