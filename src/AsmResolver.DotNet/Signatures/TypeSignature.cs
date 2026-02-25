@@ -519,6 +519,9 @@ namespace AsmResolver.DotNet.Signatures
         public TypeSignature ImportWith(ReferenceImporter importer) => importer.ImportTypeSignature(this);
 
         /// <inheritdoc />
+        IMemberDescriptor IMemberDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
           /// <summary>

@@ -178,6 +178,9 @@ namespace AsmResolver.DotNet
         public ExportedType ImportWith(ReferenceImporter importer) => importer.ImportType(this);
 
         /// <inheritdoc />
+        IMemberDescriptor IMemberDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <inheritdoc />

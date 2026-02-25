@@ -900,6 +900,9 @@ namespace AsmResolver.DotNet
         public ITypeDefOrRef ImportWith(ReferenceImporter importer) => importer.ImportType(this);
 
         /// <inheritdoc />
+        IMemberDescriptor IMemberDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <summary>

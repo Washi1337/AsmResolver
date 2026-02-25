@@ -222,6 +222,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        IMemberDescriptor IMemberDescriptor.ImportWith(ReferenceImporter importer) => throw new NotSupportedException();
+
+        /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => throw new NotSupportedException();
 
         /// <summary>

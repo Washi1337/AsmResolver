@@ -120,6 +120,9 @@ namespace AsmResolver.DotNet
         public ITypeDefOrRef ImportWith(ReferenceImporter importer) => (TypeSpecification) importer.ImportType(this);
 
         /// <inheritdoc />
+        IMemberDescriptor IMemberDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         ResolutionStatus IMemberDescriptor.Resolve(RuntimeContext? context, out IMemberDefinition? definition)
