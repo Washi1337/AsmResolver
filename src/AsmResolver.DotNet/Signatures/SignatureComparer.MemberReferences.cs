@@ -13,16 +13,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public virtual bool Equals(MemberReference? x, MemberReference? y)
         {
-            if (ReferenceEquals(x, y))
-                return true;
-            if (x is null || y is null)
-                return false;
-
-            if (x.IsMethod)
-                return Equals((IMethodDescriptor) x, y);
-            if (y.IsField)
-                return Equals((IFieldDescriptor) x, y);
-            return false;
+            return Equals(x, (IMemberDescriptor?) y);
         }
 
         /// <inheritdoc />
@@ -44,6 +35,12 @@ namespace AsmResolver.DotNet.Signatures
             return x switch
             {
                 ITypeDescriptor type => Equals(type, y as ITypeDescriptor),
+                MemberReference member => member.Signature switch
+                {
+                    MethodSignature => Equals(member, y as IMethodDescriptor),
+                    FieldSignature => Equals(member, y as IFieldDescriptor),
+                    _ => false,
+                },
                 IMethodDescriptor method => Equals(method, y as IMethodDescriptor),
                 IFieldDescriptor field => Equals(field, y as IFieldDescriptor),
                 _ => false,
@@ -56,6 +53,7 @@ namespace AsmResolver.DotNet.Signatures
             return obj switch
             {
                 ITypeDescriptor type => GetHashCode(type),
+                MemberReference member => GetHashCode(member),
                 IMethodDescriptor method => GetHashCode(method),
                 IFieldDescriptor field => GetHashCode(field),
                 _ => throw new ArgumentOutOfRangeException(nameof(obj)),
