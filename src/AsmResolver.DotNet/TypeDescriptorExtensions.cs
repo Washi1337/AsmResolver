@@ -288,7 +288,7 @@ namespace AsmResolver.DotNet
             /// <param name="context">The context to assume when resolving the method.</param>
             /// <param name="definition">The resolved method definition, or <c>null</c> if resolution failed.</param>
             /// <returns><c>true</c> if the resolution was successful, <c>false</c> otherwise.</returns>
-            public bool TryResolve(RuntimeContext? context, out MethodDefinition? definition)
+            public bool TryResolve(RuntimeContext? context, [NotNullWhen(true)] out MethodDefinition? definition)
             {
                 return method.Resolve(context, out definition) == ResolutionStatus.Success;
             }
@@ -328,7 +328,7 @@ namespace AsmResolver.DotNet
             /// <param name="context">The context to assume when resolving the field.</param>
             /// <param name="definition">The resolved field definition, or <c>null</c> if resolution failed.</param>
             /// <returns><c>true</c> if the resolution was successful, <c>false</c> otherwise.</returns>
-            public bool TryResolve(RuntimeContext? context, out FieldDefinition? definition)
+            public bool TryResolve(RuntimeContext? context, [NotNullWhen(true)] out FieldDefinition? definition)
             {
                 return field.Resolve(context, out definition) == ResolutionStatus.Success;
             }
