@@ -581,6 +581,35 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
+        public void IsAssignableToForwardedType()
+        {
+            var context = new RuntimeContext(DotNetRuntimeInfo.NetCoreApp(10, 0));
+
+            var srIOException = KnownCorLibs.SystemRuntime_v10_0_0_0
+                .CreateTypeReference("System.IO", "IOException")
+                .ToTypeSignature(isValueType: false);
+
+            var srFileNotFound = KnownCorLibs.SystemRuntime_v10_0_0_0
+                .CreateTypeReference("System.IO", "FileNotFoundException")
+                .ToTypeSignature(isValueType: false);
+
+            var spcIOException = KnownCorLibs.SystemPrivateCoreLib_v10_0_0_0
+                .CreateTypeReference("System.IO", "IOException")
+                .ToTypeSignature(isValueType: false);
+
+            var spcFileNotFound = KnownCorLibs.SystemPrivateCoreLib_v10_0_0_0
+                .CreateTypeReference("System.IO", "FileNotFoundException")
+                .ToTypeSignature(isValueType: false);
+
+            Assert.True(spcIOException.IsAssignableTo(srIOException, context));
+            Assert.True(srIOException.IsAssignableTo(spcIOException, context));
+            Assert.True(spcFileNotFound.IsAssignableTo(srIOException, context));
+            Assert.True(spcFileNotFound.IsAssignableTo(spcIOException, context));
+            Assert.True(srFileNotFound.IsAssignableTo(srIOException, context));
+            Assert.True(srFileNotFound.IsAssignableTo(spcIOException, context));
+        }
+
+        [Fact]
         public void IgnoreCustomModifiers()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
