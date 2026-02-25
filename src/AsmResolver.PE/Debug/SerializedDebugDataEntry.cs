@@ -12,7 +12,7 @@ namespace AsmResolver.PE.Debug
         private readonly DebugDataType _type;
         private readonly uint _sizeOfData;
         private readonly uint _addressOfRawData;
-        private readonly uint _pointerToRawData;
+        private readonly ulong _pointerToRawData;
 
         /// <summary>
         /// Reads a single debug data entry from an input stream.
@@ -37,7 +37,7 @@ namespace AsmResolver.PE.Debug
             _type = (DebugDataType) directoryReader.ReadUInt32();
             _sizeOfData = directoryReader.ReadUInt32();
             _addressOfRawData = directoryReader.ReadUInt32();
-            _pointerToRawData = directoryReader.ReadUInt32();
+            _pointerToRawData = directoryReader.DataSource.BaseAddress + directoryReader.ReadUInt32();
         }
 
         /// <inheritdoc />
