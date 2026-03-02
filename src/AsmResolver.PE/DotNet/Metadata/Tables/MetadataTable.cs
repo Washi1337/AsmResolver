@@ -4,12 +4,9 @@ using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.IO;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
-    // TODO: Implement a more granular lazy initialization.
-
     /// <summary>
     /// Provides a base implementation of a metadata table in the table stream of a managed executable file.
     /// </summary>
@@ -225,7 +222,26 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public bool TryGetRidByKey(int keyColumnIndex, uint key, out uint rid)
+        public bool TryGetRidByKey(int keyColumnIndex, uint key, out uint rid) => IsSorted
+            ? TryBinarySearchByKey(keyColumnIndex, key, out rid)
+            : TryLinearSearchByKey(keyColumnIndex, key, out rid);
+
+        private bool TryLinearSearchByKey(int keyColumnIndex, uint key, out uint rid)
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                if (Rows[i][keyColumnIndex] == key)
+                {
+                    rid = (uint) (i + 1);
+                    return true;
+                }
+            }
+
+            rid = 0;
+            return false;
+        }
+
+        private bool TryBinarySearchByKey(int keyColumnIndex, uint key, out uint rid)
         {
             rid = 0;
             if (Count == 0)
@@ -259,13 +275,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
-        /// Gets a single row in a table by a key. This requires the table to be sorted.
+        /// Gets a single row in a table by a key.
         /// </summary>
         /// <param name="keyColumnIndex">The column number to get the key from.</param>
         /// <param name="key">The key to search.</param>
         /// <param name="row">When this functions returns <c>true</c>, this parameter contains the first row that
         /// contains the given key.</param>
         /// <returns><c>true</c> if the row was found, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// If the table is marked as sorted, a binary search will be used. Otherwise, a linear search is used instead.
+        /// If there are multiple rows with the same key, this method may return any of the matching rows.
+        /// </remarks>
         public bool TryGetRowByKey(int keyColumnIndex, uint key, out TRow row)
         {
             if (TryGetRidByKey(keyColumnIndex, key, out uint rid))
