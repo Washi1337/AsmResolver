@@ -51,8 +51,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadDeclaringType()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
-            var field = (FieldDefinition) module.LookupMember(
-                typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
+            var field = (FieldDefinition) module.LookupMember(typeof(SingleField).GetField(nameof(SingleField.IntField))!.MetadataToken);
             Assert.NotNull(field.DeclaringType);
             Assert.Equal(nameof(SingleField), field.DeclaringType.Name);
         }
@@ -61,8 +60,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadFieldSignature()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
-            var field = (FieldDefinition) module.LookupMember(
-                typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
+            var field = (FieldDefinition) module.LookupMember(typeof(SingleField).GetField(nameof(SingleField.IntField))!.MetadataToken);
             Assert.NotNull(field.Signature);
             Assert.True(field.Signature.FieldType.IsTypeOf("System", "Int32"), "Field type should be System.Int32");
         }
@@ -71,13 +69,13 @@ namespace AsmResolver.DotNet.Tests
         public void PersistentFieldSignature()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
-            var field = (FieldDefinition) module.LookupMember(
-                typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
+            var field = (FieldDefinition) module.LookupMember(typeof(SingleField).GetField(nameof(SingleField.IntField))!.MetadataToken);
 
             field.Signature = new FieldSignature(module.CorLibTypeFactory.Byte);
 
             var newField = RebuildAndLookup(field);
 
+            Assert.NotNull(newField.Signature);
             Assert.True(newField.Signature.FieldType.IsTypeOf("System", "Byte"), "Field type should be System.Byte");
         }
 
@@ -85,8 +83,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadFullName()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
-            var field = (FieldDefinition) module.LookupMember(
-                typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
+            var field = (FieldDefinition) module.LookupMember(typeof(SingleField)!.GetField(nameof(SingleField.IntField))!.MetadataToken);
 
             Assert.Equal("System.Int32 AsmResolver.DotNet.TestCases.Fields.SingleField::IntField", field.FullName);
         }
@@ -104,6 +101,29 @@ namespace AsmResolver.DotNet.Tests
             Assert.IsAssignableFrom<IReadableSegment>(initializer.FieldRva);
 
             Assert.Equal(InitialValues.ByteArray, ((IReadableSegment) initializer.FieldRva).ToArray());
+        }
+
+        [Fact]
+        public void ReadFieldRvaWithUnsortedClassLayout()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/724
+
+            var module = ModuleDefinition.FromBytes(Properties.Resources.MetadataUnsortedTable, TestReaderParameters);
+            var dataHolderType = module.TopLevelTypes.First(t => t.Name == "DataHolder");
+
+            var xorKeyRva = dataHolderType.Fields.First(f => f.Name == "XorKey").FieldRva;
+            Assert.NotNull(xorKeyRva);
+            Assert.Equal(
+                "well-hidden secret key"u8.ToArray(),
+                Assert.IsAssignableFrom<IReadableSegment>(xorKeyRva).ToArray()
+            );
+
+            var cipherTextRva = dataHolderType.Fields.First(f => f.Name == "Ciphertext").FieldRva;
+            Assert.NotNull(cipherTextRva);
+            Assert.Equal(
+                [0x1F, 0x0C, 0x08, 0x08, 0x48, 0x06, 0x49, 0x10, 0x01, 0x1D, 0x1A],
+                Assert.IsAssignableFrom<IReadableSegment>(cipherTextRva).ToArray()
+            );
         }
 
         [Fact]
@@ -136,8 +156,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Throws<NotSupportedException>(() =>
                 module.GetModuleType()!.Fields.First(f => f.Name == "InvalidFieldRva").FieldRva);
 
-            module = ModuleDefinition.FromBytes(Properties.Resources.FieldRvaTest,
-                new ModuleReaderParameters(EmptyErrorListener.Instance));
+            module = ModuleDefinition.FromBytes(Properties.Resources.FieldRvaTest, new ModuleReaderParameters(EmptyErrorListener.Instance));
             Assert.Null(module.GetModuleType()!.Fields.First(f => f.Name == "InvalidFieldRva").FieldRva);
         }
 

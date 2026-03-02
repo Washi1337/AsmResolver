@@ -269,6 +269,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
         
+        internal static byte[] MetadataUnsortedTable {
+            get {
+                object obj = ResourceManager.GetObject("MetadataUnsortedTable", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
         internal static byte[] ForwarderDlls_ActualDll {
             get {
                 object obj = ResourceManager.GetObject("ForwarderDlls_ActualDll", resourceCulture);
