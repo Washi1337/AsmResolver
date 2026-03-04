@@ -114,6 +114,9 @@
     <data name="LargeIndicesPdb" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\LargeIndicesPdb.pdb;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="MetadataUnsortedTable" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\MetadataUnsortedTable.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
     <data name="ForwarderDlls_ActualDll" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\ActualDll.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>

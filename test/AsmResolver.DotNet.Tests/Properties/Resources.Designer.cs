@@ -429,5 +429,12 @@ namespace AsmResolver.DotNet.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        internal static byte[] MetadataUnsortedTable {
+            get {
+                object obj = ResourceManager.GetObject("MetadataUnsortedTable", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
