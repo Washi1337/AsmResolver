@@ -47,7 +47,7 @@ jobs:
           check_name: Test Results
           files: test-results/**/*.trx
           fail_on: 'test failures'
-          comment_mode: 'always'
+          comment_mode: 'failures'
           use_emojis: true
 
           commit: ${{ github.event.workflow_run.head_sha }}
