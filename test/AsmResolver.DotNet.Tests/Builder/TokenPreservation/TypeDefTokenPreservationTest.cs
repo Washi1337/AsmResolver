@@ -3,7 +3,6 @@ using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
@@ -110,7 +109,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             module = RebuildAndReloadModule(module, MetadataBuilderFlags.None);
 
             // Insert new module type, and remove original module type.
-            module.TopLevelTypes.Remove(module.GetModuleType());
+            module.TopLevelTypes.Remove(module.GetModuleType()!);
             moduleType = module.GetOrCreateModuleType();
             moduleType.Fields.Add(new FieldDefinition("OtherField", FieldAttributes.Static, module.CorLibTypeFactory.Int16));
 

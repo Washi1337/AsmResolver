@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Memory;
 using Xunit;

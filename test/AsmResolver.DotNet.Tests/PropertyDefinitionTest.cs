@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
             var property = type.Properties.First(m => m.Name == propertyName);
-            Assert.Equal(expectedReturnType, property.Signature.ReturnType.FullName);
+            Assert.Equal(expectedReturnType, property.Signature?.ReturnType.FullName);
         }
 
         [Fact]
@@ -35,7 +35,9 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location, TestReaderParameters);
             var property = (PropertyDefinition) module.LookupMember(
-                typeof(SingleProperty).GetProperty(nameof(SingleProperty.IntProperty)).MetadataToken);
+                typeof(SingleProperty).GetProperty(nameof(SingleProperty.IntProperty))!.MetadataToken
+            );
+
             Assert.NotNull(property.DeclaringType);
             Assert.Equal(nameof(SingleProperty), property.DeclaringType.Name);
         }
@@ -49,7 +51,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Single(property.Semantics);
             Assert.Equal(MethodSemanticsAttributes.Getter, property.Semantics[0].Attributes);
             Assert.Same(property, property.Semantics[0].Association);
-            Assert.Equal("get_ReadOnlyProperty", property.Semantics[0].Method.Name);
+            Assert.Equal("get_ReadOnlyProperty", property.Semantics[0].Method?.Name);
             Assert.NotNull(property.GetMethod);
             Assert.Null(property.SetMethod);
         }
@@ -63,7 +65,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Single(property.Semantics);
             Assert.Equal(MethodSemanticsAttributes.Setter, property.Semantics[0].Attributes);
             Assert.Same(property, property.Semantics[0].Association);
-            Assert.Equal("set_WriteOnlyProperty", property.Semantics[0].Method.Name);
+            Assert.Equal("set_WriteOnlyProperty", property.Semantics[0].Method?.Name);
             Assert.NotNull(property.SetMethod);
             Assert.Null(property.GetMethod);
         }
@@ -82,7 +84,8 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location, TestReaderParameters);
             var property = (PropertyDefinition) module.LookupMember(
-                typeof(MultipleProperties).GetProperty(nameof(MultipleProperties.ReadOnlyProperty)).MetadataToken);
+                typeof(MultipleProperties).GetProperty(nameof(MultipleProperties.ReadOnlyProperty))!.MetadataToken
+            );
 
             Assert.Equal("System.Int32 AsmResolver.DotNet.TestCases.Properties.MultipleProperties::ReadOnlyProperty", property.FullName);
         }
@@ -92,7 +95,8 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location, TestReaderParameters);
             var property = (PropertyDefinition) module.LookupMember(
-                typeof(MultipleProperties).GetProperty("Item").MetadataToken);
+                typeof(MultipleProperties).GetProperty("Item")!.MetadataToken
+            );
 
             Assert.Equal("System.Int32 AsmResolver.DotNet.TestCases.Properties.MultipleProperties::Item[System.Int32]", property.FullName);
         }
@@ -106,7 +110,7 @@ namespace AsmResolver.DotNet.Tests
 
             var get1 = new MethodDefinition("get_Property1", default, MethodSignature.CreateInstance(module.CorLibTypeFactory.Int32));
             var get2 = new MethodDefinition("get_Property2", default, MethodSignature.CreateInstance(module.CorLibTypeFactory.Int32));
-            var set = new MethodDefinition("set_Property", default, MethodSignature.CreateInstance(module.CorLibTypeFactory.Void, module.CorLibTypeFactory.Int32));
+            var set = new MethodDefinition("set_Property", default, MethodSignature.CreateInstance(module.CorLibTypeFactory.Void, [module.CorLibTypeFactory.Int32]));
             type.Methods.Add(get1);
             type.Methods.Add(get2);
             type.Methods.Add(set);

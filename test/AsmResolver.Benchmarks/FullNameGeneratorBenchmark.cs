@@ -16,11 +16,11 @@ namespace AsmResolver.Benchmarks
             var factory = module.CorLibTypeFactory;
             _memberReference = factory.CorLibScope
                 .CreateTypeReference("System", "Span`1")
-                .MakeGenericInstanceType(isValueType: false, factory.Int32)
+                .MakeGenericInstanceType(isValueType: false, [factory.Int32])
                 .ToTypeDefOrRef()
                 .CreateMemberReference(".ctor", MethodSignature.CreateStatic(
                     factory.Void,
-                    factory.Int32
+                    [factory.Int32]
                 ));
         }
 

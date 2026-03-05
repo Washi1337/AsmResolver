@@ -1,7 +1,6 @@
 using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
-using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
@@ -39,10 +38,11 @@ namespace AsmResolver.DotNet.Tests
         {
             var method = LookupMethod(nameof(SecurityAttributes.NoParameters), rebuild);
 
-            var declaration = method.SecurityDeclarations[0];
-            Assert.Single(declaration.PermissionSet.Attributes);
+            var permissionSet = method.SecurityDeclarations[0].PermissionSet;
+            Assert.NotNull(permissionSet);
+            Assert.Single(permissionSet.Attributes);
 
-            var attribute = declaration.PermissionSet.Attributes[0];
+            var attribute = permissionSet.Attributes[0];
             Assert.Equal(nameof(CustomCodeAccessSecurityAttribute), attribute.AttributeType.Name);
             Assert.Empty(attribute.NamedArguments);
         }
@@ -55,7 +55,7 @@ namespace AsmResolver.DotNet.Tests
             var method = LookupMethod(nameof(SecurityAttributes.NoParameters), rebuild);
 
             var declaration = method.SecurityDeclarations[0];
-            var attribute = declaration.PermissionSet.Attributes[0];
+            var attribute = declaration.PermissionSet!.Attributes[0];
             Assert.Empty(attribute.NamedArguments);
         }
 
@@ -67,10 +67,11 @@ namespace AsmResolver.DotNet.Tests
             var method = LookupMethod(nameof(SecurityAttributes.SingleParameter), rebuild);
 
             var declaration = method.SecurityDeclarations[0];
-            var attribute = declaration.PermissionSet.Attributes[0];
+            var attribute = declaration.PermissionSet!.Attributes[0];
             Assert.Contains(attribute.NamedArguments, argument =>
                 argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyA)
-                && argument.Argument.Element.Equals(1));
+                && argument.Argument.Element?.Equals(1) is true
+            );
         }
 
         [Theory]
@@ -81,16 +82,16 @@ namespace AsmResolver.DotNet.Tests
             var method = LookupMethod(nameof(SecurityAttributes.MultipleParameters), rebuild);
 
             var declaration = method.SecurityDeclarations[0];
-            var attribute = declaration.PermissionSet.Attributes[0];
+            var attribute = declaration.PermissionSet!.Attributes[0];
             Assert.Contains(attribute.NamedArguments, argument =>
                 argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyA)
-                && argument.Argument.Element.Equals(1));
+                && argument.Argument.Element?.Equals(1) is true);
             Assert.Contains(attribute.NamedArguments, argument =>
                 argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyB)
-                && argument.Argument.Element.Equals(2));
+                && argument.Argument.Element?.Equals(2) is true);
             Assert.Contains(attribute.NamedArguments, argument =>
                 argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyC)
-                && argument.Argument.Element.Equals(3));
+                && argument.Argument.Element?.Equals(3) is true);
         }
     }
 }

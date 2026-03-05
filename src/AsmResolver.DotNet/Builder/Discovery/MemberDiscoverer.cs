@@ -449,8 +449,8 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // Create signature for add/remove methods.
             var signature = MethodSignature.CreateStatic(
                 _module.CorLibTypeFactory.Void,
-                _module.CorLibTypeFactory.Object,
-                _eventHandlerTypeSig);
+                [_module.CorLibTypeFactory.Object, _eventHandlerTypeSig]
+            );
 
             // Define add and remove methods.
             var addMethod = new MethodDefinition(

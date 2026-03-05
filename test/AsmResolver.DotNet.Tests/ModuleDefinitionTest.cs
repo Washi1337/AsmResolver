@@ -161,8 +161,9 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousNestedClassLoop2, TestReaderParameters);
             Assert.Equal(
-                new HashSet<Utf8String> { "<Module>", "Program", "MaliciousEnclosingClass" },
-                new HashSet<Utf8String>(module.TopLevelTypes.Select(t => t.Name)));
+                ["<Module>", "Program", "MaliciousEnclosingClass"],
+                new HashSet<Utf8String>(module.TopLevelTypes.Select(t => t.Name ?? Utf8String.Empty))
+            );
 
             var enclosingClass = module.TopLevelTypes.First(x => x.Name == "MaliciousEnclosingClass");
             Assert.Single(enclosingClass.NestedTypes);
@@ -204,7 +205,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
 
-            Assert.True(module.TryLookupMember(new MetadataToken(TableIndex.TypeRef, 12), out TypeReference reference));
+            Assert.True(module.TryLookupMember(new MetadataToken(TableIndex.TypeRef, 12), out TypeReference? reference));
             Assert.Equal("System", reference.Namespace);
             Assert.Equal("Object", reference.Name);
         }
@@ -343,7 +344,10 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = new ModuleDefinition("TestModule", KnownCorLibs.NetStandard_v2_1_0_0);
             var cctor = module.GetOrCreateModuleConstructor();
-            Assert.Contains(cctor, module.GetModuleType().Methods);
+
+            var moduleType = module.GetModuleType();
+            Assert.NotNull(moduleType);
+            Assert.Contains(cctor, moduleType.Methods);
         }
 
         [Fact]

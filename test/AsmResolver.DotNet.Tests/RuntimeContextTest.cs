@@ -186,7 +186,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void LoadReferenceCorLibShouldNotSetAsRuntimeCorLib()
         {
-            string path = new DotNetCoreAssemblyResolver(new Version(10, 0))
+            string? path = new DotNetCoreAssemblyResolver(new Version(10, 0))
                 .ProbeAssemblyFilePath(KnownCorLibs.SystemRuntime_v10_0_0_0, null);
 
             Assert.NotNull(path);

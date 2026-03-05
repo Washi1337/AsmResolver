@@ -51,7 +51,8 @@ namespace AsmResolver.DotNet.Tests
         public void ReadDeclaringType()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
-            var field = (FieldDefinition) module.LookupMember(typeof(SingleField).GetField(nameof(SingleField.IntField))!.MetadataToken);
+            var field = module.LookupMember<FieldDefinition>(typeof(SingleField).GetField(nameof(SingleField.IntField))!.MetadataToken);
+
             Assert.NotNull(field.DeclaringType);
             Assert.Equal(nameof(SingleField), field.DeclaringType.Name);
         }
@@ -60,7 +61,8 @@ namespace AsmResolver.DotNet.Tests
         public void ReadFieldSignature()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
-            var field = (FieldDefinition) module.LookupMember(typeof(SingleField).GetField(nameof(SingleField.IntField))!.MetadataToken);
+            var field = module.LookupMember<FieldDefinition>(typeof(SingleField).GetField(nameof(SingleField.IntField))!.MetadataToken);
+
             Assert.NotNull(field.Signature);
             Assert.True(field.Signature.FieldType.IsTypeOf("System", "Int32"), "Field type should be System.Int32");
         }
@@ -69,7 +71,7 @@ namespace AsmResolver.DotNet.Tests
         public void PersistentFieldSignature()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
-            var field = (FieldDefinition) module.LookupMember(typeof(SingleField).GetField(nameof(SingleField.IntField))!.MetadataToken);
+            var field = module.LookupMember<FieldDefinition>(typeof(SingleField).GetField(nameof(SingleField.IntField))!.MetadataToken);
 
             field.Signature = new FieldSignature(module.CorLibTypeFactory.Byte);
 
@@ -83,7 +85,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadFullName()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location, TestReaderParameters);
-            var field = (FieldDefinition) module.LookupMember(typeof(SingleField)!.GetField(nameof(SingleField.IntField))!.MetadataToken);
+            var field = module.LookupMember<FieldDefinition>(typeof(SingleField).GetField(nameof(SingleField.IntField))!.MetadataToken);
 
             Assert.Equal("System.Int32 AsmResolver.DotNet.TestCases.Fields.SingleField::IntField", field.FullName);
         }
@@ -165,7 +167,8 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_VirtualSegment, TestReaderParameters);
             var data = module.GetModuleType()!.Fields.First(f => f.Name == "__dummy__").FieldRva;
-            var readableData = Assert.IsAssignableFrom<IReadableSegment>(data);
+
+            var readableData = Assert.IsType<IReadableSegment>(data, exactMatch: false);
             Assert.Equal(new byte[4], readableData.ToArray());
             Assert.Equal(new byte[4], data.WriteIntoArray());
         }
@@ -264,7 +267,7 @@ namespace AsmResolver.DotNet.Tests
             var field = new FieldDefinition("Field", FieldAttributes.Static,
                 targetModule.CorLibTypeFactory.CorLibScope
                     .CreateTypeReference("System", "Action`1")
-                    .MakeGenericInstanceType(isValueType: false, sourceType.ToTypeSignature())
+                    .MakeGenericInstanceType(isValueType: false, [sourceType.ToTypeSignature()])
             );
             targetModule.GetOrCreateModuleType().Fields.Add(field);
 

@@ -84,7 +84,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
 
             foreach ((string key, string value) in actualInfo.Tables[0])
             {
-                string expected = key switch
+                string? expected = key switch
                 {
                     StringTable.CommentsKey => expectedInfo.Comments,
                     StringTable.CompanyNameKey => expectedInfo.CompanyName,

@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Tests
         public void ResolveForwardedMethod()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.ForwarderRefTest, TestReaderParameters);
-            var context = module.RuntimeContext;
+            var context = module.RuntimeContext!;
 
             context.LoadAssembly(Properties.Resources.ForwarderLibrary);
             context.LoadAssembly(Properties.Resources.ActualLibrary);
@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet.Tests
 
             var genericType = module.CorLibTypeFactory.CorLibScope.CreateTypeReference("System", "Action`1");
 
-            var genericInstance = genericType.MakeGenericInstanceType(false, freeFloatingTypeDef.ToTypeSignature(false));
+            var genericInstance = genericType.MakeGenericInstanceType(false, [freeFloatingTypeDef.ToTypeSignature(false)]);
 
             var member = genericInstance.ToTypeDefOrRef().CreateMemberReference("SomeMethod",
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));

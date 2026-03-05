@@ -114,9 +114,10 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 .Instructions.First(i => i.OpCode.Code == CilCode.Call)
                 .Operand!;
 
-            Assert.IsAssignableFrom<MethodDefinition>(reference.Parent);
-            Assert.IsAssignableFrom<MethodDefinition>(newReference.Parent);
-            Assert.Equal(reference.Parent.Name, newReference.Parent.Name);
+            Assert.Equal(
+                Assert.IsType<MethodDefinition>(reference.Parent, exactMatch: false).Name,
+                Assert.IsType<MethodDefinition>(newReference.Parent, exactMatch: false).Name
+            );
         }
 
     }

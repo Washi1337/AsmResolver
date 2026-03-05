@@ -13,8 +13,6 @@ namespace AsmResolver.DotNet.Tests
 {
     public class ReferenceImporterTest
     {
-        private static readonly SignatureComparer Comparer = new();
-
         private readonly AssemblyReference _dummyAssembly = new("SomeAssembly", new Version(1, 2, 3, 4));
         private readonly ModuleDefinition _module;
         private readonly ReferenceImporter _importer;
@@ -30,7 +28,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var result = _importer.ImportScope(_dummyAssembly);
 
-            Assert.Equal(_dummyAssembly, result, Comparer);
+            Assert.Equal(_dummyAssembly, result, SignatureComparer.Default);
             Assert.Contains(result, _module.AssemblyReferences);
         }
 
@@ -54,7 +52,7 @@ namespace AsmResolver.DotNet.Tests
             var type = new TypeReference(_dummyAssembly, "SomeNamespace", "SomeName");
             var result = _importer.ImportType(type);
 
-            Assert.Equal(type, result, Comparer);
+            Assert.Equal(type, result, SignatureComparer.Default);
             Assert.Equal(_module, result.ContextModule);
         }
 
@@ -80,7 +78,7 @@ namespace AsmResolver.DotNet.Tests
             var result = _importer.ImportType(definition);
 
             Assert.IsAssignableFrom<TypeReference>(result);
-            Assert.Equal(definition, result, Comparer);
+            Assert.Equal(definition, result, SignatureComparer.Default);
         }
 
         [Fact]
@@ -105,7 +103,7 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Null(reference.Scope);
             var importedType = _importer.ImportType(reference);
-            Assert.Equal(assembly, importedType.Scope?.GetAssembly(), SignatureComparer.Default);
+            Assert.Equal(assembly, importedType.Scope?.GetAssembly(), SignatureComparer.Default!);
         }
 
         [Fact]
@@ -116,7 +114,7 @@ namespace AsmResolver.DotNet.Tests
 
             var result = _importer.ImportType(nested);
 
-            Assert.Equal(nested, result, Comparer);
+            Assert.Equal(nested, result, SignatureComparer.Default);
             Assert.Equal(_module, result.ContextModule);
             Assert.Equal(_module, result.DeclaringType?.ContextModule);
         }
@@ -147,7 +145,7 @@ namespace AsmResolver.DotNet.Tests
             var reference = _importer.ImportType(nestedType);
 
             Assert.NotNull(reference.DeclaringType);
-            Assert.Equal(declaringType, reference.DeclaringType, Comparer);
+            Assert.Equal(declaringType, reference.DeclaringType, SignatureComparer.Default);
             Assert.Equal(_module, reference.ContextModule);
             Assert.Equal(_module, reference.DeclaringType.ContextModule);
         }
@@ -161,7 +159,7 @@ namespace AsmResolver.DotNet.Tests
 
             var result = _importer.ImportType(typeof(TopLevelClass1.Nested1));
 
-            Assert.Equal(nested, result, Comparer);
+            Assert.Equal(nested, result, SignatureComparer.Default);
             Assert.Equal(_module, result.ContextModule);
             Assert.Equal(_module, result.DeclaringType?.ContextModule);
         }
@@ -196,12 +194,10 @@ namespace AsmResolver.DotNet.Tests
 
             var result = _importer.ImportType(type);
 
-            Assert.IsAssignableFrom<TypeSpecification>(result);
-            var specification = (TypeSpecification) result;
-            Assert.IsAssignableFrom<SzArrayTypeSignature>(specification.Signature);
-            var arrayType = (SzArrayTypeSignature) specification.Signature;
-            Assert.IsAssignableFrom<CorLibTypeSignature>(arrayType.BaseType);
-            Assert.Equal(ElementType.String, arrayType.BaseType.ElementType);
+            var specification = Assert.IsType<TypeSpecification>(result, exactMatch: false);
+            var arrayType = Assert.IsType<SzArrayTypeSignature>(specification.Signature, exactMatch: false);
+            var elementType = Assert.IsType<CorLibTypeSignature>(arrayType.BaseType, exactMatch: false);
+            Assert.Equal(ElementType.String, elementType.ElementType);
         }
 
         [Fact]
@@ -211,15 +207,10 @@ namespace AsmResolver.DotNet.Tests
 
             var result = _importer.ImportType(type);
 
-            Assert.IsAssignableFrom<TypeSpecification>(result);
-            var specification = (TypeSpecification) result;
-            Assert.IsAssignableFrom<GenericInstanceTypeSignature>(specification.Signature);
-            var genericInstance = (GenericInstanceTypeSignature) specification.Signature;
+            var specification = Assert.IsType<TypeSpecification>(result, exactMatch: false);
+            var genericInstance = Assert.IsType<GenericInstanceTypeSignature>(specification.Signature, exactMatch: false);
             Assert.Equal(typeof(List<>).FullName, genericInstance.GenericType.FullName);
-            Assert.Equal(new TypeSignature[]
-            {
-                _module.CorLibTypeFactory.String
-            }, genericInstance.TypeArguments);
+            Assert.Equal([_module.CorLibTypeFactory.String], genericInstance.TypeArguments);
         }
 
         [Fact]
@@ -231,7 +222,7 @@ namespace AsmResolver.DotNet.Tests
 
             var result = _importer.ImportMethod(method);
 
-            Assert.Equal(method, result, Comparer);
+            Assert.Equal(method, result, SignatureComparer.Default);
             Assert.Same(_module, result.ContextModule);
         }
 
@@ -257,8 +248,7 @@ namespace AsmResolver.DotNet.Tests
 
             var result = _importer.ImportMethod(method);
 
-            Assert.IsAssignableFrom<GenericParameterSignature>(result.Signature?.ParameterTypes[0]);
-            var genericParameter = (GenericParameterSignature) result.Signature.ParameterTypes[0];
+            var genericParameter = Assert.IsType<GenericParameterSignature>(result.Signature?.ParameterTypes[0], exactMatch: false);
             Assert.Equal(0, genericParameter.Index);
             Assert.Equal(GenericParameterType.Type, genericParameter.ParameterType);
         }
@@ -275,10 +265,11 @@ namespace AsmResolver.DotNet.Tests
             Assert.IsAssignableFrom<MethodSpecification>(result);
             var specification = (MethodSpecification) result;
             Assert.Equal("Empty", result.Name);
-            Assert.Equal(new TypeSignature[]
-            {
-                _module.CorLibTypeFactory.String
-            }, specification.Signature?.TypeArguments, Comparer);
+            Assert.Equal(
+                [_module.CorLibTypeFactory.String],
+                specification.Signature?.TypeArguments ?? [],
+                SignatureComparer.Default
+            );
         }
 
         [Fact]
@@ -288,11 +279,12 @@ namespace AsmResolver.DotNet.Tests
             var field = new MemberReference(
                 type,
                 "Field",
-                new FieldSignature(_module.CorLibTypeFactory.String));
+                new FieldSignature(_module.CorLibTypeFactory.String)
+            );
 
             var result = _importer.ImportField(field);
 
-            Assert.Equal(field, result, Comparer);
+            Assert.Equal(field, result, SignatureComparer.Default);
             Assert.Same(_module, result.ContextModule);
         }
 
@@ -323,7 +315,7 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal(field.Name, result.Name);
             Assert.Equal(field.DeclaringType!.FullName, result.DeclaringType?.FullName);
-            Assert.Equal(field.FieldType.FullName, ((FieldSignature) result.Signature)?.FieldType.FullName);
+            Assert.Equal(field.FieldType.FullName, ((FieldSignature?) result.Signature)?.FieldType.FullName);
         }
 
         [Fact]
@@ -335,7 +327,7 @@ namespace AsmResolver.DotNet.Tests
             var imported = _importer.ImportTypeSignature(signature);
 
             Assert.NotSame(signature, imported);
-            Assert.Equal(signature, imported, Comparer);
+            Assert.Equal(signature, imported, SignatureComparer.Default);
             Assert.Equal(_module, imported.ContextModule);
         }
 
@@ -346,10 +338,9 @@ namespace AsmResolver.DotNet.Tests
                 .ToTypeSignature(false)
                 .MakeSzArrayType();
 
-            var imported = _importer.ImportTypeSignature(signature);
-            var newInstance = Assert.IsAssignableFrom<SzArrayTypeSignature>(imported);
+            var newInstance = Assert.IsType<SzArrayTypeSignature>(_importer.ImportTypeSignature(signature), exactMatch: false);
             Assert.NotSame(signature, newInstance);
-            Assert.Equal(signature, newInstance, Comparer);
+            Assert.Equal(signature, newInstance, SignatureComparer.Default);
             Assert.Equal(_module, newInstance.BaseType.ContextModule);
         }
 
@@ -385,10 +376,12 @@ namespace AsmResolver.DotNet.Tests
 
             var instance = genericType.MakeGenericInstanceType(
                 isValueType: false,
-                new TypeDefOrRefSignature(
-                    new TypeReference(null, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream"),
-                    false
-                )
+                typeArguments: [
+                    new TypeDefOrRefSignature(
+                        new TypeReference(null, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream"),
+                        false
+                    )
+                ]
             );
 
             var imported = _importer.ImportTypeSignature(instance);
@@ -410,10 +403,13 @@ namespace AsmResolver.DotNet.Tests
 
             var instance = genericType.MakeGenericInstanceType(
                 isValueType: false,
-                new TypeDefOrRefSignature(
-                    new TypeReference(_module, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream"),
-                    false
-                )
+                typeArguments:
+                [
+                    new TypeDefOrRefSignature(
+                        new TypeReference(_module, _module.CorLibTypeFactory.CorLibScope, "System.IO", "Stream"),
+                        false
+                    )
+                ]
             );
 
             var imported = _importer.ImportTypeSignature(instance);
@@ -454,17 +450,16 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportFunctionPointerTypeWithNonImportedParameterShouldResultInNewInstance()
         {
-            var signature = MethodSignature
-                .CreateStatic(
-                    _module.CorLibTypeFactory.Void,
-                    new TypeReference(_dummyAssembly, "SomeNamespace", "SomeType").ToTypeSignature(false))
-                .MakeFunctionPointerType();
+            var signature = MethodSignature.CreateStatic(
+                _module.CorLibTypeFactory.Void,
+                [new TypeReference(_dummyAssembly, "SomeNamespace", "SomeType").ToTypeSignature(false)]
+            ).MakeFunctionPointerType();
 
             var imported = _importer.ImportTypeSignature(signature);
 
-            var newInstance = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(imported);
+            var newInstance = Assert.IsType<FunctionPointerTypeSignature>(imported, exactMatch: false);
             Assert.NotSame(signature, newInstance);
-            Assert.Equal(signature, newInstance, Comparer);
+            Assert.Equal(signature, newInstance, SignatureComparer.Default);
             Assert.Equal(_module, newInstance.ContextModule);
             Assert.Equal(_module, newInstance.Signature.ParameterTypes[0].ContextModule);
         }
@@ -472,17 +467,16 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ImportFunctionPointerTypeWithNonImportedReturnTypeShouldResultInNewInstance()
         {
-            var signature = MethodSignature
-                .CreateStatic(
-                    new TypeReference(_dummyAssembly, "SomeNamespace", "SomeType").ToTypeSignature(false),
-                    _module.CorLibTypeFactory.Int32)
-                .MakeFunctionPointerType();
+            var signature = MethodSignature.CreateStatic(
+                new TypeReference(_dummyAssembly, "SomeNamespace", "SomeType").ToTypeSignature(false),
+                [_module.CorLibTypeFactory.Int32]
+            ).MakeFunctionPointerType();
 
             var imported = _importer.ImportTypeSignature(signature);
 
-            var newInstance = Assert.IsAssignableFrom<FunctionPointerTypeSignature>(imported);
+            var newInstance = Assert.IsType<FunctionPointerTypeSignature>(imported, exactMatch: false);
             Assert.NotSame(signature, newInstance);
-            Assert.Equal(signature, newInstance, Comparer);
+            Assert.Equal(signature, newInstance, SignatureComparer.Default);
             Assert.Equal(_module, newInstance.ContextModule);
             Assert.Equal(_module, newInstance.Signature.ReturnType.ContextModule);
         }
@@ -491,11 +485,10 @@ namespace AsmResolver.DotNet.Tests
         public void ImportFullyImportedFunctionPointerTypeShouldResultInSameInstance()
         {
             var assembly = _importer.ImportScope(_dummyAssembly);
-            var signature = MethodSignature
-                .CreateStatic(
-                    _module.CorLibTypeFactory.Void,
-                    new TypeReference(_module, assembly, "SomeNamespace", "SomeType").ToTypeSignature(false))
-                .MakeFunctionPointerType();
+            var signature = MethodSignature.CreateStatic(
+                _module.CorLibTypeFactory.Void,
+                [new TypeReference(_module, assembly, "SomeNamespace", "SomeType").ToTypeSignature(false)]
+            ).MakeFunctionPointerType();
 
             var imported = _importer.ImportTypeSignature(signature);
 
@@ -520,7 +513,7 @@ namespace AsmResolver.DotNet.Tests
             var imported = importer.ImportField(fieldInfo);
             var resolved = imported.Resolve(module.RuntimeContext);
 
-            Assert.Equal(field, Assert.IsAssignableFrom<IFieldDescriptor>(resolved), Comparer);
+            Assert.Equal(field, Assert.IsAssignableFrom<IFieldDescriptor>(resolved), SignatureComparer.Default);
         }
 
         [Fact]
@@ -528,8 +521,8 @@ namespace AsmResolver.DotNet.Tests
         {
             var type = typeof(GenericType<int, string, Stream>);
 
-            var imported = Assert.IsAssignableFrom<TypeSpecification>(_importer.ImportType(type));
-            var signature = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(imported.Signature);
+            var imported = Assert.IsType<TypeSpecification>(_importer.ImportType(type), exactMatch: false);
+            var signature = Assert.IsType<GenericInstanceTypeSignature>(imported.Signature, exactMatch: false);
             Assert.Equal("Int32",  signature.TypeArguments[0].Name);
             Assert.Equal("String", signature.TypeArguments[1].Name);
             Assert.Equal("Stream", signature.TypeArguments[2].Name);

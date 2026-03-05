@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet
             /// <param name="context">The runtime context to assume when constructing the signature, if any.</param>
             /// <param name="typeArguments">The arguments to instantiate the type with.</param>
             /// <returns>The constructed by-reference type signature.</returns>
-            public GenericInstanceTypeSignature MakeGenericInstanceType(RuntimeContext? context, params TypeSignature[] typeArguments)
+            public GenericInstanceTypeSignature MakeGenericInstanceType(RuntimeContext? context, TypeSignature[] typeArguments)
             {
                 return type.MakeGenericInstanceType(type.GetIsValueType(context), typeArguments);
             }
@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet
             /// <param name="isValueType"><c>true</c> if the type is a value type, <c>false</c> otherwise.</param>
             /// <param name="typeArguments">The arguments to instantiate the type with.</param>
             /// <returns>The constructed by-reference type signature.</returns>
-            public GenericInstanceTypeSignature MakeGenericInstanceType(bool isValueType, params TypeSignature[] typeArguments)
+            public GenericInstanceTypeSignature MakeGenericInstanceType(bool isValueType, TypeSignature[] typeArguments)
             {
                 return type.ToTypeDefOrRef().MakeGenericInstanceType(isValueType, typeArguments);
             }
@@ -111,7 +111,7 @@ namespace AsmResolver.DotNet
             /// <remarks>
             /// This function can be used to avoid type resolution on type references.
             /// </remarks>
-            public GenericInstanceTypeSignature MakeGenericInstanceType(bool isValueType, params TypeSignature[] typeArguments)
+            public GenericInstanceTypeSignature MakeGenericInstanceType(bool isValueType, TypeSignature[] typeArguments)
             {
                 return new GenericInstanceTypeSignature(type, isValueType, typeArguments);
             }

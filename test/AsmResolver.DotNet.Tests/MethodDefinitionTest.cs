@@ -287,11 +287,12 @@ namespace AsmResolver.DotNet.Tests
             assembly.Modules.Add(module);
 
             // Import Console.WriteLine.
-            var importer = new ReferenceImporter(module);
-            var writeLine = importer.ImportMethod(new MemberReference(
-                new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Console"),
-                "WriteLine",
-                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void, module.CorLibTypeFactory.String)));
+            var writeLine = module.CorLibTypeFactory.CorLibScope
+                .CreateTypeReference("System", "Console")
+                .CreateMemberReference(
+                    "WriteLine",
+                    MethodSignature.CreateStatic(module.CorLibTypeFactory.Void, [module.CorLibTypeFactory.String])
+                );
 
             // Add a couple unmanaged exports.
             for (int i = 0; i < methodCount; i++)
@@ -758,6 +759,8 @@ namespace AsmResolver.DotNet.Tests
                 IsRuntimeAsync = true
             };
             module.GetOrCreateModuleType().Methods.Add(method);
+            Assert.NotNull(method.Signature);
+
             method.VerifyMetadata(module.RuntimeContext);
 
             method.IsSynchronized = true;
@@ -773,7 +776,7 @@ namespace AsmResolver.DotNet.Tests
 
             method.Signature.ReturnType = factory.CorLibScope
                 .CreateTypeReference("System", "Span`1")
-                .MakeGenericInstanceType(isValueType: true, factory.Int32);
+                .MakeGenericInstanceType(isValueType: true, [factory.Int32]);
 
             Assert.Throws<AggregateException>(() => method.VerifyMetadata(context));
         }
@@ -802,7 +805,7 @@ namespace AsmResolver.DotNet.Tests
 
             var targetModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var method = new MethodDefinition("Method", MethodAttributes.Static,
-                MethodSignature.CreateStatic(targetModule.CorLibTypeFactory.Void, sourceType.ToTypeSignature())
+                MethodSignature.CreateStatic(targetModule.CorLibTypeFactory.Void, [sourceType.ToTypeSignature()])
             );
             targetModule.GetOrCreateModuleType().Methods.Add(method);
 

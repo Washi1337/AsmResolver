@@ -115,15 +115,16 @@ namespace AsmResolver.PE.File.Tests
             var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
 
             var section = peFile.Sections[0];
-            byte[] contents = ((IReadableSegment) section.Contents).ToArray();
+            byte[] contents = Assert.IsType<IReadableSegment>(section.Contents, false).ToArray();
 
             peFile.Sections.Insert(0, new PESection(".test",
                 SectionFlags.MemoryRead | SectionFlags.MemoryWrite | SectionFlags.ContentInitializedData,
-                new DataSegment(new byte[] {1, 2, 3, 4})));
+                new DataSegment([1, 2, 3, 4])
+            ));
 
             peFile.UpdateHeaders();
 
-            byte[] contents2 = ((IReadableSegment) section.Contents).ToArray();
+            byte[] contents2 = Assert.IsType<IReadableSegment>(section.Contents, false).ToArray();
             Assert.Equal(contents, contents2);
         }
 
@@ -133,13 +134,13 @@ namespace AsmResolver.PE.File.Tests
             var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
 
             var section = peFile.Sections[1];
-            byte[] contents = ((IReadableSegment) section.Contents).ToArray();
+            byte[] contents = Assert.IsType<IReadableSegment>(section.Contents, false).ToArray();
 
             peFile.Sections.RemoveAt(0);
 
             peFile.UpdateHeaders();
 
-            byte[] contents2 = ((IReadableSegment) section.Contents).ToArray();
+            byte[] contents2 = Assert.IsType<IReadableSegment>(section.Contents, false).ToArray();
             Assert.Equal(contents, contents2);
         }
 
@@ -180,7 +181,7 @@ namespace AsmResolver.PE.File.Tests
         {
             var file = PEFile.FromBytes(Properties.Resources.HelloWorld_EOF);
             byte[] data = Assert.IsAssignableFrom<IReadableSegment>(file.EofData).ToArray();
-            Assert.Equal(Encoding.ASCII.GetBytes("abcdefghijklmnopqrstuvwxyz"), data);
+            Assert.Equal("abcdefghijklmnopqrstuvwxyz"u8.ToArray(), data);
         }
 
         [Fact]
@@ -190,7 +191,7 @@ namespace AsmResolver.PE.File.Tests
             Assert.NotNull(file.EofData);
             Assert.True(file.TryCreateReaderAtFileOffset((uint) file.EofData.Offset, out var reader));
             byte[] data = reader.ReadToEnd();
-            Assert.Equal(Encoding.ASCII.GetBytes("abcdefghijklmnopqrstuvwxyz"), data);
+            Assert.Equal("abcdefghijklmnopqrstuvwxyz"u8.ToArray(), data);
         }
 
         [Fact]

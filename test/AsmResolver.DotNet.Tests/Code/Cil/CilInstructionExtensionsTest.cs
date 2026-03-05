@@ -51,9 +51,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Int32));
             method.CilMethodBody = new CilMethodBody();
 
-            var type = new TypeReference(_module, null, "SomeType");
-            var member = new MemberReference(type, "SomeMethod",
-                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
+            var member = _module
+                .CreateTypeReference(null, "SomeType")
+                .CreateMemberReference("SomeMethod", MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
 
             var instruction = new CilInstruction(CilOpCodes.Call, member);
             Assert.Equal(0, instruction.GetStackPopCount(method.CilMethodBody));
@@ -66,10 +66,15 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Int32));
             method.CilMethodBody = new CilMethodBody();
 
-            var type = new TypeReference(_module, null, "SomeType");
-            var member = new MemberReference(type, "SomeMethod",
-                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void,
-                    _module.CorLibTypeFactory.Int32, _module.CorLibTypeFactory.Int32));
+            var member = _module
+                .CreateTypeReference(null, "SomeType")
+                .CreateMemberReference(
+                    "SomeMethod",
+                    MethodSignature.CreateStatic(
+                        _module.CorLibTypeFactory.Void,
+                        [_module.CorLibTypeFactory.Int32, _module.CorLibTypeFactory.Int32]
+                    )
+                );
 
             var instruction = new CilInstruction(CilOpCodes.Call, member);
             Assert.Equal(2, instruction.GetStackPopCount(method.CilMethodBody));
@@ -82,9 +87,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Int32));
             method.CilMethodBody = new CilMethodBody();
 
-            var type = new TypeReference(_module, null, "SomeType");
-            var member = new MemberReference(type, "SomeMethod",
-                MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void));
+            var member = _module
+                .CreateTypeReference(null, "SomeType")
+                .CreateMemberReference("SomeMethod", MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void));
 
             var instruction = new CilInstruction(CilOpCodes.Call, member);
             Assert.Equal(1, instruction.GetStackPopCount(method.CilMethodBody));
@@ -97,10 +102,15 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Int32));
             method.CilMethodBody = new CilMethodBody();
 
-            var type = new TypeReference(_module, null, "SomeType");
-            var member = new MemberReference(type, "SomeMethod",
-                MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void,
-                    _module.CorLibTypeFactory.Int32, _module.CorLibTypeFactory.Int32));
+            var member = _module
+                .CreateTypeReference(null, "SomeType")
+                .CreateMemberReference(
+                    "SomeMethod",
+                    MethodSignature.CreateInstance(
+                        _module.CorLibTypeFactory.Void,
+                        [_module.CorLibTypeFactory.Int32, _module.CorLibTypeFactory.Int32]
+                    )
+                );
 
             var instruction = new CilInstruction(CilOpCodes.Call, member);
             Assert.Equal(3, instruction.GetStackPopCount(method.CilMethodBody));
@@ -109,9 +119,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [Fact]
         public void CallVoidMethodShouldPushZeroElements()
         {
-            var type = new TypeReference(_module, null, "SomeType");
-            var member = new MemberReference(type, "SomeMethod",
-                MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void));
+            var member = _module
+                .CreateTypeReference(null, "SomeType")
+                .CreateMemberReference("SomeMethod", MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void));
 
             var instruction = new CilInstruction(CilOpCodes.Call, member);
             Assert.Equal(0, instruction.GetStackPushCount());
@@ -120,9 +130,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [Fact]
         public void CallNonVoidMethodShouldPushSingleElement()
         {
-            var type = new TypeReference(_module, null, "SomeType");
-            var member = new MemberReference(type, "SomeMethod",
-                MethodSignature.CreateInstance(_module.CorLibTypeFactory.Int32));
+            var member = _module
+                .CreateTypeReference(null, "SomeType")
+                .CreateMemberReference("SomeMethod", MethodSignature.CreateInstance(_module.CorLibTypeFactory.Int32));
 
             var instruction = new CilInstruction(CilOpCodes.Call, member);
             Assert.Equal(1, instruction.GetStackPushCount());
@@ -131,9 +141,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [Fact]
         public void NewObjVoidMethodShouldPushSingleElement()
         {
-            var type = new TypeReference(_module, null, "SomeType");
-            var member = new MemberReference(type, "SomeMethod",
-                MethodSignature.CreateInstance(_module.CorLibTypeFactory.Int32));
+            var member = _module
+                .CreateTypeReference(null, "SomeType")
+                .CreateMemberReference(".ctor", MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void));
 
             var instruction = new CilInstruction(CilOpCodes.Newobj, member);
             Assert.Equal(1, instruction.GetStackPushCount());
@@ -160,7 +170,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             init;
         }
 
-        public string Test2
+        public string? Test2
         {
             get;
             init;

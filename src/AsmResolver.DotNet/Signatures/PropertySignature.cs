@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="returnType">The return type of the method.</param>
         /// <returns>The signature.</returns>
         public static PropertySignature CreateStatic(TypeSignature returnType)
-            => new PropertySignature(0, returnType, Enumerable.Empty<TypeSignature>());
+            => new(0, returnType, Enumerable.Empty<TypeSignature>());
 
         /// <summary>
         /// Creates a method signature for a static method that has a number of parameters.
@@ -50,8 +50,8 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="returnType">The return type of the method.</param>
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
-        public static PropertySignature CreateStatic(TypeSignature returnType, params TypeSignature[] parameterTypes)
-            => new PropertySignature(0, returnType, parameterTypes);
+        public static PropertySignature CreateStatic(TypeSignature returnType, TypeSignature[] parameterTypes)
+            => new(0, returnType, parameterTypes);
 
         /// <summary>
         /// Creates a method signature for a static method that has a number of parameters.
@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
         public static PropertySignature CreateStatic(TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes)
-            => new PropertySignature(0, returnType, parameterTypes);
+            => new(0, returnType, parameterTypes);
 
         /// <summary>
         /// Creates a new parameter-less method signature for an instance method.
@@ -68,7 +68,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="returnType">The return type of the method.</param>
         /// <returns>The signature.</returns>
         public static PropertySignature CreateInstance(TypeSignature returnType)
-            => new PropertySignature(CallingConventionAttributes.HasThis, returnType, Enumerable.Empty<TypeSignature>());
+            => new(CallingConventionAttributes.HasThis, returnType, Enumerable.Empty<TypeSignature>());
 
         /// <summary>
         /// Creates a method signature for an instance method that has a number of parameters.
@@ -76,8 +76,8 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="returnType">The return type of the method.</param>
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
-        public static PropertySignature CreateInstance(TypeSignature returnType, params TypeSignature[] parameterTypes)
-            => new PropertySignature(CallingConventionAttributes.HasThis, returnType, parameterTypes);
+        public static PropertySignature CreateInstance(TypeSignature returnType, TypeSignature[] parameterTypes)
+            => new(CallingConventionAttributes.HasThis, returnType, parameterTypes);
 
         /// <summary>
         /// Creates a method signature for an instance method  that has a number of parameters.
@@ -86,7 +86,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
         public static PropertySignature CreateInstance(TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes)
-            => new PropertySignature(CallingConventionAttributes.HasThis, returnType, parameterTypes);
+            => new(CallingConventionAttributes.HasThis, returnType, parameterTypes);
 
         /// <summary>
         /// Initializes a new property signature with the provided property type and a list of parameter types.

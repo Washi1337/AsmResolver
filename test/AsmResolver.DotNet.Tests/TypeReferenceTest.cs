@@ -212,7 +212,7 @@ namespace AsmResolver.DotNet.Tests
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
             var newReference = newModule.GetOrCreateModuleType().Fields[0].Signature!.FieldType.GetUnderlyingTypeDefOrRef()!;
             Assert.IsAssignableFrom<ModuleDefinition>(newReference.Scope);
-            Assert.Equal(reference.Scope!.GetAssembly(), newReference.Scope!.GetAssembly(), SignatureComparer.Default);
+            Assert.Equal(reference.Scope!.GetAssembly(), newReference.Scope!.GetAssembly(), SignatureComparer.Default!);
         }
 
 
@@ -238,7 +238,7 @@ namespace AsmResolver.DotNet.Tests
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
             var newReference = newModule.GetOrCreateModuleType().Fields[0].Signature!.FieldType.GetUnderlyingTypeDefOrRef()!;
             Assert.IsAssignableFrom<AssemblyReference>(newReference.Scope);
-            Assert.Equal(reference.Scope!.GetAssembly(), newReference.Scope!.GetAssembly(), SignatureComparer.Default);
+            Assert.Equal(reference.Scope!.GetAssembly(), newReference.Scope!.GetAssembly(), SignatureComparer.Default!);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Tests.Resources
         [InlineData("Int64", ResourceTypeCode.Int64, (long) 0x123456789abcdef)]
         [InlineData("Single", ResourceTypeCode.Single, 1.234f)]
         [InlineData("Double", ResourceTypeCode.Double, 1.234D)]
-        public void ReadIntrinsicElement(string key, ResourceTypeCode expectedType, object expectedValue)
+        public void ReadIntrinsicElement(string key, ResourceTypeCode expectedType, object? expectedValue)
         {
             var entry = ReadResourceSet().First(e => e.Name == key);
             Assert.Equal(IntrinsicResourceType.Get(expectedType), entry.Type);
@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet.Tests.Resources
         [InlineData("Int64", ResourceTypeCode.Int64, (long) 0x123456789abcdef)]
         [InlineData("Single", ResourceTypeCode.Single, 1.234f)]
         [InlineData("Double", ResourceTypeCode.Double, 1.234D)]
-        public void PersistentIntrinsicElement(string key, ResourceTypeCode type, object value)
+        public void PersistentIntrinsicElement(string key, ResourceTypeCode type, object? value)
         {
             var set = new ResourceSet();
             var entry = new ResourceSetEntry(key, type, value);
@@ -146,7 +146,7 @@ namespace AsmResolver.DotNet.Tests.Resources
                 Assert.Equal(entry.Data, actualEntry.Data);
 
                 // Verify default resource reader can still get to the data (== hash table verification).
-                resourceReader.GetResourceData(entry.Name, out string type, out byte[] data);
+                resourceReader.GetResourceData(entry.Name, out _, out _);
             }
         }
     }

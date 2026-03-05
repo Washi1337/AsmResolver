@@ -55,28 +55,25 @@ namespace AsmResolver.DotNet.Dynamic.Tests
                 .GetType()
                 .GetField("m_dynMethod", (BindingFlags) (-1))?
                 .GetValue(generatedDynamicMethod) ?? generatedDynamicMethod;
-            var dynamicMethod = new DynamicMethodDefinition(module, rtDynamicMethod!);
+            var dynamicMethod = new DynamicMethodDefinition(module, rtDynamicMethod);
 
             Assert.NotNull(dynamicMethod);
             Assert.NotEmpty(dynamicMethod.CilMethodBody!.Instructions);
-            Assert.Equal(new[]
-            {
+            Assert.Equal([
                 CilCode.Ldarg_0,
                 CilCode.Stloc_0,
                 CilCode.Ldloc_0,
                 CilCode.Call,
                 CilCode.Ldarg_1,
                 CilCode.Ret
-            }, dynamicMethod.CilMethodBody.Instructions.Select(q => q.OpCode.Code));
-            Assert.Equal(new TypeSignature[]
-            {
+            ], dynamicMethod.CilMethodBody.Instructions.Select(q => q.OpCode.Code));
+            Assert.Equal([
                 module.CorLibTypeFactory.String,
                 module.CorLibTypeFactory.Int32
-            }, dynamicMethod.Parameters.Select(q => q.ParameterType));
-            Assert.Equal(new TypeSignature[]
-            {
-                module.CorLibTypeFactory.String,
-            }, dynamicMethod.CilMethodBody.LocalVariables.Select(v => v.VariableType));
+            ], dynamicMethod.Parameters.Select(q => q.ParameterType));
+            Assert.Equal([
+                module.CorLibTypeFactory.String
+            ], dynamicMethod.CilMethodBody.LocalVariables.Select(v => v.VariableType));
         }
 
         [Fact]
@@ -84,8 +81,8 @@ namespace AsmResolver.DotNet.Dynamic.Tests
         {
             var method = new DynamicMethod("Test", typeof(void), Type.EmptyTypes);
             var info = method.GetDynamicILInfo();
-            info.SetLocalSignature(new byte[] { 0x7, 0x0 });
-            info.SetCode(new byte[] {0x2a}, 1);
+            info.SetLocalSignature([0x7, 0x0]);
+            info.SetCode([0x2a], 1);
 
             var contextModule = ModuleDefinition.FromFile(typeof(DynamicMethodDefinitionTest).Assembly.Location);
             var definition = new DynamicMethodDefinition(contextModule, method);
@@ -171,14 +168,14 @@ namespace AsmResolver.DotNet.Dynamic.Tests
             // Create new dynamic method.
             var method = new DynamicMethod("Test", typeof(void), Type.EmptyTypes);
             var info = method.GetDynamicILInfo();
-            info.SetLocalSignature(new byte[] { 0x7, 0x0 });
+            info.SetLocalSignature([0x7, 0x0]);
 
             // Write some IL.
             using var codeStream = new MemoryStream();
             var assembler = new CilAssembler(
                 new BinaryStreamWriter(codeStream),
                 new CilOperandBuilder(new OriginalMetadataTokenProvider(null), EmptyErrorListener.Instance));
-            uint token = (uint)info.GetTokenFor(typeof(Console).GetMethod("WriteLine", Type.EmptyTypes).MethodHandle);
+            uint token = (uint)info.GetTokenFor(typeof(Console).GetMethod("WriteLine", Type.EmptyTypes)!.MethodHandle);
             assembler.WriteInstruction(new CilInstruction(CilOpCodes.Call, new MetadataToken(token)));
             assembler.WriteInstruction(new CilInstruction(CilOpCodes.Ret));
 
@@ -214,7 +211,7 @@ namespace AsmResolver.DotNet.Dynamic.Tests
             info.SetLocalSignature(helper.GetSignature());
 
             // Write some IL.
-            info.SetCode(new byte[] {0x2a}, 1);
+            info.SetCode([0x2a], 1);
 
             // Pass into DynamicMethodDefinition
             var contextModule = ModuleDefinition.FromFile(typeof(DynamicMethodDefinitionTest).Assembly.Location);

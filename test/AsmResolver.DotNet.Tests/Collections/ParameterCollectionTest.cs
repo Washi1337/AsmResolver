@@ -55,19 +55,17 @@ namespace AsmResolver.DotNet.Tests.Collections
         {
             var method = ObtainStaticTestMethod(nameof(MultipleMethods.MultipleParameterMethod));
 
-            Assert.Equal(new[]
-            {
+            Assert.Equal([
                 "intParameter",
                 "stringParameter",
                 "typeDefOrRefParameter"
-            }, method.Parameters.Select(p => p.Name));
+            ], method.Parameters.Select(p => p.Name));
 
-            Assert.Equal(new[]
-            {
+            Assert.Equal([
                 "System.Int32",
                 "System.String",
                 typeof(MultipleMethods).FullName
-            }, method.Parameters.Select(p => p.ParameterType.FullName));
+            ], method.Parameters.Select(p => p.ParameterType.FullName));
 
             Assert.Null(method.Parameters.ThisParameter);
         }
@@ -86,10 +84,9 @@ namespace AsmResolver.DotNet.Tests.Collections
         {
             var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceSingleParameterMethod));
             Assert.Single(method.Parameters);
-            Assert.Equal(new[]
-            {
+            Assert.Equal([
                 "intParameter"
-            }, method.Parameters.Select(p => p.Name));
+            ], method.Parameters.Select(p => p.Name));
             Assert.NotNull(method.Parameters.ThisParameter);
             Assert.Equal(nameof(InstanceMethods), method.Parameters.ThisParameter.ParameterType.Name);
         }
@@ -98,20 +95,18 @@ namespace AsmResolver.DotNet.Tests.Collections
         public void ReadMultipleParametersFromInstanceMethod()
         {
             var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceMultipleParametersMethod));
-            Assert.Equal(new[]
-            {
+            Assert.Equal([
                 "intParameter",
                 "stringParameter",
                 "boolParameter"
 
-            }, method.Parameters.Select(p => p.Name));
+            ], method.Parameters.Select(p => p.Name));
 
-            Assert.Equal(new[]
-            {
+            Assert.Equal([
                 "System.Int32",
                 "System.String",
-                "System.Boolean",
-            }, method.Parameters.Select(p => p.ParameterType.FullName));
+                "System.Boolean"
+            ], method.Parameters.Select(p => p.ParameterType.FullName));
 
             Assert.NotNull(method.Parameters.ThisParameter);
             Assert.Equal(nameof(InstanceMethods), method.Parameters.ThisParameter.ParameterType.Name);
@@ -164,12 +159,12 @@ namespace AsmResolver.DotNet.Tests.Collections
         {
             var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceParameterlessMethod));
             var newType = method.DeclaringModule!.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
-            method.DeclaringType.Methods.Remove(method);
+            method.DeclaringType!.Methods.Remove(method);
             newType.Methods.Add(method);
 
             method.Parameters.PullUpdatesFromMethodSignature();
 
-            Assert.Equal(nameof(MultipleMethods), method.Parameters.ThisParameter.ParameterType.Name);
+            Assert.Equal(nameof(MultipleMethods), method.Parameters.ThisParameter?.ParameterType.Name);
         }
 
         [Fact]
@@ -178,7 +173,7 @@ namespace AsmResolver.DotNet.Tests.Collections
             var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceParameterlessMethod));
 
             method.IsStatic = true;
-            method.Signature.HasThis = false;
+            method.Signature!.HasThis = false;
 
             method.Parameters.PullUpdatesFromMethodSignature();
 
@@ -191,7 +186,7 @@ namespace AsmResolver.DotNet.Tests.Collections
             var method = ObtainStaticTestMethod(nameof(MultipleMethods.VoidParameterlessMethod));
 
             method.IsStatic = false;
-            method.Signature.HasThis = true;
+            method.Signature!.HasThis = true;
 
             method.Parameters.PullUpdatesFromMethodSignature();
 
@@ -225,7 +220,7 @@ namespace AsmResolver.DotNet.Tests.Collections
             var corLibTypesFactory = dummyModule.CorLibTypeFactory;
             var method = new MethodDefinition("TestMethodNoParameterDefinitions",
                 MethodAttributes.Public | MethodAttributes.Static,
-                MethodSignature.CreateStatic(corLibTypesFactory.Void, corLibTypesFactory.Int32));
+                MethodSignature.CreateStatic(corLibTypesFactory.Void, [corLibTypesFactory.Int32]));
 
             var param = Assert.Single(method.Parameters);
 
@@ -246,7 +241,7 @@ namespace AsmResolver.DotNet.Tests.Collections
             var corLibTypesFactory = dummyModule.CorLibTypeFactory;
             var method = new MethodDefinition("TestMethodNoParameterDefinitions",
                 MethodAttributes.Public | MethodAttributes.Static,
-                MethodSignature.CreateStatic(corLibTypesFactory.Int32, corLibTypesFactory.Int32, corLibTypesFactory.Int32));
+                MethodSignature.CreateStatic(corLibTypesFactory.Int32, [corLibTypesFactory.Int32, corLibTypesFactory.Int32]));
 
             Assert.Equal(2, method.Parameters.Count);
 

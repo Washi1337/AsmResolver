@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet.Tests.Collections
 
             _setMethod = new MethodDefinition("set_Property",
                 MethodAttributes.Public | MethodAttributes.Static,
-                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void, module.CorLibTypeFactory.Int32));
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void, [module.CorLibTypeFactory.Int32]));
         }
 
         [Fact]

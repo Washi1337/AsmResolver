@@ -19,15 +19,13 @@ namespace AsmResolver.DotNet.Tests
 {
     public class TypeDefinitionTest
     {
-        private static readonly SignatureComparer Comparer = new();
-
-        private TypeDefinition RebuildAndLookup(TypeDefinition type)
+        private static TypeDefinition RebuildAndLookup(TypeDefinition type)
         {
             var stream = new MemoryStream();
             type.DeclaringModule!.Write(stream);
 
             var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
-            return newModule.TopLevelTypes.FirstOrDefault(t => t.FullName == type.FullName);
+            return newModule.TopLevelTypes.First(t => t.FullName == type.FullName);
         }
 
         private void AssertNamesEqual(IEnumerable<INameProvider> expected, IEnumerable<INameProvider> actual)
@@ -124,7 +122,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             Assert.Null(module.TopLevelTypes[0].BaseType);
             Assert.NotNull(module.TopLevelTypes[1].BaseType);
-            Assert.Equal("System.Object", module.TopLevelTypes[1].BaseType.FullName);
+            Assert.Equal("System.Object", module.TopLevelTypes[1].BaseType?.FullName);
         }
 
         [Fact]
@@ -508,7 +506,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(new HashSet<Utf8String>(new Utf8String[]
             {
                 nameof(IInterface1), nameof(IInterface2),
-            }), new HashSet<Utf8String>(type.Interfaces.Select(i => i.Interface?.Name)));
+            }), new HashSet<Utf8String>(type.Interfaces.Select(i => i.Interface?.Name ?? Utf8String.Empty)));
         }
 
         [Fact]
@@ -520,7 +518,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(new HashSet<Utf8String>(new Utf8String[]
             {
                 nameof(IInterface1), nameof(IInterface2),
-            }), new HashSet<Utf8String>(newType.Interfaces.Select(i => i.Interface?.Name)));
+            }), new HashSet<Utf8String>(newType.Interfaces.Select(i => i.Interface?.Name ?? Utf8String.Empty)));
         }
 
         [Fact]
@@ -648,7 +646,7 @@ namespace AsmResolver.DotNet.Tests
             var scope = corlib.Object.Scope;
 
             var newType = RebuildAndLookup(type);
-            Assert.Equal(newType.BaseType, type.BaseType, Comparer);
+            Assert.Equal(newType.BaseType, type.BaseType, SignatureComparer.Default!);
 
             Assert.Same(scope, corlib.Object.Scope);
             var reference = Assert.IsAssignableFrom<AssemblyReference>(corlib.Object.Scope!.GetAssembly());
@@ -662,6 +660,7 @@ namespace AsmResolver.DotNet.Tests
             var status = resolver.Resolve(KnownCorLibs.SystemPrivateCoreLib_v8_0_0_0, null, out var corLib);
 
             Assert.Equal(ResolutionStatus.Success, status);
+            Assert.NotNull(corLib);
 
             var intType = corLib.ManifestModule!.TopLevelTypes.First(t => t.Name == "Int32");
             var spanType = corLib.ManifestModule.TopLevelTypes.First(t => t.Name == "Span`1");
@@ -730,7 +729,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location, TestReaderParameters);
             var type = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
 
-            var signatures = types.Select(x => (TypeSignature) module.CorLibTypeFactory.FromElementType(x)).ToArray();
+            var signatures = types.Select(x => (TypeSignature) module.CorLibTypeFactory.FromElementType(x)!).ToArray();
             var ctor = type.GetConstructor(signatures);
             Assert.NotNull(ctor);
             Assert.False(ctor.IsStatic);
@@ -846,7 +845,7 @@ namespace AsmResolver.DotNet.Tests
             var newType = RebuildAndLookup(type);
 
             Assert.IsAssignableFrom<TypeReference>(newType.BaseType);
-            Assert.Equal(type.BaseType, newType.BaseType, Comparer);
+            Assert.Equal(type.BaseType, newType.BaseType, SignatureComparer.Default!);
         }
     }
 }

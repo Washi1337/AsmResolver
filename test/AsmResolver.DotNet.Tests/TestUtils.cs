@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Serialized;
@@ -25,21 +26,22 @@ namespace AsmResolver.DotNet.Tests
 
         public static FieldDefinition FindInitializerField(this FieldDefinition field)
         {
-            var cctor = field.DeclaringType.GetStaticConstructor();
+            var cctor = field.DeclaringType!.GetStaticConstructor()
+                ?? throw new ArgumentException("Could not find static constructor");
 
-            var instructions = cctor.CilMethodBody.Instructions;
+            var instructions = cctor.CilMethodBody!.Instructions;
             for (int i = 0; i < instructions.Count; i++)
             {
                 if (instructions[i].OpCode.Code == CilCode.Ldtoken
                     && instructions[i + 2].OpCode.Code == CilCode.Stsfld
-                    && instructions[i+2].Operand is FieldDefinition f
+                    && instructions[i + 2].Operand is FieldDefinition f
                     && f == field)
                 {
-                    return (FieldDefinition) instructions[i].Operand;
+                    return (FieldDefinition) instructions[i].Operand!;
                 }
             }
 
-            return null;
+            throw new ArgumentException($"Could not find initializer field of {field}.");
         }
     }
 }
