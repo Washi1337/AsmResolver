@@ -94,7 +94,8 @@ var newType = new TypeDefinition(
     "Namespace",
     "Name",
     TypeAttributes.Public,
-    module.CorLibTypeFactory.Object);
+    module.CorLibTypeFactory.Object
+);
 ```
 
 > [!WARNING]
@@ -109,8 +110,7 @@ var newType = new TypeDefinition(
     "Namespace",
     "Name",
     TypeAttributes.Public,
-    module.CorLibTypeFactory.CorLibScope
-        .CreateTypeReference("System", "ValueType")
+    module.CorLibTypeFactory.CorLibScope.CreateTypeReference("System", "ValueType")
 );
 ```
 
@@ -122,7 +122,8 @@ ModuleDefinition module = ...
 var newType = new TypeDefinition(
     "Namespace",
     "IName",
-    TypeAttributes.Public | TypeAttributes.Interface);
+    TypeAttributes.Public | TypeAttributes.Interface
+);
 ```
 
 Once a type has been constructed, it can be added to either a `ModuleDefinition`
@@ -193,7 +194,8 @@ ModuleDefinition module = ...;
 var field = new FieldDefinition(
     "MyField",
     FieldAttributes.Public,
-    module.CorLibTypeFactory.Int32);"
+    module.CorLibTypeFactory.Int32
+);"
 ```
 
 Fields can be added to a type:
@@ -294,10 +296,10 @@ var method = new MethodDefinition(
     "MyMethod",
     MethodAttributes.Public | MethodAttributes.Static,
     MethodSignature.CreateStatic(
-        module.CorLibTypeFactory.Void,   // Return type
-        module.CorLibTypeFactory.Int32,  // Parameter 1
-        module.CorLibTypeFactory.String // Parameter 2
-    ));
+        returnType: module.CorLibTypeFactory.Void,
+        parameterTypes: [module.CorLibTypeFactory.Int32, module.CorLibTypeFactory.String]
+    )
+);
 ```
 
 Similarly, for instance methods, use the `MethodSignature.CreateInstance` to create the signature:
@@ -308,10 +310,10 @@ var method = new MethodDefinition(
     "MyMethod",
     MethodAttributes.Public,
     MethodSignature.CreateInstance(
-        module.CorLibTypeFactory.Void,   // Return type
-        module.CorLibTypeFactory.Int32,  // Parameter 1
-        module.CorLibTypeFactory.String // Parameter 2
-    ));
+        returnType: module.CorLibTypeFactory.Void,
+        parameterTypes: [module.CorLibTypeFactory.Int32, module.CorLibTypeFactory.String]
+    )
+);
 ```
 
 See also [Metadata Signatures](metadata-signatures.md) for more information on type and method signatures.

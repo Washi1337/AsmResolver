@@ -82,7 +82,9 @@ Below is an example of how to create a fully imported reference to `void System.
 var method = factory.CorLibScope
     .CreateTypeReference("System", "Console")
     .CreateMemberReference("WriteLine", MethodSignature.CreateStatic(
-        factory.Void, factory.String));
+        returnType: factory.Void,
+        parameterTypes: [factory.String]
+    ));
 
 // importedMethod now references "void System.Console.WriteLine(string)"
 ```
@@ -93,7 +95,7 @@ var method = factory.CorLibScope
 > ```csharp
 > var method = factory.CorLibScope
 >    .CreateTypeReference("System", "Console")
->    .CreateMemberReference("WriteLine", MethodSignature.CreateStatic(factory.Void, factory.String))
+>    .CreateMemberReference("WriteLine", MethodSignature.CreateStatic(factory.Void, [factory.String]))
 >    .ImportWith(module.DefaultImporter); // Explicitly import the reference.
 > ```
 
@@ -108,8 +110,9 @@ var importedMethod = factory.CorLibScope
     .MakeGenericInstanceType(factory.Int32)
     .ToTypeDefOrRef()
     .CreateMemberReference("Add", MethodSignature.CreateInstance(
-        factory.Void,
-        new GenericParameterSignature(GenericParameterType.Type, 0)));
+        returnType: factory.Void,
+        parameterTypes: [new GenericParameterSignature(GenericParameterType.Type, 0)]
+    ));
 
 // importedMethod now references "System.Collections.Generic.List`1<System.Int32>.Add(!0)"
 ```
@@ -123,7 +126,9 @@ var factory = module.CorLibTypeFactory;
 var importedMethod = factory.CorLibScope
     .CreateTypeReference("System", "Array")
     .CreateMemberReference("Empty", MethodSignature.CreateStatic(
-        new GenericParameterSignature(GenericParameterType.Method, 0).MakeSzArrayType(), 1))
+        returnType: new GenericParameterSignature(GenericParameterType.Method, 0).MakeSzArrayType(), 
+        genericParameterCount: 1, 
+        parameterTypes: []))
     .MakeGenericInstanceMethod(factory.String);
 
 // importedMethod now references "!0[] System.Array.Empty<System.String>()"

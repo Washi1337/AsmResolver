@@ -229,7 +229,10 @@ Below an example on how emit a call to `Console::WriteLine(string)`:
 ``` csharp
 var writeLine = targetModule.CorLibTypeFactory.CorLibScope
     .CreateTypeReference("System", "Console")
-    .CreateMemberReference("WriteLine", MethodSignature.CreateStatic(targetModule.CorLibTypeFactory.Void, targetModule.CorLibTypeFactory.String));
+    .CreateMemberReference("WriteLine", MethodSignature.CreateStatic(
+        returnType: targetModule.CorLibTypeFactory.Void,
+        parameterTypes: [targetModule.CorLibTypeFactory.String]
+    ));
 
 body.Instructions.Add(CilOpCodes.Ldstr, "Hello, world!");
 body.Instructions.Add(CilOpCodes.Call, writeLine);

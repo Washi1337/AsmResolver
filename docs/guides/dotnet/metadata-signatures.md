@@ -123,7 +123,8 @@ This can also be created by manually instantiating a `GenericInstanceTypeSignatu
 ``` csharp
 var listTypeRef = new TypeReference(corlibScope, "System.Collections.Generic", "List`1");
 
-var listOfString = new GenericInstanceTypeSignature(listTypeRef, 
+var listOfString = new GenericInstanceTypeSignature(
+    listTypeRef, 
     isValueType: false, 
     typeArguments: [module.CorLibTypeFactory.String]
 );
@@ -140,9 +141,9 @@ In AsmResolver, they are represented by wrapping a `MethodSignature` into a `Fun
 ``` csharp
 var factory = module.CorLibTypeFactory;
 var type = MethodSignature.CreateStatic(
-        factory.Void,
-        factory.Int32, factory.Int32)
-    .MakeFunctionPointerType();
+    returnType: factory.Void,
+    parameterTypes: [factory.Int32, factory.Int32]
+).MakeFunctionPointerType();
 
 // type now contains a reference to `method void *(int32, int32)`.
 ```
@@ -152,8 +153,8 @@ Alternatively, a `FunctionPointerTypeSignature` can be created manually as well:
 ``` csharp
 var factory = module.CorLibTypeFactory;
 var signature = MethodSignature.CreateStatic(
-    factory.Void,
-    factory.Int32, factory.Int32
+    returnType: factory.Void,
+    parameterTypes: [factory.Int32, factory.Int32]
 );
 
 var type = new FunctionPointerTypeSignature(signature);
@@ -323,7 +324,10 @@ Method signatures can be created using the factory methods `MethodSiganture.Crea
 var method = new MethodDefinition(
     name: "Foo", 
     attributes: MethodAttributes.Static,
-    signature: MethodSignature.CreateStatic(module.CorLibTypeFactory.Void, module.CorLibTypeFactory.Int32)
+    signature: MethodSignature.CreateStatic(
+        returnType: module.CorLibTypeFactory.Void,
+        parameterTypes: [module.CorLibTypeFactory.Int32]
+    )
 );
 ```
 

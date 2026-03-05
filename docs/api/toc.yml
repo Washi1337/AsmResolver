@@ -8,5 +8,7 @@
   href: win32resources/toc.yml
 - name: AsmResolver.DotNet.dll
   href: dotnet/toc.yml
+- name: AsmResolver.DotNet.Dynamic.dll
+  href: dotnet-dynamic/toc.yml
 - name: AsmResolver.Symbols.Pdb.dll
   href: symbols/toc.yml

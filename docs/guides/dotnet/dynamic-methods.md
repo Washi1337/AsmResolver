@@ -67,6 +67,6 @@ contextModule.GetOrCreateModuleType().Methods.Add(definition);
 contextModule.Write("Program.patched.dll");
 ```
 
-See [Obtaining methods and fields](metadata-definitions.md#obtaining-methods-and-fields)
+See [Metadata Definitions - Methods](metadata-definitions.md#methods)
 and [CIL Method Bodies](managed-method-bodies.md) for more
 information on how to use `MethodDefinition` objects.
