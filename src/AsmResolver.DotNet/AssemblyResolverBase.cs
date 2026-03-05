@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet
     /// </summary>
     public abstract class AssemblyResolverBase : IAssemblyResolver
     {
-        private static readonly string[] BinaryFileExtensions = [".dll", ".exe"];
+        internal static readonly string[] BinaryFileExtensions = [".dll", ".exe"];
 
         /// <summary>
         /// Initializes the base of an assembly resolver.
