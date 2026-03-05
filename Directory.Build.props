@@ -9,7 +9,7 @@
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
         <LangVersion>14</LangVersion>
         <VersionPrefix>6.0.0</VersionPrefix>
-        <VersionSuffix>beta.6</VersionSuffix>
+        <VersionSuffix>rc.1</VersionSuffix>
         <Deterministic>true</Deterministic>
         <UseArtifactsOutput>true</UseArtifactsOutput>
         <CheckEolTargetFramework>false</CheckEolTargetFramework>
