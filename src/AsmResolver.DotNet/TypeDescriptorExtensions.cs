@@ -212,45 +212,45 @@ namespace AsmResolver.DotNet
             /// <summary>
             /// Constructs a reference to a member declared within the provided parent member.
             /// </summary>
-            /// <param name="memberName">The name of the member to reference.</param>
+            /// <param name="name">The name of the member to reference.</param>
             /// <param name="signature">The signature of the member to reference.</param>
             /// <returns>The constructed reference.</returns>
-            public MemberReference CreateMemberReference(Utf8String? memberName, MemberSignature? signature)
+            public MemberReference CreateMemberReference(Utf8String? name, MemberSignature? signature)
             {
-                return new MemberReference(parent, memberName, signature);
+                return new MemberReference(parent, name, signature);
             }
 
             /// <summary>
             /// Constructs a reference to a field declared within the provided parent member.
             /// </summary>
-            /// <param name="fieldName">The name of the field to reference.</param>
+            /// <param name="name">The name of the field to reference.</param>
             /// <param name="fieldType">The type of the field to reference.</param>
             /// <returns>The constructed reference.</returns>
-            public IFieldDescriptor CreateFieldReference(Utf8String? fieldName, TypeSignature fieldType)
+            public IFieldDescriptor CreateFieldReference(Utf8String? name, TypeSignature fieldType)
             {
-                return new MemberReference(parent, fieldName, new FieldSignature(fieldType));
+                return new MemberReference(parent, name, new FieldSignature(fieldType));
             }
 
             /// <summary>
             /// Constructs a reference to a field declared within the provided parent member.
             /// </summary>
-            /// <param name="fieldName">The name of the field to reference.</param>
+            /// <param name="name">The name of the field to reference.</param>
             /// <param name="signature">The signature of the field to reference.</param>
             /// <returns>The constructed reference.</returns>
-            public IFieldDescriptor CreateFieldReference(Utf8String? fieldName, FieldSignature? signature)
+            public IFieldDescriptor CreateFieldReference(Utf8String? name, FieldSignature? signature)
             {
-                return new MemberReference(parent, fieldName, signature);
+                return new MemberReference(parent, name, signature);
             }
 
             /// <summary>
             /// Constructs a reference to a method declared within the provided parent member.
             /// </summary>
-            /// <param name="methodName">The name of the method to reference.</param>
+            /// <param name="name">The name of the method to reference.</param>
             /// <param name="signature">The signature of the method to reference.</param>
             /// <returns>The constructed reference.</returns>
-            public IMethodDescriptor CreateMethodReference(Utf8String? methodName, MethodSignature? signature)
+            public IMethodDescriptor CreateMethodReference(Utf8String? name, MethodSignature? signature)
             {
-                return new MemberReference(parent, methodName, signature);
+                return new MemberReference(parent, name, signature);
             }
         }
 
