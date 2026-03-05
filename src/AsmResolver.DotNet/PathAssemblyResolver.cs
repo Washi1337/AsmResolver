@@ -72,7 +72,7 @@ public sealed class PathAssemblyResolver : IAssemblyResolver
     /// <inheritdoc />
     public ResolutionStatus Resolve(AssemblyDescriptor assembly, ModuleDefinition? originModule, out AssemblyDefinition? result)
     {
-        if (assembly.Name is null || !_simpleNameMap.TryGetValue(assembly.Name, out string path))
+        if (assembly.Name is null || !_simpleNameMap.TryGetValue(assembly.Name, out string? path))
         {
             result = null;
             return ResolutionStatus.AssemblyNotFound;
