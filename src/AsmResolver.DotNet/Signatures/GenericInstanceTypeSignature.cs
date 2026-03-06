@@ -49,15 +49,8 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="genericType">The type to instantiate.</param>
         /// <param name="isValueType">Indicates the type is a value type or not.</param>
-        /// <param name="typeArguments">The arguments to use for instantiating the generic type.</param>
-        public GenericInstanceTypeSignature(ITypeDefOrRef genericType, bool isValueType,
-            params TypeSignature[] typeArguments)
-            : this(genericType, isValueType, typeArguments.AsEnumerable())
-        {
-        }
-
-        private GenericInstanceTypeSignature(ITypeDefOrRef genericType, bool isValueType,
-            IEnumerable<TypeSignature> typeArguments)
+        /// <param name="typeArguments">The type arguments to instantiate the type with.</param>
+        public GenericInstanceTypeSignature(ITypeDefOrRef genericType, bool isValueType, IEnumerable<TypeSignature> typeArguments)
         {
             _genericType = genericType;
             _typeArguments = new List<TypeSignature>(typeArguments);

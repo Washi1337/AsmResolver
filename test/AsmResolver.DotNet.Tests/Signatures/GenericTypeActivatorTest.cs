@@ -52,52 +52,73 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void InstantiateSimpleGenericInstanceType()
         {
-
-            var signature = new GenericInstanceTypeSignature(_dummyGenericType, false,
-                new GenericParameterSignature(GenericParameterType.Type, 0));
+            var signature = _dummyGenericType.MakeGenericInstanceType(
+                isValueType: false,
+                typeArguments: [new GenericParameterSignature(GenericParameterType.Type, 0)]
+            );
 
             var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
             var newSignature = signature.InstantiateGenericTypes(context);
-            Assert.Equal(new GenericInstanceTypeSignature(_dummyGenericType, false,
-                _module.CorLibTypeFactory.String), newSignature, SignatureComparer.Default);
+            Assert.Equal(
+                _dummyGenericType.MakeGenericInstanceType(false, [_module.CorLibTypeFactory.String]),
+                newSignature,
+                SignatureComparer.Default
+            );
         }
 
         [Fact]
         public void InstantiateNestedGenericInstanceType()
         {
-            var signature = new GenericInstanceTypeSignature(_dummyGenericType, false,
-                new GenericInstanceTypeSignature(_dummyGenericType, false,
-                    new GenericParameterSignature(GenericParameterType.Type, 0)));
+            var signature = _dummyGenericType.MakeGenericInstanceType(
+                isValueType: false,
+                typeArguments: [
+                    _dummyGenericType.MakeGenericInstanceType(false, [new GenericParameterSignature(GenericParameterType.Type, 0)])
+                ]
+            );
 
             var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
             var newSignature = signature.InstantiateGenericTypes(context);
-            Assert.Equal(new GenericInstanceTypeSignature(_dummyGenericType, false,
-                new GenericInstanceTypeSignature(_dummyGenericType, false,
-                    _module.CorLibTypeFactory.String)), newSignature, SignatureComparer.Default);
+            Assert.Equal(
+                _dummyGenericType.MakeGenericInstanceType(
+                    isValueType: false,
+                    typeArguments: [_dummyGenericType.MakeGenericInstanceType(false, [_module.CorLibTypeFactory.String])]
+                ),
+                newSignature,
+                SignatureComparer.Default
+            );
         }
 
         [Fact]
         public void InstantiateGenericInstanceTypeWithTypeAndMethodArgument()
         {
-            var signature = new GenericInstanceTypeSignature(_dummyGenericType, false,
-                new GenericParameterSignature(GenericParameterType.Type, 0),
-                new GenericParameterSignature(GenericParameterType.Method, 0));
+            var signature = _dummyGenericType.MakeGenericInstanceType(
+                isValueType: false,
+                typeArguments:
+                [
+                    new GenericParameterSignature(GenericParameterType.Type, 0),
+                    new GenericParameterSignature(GenericParameterType.Method, 0)
+                ]
+            );
 
             var context = new GenericContext(
                 GetProvider(_module.CorLibTypeFactory.String),
                 GetProvider(_module.CorLibTypeFactory.Int32));
 
             var newSignature = signature.InstantiateGenericTypes(context);
-            Assert.Equal(new GenericInstanceTypeSignature(_dummyGenericType, false,
-                    _module.CorLibTypeFactory.String,
-                    _module.CorLibTypeFactory.Int32), newSignature, SignatureComparer.Default);
+            Assert.Equal(
+                _dummyGenericType.MakeGenericInstanceType(
+                    isValueType: false,
+                    typeArguments: [_module.CorLibTypeFactory.String, _module.CorLibTypeFactory.Int32]
+                ),
+                newSignature,
+                SignatureComparer.Default
+            );
         }
 
         [Fact]
         public void InstantiateMethodSignatureWithGenericReturnType()
         {
-            var signature = MethodSignature.CreateStatic(
-                    new GenericParameterSignature(GenericParameterType.Type, 0));
+            var signature = MethodSignature.CreateStatic(new GenericParameterSignature(GenericParameterType.Type, 0));
 
             var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
 
