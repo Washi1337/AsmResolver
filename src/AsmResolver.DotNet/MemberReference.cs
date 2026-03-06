@@ -158,6 +158,18 @@ namespace AsmResolver.DotNet
             : (MemberReference) importer.ImportField(this);
 
         /// <inheritdoc />
+        IMethodDefOrRef IMethodDefOrRef.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
+        IMethodDescriptor IMethodDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
+        IFieldDescriptor IFieldDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
+        IMemberDescriptor IMemberDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <summary>
@@ -181,7 +193,7 @@ namespace AsmResolver.DotNet
         /// <param name="context">The context to assume when resolving the member.</param>
         /// <param name="definition">The resolved member definition, or <c>null</c> if resolution failed.</param>
         /// <returns><c>true</c> if the resolution was successful, <c>false</c> otherwise.</returns>
-        public bool TryResolve(RuntimeContext? context, out IMemberDefinition? definition)
+        public bool TryResolve(RuntimeContext? context, [NotNullWhen(true)] out IMemberDefinition? definition)
         {
             if (IsMethod && ((IMethodDescriptor) this).TryResolve(context, out var method))
                 definition = method;

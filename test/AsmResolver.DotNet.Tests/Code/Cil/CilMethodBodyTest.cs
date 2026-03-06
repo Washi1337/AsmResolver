@@ -26,7 +26,8 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         private static CilMethodBody GetMethodBodyInModule(ModuleDefinition module, string name)
         {
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MethodBodyTypes));
-            return type.Methods.First(m => m.Name == name).CilMethodBody;
+            return type.Methods.First(m => m.Name == name).CilMethodBody
+                ?? throw new ArgumentException($"Test method {name} does not have a method body.");
         }
 
         private static CilMethodBody RebuildAndLookup(CilMethodBody methodBody, bool accessBeforeBuild)
@@ -41,7 +42,8 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             var type = newModule.TopLevelTypes.First(t => t.Name == methodBody.Owner.DeclaringType!.Name);
-            return type.Methods.First(m => m.Name == methodBody.Owner.Name).CilMethodBody;
+            return type.Methods.First(m => m.Name == methodBody.Owner.Name).CilMethodBody
+                ?? throw new ArgumentException($"Reconstructed method {methodBody.Owner!.Name} does not have a method body.");
         }
 
         [Fact]
@@ -299,7 +301,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             body.ExceptionHandlers.Add(new CilExceptionHandler
             {
                 HandlerType = CilExceptionHandlerType.Exception,
-                ExceptionType = body.Owner.DeclaringModule.CorLibTypeFactory.Object.ToTypeDefOrRef(),
+                ExceptionType = body.Owner!.DeclaringModule!.CorLibTypeFactory.Object.ToTypeDefOrRef(),
                 TryStart = tryStart,
                 TryEnd = tryEnd,
                 HandlerStart = handlerStart,
@@ -330,7 +332,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             body.ExceptionHandlers.Add(new CilExceptionHandler
             {
                 HandlerType = CilExceptionHandlerType.Finally,
-                ExceptionType = body.Owner.DeclaringModule.CorLibTypeFactory.Object.ToTypeDefOrRef(),
+                ExceptionType = body.Owner!.DeclaringModule!.CorLibTypeFactory.Object.ToTypeDefOrRef(),
                 TryStart = tryStart,
                 TryEnd = tryEnd,
                 HandlerStart = handlerStart,
@@ -361,7 +363,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             body.ExceptionHandlers.Add(new CilExceptionHandler
             {
                 HandlerType = CilExceptionHandlerType.Exception,
-                ExceptionType = body.Owner.DeclaringModule.CorLibTypeFactory.Object.ToTypeDefOrRef(),
+                ExceptionType = body.Owner!.DeclaringModule!.CorLibTypeFactory.Object.ToTypeDefOrRef(),
                 TryStart = tryStart,
                 TryEnd = tryEnd,
                 HandlerStart = handlerStart,
@@ -477,12 +479,12 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var module = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location, TestReaderParameters);
             var method = (MethodDefinition) module.LookupMember(new MetadataToken(TableIndex.Method, 1));
             var body = method.CilMethodBody;
-            method.DeclaringType.Methods.Remove(method);
+            method.DeclaringType!.Methods.Remove(method);
             Assert.NotNull(body);
 
             var module2 = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location, TestReaderParameters);
             var method2 = (MethodDefinition) module2.LookupMember(new MetadataToken(TableIndex.Method, 1));
-            method2.DeclaringType.Methods.Remove(method2);
+            method2.DeclaringType!.Methods.Remove(method2);
             var body2 = method2.CilMethodBody;
             Assert.NotNull(body2);
         }
@@ -504,7 +506,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var body = CreateDummyBody(true);
 
-            body.Instructions.Add(CilOpCodes.Jmp, body.Owner);
+            body.Instructions.Add(CilOpCodes.Jmp, body.Owner!);
             body.Instructions.Add(CilOpCodes.Ldnull);
 
             Assert.Equal(0, body.ComputeMaxStack());
@@ -516,7 +518,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var body = CreateDummyBody(true);
 
             body.Instructions.Add(CilOpCodes.Ldnull);
-            body.Instructions.Add(CilOpCodes.Jmp, body.Owner);
+            body.Instructions.Add(CilOpCodes.Jmp, body.Owner!);
 
             Assert.Throws<StackImbalanceException>(() => body.ComputeMaxStack());
         }
@@ -543,7 +545,8 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void ExceptionHandlerWithHandlerEndOutsideOfMethodShouldResultInEndLabel()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HandlerEndAtEndOfMethodBody, TestReaderParameters);
-            var body = module.ManagedEntryPointMethod.CilMethodBody;
+            var body = module.ManagedEntryPointMethod!.CilMethodBody!;
+
             Assert.Same(body.Instructions.EndLabel, body.ExceptionHandlers[0].HandlerEnd);
             body.VerifyLabels();
         }
@@ -788,11 +791,11 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             // Look up raw method body.
             var token = result.TokenMapping[method];
             var metadata = result.ConstructedImage!.DotNetDirectory!.Metadata!;
-            var rawBody = (CilRawFatMethodBody) metadata
+            var rawBody = metadata
                 .GetStream<TablesStream>()
                 .GetTable<MethodDefinitionRow>()
                 .GetByRid(token.Rid)
-                .Body.GetSegment();
+                .Body.GetSegment() as CilRawFatMethodBody;
 
             Assert.NotNull(rawBody);
 
@@ -801,7 +804,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             // Read back module definition and look up interpreted method body.
             module = ModuleDefinition.FromImage(result.ConstructedImage, new ModuleReaderParameters(listener));
-            return ((MethodDefinition) module.LookupMember(token)).CilMethodBody;
+            return module.LookupMember<MethodDefinition>(token).CilMethodBody!;
         }
 
         [Fact]
@@ -809,10 +812,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var body = CreateAndReadPatchedBody(EmptyErrorListener.Instance, raw =>
             {
-                raw.Code = new DataSegment(new byte[]
-                {
+                raw.Code = new DataSegment([
                     0xFE // 2-byte prefix opcode
-                });
+                ]);
             });
 
             Assert.NotEmpty(body.LocalVariables);
@@ -834,7 +836,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var body = CreateAndReadPatchedBody(EmptyErrorListener.Instance, raw =>
             {
-                raw.Code = new DataSegment(new byte[] { 0xFE });
+                raw.Code = new DataSegment([0xFE]);
                 raw.LocalVarSigToken = new MetadataToken(TableIndex.StandAloneSig, 0x123456);
             });
 

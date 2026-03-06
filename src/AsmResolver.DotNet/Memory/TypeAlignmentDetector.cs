@@ -9,10 +9,10 @@ namespace AsmResolver.DotNet.Memory
     {
         private readonly Stack<TypeDefinition> _traversedTypes = new();
         private readonly bool _is32Bit;
-        private readonly RuntimeContext _runtimeContext;
+        private readonly RuntimeContext? _runtimeContext;
         private GenericContext _currentGenericContext;
 
-        public TypeAlignmentDetector(RuntimeContext runtimeContext, GenericContext currentGenericContext, bool is32Bit)
+        public TypeAlignmentDetector(RuntimeContext? runtimeContext, GenericContext currentGenericContext, bool is32Bit)
         {
             _runtimeContext = runtimeContext;
             _currentGenericContext = currentGenericContext;

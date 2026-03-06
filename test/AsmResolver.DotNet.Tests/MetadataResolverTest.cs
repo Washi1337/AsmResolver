@@ -19,12 +19,12 @@ namespace AsmResolver.DotNet.Tests
         {
             _fwContext = new RuntimeContext(
                 DotNetRuntimeInfo.NetFramework(4, 0),
-                searchDirectories: [Path.GetDirectoryName(typeof(MetadataResolverTest).Assembly.Location)]
+                searchDirectories: [Path.GetDirectoryName(typeof(MetadataResolverTest).Assembly.Location)!]
             );
 
             _coreContext = new RuntimeContext(
                 DotNetRuntimeInfo.NetCoreApp(3, 1, 0),
-                searchDirectories: [Path.GetDirectoryName(typeof(MetadataResolverTest).Assembly.Location)]
+                searchDirectories: [Path.GetDirectoryName(typeof(MetadataResolverTest).Assembly.Location)!]
             );
 
             _fwComparer = new SignatureComparer(_fwContext);
@@ -208,13 +208,13 @@ namespace AsmResolver.DotNet.Tests
             var consoleType = module.CorLibTypeFactory.CorLibScope.CreateTypeReference("System", "Console");
             var writeLineMethod = consoleType.CreateMethodReference(
                 "WriteLine",
-                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void, module.CorLibTypeFactory.String)
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void, [module.CorLibTypeFactory.String])
             );
 
             var definition = writeLineMethod.Resolve(_fwContext);
 
             Assert.Equal(writeLineMethod.Name, definition.Name);
-            Assert.Equal(writeLineMethod.Signature, definition.Signature, _fwComparer);
+            Assert.Equal(writeLineMethod.Signature, definition.Signature, _fwComparer!);
         }
 
         [Fact]
@@ -228,7 +228,7 @@ namespace AsmResolver.DotNet.Tests
             var definition = emptyField.Resolve(_fwContext);
 
             Assert.Equal(emptyField.Name, definition.Name);
-            Assert.Equal(emptyField.Signature, definition.Signature, _fwComparer);
+            Assert.Equal(emptyField.Signature, definition.Signature, _fwComparer!);
         }
 
         [Fact]
@@ -240,7 +240,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_Forwarder, TestReaderParameters);
 
             // Load dependencies.
-            var context = module.RuntimeContext;
+            var context = module.RuntimeContext!;
             context.LoadAssembly(Properties.Resources.Assembly1_Forwarder);
             context.LoadAssembly(Properties.Resources.Assembly2_Actual);
 
@@ -255,7 +255,7 @@ namespace AsmResolver.DotNet.Tests
             // Load main assembly.
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousExportedTypeLoop, TestReaderParameters);
 
-            var context = module.RuntimeContext;
+            var context = module.RuntimeContext!;
             context.LoadAssembly(Properties.Resources.Assembly1_MaliciousExportedTypeLoop);
             context.LoadAssembly(Properties.Resources.Assembly2_MaliciousExportedTypeLoop);
 
@@ -274,7 +274,7 @@ namespace AsmResolver.DotNet.Tests
             // https://github.com/Washi1337/AsmResolver/issues/321
 
             var mainApp = ModuleDefinition.FromBytes(Properties.Resources.DifferentNetVersion_MainApp, TestReaderParameters);
-            var context = mainApp.RuntimeContext;
+            var context = mainApp.RuntimeContext!;
 
             var library = context.LoadAssembly(Properties.Resources.DifferentNetVersion_Library).ManifestModule!;
 
@@ -283,7 +283,7 @@ namespace AsmResolver.DotNet.Tests
                 .Methods.First(m => m.Name == "ThrowMe");
 
             var reference = (IMethodDescriptor) mainApp.ManagedEntryPointMethod!.CilMethodBody!.Instructions.First(
-                    i => i.OpCode == CilOpCodes.Callvirt && ((IMethodDescriptor) i.Operand)?.Name == "ThrowMe")
+                    i => i.OpCode == CilOpCodes.Callvirt && ((IMethodDescriptor?) i.Operand)?.Name == "ThrowMe")
                 .Operand!;
 
             var resolved = reference.Resolve(mainApp.RuntimeContext);

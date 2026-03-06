@@ -4,8 +4,6 @@
         <TargetFramework>net10.0</TargetFramework>
         <IsPackable>false</IsPackable>
         <RootNamespace>AsmResolver.PE.Win32Resources.Tests</RootNamespace>
-        <Nullable>warnings</Nullable>
-        <LangVersion>12</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

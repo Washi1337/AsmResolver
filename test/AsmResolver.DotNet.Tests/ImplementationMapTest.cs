@@ -1,19 +1,18 @@
 using System;
 using System.IO;
 using System.Linq;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Methods;
-using AsmResolver.PE;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
 {
     public class ImplementationMapTest
     {
-        private ImplementationMap Lookup(string methodName)
+        private static ImplementationMap Lookup(string methodName)
         {
             var method = LookupMethod(methodName);
-            return method.ImplementationMap;
+            return method.ImplementationMap
+                ?? throw new ArgumentException($"Method {methodName} does not have an implementation map assigned.");
         }
 
         private static MethodDefinition LookupMethod(string methodName)
@@ -24,14 +23,15 @@ namespace AsmResolver.DotNet.Tests
             return method;
         }
 
-        private ImplementationMap RebuildAndLookup(ImplementationMap implementationMap)
+        private static ImplementationMap RebuildAndLookup(ImplementationMap implementationMap)
         {
             using var stream = new MemoryStream();
             implementationMap.MemberForwarded!.DeclaringModule!.Write(stream);
 
             var newModule = ModuleDefinition.FromBytes(stream.ToArray(), TestReaderParameters);
             var t = newModule.TopLevelTypes.First(t => t.Name == nameof(PlatformInvoke));
-            return t.Methods.First(m => m.Name == implementationMap.MemberForwarded.Name).ImplementationMap;
+            return t.Methods.First(m => m.Name == implementationMap.MemberForwarded.Name).ImplementationMap
+                ?? throw new ArgumentException($"Reconstructed method does not have an implementation map assigned.");
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadScope()
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
-            Assert.Equal("SomeDll.dll", map.Scope.Name);
+            Assert.Equal("SomeDll.dll", map.Scope?.Name);
         }
 
         [Fact]
@@ -67,21 +67,21 @@ namespace AsmResolver.DotNet.Tests
             map.Scope = newModule;
 
             var newMap = RebuildAndLookup(map);
-            Assert.Equal(newModule.Name, newMap.Scope.Name);
+            Assert.Equal(newModule.Name, newMap.Scope?.Name);
         }
 
         [Fact]
         public void ReadMemberForwarded()
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
-            Assert.Equal(nameof(PlatformInvoke.ExternalMethod), map.MemberForwarded.Name);
+            Assert.Equal(nameof(PlatformInvoke.ExternalMethod), map.MemberForwarded?.Name);
         }
 
         [Fact]
         public void RemoveMapShouldUnsetMemberForwarded()
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
-            map.MemberForwarded.ImplementationMap = null;
+            map.MemberForwarded!.ImplementationMap = null;
             Assert.Null(map.MemberForwarded);
         }
 
@@ -89,9 +89,10 @@ namespace AsmResolver.DotNet.Tests
         public void AddingAlreadyAddedMapToAnotherMemberShouldThrow()
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
-            var declaringType = map.MemberForwarded.DeclaringType;
+            var declaringType = map.MemberForwarded!.DeclaringType!;
             var otherMethod = declaringType.Methods.First(m =>
-                m.Name == nameof(PlatformInvoke.NonImplementationMapMethod));
+                m.Name == nameof(PlatformInvoke.NonImplementationMapMethod)
+            );
 
             Assert.Throws<ArgumentException>(() => otherMethod.ImplementationMap = map);
         }
@@ -101,15 +102,16 @@ namespace AsmResolver.DotNet.Tests
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
 
-            var declaringType = (TypeDefinition) map.MemberForwarded.DeclaringType;
+            var declaringType = map.MemberForwarded!.DeclaringType!;
             var otherMethod = declaringType.Methods.First(m =>
-                m.Name == nameof(PlatformInvoke.NonImplementationMapMethod));
+                m.Name == nameof(PlatformInvoke.NonImplementationMapMethod)
+            );
 
             map.MemberForwarded.ImplementationMap = null;
             otherMethod.ImplementationMap = map;
 
             var newMap = RebuildAndLookup(map);
-            Assert.Equal(otherMethod.Name, newMap.MemberForwarded.Name);
+            Assert.Equal(otherMethod.Name, newMap.MemberForwarded?.Name);
         }
 
     }

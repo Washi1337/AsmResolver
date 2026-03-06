@@ -346,14 +346,14 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             var stringConstructor = module.CorLibTypeFactory.String.Type
                 .CreateMemberReference(".ctor", MethodSignature.CreateInstance(
                     module.CorLibTypeFactory.Void,
-                    module.CorLibTypeFactory.Char.MakePointerType()
+                    [module.CorLibTypeFactory.Char.MakePointerType()]
                 ));
 
             var writeLine = module.CorLibTypeFactory.CorLibScope
                 .CreateTypeReference("System", "Console")
                 .CreateMemberReference("WriteLine", MethodSignature.CreateStatic(
                     module.CorLibTypeFactory.Void,
-                    module.CorLibTypeFactory.String
+                    [module.CorLibTypeFactory.String]
                 ));
 
             var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;

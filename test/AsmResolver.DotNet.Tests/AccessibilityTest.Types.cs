@@ -14,14 +14,14 @@ public partial class AccessibilityTest
         return module;
     }
 
-    private static TypeDefinition AddTopLevelType(ModuleDefinition module, string name, TypeAttributes attributes, ITypeDefOrRef baseType = null)
+    private static TypeDefinition AddTopLevelType(ModuleDefinition module, string name, TypeAttributes attributes, ITypeDefOrRef? baseType = null)
     {
         var type = new TypeDefinition(null, name, attributes, baseType ?? module.CorLibTypeFactory.Object.Type);
         module.TopLevelTypes.Add(type);
         return type;
     }
 
-    private static TypeDefinition AddNestedType(TypeDefinition declaringType, string name, TypeAttributes attributes, ITypeDefOrRef baseType = null)
+    private static TypeDefinition AddNestedType(TypeDefinition declaringType, string name, TypeAttributes attributes, ITypeDefOrRef? baseType = null)
     {
         var type = new TypeDefinition(null, name, attributes, baseType ?? declaringType.DeclaringModule!.CorLibTypeFactory.Object.Type);
         declaringType.NestedTypes.Add(type);

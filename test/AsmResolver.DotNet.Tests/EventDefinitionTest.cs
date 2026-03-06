@@ -52,7 +52,8 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location, TestReaderParameters);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleEvents));
             var @event = type.Events.First(m => m.Name == eventName);
-            Assert.Equal(expectedReturnType, @event.EventType.FullName);
+
+            Assert.Equal(expectedReturnType, @event.EventType?.FullName);
         }
 
         [Fact]
@@ -60,7 +61,9 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var @event = (EventDefinition) module.LookupMember(
-                typeof(SingleEvent).GetEvent(nameof(SingleEvent.SimpleEvent)).MetadataToken);
+                typeof(SingleEvent).GetEvent(nameof(SingleEvent.SimpleEvent))!.MetadataToken
+            );
+
             Assert.NotNull(@event.DeclaringType);
             Assert.Equal(nameof(SingleEvent), @event.DeclaringType.Name);
         }
@@ -70,7 +73,9 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var @event = (EventDefinition) module.LookupMember(
-                typeof(SingleEvent).GetEvent(nameof(SingleEvent.SimpleEvent)).MetadataToken);
+                typeof(SingleEvent).GetEvent(nameof(SingleEvent.SimpleEvent))!.MetadataToken
+            );
+
             Assert.Equal(2, @event.Semantics.Count);
             Assert.NotNull(@event.AddMethod);
             Assert.NotNull(@event.RemoveMethod);
@@ -81,7 +86,8 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location, TestReaderParameters);
             var @event = (EventDefinition) module.LookupMember(
-                typeof(SingleEvent).GetEvent(nameof(SingleEvent.SimpleEvent)).MetadataToken);
+                typeof(SingleEvent).GetEvent(nameof(SingleEvent.SimpleEvent))!.MetadataToken
+            );
 
             Assert.Equal("System.EventHandler AsmResolver.DotNet.TestCases.Events.SingleEvent::SimpleEvent", @event.FullName);
         }

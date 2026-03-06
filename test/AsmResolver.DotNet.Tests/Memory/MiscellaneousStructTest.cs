@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Tests.Memory
             var struct1 = (TypeDefinition) module.LookupMember(typeof(Struct1).MetadataToken);
             var struct2 = (TypeDefinition) module.LookupMember(typeof(Struct2).MetadataToken);
 
-            struct2.Fields[0].Signature.FieldType = struct1.ToTypeSignature();
+            struct2.Fields[0].Signature!.FieldType = struct1.ToTypeSignature();
 
             Assert.Throws<CyclicStructureException>(() => struct1.GetImpliedMemoryLayout(module.RuntimeContext, IntPtr.Size == 4));
         }
@@ -118,7 +118,7 @@ namespace AsmResolver.DotNet.Tests.Memory
 
             var paramType = module.CorLibTypeFactory.FromElementType(elementType)!;
             var t = module.LookupMember<TypeDefinition>(type.MetadataToken)
-                .MakeGenericInstanceType(module.RuntimeContext, paramType, paramType);
+                .MakeGenericInstanceType(module.RuntimeContext, [paramType, paramType]);
 
             var layout = t.GetImpliedMemoryLayout(module.RuntimeContext, false);
             Assert.Equal(expected, layout.IsReferenceOrContainsReferences);

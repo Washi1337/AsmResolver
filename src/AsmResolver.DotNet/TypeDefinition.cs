@@ -900,6 +900,9 @@ namespace AsmResolver.DotNet
         public ITypeDefOrRef ImportWith(ReferenceImporter importer) => importer.ImportType(this);
 
         /// <inheritdoc />
+        IMemberDescriptor IMemberDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <summary>
@@ -1070,7 +1073,7 @@ namespace AsmResolver.DotNet
         /// <returns>The constructor, or <c>null</c> if none is present.</returns>
         public MethodDefinition? GetConstructor()
         {
-            return GetConstructor(SignatureComparer.Default, (IList<TypeSignature>) ArrayShim.Empty<TypeSignature>());
+            return GetConstructor(SignatureComparer.Default, ArrayShim.Empty<TypeSignature>());
         }
 
         /// <summary>
@@ -1078,20 +1081,9 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="parameterTypes">An ordered list of types the parameters of the constructor should have.</param>
         /// <returns>The constructor, or <c>null</c> if none is present.</returns>
-        public MethodDefinition? GetConstructor(params TypeSignature[] parameterTypes)
+        public MethodDefinition? GetConstructor(IList<TypeSignature> parameterTypes)
         {
             return GetConstructor(SignatureComparer.Default, parameterTypes);
-        }
-
-        /// <summary>
-        /// Finds the instance constructor with the provided parameter types this type defines.
-        /// </summary>
-        /// <param name="comparer">The signature comparer to use when comparing the parameter types.</param>
-        /// <param name="parameterTypes">An ordered list of types the parameters of the constructor should have.</param>
-        /// <returns>The constructor, or <c>null</c> if none is present.</returns>
-        public MethodDefinition? GetConstructor(SignatureComparer comparer, params TypeSignature[] parameterTypes)
-        {
-            return GetConstructor(comparer, (IList<TypeSignature>) parameterTypes);
         }
 
         /// <summary>

@@ -77,7 +77,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var type = _module.CorLibTypeFactory.Object;
             string name = TypeNameBuilder.GetAssemblyQualifiedName(type);
             Assert.Contains(type.FullName, name);
-            Assert.Contains(type.Scope!.GetAssembly().FullName, name);
+            Assert.Contains(type.Scope!.GetAssembly()!.FullName, name);
         }
 
         [Fact]

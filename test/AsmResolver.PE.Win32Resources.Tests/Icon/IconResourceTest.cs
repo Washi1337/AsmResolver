@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.Win32Resources.Icon;
 using AsmResolver.Tests.Runners;
@@ -30,7 +31,8 @@ public class IconResourceTest : IClassFixture<TemporaryDirectoryFixture>
             iconResource = IconResource.FromDirectory(image.Resources!, IconType.Icon);
         }
 
-        return iconResource;
+        return iconResource
+            ?? throw new InvalidOperationException("Test icon resource was not found. This is an indication the unit test binaries are corrupt");
     }
 
     [Theory]

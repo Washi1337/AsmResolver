@@ -38,6 +38,14 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Creates a new instantiation signature for a generic method.
         /// </summary>
+        public GenericInstanceMethodSignature()
+            : this(CallingConventionAttributes.GenericInstance, Enumerable.Empty<TypeSignature>())
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instantiation signature for a generic method.
+        /// </summary>
         /// <param name="attributes">The attributes.</param>
         public GenericInstanceMethodSignature(CallingConventionAttributes attributes)
             : this(attributes, Enumerable.Empty<TypeSignature>())
@@ -58,16 +66,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Creates a new instantiation signature for a generic method with the provided type arguments.
         /// </summary>
-        /// <param name="typeArguments">The type arguments to use for the instantiation.</param>
-        public GenericInstanceMethodSignature(params TypeSignature[] typeArguments)
-            : this(CallingConventionAttributes.GenericInstance, typeArguments)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new instantiation signature for a generic method with the provided type arguments.
-        /// </summary>
-        /// <param name="typeArguments">The type arguments to use for the instantiation.</param>
+        /// <param name="typeArguments">The type arguments to instantiate the method with.</param>
         public GenericInstanceMethodSignature(IEnumerable<TypeSignature> typeArguments)
             : this(CallingConventionAttributes.GenericInstance, typeArguments)
         {
@@ -77,7 +76,7 @@ namespace AsmResolver.DotNet.Signatures
         /// Creates a new instantiation signature for a generic method with the provided type arguments.
         /// </summary>
         /// <param name="attributes">The attributes.</param>
-        /// <param name="typeArguments">The type arguments to use for the instantiation.</param>
+        /// <param name="typeArguments">The type arguments to instantiate the method with.</param>
         public GenericInstanceMethodSignature(CallingConventionAttributes attributes, IEnumerable<TypeSignature> typeArguments)
             : base(attributes | CallingConventionAttributes.GenericInstance)
         {

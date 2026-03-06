@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void OptimizeFirst4ArgumentsToMacros(int index, CilCode expectedMacro)
         {
             var instructions = CreateDummyMethod(false, 4, 0);
-            instructions.Add(CilOpCodes.Ldarg, instructions.Owner.Owner.Parameters[index]);
+            instructions.Add(CilOpCodes.Ldarg, instructions.Owner.Owner!.Parameters[index]);
             instructions.Add(CilOpCodes.Ret);
 
             instructions.OptimizeMacros();
@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void OptimizeHiddenThisToLdarg0()
         {
             var instructions = CreateDummyMethod(true, 0, 0);
-            instructions.Add(CilOpCodes.Ldarg, instructions.Owner.Owner.Parameters.ThisParameter!);
+            instructions.Add(CilOpCodes.Ldarg, instructions.Owner.Owner!.Parameters.ThisParameter!);
             instructions.Add(CilOpCodes.Ret);
 
             instructions.OptimizeMacros();
@@ -231,7 +231,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void OptimizeLoadArgInstructions(int index, CilCode expected)
         {
             var instructions = CreateDummyMethod(false, index + 1, 0);
-            var method = instructions.Owner.Owner;
+            var method = instructions.Owner.Owner!;
 
             instructions.Add(CilOpCodes.Ldarg, method.Parameters[index]);
             instructions.Add(CilOpCodes.Ret);
@@ -249,7 +249,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void OptimizeLoadArgAddressInstructions(int index, CilCode expected)
         {
             var instructions = CreateDummyMethod(false, index + 1, 0);
-            var method = instructions.Owner.Owner;
+            var method = instructions.Owner.Owner!;
 
             instructions.Add(CilOpCodes.Ldarga, method.Parameters[index]);
             instructions.Add(CilOpCodes.Ret);
@@ -266,7 +266,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void OptimizeStoreArgInstructions(int index, CilCode expected)
         {
             var instructions = CreateDummyMethod(false, index + 1, 0);
-            var method = instructions.Owner.Owner;
+            var method = instructions.Owner.Owner!;
 
             instructions.Add(CilOpCodes.Ldnull);
             instructions.Add(CilOpCodes.Starg, method.Parameters[index]);
@@ -384,12 +384,11 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
                 instructions[6],
             };
 
-            instructions.RemoveRange(new []
-            {
+            instructions.RemoveRange([
                 instructions[1],
                 instructions[3],
-                instructions[5],
-            });
+                instructions[5]
+            ]);
 
             Assert.Equal(expected, instructions);
         }
@@ -440,7 +439,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             instructions.Add(CilOpCodes.Calli, MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void).MakeStandAloneSignature());
 
             Assert.ThrowsAny<InvalidCilInstructionException>(() =>
-                instructions.Add(CilOpCodes.Calli, new DataBlobSignature(new byte[] { 1, 2, 3 }).MakeStandAloneSignature())
+                instructions.Add(CilOpCodes.Calli, new DataBlobSignature([1, 2, 3]).MakeStandAloneSignature())
             );
         }
     }

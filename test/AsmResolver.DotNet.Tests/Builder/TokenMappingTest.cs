@@ -23,6 +23,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             // Rebuild.
             var builder = new ManagedPEImageBuilder();
             var result = builder.CreateImage(module);
+            Assert.False(result.HasFailed);
 
             // Assert valid token.
             var newToken = result.TokenMapping[type];
@@ -50,6 +51,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             // Rebuild.
             var builder = new ManagedPEImageBuilder();
             var result = builder.CreateImage(module);
+            Assert.False(result.HasFailed);
 
             // Assert valid token.
             var newToken = result.TokenMapping[field];
@@ -75,10 +77,12 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             // Get existing main method.
             var main = module.ManagedEntryPointMethod;
+            Assert.NotNull(main);
 
             // Rebuild.
             var builder = new ManagedPEImageBuilder();
             var result = builder.CreateImage(module);
+            Assert.False(result.HasFailed);
 
             // Assert valid tokens for both methods.
             var methodToken = result.TokenMapping[method];
@@ -132,16 +136,17 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             // Import arbitrary method.
             var importer = new ReferenceImporter(module);
-            var reference = importer.ImportMethod(typeof(MemoryStream).GetConstructor(Type.EmptyTypes));
+            var reference = importer.ImportMethod(typeof(MemoryStream).GetConstructor(Type.EmptyTypes)!);
 
             // Ensure method reference is added to the module by referencing it in main.
-            var instructions = module.ManagedEntryPointMethod.CilMethodBody.Instructions;
+            var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
             instructions.Insert(0, CilOpCodes.Newobj, reference);
             instructions.Insert(1, CilOpCodes.Pop);
 
             // Rebuild.
             var builder = new ManagedPEImageBuilder();
             var result = builder.CreateImage(module);
+            Assert.False(result.HasFailed);
 
             // Assert valid token.
             var newToken = result.TokenMapping[reference];
@@ -163,13 +168,14 @@ namespace AsmResolver.DotNet.Tests.Builder
             var specification = importer.ImportType(typeof(List<object>));
 
             // Ensure method reference is added to the module by referencing it in main.
-            var instructions = module.ManagedEntryPointMethod.CilMethodBody.Instructions;
+            var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
             instructions.Insert(0, CilOpCodes.Ldtoken, specification);
             instructions.Insert(1, CilOpCodes.Pop);
 
             // Rebuild.
             var builder = new ManagedPEImageBuilder();
             var result = builder.CreateImage(module);
+            Assert.False(result.HasFailed);
 
             // Assert valid token.
             var newToken = result.TokenMapping[specification];
@@ -188,16 +194,17 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             // Import arbitrary generic method.
             var importer = new ReferenceImporter(module);
-            var reference = importer.ImportMethod(typeof(Array).GetMethod("Empty").MakeGenericMethod(typeof(object)));
+            var reference = importer.ImportMethod(typeof(Array).GetMethod("Empty")!.MakeGenericMethod(typeof(object)));
 
             // Ensure method reference is added to the module by referencing it in main.
-            var instructions = module.ManagedEntryPointMethod.CilMethodBody.Instructions;
+            var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
             instructions.Insert(0, CilOpCodes.Call, reference);
             instructions.Insert(1, CilOpCodes.Pop);
 
             // Rebuild.
             var builder = new ManagedPEImageBuilder();
             var result = builder.CreateImage(module);
+            Assert.False(result.HasFailed);
 
             // Assert valid token.
             var newToken = result.TokenMapping[reference];
@@ -220,13 +227,14 @@ namespace AsmResolver.DotNet.Tests.Builder
                 importer.ImportMethodSignature(MethodSignature.CreateStatic(module.CorLibTypeFactory.Void)));
 
             // Ensure reference is added to the module by referencing it in main.
-            var instructions = module.ManagedEntryPointMethod.CilMethodBody.Instructions;
+            var instructions = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions;
             instructions.Insert(0, CilOpCodes.Ldnull);
             instructions.Insert(0, CilOpCodes.Calli, signature);
 
             // Rebuild.
             var builder = new ManagedPEImageBuilder();
             var result = builder.CreateImage(module);
+            Assert.False(result.HasFailed);
 
             // Assert valid token.
             var newToken = result.TokenMapping[signature];
@@ -235,8 +243,11 @@ namespace AsmResolver.DotNet.Tests.Builder
             // Assert token resolves to the same method reference.
             var newModule = ModuleDefinition.FromImage(result.ConstructedImage, TestReaderParameters);
             var newSignature = (StandAloneSignature) newModule.LookupMember(newToken);
-            Assert.Equal((CallingConventionSignature) signature.Signature,
-                newSignature.Signature as CallingConventionSignature, new SignatureComparer());
+            Assert.Equal(
+                (CallingConventionSignature) signature.Signature!,
+                Assert.IsType<CallingConventionSignature>(newSignature.Signature, exactMatch: false),
+                SignatureComparer.Default
+            );
         }
     }
 }

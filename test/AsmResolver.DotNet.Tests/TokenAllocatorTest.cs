@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Code.Cil;
@@ -35,7 +34,7 @@ namespace AsmResolver.DotNet.Tests
         public void GetNextAvailableTokenShouldReturnTableSize(TableIndex index)
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
-            var tableStream = module.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tableStream = module.DotNetDirectory!.Metadata!.GetStream<TablesStream>();
             var table = tableStream.GetTable(index);
             var count = (uint)table.Count;
 
@@ -126,14 +125,15 @@ namespace AsmResolver.DotNet.Tests
                 "test",
                 MethodAttributes.Public | MethodAttributes.Static,
                 MethodSignature.CreateStatic(targetModule.CorLibTypeFactory.Boolean)
-            );
-
-            method.CilMethodBody = new CilMethodBody
+            )
             {
-                Instructions =
+                CilMethodBody = new CilMethodBody
                 {
-                    {CilOpCodes.Ldc_I4, 0},
-                    CilOpCodes.Ret
+                    Instructions =
+                    {
+                        {CilOpCodes.Ldc_I4, 0},
+                        CilOpCodes.Ret
+                    }
                 }
             };
 

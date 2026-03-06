@@ -23,6 +23,11 @@ You can also explicitly create a new (empty) runtime context, targeting a specif
 var context = new RuntimeContext(DotNetRuntimeInfo.NetCoreApp(3, 1));
 ```
 ```csharp
+// Create based on the original target runtime of an existing assembly.
+var assembly = AssemblyDefinition.FromFile(@"C:\Path\To\File.exe", createRuntimeContext: false);
+var context = new RuntimeContext(assembly.ManifestModule.OriginalTargetRuntime);
+```
+```csharp
 // Create based on the contents of a runtime config JSON file.
 var config = RuntimeConfiguration.FromFile(@"C:\Path\To\File.runtimeconfig.json");
 var context = new RuntimeContext(config);
@@ -42,6 +47,7 @@ var context = new RuntimeContext(baseImage);
 BundleManifest bundle = ...
 var context = new RuntimeContext(bundle);
 ```
+
 
 A `RuntimeContext` can also be configured with a custom assembly resolver (e.g., for cases where assemblies are embedded in a module or located at unconventional file paths):
 ```csharp

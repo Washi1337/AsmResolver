@@ -27,7 +27,9 @@ namespace AsmResolver.DotNet.Tests
             var resource = module.Resources.First(r =>
                 r.Name == "AsmResolver.DotNet.TestCases.Resources.Resources.EmbeddedResource1");
 
-            Assert.Equal(TestCaseResources.GetEmbeddedResource1Data(), Encoding.ASCII.GetString(resource.GetData()));
+            byte[]? bytes = resource.GetData();
+            Assert.NotNull(bytes);
+            Assert.Equal(TestCaseResources.GetEmbeddedResource1Data(), Encoding.ASCII.GetString(bytes));
         }
 
         [Fact]
@@ -37,7 +39,9 @@ namespace AsmResolver.DotNet.Tests
             var resource = module.Resources.First(r =>
                 r.Name == "AsmResolver.DotNet.TestCases.Resources.Resources.EmbeddedResource2");
 
-            Assert.Equal(TestCaseResources.GetEmbeddedResource2Data(), Encoding.ASCII.GetString(resource.GetData()));
+            byte[]? bytes = resource.GetData();
+            Assert.NotNull(bytes);
+            Assert.Equal(TestCaseResources.GetEmbeddedResource2Data(), Encoding.ASCII.GetString(bytes));
         }
 
         [Fact]
@@ -90,17 +94,17 @@ namespace AsmResolver.DotNet.Tests
             module.Resources.Add(new ManifestResource(
                 "resource1",
                 ManifestResourceAttributes.Public,
-                new DataSegment(new byte[] {1, 2, 3, 4}))
+                new DataSegment([1, 2, 3, 4]))
             );
             module.Resources.Add(new ManifestResource(
                 "resource2",
                 ManifestResourceAttributes.Public,
-                new DataSegment(new byte[] {5, 6, 7, 8}))
+                new DataSegment([5, 6, 7, 8]))
             );
             module.Resources.Add(new ManifestResource(
                 "resource3",
                 ManifestResourceAttributes.Public,
-                new DataSegment(new byte[] {9, 10, 11, 12}))
+                new DataSegment([9, 10, 11, 12]))
             );
 
             // Verify program returns correct data.
@@ -126,17 +130,17 @@ namespace AsmResolver.DotNet.Tests
             module.Resources.Add(new ManifestResource(
                 "resource1",
                 ManifestResourceAttributes.Public,
-                new DataSegment(new byte[] {1, 2, 3, 4}))
+                new DataSegment([1, 2, 3, 4]))
             );
             module.Resources.Add(new ManifestResource(
                 "resource2",
                 ManifestResourceAttributes.Public,
-                new DataSegment(new byte[] {1, 2, 3, 4}))
+                new DataSegment([1, 2, 3, 4]))
             );
             module.Resources.Add(new ManifestResource(
                 "resource3",
                 ManifestResourceAttributes.Public,
-                new DataSegment(new byte[] {9, 10, 11, 12}))
+                new DataSegment([9, 10, 11, 12]))
             );
 
             // Build image.

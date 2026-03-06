@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Memory;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
@@ -20,7 +18,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         [InlineData(ElementType.I8, sizeof(long))]
         public void ValueTypedCorLibTypeShouldReturnElementSize(ElementType elementType, uint expectedSize)
         {
-            var type = Module.CorLibTypeFactory.FromElementType(elementType);
+            var type = Module.CorLibTypeFactory.FromElementType(elementType)!;
             var layout = type.GetImpliedMemoryLayout(Module.RuntimeContext, false);
             Assert.Equal(expectedSize, layout.Size);
         }
@@ -32,7 +30,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         [InlineData(ElementType.U)]
         public void ReferenceTypedCorLibTypeShouldReturnElementSize(ElementType elementType)
         {
-            var type = Module.CorLibTypeFactory.FromElementType(elementType);
+            var type = Module.CorLibTypeFactory.FromElementType(elementType)!;
             var layout32 = type.GetImpliedMemoryLayout(Module.RuntimeContext, true);
             Assert.Equal(4u, layout32.Size);
             var layout64 = type.GetImpliedMemoryLayout(Module.RuntimeContext, false);

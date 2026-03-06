@@ -49,24 +49,26 @@ namespace AsmResolver.DotNet.Tests.Signatures
         public void GetFunctionPointerTypeFullName()
         {
             var module = new ModuleDefinition("Dummy");
-            Assert.Equal("method System.String *(System.Object, System.Int32)",
+            Assert.Equal(
+                "method System.String *(System.Object, System.Int32)",
                 MethodSignature.CreateStatic(
-                        module.CorLibTypeFactory.String,
-                        module.CorLibTypeFactory.Object,
-                        module.CorLibTypeFactory.Int32)
-                    .MakeFunctionPointerType().FullName);
+                    module.CorLibTypeFactory.String,
+                    [module.CorLibTypeFactory.Object, module.CorLibTypeFactory.Int32]
+                ).MakeFunctionPointerType().FullName
+            );
         }
 
         [Fact]
         public void GetInstanceFunctionPointerTypeFullName()
         {
             var module = new ModuleDefinition("Dummy");
-            Assert.Equal("method instance System.String *(System.Object, System.Int32)",
+            Assert.Equal(
+                "method instance System.String *(System.Object, System.Int32)",
                 MethodSignature.CreateInstance(
-                        module.CorLibTypeFactory.String,
-                        module.CorLibTypeFactory.Object,
-                        module.CorLibTypeFactory.Int32)
-                    .MakeFunctionPointerType().FullName);
+                    module.CorLibTypeFactory.String,
+                    [module.CorLibTypeFactory.Object, module.CorLibTypeFactory.Int32]
+                ).MakeFunctionPointerType().FullName
+            );
         }
 
         [Fact]
@@ -75,8 +77,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var module = new ModuleDefinition("Dummy");
             var genericInstance = _dummyType.MakeGenericInstanceType(
                 isValueType: false,
-                module.CorLibTypeFactory.Int32,
-                _dummyType.MakeGenericInstanceType(isValueType: false, module.CorLibTypeFactory.Object)
+                typeArguments:
+                [
+                    module.CorLibTypeFactory.Int32,
+                    _dummyType.MakeGenericInstanceType(isValueType: false, [module.CorLibTypeFactory.Object])
+                ]
             );
 
             Assert.Equal("Type<System.Int32, Namespace.Type<System.Object>>", genericInstance.Name);
@@ -325,9 +330,12 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 .LookupMember<TypeDefinition>(typeof(GenericType<,,>).MetadataToken)
                 .MakeGenericInstanceType(
                     isValueType: false,
-                    module.CorLibTypeFactory.Int32,
-                    module.CorLibTypeFactory.String,
-                    module.CorLibTypeFactory.Object
+                    typeArguments:
+                    [
+                        module.CorLibTypeFactory.Int32,
+                        module.CorLibTypeFactory.String,
+                        module.CorLibTypeFactory.Object
+                    ]
                 );
 
             Assert.Equal("System.Object", genericInstanceType.GetDirectBaseClass(module.RuntimeContext)!.FullName);
@@ -340,8 +348,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var genericInstanceType = module.LookupMember<TypeDefinition>(typeof(GenericDerivedType<,>).MetadataToken)
                 .MakeGenericInstanceType(
                     isValueType: false,
-                    module.CorLibTypeFactory.Int32,
-                    module.CorLibTypeFactory.Object
+                    typeArguments:
+                    [
+                        module.CorLibTypeFactory.Int32,
+                        module.CorLibTypeFactory.Object
+                    ]
                 );
 
             var baseClass = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(
@@ -349,12 +360,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             Assert.Equal(typeof(GenericType<,,>).Namespace, baseClass.GenericType.Namespace);
             Assert.Equal(typeof(GenericType<,,>).Name, baseClass.GenericType.Name);
-            Assert.Equal(new[]
-            {
+            Assert.Equal([
                 "System.Int32",
                 "System.Object",
                 "System.String"
-            }, baseClass.TypeArguments.Select(t => t.FullName));
+            ], baseClass.TypeArguments.Select(t => t.FullName));
         }
 
         [Theory]
@@ -484,7 +494,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var type1 = module.CorLibTypeFactory.FromElementType(elementType1)!.MakeSzArrayType();
             var type2 = module.CorLibTypeFactory.CorLibScope
                 .CreateTypeReference("System.Collections.Generic", "IList`1")
-                .MakeGenericInstanceType(isValueType: false, module.CorLibTypeFactory.FromElementType(elementType2)!);
+                .MakeGenericInstanceType(isValueType: false, [module.CorLibTypeFactory.FromElementType(elementType2)!]);
 
             Assert.Equal(expected, type1.IsCompatibleWith(type2, module.RuntimeContext));
         }
@@ -498,9 +508,12 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 .LookupMember<TypeDefinition>(typeof(GenericType<,,>).MetadataToken)
                 .MakeGenericInstanceType(
                     isValueType: false,
-                    module.CorLibTypeFactory.Int32,
-                    module.CorLibTypeFactory.Object,
-                    module.CorLibTypeFactory.String
+                    typeArguments:
+                    [
+                        module.CorLibTypeFactory.Int32,
+                        module.CorLibTypeFactory.Object,
+                        module.CorLibTypeFactory.String
+                    ]
                 );
 
             Assert.True(type1.IsCompatibleWith(type1, module.RuntimeContext));
@@ -516,26 +529,35 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 .LookupMember<TypeDefinition>(typeof(GenericDerivedType<,>).MetadataToken)
                 .MakeGenericInstanceType(
                     isValueType: false,
-                    module.CorLibTypeFactory.Int32,
-                    module.CorLibTypeFactory.Object
+                    typeArguments:
+                    [
+                        module.CorLibTypeFactory.Int32,
+                        module.CorLibTypeFactory.Object
+                    ]
                 );
 
             var type2 = module
                 .LookupMember<TypeDefinition>(typeof(GenericType<,,>).MetadataToken)
                 .MakeGenericInstanceType(
                     isValueType: false,
-                    module.CorLibTypeFactory.Int32,
-                    module.CorLibTypeFactory.Object,
-                    module.CorLibTypeFactory.String
+                    typeArguments:
+                    [
+                        module.CorLibTypeFactory.Int32,
+                        module.CorLibTypeFactory.Object,
+                        module.CorLibTypeFactory.String
+                    ]
                 );
 
             var type3 = module
                 .LookupMember<TypeDefinition>(typeof(GenericType<,,>).MetadataToken)
                 .MakeGenericInstanceType(
                     isValueType: false,
-                    module.CorLibTypeFactory.Object,
-                    module.CorLibTypeFactory.Int32,
-                    module.CorLibTypeFactory.String
+                    typeArguments:
+                    [
+                        module.CorLibTypeFactory.Object,
+                        module.CorLibTypeFactory.Int32,
+                        module.CorLibTypeFactory.String
+                    ]
                 );
 
             Assert.True(type1.IsCompatibleWith(type2, module.RuntimeContext));
@@ -581,6 +603,35 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
+        public void IsAssignableToForwardedType()
+        {
+            var context = new RuntimeContext(DotNetRuntimeInfo.NetCoreApp(10, 0));
+
+            var srIOException = KnownCorLibs.SystemRuntime_v10_0_0_0
+                .CreateTypeReference("System.IO", "IOException")
+                .ToTypeSignature(isValueType: false);
+
+            var srFileNotFound = KnownCorLibs.SystemRuntime_v10_0_0_0
+                .CreateTypeReference("System.IO", "FileNotFoundException")
+                .ToTypeSignature(isValueType: false);
+
+            var spcIOException = KnownCorLibs.SystemPrivateCoreLib_v10_0_0_0
+                .CreateTypeReference("System.IO", "IOException")
+                .ToTypeSignature(isValueType: false);
+
+            var spcFileNotFound = KnownCorLibs.SystemPrivateCoreLib_v10_0_0_0
+                .CreateTypeReference("System.IO", "FileNotFoundException")
+                .ToTypeSignature(isValueType: false);
+
+            Assert.True(spcIOException.IsAssignableTo(srIOException, context));
+            Assert.True(srIOException.IsAssignableTo(spcIOException, context));
+            Assert.True(spcFileNotFound.IsAssignableTo(srIOException, context));
+            Assert.True(spcFileNotFound.IsAssignableTo(spcIOException, context));
+            Assert.True(srFileNotFound.IsAssignableTo(srIOException, context));
+            Assert.True(srFileNotFound.IsAssignableTo(spcIOException, context));
+        }
+
+        [Fact]
         public void IgnoreCustomModifiers()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
@@ -610,8 +661,8 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 .CreateTypeReference("System.Collections.Generic", "List`1")
                 .ImportWith(module.DefaultImporter);
 
-            var genericType1 = genericType.MakeGenericInstanceType(isValueType: false, type1);
-            var genericType2 = genericType.MakeGenericInstanceType(isValueType: false, type2);
+            var genericType1 = genericType.MakeGenericInstanceType(isValueType: false, [type1]);
+            var genericType2 = genericType.MakeGenericInstanceType(isValueType: false, [type2]);
 
             Assert.True(genericType1.IsCompatibleWith(genericType2, module.RuntimeContext));
             Assert.True(genericType2.IsCompatibleWith(genericType1, module.RuntimeContext));

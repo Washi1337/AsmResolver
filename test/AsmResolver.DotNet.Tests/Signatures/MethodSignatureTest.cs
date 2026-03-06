@@ -68,7 +68,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void MakeGenericInstanceShouldHaveHasThisAndGenericFlagSet()
         {
-            var signature = MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void, 1);
+            var signature = MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void, 1, []);
             Assert.True(signature.HasThis);
             Assert.True(signature.IsGeneric);
         }
@@ -76,7 +76,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void MakeGenericStaticShouldNotHaveHasThisAndGenericFlagSet()
         {
-            var signature = MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void, 1);
+            var signature = MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void, 1, []);
             Assert.False(signature.HasThis);
             Assert.True(signature.IsGeneric);
         }

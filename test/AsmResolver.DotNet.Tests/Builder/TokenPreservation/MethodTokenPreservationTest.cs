@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
             for (ushort i = 1; i <= parameterCount; i++)
             {
-                method.Signature.ParameterTypes.Add(module.CorLibTypeFactory.Object);
+                method.Signature!.ParameterTypes.Add(module.CorLibTypeFactory.Object);
                 method.ParameterDefinitions.Add(new ParameterDefinition(i, $"{name}Arg{i}", 0));
             }
 
@@ -121,7 +121,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
             var type = module.TopLevelTypes[2];
             var method = CreateDummyMethod(module, "ExtraMethod");
-            method.Signature.ParameterTypes.Add(module.CorLibTypeFactory.Int32);
+            method.Signature!.ParameterTypes.Add(module.CorLibTypeFactory.Int32);
             type.Methods.Insert(3, method);
 
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveMethodDefinitionIndices);

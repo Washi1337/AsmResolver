@@ -9,8 +9,6 @@ namespace AsmResolver.DotNet.Tests
 {
     public class MethodSpecificationTest
     {
-        private readonly SignatureComparer _comparer = new();
-
         [Fact]
         public void ReadMethod()
         {
@@ -19,9 +17,8 @@ namespace AsmResolver.DotNet.Tests
                 .GetMethod(nameof(GenericsTestClass.MethodInstantiationFromGenericType))!.MetadataToken);
 
             var call = method.CilMethodBody!.Instructions.First(i => i.OpCode.Code == CilCode.Call);
-            Assert.IsAssignableFrom<MethodSpecification>(call.Operand);
 
-            var specification = (MethodSpecification) call.Operand;
+            var specification = Assert.IsType<MethodSpecification>(call.Operand, exactMatch: false);
             Assert.Equal("GenericMethodInGenericType", specification.Method!.Name);
         }
 
@@ -33,15 +30,16 @@ namespace AsmResolver.DotNet.Tests
                 .GetMethod(nameof(GenericsTestClass.MethodInstantiationFromGenericType))!.MetadataToken);
 
             var call = method.CilMethodBody!.Instructions.First(i => i.OpCode.Code == CilCode.Call);
-            Assert.IsAssignableFrom<MethodSpecification>(call.Operand);
 
-            var specification = (MethodSpecification) call.Operand;
+            var specification = Assert.IsType<MethodSpecification>(call.Operand, exactMatch: false);
             Assert.Equal(
                 "System.Void AsmResolver.DotNet.TestCases.Generics.GenericType`3<System.Byte, System.UInt16, System.UInt32>::GenericMethodInGenericType<System.SByte, System.Int16, System.Int32>()",
-                specification.FullName);
+                specification.FullName
+            );
             Assert.Equal(
                 "System.Void AsmResolver.DotNet.TestCases.Generics.GenericType`3<System.Byte, System.UInt16, System.UInt32>::GenericMethodInGenericType<?, ?, ?>()",
-                specification.Method!.FullName);
+                specification.Method!.FullName
+            );
         }
 
         [Fact]
@@ -52,16 +50,17 @@ namespace AsmResolver.DotNet.Tests
                 .GetMethod(nameof(GenericsTestClass.MethodInstantiationFromGenericType))!.MetadataToken);
 
             var call = method.CilMethodBody!.Instructions.First(i => i.OpCode.Code == CilCode.Call);
-            Assert.IsAssignableFrom<MethodSpecification>(call.Operand);
 
-            var specification = (MethodSpecification) call.Operand;
+            var specification = Assert.IsType<MethodSpecification>(call.Operand, exactMatch: false);
             Assert.Equal(
-                new GenericInstanceMethodSignature(
+                new GenericInstanceMethodSignature([
                     module.CorLibTypeFactory.SByte,
                     module.CorLibTypeFactory.Int16,
-                    module.CorLibTypeFactory.Int32),
+                    module.CorLibTypeFactory.Int32
+                ]),
                 specification.Signature,
-                _comparer);
+                SignatureComparer.Default!
+            );
         }
 
         [Fact]
@@ -71,18 +70,21 @@ namespace AsmResolver.DotNet.Tests
             var method = (MethodDefinition) module.LookupMember(typeof(NonGenericType)
                 .GetMethod(nameof(NonGenericType.GenericMethodInNonGenericType))!.MetadataToken);
 
-            var specification = method.MakeGenericInstanceMethod(
+            var specification = method.MakeGenericInstanceMethod([
                 module.CorLibTypeFactory.SByte,
                 module.CorLibTypeFactory.Int16,
-                module.CorLibTypeFactory.Int32);
+                module.CorLibTypeFactory.Int32
+            ]);
 
             Assert.Equal(
-                new GenericInstanceMethodSignature(
+                new GenericInstanceMethodSignature([
                     module.CorLibTypeFactory.SByte,
                     module.CorLibTypeFactory.Int16,
-                    module.CorLibTypeFactory.Int32),
+                    module.CorLibTypeFactory.Int32
+                ]),
                 specification.Signature,
-                _comparer);
+                SignatureComparer.Default!
+            );
         }
 
         [Fact]
@@ -92,9 +94,10 @@ namespace AsmResolver.DotNet.Tests
             var method = (MethodDefinition) module.LookupMember(typeof(NonGenericType)
                 .GetMethod(nameof(NonGenericType.GenericMethodInNonGenericType))!.MetadataToken);
 
-            Assert.Throws<ArgumentException>(() => method.MakeGenericInstanceMethod(
+            Assert.Throws<ArgumentException>(() => method.MakeGenericInstanceMethod([
                 module.CorLibTypeFactory.SByte,
-                module.CorLibTypeFactory.Int16));
+                module.CorLibTypeFactory.Int16
+            ]));
         }
 
         [Fact]
@@ -104,10 +107,11 @@ namespace AsmResolver.DotNet.Tests
             var method = (MethodDefinition) module.LookupMember(typeof(NonGenericType)
                 .GetMethod(nameof(NonGenericType.NonGenericMethodInNonGenericType))!.MetadataToken);
 
-            Assert.Throws<ArgumentException>(() => method.MakeGenericInstanceMethod(
+            Assert.Throws<ArgumentException>(() => method.MakeGenericInstanceMethod([
                 module.CorLibTypeFactory.SByte,
                 module.CorLibTypeFactory.Int16,
-                module.CorLibTypeFactory.Int32));
+                module.CorLibTypeFactory.Int32
+            ]));
         }
     }
 }

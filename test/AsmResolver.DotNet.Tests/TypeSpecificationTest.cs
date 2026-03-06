@@ -1,6 +1,5 @@
 using System.IO;
 using System.Linq;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Generics;
@@ -19,15 +18,15 @@ namespace AsmResolver.DotNet.Tests
             var fieldType = module
                 .TopLevelTypes.First(t => t.Name == nameof(GenericsTestClass))
                 .Fields.First(f => f.Name == nameof(GenericsTestClass.GenericField))
-                .Signature.FieldType;
+                .Signature!.FieldType;
 
             Assert.IsAssignableFrom<GenericInstanceTypeSignature>(fieldType);
             var genericType = (GenericInstanceTypeSignature) fieldType;
             Assert.Equal("GenericType`3", genericType.GenericType.Name);
-            Assert.Equal(new[]
-            {
-                "System.String", "System.Int32", "System.Object"
-            }, genericType.TypeArguments.Select(a => a.FullName));
+            Assert.Equal(
+                ["System.String", "System.Int32", "System.Object"],
+                genericType.TypeArguments.Select(a => a.FullName)
+            );
         }
 
         [Fact]
@@ -40,17 +39,17 @@ namespace AsmResolver.DotNet.Tests
 
             module = ModuleDefinition.FromBytes(tempStream.ToArray(), TestReaderParameters);
             var fieldType = module
-                .TopLevelTypes.First(t => t.Name == nameof(GenericsTestClass))!
-                .Fields.First(f => f.Name == nameof(GenericsTestClass.GenericField))!
+                .TopLevelTypes.First(t => t.Name == nameof(GenericsTestClass))
+                .Fields.First(f => f.Name == nameof(GenericsTestClass.GenericField))
                 .Signature!.FieldType;
 
             Assert.IsAssignableFrom<GenericInstanceTypeSignature>(fieldType);
             var genericType = (GenericInstanceTypeSignature) fieldType;
             Assert.Equal("GenericType`3", genericType.GenericType.Name);
-            Assert.Equal(new[]
-            {
-                "System.String", "System.Int32", "System.Object"
-            }, genericType.TypeArguments.Select(a => a.FullName));
+            Assert.Equal(
+                ["System.String", "System.Int32", "System.Object"],
+                genericType.TypeArguments.Select(a => a.FullName)
+            );
         }
 
         [Fact]

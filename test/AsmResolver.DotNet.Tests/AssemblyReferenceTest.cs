@@ -99,7 +99,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var genericType = module.CorLibTypeFactory.CorLibScope
                 .CreateTypeReference("System.Collections.Generic", "List`1")
-                .MakeGenericInstanceType(isValueType: false, module.CorLibTypeFactory.Int32);
+                .MakeGenericInstanceType(isValueType: false, [module.CorLibTypeFactory.Int32]);
             Assert.False(genericType.IsValueType);
         }
 
@@ -109,7 +109,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
             var genericType = module.CorLibTypeFactory.CorLibScope
                 .CreateTypeReference("System", "Nullable`1")
-                .MakeGenericInstanceType(isValueType: true, module.CorLibTypeFactory.Int32);
+                .MakeGenericInstanceType(isValueType: true, [module.CorLibTypeFactory.Int32]);
             Assert.True(genericType.IsValueType);
         }
 
@@ -142,7 +142,7 @@ namespace AsmResolver.DotNet.Tests
             var newModule =  ModuleDefinition.FromBytes(stream.ToArray());
             var newReference = Assert.Single(newModule.AssemblyReferences, x => x.Name == "Foo");
             var newAttribute = Assert.Single(newReference.CustomAttributes);
-            Assert.Equal(ctor, newAttribute.Constructor, SignatureComparer.Default);
+            Assert.Equal(ctor, newAttribute.Constructor, SignatureComparer.Default!);
         }
 
         [Fact]

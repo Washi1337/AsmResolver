@@ -395,6 +395,9 @@ namespace AsmResolver.DotNet
         public IFieldDescriptor ImportWith(ReferenceImporter importer) => importer.ImportField(this);
 
         /// <inheritdoc />
+        IMemberDescriptor IMemberDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
+
+        /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <inheritdoc />

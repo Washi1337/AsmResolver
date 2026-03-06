@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Memory
     /// </summary>
     public class TypeMemoryLayoutDetector : ITypeSignatureVisitor<TypeMemoryLayout>
     {
-        private readonly RuntimeContext _runtimeContext;
+        private readonly RuntimeContext? _runtimeContext;
         private readonly Stack<TypeDefinition> _traversedTypes = new();
         private readonly MemoryLayoutAttributes _defaultAttributes;
         private GenericContext _currentGenericContext;
@@ -21,10 +21,9 @@ namespace AsmResolver.DotNet.Memory
         /// </summary>
         /// <param name="runtimeContext">The runtime to assume when determining the layout.</param>
         /// <param name="is32Bit">Determines whether memory addresses are 32 bit or 64 bit wide.</param>
-        public TypeMemoryLayoutDetector(RuntimeContext runtimeContext, bool is32Bit)
+        public TypeMemoryLayoutDetector(RuntimeContext? runtimeContext, bool is32Bit)
             : this(runtimeContext, new GenericContext(), is32Bit)
         {
-            _runtimeContext = runtimeContext;
         }
 
         /// <summary>
@@ -33,7 +32,7 @@ namespace AsmResolver.DotNet.Memory
         /// <param name="runtimeContext">The runtime to assume when determining the layout.</param>
         /// <param name="currentGenericContext">The current generic context to use.</param>
         /// <param name="is32Bit">Determines whether memory addresses are 32 bit or 64 bit wide.</param>
-        public TypeMemoryLayoutDetector(RuntimeContext runtimeContext, GenericContext currentGenericContext, bool is32Bit)
+        public TypeMemoryLayoutDetector(RuntimeContext? runtimeContext, GenericContext currentGenericContext, bool is32Bit)
         {
             _runtimeContext = runtimeContext;
             _currentGenericContext = currentGenericContext;

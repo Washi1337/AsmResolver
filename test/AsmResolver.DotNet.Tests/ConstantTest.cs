@@ -18,7 +18,8 @@ namespace AsmResolver.DotNet.Tests
         private static Constant GetFieldConstantInModule(ModuleDefinition module, string name)
         {
             var t = module.TopLevelTypes.First(t => t.Name == nameof(Constants));
-            return t.Fields.First(f => f.Name == name).Constant;
+            return t.Fields.First(f => f.Name == name).Constant
+                ?? throw new ArgumentException($"Field {name} does not have a constant assigned.");
         }
 
         private Constant RebuildAndLookup(ModuleDefinition module, string name)
@@ -45,7 +46,7 @@ namespace AsmResolver.DotNet.Tests
         [InlineData(nameof(Constants.Char), Constants.Char)]
         [InlineData(nameof(Constants.String), Constants.String)]
         [InlineData(nameof(Constants.NullString), Constants.NullString)]
-        public void ReadAndInterpretData(string name, object expected)
+        public void ReadAndInterpretData(string name, object? expected)
         {
             var constant = GetFieldConstant(name);
             Assert.Equal(expected, constant.InterpretData());
@@ -69,9 +70,9 @@ namespace AsmResolver.DotNet.Tests
         public void PersistentConstants(string name)
         {
             var constant = GetFieldConstant(name);
-            var newConstant = RebuildAndLookup(constant.Parent!.DeclaringModule, name);
+            var newConstant = RebuildAndLookup(constant.Parent!.DeclaringModule!, name);
             Assert.NotNull(newConstant);
-            Assert.Equal(constant.Value.Data, newConstant.Value.Data);
+            Assert.Equal(constant.Value!.Data, newConstant.Value?.Data);
         }
 
         [Fact]
@@ -81,7 +82,8 @@ namespace AsmResolver.DotNet.Tests
             var constantValue = module
                 .TopLevelTypes.First(t => t.Name == "MyClass")
                 .Fields.First(f => f.Name == "MyIntegerConstant")
-                .Constant.Value;
+                .Constant!.Value;
+
             Assert.Null(constantValue);
         }
 
@@ -98,7 +100,8 @@ namespace AsmResolver.DotNet.Tests
             var constantValue = newModule
                 .TopLevelTypes.First(t => t.Name == "MyClass")
                 .Fields.First(f => f.Name == "MyIntegerConstant")
-                .Constant.Value;
+                .Constant!.Value;
+
             Assert.Null(constantValue);
         }
 
@@ -121,9 +124,9 @@ namespace AsmResolver.DotNet.Tests
         public void DefaultConstantHasDataEqualToZero(ElementType elementType)
         {
             ModuleDefinition module = new("Module");
-            var type = module.CorLibTypeFactory.FromElementType(elementType);
-            var constant = Constant.FromDefault(type);
-            object value = constant.InterpretData();
+            var type = module.CorLibTypeFactory.FromElementType(elementType)!;
+            object? value = Constant.FromDefault(type).InterpretData();
+
             if (elementType is ElementType.String)
             {
                 Assert.Null(value);

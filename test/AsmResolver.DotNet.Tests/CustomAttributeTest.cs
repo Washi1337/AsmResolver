@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Properties;
@@ -14,8 +13,6 @@ namespace AsmResolver.DotNet.Tests
 {
     public class CustomAttributeTest
     {
-        private readonly SignatureComparer _comparer = new();
-
         [Fact]
         public void HasAttributes()
         {
@@ -253,7 +250,9 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature.FixedArguments[0];
             Assert.Equal(
                 attribute.Constructor!.ContextModule!.CorLibTypeFactory.String,
-                argument.Element as TypeSignature, _comparer);
+                Assert.IsType<TypeSignature>( argument.Element as TypeSignature, exactMatch: false),
+                SignatureComparer.Default
+            );
         }
 
         [Theory]
@@ -273,11 +272,14 @@ namespace AsmResolver.DotNet.Tests
                 .CreateTypeReference("System.Collections.Generic", "KeyValuePair`2")
                 .MakeGenericInstanceType(
                     true,
-                    factory.String.MakeSzArrayType(),
-                    factory.Int32.MakeSzArrayType()
+                    [factory.String.MakeSzArrayType(), factory.Int32.MakeSzArrayType()]
                 );
 
-            Assert.Equal(instance, argument.Element as TypeSignature, _comparer);
+            Assert.Equal(
+                instance,
+                Assert.IsType<TypeSignature>(argument.Element, exactMatch: false),
+                SignatureComparer.Default
+            );
         }
 
         [Theory]
@@ -294,10 +296,10 @@ namespace AsmResolver.DotNet.Tests
             var expected = factory.CorLibScope
                 .CreateTypeReference("System.Collections.Generic", "List`1")
                 .CreateTypeReference("Enumerator")
-                .MakeGenericInstanceType(true, factory.Int32);
+                .MakeGenericInstanceType(true, [factory.Int32]);
 
-            var type = Assert.IsAssignableFrom<GenericInstanceTypeSignature>(argument.Element);
-            Assert.Equal(expected, type, _comparer);
+            var type = Assert.IsType<GenericInstanceTypeSignature>(argument.Element, exactMatch: false);
+            Assert.Equal(expected, type, SignatureComparer.Default);
         }
 
         [Theory]
@@ -376,7 +378,8 @@ namespace AsmResolver.DotNet.Tests
 
             var argument = attribute.Signature.NamedArguments[0];
             Assert.Equal(nameof(TestCaseAttribute.TypeValue), argument.MemberName);
-            Assert.Equal(expected, (ITypeDescriptor) argument.Argument.Element, _comparer);
+            var type = Assert.IsType<ITypeDescriptor>(argument.Argument.Element, exactMatch: false);
+            Assert.Equal(expected, type, SignatureComparer.Default);
         }
 
         [Theory]
@@ -418,10 +421,10 @@ namespace AsmResolver.DotNet.Tests
 
             var module = attribute.Constructor!.ContextModule!;
             var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
-            var expected = nestedClass.MakeGenericInstanceType(false, module.CorLibTypeFactory.Object);
+            var expected = nestedClass.MakeGenericInstanceType(false, [module.CorLibTypeFactory.Object]);
 
-            var element = Assert.IsAssignableFrom<TypeSignature>(argument.Element);
-            Assert.Equal(expected, element, _comparer);
+            var element = Assert.IsType<TypeSignature>(argument.Element, exactMatch: false);
+            Assert.Equal(expected, element, SignatureComparer.Default);
         }
 
         [Theory]
@@ -438,11 +441,11 @@ namespace AsmResolver.DotNet.Tests
             var module = attribute.Constructor!.ContextModule!;
             var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
             var expected = nestedClass
-                .MakeGenericInstanceType(false, module.CorLibTypeFactory.Object)
+                .MakeGenericInstanceType(false, [module.CorLibTypeFactory.Object])
                 .MakeSzArrayType();
 
-            var element = Assert.IsAssignableFrom<TypeSignature>(argument.Element);
-            Assert.Equal(expected, element, _comparer);
+            var element = Assert.IsType<TypeSignature>(argument.Element, exactMatch: false);
+            Assert.Equal(expected, element, SignatureComparer.Default);
         }
 
         [Theory]
@@ -472,8 +475,9 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature!.FixedArguments[0];
 
             var module = attribute.Constructor!.ContextModule!;
-            var element = Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
-            Assert.Equal(module.CorLibTypeFactory.Int32, (ITypeDescriptor) element.Value, _comparer);
+            var element = Assert.IsType<BoxedArgument>(argument.Element, exactMatch: false);
+            var type = Assert.IsType<ITypeDescriptor>(element.Value, exactMatch: false);
+            Assert.Equal(module.CorLibTypeFactory.Int32, type, SignatureComparer.Default);
         }
 
         [Theory]
@@ -563,14 +567,17 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = new ModuleDefinition("Module.exe");
 
-            var attribute = new CustomAttribute(module.CorLibTypeFactory.CorLibScope
+            var attribute = new CustomAttribute(
+                module.CorLibTypeFactory.CorLibScope
                     .CreateTypeReference("System", "ObsoleteAttribute")
                     .CreateMemberReference(".ctor", MethodSignature.CreateInstance(
                         module.CorLibTypeFactory.Void,
-                        module.CorLibTypeFactory.String)),
+                        [module.CorLibTypeFactory.String]
+                    )),
                 new CustomAttributeSignature(new CustomAttributeArgument(
                     module.CorLibTypeFactory.String,
-                    "My Message")));
+                    "My Message"))
+            );
 
             Assert.NotNull(attribute.Signature);
             var argument = Assert.Single(attribute.Signature.FixedArguments);
@@ -582,14 +589,18 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = new ModuleDefinition("Module.exe");
 
-            var attribute = new CustomAttribute(module.CorLibTypeFactory.CorLibScope
-                .CreateTypeReference("System", "ObsoleteAttribute")
-                .CreateMemberReference(".ctor", MethodSignature.CreateInstance(
-                    module.CorLibTypeFactory.Void,
-                    module.CorLibTypeFactory.String)));
+            var attribute = new CustomAttribute(
+                module.CorLibTypeFactory.CorLibScope
+                    .CreateTypeReference("System", "ObsoleteAttribute")
+                    .CreateMemberReference(".ctor", MethodSignature.CreateInstance(
+                        module.CorLibTypeFactory.Void,
+                        [module.CorLibTypeFactory.String]))
+            );
+
             attribute.Signature!.FixedArguments.Add(new CustomAttributeArgument(
                 module.CorLibTypeFactory.String,
-                "My Message"));
+                "My Message"
+            ));
 
             Assert.NotNull(attribute.Signature);
             var argument = Assert.Single(attribute.Signature.FixedArguments);
@@ -665,8 +676,8 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature!.FixedArguments[0];
 
             var expected = attribute.Constructor!.ContextModule!.CorLibTypeFactory.Int32;
-            var element = Assert.IsAssignableFrom<TypeSignature>(argument.Element);
-            Assert.Equal(expected, element, _comparer);
+            var element = Assert.IsType<TypeSignature>(argument.Element, exactMatch: false);
+            Assert.Equal(expected, element, SignatureComparer.Default);
         }
 
         [Theory]
@@ -755,8 +766,8 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature!.NamedArguments[0];
 
             var expected = attribute.Constructor!.ContextModule!.CorLibTypeFactory.Int32;
-            var element = Assert.IsAssignableFrom<TypeSignature>(argument.Argument.Element);
-            Assert.Equal(expected, element, _comparer);
+            var element = Assert.IsType<TypeSignature>(argument.Argument.Element, exactMatch: false);
+            Assert.Equal(expected, element, SignatureComparer.Default);
         }
 
         [Theory]
@@ -779,7 +790,7 @@ namespace AsmResolver.DotNet.Tests
             var factory = module.CorLibTypeFactory;
             var ctor = factory.CorLibScope
                 .CreateTypeReference("System", "CLSCompliantAttribute")
-                .CreateMemberReference(".ctor", MethodSignature.CreateInstance(factory.Void, factory.Boolean));
+                .CreateMemberReference(".ctor", MethodSignature.CreateInstance(factory.Void, [factory.Boolean]));
 
             var attribute = new CustomAttribute(ctor);
 
@@ -817,7 +828,7 @@ namespace AsmResolver.DotNet.Tests
             var newAttribute = newModule.GetModuleType()!.Fields[0].CustomAttributes[0];
             var newAttributeType = Assert.IsAssignableFrom<TypeSignature>(Assert.Single(newAttribute.Signature!.FixedArguments).Element).GetUnderlyingTypeDefOrRef()!;
 
-            Assert.Equal(attributeType.DeclaringModule!.Assembly, newAttributeType.Scope?.GetAssembly(), SignatureComparer.Default);
+            Assert.Equal(attributeType.DeclaringModule!.Assembly, newAttributeType.Scope?.GetAssembly(), SignatureComparer.Default!);
         }
     }
 }

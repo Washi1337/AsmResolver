@@ -16,18 +16,9 @@ namespace AsmResolver.DotNet.Signatures
             ElementType = elementType;
             Name = name;
 
-            if (corlibScope is ModuleDefinition module)
-            {
-                Type = module.TopLevelTypes.First(t => t.IsTypeOf("System", name));
-            }
-            else if (corlibScope.ContextModule is not null)
-            {
-                Type = new TypeReference(corlibScope.ContextModule, corlibScope, "System", name);
-            }
-            else
-            {
-                throw new ArgumentException("Provided CorLib was not valid.");
-            }
+            Type = corlibScope is ModuleDefinition module
+                ? module.TopLevelTypes.First(t => t.IsTypeOf("System", name))
+                : corlibScope.CreateTypeReference("System", name);
         }
 
         /// <summary>

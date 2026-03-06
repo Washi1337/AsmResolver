@@ -5,7 +5,6 @@ using System.Reflection;
 using AsmResolver.DotNet.Cloning;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
-using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
@@ -152,15 +151,15 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneBranchInstructions()
         {
-            var clonedMethod = CloneMethod(typeof(MethodBodyTypes).GetMethod(nameof(MethodBodyTypes.Branch)), out var method);
+            var clonedMethod = CloneMethod(typeof(MethodBodyTypes).GetMethod(nameof(MethodBodyTypes.Branch))!, out var method);
 
-            var originalBranches = method.CilMethodBody.Instructions
+            var originalBranches = method.CilMethodBody!.Instructions
                 .Where(i => i.IsBranch())
                 .Select(i => i.Operand)
                 .OfType<CilInstructionLabel>()
                 .ToArray();
 
-            var newBranches = clonedMethod.CilMethodBody.Instructions
+            var newBranches = clonedMethod.CilMethodBody!.Instructions
                 .Where(i => i.IsBranch())
                 .Select(i => i.Operand)
                 .OfType<CilInstructionLabel>()
@@ -180,20 +179,21 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneSwitchInstruction()
         {
-            var clonedMethod = CloneMethod(typeof(MethodBodyTypes).GetMethod(nameof(MethodBodyTypes.Switch)), out var method);
+            var clonedMethod = CloneMethod(typeof(MethodBodyTypes).GetMethod(nameof(MethodBodyTypes.Switch))!, out var method);
 
-            var originalBranches = (IEnumerable<ICilLabel>) method.CilMethodBody.Instructions
+            var originalBranches = (IEnumerable<ICilLabel>) method.CilMethodBody!.Instructions
                 .First(i => i.OpCode.Code == CilCode.Switch)
-                .Operand;
+                .Operand!;
 
-            var newBranches = (IEnumerable<ICilLabel>) clonedMethod.CilMethodBody.Instructions
+            var newBranches = (IEnumerable<ICilLabel>) clonedMethod.CilMethodBody!.Instructions
                 .First(i => i.OpCode.Code == CilCode.Switch)
-                .Operand;
+                .Operand!;
 
             // Assert offsets match.
             Assert.Equal(
                 originalBranches.Select(x => x.Offset),
-                newBranches.Select(x => x.Offset));
+                newBranches.Select(x => x.Offset)
+            );
 
             // Assert all referenced instructions are instructions in the cloned method body.
             Assert.All(newBranches, label => Assert.Same(
@@ -218,7 +218,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
             var clonedMethod = (MethodDefinition) result.ClonedMembers
                 .First(m => m.Name == nameof(Miscellaneous.CallsToMethods));
 
-            var references = clonedMethod.CilMethodBody.Instructions
+            var references = clonedMethod.CilMethodBody!.Instructions
                 .Where(i => i.OpCode.Code == CilCode.Call)
                 .Select(i => i.Operand)
                 .Cast<MethodDefinition>()
@@ -243,8 +243,8 @@ namespace AsmResolver.DotNet.Tests.Cloning
             var clonedMethod = (MethodDefinition) result.ClonedMembers
                 .First(m => m.Name == nameof(Miscellaneous.NestedClassLocal));
 
-            var references = clonedMethod.CilMethodBody.Instructions
-                .Where(i => i.OpCode.Code == CilCode.Callvirt || i.OpCode.Code == CilCode.Newobj)
+            var references = clonedMethod.CilMethodBody!.Instructions
+                .Where(i => i.OpCode.Code is CilCode.Callvirt or CilCode.Newobj)
                 .Select(i => i.Operand)
                 .Cast<MethodDefinition>()
                 .ToArray();
@@ -259,16 +259,17 @@ namespace AsmResolver.DotNet.Tests.Cloning
             // https://github.com/Washi1337/AsmResolver/issues/43
 
             var clonedMethod = CloneMethod(
-                typeof(GenericsTestClass).GetMethod(nameof(GenericsTestClass.MethodInstantiationFromExternalType)),
-                out var method);
+                typeof(GenericsTestClass).GetMethod(nameof(GenericsTestClass.MethodInstantiationFromExternalType))!,
+                out var method
+            );
 
-            var originalSpec = (MethodSpecification) method.CilMethodBody.Instructions
+            var originalSpec = (MethodSpecification) method.CilMethodBody!.Instructions
                 .First(i => i.OpCode.Code == CilCode.Call && i.Operand is MethodSpecification)
-                .Operand;
+                .Operand!;
 
-            var newSpec = (MethodSpecification) clonedMethod.CilMethodBody.Instructions
+            var newSpec = (MethodSpecification) clonedMethod.CilMethodBody!.Instructions
                 .First(i => i.OpCode.Code == CilCode.Call && i.Operand is MethodSpecification)
-                .Operand;
+                .Operand!;
 
             Assert.Equal(originalSpec, newSpec, _signatureComparer);
             Assert.NotSame(originalSpec.ContextModule, newSpec.ContextModule);
@@ -277,7 +278,10 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneSemantics()
         {
-            var clonedProperty = CloneProperty(typeof(SingleProperty).GetProperty(nameof(SingleProperty.IntProperty)), out var originalProperty);
+            var clonedProperty = CloneProperty(
+                typeof(SingleProperty).GetProperty(nameof(SingleProperty.IntProperty))!,
+                out var originalProperty
+            );
 
             Assert.Equal(originalProperty.Name, clonedProperty.Name);
             Assert.Equal(
@@ -289,32 +293,44 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneImplMap()
         {
-            var clonedMethod = CloneMethod(typeof(PlatformInvoke).GetMethod(nameof(PlatformInvoke.LPArrayFixedSizeMarshaller)), out var method);
+            var clonedMethod = CloneMethod(
+                typeof(PlatformInvoke).GetMethod(nameof(PlatformInvoke.LPArrayFixedSizeMarshaller))!,
+                out var method
+            );
+
             Assert.NotNull(clonedMethod.ImplementationMap);
-            Assert.Equal(method.ImplementationMap.Name, clonedMethod.ImplementationMap.Name);
-            Assert.Equal(method.ImplementationMap.Scope.Name, clonedMethod.ImplementationMap.Scope.Name);
+            Assert.Equal(method.ImplementationMap!.Name, clonedMethod.ImplementationMap.Name);
+            Assert.Equal(method.ImplementationMap!.Scope!.Name, clonedMethod.ImplementationMap.Scope?.Name);
             Assert.Equal(method.ImplementationMap.Attributes, clonedMethod.ImplementationMap.Attributes);
         }
 
         [Fact]
         public void CloneConstant()
         {
-            var clonedMethod = CloneMethod(typeof(Miscellaneous).GetMethod(nameof(Miscellaneous.OptionalParameter)), out var method);
+            var clonedMethod = CloneMethod(
+                typeof(Miscellaneous).GetMethod(nameof(Miscellaneous.OptionalParameter))!,
+                out var method
+            );
 
             Assert.NotEmpty(clonedMethod.ParameterDefinitions);
             Assert.NotNull(clonedMethod.ParameterDefinitions[0].Constant);
-            Assert.Equal(clonedMethod.ParameterDefinitions[0].Constant.Type, method.ParameterDefinitions[0].Constant.Type);
-            Assert.Equal(clonedMethod.ParameterDefinitions[0].Constant.Value.Data, method.ParameterDefinitions[0].Constant.Value.Data);
+
+            var expectedConstant = method.ParameterDefinitions[0].Constant!;
+            var clonedConstant = clonedMethod.ParameterDefinitions[0].Constant!;
+            Assert.Equal(expectedConstant.Type, clonedConstant.Type);
+            Assert.Equal(expectedConstant.Value?.Data, clonedConstant.Value?.Data);
         }
 
         [Fact]
         public void CloneFieldRva()
         {
-            var clonedInitializerField =
-                CloneInitializerField(typeof(InitialValues).GetField(nameof(InitialValues.ByteArray)), out var field);
+            var clonedInitializerField = CloneInitializerField(
+                typeof(InitialValues).GetField(nameof(InitialValues.ByteArray))!,
+                out var field
+            );
 
-            var originalData = ((IReadableSegment) field.FieldRva!).ToArray();
-            var newData = ((IReadableSegment) clonedInitializerField.FieldRva!).ToArray();
+            byte[] originalData = ((IReadableSegment) field.FieldRva!).ToArray();
+            byte[] newData = ((IReadableSegment) clonedInitializerField.FieldRva!).ToArray();
 
             Assert.Equal(originalData, newData);
         }
@@ -333,16 +349,17 @@ namespace AsmResolver.DotNet.Tests.Cloning
         public void CloneGenericParameterConstraints()
         {
             var clonedMethod = CloneMethod(
-                typeof(NonGenericType).GetMethod(nameof(NonGenericType.GenericMethodWithConstraints)),
-                    out var methodDef);
+                typeof(NonGenericType).GetMethod(nameof(NonGenericType.GenericMethodWithConstraints))!,
+                out var methodDef
+            );
 
-            for (int i = 0; i < clonedMethod.GenericParameters.Count; i++)
+            Assert.All(methodDef.GenericParameters, (originalParameter, i) =>
             {
-                var originalParameter = methodDef.GenericParameters[i];
-                var newParameter  = clonedMethod.GenericParameters[i];
-                Assert.Equal(originalParameter.Constraints.Select(c => c.Constraint.FullName),
-                    newParameter.Constraints.Select(c => c.Constraint.FullName));
-            }
+                Assert.Equal(
+                    originalParameter.Constraints.Select(c => c.Constraint?.FullName),
+                    clonedMethod.GenericParameters[i].Constraints.Select(c => c.Constraint?.FullName)
+                );
+            });
         }
 
         [Fact]
@@ -359,8 +376,9 @@ namespace AsmResolver.DotNet.Tests.Cloning
             var clonedType = CloneType(typeof(InterfaceImplementations), out var originalTypeDef);
 
             Assert.Equal(
-                originalTypeDef.Interfaces.Select(t => t.Interface.FullName),
-                clonedType.Interfaces.Select(t => t.Interface.FullName));
+                originalTypeDef.Interfaces.Select(t => t.Interface?.FullName),
+                clonedType.Interfaces.Select(t => t.Interface?.FullName)
+            );
         }
 
         [Fact]
@@ -374,8 +392,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
             var reverseMethodsNames = (IMemberDefinition original, IMemberDefinition cloned) => {
 
                 if (cloned is MethodDefinition clonedDescriptor && original is MethodDefinition originalDescriptor)
-                    clonedDescriptor.Name = new string(originalDescriptor.Name.Reverse().ToArray());
-
+                    clonedDescriptor.Name = new string(originalDescriptor.Name!.Reverse().ToArray());
             };
 
             var result = new MemberCloner(targetModule, reverseMethodsNames)
@@ -385,8 +402,9 @@ namespace AsmResolver.DotNet.Tests.Cloning
             var clonedType = result.GetClonedMember(type);
 
             Assert.Equal(
-                type.Methods.Select(m => m.Name.Reverse().ToArray()),
-                clonedType.Methods.Select(m => m.Name.ToArray()));
+                type.Methods.Select(m => m.Name!.Reverse().ToArray()),
+                clonedType.Methods.Select(m => m.Name!.ToArray())
+            );
         }
 
         [Fact]
@@ -405,7 +423,8 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             Assert.Equal(
                 type.Methods.Select(m => $"Method_{m.Name}"),
-                clonedType.Methods.Select(m => m.Name.ToString()));
+                clonedType.Methods.Select(m => m.Name?.ToString())
+            );
         }
 
         [Fact]

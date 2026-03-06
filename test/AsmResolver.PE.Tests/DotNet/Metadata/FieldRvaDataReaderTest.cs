@@ -69,5 +69,29 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             Assert.NotNull(segment);
             Assert.Equal(InitialValues.ByteArray, segment.ToArray());
         }
+
+        [Fact]
+        public void ReadFromUnsortedClassLayoutTable()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/724
+
+            var image = PEImage.FromBytes(Properties.Resources.MetadataUnsortedTable);
+            var row = image.DotNetDirectory!.Metadata!
+                .GetStream<TablesStream>()
+                .GetTable<FieldRvaRow>(TableIndex.FieldRva)
+                .GetByRid(1u);
+
+            var dataReader = new FieldRvaDataReader();
+            var segment = dataReader.ResolveFieldData(
+                ThrowErrorListener.Instance,
+                Platform.Get(image.MachineType),
+                image.DotNetDirectory,
+                row
+            ) as IReadableSegment;
+
+            Assert.NotNull(segment);
+            Assert.Equal("well-hidden secret key"u8.ToArray(), segment.ToArray());
+        }
+
     }
 }

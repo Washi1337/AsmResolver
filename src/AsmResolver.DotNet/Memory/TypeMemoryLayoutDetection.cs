@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Memory
         /// <param name="context">The runtime to assume when determining the layout.</param>
         /// <param name="is32Bit">Determines whether memory addresses are 32 bit or 64 bit wide.</param>
         /// <returns>The implied memory layout of the type.</returns>
-        public static TypeMemoryLayout GetImpliedMemoryLayout(this ITypeDescriptor type, RuntimeContext context, bool is32Bit) => type switch
+        public static TypeMemoryLayout GetImpliedMemoryLayout(this ITypeDescriptor type, RuntimeContext? context, bool is32Bit) => type switch
         {
             TypeSignature signature => GetImpliedMemoryLayout(signature, context, is32Bit),
             ITypeDefOrRef typeDefOrRef => GetImpliedMemoryLayout(typeDefOrRef, context, is32Bit),
@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet.Memory
         /// <param name="context">The runtime to assume when determining the layout.</param>
         /// <param name="is32Bit">Determines whether memory addresses are 32 bit or 64 bit wide.</param>
         /// <returns>The implied memory layout of the type.</returns>
-        public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeSignature type, RuntimeContext context, bool is32Bit)
+        public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeSignature type, RuntimeContext? context, bool is32Bit)
         {
             var layoutDetector = new TypeMemoryLayoutDetector(context, is32Bit);
             return type.AcceptVisitor(layoutDetector);
@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet.Memory
         /// <param name="context">The runtime to assume when determining the layout.</param>
         /// <param name="is32Bit">Determines whether memory addresses are 32 bit or 64 bit wide.</param>
         /// <returns>The implied memory layout of the type.</returns>
-        public static TypeMemoryLayout GetImpliedMemoryLayout(this ITypeDefOrRef type, RuntimeContext context, bool is32Bit)
+        public static TypeMemoryLayout GetImpliedMemoryLayout(this ITypeDefOrRef type, RuntimeContext? context, bool is32Bit)
         {
             var layoutDetector = new TypeMemoryLayoutDetector(context, is32Bit);
             return layoutDetector.VisitTypeDefOrRef(type);

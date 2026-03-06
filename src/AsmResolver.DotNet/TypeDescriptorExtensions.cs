@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using AsmResolver.DotNet.Signatures;
@@ -20,7 +21,7 @@ namespace AsmResolver.DotNet
             /// <param name="context">The runtime context to assume when constructing the signature, if any.</param>
             /// <param name="typeArguments">The arguments to instantiate the type with.</param>
             /// <returns>The constructed by-reference type signature.</returns>
-            public GenericInstanceTypeSignature MakeGenericInstanceType(RuntimeContext? context, params TypeSignature[] typeArguments)
+            public GenericInstanceTypeSignature MakeGenericInstanceType(RuntimeContext? context, IEnumerable<TypeSignature> typeArguments)
             {
                 return type.MakeGenericInstanceType(type.GetIsValueType(context), typeArguments);
             }
@@ -32,7 +33,7 @@ namespace AsmResolver.DotNet
             /// <param name="isValueType"><c>true</c> if the type is a value type, <c>false</c> otherwise.</param>
             /// <param name="typeArguments">The arguments to instantiate the type with.</param>
             /// <returns>The constructed by-reference type signature.</returns>
-            public GenericInstanceTypeSignature MakeGenericInstanceType(bool isValueType, params TypeSignature[] typeArguments)
+            public GenericInstanceTypeSignature MakeGenericInstanceType(bool isValueType, IEnumerable<TypeSignature> typeArguments)
             {
                 return type.ToTypeDefOrRef().MakeGenericInstanceType(isValueType, typeArguments);
             }
@@ -111,7 +112,7 @@ namespace AsmResolver.DotNet
             /// <remarks>
             /// This function can be used to avoid type resolution on type references.
             /// </remarks>
-            public GenericInstanceTypeSignature MakeGenericInstanceType(bool isValueType, params TypeSignature[] typeArguments)
+            public GenericInstanceTypeSignature MakeGenericInstanceType(bool isValueType, IEnumerable<TypeSignature> typeArguments)
             {
                 return new GenericInstanceTypeSignature(type, isValueType, typeArguments);
             }
@@ -212,45 +213,45 @@ namespace AsmResolver.DotNet
             /// <summary>
             /// Constructs a reference to a member declared within the provided parent member.
             /// </summary>
-            /// <param name="memberName">The name of the member to reference.</param>
+            /// <param name="name">The name of the member to reference.</param>
             /// <param name="signature">The signature of the member to reference.</param>
             /// <returns>The constructed reference.</returns>
-            public MemberReference CreateMemberReference(Utf8String? memberName, MemberSignature? signature)
+            public MemberReference CreateMemberReference(Utf8String? name, MemberSignature? signature)
             {
-                return new MemberReference(parent, memberName, signature);
+                return new MemberReference(parent, name, signature);
             }
 
             /// <summary>
             /// Constructs a reference to a field declared within the provided parent member.
             /// </summary>
-            /// <param name="fieldName">The name of the field to reference.</param>
+            /// <param name="name">The name of the field to reference.</param>
             /// <param name="fieldType">The type of the field to reference.</param>
             /// <returns>The constructed reference.</returns>
-            public IFieldDescriptor CreateFieldReference(Utf8String? fieldName, TypeSignature fieldType)
+            public IFieldDescriptor CreateFieldReference(Utf8String? name, TypeSignature fieldType)
             {
-                return new MemberReference(parent, fieldName, new FieldSignature(fieldType));
+                return new MemberReference(parent, name, new FieldSignature(fieldType));
             }
 
             /// <summary>
             /// Constructs a reference to a field declared within the provided parent member.
             /// </summary>
-            /// <param name="fieldName">The name of the field to reference.</param>
+            /// <param name="name">The name of the field to reference.</param>
             /// <param name="signature">The signature of the field to reference.</param>
             /// <returns>The constructed reference.</returns>
-            public IFieldDescriptor CreateFieldReference(Utf8String? fieldName, FieldSignature? signature)
+            public IFieldDescriptor CreateFieldReference(Utf8String? name, FieldSignature? signature)
             {
-                return new MemberReference(parent, fieldName, signature);
+                return new MemberReference(parent, name, signature);
             }
 
             /// <summary>
             /// Constructs a reference to a method declared within the provided parent member.
             /// </summary>
-            /// <param name="methodName">The name of the method to reference.</param>
+            /// <param name="name">The name of the method to reference.</param>
             /// <param name="signature">The signature of the method to reference.</param>
             /// <returns>The constructed reference.</returns>
-            public IMethodDescriptor CreateMethodReference(Utf8String? methodName, MethodSignature? signature)
+            public IMethodDescriptor CreateMethodReference(Utf8String? name, MethodSignature? signature)
             {
-                return new MemberReference(parent, methodName, signature);
+                return new MemberReference(parent, name, signature);
             }
         }
 
@@ -288,7 +289,7 @@ namespace AsmResolver.DotNet
             /// <param name="context">The context to assume when resolving the method.</param>
             /// <param name="definition">The resolved method definition, or <c>null</c> if resolution failed.</param>
             /// <returns><c>true</c> if the resolution was successful, <c>false</c> otherwise.</returns>
-            public bool TryResolve(RuntimeContext? context, out MethodDefinition? definition)
+            public bool TryResolve(RuntimeContext? context, [NotNullWhen(true)] out MethodDefinition? definition)
             {
                 return method.Resolve(context, out definition) == ResolutionStatus.Success;
             }
@@ -328,7 +329,7 @@ namespace AsmResolver.DotNet
             /// <param name="context">The context to assume when resolving the field.</param>
             /// <param name="definition">The resolved field definition, or <c>null</c> if resolution failed.</param>
             /// <returns><c>true</c> if the resolution was successful, <c>false</c> otherwise.</returns>
-            public bool TryResolve(RuntimeContext? context, out FieldDefinition? definition)
+            public bool TryResolve(RuntimeContext? context, [NotNullWhen(true)] out FieldDefinition? definition)
             {
                 return field.Resolve(context, out definition) == ResolutionStatus.Success;
             }

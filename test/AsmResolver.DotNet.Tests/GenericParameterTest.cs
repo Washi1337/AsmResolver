@@ -1,6 +1,5 @@
 using System.Linq;
 using AsmResolver.DotNet.TestCases.Generics;
-using AsmResolver.PE.DotNet.Metadata;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -34,8 +33,8 @@ namespace AsmResolver.DotNet.Tests
         public void ReadMethodOwner()
         {
             var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location, TestReaderParameters);
-            var method = typeof(GenericType<,,>).GetMethod("GenericMethodInGenericType");
-            var token = method.GetGenericArguments()[0].MetadataToken;
+            var method = typeof(GenericType<,,>).GetMethod("GenericMethodInGenericType")!;
+            int token = method.GetGenericArguments()[0].MetadataToken;
 
             var genericParameter = (GenericParameter) module.LookupMember(token);
             Assert.NotNull(genericParameter.Owner);
@@ -46,14 +45,14 @@ namespace AsmResolver.DotNet.Tests
         public void ReadSingleGenericParameterConstraint()
         {
             var module = ModuleDefinition.FromFile(typeof(NonGenericType).Assembly.Location, TestReaderParameters);
-            var token = typeof(NonGenericType)
-                .GetMethod(nameof(NonGenericType.GenericMethodWithConstraints))
+            int token = typeof(NonGenericType)
+                .GetMethod(nameof(NonGenericType.GenericMethodWithConstraints))!
                 .GetGenericArguments()[0]
                 .MetadataToken;
 
             var genericParameter = (GenericParameter) module.LookupMember(token);
             Assert.Single(genericParameter.Constraints);
-            Assert.Equal(nameof(IFoo), genericParameter.Constraints[0].Constraint.Name);
+            Assert.Equal(nameof(IFoo), genericParameter.Constraints[0].Constraint!.Name);
         }
 
         [Fact]
@@ -61,16 +60,18 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(NonGenericType).Assembly.Location, TestReaderParameters);
             var token = typeof(NonGenericType)
-                .GetMethod(nameof(NonGenericType.GenericMethodWithConstraints))
+                .GetMethod(nameof(NonGenericType.GenericMethodWithConstraints))!
                 .GetGenericArguments()[1]
                 .MetadataToken;
 
             var genericParameter = (GenericParameter) module.LookupMember(token);
             Assert.Equal(new Utf8String[]
-            {
-                nameof(IFoo),
-                nameof(IBar)
-            }, genericParameter.Constraints.Select(c => c.Constraint.Name));
+                {
+                    nameof(IFoo),
+                    nameof(IBar)
+                },
+                genericParameter.Constraints.Select(c => c.Constraint?.Name)
+            );
         }
     }
 }

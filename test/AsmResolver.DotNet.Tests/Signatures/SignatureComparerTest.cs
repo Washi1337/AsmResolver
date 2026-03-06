@@ -132,7 +132,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var methodDefinition = moduleDefinition
                 .GetAllTypes().First(t => t.Name == nameof(GenericInstanceMethods))
                 .Methods.First(t => t.Name == nameof(GenericInstanceMethods.InstanceMethodOneTypeParameter));
-            var methodSpecification = methodDefinition.MakeGenericInstanceMethod(moduleDefinition.CorLibTypeFactory.Int32);
+            var methodSpecification = methodDefinition.MakeGenericInstanceMethod([moduleDefinition.CorLibTypeFactory.Int32]);
 
             Assert.NotEqual<IMethodDescriptor>(methodDefinition, methodSpecification, _comparer);
             Assert.NotEqual<IMethodDescriptor>(methodSpecification, methodDefinition, _comparer);
@@ -162,21 +162,21 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var module = ModuleDefinition.FromBytes(Properties.Resources.ForwarderRefTest, TestReaderParameters);
 
             // Load dependencies.
-            var context = module.RuntimeContext;
+            var context = module.RuntimeContext!;
             context.LoadAssembly(Properties.Resources.ForwarderLibrary);
             context.LoadAssembly(Properties.Resources.ActualLibrary);
 
             // Find all referenced types in main.
             var referencedTypes = module.ManagedEntryPointMethod!.CilMethodBody!.Instructions
                 .Where(i => i.OpCode.Code == CilCode.Call)
-                .Select(i => ((IMethodDefOrRef) i.Operand!).DeclaringType)
+                .Select(i => ((IMethodDefOrRef) i.Operand!).DeclaringType!)
                 .Where(t => t.Name == "MyNestedClass")
                 .ToArray();
 
             var comparer = context.SignatureComparer;
 
-            var type1 = referencedTypes[0]!;
-            var type2 = referencedTypes[1]!;
+            var type1 = referencedTypes[0];
+            var type2 = referencedTypes[1];
 
             var resolvedType1 = type1.Resolve(context);
             var resolvedType2 = type2.Resolve(context);
@@ -242,6 +242,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 .Resolve(KnownCorLibs.MsCorLib_v4_0_0_0, null, out var assembly);
 
             Assert.Equal(ResolutionStatus.Success, status);
+            Assert.NotNull(assembly);
 
             var definition = assembly.ManifestModule!.TopLevelTypes.First(x => x.IsTypeOf("System.IO", "Stream"));
             var reference = definition.ToTypeReference();

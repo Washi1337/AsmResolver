@@ -422,7 +422,10 @@ namespace AsmResolver.DotNet.Signatures
         /// <remarks>
         /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.1.
         /// </remarks>
-        public bool IsCompatibleWith(TypeSignature other, RuntimeContext? context) => IsCompatibleWith(other, context, SignatureComparer.Default);
+        public bool IsCompatibleWith(TypeSignature other, RuntimeContext? context)
+        {
+            return IsCompatibleWith(other, context, context?.SignatureComparer ?? SignatureComparer.Default);
+        }
 
         /// <summary>
         /// Determines whether the current type is compatible with the provided type.
@@ -469,7 +472,10 @@ namespace AsmResolver.DotNet.Signatures
         /// <remarks>
         /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.3.
         /// </remarks>
-        public bool IsAssignableTo(TypeSignature other, RuntimeContext? context) => IsAssignableTo(other, context, SignatureComparer.Default);
+        public bool IsAssignableTo(TypeSignature other, RuntimeContext? context)
+        {
+            return IsAssignableTo(other, context, context?.SignatureComparer ?? SignatureComparer.Default);
+        }
 
         /// <summary>
         /// Determines whether the current type is assignable to the provided type.
@@ -517,6 +523,9 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="importer">The reference importer to us.</param>
         /// <returns>The imported type.</returns>
         public TypeSignature ImportWith(ReferenceImporter importer) => importer.ImportTypeSignature(this);
+
+        /// <inheritdoc />
+        IMemberDescriptor IMemberDescriptor.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);

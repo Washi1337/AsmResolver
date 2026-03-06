@@ -32,21 +32,39 @@ namespace AsmResolver.PE.DotNet.Metadata
                 return null;
             }
 
-            if (!metadata.TryGetStream<TablesStream>(out var tablesStream))
+            var streams = metadata.GetImpliedStreamSelection();
+
+            // Validate we have at least a tables stream (to find fielddefs and classlayouts)
+            // and blob stream (to parse the field signature).
+            if (streams.TablesStream is null)
             {
                 listener.BadImage("Metadata does not contain a tables stream.");
                 return null;
             }
 
-            var table = tablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
+            if (streams.BlobStream is null)
+            {
+                listener.BadImage("Metadata does not contain a blob stream.");
+                return null;
+            }
+
+            // Is the referenced field a valid index?
+            var table = streams.TablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
             if (fieldRvaRow.Field > table.Count)
             {
                 listener.BadImage("FieldRva row has an invalid Field column value.");
                 return null;
             }
 
+            // Determine the size of the field.
             var field = table.GetByRid(fieldRvaRow.Field);
-            int valueSize = DetermineFieldSize(listener, platform, directory, field);
+            int valueSize = DetermineFieldSize(
+                listener,
+                platform,
+                directory.Flags,
+                in streams,
+                in field
+            );
 
             if (fieldRvaRow.Data.CanRead)
             {
@@ -56,7 +74,7 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             if (fieldRvaRow.Data is PESegmentReference {IsValidAddress: true})
             {
-                // We are reading from a virtual segment that is resized at runtime, assume zeroes.
+                // We are reading from a virtual segment that is resized at runtime, assume initialized data (zeroes).
                 var segment = new ZeroesSegment((uint) valueSize);
                 segment.UpdateOffsets(new RelocationParameters(fieldRvaRow.Data.Offset, fieldRvaRow.Data.Rva));
                 return segment;
@@ -66,19 +84,32 @@ namespace AsmResolver.PE.DotNet.Metadata
             return null;
         }
 
-        private int DetermineFieldSize(IErrorListener listener, Platform platform, DotNetDirectory directory, in FieldDefinitionRow field)
+        private int DetermineFieldSize(
+            IErrorListener listener,
+            Platform platform,
+            DotNetDirectoryFlags directoryFlags,
+            in MetadataStreamSelection streams,
+            in FieldDefinitionRow field)
         {
-            if (!directory.Metadata!.TryGetStream<BlobStream>(out var blobStream)
-                || !blobStream.TryGetBlobReaderByIndex(field.Signature, out var reader))
-            {
-                return 0;
-            }
+            // Follow field signature index.
+            if (!streams.BlobStream!.TryGetBlobReaderByIndex(field.Signature, out var reader))
+                return listener.BadImageAndReturn<int>($"Invalid field signature index 0x{field.Signature:X8}.");
 
-            reader.ReadByte(); // calling convention attributes.
+            // Check if we're actually a field signature.
+            if (!reader.CanRead(sizeof(byte)))
+                return listener.BadImageAndReturn<int>("Expected a field signature header.");
+            byte attributes = reader.ReadByte();
+            if ((attributes & 0xF) != 0x06)
+                return listener.BadImageAndReturn<int>("Expected a field signature header.");
 
+            // Minimal field type parser tuned to all supported value types.
             while (true)
             {
-                switch ((ElementType)reader.ReadByte())
+                if (!reader.CanRead(sizeof(byte)))
+                    return listener.BadImageAndReturn<int>($"Expected an element type at blob signature index {reader.RelativeOffset}.");
+
+                var elementType = (ElementType)reader.ReadByte();
+                switch (elementType)
                 {
                     case ElementType.Boolean:
                         return sizeof(bool);
@@ -117,43 +148,47 @@ namespace AsmResolver.PE.DotNet.Metadata
                         return sizeof(double);
 
                     case ElementType.ValueType:
-                        return GetCustomTypeSize(directory.Metadata, ref reader);
+                        return GetCustomTypeSize(listener, streams.TablesStream!, ref reader);
 
                     case ElementType.I:
                     case ElementType.U:
                     case ElementType.Ptr:
                     case ElementType.FnPtr:
-                        return directory.Flags.IsLoadedAs32Bit(platform) ? sizeof(uint) : sizeof(ulong);
+                        return directoryFlags.IsLoadedAs32Bit(platform) ? sizeof(uint) : sizeof(ulong);
 
                     case ElementType.CModReqD:
                     case ElementType.CModOpt:
                         if (!reader.TryReadCompressedUInt32(out _))
                             return listener.BadImageAndReturn<int>("Invalid field signature.");
                         break;
+
+                    default:
+                        return listener.BadImageAndReturn<int>($"Unsupported field element type {elementType}.");
                 }
             }
         }
 
-        private int GetCustomTypeSize(MetadataDirectory metadataDirectory, ref BinaryStreamReader reader)
+        private static int GetCustomTypeSize(IErrorListener listener, TablesStream tablesStream, ref BinaryStreamReader reader)
         {
-            if (!reader.TryReadCompressedUInt32(out uint codedIndex)
-                || !metadataDirectory.TryGetStream<TablesStream>(out var tablesStream))
-            {
-                return 0;
-            }
+            // Read and decode the TypeDefOrRef index.
+            if (!reader.TryReadCompressedUInt32(out uint codedIndex))
+                return listener.BadImageAndReturn<int>($"Expected a TypeDefOrRef coded index at blob signature offset {reader.RelativeOffset}.");
 
             var typeToken = tablesStream
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef)
                 .DecodeIndex(codedIndex);
 
-            if (typeToken.Table == TableIndex.TypeDef)
-            {
-                var classLayoutTable = tablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);
-                if (classLayoutTable.TryGetRowByKey(2, typeToken.Rid, out var row))
-                    return (int) row.ClassSize;
-            }
+            // Type needs to be a definition in the current module.
+            if (typeToken.Table != TableIndex.TypeDef)
+                return listener.BadImageAndReturn<int>($"Decoded TypeDefOrRef token {typeToken} at blob signature offset {reader.RelativeOffset} does not reference a type definition.");
 
-            return 0;
+            // Find a class layout that is associated to the type.
+            var classLayoutTable = tablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);
+            if (!classLayoutTable.TryGetRowByKey(2, typeToken.Rid, out var row))
+                return listener.BadImageAndReturn<int>($"Field type {typeToken} does not have a class layout attached to it.");
+
+            // Get the size.
+            return (int) row.ClassSize;
         }
     }
 }
