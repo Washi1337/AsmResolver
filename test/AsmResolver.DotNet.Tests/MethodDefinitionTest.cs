@@ -656,7 +656,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location, TestReaderParameters);
             var factory = module.CorLibTypeFactory;
-            var ctor = MethodDefinition.CreateConstructor(module, factory.Int32, factory.Double);
+            var ctor = MethodDefinition.CreateConstructor(module, [factory.Int32, factory.Double]);
 
             Assert.True(ctor.IsConstructor);
             Assert.Equal(new[] {factory.Int32, factory.Double}, ctor.Parameters.Select(x => x.ParameterType));
@@ -679,7 +679,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(Constructors).Assembly.Location, TestReaderParameters);
             var factory = module.CorLibTypeFactory;
-            var ctor = MethodDefinition.CreateConstructor(factory, factory.Int32, factory.Double);
+            var ctor = MethodDefinition.CreateConstructor(factory, [factory.Int32, factory.Double]);
 
             Assert.True(ctor.IsConstructor);
             Assert.Equal(new[] { factory.Int32, factory.Double }, ctor.Parameters.Select(x => x.ParameterType));

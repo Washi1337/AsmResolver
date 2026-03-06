@@ -132,7 +132,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var methodDefinition = moduleDefinition
                 .GetAllTypes().First(t => t.Name == nameof(GenericInstanceMethods))
                 .Methods.First(t => t.Name == nameof(GenericInstanceMethods.InstanceMethodOneTypeParameter));
-            var methodSpecification = methodDefinition.MakeGenericInstanceMethod(moduleDefinition.CorLibTypeFactory.Int32);
+            var methodSpecification = methodDefinition.MakeGenericInstanceMethod([moduleDefinition.CorLibTypeFactory.Int32]);
 
             Assert.NotEqual<IMethodDescriptor>(methodDefinition, methodSpecification, _comparer);
             Assert.NotEqual<IMethodDescriptor>(methodSpecification, methodDefinition, _comparer);

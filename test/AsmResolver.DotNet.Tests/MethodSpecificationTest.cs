@@ -70,10 +70,11 @@ namespace AsmResolver.DotNet.Tests
             var method = (MethodDefinition) module.LookupMember(typeof(NonGenericType)
                 .GetMethod(nameof(NonGenericType.GenericMethodInNonGenericType))!.MetadataToken);
 
-            var specification = method.MakeGenericInstanceMethod(
+            var specification = method.MakeGenericInstanceMethod([
                 module.CorLibTypeFactory.SByte,
                 module.CorLibTypeFactory.Int16,
-                module.CorLibTypeFactory.Int32);
+                module.CorLibTypeFactory.Int32
+            ]);
 
             Assert.Equal(
                 new GenericInstanceMethodSignature([
@@ -93,9 +94,10 @@ namespace AsmResolver.DotNet.Tests
             var method = (MethodDefinition) module.LookupMember(typeof(NonGenericType)
                 .GetMethod(nameof(NonGenericType.GenericMethodInNonGenericType))!.MetadataToken);
 
-            Assert.Throws<ArgumentException>(() => method.MakeGenericInstanceMethod(
+            Assert.Throws<ArgumentException>(() => method.MakeGenericInstanceMethod([
                 module.CorLibTypeFactory.SByte,
-                module.CorLibTypeFactory.Int16));
+                module.CorLibTypeFactory.Int16
+            ]));
         }
 
         [Fact]
@@ -105,10 +107,11 @@ namespace AsmResolver.DotNet.Tests
             var method = (MethodDefinition) module.LookupMember(typeof(NonGenericType)
                 .GetMethod(nameof(NonGenericType.NonGenericMethodInNonGenericType))!.MetadataToken);
 
-            Assert.Throws<ArgumentException>(() => method.MakeGenericInstanceMethod(
+            Assert.Throws<ArgumentException>(() => method.MakeGenericInstanceMethod([
                 module.CorLibTypeFactory.SByte,
                 module.CorLibTypeFactory.Int16,
-                module.CorLibTypeFactory.Int32));
+                module.CorLibTypeFactory.Int32
+            ]));
         }
     }
 }

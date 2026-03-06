@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
@@ -30,10 +31,30 @@ namespace AsmResolver.DotNet
         /// <param name="method">The method to instantiate.</param>
         /// <param name="signature">The instantiation signature.</param>
         public MethodSpecification(IMethodDefOrRef? method, GenericInstanceMethodSignature? signature)
+            : this(method, signature, true)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new reference to a generic instantiation of a method.
+        /// </summary>
+        /// <param name="method">The method to instantiate.</param>
+        /// <param name="signature">The instantiation signature.</param>
+        /// <param name="verify"><c>true</c> if <paramref name="signature"/> should be verified for compatibility with the provided method, <c>false</c> otherwise.</param>
+        public MethodSpecification(IMethodDefOrRef? method, GenericInstanceMethodSignature? signature, bool verify)
             : this(new MetadataToken(TableIndex.MethodSpec,0))
         {
             Method = method;
             Signature = signature;
+
+            if (verify
+                && method?.Signature is not null
+                && signature is not null
+                && method.Signature.GenericParameterCount != signature.TypeArguments.Count)
+            {
+                throw new ArgumentException(
+                    $"Expected {method.Signature.GenericParameterCount} type arguments but {signature.TypeArguments.Count} were given.");
+            }
         }
 
         /// <summary>

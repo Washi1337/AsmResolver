@@ -10,6 +10,7 @@ using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet
 {
@@ -829,7 +830,7 @@ namespace AsmResolver.DotNet
         /// The resulting method's body will consist of a single <c>ret</c> instruction, and does not contain a call to
         /// any of the declaring type's base classes. For an idiomatic .NET binary, this should be added.
         /// </remarks>
-        public static MethodDefinition CreateConstructor(ModuleDefinition module, params TypeSignature[] parameterTypes)
+        public static MethodDefinition CreateConstructor(ModuleDefinition module, IEnumerable<TypeSignature>? parameterTypes = null)
         {
             return CreateConstructor(module.CorLibTypeFactory, parameterTypes);
         }
@@ -844,15 +845,16 @@ namespace AsmResolver.DotNet
         /// The resulting method's body will consist of a single <c>ret</c> instruction, and does not contain a call to
         /// any of the declaring type's base classes. For an idiomatic .NET binary, this should be added.
         /// </remarks>
-        public static MethodDefinition CreateConstructor(CorLibTypeFactory corLibTypeFactory, params TypeSignature[] parameterTypes)
+        public static MethodDefinition CreateConstructor(CorLibTypeFactory corLibTypeFactory, IEnumerable<TypeSignature>? parameterTypes = null)
         {
             var ctor = new MethodDefinition(".ctor",
                 MethodAttributes.Public
                 | MethodAttributes.SpecialName
                 | MethodAttributes.RuntimeSpecialName,
-                MethodSignature.CreateInstance(corLibTypeFactory.Void, parameterTypes));
+                MethodSignature.CreateInstance(corLibTypeFactory.Void, parameterTypes ?? ArrayShim.Empty<TypeSignature>())
+            );
 
-            for (int i = 0; i < parameterTypes.Length; i++)
+            for (int i = 0; i < ctor.Signature!.ParameterTypes.Count; i++)
                 ctor.ParameterDefinitions.Add(new ParameterDefinition(null));
 
             ctor.CilMethodBody = new CilMethodBody();

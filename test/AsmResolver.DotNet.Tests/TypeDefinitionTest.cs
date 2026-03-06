@@ -744,8 +744,8 @@ namespace AsmResolver.DotNet.Tests
             var type = module.LookupMember<TypeDefinition>(typeof(Constructors).MetadataToken);
             var factory = module.CorLibTypeFactory;
 
-            Assert.Null(type.GetConstructor(factory.String));
-            Assert.Null(type.GetConstructor(factory.String, factory.String));
+            Assert.Null(type.GetConstructor([factory.String]));
+            Assert.Null(type.GetConstructor([factory.String, factory.String]));
         }
 
         [Fact]

@@ -160,12 +160,10 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var method = new MethodDefinition(
                 "TestMethod",
                 MethodAttributes.Static,
-                MethodSignature.CreateStatic(genericParameter)
+                MethodSignature.CreateStatic(genericParameter, 1, [])
             );
 
-            var genericInstance = new GenericInstanceMethodSignature();
-            genericInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(int)));
-            var methodSpecification = new MethodSpecification(method, genericInstance);
+            var methodSpecification = method.MakeGenericInstanceMethod([_importer.ImportTypeSignature(typeof(int))]);
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);
@@ -175,7 +173,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(context, context2);
             Assert.False(context.IsEmpty);
             Assert.Null(context.Type);
-            Assert.Equal(genericInstance, context.Method);
+            Assert.Equal(methodSpecification.Signature, context.Method);
         }
 
         [Fact]
@@ -186,13 +184,12 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var typeSpecification = new TypeSpecification(genericTypeInstance);
 
             var genericParameter = new GenericParameterSignature(GenericParameterType.Method, 0);
-            var method = new MemberReference(typeSpecification, "TestMethod",
-                MethodSignature.CreateStatic(genericParameter));
+            var method = typeSpecification.CreateMemberReference(
+                "TestMethod",
+                MethodSignature.CreateStatic(genericParameter, 1, [])
+            );
 
-            var genericMethodInstance = new GenericInstanceMethodSignature();
-            genericMethodInstance.TypeArguments.Add(_importer.ImportTypeSignature(typeof(int)));
-            var methodSpecification = new MethodSpecification(method, genericMethodInstance);
-
+            var methodSpecification = method.MakeGenericInstanceMethod([_importer.ImportTypeSignature(typeof(int))]);
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);
@@ -202,7 +199,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(context, context2);
             Assert.False(context.IsEmpty);
             Assert.Equal(genericTypeInstance, context.Type);
-            Assert.Equal(genericMethodInstance, context.Method);
+            Assert.Equal(methodSpecification.Signature, context.Method);
         }
 
         [Fact]
