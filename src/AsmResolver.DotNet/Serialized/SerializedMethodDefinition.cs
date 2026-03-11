@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.PortablePdbs;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Serialized
@@ -148,5 +149,32 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         protected override UnmanagedExportInfo? GetExportInfo() => _context.ParentModule.GetExportInfo(MetadataToken);
+
+        protected override MethodDebugInformation? GetMethodDebugInformation() => _context.SymbolReader.GetMethodDebugInformation(this);
+
+        protected override IList<LocalScope> GetLocalScopes()
+        {
+            var scopes = new MemberCollection<MethodDefinition, LocalScope>(this);
+            foreach (var localScope in _context.SymbolReader.GetLocalScopes(this))
+            {
+                scopes.AddNoOwnerCheck(localScope);
+            }
+            return scopes;
+        }
+
+        protected override MethodDefinition? GetKickoffMethod() => _context.SymbolReader.GetKickoffMethod(this);
+
+        protected override MethodDefinition? GetMoveNextMethod() => _context.SymbolReader.GetMoveNextMethod(this);
+
+        protected override IList<CustomDebugInformation> GetCustomDebugInformations()
+        {
+            var cdis = _context.SymbolReader.GetCustomDebugInformations(this);
+            var result = new MemberCollection<IHasCustomDebugInformation, CustomDebugInformation>(this);
+            foreach (var cdi in cdis)
+            {
+                result.AddNoOwnerCheck(cdi);
+            }
+            return result;
+        }
     }
 }

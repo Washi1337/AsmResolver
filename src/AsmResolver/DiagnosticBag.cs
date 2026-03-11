@@ -42,6 +42,12 @@ namespace AsmResolver
         /// <param name="exception">The error.</param>
         public void RegisterException(Exception exception)
         {
+#if NET6_0_OR_GREATER
+            if (exception.StackTrace == null)
+            {
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.SetCurrentStackTrace(exception);
+            }
+#endif
             Exceptions.Add(exception);
         }
     }
