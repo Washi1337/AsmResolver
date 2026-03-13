@@ -43,10 +43,10 @@ public class SerializedSubStringListLeaf : SubStringListLeaf
         for (int i = 0; i < count; i++)
         {
             uint index = reader.ReadUInt32();
-            if (!context.ParentImage.TryGetIdLeafRecord(index, out StringIdentifier? entry))
+            var entry = context.ParentImage.GetIdLeafRecord<StringIdentifier>(index);
+            if (entry is null)
             {
-                context.Parameters.ErrorListener.BadImage(
-                    $"String List {originIndex:X8} contains an invalid string index {index:X8}.");
+                // The index could not be resolved.
                 return result;
             }
             result.Add(entry);
