@@ -81,6 +81,19 @@ namespace AsmResolver.DotNet.Config.Json
         }
 
         /// <summary>
+        /// Gets an array (added in .NET Core 3.0) of shared frameworks when activating the application.
+        /// </summary>
+        /// <remarks>
+        /// The presence of this section (or another framework in the new "framework" section) indicates
+        /// that the application is a framework-dependent app.
+        /// </remarks>
+        public List<RuntimeFramework>? Frameworks
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets an optional array (added in .NET Core 3.0) that allows multiple frameworks to be specified.
         /// </summary>
         public List<RuntimeFramework>? IncludedFrameworks
@@ -130,6 +143,13 @@ namespace AsmResolver.DotNet.Config.Json
             if (node.HasKey("framework"))
                 result.Framework = RuntimeFramework.FromJsonNode(node["framework"]);
 
+            if (node.HasKey("frameworks"))
+            {
+                result.Frameworks = new List<RuntimeFramework>();
+                foreach (var item in node["frameworks"].Values)
+                    result.Frameworks.Add(RuntimeFramework.FromJsonNode(item));
+            }
+
             if (node.HasKey("includedFrameworks"))
             {
                 result.IncludedFrameworks = new List<RuntimeFramework>();
@@ -178,9 +198,15 @@ namespace AsmResolver.DotNet.Config.Json
             if (Framework is { } framework)
                 yield return framework;
 
-            if (IncludedFrameworks is { } frameworks)
+            if (Frameworks is { } frameworks)
             {
                 foreach (var includedFramework in frameworks)
+                    yield return includedFramework;
+            }
+
+            if (IncludedFrameworks is { } includedFrameworks)
+            {
+                foreach (var includedFramework in includedFrameworks)
                     yield return includedFramework;
             }
         }
