@@ -378,10 +378,10 @@ namespace AsmResolver.DotNet.Tests
                     {
                         "runtimeOptions": {
                             "tfm": "net10.0",
-                            "includedFrameworks": [{
+                            "framework": {
                                 "name": "Microsoft.NETCore.App",
                                 "version": "10.0.0"
-                            }]
+                            }
                         }
                     }
                     """
@@ -421,10 +421,10 @@ namespace AsmResolver.DotNet.Tests
                     {
                         "runtimeOptions": {
                             "tfm": "net10.0",
-                            "framework": {
+                            "includedFrameworks": [{
                                 "name": "Microsoft.NETCore.App",
                                 "version": "10.0.0"
-                            }
+                            }]
                         }
                     }
                     """
