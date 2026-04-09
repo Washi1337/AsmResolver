@@ -83,8 +83,11 @@ namespace AsmResolver.DotNet.Signatures
                 if (!AcceptNewerAssemblyVersionNumbers && !AcceptOlderAssemblyVersionNumbers)
                     hashCode = (hashCode * 397) ^ obj.Version.GetHashCode();
 
-                byte[]? publicKeyToken = obj.GetPublicKeyToken();
-                hashCode = (hashCode * 397) ^ (publicKeyToken is not null ? GetHashCode(publicKeyToken) : 0);
+                if (!IgnoreStrongNames)
+                {
+                    byte[]? publicKeyToken = obj.GetPublicKeyToken();
+                    hashCode = (hashCode * 397) ^ (publicKeyToken is not null ? GetHashCode(publicKeyToken) : 0);
+                }
 
                 return hashCode;
             }
