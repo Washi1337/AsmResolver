@@ -10,7 +10,6 @@ AsmResolver is a library for reading, modifying and reconstructing Portable Exec
 
 AsmResolver is released under the MIT license.
 
-
 ## Main Features
 
 AsmResolver has a lot of features. Below is a non-exhaustive list of the highlights:
@@ -19,7 +18,7 @@ AsmResolver has a lot of features. Below is a non-exhaustive list of the highlig
   - [x] Full access to sections, data directories and their interpretations.
   - [x] Import Address Table (IAT) reconstruction and trampolining.
   - [x] Full control over the layout of the final PE file output.
-- [x] Rich support for various Win32 resource types.
+- [x] Rich support for various Win32 resource types (Icons, VersionInfo, etc.).
 - [x] Rich support for .NET metadata with an intuitive API similar to `System.Reflection`.
   - [x] Managed, native and dynamic method body support.
   - [x] Easy metadata importing and cloning.
@@ -28,18 +27,16 @@ AsmResolver has a lot of features. Below is a non-exhaustive list of the highlig
   - [x] Support for ReadyToRun (R2R) binaries.
 - [x] Build to be robust against malformed/obfuscated binaries.
 - [x] Rich read support for PDB and PortablePdb symbols.
-  - [x] Fully managed cross-platform API (No DIA or similar required).
-- [x] .NET 3.5 compatible.
-- [x] Cross-platform (Windows and *nix, .NET standard 2.0 and Mono compatible).
-- [x] Documented.
+  - [x] Fully managed cross-platform API (No [DIA](https://learn.microsoft.com/en-us/visualstudio/debugger/debug-interface-access/debug-interface-access-sdk?view=visualstudio) or similar dependencies required).
+- [x] Cross-platform (Windows and *nix, .NET Framework 3.5+, .NET standard 2.0, .NET Core, Mono and NixOS package compatible).
+- [x] [Documented](https://docs.washi.dev/asmresolver).
 - [x] Unit tested.
-
 
 ## Documentation
 
 - [Guides](https://docs.washi.dev/asmresolver)
+    - [Migrating from v5.x to v6.0](https://docs.washi.dev/asmresolver/guides/migration-v5-v6.html)
 - [API Reference](https://docs.washi.dev/asmresolver/api/core/AsmResolver.html)
-
 
 ## Support
 
@@ -65,7 +62,7 @@ Nightly Builds:
 
 ## Compiling
 
-The solution can be built using the .NET SDK or an IDE that works with it (e.g., Visual Studio and JetBrains Rider). The main packages target LTS versions of various .NET runtimes (.NET 3.5, .NET Standard 2.0, .NET Standard 2.1, .NET Core 3.1, .NET 6.0, .NET 8.0, .NET 9.0, .NET 10.0).
+The solution can be built using the .NET SDK or an IDE that works with it (e.g., Visual Studio and JetBrains Rider). The main packages target LTS versions of various .NET runtimes (.NET Framework 3.5, .NET Standard 2.0, .NET Standard 2.1, .NET Core 3.1, .NET 6.0, .NET 8.0, .NET 9.0, .NET 10.0).
 
 To build the project from the command line, use:
 ```bash
@@ -91,7 +88,7 @@ AsmResolver started as a hobby project but has grown into a community project wi
 
 - Special thanks to all the people who contributed [directly with code commits](https://github.com/Washi1337/AsmResolver/graphs/contributors) or monetarily via [GitHub sponsors](https://github.com/sponsors/Washi1337).
 
-- Special thanks to the people at [@MonoMod](https://github.com/MonoMod) for helping with .NET 3.5 compatibility.
+- Special thanks to the people at [@MonoMod](https://github.com/MonoMod) for helping with .NET Framework 3.5 compatibility.
 
 - Another big thank you to all the people that suggested new features, provided feedback on the API design, have done extensive testing, and/or reported bugs on the [issue board](https://github.com/Washi1337/AsmResolver/issues), by e-mail, or through DMs.
 
