@@ -2,7 +2,7 @@
 
 Most models in AsmResolver v5.x have stayed the same in v6.0. However there are a few breaking changes that likely will require attention when upgrading.
 
-## Removal of Namespaces
+## Removal of redundant namespaces
 
 To reduce the number of `using` directives in a typical use-case of AsmResolver, v6.0 flattens many namespaces into a single namespace.
 This includes the following list:
@@ -192,7 +192,50 @@ All resolution of metadata goes through `RuntimeContext`.
 See also [Runtime Contexts](dotnet/runtime-contexts.md) for more details.
 
 
-## Creating .NET Method Bodies
+## Type comparisons using SignatureComparer
+
+AsmResolver v6.0 changes the way types are resolved.
+This also affects the way `SignatureComparer` compares types that are forwarded through an `ExportedType` (`TypeForwardedTo` attribute in C#), and in particular, the use of `SignatureComparer.Default`.
+
+In v5.x, `SignatureComparer` always attempts to resolve any potentially exported types.
+As a result, comparisons between type references `[System.Runtime] System.Object` and `[System.Private.CoreLib] System.Object` returns `true` even though they have a different assembly reference defined as their resolution scope:
+
+```csharp
+// Using AsmResolver v5.x
+var t1 = KnownCorLibs.SystemRuntime_v10_0_0_0.CreateTypeReference("System", "Object");
+var t2 = KnownCorLibs.SystemPrivateCoreLib_v10_0_0_0.CreateTypeReference("System", "Object");
+
+bool equal = SignatureComparer.Default.Equals(t1, t2); // returns true
+```
+
+In v6.0, `SignatureComparer` by default **does not resolve forwarded types**, and thus treat these two type references as distinct:
+
+```csharp
+// Using AsmResolver v6.0
+var t1 = KnownCorLibs.SystemRuntime_v10_0_0_0.CreateTypeReference("System", "Object");
+var t2 = KnownCorLibs.SystemPrivateCoreLib_v10_0_0_0.CreateTypeReference("System", "Object");
+
+bool equal = SignatureComparer.Default.Equals(t1, t2); // returns false
+```
+
+However, if a comparer is initialized with a non-`null` instance of `RuntimeContext`, the comparer will use the original behavior again:
+
+```csharp
+// Using AsmResolver v6.0
+var t1 = KnownCorLibs.SystemRuntime_v10_0_0_0.CreateTypeReference("System", "Object");
+var t2 = KnownCorLibs.SystemPrivateCoreLib_v10_0_0_0.CreateTypeReference("System", "Object");
+
+var context = new RuntimeContext(DotNetRuntimeInfo.NetCoreApp(10, 0));
+var comparer = context.SignatureComparer; // or `var comparer = new SignatureComparer(context)`;
+
+bool equal = comparer.Equals(t1, t2); // returns true
+```
+
+Note that `SignatureComparer.Default` is not initialized with a `RuntimeContext`.
+Users that rely on the equality of potentially forwarded types will therefore have to migrate to a manually initialized `SignatureComparer` instead of using `SignatureComparer.Default`.
+
+
+## Creating .NET method bodies
 
 In AsmResolver v5.x, when instantiating a new body for a method definition, it was required to specify the owner method definition in its constructor.
 With v6.0 this is no longer necessary.

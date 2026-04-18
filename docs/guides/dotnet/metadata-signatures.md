@@ -44,7 +44,7 @@ Member signatures:
 | `PropertySignature`     | `System.Int32 *()` (attached to a `PropertyDefinition`)   |
 
 
-## Basic Element Types
+## Basic element types
 
 The CLR defines a set of primitive types (such as `System.Int32`, `System.Object`) as basic element types that can be referenced using a single byte, rather than the fully qualified name.
 These are represented using the `CorLibTypeSignature` class.
@@ -69,7 +69,7 @@ int32Type = module.CorLibTypeFactory.FromType(int32TypeRef);
 If an invalid element type, name or type descriptor is passed on, `FromType` returns `null`.
 
 
-## Class and Struct Types
+## Class and struct types
 
 Type signatures from non-primitive types (e.g., `TypeDefinition`s or `TypeReference`s) can be created by using the `ToTypeSignature` on an instance of a `ITypeDefOrRef`:
 
@@ -106,7 +106,7 @@ TypeSignature streamTypeSig = new TypeDefOrRefSignature(streamTypeRef, isValueTy
 > Prefer to use `ToTypeSignature`, or always use the `CorLibTypeSignature` to reference basic types within your blob signatures.
 
 
-## Generic Instance Types
+## Generic instance types
 
 To create generic instances of types, use `MakeGenericInstanceType`:
 
@@ -133,7 +133,7 @@ var listOfString = new GenericInstanceTypeSignature(
 ```
 
 
-## Function Pointer Types
+## Function pointer types
 
 Function pointer signatures are strongly-typed pointer types used to describe addresses to functions or methods.
 In AsmResolver, they are represented by wrapping a `MethodSignature` into a `FunctionPointerTypeSignature` using `MakeFunctionPointerType`:
@@ -163,7 +163,7 @@ var type = new FunctionPointerTypeSignature(signature);
 ```
 
 
-## Decorating Types
+## Decorating types with annotations
 
 Type signatures can be annotated with extra properties, such as an array or pointer specifier.
 This is done using the `MakeXXXType` methods.
@@ -227,72 +227,7 @@ TypeSignature signature = ...;
 var result = signature.AcceptVisitor(new MyVisitor());
 ```
 
-## Comparing Types
-
-Type signatures can be tested for semantic equivalence using the `SignatureComparer` class.
-Most use-cases of this class will not require any customization.
-In these cases, the default `SignatureComparer` can be used:
-
-``` csharp
-var comparer = SignatureComparer.Default;
-```
-
-To mimic the comparison the runtime does (including following forwarded types and strong name handling), use the signature comparer as stored in the `RuntimeContext` you are operating in:
-
-``` csharp
-var comparer = context.SignatureComparer;
-```
-
-if you wish to configure the comparer yourself (e.g., for relaxing some of the declaring assembly version comparison rules), it is possible to create a new instance instead:
-
-``` csharp
-var comparer = new SignatureComparer(SignatureComparisonFlags.AllowNewerVersions);
-```
-
-Once a comparer is obtained, we can test for type equality using any of the overloaded `Equals` methods:
-
-``` csharp
-TypeSignature type1 = ...;
-TypeSignature type2 = ...;
-
-if (comparer.Equals(type1, type2)) 
-{
-    // type1 and type2 are semantically equivalent.
-}
-```
-
-The `SignatureComparer` class implements various instances of the `IEqualityComparer<T>` interface, and as such, it can be used as a comparer for dictionaries and related types:
-
-``` csharp
-var dictionary = new Dictionary<TypeSignature, TValue>(comparer);
-```
-
-> [!TIP]
-> The `SignatureComparer` class also implements equality comparers for other kinds of metadata, such as field and method descriptors and their  signatures.
-
-In some cases, exact type equivalence is too strict.
-Since .NET facilitates an object oriented environment, many types will inherit or derive from each other, making it difficult to pinpoint exactly which types we would need to compare to test whether two types are compatible with each other.
-
-Section I.8.7 of the ECMA-335 specification defines a set of rules that dictate whether values of a certain type are compatible with or assignable to variables of another type.
-These rules are implemented in AsmResolver using the `IsCompatibleWith` and `IsAssignableTo` methods:
-
-``` csharp
-RuntimeContext? context = ...;
-if (type1.IsCompatibleWith(type2, context)) 
-{
-    // type1 can be converted to type2.
-}
-```
-
-``` csharp
-RuntimeContext? context = ...;
-if (type1.IsAssignableTo(type2, context)) 
-{
-    // Values of type1 can be assigned to variables of type2.
-}
-```
-
-## Member Signatures
+## Creating member signatures
 
 `TypeSignature`s form the building blocks for more complex signatures.
 
@@ -358,3 +293,92 @@ var method = module.CorLibTypeFactory.CorLibScope
 > [!WARNING]
 > Ensure that you use the right method signature factory method for the right method.
 > Creating an instance signature for a static method or vice versa will cause the CLR to reject the final binary.
+
+
+## Comparing signatures
+
+Signatures can be tested for semantic equivalence using the `SignatureComparer` class.
+Most use-cases of this class will not require any customization.
+In these cases, the default `SignatureComparer` can be used:
+
+``` csharp
+var comparer = SignatureComparer.Default;
+```
+
+Note that, by default, `SignatureComparer` does not take into account forwarded types.
+Therefore, it treats types such as `[System.Runtime] System.Object` and `[System.Private.CoreLib] System.Object` as two distinct types (even though at runtime they are the same).
+To mimic comparisons that the runtime performs (including following forwarded types and strong name handling), use the signature comparer as stored in the `RuntimeContext` you are operating in:
+
+``` csharp
+RuntimeContext context = ...;
+var comparer = context.SignatureComparer;
+```
+
+If you wish to configure the comparer yourself (e.g., for relaxing some of the declaring assembly version comparison rules), it is possible to create a new instance instead:
+
+``` csharp
+var comparer = new SignatureComparer(SignatureComparisonFlags.AllowNewerVersions);
+```
+
+Once a comparer is obtained, metadata signature equality can be tested using any of the overloaded `Equals` methods:
+
+``` csharp
+TypeSignature type1 = ...;
+TypeSignature type2 = ...;
+
+if (comparer.Equals(type1, type2)) 
+{
+    // type1 and type2 are equivalent.
+}
+```
+
+The `SignatureComparer` class implements various instances of the `IEqualityComparer<T>` interface, and as such, it can be used as a comparer for dictionaries and related types:
+
+``` csharp
+var dictionary = new Dictionary<TypeSignature, TValue>(comparer);
+```
+
+> [!TIP]
+> The `SignatureComparer` class also implements equality comparers for other kinds of metadata, such as field and method descriptors and their  signatures.
+
+Since .NET facilitates an object oriented environment, many types will inherit or derive from each other.
+In some cases where inheritance needs to be taken into account, exact equivalence comparisons may therefore be too strict.
+
+Section I.8.7 of the ECMA-335 specification defines a set of rules that dictate whether values of a certain type are compatible with or assignable to variables of another type.
+These rules are implemented in AsmResolver using the `IsCompatibleWith` and `IsAssignableTo` methods:
+
+``` csharp
+RuntimeContext? context = ...;
+if (type1.IsCompatibleWith(type2, context)) 
+{
+    // type1 can be converted to type2.
+}
+```
+
+``` csharp
+RuntimeContext? context = ...;
+if (type1.IsAssignableTo(type2, context)) 
+{
+    // Values of type1 can be assigned to variables of type2.
+}
+```
+
+By default, this uses the `SigantureComparer` of the `RuntimeContext`, but these methods come with overloads that take in a custom `SignatureComparer` as well:
+
+``` csharp
+RuntimeContext? context = ...;
+SignatureComparer comparer = ...;
+if (type1.IsCompatibleWith(type2, context, comparer)) 
+{
+    // type1 can be converted to type2.
+}
+```
+
+``` csharp
+RuntimeContext? context = ...;
+SignatureComparer comparer = ...;
+if (type1.IsAssignableTo(type2, context, comparer)) 
+{
+    // Values of type1 can be assigned to variables of type2.
+}
+```
