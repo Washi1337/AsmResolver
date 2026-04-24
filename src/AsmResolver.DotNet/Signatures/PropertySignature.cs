@@ -32,7 +32,25 @@ namespace AsmResolver.DotNet.Signatures
                 null
             );
 
-            result.ReadParametersAndReturnType(ref context, ref reader);
+            // Parameter count.
+            if (!reader.TryReadCompressedUInt32(out uint parameterCount))
+            {
+                context.ReaderContext.BadImage("Invalid number of parameters in signature.");
+                return result;
+            }
+
+            // Return type.
+            result.ReturnType = TypeSignature.FromReader(ref context, ref reader);
+
+            // Parameter types.
+            if (parameterCount > 0)
+            {
+                result.ParameterTypes = new List<TypeSignature>((int) parameterCount);
+
+                for (int i = 0; i < parameterCount; i++)
+                    result.ParameterTypes.Add(TypeSignature.FromReader(ref context, ref reader));
+            }
+
             return result;
         }
 
@@ -100,8 +118,23 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         protected override void WriteContents(in BlobSerializationContext context)
         {
-            context.Writer.WriteByte((byte) Attributes);
-            WriteParametersAndReturnType(context);
+            var writer = context.Writer;
+
+            // Attributes
+            writer.WriteByte((byte) Attributes);
+
+            // Parameter type count
+            writer.WriteCompressedUInt32((uint) ParameterTypes.Count);
+
+            // Return type
+            ReturnType.Write(context);
+
+            // Parameter types
+            if (HasParameterTypes)
+            {
+                for (int i = 0; i < ParameterTypes.Count; i++)
+                    ParameterTypes[i].Write(context);
+            }
         }
 
         /// <inheritdoc />

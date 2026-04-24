@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using AsmResolver.IO;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Signatures
@@ -10,6 +12,8 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public class MethodSignature : MethodSignatureBase
     {
+        private List<TypeSignature>? _sentinelTypes;
+
         /// <summary>
         /// Reads a single method signature from an input stream.
         /// </summary>
@@ -21,7 +25,7 @@ namespace AsmResolver.DotNet.Signatures
             var result = new MethodSignature(
                 (CallingConventionAttributes) reader.ReadByte(),
                 context.ReaderContext.ParentModule.CorLibTypeFactory.Void,
-                Enumerable.Empty<TypeSignature>()
+                null
             );
 
             // Generic parameter count.
@@ -36,7 +40,43 @@ namespace AsmResolver.DotNet.Signatures
                 result.GenericParameterCount = (int) genericParameterCount;
             }
 
-            result.ReadParametersAndReturnType(ref context, ref reader);
+            // Parameter count.
+            if (!reader.TryReadCompressedUInt32(out uint parameterCount))
+            {
+                context.ReaderContext.BadImage("Invalid number of parameters in signature.");
+                return result;
+            }
+
+            // Return type.
+            result.ReturnType = TypeSignature.FromReader(ref context, ref reader);
+
+            // (Sentinel) parameter types.
+            if (parameterCount > 0)
+            {
+                result.ParameterTypes = new List<TypeSignature>((int) parameterCount);
+
+                result.IncludeSentinel = false;
+                for (int i = 0; i < parameterCount; i++)
+                {
+                    var parameterType = TypeSignature.FromReader(ref context, ref reader);
+
+                    if (parameterType.ElementType == ElementType.Sentinel)
+                    {
+                        result.IncludeSentinel = true;
+                        i--;
+                        result._sentinelTypes = new List<TypeSignature>((int) parameterCount - result.ParameterTypes.Count);
+                    }
+                    else if (result.IncludeSentinel)
+                    {
+                        result._sentinelTypes!.Add(parameterType);
+                    }
+                    else
+                    {
+                        result.ParameterTypes.Add(parameterType);
+                    }
+                }
+            }
+
             return result;
         }
 
@@ -151,6 +191,37 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether sentinel parameters should be included in the signature.
+        /// </summary>
+        public bool IncludeSentinel
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether there are any sentinel parameters present in this signature.
+        /// </summary>
+        public bool HasSentinelParameterTypes => _sentinelTypes is { Count: > 0 };
+
+        /// <summary>
+        /// Gets an ordered list of types indicating the types of the sentinel parameters that this member defines.
+        /// </summary>
+        /// <remarks>
+        /// For any of the sentinel parameter types to be emitted to the output module, the <see cref="IncludeSentinel"/>
+        /// must be set to <c>true</c>.
+        /// </remarks>
+        public IList<TypeSignature> SentinelParameterTypes
+        {
+            get
+            {
+                if (_sentinelTypes is null)
+                    Interlocked.CompareExchange(ref _sentinelTypes, [], null);
+                return _sentinelTypes;
+            }
+        }
+
+        /// <summary>
         /// Substitutes any generic type parameter in the method signature with the parameters provided by
         /// the generic context.
         /// </summary>
@@ -170,16 +241,69 @@ namespace AsmResolver.DotNet.Signatures
         public FunctionPointerTypeSignature MakeFunctionPointerType() => new(this);
 
         /// <inheritdoc />
+        public override bool IsImportedInModule(ModuleDefinition module)
+        {
+            if (!base.IsImportedInModule(module))
+                return false;
+
+            for (int i = 0; i < SentinelParameterTypes.Count; i++)
+            {
+                var x = SentinelParameterTypes[i];
+                if (!x.IsImportedInModule(module))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public override int GetTotalParameterCount()
+        {
+            return base.GetTotalParameterCount() + (_sentinelTypes?.Count ?? 0);
+        }
+
+        /// <inheritdoc />
         protected override void WriteContents(in BlobSerializationContext context)
         {
             var writer = context.Writer;
 
+            // Attributes
             writer.WriteByte((byte) Attributes);
 
+            // Generic parameter count
             if (IsGeneric)
                 writer.WriteCompressedUInt32((uint) GenericParameterCount);
 
-            WriteParametersAndReturnType(context);
+            // Parameter count
+            uint totalCount = 0;
+            if (HasParameterTypes)
+                totalCount += (uint) ParameterTypes.Count;
+            if (IncludeSentinel && HasSentinelParameterTypes)
+                totalCount += (uint) SentinelParameterTypes.Count;
+
+            context.Writer.WriteCompressedUInt32(totalCount);
+
+            // Return type
+            ReturnType.Write(context);
+
+            // Parameter types
+            if (HasParameterTypes)
+            {
+                for (int i = 0; i < ParameterTypes.Count; i++)
+                    ParameterTypes[i].Write(context);
+            }
+
+            // Sentinel parameter types.
+            if (IncludeSentinel)
+            {
+                context.Writer.WriteByte((byte) ElementType.Sentinel);
+
+                if (HasSentinelParameterTypes)
+                {
+                    for (int i = 0; i < SentinelParameterTypes.Count; i++)
+                        SentinelParameterTypes[i].Write(context);
+                }
+            }
         }
 
         /// <inheritdoc />
