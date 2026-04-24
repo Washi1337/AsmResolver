@@ -31,6 +31,38 @@ namespace AsmResolver.DotNet.Tests.Collections
         }
 
         [Fact]
+        public void ReadReturnParameterName()
+        {
+            var method = ObtainStaticTestMethod(nameof(MultipleMethods.IntParameterlessMethod));
+            Assert.NotNull(method.Parameters.ReturnParameter.Name);
+        }
+
+        [Fact]
+        public void ReadHiddenThisParameterName()
+        {
+            var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceParameterlessInt32Method));
+            Assert.NotNull(method.Parameters.ThisParameter);
+            Assert.NotNull(method.Parameters.ThisParameter.Name);
+        }
+
+        [Fact]
+        public void ReadNamesFromStaticMethodWithNoDefinitions()
+        {
+            var method = ObtainStaticTestMethod(nameof(MultipleMethods.MultipleParameterMethod));
+            method.ParameterDefinitions.Clear();
+            Assert.Equal(["A_0", "A_1", "A_2"], method.Parameters.Select(x => x.Name));
+        }
+
+        [Fact]
+        public void ReadNamesFromInstanceMethodWithNoDefinitions()
+        {
+            var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceMultipleParametersMethod));
+            method.ParameterDefinitions.Clear();
+            Assert.Equal(["A_1", "A_2", "A_3"], method.Parameters.Select(x => x.Name));
+            Assert.Equal("A_0", method.Parameters.ThisParameter?.Name);
+        }
+
+        [Fact]
         public void ReadEmptyParametersFromStaticMethod()
         {
             var method = ObtainStaticTestMethod(nameof(MultipleMethods.VoidParameterlessMethod));
@@ -143,6 +175,16 @@ namespace AsmResolver.DotNet.Tests.Collections
             Assert.Throws<InvalidOperationException>(
                 () => method.Parameters.ReturnParameter.ParameterType = method.DeclaringModule!.CorLibTypeFactory.Int32
             );
+        }
+
+        [Fact]
+        public void UpdateReturnTypeAndPullShouldUpdateReturnParameterType()
+        {
+            var method = ObtainStaticTestMethod(nameof(MultipleMethods.VoidParameterlessMethod));
+            Assert.Equal(ElementType.Void, method.Parameters.ReturnParameter.ParameterType.ElementType);
+            method.Signature!.ReturnType = method.DeclaringModule!.CorLibTypeFactory.Int32;
+            method.Parameters.PullUpdatesFromMethodSignature();
+            Assert.Equal(ElementType.I4, method.Parameters.ReturnParameter.ParameterType.ElementType);
         }
 
         [Fact]

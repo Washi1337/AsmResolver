@@ -89,6 +89,9 @@ namespace AsmResolver.DotNet.Collections
         [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
         private static string GetDummyArgumentName(int index)
         {
+            if (index == -1)
+                return "A_Return";
+
             if (index >= CachedArgNames.Count)
             {
                 lock (CachedArgNames)
