@@ -555,14 +555,12 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <summary>
         /// Constructs a new boxed type signature with the provided type descriptor as element type.
-        /// as element type.
         /// </summary>
         /// <returns>The constructed boxed type signature.</returns>
         public BoxedTypeSignature MakeBoxedType() => new(this);
 
         /// <summary>
         /// Constructs a new by-reference type signature with the provided type descriptor as element type.
-        /// as element type.
         /// </summary>
         /// <returns>The constructed by-reference type signature.</returns>
         public ByReferenceTypeSignature MakeByReferenceType() => new(this);
@@ -576,14 +574,12 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <summary>
         /// Constructs a new pointer type signature with the provided type descriptor as element type.
-        /// as element type.
         /// </summary>
         /// <returns>The constructed by-reference type signature.</returns>
         public PointerTypeSignature MakePointerType() => new(this);
 
         /// <summary>
-        /// Constructs a new pointer type signature with the provided type descriptor as element type.
-        /// as element type.
+        /// Annotates a type signature with the provided modifier type descriptor.
         /// </summary>
         /// <param name="modifierType">The modifier type to add.</param>
         /// <param name="isRequired">Indicates whether the modifier is required or optional.</param>
