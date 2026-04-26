@@ -22,6 +22,12 @@ your mixed mode application, and might throw runtime or image format
 exceptions, even if everything else conforms to the right format. This
 section will go over these requirements briefly.
 
+> [!NOTE]
+> There are restrictions on the location of native methods in the 
+> CLR core implementation: they can only be located in the global `<Module>` class.
+> Defining a native method in a different class will result 
+> in a "Native method is not supported" exception being thrown.
+
 ### Allowing native code in modules
 
 To make the CLR treat the output file as a mixed mode application, the
