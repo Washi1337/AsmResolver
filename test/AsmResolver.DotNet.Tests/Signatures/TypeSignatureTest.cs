@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Generics;
@@ -600,35 +601,38 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var type2 = module.CorLibTypeFactory.FromElementType(elementType2)!;
 
             Assert.Equal(expected, type1.IsAssignableTo(type2, module.RuntimeContext));
+            Assert.Equal(expected, type2.IsAssignableFrom(type1, module.RuntimeContext));
         }
 
-        [Fact]
-        public void IsAssignableToForwardedType()
+        public static TheoryData<TypeSignature, TypeSignature> IsAssignableForwardedTypeData(string ns, string name)
+        {
+            var data = new TheoryData<TypeSignature, TypeSignature>();
+
+            var srType = KnownCorLibs.SystemRuntime_v10_0_0_0
+                .CreateTypeReference(ns, name)
+                .ToTypeSignature(isValueType: false);
+
+            var spcType = KnownCorLibs.SystemPrivateCoreLib_v10_0_0_0
+                .CreateTypeReference(ns, name)
+                .ToTypeSignature(isValueType: false);
+
+            data.Add(srType, srType);
+            data.Add(srType, spcType);
+            data.Add(spcType, srType);
+            data.Add(spcType, spcType);
+
+            return data;
+        }
+
+        [Theory]
+        [MemberData(nameof(IsAssignableForwardedTypeData), "System.IO", "IOException")]
+        [MemberData(nameof(IsAssignableForwardedTypeData), "System.IO", "FileNotFoundException")]
+        public void IsAssignableForwardedType(TypeSignature type1, TypeSignature type2)
         {
             var context = new RuntimeContext(DotNetRuntimeInfo.NetCoreApp(10, 0));
 
-            var srIOException = KnownCorLibs.SystemRuntime_v10_0_0_0
-                .CreateTypeReference("System.IO", "IOException")
-                .ToTypeSignature(isValueType: false);
-
-            var srFileNotFound = KnownCorLibs.SystemRuntime_v10_0_0_0
-                .CreateTypeReference("System.IO", "FileNotFoundException")
-                .ToTypeSignature(isValueType: false);
-
-            var spcIOException = KnownCorLibs.SystemPrivateCoreLib_v10_0_0_0
-                .CreateTypeReference("System.IO", "IOException")
-                .ToTypeSignature(isValueType: false);
-
-            var spcFileNotFound = KnownCorLibs.SystemPrivateCoreLib_v10_0_0_0
-                .CreateTypeReference("System.IO", "FileNotFoundException")
-                .ToTypeSignature(isValueType: false);
-
-            Assert.True(spcIOException.IsAssignableTo(srIOException, context));
-            Assert.True(srIOException.IsAssignableTo(spcIOException, context));
-            Assert.True(spcFileNotFound.IsAssignableTo(srIOException, context));
-            Assert.True(spcFileNotFound.IsAssignableTo(spcIOException, context));
-            Assert.True(srFileNotFound.IsAssignableTo(srIOException, context));
-            Assert.True(srFileNotFound.IsAssignableTo(spcIOException, context));
+            Assert.True(type1.IsAssignableTo(type2, context));
+            Assert.True(type2.IsAssignableFrom(type1, context));
         }
 
         [Fact]
