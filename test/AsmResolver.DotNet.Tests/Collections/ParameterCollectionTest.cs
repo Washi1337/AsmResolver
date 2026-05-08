@@ -169,15 +169,6 @@ namespace AsmResolver.DotNet.Tests.Collections
         }
 
         [Fact]
-        public void UpdateReturnTypeFromStaticParameterlessMethodShouldThrow()
-        {
-            var method = ObtainStaticTestMethod(nameof(MultipleMethods.VoidParameterlessMethod));
-            Assert.Throws<InvalidOperationException>(
-                () => method.Parameters.ReturnParameter.ParameterType = method.DeclaringModule!.CorLibTypeFactory.Int32
-            );
-        }
-
-        [Fact]
         public void UpdateReturnTypeAndPullShouldUpdateReturnParameterType()
         {
             var method = ObtainStaticTestMethod(nameof(MultipleMethods.VoidParameterlessMethod));
@@ -185,6 +176,42 @@ namespace AsmResolver.DotNet.Tests.Collections
             method.Signature!.ReturnType = method.DeclaringModule!.CorLibTypeFactory.Int32;
             method.Parameters.PullUpdatesFromMethodSignature();
             Assert.Equal(ElementType.I4, method.Parameters.ReturnParameter.ParameterType.ElementType);
+        }
+
+        [Fact]
+        public void UpdateReturnParameterParameterTypeShouldUpdateStaticSignatureReturnType()
+        {
+            var method = ObtainStaticTestMethod(nameof(MultipleMethods.VoidParameterlessMethod));
+            Assert.Equal(ElementType.Void, method.Signature!.ReturnType.ElementType);
+            method.Parameters.ReturnParameter.ParameterType = method.DeclaringModule!.CorLibTypeFactory.Int32;
+            Assert.Equal(ElementType.I4, method.Signature.ReturnType.ElementType);
+        }
+
+        [Fact]
+        public void UpdateReturnParameterParameterTypeShouldUpdateInstanceSignatureReturnType()
+        {
+            var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceParameterlessMethod));
+            Assert.Equal(ElementType.Void, method.Signature!.ReturnType.ElementType);
+            method.Parameters.ReturnParameter.ParameterType = method.DeclaringModule!.CorLibTypeFactory.Int32;
+            Assert.Equal(ElementType.I4, method.Signature.ReturnType.ElementType);
+        }
+
+        [Fact]
+        public void UpdateParameterParameterTypeShouldUpdateStaticSignatureParameterTypes()
+        {
+            var method = ObtainStaticTestMethod(nameof(MultipleMethods.MultipleParameterMethod));
+            Assert.Equal(ElementType.String, method.Signature!.ParameterTypes[1].ElementType);
+            method.Parameters[1].ParameterType = method.DeclaringModule!.CorLibTypeFactory.Int32;
+            Assert.Equal(ElementType.I4, method.Signature!.ParameterTypes[1].ElementType);
+        }
+
+        [Fact]
+        public void UpdateParameterParameterTypeShouldUpdateInstanceSignatureParameterTypes()
+        {
+            var method = ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceMultipleParametersMethod));
+            Assert.Equal(ElementType.String, method.Signature!.ParameterTypes[1].ElementType);
+            method.Parameters[1].ParameterType = method.DeclaringModule!.CorLibTypeFactory.Int32;
+            Assert.Equal(ElementType.I4, method.Signature!.ParameterTypes[1].ElementType);
         }
 
         [Fact]
@@ -318,6 +345,13 @@ namespace AsmResolver.DotNet.Tests.Collections
 
             Assert.NotNull(method.Parameters.ThisParameter);
             Assert.Throws<InvalidOperationException>(() => method.Parameters.ThisParameter.GetOrCreateDefinition());
+        }
+
+        [Fact]
+        private void ReturnTypeSequenceZero()
+        {
+            Assert.Equal(0, ObtainInstanceTestMethod(nameof(InstanceMethods.InstanceParameterlessInt32Method)).Parameters.ReturnParameter.Sequence);
+            Assert.Equal(0, ObtainStaticTestMethod(nameof(MultipleMethods.IntParameterlessMethod)).Parameters.ReturnParameter.Sequence);
         }
     }
 }
