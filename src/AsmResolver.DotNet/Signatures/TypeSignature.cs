@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
-        /// Gets the element type of the
+        /// Gets the element type of the current type signature.
         /// </summary>
         public abstract ElementType ElementType
         {
@@ -559,50 +559,49 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         IImportable IImportable.ImportWith(ReferenceImporter importer) => ImportWith(importer);
 
-          /// <summary>
-        /// Constructs a new single-dimension, zero based array signature with the provided type descriptor
-        /// as element type.
+        /// <summary>
+        /// Constructs a new single-dimensional, zero-based array signature with the current type signature
+        /// as the element type.
         /// </summary>
         /// <returns>The constructed array type signature.</returns>
         public SzArrayTypeSignature MakeSzArrayType() => new(this);
 
         /// <summary>
-        /// Constructs a new single-dimension, zero based array signature with the provided type descriptor
-        /// as element type.
+        /// Constructs a new zero-based array signature with the provided number of dimensions and the
+        /// current type signature as the element type.
         /// </summary>
         /// <param name="dimensionCount">The number of dimensions in the array.</param>
         /// <returns>The constructed array type signature.</returns>
         public ArrayTypeSignature MakeArrayType(int dimensionCount) => new(this, dimensionCount);
 
         /// <summary>
-        /// Constructs a new single-dimension, zero based array signature with the provided type descriptor
-        /// as element type.
+        /// Constructs a new array signature with the provided dimensions and the current type signature
+        /// as the element type.
         /// </summary>
         /// <param name="dimensions">The dimensions of the array.</param>
         /// <returns>The constructed array type signature.</returns>
         public ArrayTypeSignature MakeArrayType(params ArrayDimension[] dimensions) => new(this, dimensions);
 
         /// <summary>
-        /// Constructs a new boxed type signature with the provided type descriptor as element type.
+        /// Constructs a new boxed type signature with the current type signature as the element type.
         /// </summary>
         /// <returns>The constructed boxed type signature.</returns>
         public BoxedTypeSignature MakeBoxedType() => new(this);
 
         /// <summary>
-        /// Constructs a new by-reference type signature with the provided type descriptor as element type.
+        /// Constructs a new by-reference type signature with the current type signature as the element type.
         /// </summary>
         /// <returns>The constructed by-reference type signature.</returns>
         public ByReferenceTypeSignature MakeByReferenceType() => new(this);
 
         /// <summary>
-        /// Constructs a new pinned type signature with the provided type descriptor as element type.
-        /// as element type.
+        /// Constructs a new pinned type signature with the current type signature as the element type.
         /// </summary>
         /// <returns>The constructed by-reference type signature.</returns>
         public PinnedTypeSignature MakePinnedType() => new(this);
 
         /// <summary>
-        /// Constructs a new pointer type signature with the provided type descriptor as element type.
+        /// Constructs a new pointer type signature with the current type signature as the element type.
         /// </summary>
         /// <returns>The constructed by-reference type signature.</returns>
         public PointerTypeSignature MakePointerType() => new(this);
