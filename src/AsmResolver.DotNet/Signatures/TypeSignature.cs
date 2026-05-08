@@ -503,6 +503,35 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
+        /// Determines whether the current type is assignable from the provided type.
+        /// </summary>
+        /// <param name="other">The other type.</param>
+        /// <param name="context">The runtime context to assume when comparing the types.</param>
+        /// <returns><c>true</c> if the type is assignable from <paramref name="other" />, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.3.
+        /// </remarks>
+        public bool IsAssignableFrom(TypeSignature other, RuntimeContext? context)
+        {
+            return other.IsAssignableTo(this, context);
+        }
+
+        /// <summary>
+        /// Determines whether the current type is assignable from the provided type.
+        /// </summary>
+        /// <param name="other">The other type.</param>
+        /// <param name="context">The runtime context to assume when comparing the types.</param>
+        /// <param name="comparer">The comparer to use for comparing type signatures.</param>
+        /// <returns><c>true</c> if the type is assignable from <paramref name="other" />, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// Type compatibility is determined according to the rules in ECMA-335 I.8.7.3.
+        /// </remarks>
+        public bool IsAssignableFrom(TypeSignature other, RuntimeContext? context, SignatureComparer comparer)
+        {
+            return other.IsAssignableTo(this, context, comparer);
+        }
+
+        /// <summary>
         /// Substitutes any generic type parameter in the type signature with the parameters provided by
         /// the generic context.
         /// </summary>
