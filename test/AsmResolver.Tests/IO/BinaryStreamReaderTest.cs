@@ -92,7 +92,9 @@ namespace AsmResolver.Tests.IO
         public void ReadCompressedUInt32(byte[] data, uint expected)
         {
             var reader = new BinaryStreamReader(data);
-            Assert.Equal(expected, reader.ReadCompressedUInt32());
+            Assert.Equal(expected, reader.Fork().ReadCompressedUInt32());
+            Assert.True(reader.Fork().TryReadCompressedUInt32(out uint value));
+            Assert.Equal(expected, value);
         }
 
         [Theory]
@@ -104,10 +106,12 @@ namespace AsmResolver.Tests.IO
         [InlineData(new byte[] {0x80, 0x01}, -8192)]
         [InlineData(new byte[] {0xDF, 0xFF, 0xFF, 0xFE}, 0xFFFFFFF)]
         [InlineData(new byte[] {0xC0, 0x00, 0x00, 0x01}, -0x10000000)]
-        public void ReadCompressedInt32(byte[] data, int value)
+        public void ReadCompressedInt32(byte[] data, int expected)
         {
             var reader = new BinaryStreamReader(data);
-            Assert.Equal(value, reader.ReadCompressedInt32());
+            Assert.Equal(expected, reader.Fork().ReadCompressedInt32());
+            Assert.True(reader.Fork().TryReadCompressedInt32(out int value));
+            Assert.Equal(expected, value);
         }
 
         [Theory]

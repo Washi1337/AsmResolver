@@ -98,6 +98,28 @@ public class MsfStreamDataSource : IDataSource
         return totalReadCount;
     }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+
+    /// <inheritdoc />
+    public void ReadBytes(ulong address, Span<byte> buffer)
+    {
+        while (!buffer.IsEmpty)
+        {
+            // Obtain current block and offset within block.
+            var block = GetBlockAndOffset(address, out ulong offset);
+
+            // Read available bytes.
+            int readCount = (int) Math.Min(buffer.Length, _blockSize - (uint) offset);
+            block.ReadBytes(block.BaseAddress + offset, buffer[..readCount]);
+
+            // Move to the next block.
+            address += (ulong) readCount;
+            buffer = buffer[readCount..];
+        }
+    }
+
+#endif
+
     private IDataSource GetBlockAndOffset(ulong address, out ulong offset)
     {
         var block = _blocks[Math.DivRem((long) address, _blockSize, out long x)];

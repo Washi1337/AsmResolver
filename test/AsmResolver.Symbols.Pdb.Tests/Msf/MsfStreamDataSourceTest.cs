@@ -43,11 +43,11 @@ public class MsfStreamDataSourceTest
     {
         byte[] block1 = new byte[blockSize];
         for (int i = 0; i < blockSize; i++)
-            block1[i] = (byte) 'A';
+            block1[i] = (byte) (i & 0x7F);
 
         byte[] block2 = new byte[blockSize];
         for (int i = 0; i < blockSize; i++)
-            block2[i] = (byte) 'B';
+            block2[i] = (byte) (i & 0x7F + 0x80);
 
         var source = new MsfStreamDataSource((ulong) actualSize, (uint) blockSize, new[] {block1, block2});
 
@@ -55,6 +55,26 @@ public class MsfStreamDataSourceTest
         int readCount = source.ReadBytes(0, buffer, 0, buffer.Length);
         Assert.Equal(actualSize, readCount);
         Assert.Equal(block1.Concat(block2).Take(actualSize), buffer.Take(actualSize));
+    }
+
+    [Theory]
+    [InlineData(0x200, 0x400)]
+    [InlineData(0x200, 0x300)]
+    public void StreamWithTwoBlocksSpan(int blockSize, int actualSize)
+    {
+        byte[] block1 = new byte[blockSize];
+        for (int i = 0; i < blockSize; i++)
+            block1[i] = (byte) (i & 0x7F);
+
+        byte[] block2 = new byte[blockSize];
+        for (int i = 0; i < blockSize; i++)
+            block2[i] = (byte) (i & 0x7F + 0x80);
+
+        var source = new MsfStreamDataSource((ulong) actualSize, (uint) blockSize, new[] {block1, block2});
+
+        byte[] buffer = new byte[actualSize];
+        source.ReadBytes(0, buffer);
+        Assert.Equal(block1.Concat(block2).Take(actualSize), buffer);
     }
 
     [Theory]
@@ -74,6 +94,25 @@ public class MsfStreamDataSourceTest
         byte[] buffer = new byte[blockSize];
         int readCount = source.ReadBytes((ulong) blockSize / 4, buffer, 0, blockSize);
         Assert.Equal(blockSize, readCount);
+        Assert.Equal(block1.Skip(blockSize / 4).Concat(block2).Take(blockSize), buffer);
+    }
+
+    [Theory]
+    [InlineData(0x200, 0x400)]
+    public void ReadInMiddleOfBlockSpan(int blockSize, int actualSize)
+    {
+        byte[] block1 = new byte[blockSize];
+        for (int i = 0; i < blockSize; i++)
+            block1[i] = (byte) ((i*2) & 0xFF);
+
+        byte[] block2 = new byte[blockSize];
+        for (int i = 0; i < blockSize; i++)
+            block2[i] = (byte) ((i * 2 + 1) & 0xFF);
+
+        var source = new MsfStreamDataSource((ulong) actualSize, (uint) blockSize, new[] {block1, block2});
+
+        byte[] buffer = new byte[blockSize];
+        source.ReadBytes((ulong) blockSize / 4, buffer);
         Assert.Equal(block1.Skip(blockSize / 4).Concat(block2).Take(blockSize), buffer);
     }
 }

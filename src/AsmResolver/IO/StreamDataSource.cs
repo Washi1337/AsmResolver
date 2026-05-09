@@ -7,9 +7,6 @@ namespace AsmResolver.IO
     /// Provides a <see cref="IDataSource"/> wrapper around a raw <see cref="Stream"/>.
     /// </summary>
     public sealed class StreamDataSource : IDataSource
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        , ISpanDataSource
-#endif
     {
         private readonly Stream _stream;
 
@@ -61,7 +58,7 @@ namespace AsmResolver.IO
         }
 
         /// <inheritdoc />
-        public ulong Length => (ulong)_stream.Length;
+        public ulong Length => (ulong) _stream.Length;
 
         /// <inheritdoc />
         public bool IsValidAddress(ulong address) => address - BaseAddress < Length;
@@ -79,13 +76,24 @@ namespace AsmResolver.IO
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <inheritdoc />
-        public int ReadBytes(ulong address, Span<byte> buffer)
+        public void ReadBytes(ulong address, Span<byte> buffer)
         {
             long offset = (long)address - (long)BaseAddress;
             lock (_stream)
             {
                 _stream.Seek(offset, SeekOrigin.Begin);
-                return _stream.Read(buffer);
+
+                #if NET8_0_OR_GREATER
+                _stream.ReadExactly(buffer);
+                #else
+                while (!buffer.IsEmpty)
+                {
+                    int readCount = _stream.Read(buffer);
+                    if (readCount == 0)
+                        throw new EndOfStreamException();
+                    buffer = buffer[readCount..];
+                }
+                #endif
             }
         }
 #endif

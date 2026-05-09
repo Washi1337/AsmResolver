@@ -18,8 +18,6 @@ namespace AsmResolver.Benchmarks
         private static readonly IInputFile SystemRuntime;
         private static readonly IInputFile SystemPrivateXml;
 
-        private readonly MemoryStream _outputStream = new();
-
         static ModuleReadWriteBenchmark()
         {
             string runtimePath = DotNetCorePathProvider.Default
@@ -42,7 +40,7 @@ namespace AsmResolver.Benchmarks
         public void HelloWorld_ReadWrite()
         {
             var file = ModuleDefinition.FromBytes(HelloWorldApp);
-            file.Write(_outputStream);
+            file.Write(Stream.Null);
         }
 
         [Benchmark]
@@ -55,7 +53,7 @@ namespace AsmResolver.Benchmarks
         public void CrackMe_ReadWrite()
         {
             var file = ModuleDefinition.FromBytes(CrackMeApp);
-            file.Write(_outputStream);
+            file.Write(Stream.Null);
         }
 
         [Benchmark]
@@ -68,28 +66,28 @@ namespace AsmResolver.Benchmarks
         public void ManyMethods_ReadWrite()
         {
             var file = ModuleDefinition.FromBytes(ManyMethods);
-            file.Write(_outputStream);
+            file.Write(Stream.Null);
         }
 
         [Benchmark]
         public void SystemPrivateCoreLib_ReadWrite()
         {
             var module = ModuleDefinition.FromFile(SystemPrivateCoreLib);
-            module.Write(_outputStream);
+            module.Write(Stream.Null);
         }
 
         [Benchmark]
         public void SystemRuntimeLib_ReadWrite()
         {
             var module = ModuleDefinition.FromFile(SystemRuntime);
-            module.Write(_outputStream);
+            module.Write(Stream.Null);
         }
 
         [Benchmark]
         public void SystemPrivateXml_ReadWrite()
         {
             var module = ModuleDefinition.FromFile(SystemPrivateXml);
-            module.Write(_outputStream);
+            module.Write(Stream.Null);
         }
     }
 }

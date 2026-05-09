@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace AsmResolver.IO
 {
@@ -6,9 +7,6 @@ namespace AsmResolver.IO
     /// Implements a data source that reads zero bytes.
     /// </summary>
     public sealed class ZeroesDataSource : IDataSource
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        , ISpanDataSource
-#endif
     {
         /// <summary>
         /// Creates a new zeroes data source.
@@ -60,11 +58,14 @@ namespace AsmResolver.IO
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <inheritdoc />
-        public int ReadBytes(ulong address, Span<byte> buffer)
+        public void ReadBytes(ulong address, Span<byte> buffer)
         {
-            int actualLength = (int) Math.Min(Length, (uint) buffer.Length);
-            buffer[..actualLength].Clear();
-            return actualLength;
+            if (!IsValidAddress(address))
+                throw new ArgumentOutOfRangeException(nameof(address));
+            if (!IsValidAddress(address + (ulong) buffer.Length))
+                throw new EndOfStreamException();
+
+            buffer.Clear();
         }
 #endif
     }

@@ -8,6 +8,10 @@ using AsmResolver.Shims;
 using System.Buffers;
 #endif
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+using System.Buffers.Binary;
+#endif
+
 namespace AsmResolver.IO
 {
     /// <summary>
@@ -196,10 +200,20 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public ushort ReadUInt16()
         {
-            AssertCanRead(2);
-            ushort value = (ushort) (DataSource[Offset]
-                                     | (DataSource[Offset + 1] << 8));
-            Offset += 2;
+            AssertCanRead(sizeof(ushort));
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            Span<byte> buffer = stackalloc byte[sizeof(ushort)];
+            DataSource.ReadBytes(Offset, buffer);
+            ushort value = BinaryPrimitives.ReadUInt16LittleEndian(buffer);
+#else
+            ushort value = (ushort) (
+                DataSource[Offset]
+                | (DataSource[Offset + 1] << 8)
+            );
+#endif
+
+            Offset += sizeof(ushort);
             return value;
         }
 
@@ -209,12 +223,22 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public uint ReadUInt32()
         {
-            AssertCanRead(4);
-            uint value = unchecked((uint) (DataSource[Offset]
-                                           | (DataSource[Offset + 1] << 8)
-                                           | (DataSource[Offset + 2] << 16)
-                                           | (DataSource[Offset + 3] << 24)));
-            Offset += 4;
+            AssertCanRead(sizeof(uint));
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            Span<byte> buffer = stackalloc byte[sizeof(uint)];
+            DataSource.ReadBytes(Offset, buffer);
+            uint value = BinaryPrimitives.ReadUInt32LittleEndian(buffer);
+#else
+            uint value = unchecked((uint) (
+                DataSource[Offset]
+                | (DataSource[Offset + 1] << 8)
+                | (DataSource[Offset + 2] << 16)
+                | (DataSource[Offset + 3] << 24)
+            ));
+#endif
+
+            Offset += sizeof(uint);
             return value;
         }
 
@@ -224,16 +248,25 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public ulong ReadUInt64()
         {
-            AssertCanRead(8);
+            AssertCanRead(sizeof(ulong));
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            Span<byte> buffer = stackalloc byte[sizeof(ulong)];
+            DataSource.ReadBytes(Offset, buffer);
+            ulong value = BinaryPrimitives.ReadUInt64LittleEndian(buffer);
+#else
             ulong value = unchecked((ulong) (DataSource[Offset]
-                                             | ( (long) DataSource[Offset + 1] << 8)
-                                             | ( (long) DataSource[Offset + 2] << 16)
-                                             | ( (long) DataSource[Offset + 3] << 24)
-                                             | ( (long) DataSource[Offset + 4] << 32)
-                                             | ( (long) DataSource[Offset + 5] << 40)
-                                             | ( (long) DataSource[Offset + 6] << 48)
-                                             | ( (long) DataSource[Offset + 7] << 56)));
-            Offset += 8;
+                | ((long) DataSource[Offset + 1] << 8)
+                | ((long) DataSource[Offset + 2] << 16)
+                | ((long) DataSource[Offset + 3] << 24)
+                | ((long) DataSource[Offset + 4] << 32)
+                | ((long) DataSource[Offset + 5] << 40)
+                | ((long) DataSource[Offset + 6] << 48)
+                | ((long) DataSource[Offset + 7] << 56)
+            ));
+#endif
+
+            Offset += sizeof(ulong);
             return value;
         }
 
@@ -243,7 +276,7 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public sbyte ReadSByte()
         {
-            AssertCanRead(1);
+            AssertCanRead(sizeof(byte));
             return unchecked((sbyte) DataSource[Offset++]);
         }
 
@@ -253,10 +286,20 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public short ReadInt16()
         {
-            AssertCanRead(2);
-            short value = (short) (DataSource[Offset]
-                                   | (DataSource[Offset + 1] << 8));
-            Offset += 2;
+            AssertCanRead(sizeof(short));
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            Span<byte> buffer = stackalloc byte[sizeof(short)];
+            DataSource.ReadBytes(Offset, buffer);
+            short value = BinaryPrimitives.ReadInt16LittleEndian(buffer);
+#else
+            short value = unchecked((short) (
+                DataSource[Offset]
+                | (DataSource[Offset + 1] << 8)
+            ));
+#endif
+
+            Offset += sizeof(short);
             return value;
         }
 
@@ -266,12 +309,20 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public int ReadInt32()
         {
-            AssertCanRead(4);
+            AssertCanRead(sizeof(int));
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            Span<byte> buffer = stackalloc byte[sizeof(int)];
+            DataSource.ReadBytes(Offset, buffer);
+            int value = BinaryPrimitives.ReadInt32LittleEndian(buffer);
+#else
             int value = DataSource[Offset]
-                        | (DataSource[Offset + 1] << 8)
-                        | (DataSource[Offset + 2] << 16)
-                        | (DataSource[Offset + 3] << 24);
-            Offset += 4;
+                | (DataSource[Offset + 1] << 8)
+                | (DataSource[Offset + 2] << 16)
+                | (DataSource[Offset + 3] << 24);
+#endif
+
+            Offset += sizeof(int);
             return value;
         }
 
@@ -281,16 +332,24 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public long ReadInt64()
         {
-            AssertCanRead(8);
+            AssertCanRead(sizeof(long));
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            Span<byte> buffer = stackalloc byte[sizeof(long)];
+            DataSource.ReadBytes(Offset, buffer);
+            long value = BinaryPrimitives.ReadInt64LittleEndian(buffer);
+#else
             long value = DataSource[Offset]
-                         | ((long) DataSource[Offset + 1] << 8)
-                         | ((long) DataSource[Offset + 2] << 16)
-                         | ((long) DataSource[Offset + 3] << 24)
-                         | ((long) DataSource[Offset + 4] << 32)
-                         | ((long) DataSource[Offset + 5] << 40)
-                         | ((long) DataSource[Offset + 6] << 48)
-                         | ((long) DataSource[Offset + 7] << 56);
-            Offset += 8;
+                | ((long) DataSource[Offset + 1] << 8)
+                | ((long) DataSource[Offset + 2] << 16)
+                | ((long) DataSource[Offset + 3] << 24)
+                | ((long) DataSource[Offset + 4] << 32)
+                | ((long) DataSource[Offset + 5] << 40)
+                | ((long) DataSource[Offset + 6] << 48)
+                | ((long) DataSource[Offset + 7] << 56);
+#endif
+
+            Offset += sizeof(long);
             return value;
         }
 
@@ -354,11 +413,10 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="buffer">The buffer that receives the read bytes.</param>
         /// <returns>The number of bytes that were read.</returns>
-        public int ReadBytes(Span<byte> buffer)
+        public void ReadBytes(Span<byte> buffer)
         {
-            int actualLength = DataSource.ReadBytes(Offset, buffer);
-            Offset += (uint) actualLength;
-            return actualLength;
+            DataSource.ReadBytes(Offset, buffer);
+            Offset += (uint) buffer.Length;
         }
 #endif
 
@@ -610,7 +668,7 @@ namespace AsmResolver.IO
                 return true;
             }
 
-            return true;
+            return false;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace AsmResolver.IO
 {
@@ -6,9 +7,6 @@ namespace AsmResolver.IO
     /// Represents a data source that only exposes a part (slice) of another data source.
     /// </summary>
     public class DataSourceSlice : IDataSource
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        , ISpanDataSource
-#endif
     {
         private readonly IDataSource _source;
 
@@ -70,10 +68,16 @@ namespace AsmResolver.IO
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <inheritdoc />
-        public int ReadBytes(ulong address, Span<byte> buffer)
+        public void ReadBytes(ulong address, Span<byte> buffer)
         {
-            int maxCount = Math.Max(0, (int) (Length - (address - BaseAddress)));
-            return _source.ReadBytes(address, buffer[..Math.Min(maxCount, buffer.Length)]);
+            if (!IsValidAddress(address))
+                throw new ArgumentOutOfRangeException(nameof(address));
+            if (buffer.IsEmpty)
+                return;
+            if (!IsValidAddress(address + (ulong) buffer.Length - 1))
+                throw new EndOfStreamException();
+
+            _source.ReadBytes(address, buffer);
         }
 #endif
     }

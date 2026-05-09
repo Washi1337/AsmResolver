@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+
 namespace AsmResolver.IO
 {
     /// <summary>
@@ -46,5 +49,20 @@ namespace AsmResolver.IO
         /// <param name="count">The number of bytes to read.</param>
         /// <returns>The number of bytes that were read.</returns>
         int ReadBytes(ulong address, byte[] buffer, int index, int count);
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        /// <summary>
+        /// Reads a block of data from the data source.
+        /// </summary>
+        /// <param name="address">The starting address to read from.</param>
+        /// <param name="buffer">The buffer that receives the read bytes.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when the address is invalid.
+        /// </exception>
+        /// <exception cref="EndOfStreamException">
+        /// Occurs when the buffer is larger than the number of bytes available at the provided access.
+        /// </exception>
+        void ReadBytes(ulong address, Span<byte> buffer);
+#endif
     }
 }

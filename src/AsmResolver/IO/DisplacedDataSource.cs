@@ -6,9 +6,6 @@ namespace AsmResolver.IO
     /// Represents a data source that was moved in memory to a different address.
     /// </summary>
     public class DisplacedDataSource : IDataSource
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        , ISpanDataSource
-#endif
     {
         private readonly IDataSource _dataSource;
         private readonly long _displacement;
@@ -45,9 +42,9 @@ namespace AsmResolver.IO
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <inheritdoc />
-        public int ReadBytes(ulong address, Span<byte> buffer)
+        public void ReadBytes(ulong address, Span<byte> buffer)
         {
-            return _dataSource.ReadBytes(address - (ulong) _displacement, buffer);
+            _dataSource.ReadBytes(address - (ulong) _displacement, buffer);
         }
 #endif
     }
