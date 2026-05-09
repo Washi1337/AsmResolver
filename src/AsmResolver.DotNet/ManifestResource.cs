@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Collections;
@@ -180,20 +179,6 @@ namespace AsmResolver.DotNet
 
             return EmbeddedDataSegment is IReadableSegment readableSegment
                 ? readableSegment.ToArray()
-                : null;
-        }
-
-        /// <summary>
-        /// Gets the reader of stored data in the manifest resource.
-        /// </summary>
-        /// <returns>The reader, or <c>null</c> if no data was stored or if the external resource was not found.</returns>
-        [Obsolete("Use TryGetReader instead.")]
-        public BinaryStreamReader? GetReader()
-        {
-            // TODO: resolve external resources.
-
-            return EmbeddedDataSegment is IReadableSegment readableSegment
-                ? readableSegment.CreateReader()
                 : null;
         }
 

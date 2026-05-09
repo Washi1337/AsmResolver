@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Bundles
     public class SerializedBundleManifest : BundleManifest
     {
         private readonly uint _originalMajorVersion;
-        private readonly BinaryStreamReader _fileEntriesReader;
+        private readonly BinaryStreamReaderState _fileEntriesReaderState;
         private readonly int _originalFileCount;
 
         /// <summary>
@@ -30,13 +30,13 @@ namespace AsmResolver.DotNet.Bundles
                 Flags = (BundleManifestFlags) reader.ReadUInt64();
             }
 
-            _fileEntriesReader = reader;
+            _fileEntriesReaderState = reader.GetState();
         }
 
         /// <inheritdoc />
         protected override IList<BundleFile> GetFiles()
         {
-            var reader = _fileEntriesReader;
+            var reader = _fileEntriesReaderState.CreateReader();
             var result = new OwnedCollection<BundleManifest, BundleFile>(this);
 
             for (int i = 0; i < _originalFileCount; i++)

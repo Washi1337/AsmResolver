@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Resources
@@ -10,8 +9,8 @@ namespace AsmResolver.DotNet.Resources
     public class SerializedResourceSet : ResourceSet
     {
         private readonly int _originalCount;
-        private readonly BinaryStreamReader _dataSectionReader;
-        private readonly BinaryStreamReader _entryReader;
+        private readonly BinaryStreamReaderState _dataSectionReaderState;
+        private readonly BinaryStreamReaderState _entryReaderState;
 
         /// <summary>
         /// Reads a resource set from an input stream.
@@ -57,10 +56,10 @@ namespace AsmResolver.DotNet.Resources
             reader.RelativeOffset += (uint) (_originalCount * sizeof(uint) * 2);
 
             // Slice data section.
-            _dataSectionReader = reader.ForkRelative(reader.ReadUInt32());
+            _dataSectionReaderState = reader.ForkRelative(reader.ReadUInt32()).GetState();
 
             // Set up reader for entries table.
-            _entryReader = reader.Fork();
+            _entryReaderState = reader.GetState();
         }
 
         /// <inheritdoc />
@@ -89,7 +88,7 @@ namespace AsmResolver.DotNet.Resources
             var headers = new ResourceSetEntryHeader[_originalCount];
 
             // Read all headers of every entry.
-            var entryReader = _entryReader;
+            var entryReader = _entryReaderState.CreateReader();
             for (int i = 0; i < _originalCount; i++)
                 headers[i] = ResourceSetEntryHeader.FromReader(ref entryReader);
 
@@ -102,11 +101,13 @@ namespace AsmResolver.DotNet.Resources
                 // Determine size of data.
                 uint nextOffset = i < _originalCount - 1
                     ? headers[i + 1].Offset
-                    : _dataSectionReader.Length;
+                    : _dataSectionReaderState.Length;
                 uint size = nextOffset - headers[i].Offset;
 
                 // Slice data reader.
-                var contentsReader = _dataSectionReader.ForkRelative(headers[i].Offset, size);
+                var contentsReader = _dataSectionReaderState
+                    .WithRelativeOffsetSize(headers[i].Offset, size)
+                    .CreateReader();
 
                 var type = GetResourceType(contentsReader.Read7BitEncodedInt32());
                 Items.Add(new SerializedResourceSetEntry(this, headers[i].Name, type, contentsReader));

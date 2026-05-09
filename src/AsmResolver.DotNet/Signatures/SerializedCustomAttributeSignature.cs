@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Signatures
         private readonly BlobReaderContext _readerContext;
         private readonly GenericContext _genericContext;
         private readonly TypeSignature[] _fixedArgTypes;
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
 
         /// <summary>
         /// Initializes a new lazy custom attribute signature from an input blob stream reader.
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Signatures
             _readerContext = readerContext;
             _genericContext = genericContext;
             _fixedArgTypes = fixedArgTypes.ToArray();
-            _reader = reader;
+            _readerState = reader.GetState();
         }
 
         /// <inheritdoc />
@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Signatures
             IList<CustomAttributeArgument> fixedArguments,
             IList<CustomAttributeNamedArgument> namedArguments)
         {
-            var reader = _reader.Fork();
+            var reader = _readerState.CreateReader();
 
             // Verify magic header.
             ushort prologue = reader.ReadUInt16();
@@ -72,7 +72,7 @@ namespace AsmResolver.DotNet.Signatures
             if (IsInitialized)
                 base.WriteContents(context);
             else
-                _reader.Fork().WriteToOutput(context.Writer);
+                _readerState.CreateReader().WriteToOutput(context.Writer);
         }
 
         /// <inheritdoc />

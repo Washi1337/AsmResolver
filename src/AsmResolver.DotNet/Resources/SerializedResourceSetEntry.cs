@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Resources
     public class SerializedResourceSetEntry : ResourceSetEntry
     {
         private readonly SerializedResourceSet _parentSet;
-        private readonly BinaryStreamReader _contentsReader;
+        private readonly BinaryStreamReaderState _contentsReaderState;
 
         /// <summary>
         /// Initializes a new <see cref="SerializedResourceSetEntry"/>.
@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Resources
             : base(name, type)
         {
             _parentSet = parentSet;
-            _contentsReader = contentsReader;
+            _contentsReaderState = contentsReader.GetState();
         }
 
         /// <inheritdoc />
@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet.Resources
             if (commaIndex >= 0)
                 typeName = typeName.Remove(commaIndex);
 
-            var reader = _contentsReader;
+            var reader = _contentsReaderState.CreateReader();
             return typeName switch
             {
                 "System.String" => reader.ReadBinaryFormatterString(),
@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Resources
             // Reference:
             // https://github.com/dotnet/runtime/blob/9d771a26f058a9fa4a49850d4778bbab7aa79a22/src/libraries/System.Private.CoreLib/src/System/Resources/ResourceReader.cs#L610
 
-            var reader = _contentsReader;
+            var reader = _contentsReaderState.CreateReader();
 
             if (Type is not IntrinsicResourceType intrinsicType)
                 return _parentSet.DataSerializer.Deserialize(ref reader, Type);
@@ -98,12 +98,12 @@ namespace AsmResolver.DotNet.Resources
                 ResourceTypeCode.Decimal => reader.ReadDecimal(),
                 ResourceTypeCode.DateTime => DateTime.FromBinary(reader.ReadInt64()),
                 ResourceTypeCode.TimeSpan => new TimeSpan(reader.ReadInt64()),
-                ResourceTypeCode.ByteArray => ReadByteArray(),
-                ResourceTypeCode.Stream => ReadByteArray(),
+                ResourceTypeCode.ByteArray => ReadByteArray(ref reader),
+                ResourceTypeCode.Stream => ReadByteArray(ref reader),
                 _ => _parentSet.DataSerializer.Deserialize(ref reader, Type),
             };
 
-            byte[] ReadByteArray()
+            byte[] ReadByteArray(ref BinaryStreamReader reader)
             {
                 int length = reader.ReadInt32();
                 if (length < 0)

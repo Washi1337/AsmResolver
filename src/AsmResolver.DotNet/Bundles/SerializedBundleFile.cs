@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Bundles
     /// </summary>
     public class SerializedBundleFile : BundleFile
     {
-        private readonly BinaryStreamReader _contentsReader;
+        private readonly BinaryStreamReaderState _contentsReaderState;
 
         /// <summary>
         /// Reads a bundle file entry from the provided input stream.
@@ -33,10 +33,10 @@ namespace AsmResolver.DotNet.Bundles
             Type = (BundleFileType) reader.ReadByte();
             RelativePath = reader.ReadBinaryFormatterString();
 
-            _contentsReader = reader.ForkAbsolute(offset, (uint) size);
+            _contentsReaderState = reader.GetState().WithOffsetSize(offset, (uint) size);
         }
 
         /// <inheritdoc />
-        protected override ISegment GetContents() => _contentsReader.Fork().ReadSegment(_contentsReader.Length);
+        protected override ISegment GetContents() => _contentsReaderState.CreateReader().ReadSegment(_contentsReaderState.Length);
     }
 }
