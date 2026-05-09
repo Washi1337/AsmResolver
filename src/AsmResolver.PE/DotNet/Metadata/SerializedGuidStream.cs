@@ -12,7 +12,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         [ThreadStatic]
         private static byte[]? _readBuffer;
 
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
 
         /// <summary>
         /// Creates a new GUID stream with the provided byte array as the raw contents of the stream.
@@ -41,7 +41,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         public SerializedGuidStream(string name, in BinaryStreamReader reader)
             : base(name)
         {
-            _reader = reader;
+            _readerState = reader.GetState();
             Offset = reader.Offset;
             Rva = reader.Rva;
         }
@@ -50,13 +50,13 @@ namespace AsmResolver.PE.DotNet.Metadata
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override BinaryStreamReader CreateReader() => _reader.Fork();
+        public override BinaryStreamReader CreateReader() => _readerState.CreateReader();
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => _reader.Length;
+        public override uint GetPhysicalSize() => _readerState.Length;
 
         /// <inheritdoc />
-        public override void Write(BinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
+        public override void Write(BinaryStreamWriter writer) => _readerState.CreateReader().WriteToOutput(writer);
 
         /// <inheritdoc />
         public override System.Guid GetGuidByIndex(uint index)
@@ -67,9 +67,9 @@ namespace AsmResolver.PE.DotNet.Metadata
             _readBuffer ??= new byte[GuidSize];
 
             uint offset = (index - 1) * GuidSize;
-            if (offset < _reader.Length)
+            if (offset < _readerState.Length)
             {
-                var guidReader = _reader.ForkRelative(offset);
+                var guidReader = _readerState.WithRelativeOffset(offset).CreateReader();
                 guidReader.ReadBytes(_readBuffer, 0, _readBuffer.Length);
                 return new System.Guid(_readBuffer);
             }
@@ -83,7 +83,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             _readBuffer ??= new byte[GuidSize];
 
             index = 1;
-            var reader = _reader.Fork();
+            var reader = _readerState.CreateReader();
             while (reader.CanRead(GuidSize))
             {
                 int count = reader.ReadBytes(_readBuffer, 0, _readBuffer.Length);
@@ -100,7 +100,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <inheritdoc />
         public override IEnumerable<Guid> EnumerateGuids()
         {
-            int totalGuids = (int) (_reader.Length / GuidSize);
+            int totalGuids = (int) (_readerState.Length / GuidSize);
             for (int i = 0; i < totalGuids; i++)
                 yield return GetGuidByIndex((uint) (i + 1));
         }

@@ -7,7 +7,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class SerializedPdbStream : PdbStream
     {
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
 
         /// <summary>
         /// Creates a new PDB stream with the provided byte array as the raw contents of the stream.
@@ -35,7 +35,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="reader">The raw contents of the stream.</param>
         public SerializedPdbStream(string name, in BinaryStreamReader reader)
         {
-            _reader = reader;
+            _readerState = reader.GetState();
 
             Name = name;
             Offset = reader.Offset;
@@ -58,6 +58,6 @@ namespace AsmResolver.PE.DotNet.Metadata
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override BinaryStreamReader CreateReader() => _reader.Fork();
+        public override BinaryStreamReader CreateReader() => _readerState.CreateReader();
     }
 }

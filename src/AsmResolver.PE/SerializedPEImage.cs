@@ -167,12 +167,13 @@ namespace AsmResolver.PE
                 var type = (CertificateType) reader.ReadUInt16();
 
                 // Bound contents reader to just the contents as indicated by the header.
-                var contentsReader = reader.ForkRelative(
+                var contentsReader = reader.GetState().WithOffsetSize(
                     AttributeCertificate.HeaderSize,
-                    length - AttributeCertificate.HeaderSize);
+                    length - AttributeCertificate.HeaderSize
+                ).CreateReader();
 
                 // Read it.
-                result.Add(certificateReader.ReadCertificate(ReaderContext, revision, type, contentsReader));
+                result.Add(certificateReader.ReadCertificate(ReaderContext, revision, type, ref contentsReader));
 
                 // Advance to next certificate in the table.
                 reader.RelativeOffset += length - AttributeCertificate.HeaderSize;

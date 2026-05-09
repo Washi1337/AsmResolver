@@ -12,7 +12,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class SerializedMetadataDirectory : MetadataDirectory
     {
         private readonly MetadataReaderContext _context;
-        private readonly BinaryStreamReader _streamContentsReader;
+        private readonly BinaryStreamReaderState _streamContentsReaderState;
         private readonly MetadataStreamHeader[] _streamHeaders;
         private readonly bool _hasJtdStream;
         private readonly bool _isEncMetadata;
@@ -34,7 +34,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             Offset = directoryReader.Offset;
             Rva = directoryReader.Rva;
 
-            _streamContentsReader = directoryReader.Fork();
+            _streamContentsReaderState = directoryReader.GetState();
             _streamHeaders = ArrayShim.Empty<MetadataStreamHeader>();
 
             // Verify signature.
@@ -125,7 +125,8 @@ namespace AsmResolver.PE.DotNet.Metadata
                 _context,
                 flags,
                 _streamHeaders,
-                _streamContentsReader);
+                _streamContentsReaderState
+            );
         }
 
     }

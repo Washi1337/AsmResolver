@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
     /// </summary>
     public class SerializedMethodEntryPointsSection : MethodEntryPointsSection
     {
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
 
         /// <summary>
         /// Reads a method entry points section from the provided input stream.
@@ -19,20 +19,20 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             Offset = reader.Offset;
             Rva = reader.Rva;
 
-            _reader = reader;
+            _readerState = reader.GetState();
         }
 
         /// <inheritdoc />
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override BinaryStreamReader CreateReader() => _reader.Fork();
+        public override BinaryStreamReader CreateReader() => _readerState.CreateReader();
 
         /// <inheritdoc />
         protected override NativeArray<MethodEntryPoint> GetEntryPoints()
         {
             return NativeArray<MethodEntryPoint>.FromReader(
-                _reader,
+                _readerState.CreateReader(),
                 reader => MethodEntryPoint.FromReader(ref reader)
             );
         }

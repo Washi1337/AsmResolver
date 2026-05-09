@@ -2,7 +2,7 @@ using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.ReadyToRun
 {
-    internal struct NibbleReader
+    internal ref struct NibbleReader
     {
         private BinaryStreamReader _reader;
         private byte? _buffer;

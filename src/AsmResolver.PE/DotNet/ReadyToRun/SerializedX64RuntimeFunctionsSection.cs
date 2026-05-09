@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
     public class SerializedX64RuntimeFunctionsSection : RuntimeFunctionsSection<X64RuntimeFunction>
     {
         private readonly PEReaderContext _context;
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
 
         /// <summary>
         /// Reads a runtime function section from the provided input stream.
@@ -24,21 +24,21 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             Rva = reader.Rva;
 
             _context = context;
-            _reader = reader;
+            _readerState = reader.GetState();
         }
 
         /// <inheritdoc />
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override BinaryStreamReader CreateReader() => _reader.Fork();
+        public override BinaryStreamReader CreateReader() => _readerState.CreateReader();
 
         /// <inheritdoc />
         protected override IList<X64RuntimeFunction> GetEntries()
         {
             var result =  base.GetEntries();
 
-            var reader = _reader.Fork();
+            var reader = _readerState.CreateReader();
             while (reader.CanRead(X64RuntimeFunction.EntrySize))
                 result.Add(X64RuntimeFunction.FromReader(_context, ref reader));
 

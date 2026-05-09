@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class SerializedUserStringsStream : UserStringsStream
     {
         private readonly ConcurrentDictionary<uint, string?> _cachedStrings = new();
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
 
         /// <summary>
         /// Creates a new user-strings stream with the provided byte array as the raw contents of the stream.
@@ -40,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         public SerializedUserStringsStream(string name, BinaryStreamReader reader)
             : base(name)
         {
-            _reader = reader;
+            _readerState = reader.GetState();
             Offset = reader.Offset;
             Rva = reader.Rva;
         }
@@ -49,22 +49,22 @@ namespace AsmResolver.PE.DotNet.Metadata
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override BinaryStreamReader CreateReader() => _reader.Fork();
+        public override BinaryStreamReader CreateReader() => _readerState.CreateReader();
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => _reader.Length;
+        public override uint GetPhysicalSize() => _readerState.Length;
 
         /// <inheritdoc />
-        public override void Write(BinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
+        public override void Write(BinaryStreamWriter writer) => _readerState.CreateReader().WriteToOutput(writer);
 
         /// <inheritdoc />
         public override string? GetStringByIndex(uint index)
         {
             index &= 0x00FFFFFF;
 
-            if (!_cachedStrings.TryGetValue(index, out string? value) && index < _reader.Length)
+            if (!_cachedStrings.TryGetValue(index, out string? value) && index < _readerState.Length)
             {
-                var stringsReader = _reader.ForkRelative(index);
+                var stringsReader = _readerState.WithRelativeOffset(index).CreateReader();
 
                 // Try read length.
                 if (stringsReader.TryReadCompressedUInt32(out uint length))
@@ -102,7 +102,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             uint byteCount = (uint) (value.Length * sizeof(ushort)) + sizeof(byte);
             uint totalLength = byteCount.GetCompressedSize() + byteCount;
 
-            var reader = _reader.Fork();
+            var reader = _readerState.CreateReader();
             while (reader.CanRead(totalLength))
             {
                 index = reader.RelativeOffset;
@@ -132,7 +132,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             uint currentIndex = 1;
 
-            while (currentIndex < _reader.Length)
+            while (currentIndex < _readerState.Length)
             {
                 string? result = GetStringByIndex(currentIndex);
 

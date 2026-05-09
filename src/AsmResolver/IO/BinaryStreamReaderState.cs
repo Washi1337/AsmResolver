@@ -82,6 +82,22 @@ public struct BinaryStreamReaderState : IEquatable<BinaryStreamReaderState>
         );
     }
 
+    public readonly BinaryStreamReaderState WithRelativeOffset(uint relativeOffset)
+    {
+        return WithRelativeOffsetSize(relativeOffset, Length - relativeOffset);
+    }
+
+    public readonly BinaryStreamReaderState WithRelativeOffsetSize(ulong offset, uint size)
+    {
+        return new BinaryStreamReaderState(
+            dataSource: DataSource,
+            startOffset: StartOffset + offset,
+            startRva: (uint) (StartRva + offset),
+            length: size,
+            offset: StartOffset + offset
+        );
+    }
+
     public bool Equals(BinaryStreamReaderState other)
     {
         return DataSource.Equals(other.DataSource)

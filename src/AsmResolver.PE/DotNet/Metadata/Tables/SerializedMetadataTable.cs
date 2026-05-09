@@ -29,7 +29,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             ref BinaryStreamReader reader,
             TableLayout layout);
 
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
         private readonly TableLayout _originalLayout;
         private readonly int _rowCount;
         private readonly ReadRowDelegate _readRow;
@@ -53,7 +53,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             Offset = reader.Offset;
             Rva = reader.Rva;
 
-            _reader = reader;
+            _readerState = reader.GetState();
             _originalLayout = originalLayout;
             _rowCount = (int) (reader.Length / originalLayout.RowSize);
             _readRow = readRow ?? throw new ArgumentNullException(nameof(readRow));
@@ -88,7 +88,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             var result = new RefList<TRow>(_rowCount);
 
-            var reader = _reader.Fork();
+            var reader = _readerState.CreateReader();
             for (int i = 0; i < _rowCount; i++)
                 result.Add(_readRow(ref reader, _originalLayout));
 

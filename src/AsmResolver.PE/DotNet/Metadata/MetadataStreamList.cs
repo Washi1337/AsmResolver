@@ -12,7 +12,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         private readonly MetadataReaderContext _context;
         private readonly MetadataStreamHeader[] _streamHeaders;
         private readonly MetadataDirectory _owner;
-        private readonly BinaryStreamReader _directoryReader;
+        private readonly BinaryStreamReaderState _directoryReaderState;
         private readonly MetadataStreamReaderFlags _streamReaderFlags;
 
         /// <summary>
@@ -28,12 +28,12 @@ namespace AsmResolver.PE.DotNet.Metadata
             MetadataReaderContext context,
             MetadataStreamReaderFlags streamReaderFlags,
             MetadataStreamHeader[] streamHeaders,
-            in BinaryStreamReader directoryReader)
+            in BinaryStreamReaderState directoryReaderState)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _streamHeaders = streamHeaders;
             _owner = owner;
-            _directoryReader = directoryReader;
+            _directoryReaderState = directoryReaderState;
             _streamReaderFlags = streamReaderFlags;
         }
 
@@ -45,7 +45,10 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             foreach (var header in _streamHeaders)
             {
-                var streamReader = _directoryReader.ForkAbsolute(_directoryReader.Offset + header.Offset, header.Size);
+                var streamReader = _directoryReaderState
+                    .WithOffsetSize(_directoryReaderState.CurrentOffset + header.Offset, header.Size)
+                    .CreateReader();
+
                 var stream = _context.MetadataStreamReader.ReadStream(_context, _streamReaderFlags, header, ref streamReader);
                 Items.Add(stream);
             }

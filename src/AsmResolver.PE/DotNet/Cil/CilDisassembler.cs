@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet.Cil
     public class CilDisassembler
     {
         private readonly ICilOperandResolver _operandResolver;
-        private BinaryStreamReader _reader;
+        private BinaryStreamReaderState _readerState;
 
         /// <summary>
         /// Creates a new CIL disassembler using the provided input stream.
@@ -19,7 +19,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <param name="reader">The input stream to read the code from.</param>
         public CilDisassembler(in BinaryStreamReader reader)
         {
-            _reader = reader;
+            _readerState = reader.GetState();
             _operandResolver = EmptyOperandResolver.Instance;
         }
 
@@ -30,7 +30,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <param name="operandResolver">The object responsible for resolving operands.</param>
         public CilDisassembler(in BinaryStreamReader reader, ICilOperandResolver operandResolver)
         {
-            _reader = reader;
+            _readerState = reader.GetState();
             _operandResolver = operandResolver ?? throw new ArgumentNullException(nameof(operandResolver));
         }
 
@@ -55,9 +55,10 @@ namespace AsmResolver.PE.DotNet.Cil
 
             var instructions = new List<CilInstruction>();
 
-            while (_reader.Offset < _reader.StartOffset + _reader.Length)
+            var reader = _readerState.CreateReader();
+            while (reader.Offset < reader.StartOffset + reader.Length)
             {
-                var instruction = ReadInstruction();
+                var instruction = ReadInstruction(ref reader);
                 instructions.Add(instruction);
 
                 if (ResolveBranchTargets)
@@ -112,24 +113,24 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Reads the next instruction from the input stream.
         /// </summary>
         /// <returns>The instruction.</returns>
-        private CilInstruction ReadInstruction()
+        private CilInstruction ReadInstruction(ref BinaryStreamReader reader)
         {
-            int offset = (int) _reader.RelativeOffset;
-            var code = ReadOpCode();
-            object? operand = ReadOperand(code.OperandType);
+            int offset = (int) reader.RelativeOffset;
+            var code = ReadOpCode(ref reader);
+            object? operand = ReadOperand(ref reader, code.OperandType);
 
             return new CilInstruction(offset, code, operand);
         }
 
-        private CilOpCode ReadOpCode()
+        private CilOpCode ReadOpCode(ref BinaryStreamReader reader)
         {
-            byte op = _reader.ReadByte();
+            byte op = reader.ReadByte();
             return op == 0xFE
-                ? CilOpCodes.MultiByteOpCodes[_reader.ReadByte()]
+                ? CilOpCodes.MultiByteOpCodes[reader.ReadByte()]
                 : CilOpCodes.SingleByteOpCodes[op];
         }
 
-        private object? ReadOperand(CilOperandType operandType)
+        private object? ReadOperand(ref BinaryStreamReader reader, CilOperandType operandType)
         {
             switch (operandType)
             {
@@ -137,44 +138,44 @@ namespace AsmResolver.PE.DotNet.Cil
                     return null;
 
                 case CilOperandType.ShortInlineI:
-                    return _reader.ReadSByte();
+                    return reader.ReadSByte();
 
                 case CilOperandType.ShortInlineBrTarget:
-                    return new CilOffsetLabel(_reader.ReadSByte() + (int) _reader.RelativeOffset);
+                    return new CilOffsetLabel(reader.ReadSByte() + (int) reader.RelativeOffset);
 
                 case CilOperandType.ShortInlineVar:
-                    byte shortLocalIndex = _reader.ReadByte();
+                    byte shortLocalIndex = reader.ReadByte();
                     return _operandResolver.ResolveLocalVariable(shortLocalIndex) ?? shortLocalIndex;
 
                 case CilOperandType.ShortInlineArgument:
-                    byte shortArgIndex = _reader.ReadByte();
+                    byte shortArgIndex = reader.ReadByte();
                     return _operandResolver.ResolveParameter(shortArgIndex) ?? shortArgIndex;
 
                 case CilOperandType.InlineVar:
-                    ushort longLocalIndex = _reader.ReadUInt16();
+                    ushort longLocalIndex = reader.ReadUInt16();
                     return _operandResolver.ResolveLocalVariable(longLocalIndex) ?? longLocalIndex;
 
                 case CilOperandType.InlineArgument:
-                    ushort longArgIndex = _reader.ReadUInt16();
+                    ushort longArgIndex = reader.ReadUInt16();
                     return _operandResolver.ResolveParameter(longArgIndex) ?? longArgIndex;
 
                 case CilOperandType.InlineI:
-                    return _reader.ReadInt32();
+                    return reader.ReadInt32();
 
                 case CilOperandType.InlineBrTarget:
-                    return new CilOffsetLabel(_reader.ReadInt32() + (int) _reader.RelativeOffset);
+                    return new CilOffsetLabel(reader.ReadInt32() + (int) reader.RelativeOffset);
 
                 case CilOperandType.ShortInlineR:
-                    return _reader.ReadSingle();
+                    return reader.ReadSingle();
 
                 case CilOperandType.InlineI8:
-                    return _reader.ReadInt64();
+                    return reader.ReadInt64();
 
                 case CilOperandType.InlineR:
-                    return _reader.ReadDouble();
+                    return reader.ReadDouble();
 
                 case CilOperandType.InlineString:
-                    var stringToken = new MetadataToken(_reader.ReadUInt32());
+                    var stringToken = new MetadataToken(reader.ReadUInt32());
                     return _operandResolver.ResolveString(stringToken) ?? stringToken;
 
                 case CilOperandType.InlineField:
@@ -182,28 +183,28 @@ namespace AsmResolver.PE.DotNet.Cil
                 case CilOperandType.InlineSig:
                 case CilOperandType.InlineTok:
                 case CilOperandType.InlineType:
-                    var memberToken = new MetadataToken(_reader.ReadUInt32());
+                    var memberToken = new MetadataToken(reader.ReadUInt32());
                     return _operandResolver.ResolveMember(memberToken) ?? memberToken;
 
                 case CilOperandType.InlinePhi:
                     throw new NotSupportedException();
 
                 case CilOperandType.InlineSwitch:
-                    return ReadSwitchTable();
+                    return ReadSwitchTable(ref reader);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(operandType), operandType, null);
             }
         }
 
-        private IList<ICilLabel> ReadSwitchTable()
+        private IList<ICilLabel> ReadSwitchTable(ref BinaryStreamReader reader)
         {
-            int count = _reader.ReadInt32();
-            int nextOffset = (int) _reader.RelativeOffset + count * sizeof(int);
+            int count = reader.ReadInt32();
+            int nextOffset = (int) reader.RelativeOffset + count * sizeof(int);
 
             var offsets = new List<ICilLabel>(count);
             for (int i = 0; i < count; i++)
-                offsets.Add(new CilOffsetLabel(nextOffset + _reader.ReadInt32()));
+                offsets.Add(new CilOffsetLabel(nextOffset + reader.ReadInt32()));
 
             return offsets;
         }

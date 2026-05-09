@@ -9,7 +9,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
     public sealed class SerializedImportSectionsSection : ImportSectionsSection
     {
         private readonly PEReaderContext _context;
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
 
         /// <summary>
         /// Reads a single import sections section from the provided input stream.
@@ -22,21 +22,21 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             Rva = reader.Rva;
 
             _context = context;
-            _reader = reader;
+            _readerState = reader.GetState();
         }
 
         /// <inheritdoc />
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override BinaryStreamReader CreateReader() => _reader.Fork();
+        public override BinaryStreamReader CreateReader() => _readerState.CreateReader();
 
         /// <inheritdoc />
         protected override IList<ImportSection> GetSections()
         {
             var result = new List<ImportSection>();
 
-            var reader = _reader.Fork();
+            var reader = _readerState.CreateReader();
             while (reader.CanRead(ImportSection.ImportSectionSize))
                 result.Add(new SerializedImportSection(_context, ref reader));
 

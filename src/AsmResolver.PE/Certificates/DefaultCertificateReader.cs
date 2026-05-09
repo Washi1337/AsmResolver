@@ -18,7 +18,7 @@ namespace AsmResolver.PE.Certificates
             PEReaderContext context,
             CertificateRevision revision,
             CertificateType type,
-            BinaryStreamReader reader)
+            ref BinaryStreamReader reader)
         {
             return new CustomAttributeCertificate(revision, type, reader.ReadSegment(reader.Length));
         }

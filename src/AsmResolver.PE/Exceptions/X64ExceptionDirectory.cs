@@ -7,18 +7,18 @@ namespace AsmResolver.PE.Exceptions
     internal class X64ExceptionDirectory : ExceptionDirectory<X64RuntimeFunction>
     {
         private readonly PEReaderContext _context;
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
 
         public X64ExceptionDirectory(PEReaderContext context, in BinaryStreamReader reader)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _reader = reader;
+            _readerState = reader.GetState();
         }
 
         /// <inheritdoc />
         protected override IList<X64RuntimeFunction> GetFunctions()
         {
-            var reader = _reader.Fork();
+            var reader = _readerState.CreateReader();
             var result = new List<X64RuntimeFunction>();
 
             while (reader.CanRead(X64RuntimeFunction.EntrySize))

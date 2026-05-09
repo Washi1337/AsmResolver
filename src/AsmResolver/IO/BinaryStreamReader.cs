@@ -788,75 +788,75 @@ namespace AsmResolver.IO
 
         public readonly BinaryStreamReaderState GetState() => _state;
 
-        // /// <summary>
-        // /// Creates an exact copy of the reader.
-        // /// </summary>
-        // /// <returns>The copied reader.</returns>
-        // /// <remarks>This method does not copy the underlying buffer.</remarks>
-        // public readonly BinaryStreamReader Fork() => this;
-        //
-        // /// <summary>
-        // /// Creates a copy of the reader, and moves the offset of the copied reader to the provided file offset.
-        // /// </summary>
-        // /// <param name="offset">The file offset.</param>
-        // /// <returns>The new reader.</returns>
-        // /// <remarks>This method does not copy the underlying buffer.</remarks>
-        // public readonly BinaryStreamReader ForkAbsolute(ulong offset)
-        // {
-        //     return ForkAbsolute(offset, (uint) (Length - (offset - StartOffset)));
-        // }
-        //
-        // /// <summary>
-        // /// Creates a copy of the reader, moves the offset of the copied reader to the provided file offset, and resizes
-        // /// the copied reader to the provided number of bytes.
-        // /// </summary>
-        // /// <param name="offset">The file offset.</param>
-        // /// <param name="size">The number of bytes to read.</param>
-        // /// <returns>The new reader.</returns>
-        // /// <remarks>This method does not copy the underlying buffer.</remarks>
-        // public readonly BinaryStreamReader ForkAbsolute(ulong offset, uint size)
-        // {
-        //     return new(DataSource, offset, (uint) (StartRva + (offset - StartOffset)), size);
-        // }
-        //
-        // /// <summary>
-        // /// Creates a copy of the reader, and moves to the provided relative offset of the copied reader.
-        // /// </summary>
-        // /// <param name="relativeOffset">The displacement.</param>
-        // /// <returns>The new reader.</returns>
-        // /// <remarks>This method does not copy the underlying buffer.</remarks>
-        // public readonly BinaryStreamReader ForkRelative(uint relativeOffset)
-        // {
-        //     return ForkRelative(relativeOffset, Length - relativeOffset);
-        // }
-        //
-        // /// <summary>
-        // /// Creates a copy of the reader, moves the copied reader to the provided relative offset, and resizes the
-        // /// copied reader to the provided number of bytes.
-        // /// </summary>
-        // /// <param name="relativeOffset">The displacement.</param>
-        // /// <param name="size">The number of bytes to read.</param>
-        // /// <returns>The new reader.</returns>
-        // /// <remarks>This method does not copy the underlying buffer.</remarks>
-        // public readonly BinaryStreamReader ForkRelative(uint relativeOffset, uint size)
-        // {
-        //     return new(DataSource, StartOffset + relativeOffset, StartRva + relativeOffset, size);
-        // }
+        /// <summary>
+        /// Creates an exact copy of the reader.
+        /// </summary>
+        /// <returns>The copied reader.</returns>
+        /// <remarks>This method does not copy the underlying buffer.</remarks>
+        public readonly BinaryStreamReader Fork() => this;
 
-        // /// <summary>
-        // /// Resizes the current reader to a new number of bytes.
-        // /// </summary>
-        // /// <param name="newSize">The new number of bytes.</param>
-        // /// <exception cref="EndOfStreamException">
-        // /// Occurs when the provided size reaches outside of the input stream's length.
-        // /// </exception>
-        // public void ChangeSize(uint newSize)
-        // {
-        //     if (newSize > Length)
-        //         throw new EndOfStreamException();
-        //
-        //     Length = newSize;
-        // }
+        /// <summary>
+        /// Creates a copy of the reader, and moves the offset of the copied reader to the provided file offset.
+        /// </summary>
+        /// <param name="offset">The file offset.</param>
+        /// <returns>The new reader.</returns>
+        /// <remarks>This method does not copy the underlying buffer.</remarks>
+        public readonly BinaryStreamReader ForkAbsolute(ulong offset)
+        {
+            return ForkAbsolute(offset, (uint) (Length - (offset - StartOffset)));
+        }
+
+        /// <summary>
+        /// Creates a copy of the reader, moves the offset of the copied reader to the provided file offset, and resizes
+        /// the copied reader to the provided number of bytes.
+        /// </summary>
+        /// <param name="offset">The file offset.</param>
+        /// <param name="size">The number of bytes to read.</param>
+        /// <returns>The new reader.</returns>
+        /// <remarks>This method does not copy the underlying buffer.</remarks>
+        public readonly BinaryStreamReader ForkAbsolute(ulong offset, uint size)
+        {
+            return new(DataSource, offset, (uint) (StartRva + (offset - StartOffset)), size);
+        }
+
+        /// <summary>
+        /// Creates a copy of the reader, and moves to the provided relative offset of the copied reader.
+        /// </summary>
+        /// <param name="relativeOffset">The displacement.</param>
+        /// <returns>The new reader.</returns>
+        /// <remarks>This method does not copy the underlying buffer.</remarks>
+        public readonly BinaryStreamReader ForkRelative(uint relativeOffset)
+        {
+            return ForkRelative(relativeOffset, Length - relativeOffset);
+        }
+
+        /// <summary>
+        /// Creates a copy of the reader, moves the copied reader to the provided relative offset, and resizes the
+        /// copied reader to the provided number of bytes.
+        /// </summary>
+        /// <param name="relativeOffset">The displacement.</param>
+        /// <param name="size">The number of bytes to read.</param>
+        /// <returns>The new reader.</returns>
+        /// <remarks>This method does not copy the underlying buffer.</remarks>
+        public readonly BinaryStreamReader ForkRelative(uint relativeOffset, uint size)
+        {
+            return new(DataSource, StartOffset + relativeOffset, StartRva + relativeOffset, size);
+        }
+
+        /// <summary>
+        /// Resizes the current reader to a new number of bytes.
+        /// </summary>
+        /// <param name="newSize">The new number of bytes.</param>
+        /// <exception cref="EndOfStreamException">
+        /// Occurs when the provided size reaches outside of the input stream's length.
+        /// </exception>
+        public void ChangeSize(uint newSize)
+        {
+            if (newSize > Length)
+                throw new EndOfStreamException();
+
+            Length = newSize;
+        }
 
         /// <summary>
         /// Consumes and copies the remainder of the contents to the provided output stream.

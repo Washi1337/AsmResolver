@@ -12,7 +12,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
     {
         private readonly PEReaderContext _context;
         private readonly uint _numberOfSections = 0;
-        private readonly BinaryStreamReader _sectionReader;
+        private readonly BinaryStreamReaderState _sectionReaderState;
 
         /// <summary>
         /// Reads a .NET ReadyToRun directory from an input stream.
@@ -32,7 +32,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             MinorVersion = reader.ReadUInt16();
             Attributes = (ReadyToRunAttributes) reader.ReadUInt32();
             _numberOfSections = reader.ReadUInt32();
-            _sectionReader = reader.Fork();
+            _sectionReaderState = reader.GetState();
         }
 
         /// <inheritdoc />
@@ -40,7 +40,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         {
             var result = new List<IReadyToRunSection>();
 
-            var reader = _sectionReader.Fork();
+            var reader = _sectionReaderState.CreateReader();
             for (int i = 0; i < _numberOfSections; i++)
             {
                 // Read header.

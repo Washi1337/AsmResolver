@@ -9,39 +9,41 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
     public class SerializedDebugInfo : DebugInfo
     {
         private readonly PEReaderContext _context;
-        private readonly BinaryStreamReader _boundsReader;
-        private readonly BinaryStreamReader _variablesReader;
+        private readonly BinaryStreamReaderState _boundsReaderState;
+        private readonly BinaryStreamReaderState _variablesReaderState;
 
         /// <summary>
         /// Reads debug information from the provided input stream.
         /// </summary>
         /// <param name="context">The context the reader is situated in.</param>
         /// <param name="reader">The input stream.</param>
-        public SerializedDebugInfo(PEReaderContext context, BinaryStreamReader reader)
+        public SerializedDebugInfo(PEReaderContext context, in BinaryStreamReader reader)
         {
             _context = context;
 
-            var original = reader;
-            uint lookBack = NativeFormat.DecodeUnsigned(ref reader);
+            var state = reader.GetState();
+
+            var lookahead = reader;
+            uint lookBack = NativeFormat.DecodeUnsigned(ref lookahead);
             if (lookBack != 0)
-                reader.Offset = original.Offset - lookBack;
+                state.CurrentOffset -= lookBack;
 
             var nibbleReader = new NibbleReader(reader);
             uint boundsByteCount = nibbleReader.Read3BitEncodedUInt();
             uint variablesByteCount = nibbleReader.Read3BitEncodedUInt();
 
-            _boundsReader = reader.ForkRelative(nibbleReader.BaseReader.RelativeOffset, boundsByteCount);
-            _variablesReader = reader.ForkRelative(nibbleReader.BaseReader.RelativeOffset + boundsByteCount, variablesByteCount);
+            _boundsReaderState = state.WithRelativeOffsetSize(nibbleReader.BaseReader.RelativeOffset, boundsByteCount);
+            _variablesReaderState = state.WithRelativeOffsetSize(nibbleReader.BaseReader.RelativeOffset + boundsByteCount, variablesByteCount);
         }
 
         /// <inheritdoc />
         protected override IList<DebugInfoBounds> GetBounds()
         {
             var result = base.GetBounds();
-            if (_boundsReader.Length == 0)
+            if (_boundsReaderState.Length == 0)
                 return result;
 
-            var reader = new NibbleReader(_boundsReader);
+            var reader = new NibbleReader(_boundsReaderState.CreateReader());
             uint count = reader.Read3BitEncodedUInt();
 
             uint nativeOffset = 0;
@@ -63,10 +65,10 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         protected override IList<DebugInfoVariable> GetVariables()
         {
             var result = base.GetVariables();
-            if (_variablesReader.Length == 0)
+            if (_variablesReaderState.Length == 0)
                 return result;
 
-            var reader = new NibbleReader(_variablesReader);
+            var reader = new NibbleReader(_variablesReaderState.CreateReader());
             uint count = reader.Read3BitEncodedUInt();
 
             for (int i = 0; i < count; i++)

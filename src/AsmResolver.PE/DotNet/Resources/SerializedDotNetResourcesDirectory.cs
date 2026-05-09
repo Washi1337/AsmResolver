@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Resources
     /// </summary>
     public class SerializedDotNetResourcesDirectory : DotNetResourcesDirectory
     {
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
 
         /// <summary>
         /// Creates a new instance of the <see cref="SerializedDotNetResourcesDirectory"/> using an input stream as
@@ -19,7 +19,7 @@ namespace AsmResolver.PE.DotNet.Resources
         {
             if (!reader.IsValid)
                 throw new ArgumentNullException(nameof(reader));
-            _reader = reader;
+            _readerState = reader.GetState();
             Offset = reader.Offset;
             Rva = reader.Rva;
         }
@@ -35,10 +35,10 @@ namespace AsmResolver.PE.DotNet.Resources
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => _reader.Length;
+        public override uint GetPhysicalSize() => _readerState.Length;
 
         /// <inheritdoc />
-        public override void Write(BinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
+        public override void Write(BinaryStreamWriter writer) => _readerState.CreateReader().WriteToOutput(writer);
 
         /// <inheritdoc />
         public override byte[]? GetManifestResourceData(uint offset)
@@ -54,13 +54,13 @@ namespace AsmResolver.PE.DotNet.Resources
         /// <inheritdoc />
         public override bool TryCreateManifestResourceReader(uint offset, out BinaryStreamReader reader)
         {
-            if (offset >= _reader.Length - sizeof(uint))
+            if (offset >= _readerState.Length - sizeof(uint))
             {
                 reader = default;
                 return false;
             }
 
-            reader = _reader.ForkRelative(offset);
+            reader = _readerState.WithRelativeOffset(offset).CreateReader();
             uint length = reader.ReadUInt32();
 
             if (!reader.CanRead(length))

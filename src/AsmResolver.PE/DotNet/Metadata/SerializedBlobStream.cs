@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
@@ -10,7 +9,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class SerializedBlobStream : BlobStream
     {
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
 
         /// <summary>
         /// Creates a new blob stream with the provided byte array as the raw contents of the stream.
@@ -39,7 +38,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         public SerializedBlobStream(string name, in BinaryStreamReader reader)
             : base(name)
         {
-            _reader = reader;
+            _readerState = reader.GetState();
             Offset = reader.Offset;
             Rva = reader.Rva;
         }
@@ -48,13 +47,13 @@ namespace AsmResolver.PE.DotNet.Metadata
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override BinaryStreamReader CreateReader() => _reader.Fork();
+        public override BinaryStreamReader CreateReader() => _readerState.CreateReader();
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => _reader.Length;
+        public override uint GetPhysicalSize() => _readerState.Length;
 
         /// <inheritdoc />
-        public override void Write(BinaryStreamWriter writer) => _reader.Fork().WriteToOutput(writer);
+        public override void Write(BinaryStreamWriter writer) => _readerState.CreateReader().WriteToOutput(writer);
 
         /// <inheritdoc />
         public override byte[]? GetBlobByIndex(uint index) => TryGetBlobReaderByIndex(index, out var reader)
@@ -64,13 +63,13 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <inheritdoc />
         public override bool TryGetBlobReaderByIndex(uint index, out BinaryStreamReader reader)
         {
-            if (index == 0 || index >= _reader.Length)
+            if (index == 0 || index >= _readerState.Length)
             {
                 reader = default;
                 return false;
             }
 
-            reader = _reader.ForkRelative(index);
+            reader = _readerState.WithRelativeOffset(index).CreateReader();
             if (reader.TryReadCompressedUInt32(out uint length))
             {
                 uint headerSize = (uint) (reader.Offset - reader.StartOffset);
@@ -92,7 +91,7 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             uint totalLength = (uint) blob.Length + ((uint) blob.Length).GetCompressedSize();
 
-            var reader = _reader.Fork();
+            var reader = _readerState.CreateReader();
             while (reader.CanRead(totalLength))
             {
                 index = reader.RelativeOffset;
@@ -122,7 +121,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             uint currentIndex = 1;
 
-            while (currentIndex < _reader.Length)
+            while (currentIndex < _readerState.Length)
             {
                 byte[]? result = GetBlobByIndex(currentIndex);
 

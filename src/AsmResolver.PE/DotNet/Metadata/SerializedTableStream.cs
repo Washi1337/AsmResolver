@@ -12,7 +12,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class SerializedTableStream : TablesStream, ILazyMetadataStream
     {
         private readonly MetadataReaderContext _context;
-        private readonly BinaryStreamReader _reader;
+        private readonly BinaryStreamReaderState _readerState;
         private readonly ulong _validMask;
         private readonly ulong _sortedMask;
         private readonly uint[] _rowCounts;
@@ -51,12 +51,12 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _reader = reader;
+            _readerState = reader.GetState();
 
             Offset = reader.Offset;
             Rva = reader.Rva;
 
-            var headerReader = _reader.Fork();
+            var headerReader = reader.Fork();
             Reserved = headerReader.ReadUInt32();
             MajorVersion = headerReader.ReadByte();
             MinorVersion = headerReader.ReadByte();
@@ -76,7 +76,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override BinaryStreamReader CreateReader() => _reader.Fork();
+        public override BinaryStreamReader CreateReader() => _readerState.CreateReader();
 
         private uint[] ReadRowCounts(ref BinaryStreamReader reader)
         {
@@ -293,7 +293,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             int index = (int) currentIndex;
             uint rawSize = TableLayouts[index].RowSize * _rowCounts[index];
-            var tableReader = _reader.ForkRelative(currentOffset, rawSize);
+            var tableReader = _readerState.WithRelativeOffsetSize(currentOffset, rawSize).CreateReader();
             currentOffset += rawSize;
             return tableReader;
         }
