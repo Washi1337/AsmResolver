@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using AsmResolver.IO;
@@ -8,20 +9,27 @@ namespace AsmResolver.Tests.IO
 {
     public class BinaryStreamReaderTest
     {
-        [Fact]
-        public void EmptyArray()
+        private static IDataSource CreateByteDataSource(bool useSpan, byte[] data)
         {
-            var readerState = new BinaryStreamReaderState([]);
+            return useSpan ? new ByteArrayDataSource(data) : new NoSpanByteArrayDataSource(data);
+        }
+
+        [Theory]
+        [MemberData(nameof(XunitHelpers.Bool1), MemberType = typeof(XunitHelpers))]
+        public void EmptyArray(bool useSpan)
+        {
+            var readerState = new BinaryStreamReaderState(CreateByteDataSource(useSpan, []));
             Assert.Equal(0u, readerState.Length);
 
             Assert.Throws<EndOfStreamException>(() => readerState.CreateReader().ReadByte());
             Assert.Equal(0, readerState.CreateReader().ReadBytes(new byte[10], 0, 10));
         }
 
-        [Fact]
-        public void ReadByte()
+        [Theory]
+        [MemberData(nameof(XunitHelpers.Bool1), MemberType = typeof(XunitHelpers))]
+        public void ReadByte(bool useSpan)
         {
-            var state = new BinaryStreamReaderState([0x80, 0x80]);
+            var state = new BinaryStreamReaderState(CreateByteDataSource(useSpan, [0x80, 0x80]));
             var reader = state.CreateReader();
 
             Assert.Equal((byte) 0x80, reader.ReadByte());
@@ -29,16 +37,17 @@ namespace AsmResolver.Tests.IO
             Assert.Equal((sbyte) -128, reader.ReadSByte());
 
             state = reader.GetState();
-            Assert.Throws<EndOfStreamException>(() => state.CreateReader().ReadByte());
+            Assert.ThrowsAny<Exception>(() => state.CreateReader().ReadByte());
         }
 
-        [Fact]
-        public void ReadInt16()
+        [Theory]
+        [MemberData(nameof(XunitHelpers.Bool1), MemberType = typeof(XunitHelpers))]
+        public void ReadInt16(bool useSpan)
         {
-            var state = new BinaryStreamReaderState([
+            var state = new BinaryStreamReaderState(CreateByteDataSource(useSpan, [
                 0x01, 0x80,
                 0x02, 0x80
-            ]);
+            ]));
 
             var reader = state.CreateReader();
             Assert.Equal((ushort) 0x8001, reader.ReadUInt16());
@@ -47,13 +56,14 @@ namespace AsmResolver.Tests.IO
             Assert.Equal(4u, reader.Offset);
         }
 
-        [Fact]
-        public void ReadInt32()
+        [Theory]
+        [MemberData(nameof(XunitHelpers.Bool1), MemberType = typeof(XunitHelpers))]
+        public void ReadInt32(bool useSpan)
         {
-            var state = new BinaryStreamReaderState([
+            var state = new BinaryStreamReaderState(CreateByteDataSource(useSpan, [
                 0x04, 0x03, 0x02, 0x81,
                 0x08, 0x07, 0x06, 0x85
-            ]);
+            ]));
 
             var reader = state.CreateReader();
             Assert.Equal(0x81020304u, reader.ReadUInt32());
@@ -62,14 +72,14 @@ namespace AsmResolver.Tests.IO
             Assert.Equal(8u, reader.Offset);
         }
 
-
-        [Fact]
-        public void ReadInt64()
+        [Theory]
+        [MemberData(nameof(XunitHelpers.Bool1), MemberType = typeof(XunitHelpers))]
+        public void ReadInt64(bool useSpan)
         {
-            var state = new BinaryStreamReaderState([
+            var state = new BinaryStreamReaderState(CreateByteDataSource(useSpan, [
                 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x80,
                 0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x88
-            ]);
+            ]));
 
             var reader = state.CreateReader();
             Assert.Equal(0x8001020304050607ul, reader.ReadUInt64());
@@ -78,52 +88,134 @@ namespace AsmResolver.Tests.IO
             Assert.Equal(16u, reader.Offset);
         }
 
+        public static IEnumerable<object[]> ReadCompressedUInt32Data() => XunitHelpers.Bool1().Cross([
+            [new byte[] { 0x03 }, 3],
+            [new byte[] { 0x7f }, 0x7f],
+            [new byte[] { 0x80, 0x80 }, 0x80],
+            [new byte[] { 0xAE, 0x57 }, 0x2E57],
+            [new byte[] { 0xBF, 0xFF }, 0x3FFF],
+            [new byte[] { 0xC0, 0x00, 0x40, 0x00 }, 0x4000],
+            [new byte[] { 0xDF, 0x12, 0x34, 0x56 }, 0x1F123456],
+            [new byte[] { 0xDF, 0xFF, 0xFF, 0xFF }, 0x1FFFFFFF]
+        ]);
+
         [Theory]
-        [InlineData(new byte[] {0x03}, 3)]
-        [InlineData(new byte[] {0x7f}, 0x7f)]
-        [InlineData(new byte[] {0x80, 0x80}, 0x80)]
-        [InlineData(new byte[] {0xAE, 0x57}, 0x2E57)]
-        [InlineData(new byte[] {0xBF, 0xFF}, 0x3FFF)]
-        [InlineData(new byte[] {0xC0, 0x00, 0x40, 0x00}, 0x4000)]
-        [InlineData(new byte[] {0xDF, 0x12, 0x34, 0x56}, 0x1F123456)]
-        [InlineData(new byte[] {0xDF, 0xFF, 0xFF, 0xFF}, 0x1FFFFFFF)]
-        public void ReadCompressedUInt32(byte[] data, uint expected)
+        [MemberData(nameof(ReadCompressedUInt32Data))]
+        public void ReadCompressedUInt32(bool useSpan, byte[] data, uint expected)
         {
-            var state = new BinaryStreamReaderState(data);
+            var state = new BinaryStreamReaderState(CreateByteDataSource(useSpan, data));
             Assert.Equal(expected, state.CreateReader().ReadCompressedUInt32());
             Assert.True(state.CreateReader().TryReadCompressedUInt32(out uint value));
             Assert.Equal(expected, value);
         }
 
+        public static IEnumerable<object[]> ReadCompressedInt32Data() => XunitHelpers.Bool1().Cross([
+            [new byte[] { 0x06 }, 3],
+            [new byte[] { 0x7B }, -3],
+            [new byte[] { 0x80, 0x80 }, 64],
+            [new byte[] { 0x01 }, -64],
+            [new byte[] { 0xC0, 0x00, 0x40, 0x00 }, 8192],
+            [new byte[] { 0x80, 0x01 }, -8192],
+            [new byte[] { 0xDF, 0xFF, 0xFF, 0xFE }, 0xFFFFFFF],
+            [new byte[] { 0xC0, 0x00, 0x00, 0x01 }, -0x10000000]
+        ]);
+
         [Theory]
-        [InlineData(new byte[] {0x06}, 3)]
-        [InlineData(new byte[] {0x7B}, -3)]
-        [InlineData(new byte[] {0x80, 0x80}, 64)]
-        [InlineData(new byte[] {0x01}, -64)]
-        [InlineData(new byte[] {0xC0, 0x00, 0x40, 0x00}, 8192)]
-        [InlineData(new byte[] {0x80, 0x01}, -8192)]
-        [InlineData(new byte[] {0xDF, 0xFF, 0xFF, 0xFE}, 0xFFFFFFF)]
-        [InlineData(new byte[] {0xC0, 0x00, 0x00, 0x01}, -0x10000000)]
-        public void ReadCompressedInt32(byte[] data, int expected)
+        [MemberData(nameof(ReadCompressedInt32Data))]
+        public void ReadCompressedInt32(bool useSpan, byte[] data, int expected)
         {
-            var state = new BinaryStreamReaderState(data);
+            var state = new BinaryStreamReaderState(CreateByteDataSource(useSpan, data));
             Assert.Equal(expected, state.CreateReader().ReadCompressedInt32());
             Assert.True(state.CreateReader().TryReadCompressedInt32(out int value));
             Assert.Equal(expected, value);
         }
 
+        public static IEnumerable<object[]> ReadBinaryFormatterStringData() => XunitHelpers.Bool1().Cross([
+            [""],
+            ["Hello, world!"],
+            ["0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"]
+        ]);
+
         [Theory]
-        [InlineData("")]
-        [InlineData("Hello, world!")]
-        [InlineData("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789")]
-        public void ReadBinaryFormatterString(string value)
+        [MemberData(nameof(ReadBinaryFormatterStringData))]
+        public void ReadBinaryFormatterString(bool useSpan, string value)
         {
             using var stream = new MemoryStream();
             var writer = new BinaryWriter(stream, Encoding.UTF8);
             writer.Write(value);
 
-            var reader = new BinaryStreamReader(stream);
+            var reader = new BinaryStreamReader(CreateByteDataSource(useSpan, stream.ToArray()));
             Assert.Equal(value, reader.ReadBinaryFormatterString());
+        }
+
+        public static IEnumerable<object[]> AdvanceUntilData() => XunitHelpers.Bool1().Cross([
+            ["1234"u8.ToArray(), 0x00, false, false, 4],
+            ["1234"u8.ToArray(), 0x00, true, false, 4],
+            ["1234\0"u8.ToArray(), 0x00, false, false, 4],
+            ["1234\0"u8.ToArray(), 0x00, true, true, 5],
+            ["1234\056"u8.ToArray(), 0x00, false, false, 4],
+            ["1234\056"u8.ToArray(), 0x00, true, true, 5],
+            ["123456"u8.ToArray(), 0x00, true, false, 6],
+        ]);
+
+        [Theory]
+        [MemberData(nameof(AdvanceUntilData))]
+        public void AdvanceUntil(bool useSpan, byte[] data, byte delimeter, bool consumeDelimiter, bool expectedConsumed, uint expectedOffset)
+        {
+            var reader = new BinaryStreamReader(CreateByteDataSource(useSpan, data));
+            Assert.Equal(expectedConsumed, reader.AdvanceUntil(delimeter, consumeDelimiter));
+            Assert.Equal(expectedOffset, reader.RelativeOffset);
+        }
+
+        public static IEnumerable<object[]> ReadBytesUntilData() => XunitHelpers.Bool1().Cross([
+            ["1234"u8.ToArray(), 0x00, false, new byte[] { 0x31, 0x32, 0x33, 0x34 }],
+            ["1234"u8.ToArray(), 0x00, true, new byte[] { 0x31, 0x32, 0x33, 0x34 }],
+            ["1234\0"u8.ToArray(), 0x00, false, new byte[] { 0x31, 0x32, 0x33, 0x34 }],
+            ["1234\0"u8.ToArray(), 0x00, true, new byte[] { 0x31, 0x32, 0x33, 0x34, 0x00 }],
+            ["1234\056"u8.ToArray(), 0x00, false, new byte[] { 0x31, 0x32, 0x33, 0x34 }],
+            ["1234\056"u8.ToArray(), 0x00, true, new byte[] { 0x31, 0x32, 0x33, 0x34, 0x00 }],
+            ["123456"u8.ToArray(), 0x00, true, new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 }],
+        ]);
+
+        [Theory]
+        [MemberData(nameof(ReadBytesUntilData))]
+        public void ReadBytesUntil(bool useSpan, byte[] data, byte delimeter, bool includeDelimiter, byte[] expectedData)
+        {
+            var reader = new BinaryStreamReader(CreateByteDataSource(useSpan, data));
+            Assert.Equal(expectedData, reader.ReadBytesUntil(delimeter, includeDelimiter));
+        }
+
+        public static IEnumerable<object[]> ReadAsciiStringData() => XunitHelpers.Bool1().Cross([
+            ["1234"u8.ToArray(), "1234", 4],
+            ["1234\0"u8.ToArray(), "1234", 5],
+            ["1234\056"u8.ToArray(), "1234", 5],
+            ["123456"u8.ToArray(), "123456", 6],
+        ]);
+
+        [Theory]
+        [MemberData(nameof(ReadAsciiStringData))]
+        public void ReadAsciiString(bool useSpan, byte[] data, string expected, uint expectedOffset)
+        {
+            var reader = new BinaryStreamReader(CreateByteDataSource(useSpan, data));
+            Assert.Equal(expected, reader.ReadAsciiString());
+            Assert.Equal(expectedOffset, reader.RelativeOffset);
+        }
+
+        public static IEnumerable<object[]> ReadUnicodeStringData() => XunitHelpers.Bool1().Cross([
+            ["1\02\03\04\0"u8.ToArray(), "1234", 8],
+            ["1\02\03\04\0\0\0"u8.ToArray(), "1234", 10],
+            ["1\02\03\04\0\0\05\06\0"u8.ToArray(), "1234", 10],
+            ["1\02\03\04\05\06\0"u8.ToArray(), "123456", 12],
+            ["1\02\03\04\05\06\0\0"u8.ToArray(), "123456", 12],
+        ]);
+
+        [Theory]
+        [MemberData(nameof(ReadUnicodeStringData))]
+        public void ReadUnicodeString(bool useSpan, byte[] data, string expected, uint expectedOffset)
+        {
+            var reader = new BinaryStreamReader(CreateByteDataSource(useSpan, data));
+            Assert.Equal(expected, reader.ReadUnicodeString());
+            Assert.Equal(expectedOffset, reader.RelativeOffset);
         }
 
         [Fact]

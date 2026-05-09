@@ -51,8 +51,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// method body format.</exception>
         public static CilRawMethodBody? FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
         {
-            var flag = (CilMethodBodyAttributes) reader.ReadByte();
-            reader.Offset--;
+            var flag = (CilMethodBodyAttributes) reader.PeekByte();
 
             if ((flag & CilMethodBodyAttributes.Fat) == CilMethodBodyAttributes.Fat)
                 return CilRawFatMethodBody.FromReader(errorListener, ref reader);

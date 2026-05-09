@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using AsmResolver.PE.File;
 using Xunit;
@@ -6,6 +8,21 @@ namespace AsmResolver.Tests;
 
 public static class XunitHelpers
 {
+    public static IEnumerable<object[]> Bool1() => [[false], [true]];
+
+    public static IEnumerable<object[]> Cross(this IEnumerable<object[]> self,  IEnumerable<object[]> other)
+    {
+        object[] otherObjects = other as object[][] ?? other.ToArray<object>();
+
+        foreach (object[] x in self)
+        {
+            foreach (object[] y in otherObjects)
+            {
+                yield return x.Concat(y).ToArray();
+            }
+        }
+    }
+
     public static bool IsRunningOnCompatible(MachineType machine) => machine switch
     {
         MachineType.I386 => RuntimeInformation.ProcessArchitecture is Architecture.X86 or Architecture.X64,

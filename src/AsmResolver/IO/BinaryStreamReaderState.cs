@@ -92,7 +92,16 @@ public struct BinaryStreamReaderState : IEquatable<BinaryStreamReaderState>
     /// <summary>
     /// Gets or sets the current reader offset.
     /// </summary>
-    public ulong CurrentOffset { get; set; }
+    public ulong CurrentOffset
+    {
+        get => StartOffset + RelativeOffset;
+        set => RelativeOffset = (uint) (value - StartOffset);
+    }
+
+    /// <summary>
+    /// Gets or sets the current index relative to the start of the buffer.
+    /// </summary>
+    public uint RelativeOffset { get; set; }
 
     /// <summary>
     /// Creates a reader based on the current reader state.
@@ -161,7 +170,7 @@ public struct BinaryStreamReaderState : IEquatable<BinaryStreamReaderState>
             && StartOffset == other.StartOffset
             && StartRva == other.StartRva
             && Length == other.Length
-            && CurrentOffset == other.CurrentOffset;
+            && RelativeOffset == other.RelativeOffset;
     }
 
     /// <inheritdoc />
@@ -179,7 +188,7 @@ public struct BinaryStreamReaderState : IEquatable<BinaryStreamReaderState>
             hashCode = (hashCode * 397) ^ StartOffset.GetHashCode();
             hashCode = (hashCode * 397) ^ (int) StartRva;
             hashCode = (hashCode * 397) ^ (int) Length;
-            hashCode = (hashCode * 397) ^ CurrentOffset.GetHashCode();
+            hashCode = (hashCode * 397) ^ RelativeOffset.GetHashCode();
             return hashCode;
         }
     }

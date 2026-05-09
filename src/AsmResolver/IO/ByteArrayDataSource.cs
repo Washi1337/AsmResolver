@@ -66,7 +66,7 @@ namespace AsmResolver.IO
             if (length != 0)
             {
                 int relativeIndex = unchecked((int) (address - BaseAddress));
-                if (relativeIndex >= 0 && relativeIndex < _data.Length - length)
+                if (relativeIndex >= 0 && relativeIndex <= _data.Length - length)
                 {
                     span = _data.AsSpan(relativeIndex, length);
                     return true;

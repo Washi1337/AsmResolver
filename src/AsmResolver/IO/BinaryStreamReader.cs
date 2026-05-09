@@ -10,6 +10,7 @@ using System.Buffers;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
 using System.Buffers.Binary;
+using System.Runtime.InteropServices;
 #endif
 
 namespace AsmResolver.IO
@@ -26,9 +27,7 @@ namespace AsmResolver.IO
         private BinaryStreamReaderState _state;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        private readonly bool _hasSpan;
         private readonly ReadOnlySpan<byte> _span;
-        private readonly ulong _baseOffset;
 #endif
 
         /// <summary>
@@ -70,21 +69,6 @@ namespace AsmResolver.IO
         /// <exception cref="EndOfStreamException">Occurs when too many bytes are specified by <paramref name="length"/>.</exception>
         public BinaryStreamReader(IDataSource dataSource, ulong offset, uint rva, uint length)
         {
-            if (dataSource is null)
-                throw new ArgumentNullException(nameof(dataSource));
-
-            if (length > 0)
-            {
-                if (!dataSource.IsValidAddress(offset))
-                    throw new ArgumentOutOfRangeException(nameof(offset));
-
-                if (!dataSource.IsValidAddress(offset + length - 1))
-                {
-                    throw new EndOfStreamException(
-                        "Offset and address reach outside of the boundaries of the data source.");
-                }
-            }
-
             _state = new BinaryStreamReaderState(
                 dataSource,
                 offset,
@@ -94,8 +78,7 @@ namespace AsmResolver.IO
             );
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            _hasSpan = dataSource.TryGetSpan(offset, (int) length, out _span);
-            _baseOffset = offset;
+            dataSource.TryGetSpan(offset, (int) length, out _span);
 #endif
         }
 
@@ -108,8 +91,7 @@ namespace AsmResolver.IO
             _state = state;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            _hasSpan = state.DataSource.TryGetSpan(state.StartOffset, (int) state.Length, out _span);
-            _baseOffset = state.StartOffset;
+            state.DataSource.TryGetSpan(state.StartOffset, (int) state.Length, out _span);
 #endif
         }
 
@@ -161,8 +143,8 @@ namespace AsmResolver.IO
         /// </summary>
         public uint RelativeOffset
         {
-            readonly get => (uint) (Offset - StartOffset);
-            set => Offset = value + StartOffset;
+            readonly get => _state.RelativeOffset;
+            set => _state.RelativeOffset = value;
         }
 
         /// <summary>
@@ -203,12 +185,12 @@ namespace AsmResolver.IO
         /// <returns>The read byte, or <c>-1</c> if no byte could be read.</returns>
         public int PeekByte()
         {
-            if (!CanRead(1))
+            if (!CanRead(sizeof(byte)))
                 return -1;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            if (_hasSpan)
-                return _span[(int) (Offset - _baseOffset)];
+            if (!_span.IsEmpty)
+                return _span[(int) RelativeOffset];
 #endif
 
             return DataSource[Offset];
@@ -223,10 +205,10 @@ namespace AsmResolver.IO
             byte result;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            if (_hasSpan)
+            if (!_span.IsEmpty)
             {
                 // Bounds check is already done by accessing `_span` indexer.
-                result = _span[(int) (Offset - _baseOffset)];
+                result = _span[(int) RelativeOffset];
             }
             else
             {
@@ -238,7 +220,7 @@ namespace AsmResolver.IO
             result = DataSource[Offset];
 #endif
 
-            Offset++;
+            RelativeOffset++;
             return result;
         }
 
@@ -251,9 +233,9 @@ namespace AsmResolver.IO
             ushort value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            if (_hasSpan)
+            if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadUInt16LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+                value = BinaryPrimitives.ReadUInt16LittleEndian(_span[(int) RelativeOffset..]);
             }
             else
             {
@@ -270,7 +252,7 @@ namespace AsmResolver.IO
             );
 #endif
 
-            Offset += sizeof(ushort);
+            RelativeOffset += sizeof(ushort);
             return value;
         }
 
@@ -283,9 +265,9 @@ namespace AsmResolver.IO
             uint value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            if (_hasSpan)
+            if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadUInt32LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+                value = BinaryPrimitives.ReadUInt32LittleEndian(_span[(int) RelativeOffset..]);
             }
             else
             {
@@ -304,7 +286,7 @@ namespace AsmResolver.IO
             ));
 #endif
 
-            Offset += sizeof(uint);
+            RelativeOffset += sizeof(uint);
             return value;
         }
 
@@ -317,9 +299,9 @@ namespace AsmResolver.IO
             ulong value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            if (_hasSpan)
+            if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadUInt64LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+                value = BinaryPrimitives.ReadUInt64LittleEndian(_span[(int) RelativeOffset..]);
             }
             else
             {
@@ -341,7 +323,7 @@ namespace AsmResolver.IO
             ));
 #endif
 
-            Offset += sizeof(ulong);
+            RelativeOffset += sizeof(ulong);
             return value;
         }
 
@@ -363,9 +345,9 @@ namespace AsmResolver.IO
             short value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            if (_hasSpan)
+            if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadInt16LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+                value = BinaryPrimitives.ReadInt16LittleEndian(_span[(int) RelativeOffset..]);
             }
             else
             {
@@ -382,7 +364,7 @@ namespace AsmResolver.IO
             ));
 #endif
 
-            Offset += sizeof(short);
+            RelativeOffset += sizeof(short);
             return value;
         }
 
@@ -395,9 +377,9 @@ namespace AsmResolver.IO
             int value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            if (_hasSpan)
+            if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadInt32LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+                value = BinaryPrimitives.ReadInt32LittleEndian(_span[(int) RelativeOffset..]);
             }
             else
             {
@@ -414,7 +396,7 @@ namespace AsmResolver.IO
                 | (DataSource[Offset + 3] << 24);
 #endif
 
-            Offset += sizeof(int);
+            RelativeOffset += sizeof(int);
             return value;
         }
 
@@ -427,9 +409,9 @@ namespace AsmResolver.IO
             long value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            if (_hasSpan)
+            if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadInt64LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+                value = BinaryPrimitives.ReadInt64LittleEndian(_span[(int) RelativeOffset..]);
             }
             else
             {
@@ -450,7 +432,7 @@ namespace AsmResolver.IO
                 | ((long) DataSource[Offset + 7] << 56);
 #endif
 
-            Offset += sizeof(long);
+            RelativeOffset += sizeof(long);
             return value;
         }
 
@@ -517,7 +499,7 @@ namespace AsmResolver.IO
         public void ReadBytes(Span<byte> buffer)
         {
             DataSource.ReadBytes(Offset, buffer);
-            Offset += (uint) buffer.Length;
+            RelativeOffset += (uint) buffer.Length;
         }
 #endif
 
@@ -531,7 +513,7 @@ namespace AsmResolver.IO
         public int ReadBytes(byte[] buffer, int index, int count)
         {
             int actualLength = DataSource.ReadBytes(Offset, buffer, index, count);
-            Offset += (uint) actualLength;
+            RelativeOffset += (uint) actualLength;
             return actualLength;
         }
 
@@ -544,7 +526,7 @@ namespace AsmResolver.IO
         public IReadableSegment ReadSegment(uint count)
         {
             var segment = new DataSourceSegment(DataSource, Offset, Rva, count);
-            Offset += count;
+            RelativeOffset += count;
             return segment;
         }
 
@@ -583,14 +565,14 @@ namespace AsmResolver.IO
         /// </remarks>
         public byte[] ReadBytesUntil(byte delimiter, bool includeDelimiterInReturn)
         {
-            var lookahead = GetState().CreateReader();
+            var lookahead = Fork();
             bool hasConsumedDelimiter = lookahead.AdvanceUntil(delimiter, includeDelimiterInReturn);
 
             byte[] buffer = new byte[lookahead.RelativeOffset - RelativeOffset];
             ReadBytes(buffer, 0, buffer.Length);
 
-            if (hasConsumedDelimiter)
-                ReadByte();
+            if (!hasConsumedDelimiter && PeekByte() == delimiter)
+                RelativeOffset++;
 
             return buffer;
         }
@@ -605,6 +587,30 @@ namespace AsmResolver.IO
         /// <returns><c>true</c> if the delimiter byte was found and consumed, <c>false</c> otherwise.</returns>
         public bool AdvanceUntil(byte delimiter, bool consumeDelimiter)
         {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            // Prefer span-accelerated search over manual loop if possible.
+            if (!_span.IsEmpty)
+            {
+                int index = _span[(int) RelativeOffset..].IndexOf(delimiter);
+                if (index == -1)
+                {
+                    RelativeOffset = Length;
+                    return false;
+                }
+
+                RelativeOffset += (uint) index;
+
+                if (consumeDelimiter)
+                {
+                    RelativeOffset++;
+                    return true;
+                }
+
+                return false;
+            }
+#endif
+
+            // Slow path: manually find the delimiter.
             while (RelativeOffset < Length)
             {
                 byte b = ReadByte();
@@ -613,10 +619,10 @@ namespace AsmResolver.IO
                     if (!consumeDelimiter)
                     {
                         RelativeOffset--;
-                        return true;
+                        return false;
                     }
 
-                    return false;
+                    return true;
                 }
             }
 
@@ -627,7 +633,11 @@ namespace AsmResolver.IO
         /// Reads a null-terminated ASCII string from the input stream.
         /// </summary>
         /// <returns>The read ASCII string, excluding the null terminator.</returns>
-        public string ReadAsciiString() => Encoding.ASCII.GetString(ReadBytesUntil(0, false));
+        public string ReadAsciiString()
+        {
+
+            return Encoding.ASCII.GetString(ReadBytesUntil(0, false));
+        }
 
         /// <summary>
         /// Reads a zero-terminated Unicode string from the stream.
@@ -635,9 +645,29 @@ namespace AsmResolver.IO
         /// <returns>The string that was read from the stream.</returns>
         public string ReadUnicodeString()
         {
-            var builder = new StringBuilder();
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            // Prefer span-accelerated search over manual loop if possible.
+            if (!_span.IsEmpty)
+            {
+                var charSpan = MemoryMarshal.Cast<byte, char>(_span[(int) RelativeOffset..]);
 
-            while (true)
+                int index = charSpan.IndexOf('\0');
+                int length = index == -1 ? (int) (Length - RelativeOffset) / sizeof(char) : index;
+
+                string result = new string(charSpan[..length]);
+
+                if (index != -1)
+                    length++;
+
+                RelativeOffset += (uint) length * sizeof(char);
+
+                return result;
+            }
+#endif
+
+            // Slow path: manually find the zero char.
+            var builder = new StringBuilder();
+            while (CanRead(sizeof(ushort)))
             {
                 char nextChar = (char) ReadUInt16();
                 if (nextChar is '\0')
@@ -673,13 +703,39 @@ namespace AsmResolver.IO
         /// <returns>The unsigned integer that was read from the stream.</returns>
         public uint ReadCompressedUInt32()
         {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            // Prefer span-accelerated read over manual integer decoding.
+            if (!_span.IsEmpty)
+            {
+                uint result = _span[(int) RelativeOffset];
+
+                if ((result & 0x80) == 0)
+                {
+                    RelativeOffset++;
+                    return result;
+                }
+
+                if ((result & 0x40) == 0)
+                {
+                    result = BinaryPrimitives.ReadUInt16BigEndian(_span[(int) RelativeOffset..]) & 0x7FFFu;
+                    RelativeOffset += sizeof(ushort);
+                    return result;
+                }
+
+                result = BinaryPrimitives.ReadUInt32BigEndian(_span[(int) RelativeOffset..]) & 0x3FFF_FFFFu;
+                RelativeOffset += sizeof(uint);
+                return result;
+            }
+#endif
+
+            // Slow path: manual decoding.
             byte firstByte = ReadByte();
 
-                if ((firstByte & 0x80) == 0)
-                    return firstByte;
+            if ((firstByte & 0x80) == 0)
+                return firstByte;
 
-                if ((firstByte & 0x40) == 0)
-                    return (uint) (((firstByte & 0x7F) << 8) | ReadByte());
+            if ((firstByte & 0x40) == 0)
+                return (uint) (((firstByte & 0x7F) << 8) | ReadByte());
 
             return (uint) (((firstByte & 0x3F) << 0x18) |
                 (ReadByte() << 0x10) |
@@ -722,7 +778,7 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
-        /// Tries to reads a compressed unsigned integer from the stream.
+        /// Tries to read a compressed unsigned integer from the stream.
         /// </summary>
         /// <param name="value">The unsigned integer that was read from the stream.</param>
         /// <returns><c>True</c> if the method succeeded, false otherwise.</returns>
