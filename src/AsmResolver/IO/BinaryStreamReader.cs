@@ -18,10 +18,14 @@ namespace AsmResolver.IO
     /// Provides methods for reading binary data from a data source.
     /// </summary>
     [DebuggerDisplay("[{StartOffset}..{EndOffset}) at {Offset} ({RelativeOffset})")]
-    public struct BinaryStreamReader
+    public ref struct BinaryStreamReader
     {
         [ThreadStatic]
         private static int[]? _buffer;
+
+        private BinaryStreamReaderState _state;
+        private bool _hasSpan = false;
+        private ReadOnlySpan<byte> _span;
 
         /// <summary>
         /// Creates a new binary stream reader on the provided data source.
@@ -46,7 +50,7 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="dataSource">The object to get the data from.</param>
         public BinaryStreamReader(IDataSource dataSource)
-            : this(dataSource, 0, 0, (uint) dataSource.Length)
+            : this(dataSource, dataSource.BaseAddress, 0, (uint) dataSource.Length)
         {
         }
 
@@ -77,62 +81,64 @@ namespace AsmResolver.IO
                 }
             }
 
-            DataSource = dataSource;
-            StartOffset = Offset = offset;
-            StartRva = rva;
-            Length = length;
+            _state = new BinaryStreamReaderState(
+                dataSource,
+                offset,
+                rva,
+                length,
+                offset
+            );
+
+            _hasSpan = dataSource.TryGetSpan(offset, (int) length, out _span);
+        }
+
+        public BinaryStreamReader(BinaryStreamReaderState state)
+        {
+            _state = state;
+            _hasSpan = state.DataSource.TryGetSpan(state.StartOffset, (int) state.Length, out _span);
         }
 
         /// <summary>
         /// Gets the data source the reader is reading from.
         /// </summary>
-        public IDataSource DataSource
-        {
-            get;
-        }
+        public readonly IDataSource DataSource => _state.DataSource;
 
         /// <summary>
         /// Gets the raw offset this reader started from.
         /// </summary>
-        public ulong StartOffset
-        {
-            get;
-        }
+        public readonly ulong StartOffset => _state.StartOffset;
 
         /// <summary>
         /// Gets the relative virtual address this reader started from.
         /// </summary>
-        public uint StartRva
-        {
-            get;
-        }
+        public readonly uint StartRva => _state.StartRva;
 
         /// <summary>
         /// Gets the number of bytes that can be read by the reader.
         /// </summary>
         public uint Length
         {
-            get;
-            private set;
+            readonly get => _state.Length;
+            set => _state.Length = value;
         }
 
         /// <summary>
         /// Gets the raw address indicating the end of the stream.
         /// </summary>
-        public ulong EndOffset => StartOffset + Length;
+        public readonly ulong EndOffset => StartOffset + Length;
 
         /// <summary>
         /// Gets the relative virtual address indicating the end of the stream.
         /// </summary>
-        public ulong EndRva => StartRva + Length;
+        public readonly ulong EndRva => StartRva + Length;
 
         /// <summary>
         /// Gets or sets the current raw offset to read from.
         /// </summary>
         public ulong Offset
         {
-            get;
-            set;
+            readonly get => _state.CurrentOffset;
+            set => _state.CurrentOffset = value;
         }
 
         /// <summary>
@@ -140,28 +146,28 @@ namespace AsmResolver.IO
         /// </summary>
         public uint RelativeOffset
         {
-            get => (uint) (Offset - StartOffset);
+            readonly get => (uint) (Offset - StartOffset);
             set => Offset = value + StartOffset;
         }
 
         /// <summary>
         /// Gets the remaining number of bytes that can be read from the stream.
         /// </summary>
-        public uint RemainingLength => Length - RelativeOffset;
+        public readonly uint RemainingLength => Length - RelativeOffset;
 
         /// <summary>
         /// Gets or sets the current virtual address (relative to the image base) to read from.
         /// </summary>
         public uint Rva
         {
-            get => RelativeOffset + StartRva;
+            readonly get => RelativeOffset + StartRva;
             set => RelativeOffset = value - StartRva;
         }
 
         /// <summary>
         /// Gets a value indicating whether the reader is in a valid state.
         /// </summary>
-        public bool IsValid => DataSource is not null;
+        public bool IsValid => _state.DataSource is not null;
 
         /// <summary>
         /// Determines whether the provided number of bytes can be read from the current position.
@@ -482,7 +488,7 @@ namespace AsmResolver.IO
         /// </remarks>
         public byte[] ReadBytesUntil(byte delimiter, bool includeDelimiterInReturn)
         {
-            var lookahead = Fork();
+            var lookahead = GetState().CreateReader();
             bool hasConsumedDelimiter = lookahead.AdvanceUntil(delimiter, includeDelimiterInReturn);
 
             byte[] buffer = new byte[lookahead.RelativeOffset - RelativeOffset];
@@ -780,75 +786,77 @@ namespace AsmResolver.IO
         /// <param name="alignment">The boundary to use.</param>
         public void AlignRelative(uint alignment) => RelativeOffset = RelativeOffset.Align(alignment);
 
-        /// <summary>
-        /// Creates an exact copy of the reader.
-        /// </summary>
-        /// <returns>The copied reader.</returns>
-        /// <remarks>This method does not copy the underlying buffer.</remarks>
-        public readonly BinaryStreamReader Fork() => this;
+        public readonly BinaryStreamReaderState GetState() => _state;
 
-        /// <summary>
-        /// Creates a copy of the reader, and moves the offset of the copied reader to the provided file offset.
-        /// </summary>
-        /// <param name="offset">The file offset.</param>
-        /// <returns>The new reader.</returns>
-        /// <remarks>This method does not copy the underlying buffer.</remarks>
-        public readonly BinaryStreamReader ForkAbsolute(ulong offset)
-        {
-            return ForkAbsolute(offset, (uint) (Length - (offset - StartOffset)));
-        }
+        // /// <summary>
+        // /// Creates an exact copy of the reader.
+        // /// </summary>
+        // /// <returns>The copied reader.</returns>
+        // /// <remarks>This method does not copy the underlying buffer.</remarks>
+        // public readonly BinaryStreamReader Fork() => this;
+        //
+        // /// <summary>
+        // /// Creates a copy of the reader, and moves the offset of the copied reader to the provided file offset.
+        // /// </summary>
+        // /// <param name="offset">The file offset.</param>
+        // /// <returns>The new reader.</returns>
+        // /// <remarks>This method does not copy the underlying buffer.</remarks>
+        // public readonly BinaryStreamReader ForkAbsolute(ulong offset)
+        // {
+        //     return ForkAbsolute(offset, (uint) (Length - (offset - StartOffset)));
+        // }
+        //
+        // /// <summary>
+        // /// Creates a copy of the reader, moves the offset of the copied reader to the provided file offset, and resizes
+        // /// the copied reader to the provided number of bytes.
+        // /// </summary>
+        // /// <param name="offset">The file offset.</param>
+        // /// <param name="size">The number of bytes to read.</param>
+        // /// <returns>The new reader.</returns>
+        // /// <remarks>This method does not copy the underlying buffer.</remarks>
+        // public readonly BinaryStreamReader ForkAbsolute(ulong offset, uint size)
+        // {
+        //     return new(DataSource, offset, (uint) (StartRva + (offset - StartOffset)), size);
+        // }
+        //
+        // /// <summary>
+        // /// Creates a copy of the reader, and moves to the provided relative offset of the copied reader.
+        // /// </summary>
+        // /// <param name="relativeOffset">The displacement.</param>
+        // /// <returns>The new reader.</returns>
+        // /// <remarks>This method does not copy the underlying buffer.</remarks>
+        // public readonly BinaryStreamReader ForkRelative(uint relativeOffset)
+        // {
+        //     return ForkRelative(relativeOffset, Length - relativeOffset);
+        // }
+        //
+        // /// <summary>
+        // /// Creates a copy of the reader, moves the copied reader to the provided relative offset, and resizes the
+        // /// copied reader to the provided number of bytes.
+        // /// </summary>
+        // /// <param name="relativeOffset">The displacement.</param>
+        // /// <param name="size">The number of bytes to read.</param>
+        // /// <returns>The new reader.</returns>
+        // /// <remarks>This method does not copy the underlying buffer.</remarks>
+        // public readonly BinaryStreamReader ForkRelative(uint relativeOffset, uint size)
+        // {
+        //     return new(DataSource, StartOffset + relativeOffset, StartRva + relativeOffset, size);
+        // }
 
-        /// <summary>
-        /// Creates a copy of the reader, moves the offset of the copied reader to the provided file offset, and resizes
-        /// the copied reader to the provided number of bytes.
-        /// </summary>
-        /// <param name="offset">The file offset.</param>
-        /// <param name="size">The number of bytes to read.</param>
-        /// <returns>The new reader.</returns>
-        /// <remarks>This method does not copy the underlying buffer.</remarks>
-        public readonly BinaryStreamReader ForkAbsolute(ulong offset, uint size)
-        {
-            return new(DataSource, offset, (uint) (StartRva + (offset - StartOffset)), size);
-        }
-
-        /// <summary>
-        /// Creates a copy of the reader, and moves to the provided relative offset of the copied reader.
-        /// </summary>
-        /// <param name="relativeOffset">The displacement.</param>
-        /// <returns>The new reader.</returns>
-        /// <remarks>This method does not copy the underlying buffer.</remarks>
-        public readonly BinaryStreamReader ForkRelative(uint relativeOffset)
-        {
-            return ForkRelative(relativeOffset, Length - relativeOffset);
-        }
-
-        /// <summary>
-        /// Creates a copy of the reader, moves the copied reader to the provided relative offset, and resizes the
-        /// copied reader to the provided number of bytes.
-        /// </summary>
-        /// <param name="relativeOffset">The displacement.</param>
-        /// <param name="size">The number of bytes to read.</param>
-        /// <returns>The new reader.</returns>
-        /// <remarks>This method does not copy the underlying buffer.</remarks>
-        public readonly BinaryStreamReader ForkRelative(uint relativeOffset, uint size)
-        {
-            return new(DataSource, StartOffset + relativeOffset, StartRva + relativeOffset, size);
-        }
-
-        /// <summary>
-        /// Resizes the current reader to a new number of bytes.
-        /// </summary>
-        /// <param name="newSize">The new number of bytes.</param>
-        /// <exception cref="EndOfStreamException">
-        /// Occurs when the provided size reaches outside of the input stream's length.
-        /// </exception>
-        public void ChangeSize(uint newSize)
-        {
-            if (newSize > Length)
-                throw new EndOfStreamException();
-
-            Length = newSize;
-        }
+        // /// <summary>
+        // /// Resizes the current reader to a new number of bytes.
+        // /// </summary>
+        // /// <param name="newSize">The new number of bytes.</param>
+        // /// <exception cref="EndOfStreamException">
+        // /// Occurs when the provided size reaches outside of the input stream's length.
+        // /// </exception>
+        // public void ChangeSize(uint newSize)
+        // {
+        //     if (newSize > Length)
+        //         throw new EndOfStreamException();
+        //
+        //     Length = newSize;
+        // }
 
         /// <summary>
         /// Consumes and copies the remainder of the contents to the provided output stream.

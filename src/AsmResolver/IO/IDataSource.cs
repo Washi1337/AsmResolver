@@ -63,6 +63,8 @@ namespace AsmResolver.IO
         /// Occurs when the buffer is larger than the number of bytes available at the provided access.
         /// </exception>
         void ReadBytes(ulong address, Span<byte> buffer);
+
+        bool TryGetSpan(ulong address, int length, out ReadOnlySpan<byte> span);
 #endif
     }
 }

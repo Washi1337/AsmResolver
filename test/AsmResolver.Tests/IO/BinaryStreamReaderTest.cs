@@ -11,38 +11,36 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void EmptyArray()
         {
-            var reader = new BinaryStreamReader(new byte[0]);
-            Assert.Equal(0u, reader.Length);
+            var readerState = new BinaryStreamReaderState([]);
+            Assert.Equal(0u, readerState.Length);
 
-            Assert.Throws<EndOfStreamException>(() => reader.ReadByte());
-            Assert.Equal(0, reader.ReadBytes(new byte[10], 0, 10));
+            Assert.Throws<EndOfStreamException>(() => readerState.CreateReader().ReadByte());
+            Assert.Equal(0, readerState.CreateReader().ReadBytes(new byte[10], 0, 10));
         }
 
         [Fact]
         public void ReadByte()
         {
-            var reader = new BinaryStreamReader(new byte[]
-            {
-                0x80,
-                0x80
-            });
+            var state = new BinaryStreamReaderState([0x80, 0x80]);
+            var reader = state.CreateReader();
 
             Assert.Equal((byte) 0x80, reader.ReadByte());
             Assert.Equal(1u, reader.Offset);
             Assert.Equal((sbyte) -128, reader.ReadSByte());
 
-            Assert.Throws<EndOfStreamException>(() => reader.ReadByte());
+            state = reader.GetState();
+            Assert.Throws<EndOfStreamException>(() => state.CreateReader().ReadByte());
         }
 
         [Fact]
         public void ReadInt16()
         {
-            var reader = new BinaryStreamReader(new byte[]
-            {
+            var state = new BinaryStreamReaderState([
                 0x01, 0x80,
                 0x02, 0x80
-            });
+            ]);
 
+            var reader = state.CreateReader();
             Assert.Equal((ushort) 0x8001, reader.ReadUInt16());
             Assert.Equal(2u, reader.Offset);
             Assert.Equal((short) -32766, reader.ReadInt16());
@@ -52,12 +50,12 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void ReadInt32()
         {
-            var reader = new BinaryStreamReader(new byte[]
-            {
+            var state = new BinaryStreamReaderState([
                 0x04, 0x03, 0x02, 0x81,
                 0x08, 0x07, 0x06, 0x85
-            });
+            ]);
 
+            var reader = state.CreateReader();
             Assert.Equal(0x81020304u, reader.ReadUInt32());
             Assert.Equal(4u, reader.Offset);
             Assert.Equal(-2063202552, reader.ReadInt32());
@@ -68,12 +66,12 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void ReadInt64()
         {
-            var reader = new BinaryStreamReader(new byte[]
-            {
+            var state = new BinaryStreamReaderState([
                 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x80,
-                0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x88,
-            });
+                0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x88
+            ]);
 
+            var reader = state.CreateReader();
             Assert.Equal(0x8001020304050607ul, reader.ReadUInt64());
             Assert.Equal(8u, reader.Offset);
             Assert.Equal(-8644366967197856241, reader.ReadInt64());
@@ -91,9 +89,9 @@ namespace AsmResolver.Tests.IO
         [InlineData(new byte[] {0xDF, 0xFF, 0xFF, 0xFF}, 0x1FFFFFFF)]
         public void ReadCompressedUInt32(byte[] data, uint expected)
         {
-            var reader = new BinaryStreamReader(data);
-            Assert.Equal(expected, reader.Fork().ReadCompressedUInt32());
-            Assert.True(reader.Fork().TryReadCompressedUInt32(out uint value));
+            var state = new BinaryStreamReaderState(data);
+            Assert.Equal(expected, state.CreateReader().ReadCompressedUInt32());
+            Assert.True(state.CreateReader().TryReadCompressedUInt32(out uint value));
             Assert.Equal(expected, value);
         }
 
@@ -108,9 +106,9 @@ namespace AsmResolver.Tests.IO
         [InlineData(new byte[] {0xC0, 0x00, 0x00, 0x01}, -0x10000000)]
         public void ReadCompressedInt32(byte[] data, int expected)
         {
-            var reader = new BinaryStreamReader(data);
-            Assert.Equal(expected, reader.Fork().ReadCompressedInt32());
-            Assert.True(reader.Fork().TryReadCompressedInt32(out int value));
+            var state = new BinaryStreamReaderState(data);
+            Assert.Equal(expected, state.CreateReader().ReadCompressedInt32());
+            Assert.True(state.CreateReader().TryReadCompressedInt32(out int value));
             Assert.Equal(expected, value);
         }
 
@@ -131,12 +129,11 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void NewForkSubRange()
         {
-            var reader = new BinaryStreamReader(new byte[]
-            {
+            var reader = new BinaryStreamReader([
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            });
+            ]);
 
-            var fork = reader.ForkAbsolute(2, 3);
+            var fork = reader.GetState().WithOffsetSize(2, 3).CreateReader();
 
             Assert.Equal(2u, fork.StartOffset);
             Assert.Equal(2u, fork.Offset);
@@ -146,46 +143,48 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void NewForkInvalidStart()
         {
-            var reader = new BinaryStreamReader(new byte[]
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            });
+                var reader = new BinaryStreamReader([
+                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+                ]);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => reader.ForkAbsolute(9, 3));
+                reader.GetState().WithOffsetSize(9, 3);
+            });
         }
 
         [Fact]
         public void NewForkTooLong()
         {
-            var reader = new BinaryStreamReader(new byte[]
+            Assert.Throws<EndOfStreamException>(() =>
             {
-                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            });
+                var reader = new BinaryStreamReader([
+                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+                ]);
 
-            Assert.Throws<EndOfStreamException>(() => reader.ForkAbsolute(6, 4));
+                reader.GetState().WithOffsetSize(6, 4);
+            });
         }
 
         [Fact]
         public void ForkReadsSameData()
         {
-            var reader = new BinaryStreamReader(new byte[]
-            {
+            var reader = new BinaryStreamReader([
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            });
+            ]);
 
-            var fork = reader.ForkAbsolute(0, 2);
+            var fork = reader.GetState().WithOffsetSize(0, 2).CreateReader();
             Assert.Equal(0x0201, fork.ReadUInt16());
         }
 
         [Fact]
         public void ForkMovesIndependentOfOriginal()
         {
-            var reader = new BinaryStreamReader(new byte[]
-            {
+            var reader = new BinaryStreamReader([
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            });
+            ]);
 
-            var fork = reader.ForkAbsolute(0, 2);
+            var fork = reader.GetState().WithOffsetSize(0, 2).CreateReader();
             fork.ReadUInt16();
 
             Assert.Equal(0u, reader.Offset);
@@ -195,25 +194,23 @@ namespace AsmResolver.Tests.IO
         [Fact]
         public void ForkStartAtMiddle()
         {
-            var reader = new BinaryStreamReader(new byte[]
-            {
+            var reader = new BinaryStreamReader([
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            });
+            ]);
 
-            var fork = reader.ForkAbsolute(4, 2);
+            var fork = reader.GetState().WithOffsetSize(4, 2).CreateReader();
             Assert.Equal(0x0605, fork.ReadUInt16());
         }
 
         [Fact]
         public void ForkOfFork()
         {
-            var reader = new BinaryStreamReader(new byte[]
-            {
+            var reader = new BinaryStreamReader([
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-            });
+            ]);
 
-            var fork = reader.ForkAbsolute(2, 4);
-            var fork2 = fork.ForkAbsolute(3, 2);
+            var fork = reader.GetState().WithOffsetSize(2, 4).CreateReader();
+            var fork2 = fork.GetState().WithOffsetSize(3, 2).CreateReader();
             Assert.Equal(0x04, fork2.ReadByte());
         }
     }

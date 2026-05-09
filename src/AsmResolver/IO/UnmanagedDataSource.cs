@@ -73,6 +73,13 @@ namespace AsmResolver.IO
         {
             new ReadOnlySpan<byte>((byte*) address, buffer.Length).CopyTo(buffer);
         }
+
+        /// <inheritdoc />
+        public bool TryGetSpan(ulong address, int length, out ReadOnlySpan<byte> span)
+        {
+            span = default;
+            return false;
+        }
 #endif
     }
 }

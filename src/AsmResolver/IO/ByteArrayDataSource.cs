@@ -41,14 +41,6 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public ulong Length => (ulong) _data.Length;
 
-        /// <summary>
-        /// Constructs a new binary stream reader on the provided byte array.
-        /// </summary>
-        /// <param name="data">The byte array to read.</param>
-        /// <returns>The stream reader.</returns>
-        [Obsolete("Use the constructor of AsmResolver.IO.BinaryStreamReader instead.")]
-        public static BinaryStreamReader CreateReader(byte[] data) => new(data);
-
         /// <inheritdoc />
         public bool IsValidAddress(ulong address) => address - BaseAddress < (ulong) _data.Length;
 
@@ -66,6 +58,20 @@ namespace AsmResolver.IO
         public void ReadBytes(ulong address, Span<byte> buffer)
         {
             _data.AsSpan((int) (address - BaseAddress), buffer.Length).CopyTo(buffer);
+        }
+
+        /// <inheritdoc />
+        public bool TryGetSpan(ulong address, int length, out ReadOnlySpan<byte> span)
+        {
+            int relativeIndex = unchecked((int) (address - BaseAddress));
+            if (relativeIndex < 0 || relativeIndex >= _data.Length - length)
+            {
+                span = default;
+                return false;
+            }
+
+            span = _data;
+            return true;
         }
 #endif
     }

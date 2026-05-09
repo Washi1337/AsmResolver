@@ -46,6 +46,13 @@ namespace AsmResolver.IO
         {
             _dataSource.ReadBytes(address - (ulong) _displacement, buffer);
         }
+
+        /// <inheritdoc />
+        public bool TryGetSpan(ulong address, int length, out ReadOnlySpan<byte> span)
+        {
+            span = default;
+            return false;
+        }
 #endif
     }
 }
