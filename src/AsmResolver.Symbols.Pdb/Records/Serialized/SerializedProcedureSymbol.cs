@@ -10,7 +10,7 @@ public class SerializedProcedureSymbol : ProcedureSymbol
 {
     private readonly PdbReaderContext _context;
     private readonly uint _typeIndex;
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
     private readonly bool _isId;
 
     /// <summary>
@@ -38,13 +38,13 @@ public class SerializedProcedureSymbol : ProcedureSymbol
         SegmentIndex = reader.ReadUInt16();
         Attributes = (ProcedureAttributes) reader.ReadByte();
 
-        _nameReader = reader;
+        _nameReaderState = reader.GetState();
         IsGlobal = isGlobal;
         _isId = isId;
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
     protected override CodeViewLeaf? GetFunctionType()

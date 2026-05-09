@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 /// </summary>
 public class SerializedRegisterRelativeRangeSymbol : RegisterRelativeRangeSymbol
 {
-    private readonly BinaryStreamReader _gapsReader;
+    private readonly BinaryStreamReaderState _gapsReaderState;
 
     /// <summary>
     /// Reads a relative register def-range symbol from the provided input stream.
@@ -25,7 +25,7 @@ public class SerializedRegisterRelativeRangeSymbol : RegisterRelativeRangeSymbol
 
         Range = LocalAddressRange.FromReader(ref reader);
 
-        _gapsReader = reader;
+        _gapsReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
@@ -33,7 +33,7 @@ public class SerializedRegisterRelativeRangeSymbol : RegisterRelativeRangeSymbol
     {
         var result = new List<LocalAddressGap>();
 
-        var reader = _gapsReader.Fork();
+        var reader = _gapsReaderState.CreateReader();
         while (reader.CanRead(LocalAddressGap.Size))
             result.Add(LocalAddressGap.FromReader(ref reader));
 

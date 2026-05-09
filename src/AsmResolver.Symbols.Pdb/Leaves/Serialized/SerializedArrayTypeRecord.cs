@@ -11,7 +11,7 @@ public class SerializedArrayTypeRecord : ArrayTypeRecord
     private readonly PdbReaderContext _context;
     private readonly uint _elementTypeIndex;
     private readonly uint _indexTypeIndex;
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads an array type from the provided input stream.
@@ -26,11 +26,11 @@ public class SerializedArrayTypeRecord : ArrayTypeRecord
         _elementTypeIndex = reader.ReadUInt32();
         _indexTypeIndex = reader.ReadUInt32();
         Length = Convert.ToUInt64(ReadNumeric(ref reader));
-        _nameReader = reader.Fork();
+        _nameReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetElementType()

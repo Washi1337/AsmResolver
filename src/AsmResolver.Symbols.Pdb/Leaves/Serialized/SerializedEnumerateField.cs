@@ -7,7 +7,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 /// </summary>
 public class SerializedEnumerateField : EnumerateField
 {
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads a enumerate field list from the provided input stream.
@@ -23,10 +23,10 @@ public class SerializedEnumerateField : EnumerateField
         // We need to eagerly initialize the value because it is the only way to know how large the leaf is.
         Value = ReadNumeric(ref reader);
 
-        _nameReader = reader;
+        _nameReaderState = reader.GetState();
         reader.AdvanceUntil(0, true);
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 }

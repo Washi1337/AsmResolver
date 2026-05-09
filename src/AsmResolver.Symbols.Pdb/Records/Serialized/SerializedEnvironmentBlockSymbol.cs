@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 /// </summary>
 public class SerializedEnvironmentBlockSymbol : EnvironmentBlockSymbol
 {
-    private readonly BinaryStreamReader _entriesReader;
+    private readonly BinaryStreamReaderState _entriesReaderState;
 
     /// <summary>
     /// Reads an environment block symbol from the provided input stream.
@@ -17,7 +17,7 @@ public class SerializedEnvironmentBlockSymbol : EnvironmentBlockSymbol
     public SerializedEnvironmentBlockSymbol(BinaryStreamReader reader)
     {
         reader.ReadByte(); // padding?
-        _entriesReader = reader;
+        _entriesReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
@@ -25,7 +25,7 @@ public class SerializedEnvironmentBlockSymbol : EnvironmentBlockSymbol
     {
         var result = new List<KeyValuePair<Utf8String, Utf8String>>();
 
-        var reader = _entriesReader.Fork();
+        var reader = _entriesReaderState.CreateReader();
         while (reader.CanRead(sizeof(byte)) && reader.PeekByte() != 0)
         {
             var key = reader.ReadUtf8String();

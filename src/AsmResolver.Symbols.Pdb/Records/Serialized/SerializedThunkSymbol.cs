@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 public class SerializedThunkSymbol : ThunkSymbol
 {
     private readonly PdbReaderContext _context;
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads a thunk symbol from the provided input stream.
@@ -28,10 +28,10 @@ public class SerializedThunkSymbol : ThunkSymbol
         Size = reader.ReadUInt16();
         Ordinal = (ThunkOrdinal) reader.ReadByte();
 
-        _nameReader = reader;
+        _nameReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 
 }

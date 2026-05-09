@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 /// </summary>
 public class SerializedSectionSymbol : SectionSymbol
 {
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads a section symbol from the provided input stream.
@@ -23,9 +23,9 @@ public class SerializedSectionSymbol : SectionSymbol
         Size = reader.ReadUInt32();
         Attributes = (SectionFlags) reader.ReadUInt32();
 
-        _nameReader = reader;
+        _nameReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 }

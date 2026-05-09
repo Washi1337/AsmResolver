@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 /// </summary>
 public class SerializedCoffGroup : CoffGroupSymbol
 {
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads a COFF group symbol from the provided input stream.
@@ -21,9 +21,9 @@ public class SerializedCoffGroup : CoffGroupSymbol
         Offset = reader.ReadUInt32();
         SegmentIndex = reader.ReadUInt16();
 
-        _nameReader = reader;
+        _nameReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String? GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String? GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 }

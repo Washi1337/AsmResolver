@@ -10,13 +10,13 @@ namespace AsmResolver.Symbols.Pdb.Metadata.Dbi;
 /// </summary>
 public class SerializedDbiStream : DbiStream
 {
-    private readonly BinaryStreamReader _moduleInfoReader;
-    private readonly BinaryStreamReader _sectionContributionReader;
-    private readonly BinaryStreamReader _sectionMapReader;
-    private readonly BinaryStreamReader _sourceInfoReader;
-    private readonly BinaryStreamReader _typeServerMapReader;
-    private readonly BinaryStreamReader _optionalDebugHeaderReader;
-    private readonly BinaryStreamReader _ecReader;
+    private readonly BinaryStreamReaderState _moduleInfoReaderState;
+    private readonly BinaryStreamReaderState _sectionContributionReaderState;
+    private readonly BinaryStreamReaderState _sectionMapReaderState;
+    private readonly BinaryStreamReaderState _sourceInfoReaderState;
+    private readonly BinaryStreamReaderState _typeServerMapReaderState;
+    private readonly BinaryStreamReaderState _optionalDebugHeaderReaderState;
+    private readonly BinaryStreamReaderState _ecReaderState;
 
     /// <summary>
     /// Parses a DBI stream from an input stream reader.
@@ -53,20 +53,21 @@ public class SerializedDbiStream : DbiStream
 
         _ = reader.ReadUInt32();
 
-        _moduleInfoReader = reader.ForkRelative(reader.RelativeOffset, moduleInfoSize);
-        reader.Offset += moduleInfoSize;
-        _sectionContributionReader = reader.ForkRelative(reader.RelativeOffset, sectionContributionSize);
-        reader.Offset += sectionContributionSize;
-        _sectionMapReader = reader.ForkRelative(reader.RelativeOffset, sectionMapSize);
-        reader.Offset += sectionMapSize;
-        _sourceInfoReader = reader.ForkRelative(reader.RelativeOffset, sourceInfoSize);
-        reader.Offset += sourceInfoSize;
-        _typeServerMapReader = reader.ForkRelative(reader.RelativeOffset, typeServerMapSize);
-        reader.Offset += typeServerMapSize;
-        _ecReader = reader.ForkRelative(reader.RelativeOffset, ecSize);
-        reader.Offset += ecSize;
-        _optionalDebugHeaderReader = reader.ForkRelative(reader.RelativeOffset, optionalDebugHeaderSize);
-        reader.Offset += optionalDebugHeaderSize;
+        var state = reader.GetState();
+        _moduleInfoReaderState = state.WithRelativeOffsetSize(reader.RelativeOffset, moduleInfoSize);
+        state.CurrentOffset += moduleInfoSize;
+        _sectionContributionReaderState = state.WithRelativeOffsetSize(reader.RelativeOffset, sectionContributionSize);
+        state.CurrentOffset += sectionContributionSize;
+        _sectionMapReaderState = state.WithRelativeOffsetSize(reader.RelativeOffset, sectionMapSize);
+        state.CurrentOffset += sectionMapSize;
+        _sourceInfoReaderState = state.WithRelativeOffsetSize(reader.RelativeOffset, sourceInfoSize);
+        state.CurrentOffset += sourceInfoSize;
+        _typeServerMapReaderState = state.WithRelativeOffsetSize(reader.RelativeOffset, typeServerMapSize);
+        state.CurrentOffset += typeServerMapSize;
+        _ecReaderState = state.WithRelativeOffsetSize(reader.RelativeOffset, ecSize);
+        state.CurrentOffset += ecSize;
+        _optionalDebugHeaderReaderState = state.WithRelativeOffsetSize(reader.RelativeOffset, optionalDebugHeaderSize);
+        state.CurrentOffset += optionalDebugHeaderSize;
     }
 
     /// <inheritdoc />
@@ -74,7 +75,7 @@ public class SerializedDbiStream : DbiStream
     {
         var result = new List<ModuleDescriptor>();
 
-        var reader = _moduleInfoReader.Fork();
+        var reader = _moduleInfoReaderState.CreateReader();
         while (reader.CanRead(1))
             result.Add(ModuleDescriptor.FromReader(ref reader));
 
@@ -86,7 +87,7 @@ public class SerializedDbiStream : DbiStream
     {
         var result = new List<SectionContribution>();
 
-        var reader = _sectionContributionReader.Fork();
+        var reader = _sectionContributionReaderState.CreateReader();
         var version = (SectionContributionStreamVersion) reader.ReadUInt32();
 
         while (reader.CanRead(1))
@@ -102,7 +103,7 @@ public class SerializedDbiStream : DbiStream
     /// <inheritdoc />
     protected override IList<SectionMap> GetSectionMaps()
     {
-        var reader = _sectionMapReader.Fork();
+        var reader = _sectionMapReaderState.CreateReader();
 
         ushort count = reader.ReadUInt16();
         ushort logCount = reader.ReadUInt16();
@@ -117,7 +118,7 @@ public class SerializedDbiStream : DbiStream
     /// <inheritdoc />
     protected override ISegment? GetTypeServerMapStream()
     {
-        var reader = _typeServerMapReader.Fork();
+        var reader = _typeServerMapReaderState.CreateReader();
         return reader.Length != 0
             ? reader.ReadSegment(reader.Length)
             : null;
@@ -126,7 +127,7 @@ public class SerializedDbiStream : DbiStream
     /// <inheritdoc />
     protected override ISegment? GetECStream()
     {
-        var reader = _ecReader.Fork();
+        var reader = _ecReaderState.CreateReader();
         return reader.Length != 0
             ? reader.ReadSegment(reader.Length)
             : null;
@@ -135,7 +136,7 @@ public class SerializedDbiStream : DbiStream
     /// <inheritdoc />
     protected override IList<SourceFileCollection> GetSourceFiles()
     {
-        var reader = _sourceInfoReader.Fork();
+        var reader = _sourceInfoReaderState.CreateReader();
 
         ushort moduleCount = reader.ReadUInt16();
         ushort sourceFileCount = reader.ReadUInt16();
@@ -182,7 +183,7 @@ public class SerializedDbiStream : DbiStream
     /// <inheritdoc />
     protected override IList<ushort> GetExtraStreamIndices()
     {
-        var reader = _optionalDebugHeaderReader.Fork();
+        var reader = _optionalDebugHeaderReaderState.CreateReader();
 
         var result = new List<ushort>((int) (reader.Length / sizeof(ushort)));
 

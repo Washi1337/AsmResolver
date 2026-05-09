@@ -10,7 +10,7 @@ public class SerializedLocalSymbol : LocalSymbol
 {
     private readonly PdbReaderContext _context;
     private readonly uint _typeIndex;
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads a local variable symbol from the provided input stream.
@@ -22,11 +22,11 @@ public class SerializedLocalSymbol : LocalSymbol
         _context = context;
         _typeIndex = reader.ReadUInt32();
         Attributes = (LocalAttributes) reader.ReadUInt16();
-        _nameReader = reader;
+        _nameReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetVariableType()

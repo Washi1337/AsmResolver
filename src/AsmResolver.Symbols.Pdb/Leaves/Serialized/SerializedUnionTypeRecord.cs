@@ -11,8 +11,8 @@ public class SerializedUnionTypeRecord : UnionTypeRecord
     private readonly PdbReaderContext _context;
     private readonly ushort _memberCount;
     private readonly uint _fieldIndex;
-    private readonly BinaryStreamReader _nameReader;
-    private readonly BinaryStreamReader _uniqueNameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
+    private readonly BinaryStreamReaderState _uniqueNameReaderState;
 
     /// <summary>
     /// Reads a union type from the provided input stream.
@@ -30,16 +30,16 @@ public class SerializedUnionTypeRecord : UnionTypeRecord
 
         Size = Convert.ToUInt64(ReadNumeric(ref reader));
 
-        _nameReader = reader.Fork();
+        _nameReaderState = reader.GetState();
         reader.AdvanceUntil(0, true);
-        _uniqueNameReader = reader.Fork();
+        _uniqueNameReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
-    protected override Utf8String GetUniqueName() => _uniqueNameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetUniqueName() => _uniqueNameReaderState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
     protected override FieldListLeaf? GetFields()

@@ -9,7 +9,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 internal class SerializedFieldListLeaf : FieldListLeaf
 {
     private readonly PdbReaderContext _context;
-    private readonly BinaryStreamReader _reader;
+    private readonly BinaryStreamReaderState _readerState;
 
     /// <summary>
     /// Reads a field list from the provided input stream.
@@ -21,7 +21,7 @@ internal class SerializedFieldListLeaf : FieldListLeaf
         : base(typeIndex)
     {
         _context = context;
-        _reader = reader;
+        _readerState = reader.GetState();
     }
 
     /// <inheritdoc />
@@ -29,7 +29,7 @@ internal class SerializedFieldListLeaf : FieldListLeaf
 
     protected override IList<CodeViewField> GetEntries()
     {
-        var reader = _reader.Fork();
+        var reader = _readerState.CreateReader();
         var result = new List<CodeViewField>();
 
         while (reader.CanRead(sizeof(ushort)))

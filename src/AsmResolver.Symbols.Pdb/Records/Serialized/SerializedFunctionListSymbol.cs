@@ -11,7 +11,7 @@ public class SerializedFunctionListSymbol : FunctionListSymbol
 {
     private readonly int _count;
     private readonly PdbReaderContext _context;
-    private readonly BinaryStreamReader _entriesReader;
+    private readonly BinaryStreamReaderState _entriesReaderState;
 
     /// <summary>
     /// Reads a function list symbol from the provided input stream.
@@ -25,7 +25,7 @@ public class SerializedFunctionListSymbol : FunctionListSymbol
         _context = context;
         _count = reader.ReadInt32();
 
-        _entriesReader = reader;
+        _entriesReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
@@ -33,8 +33,8 @@ public class SerializedFunctionListSymbol : FunctionListSymbol
     {
         var result = new List<FunctionCountPair>(_count);
 
-        var indexReader = _entriesReader.Fork();
-        var countReader = _entriesReader.ForkRelative((uint) (_count + 1) * sizeof(int));
+        var indexReader = _entriesReaderState.CreateReader();
+        var countReader = _entriesReaderState.WithRelativeOffset((uint) (_count + 1) * sizeof(int)).CreateReader();
 
         for (int i = 0; i < _count; i++)
         {

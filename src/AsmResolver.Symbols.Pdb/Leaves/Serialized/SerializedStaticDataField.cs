@@ -9,7 +9,7 @@ public class SerializedStaticDataField : StaticDataField
 {
     private readonly PdbReaderContext _context;
     private readonly uint _dataTypeIndex;
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads a static data member list from the provided input stream.
@@ -24,12 +24,12 @@ public class SerializedStaticDataField : StaticDataField
         _dataTypeIndex = reader.ReadUInt32();
 
         _context = context;
-        _nameReader = reader;
+        _nameReaderState = reader.GetState();
         reader.AdvanceUntil(0, true);
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetDataType()

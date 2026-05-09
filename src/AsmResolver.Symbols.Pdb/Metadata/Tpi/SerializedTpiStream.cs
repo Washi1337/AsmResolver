@@ -11,7 +11,7 @@ namespace AsmResolver.Symbols.Pdb.Metadata.Tpi;
 /// </summary>
 public class SerializedTpiStream : TpiStream
 {
-    private readonly BinaryStreamReader _recordsReader;
+    private readonly BinaryStreamReaderState _recordsReaderState;
     private List<(uint Offset, uint Length)>? _recordOffsets;
 
     /// <summary>
@@ -42,7 +42,7 @@ public class SerializedTpiStream : TpiStream
         HashAdjBufferOffset = reader.ReadUInt32();
         HashAdjBufferLength = reader.ReadUInt32();
 
-        _recordsReader = reader.ForkRelative(reader.RelativeOffset, TypeRecordsByteCount);
+        _recordsReaderState = reader.GetState().WithRelativeOffsetSize(reader.RelativeOffset, TypeRecordsByteCount);
     }
 
     [MemberNotNull(nameof(_recordOffsets))]
@@ -57,7 +57,7 @@ public class SerializedTpiStream : TpiStream
         int count = (int) (TypeIndexEnd - TypeIndexBegin);
         var result = new List<(uint Offset, uint Length)>(count);
 
-        var reader = _recordsReader.Fork();
+        var reader = _recordsReaderState.CreateReader();
         while (reader.CanRead(sizeof(ushort) * 2))
         {
             uint offset = reader.RelativeOffset;
@@ -82,13 +82,13 @@ public class SerializedTpiStream : TpiStream
         }
 
         (uint offset, uint length) = _recordOffsets[(int) typeIndex];
-        reader = _recordsReader.ForkRelative(offset, length + sizeof(ushort));
+        reader = _recordsReaderState.WithRelativeOffsetSize(offset, length + sizeof(ushort)).CreateReader();
         return true;
     }
 
     /// <inheritdoc />
     protected override void WriteTypeRecords(BinaryStreamWriter writer)
     {
-        _recordsReader.Fork().WriteToOutput(writer);
+        _recordsReaderState.CreateReader().WriteToOutput(writer);
     }
 }

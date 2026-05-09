@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 /// </summary>
 public class SerializedFramePointerRangeSymbol : FramePointerRangeSymbol
 {
-    private readonly BinaryStreamReader? _gapsReader;
+    private readonly BinaryStreamReaderState? _gapsReaderState;
 
     /// <summary>
     /// Reads a frame-pointer def-range from the provided input stream.
@@ -23,7 +23,7 @@ public class SerializedFramePointerRangeSymbol : FramePointerRangeSymbol
         if (!isFullScope)
         {
             Range = LocalAddressRange.FromReader(ref reader);
-            _gapsReader = reader;
+            _gapsReaderState = reader.GetState();
         }
     }
 
@@ -31,10 +31,10 @@ public class SerializedFramePointerRangeSymbol : FramePointerRangeSymbol
     protected override IList<LocalAddressGap> GetGaps()
     {
         var result = new List<LocalAddressGap>();
-        if (_gapsReader is null)
+        if (_gapsReaderState is null)
             return result;
 
-        var reader = _gapsReader.Value.Fork();
+        var reader = _gapsReaderState.Value.CreateReader();
         while (reader.CanRead(LocalAddressGap.Size))
             result.Add(LocalAddressGap.FromReader(ref reader));
 

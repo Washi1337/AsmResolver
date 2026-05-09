@@ -13,8 +13,8 @@ public class SerializedClassTypeRecord : ClassTypeRecord
     private readonly uint _baseTypeIndex;
     private readonly uint _fieldIndex;
     private readonly uint _vTableShapeIndex;
-    private readonly BinaryStreamReader _nameReader;
-    private readonly BinaryStreamReader _uniqueNameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
+    private readonly BinaryStreamReaderState _uniqueNameReaderState;
 
     /// <summary>
     /// Reads a class type from the provided input stream.
@@ -35,16 +35,16 @@ public class SerializedClassTypeRecord : ClassTypeRecord
 
         Size = Convert.ToUInt32(ReadNumeric(ref reader));
 
-        _nameReader = reader.Fork();
+        _nameReaderState = reader.GetState();
         reader.AdvanceUntil(0, true);
-        _uniqueNameReader = reader.Fork();
+        _uniqueNameReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
-    protected override Utf8String GetUniqueName() => _uniqueNameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetUniqueName() => _uniqueNameReaderState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetBaseType()

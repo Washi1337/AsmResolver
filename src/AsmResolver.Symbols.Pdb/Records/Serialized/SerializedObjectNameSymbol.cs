@@ -7,7 +7,7 @@ namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 /// </summary>
 public class SerializedObjectNameSymbol : ObjectNameSymbol
 {
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads an object name from the provided input stream.
@@ -16,9 +16,9 @@ public class SerializedObjectNameSymbol : ObjectNameSymbol
     public SerializedObjectNameSymbol(BinaryStreamReader reader)
     {
         Signature = reader.ReadUInt32();
-        _nameReader = reader;
+        _nameReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 }

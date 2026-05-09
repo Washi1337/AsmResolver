@@ -12,7 +12,7 @@ public class SerializedInlineSiteSymbol : InlineSiteSymbol
     private readonly PdbReaderContext _context;
     private readonly uint _inlineeIndex;
 
-    private readonly BinaryStreamReader _annotationsReader;
+    private readonly BinaryStreamReaderState _annotationsReaderState;
 
     /// <summary>
     /// Reads a function list symbol from the provided input stream.
@@ -26,7 +26,7 @@ public class SerializedInlineSiteSymbol : InlineSiteSymbol
         _ = reader.ReadUInt32(); // pEnd.
         _inlineeIndex = reader.ReadUInt32();
 
-        _annotationsReader = reader;
+        _annotationsReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
@@ -43,7 +43,7 @@ public class SerializedInlineSiteSymbol : InlineSiteSymbol
     {
         var result = new List<BinaryAnnotation>();
 
-        var reader = _annotationsReader.Fork();
+        var reader = _annotationsReaderState.CreateReader();
         while (reader.TryReadCompressedUInt32(out uint raw))
         {
             var opCode = (BinaryAnnotationOpCode) raw;

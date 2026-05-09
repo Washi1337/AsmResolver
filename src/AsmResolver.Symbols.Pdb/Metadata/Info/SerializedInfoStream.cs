@@ -9,7 +9,7 @@ namespace AsmResolver.Symbols.Pdb.Metadata.Info;
 /// </summary>
 public class SerializedInfoStream : InfoStream
 {
-    private readonly BinaryStreamReader _reader;
+    private readonly BinaryStreamReaderState _readerState;
     private ulong _featureOffset;
 
     /// <summary>
@@ -27,21 +27,21 @@ public class SerializedInfoStream : InfoStream
 
         UniqueId = new Guid(guidBytes);
 
-        _reader = reader;
+        _readerState = reader.GetState();
     }
 
     /// <inheritdoc />
     protected override IDictionary<Utf8String, int> GetStreamIndices()
     {
-        var reader = _reader.Fork();
+        var reader = _readerState.CreateReader();
         uint length = reader.ReadUInt32();
 
-        var stringsReader = reader.ForkRelative(reader.RelativeOffset, length);
+        var stringsReaderState = reader.ForkRelative(reader.RelativeOffset, length).GetState();
         var hashTableReader = reader.ForkRelative(reader.RelativeOffset + length);
 
         var result = PdbHashTable.FromReader(ref hashTableReader, (key, value) =>
         {
-            var stringReader = stringsReader.ForkRelative(key);
+            var stringReader = stringsReaderState.WithRelativeOffset(key).CreateReader();
             var keyString = stringReader.ReadUtf8String();
             return (keyString, (int) value);
         });
@@ -60,7 +60,7 @@ public class SerializedInfoStream : InfoStream
 
         var result = new List<PdbFeature>();
 
-        var reader = _reader.ForkAbsolute(_featureOffset);
+        var reader = _readerState.WithOffset(_featureOffset).CreateReader();
         while (reader.CanRead(sizeof(uint)))
             result.Add((PdbFeature) reader.ReadUInt32());
 

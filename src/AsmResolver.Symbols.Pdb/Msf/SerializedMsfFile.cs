@@ -14,7 +14,7 @@ namespace AsmResolver.Symbols.Pdb.Msf;
 /// </remarks>
 public class SerializedMsfFile : MsfFile
 {
-    private readonly BinaryStreamReader _reader;
+    private readonly BinaryStreamReaderState _readerState;
     private readonly MsfSuperBlock _originalSuperBlock;
     private readonly IDataSource?[] _blocks;
 
@@ -29,7 +29,7 @@ public class SerializedMsfFile : MsfFile
 
         BlockSize = _originalSuperBlock.BlockSize;
         _blocks = new IDataSource?[_originalSuperBlock.BlockCount];
-        _reader = reader;
+        _readerState = reader.GetState();
     }
 
     private IDataSource GetBlock(int index)
@@ -38,9 +38,10 @@ public class SerializedMsfFile : MsfFile
         {
             // We lazily initialize all blocks by slicing the original data source of the reader.
             var block = new DataSourceSlice(
-                _reader.DataSource,
-                _reader.DataSource.BaseAddress + (ulong) (index * _originalSuperBlock.BlockSize),
-                _originalSuperBlock.BlockSize);
+                _readerState.DataSource,
+                _readerState.DataSource.BaseAddress + (ulong) (index * _originalSuperBlock.BlockSize),
+                _originalSuperBlock.BlockSize
+            );
 
             Interlocked.CompareExchange(ref _blocks[index], block, null);
         }

@@ -7,7 +7,7 @@ namespace AsmResolver.Symbols.Pdb.Records.Serialized;
 /// </summary>
 public class SerializedCompile2Symbol : Compile2Symbol
 {
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads a compile symbol from the provided input stream.
@@ -25,9 +25,9 @@ public class SerializedCompile2Symbol : Compile2Symbol
         BackEndMajorVersion = reader.ReadUInt16();
         BackEndMinorVersion = reader.ReadUInt16();
         BackEndBuildVersion = reader.ReadUInt16();
-        _nameReader = reader;
+        _nameReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetCompilerVersion() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetCompilerVersion() => _nameReaderState.CreateReader().ReadUtf8String();
 }

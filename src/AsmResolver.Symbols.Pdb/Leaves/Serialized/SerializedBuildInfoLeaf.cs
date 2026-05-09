@@ -9,7 +9,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 public class SerializedBuildInfoLeaf : BuildInfoLeaf
 {
     private readonly PdbReaderContext _context;
-    private readonly BinaryStreamReader _reader;
+    private readonly BinaryStreamReaderState _readerState;
 
     /// <summary>
     /// Reads a build information leaf from the provided input stream.
@@ -21,13 +21,13 @@ public class SerializedBuildInfoLeaf : BuildInfoLeaf
         : base(typeIndex)
     {
         _context = context;
-        _reader = reader;
+        _readerState = reader.GetState();
     }
 
     /// <inheritdoc />
     protected override IList<StringIdentifier> GetEntries()
     {
-        var reader = _reader.Fork();
+        var reader = _readerState.CreateReader();
         uint count = reader.ReadUInt16();
         return SerializedSubStringListLeaf.ReadEntries(_context, TypeIndex, count, ref reader);
     }

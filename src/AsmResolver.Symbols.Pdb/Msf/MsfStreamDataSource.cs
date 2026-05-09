@@ -118,6 +118,14 @@ public class MsfStreamDataSource : IDataSource
         }
     }
 
+    /// <inheritdoc />
+    public bool TryGetSpan(ulong address, int length, out ReadOnlySpan<byte> span)
+    {
+        // TODO: slice when possible.
+        span = default;
+        return false;
+    }
+
 #endif
 
     private IDataSource GetBlockAndOffset(ulong address, out ulong offset)

@@ -11,7 +11,7 @@ public class SerializedEnumTypeRecord : EnumTypeRecord
     private readonly ushort _memberCount;
     private readonly uint _underlyingType;
     private readonly uint _fieldIndex;
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads a constant symbol from the provided input stream.
@@ -27,11 +27,11 @@ public class SerializedEnumTypeRecord : EnumTypeRecord
         StructureAttributes = (StructureAttributes) reader.ReadUInt16();
         _underlyingType = reader.ReadUInt32();
         _fieldIndex = reader.ReadUInt32();
-        _nameReader = reader;
+        _nameReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetBaseType()

@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Metadata.Modi;
 /// </summary>
 public class SerializedModiStream : ModiStream
 {
-    private readonly BinaryStreamReader _reader;
+    private readonly BinaryStreamReaderState _readerState;
     private readonly uint _symbolSize;
     private readonly uint _c11Size;
     private readonly uint _c13Size;
@@ -41,28 +41,28 @@ public class SerializedModiStream : ModiStream
 
         Signature = reader.ReadUInt32();
 
-        _reader = reader;
+        _readerState = reader.GetState();
     }
 
     /// <inheritdoc />
     protected override IReadableSegment? GetSymbols() => _symbolSize > 0
-        ? _reader.Fork().ReadSegment(_symbolSize)
+        ? _readerState.CreateReader().ReadSegment(_symbolSize)
         : null;
 
     /// <inheritdoc />
     protected override IReadableSegment? GetC11LineInfo() => _c11Size > 0
-        ? _reader.ForkRelative(_symbolSize).ReadSegment(_c11Size)
+        ? _readerState.WithRelativeOffset(_symbolSize).CreateReader().ReadSegment(_c11Size)
         : null;
 
     /// <inheritdoc />
     protected override IReadableSegment? GetC13LineInfo() => _c13Size > 0
-        ? _reader.ForkRelative(_symbolSize + _c11Size).ReadSegment(_c13Size)
+        ? _readerState.WithRelativeOffset(_symbolSize + _c11Size).CreateReader().ReadSegment(_c13Size)
         : null;
 
     /// <inheritdoc />
     protected override IReadableSegment? GetGlobalReferences()
     {
-        var reader = _reader.ForkRelative(_symbolSize + _c11Size + _c13Size);
+        var reader = _readerState.WithRelativeOffset(_symbolSize + _c11Size + _c13Size).CreateReader();
 
         uint size = reader.ReadUInt32();
         return size > 0

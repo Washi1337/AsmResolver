@@ -9,7 +9,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 public class SerializedArgumentListLeaf : ArgumentListLeaf
 {
     private readonly PdbReaderContext _context;
-    private readonly BinaryStreamReader _reader;
+    private readonly BinaryStreamReaderState _readerState;
 
     /// <summary>
     /// Reads a argument list from the provided input stream.
@@ -21,13 +21,13 @@ public class SerializedArgumentListLeaf : ArgumentListLeaf
         : base(typeIndex)
     {
         _context = context;
-        _reader = reader;
+        _readerState = reader.GetState();
     }
 
     /// <inheritdoc />
     protected override IList<CodeViewTypeRecord> GetArgumentTypes()
     {
-        var reader = _reader.Fork();
+        var reader = _readerState.CreateReader();
 
         int count = reader.ReadInt32();
         var result = new List<CodeViewTypeRecord>(count);

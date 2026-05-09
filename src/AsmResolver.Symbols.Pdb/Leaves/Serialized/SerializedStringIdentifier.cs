@@ -8,7 +8,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 public class SerializedStringIdentifier : StringIdentifier
 {
     private readonly PdbReaderContext _context;
-    private readonly BinaryStreamReader _reader;
+    private readonly BinaryStreamReaderState _readerState;
     private readonly uint _subStringsIndex;
 
     /// <summary>
@@ -22,11 +22,11 @@ public class SerializedStringIdentifier : StringIdentifier
     {
         _context = context;
         _subStringsIndex = reader.ReadUInt32();
-        _reader = reader;
+        _readerState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetValue() => _reader.Fork().ReadUtf8String();
+    protected override Utf8String GetValue() => _readerState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
     protected override SubStringListLeaf? GetSubStrings()

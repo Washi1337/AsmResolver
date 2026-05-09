@@ -10,7 +10,7 @@ public class SerializedBasePointerRelativeSymbol : BasePointerRelativeSymbol
 {
     private readonly PdbReaderContext _context;
     private readonly uint _typeIndex;
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads a base-pointer relative symbol from the provided input stream.
@@ -24,11 +24,11 @@ public class SerializedBasePointerRelativeSymbol : BasePointerRelativeSymbol
         Offset = reader.ReadInt32();
         _typeIndex = reader.ReadUInt32();
 
-        _nameReader = reader;
+        _nameReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetVariableType()

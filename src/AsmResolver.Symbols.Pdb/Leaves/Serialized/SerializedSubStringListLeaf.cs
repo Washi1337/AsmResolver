@@ -9,7 +9,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 public class SerializedSubStringListLeaf : SubStringListLeaf
 {
     private readonly PdbReaderContext _context;
-    private readonly BinaryStreamReader _reader;
+    private readonly BinaryStreamReaderState _readerState;
 
     /// <summary>
     /// Reads a list of sub-strings from the provided input stream.
@@ -21,13 +21,13 @@ public class SerializedSubStringListLeaf : SubStringListLeaf
         : base(typeIndex)
     {
         _context = context;
-        _reader = reader;
+        _readerState = reader.GetState();
     }
 
     /// <inheritdoc />
     protected override IList<StringIdentifier> GetEntries()
     {
-        var reader = _reader.Fork();
+        var reader = _readerState.CreateReader();
         uint count = reader.ReadUInt32();
         return ReadEntries(_context, TypeIndex, count, ref reader);
     }

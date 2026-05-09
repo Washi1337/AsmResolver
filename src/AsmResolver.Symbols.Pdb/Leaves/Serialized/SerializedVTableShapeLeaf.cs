@@ -9,7 +9,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 public class SerializedVTableShapeLeaf : VTableShapeLeaf
 {
     private readonly ushort _count;
-    private readonly BinaryStreamReader _entriesReader;
+    private readonly BinaryStreamReaderState _entriesReaderState;
 
     /// <summary>
     /// Reads a virtual function table shape from the provided input stream.
@@ -21,14 +21,14 @@ public class SerializedVTableShapeLeaf : VTableShapeLeaf
         : base(typeIndex)
     {
         _count = reader.ReadUInt16();
-        _entriesReader = reader;
+        _entriesReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
     protected override IList<VTableShapeEntry> GetEntries()
     {
         var result = new List<VTableShapeEntry>(_count);
-        var reader = _entriesReader.Fork();
+        var reader = _entriesReaderState.CreateReader();
 
         // Entries are stored as 4-bit values.
         byte currentByte = 0;

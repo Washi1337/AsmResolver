@@ -9,7 +9,7 @@ public class SerializedNestedTypeField : NestedTypeField
 {
     private readonly PdbReaderContext _context;
     private readonly uint _typeIndex;
-    private readonly BinaryStreamReader _nameReader;
+    private readonly BinaryStreamReaderState _nameReaderState;
 
     /// <summary>
     /// Reads a nested type field from the provided input stream.
@@ -23,12 +23,12 @@ public class SerializedNestedTypeField : NestedTypeField
         _context = context;
         Attributes = (CodeViewFieldAttributes) reader.ReadUInt16();
         _typeIndex = reader.ReadUInt32();
-        _nameReader = reader.Fork();
+        _nameReaderState = reader.GetState();
         reader.AdvanceUntil(0, true);
     }
 
     /// <inheritdoc />
-    protected override Utf8String GetName() => _nameReader.Fork().ReadUtf8String();
+    protected override Utf8String GetName() => _nameReaderState.CreateReader().ReadUtf8String();
 
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetNestedType()

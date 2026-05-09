@@ -9,7 +9,7 @@ namespace AsmResolver.Symbols.Pdb.Leaves.Serialized;
 public class SerializedMethodListLeaf : MethodListLeaf
 {
     private readonly PdbReaderContext _context;
-    private readonly BinaryStreamReader _reader;
+    private readonly BinaryStreamReaderState _readerState;
 
     /// <summary>
     /// Reads a method list from the provided input stream.
@@ -21,7 +21,7 @@ public class SerializedMethodListLeaf : MethodListLeaf
         : base(typeIndex)
     {
         _context = context;
-        _reader = reader;
+        _readerState = reader.GetState();
     }
 
     /// <inheritdoc />
@@ -29,7 +29,7 @@ public class SerializedMethodListLeaf : MethodListLeaf
     {
         var result = new List<MethodListEntry>();
 
-        var reader = _reader.Fork();
+        var reader = _readerState.CreateReader();
         while (reader.CanRead(8))
             result.Add(new SerializedMethodListEntry(_context, ref reader));
 
