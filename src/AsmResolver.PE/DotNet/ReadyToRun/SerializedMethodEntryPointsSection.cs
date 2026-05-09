@@ -33,7 +33,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         {
             return NativeArray<MethodEntryPoint>.FromReader(
                 _readerState.CreateReader(),
-                reader => MethodEntryPoint.FromReader(ref reader)
+                (ref reader) => MethodEntryPoint.FromReader(ref reader)
             );
         }
 

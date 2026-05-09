@@ -35,7 +35,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         {
             return NativeArray<DebugInfo>.FromReader(
                 _readerState.CreateReader(),
-                r => new SerializedDebugInfo(_context, r)
+                (ref reader) => new SerializedDebugInfo(_context, reader)
             );
         }
     }

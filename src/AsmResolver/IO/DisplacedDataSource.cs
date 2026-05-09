@@ -50,8 +50,7 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public bool TryGetSpan(ulong address, int length, out ReadOnlySpan<byte> span)
         {
-            span = default;
-            return false;
+            return _dataSource.TryGetSpan(address - (ulong) _displacement, length, out span);
         }
 #endif
     }

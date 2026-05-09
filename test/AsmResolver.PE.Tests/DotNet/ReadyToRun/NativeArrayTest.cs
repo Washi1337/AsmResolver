@@ -41,7 +41,7 @@ public class NativeArrayTest
 
         array.UpdateOffsets(new RelocationParameters(0, 0));
         byte[] raw = array.WriteIntoArray();
-        var view = NativeArray<IntValue>.FromReader(new BinaryStreamReader(raw), reader => reader.ReadInt32());
+        var view = NativeArray<IntValue>.FromReader(new BinaryStreamReader(raw), (ref reader) => reader.ReadInt32());
 
         Assert.All(Enumerable.Range(0, elements.Length), i => Assert.Equal(elements[i], view[i].Value));
     }

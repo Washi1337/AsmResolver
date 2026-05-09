@@ -13,6 +13,11 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
     public class NativeArray<T> : Collection<T?>, ISegment
         where T : IWritable
     {
+        /// <summary>
+        /// Describes a function that reads a single element in the array.
+        /// </summary>
+        public delegate T ReadElement(ref BinaryStreamReader reader);
+
         private readonly List<Node> _roots = new();
         private uint _entryIndexSize = 2;
         private uint _totalSize;
@@ -42,7 +47,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
         /// <param name="reader">The input stream.</param>
         /// <param name="readElement">The function to use for reading individual elements.</param>
         /// <returns>The read array.</returns>
-        public static NativeArray<T> FromReader(BinaryStreamReader reader, Func<BinaryStreamReader, T> readElement)
+        public static NativeArray<T> FromReader(BinaryStreamReader reader, ReadElement readElement)
         {
             var result = new NativeArray<T>();
 
@@ -54,7 +59,7 @@ namespace AsmResolver.PE.DotNet.ReadyToRun
             for (int i = 0; i < count; i++)
             {
                 result.Add(NativeFormat.TryGetArrayElement(reader, result._entryIndexSize, i, out var elementReader)
-                    ? readElement(elementReader)
+                    ? readElement(ref elementReader)
                     : default);
             }
 

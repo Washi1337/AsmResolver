@@ -24,8 +24,12 @@ namespace AsmResolver.IO
         private static int[]? _buffer;
 
         private BinaryStreamReaderState _state;
-        private bool _hasSpan = false;
-        private ReadOnlySpan<byte> _span;
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        private readonly bool _hasSpan;
+        private readonly ReadOnlySpan<byte> _span;
+        private readonly ulong _baseOffset;
+#endif
 
         /// <summary>
         /// Creates a new binary stream reader on the provided data source.
@@ -89,13 +93,24 @@ namespace AsmResolver.IO
                 offset
             );
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             _hasSpan = dataSource.TryGetSpan(offset, (int) length, out _span);
+            _baseOffset = offset;
+#endif
         }
 
+        /// <summary>
+        /// Creates a new reader from the provided state.
+        /// </summary>
+        /// <param name="state">The state</param>
         public BinaryStreamReader(BinaryStreamReaderState state)
         {
             _state = state;
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             _hasSpan = state.DataSource.TryGetSpan(state.StartOffset, (int) state.Length, out _span);
+            _baseOffset = state.StartOffset;
+#endif
         }
 
         /// <summary>
@@ -186,9 +201,18 @@ namespace AsmResolver.IO
         /// Peeks a single byte from the input stream.
         /// </summary>
         /// <returns>The read byte, or <c>-1</c> if no byte could be read.</returns>
-        public int PeekByte() => CanRead(1)
-            ? DataSource[Offset]
-            : -1;
+        public int PeekByte()
+        {
+            if (!CanRead(1))
+                return -1;
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            if (_hasSpan)
+                return _span[(int) (Offset - _baseOffset)];
+#endif
+
+            return DataSource[Offset];
+        }
 
         /// <summary>
         /// Reads a single byte from the input stream, and advances the current offset by one.
@@ -196,8 +220,26 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public byte ReadByte()
         {
+            byte result;
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            if (_hasSpan)
+            {
+                // Bounds check is already done by accessing `_span` indexer.
+                result = _span[(int) (Offset - _baseOffset)];
+            }
+            else
+            {
+                AssertCanRead(sizeof(byte));
+                result = DataSource[Offset];
+            }
+#else
             AssertCanRead(sizeof(byte));
-            return DataSource[Offset++];
+            result = DataSource[Offset];
+#endif
+
+            Offset++;
+            return result;
         }
 
         /// <summary>
@@ -206,14 +248,23 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public ushort ReadUInt16()
         {
-            AssertCanRead(sizeof(ushort));
+            ushort value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            Span<byte> buffer = stackalloc byte[sizeof(ushort)];
-            DataSource.ReadBytes(Offset, buffer);
-            ushort value = BinaryPrimitives.ReadUInt16LittleEndian(buffer);
+            if (_hasSpan)
+            {
+                value = BinaryPrimitives.ReadUInt16LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+            }
+            else
+            {
+                AssertCanRead(sizeof(ushort));
+                Span<byte> buffer = stackalloc byte[sizeof(ushort)];
+                DataSource.ReadBytes(Offset, buffer);
+                value = BinaryPrimitives.ReadUInt16LittleEndian(buffer);
+            }
 #else
-            ushort value = (ushort) (
+            AssertCanRead(sizeof(ushort));
+            value = (ushort) (
                 DataSource[Offset]
                 | (DataSource[Offset + 1] << 8)
             );
@@ -229,14 +280,23 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public uint ReadUInt32()
         {
-            AssertCanRead(sizeof(uint));
+            uint value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            Span<byte> buffer = stackalloc byte[sizeof(uint)];
-            DataSource.ReadBytes(Offset, buffer);
-            uint value = BinaryPrimitives.ReadUInt32LittleEndian(buffer);
+            if (_hasSpan)
+            {
+                value = BinaryPrimitives.ReadUInt32LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+            }
+            else
+            {
+                AssertCanRead(sizeof(uint));
+                Span<byte> buffer = stackalloc byte[sizeof(uint)];
+                DataSource.ReadBytes(Offset, buffer);
+                value = BinaryPrimitives.ReadUInt32LittleEndian(buffer);
+            }
 #else
-            uint value = unchecked((uint) (
+            AssertCanRead(sizeof(uint));
+            value = unchecked((uint) (
                 DataSource[Offset]
                 | (DataSource[Offset + 1] << 8)
                 | (DataSource[Offset + 2] << 16)
@@ -254,14 +314,23 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public ulong ReadUInt64()
         {
-            AssertCanRead(sizeof(ulong));
+            ulong value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            Span<byte> buffer = stackalloc byte[sizeof(ulong)];
-            DataSource.ReadBytes(Offset, buffer);
-            ulong value = BinaryPrimitives.ReadUInt64LittleEndian(buffer);
+            if (_hasSpan)
+            {
+                value = BinaryPrimitives.ReadUInt64LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+            }
+            else
+            {
+                AssertCanRead(sizeof(ulong));
+                Span<byte> buffer = stackalloc byte[sizeof(ulong)];
+                DataSource.ReadBytes(Offset, buffer);
+                value = BinaryPrimitives.ReadUInt64LittleEndian(buffer);
+            }
 #else
-            ulong value = unchecked((ulong) (DataSource[Offset]
+            AssertCanRead(sizeof(ulong));
+            value = unchecked((ulong) (DataSource[Offset]
                 | ((long) DataSource[Offset + 1] << 8)
                 | ((long) DataSource[Offset + 2] << 16)
                 | ((long) DataSource[Offset + 3] << 24)
@@ -282,8 +351,7 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public sbyte ReadSByte()
         {
-            AssertCanRead(sizeof(byte));
-            return unchecked((sbyte) DataSource[Offset++]);
+            return unchecked((sbyte) ReadByte());
         }
 
         /// <summary>
@@ -292,14 +360,23 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public short ReadInt16()
         {
-            AssertCanRead(sizeof(short));
+            short value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            Span<byte> buffer = stackalloc byte[sizeof(short)];
-            DataSource.ReadBytes(Offset, buffer);
-            short value = BinaryPrimitives.ReadInt16LittleEndian(buffer);
+            if (_hasSpan)
+            {
+                value = BinaryPrimitives.ReadInt16LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+            }
+            else
+            {
+                AssertCanRead(sizeof(short));
+                Span<byte> buffer = stackalloc byte[sizeof(short)];
+                DataSource.ReadBytes(Offset, buffer);
+                value = BinaryPrimitives.ReadInt16LittleEndian(buffer);
+            }
 #else
-            short value = unchecked((short) (
+            AssertCanRead(sizeof(short));
+            value = unchecked((short) (
                 DataSource[Offset]
                 | (DataSource[Offset + 1] << 8)
             ));
@@ -315,14 +392,23 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public int ReadInt32()
         {
-            AssertCanRead(sizeof(int));
+            int value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            Span<byte> buffer = stackalloc byte[sizeof(int)];
-            DataSource.ReadBytes(Offset, buffer);
-            int value = BinaryPrimitives.ReadInt32LittleEndian(buffer);
+            if (_hasSpan)
+            {
+                value = BinaryPrimitives.ReadInt32LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+            }
+            else
+            {
+                AssertCanRead(sizeof(int));
+                Span<byte> buffer = stackalloc byte[sizeof(int)];
+                DataSource.ReadBytes(Offset, buffer);
+                value = BinaryPrimitives.ReadInt32LittleEndian(buffer);
+            }
 #else
-            int value = DataSource[Offset]
+            AssertCanRead(sizeof(int));
+            value = DataSource[Offset]
                 | (DataSource[Offset + 1] << 8)
                 | (DataSource[Offset + 2] << 16)
                 | (DataSource[Offset + 3] << 24);
@@ -338,14 +424,23 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public long ReadInt64()
         {
-            AssertCanRead(sizeof(long));
+            long value;
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            Span<byte> buffer = stackalloc byte[sizeof(long)];
-            DataSource.ReadBytes(Offset, buffer);
-            long value = BinaryPrimitives.ReadInt64LittleEndian(buffer);
+            if (_hasSpan)
+            {
+                value = BinaryPrimitives.ReadInt64LittleEndian(_span[(int) (Offset - _baseOffset)..]);
+            }
+            else
+            {
+                AssertCanRead(sizeof(long));
+                Span<byte> buffer = stackalloc byte[sizeof(long)];
+                DataSource.ReadBytes(Offset, buffer);
+                value = BinaryPrimitives.ReadInt64LittleEndian(buffer);
+            }
 #else
-            long value = DataSource[Offset]
+            AssertCanRead(sizeof(long));
+            value = DataSource[Offset]
                 | ((long) DataSource[Offset + 1] << 8)
                 | ((long) DataSource[Offset + 2] << 16)
                 | ((long) DataSource[Offset + 3] << 24)
@@ -580,11 +675,11 @@ namespace AsmResolver.IO
         {
             byte firstByte = ReadByte();
 
-            if ((firstByte & 0x80) == 0)
-                return firstByte;
+                if ((firstByte & 0x80) == 0)
+                    return firstByte;
 
-            if ((firstByte & 0x40) == 0)
-                return (uint)(((firstByte & 0x7F) << 8) | ReadByte());
+                if ((firstByte & 0x40) == 0)
+                    return (uint) (((firstByte & 0x7F) << 8) | ReadByte());
 
             return (uint) (((firstByte & 0x3F) << 0x18) |
                 (ReadByte() << 0x10) |
@@ -634,13 +729,12 @@ namespace AsmResolver.IO
         public bool TryReadCompressedUInt32(out uint value)
         {
             value = 0;
-            if (!CanRead(sizeof(byte)))
+
+            int firstByte = PeekByte();
+            if (firstByte < 0)
                 return false;
 
-            byte firstByte = ReadByte();
-            Offset--;
-
-            if ((firstByte & 0x80) == 0 && CanRead(sizeof(byte))
+            if ((firstByte & 0x80) == 0 /* && CanRead(sizeof(byte)) */
                 || (firstByte & 0x40) == 0 && CanRead(sizeof(ushort))
                 || CanRead(sizeof(uint)))
             {
@@ -660,13 +754,11 @@ namespace AsmResolver.IO
         {
             value = 0;
 
-            if (!CanRead(sizeof(byte)))
+            int firstByte = PeekByte();
+            if (firstByte < 0)
                 return false;
 
-            byte firstByte = ReadByte();
-            Offset--;
-
-            if ((firstByte & 0x80) == 0 && CanRead(sizeof(byte))
+            if ((firstByte & 0x80) == 0 /* && CanRead(sizeof(byte)) */
                 || (firstByte & 0x40) == 0 && CanRead(sizeof(ushort))
                 || CanRead(sizeof(uint)))
             {
@@ -786,6 +878,10 @@ namespace AsmResolver.IO
         /// <param name="alignment">The boundary to use.</param>
         public void AlignRelative(uint alignment) => RelativeOffset = RelativeOffset.Align(alignment);
 
+        /// <summary>
+        /// Gets the current state of the reader.
+        /// </summary>
+        /// <returns>The state.</returns>
         public readonly BinaryStreamReaderState GetState() => _state;
 
         /// <summary>

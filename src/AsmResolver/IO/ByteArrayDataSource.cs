@@ -63,15 +63,18 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public bool TryGetSpan(ulong address, int length, out ReadOnlySpan<byte> span)
         {
-            int relativeIndex = unchecked((int) (address - BaseAddress));
-            if (relativeIndex < 0 || relativeIndex >= _data.Length - length)
+            if (length != 0)
             {
-                span = default;
-                return false;
+                int relativeIndex = unchecked((int) (address - BaseAddress));
+                if (relativeIndex >= 0 && relativeIndex < _data.Length - length)
+                {
+                    span = _data.AsSpan(relativeIndex, length);
+                    return true;
+                }
             }
 
-            span = _data;
-            return true;
+            span = default;
+            return false;
         }
 #endif
     }

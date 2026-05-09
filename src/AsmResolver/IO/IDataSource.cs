@@ -64,6 +64,13 @@ namespace AsmResolver.IO
         /// </exception>
         void ReadBytes(ulong address, Span<byte> buffer);
 
+        /// <summary>
+        /// Attempts to get a span that directly accesses the underlying buffer of the provided byte range.
+        /// </summary>
+        /// <param name="address">The start address of the range to access.</param>
+        /// <param name="length">The length of the range to access.</param>
+        /// <param name="span">The resulting span.</param>
+        /// <returns><c>true</c> if the span was created successfully, <c>false</c> otherwise.</returns>
         bool TryGetSpan(ulong address, int length, out ReadOnlySpan<byte> span);
 #endif
     }

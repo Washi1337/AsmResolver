@@ -83,8 +83,15 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public bool TryGetSpan(ulong address, int length, out ReadOnlySpan<byte> span)
         {
-            span = default;
-            return false;
+            if (length == 0
+                || !IsValidAddress(address)
+                || !IsValidAddress(address + (ulong) length - 1))
+            {
+                span = default;
+                return false;
+            }
+
+            return _source.TryGetSpan(address, length, out span);
         }
 #endif
     }

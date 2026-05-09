@@ -17,7 +17,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Reads a PE file from an input stream.
         /// </summary>
-        /// <param name="reader">The input stream.</param>
+        /// <param name="readerState">The input stream.</param>
         /// <param name="mode">Indicates how the input PE file is mapped.</param>
         /// <exception cref="BadImageFormatException">Occurs when the input stream is malformed.</exception>
         public SerializedPEFile(in BinaryStreamReaderState readerState, PEMappingMode mode)

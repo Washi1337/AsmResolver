@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="context">The reader context.</param>
         /// <param name="streamReaderFlags">Flags describing the currently read metadata.</param>
         /// <param name="streamHeaders">The stream headers.</param>
-        /// <param name="directoryReader">The input stream containing the metadata directory.</param>
+        /// <param name="directoryReaderState">The input stream containing the metadata directory.</param>
         public MetadataStreamList(
             MetadataDirectory owner,
             MetadataReaderContext context,
