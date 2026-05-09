@@ -10,7 +10,7 @@ public class SerializedIconGroup : IconGroup
 {
     private readonly ResourceDirectory _iconDirectory;
     private readonly ushort _count;
-    private readonly BinaryStreamReader _itemReader;
+    private readonly BinaryStreamReaderState _itemReaderState;
 
     /// <summary>
     /// Reads an icon group from the provided icon directory and input stream.
@@ -27,7 +27,7 @@ public class SerializedIconGroup : IconGroup
         Reserved = reader.ReadUInt16();
         Type = (IconType) reader.ReadUInt16();
         _count = reader.ReadUInt16();
-        _itemReader = reader;
+        _itemReaderState = reader.GetState();
     }
 
     /// <inheritdoc />
@@ -35,7 +35,7 @@ public class SerializedIconGroup : IconGroup
     {
         var result = new List<IconEntry>();
 
-        var reader = _itemReader;
+        var reader = _itemReaderState.CreateReader();
         for (int i = 0; i < _count; i++)
             result.Add(new SerializedIconEntry(Lcid, _iconDirectory, ref reader));
 
