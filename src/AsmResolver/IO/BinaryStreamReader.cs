@@ -235,7 +235,9 @@ namespace AsmResolver.IO
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadUInt16LittleEndian(_span[(int) RelativeOffset..]);
+                value = BinaryPrimitives.ReadUInt16LittleEndian(
+                    _span.Slice((int) RelativeOffset, sizeof(ushort))
+                );
             }
             else
             {
@@ -267,7 +269,9 @@ namespace AsmResolver.IO
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadUInt32LittleEndian(_span[(int) RelativeOffset..]);
+                value = BinaryPrimitives.ReadUInt32LittleEndian(
+                    _span.Slice((int) RelativeOffset, sizeof(uint))
+                );
             }
             else
             {
@@ -301,7 +305,9 @@ namespace AsmResolver.IO
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadUInt64LittleEndian(_span[(int) RelativeOffset..]);
+                value = BinaryPrimitives.ReadUInt64LittleEndian(
+                    _span.Slice((int) RelativeOffset, sizeof(ulong))
+                );
             }
             else
             {
@@ -347,7 +353,9 @@ namespace AsmResolver.IO
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadInt16LittleEndian(_span[(int) RelativeOffset..]);
+                value = BinaryPrimitives.ReadInt16LittleEndian(
+                    _span.Slice((int) RelativeOffset, sizeof(short))
+                );
             }
             else
             {
@@ -379,7 +387,9 @@ namespace AsmResolver.IO
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadInt32LittleEndian(_span[(int) RelativeOffset..]);
+                value = BinaryPrimitives.ReadInt32LittleEndian(
+                    _span.Slice((int) RelativeOffset, sizeof(int))
+                );
             }
             else
             {
@@ -411,7 +421,9 @@ namespace AsmResolver.IO
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             if (!_span.IsEmpty)
             {
-                value = BinaryPrimitives.ReadInt64LittleEndian(_span[(int) RelativeOffset..]);
+                value = BinaryPrimitives.ReadInt64LittleEndian(
+                    _span.Slice((int) RelativeOffset, sizeof(long))
+                );
             }
             else
             {
@@ -876,7 +888,10 @@ namespace AsmResolver.IO
         /// <returns>The string that was read from the stream.</returns>
         public Utf8String? ReadSerString()
         {
-            if (!CanRead(1) || DataSource[Offset] == 0xFF)
+            if (!CanRead(1))
+                return null;
+
+            if (DataSource[Offset] == 0xFF)
             {
                 Offset++;
                 return null;
