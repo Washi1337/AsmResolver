@@ -6,6 +6,10 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 using System.Buffers;
 #endif
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+using System.Buffers.Binary;
+#endif
+
 namespace AsmResolver.PE.DotNet.Cil;
 
 /// <summary>
@@ -16,6 +20,81 @@ public static class FastCilReassembler
     private const int TinyExceptionHandlerSize = 2 * sizeof(byte) + 3 * sizeof(ushort) + sizeof(uint);
     private const int FatExceptionHandlerSize = 6 * sizeof(uint);
     private const uint ExceptionHandlerType = 0;
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+    /// <summary>
+    /// Patches the provided code stream.
+    /// </summary>
+    /// <param name="codeStream">The code stream to patch.</param>
+    /// <param name="tokenRewriter">The function to use for translating old metadata tokens to new metadata tokens.</param>
+    public static void PatchCode(Span<byte> codeStream, Func<MetadataToken, MetadataToken> tokenRewriter)
+    {
+        int index = 0;
+
+        while (index < codeStream.Length)
+        {
+            byte op = codeStream[index++];
+
+            var code = op == 0xFE
+                ? CilOpCodes.MultiByteOpCodes[codeStream[index++]]
+                : CilOpCodes.SingleByteOpCodes[op];
+
+            switch (code.OperandType)
+            {
+                case CilOperandType.InlineNone:
+                    break;
+
+                case CilOperandType.ShortInlineI:
+                case CilOperandType.ShortInlineArgument:
+                case CilOperandType.ShortInlineBrTarget:
+                case CilOperandType.ShortInlineVar:
+                    index += sizeof(byte);
+                    break;
+
+                case CilOperandType.InlineVar:
+                case CilOperandType.InlineArgument:
+                    index += sizeof(ushort);
+                    break;
+
+                case CilOperandType.InlineBrTarget:
+                case CilOperandType.InlineI:
+                case CilOperandType.ShortInlineR:
+                    index += sizeof(uint);
+                    break;
+
+                case CilOperandType.InlineI8:
+                case CilOperandType.InlineR:
+                    index += sizeof(ulong);
+                    break;
+
+                case CilOperandType.InlineSwitch:
+                    int count = BinaryPrimitives.ReadInt32LittleEndian(codeStream.Slice(index, sizeof(int)));
+                    index += (count + 1) * sizeof(uint);
+                    break;
+
+                case CilOperandType.InlinePhi:
+                    throw new NotSupportedException();
+
+                case CilOperandType.InlineField:
+                case CilOperandType.InlineSig:
+                case CilOperandType.InlineTok:
+                case CilOperandType.InlineType:
+                case CilOperandType.InlineMethod:
+                case CilOperandType.InlineString:
+                    var tokenSlice = codeStream.Slice(index, sizeof(int));
+
+                    MetadataToken token = BinaryPrimitives.ReadUInt32LittleEndian(tokenSlice);
+                    BinaryPrimitives.WriteUInt32LittleEndian(tokenSlice, tokenRewriter(token).ToUInt32());
+
+                    index += sizeof(uint);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+#endif
 
     /// <summary>
     /// Patches the provided code stream.
@@ -125,6 +204,69 @@ public static class FastCilReassembler
 
         return CilOpCodes.SingleByteOpCodes[op];
     }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+
+    /// <summary>
+    /// Patches the provided raw extra section containing exception handlers.
+    /// </summary>
+    /// <param name="sectionData">The section data to patch.</param>
+    /// <param name="tokenRewriter">The function to use for translating old metadata tokens to new metadata tokens.</param>
+    /// <param name="fatFormat"></param>
+    public static void PatchExceptionHandlerSection(Span<byte> sectionData, Func<MetadataToken, MetadataToken> tokenRewriter, bool fatFormat)
+    {
+        // Outlined specific cases for better JIT loop optimization.
+        if (fatFormat)
+            PatchExceptionHandlerSectionFat(sectionData, tokenRewriter);
+        else
+            PatchExceptionHandlerSectionSmall(sectionData, tokenRewriter);
+    }
+
+    private static void PatchExceptionHandlerSectionSmall(Span<byte> sectionData, Func<MetadataToken, MetadataToken> tokenRewriter)
+    {
+        while (TinyExceptionHandlerSize <= sectionData.Length)
+        {
+            // Carve out handler type.
+            ushort handlerType = BinaryPrimitives.ReadUInt16LittleEndian(sectionData);
+
+            // If the handler references an exception type, then we should update the md token.
+            if (handlerType == ExceptionHandlerType)
+            {
+                var exceptionTokenSlice = sectionData.Slice(TinyExceptionHandlerSize - sizeof(uint), sizeof(uint));
+
+                uint exceptionToken = BinaryPrimitives.ReadUInt32LittleEndian(exceptionTokenSlice);
+                exceptionToken = tokenRewriter(exceptionToken).ToUInt32();
+
+                BinaryPrimitives.WriteUInt32LittleEndian(exceptionTokenSlice, exceptionToken);
+            }
+
+            sectionData = sectionData.Slice(TinyExceptionHandlerSize);
+        }
+    }
+
+    private static void PatchExceptionHandlerSectionFat(Span<byte> sectionData, Func<MetadataToken, MetadataToken> tokenRewriter)
+    {
+        while (FatExceptionHandlerSize <= sectionData.Length)
+        {
+            // Carve out handler type.
+            uint handlerType = BinaryPrimitives.ReadUInt32LittleEndian(sectionData);
+
+            // If the handler references an exception type, then we should update the md token.
+            if (handlerType == ExceptionHandlerType)
+            {
+                var exceptionTokenSlice = sectionData.Slice(FatExceptionHandlerSize - sizeof(uint), sizeof(uint));
+
+                uint exceptionToken = BinaryPrimitives.ReadUInt32LittleEndian(exceptionTokenSlice);
+                exceptionToken = tokenRewriter(exceptionToken).ToUInt32();
+
+                BinaryPrimitives.WriteUInt32LittleEndian(exceptionTokenSlice, exceptionToken);
+            }
+
+            sectionData = sectionData.Slice(FatExceptionHandlerSize);
+        }
+    }
+
+#endif
 
     /// <summary>
     /// Patches the provided raw extra section containing exception handlers.
