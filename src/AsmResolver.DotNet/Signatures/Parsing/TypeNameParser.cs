@@ -14,7 +14,6 @@ namespace AsmResolver.DotNet.Signatures.Parsing
         // src/coreclr/src/vm/typeparse.cpp
         // https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names
 
-        private static readonly SignatureComparer Comparer = new();
         private readonly ModuleDefinition _module;
         private TypeNameLexer _lexer;
 
@@ -309,7 +308,7 @@ namespace AsmResolver.DotNet.Signatures.Parsing
             for (int i = 0; i < _module.AssemblyReferences.Count; i++)
             {
                 var existingReference = _module.AssemblyReferences[i];
-                if (Comparer.Equals((AssemblyDescriptor) existingReference, newReference))
+                if (SignatureComparer.Default.Equals((AssemblyDescriptor) existingReference, newReference))
                     return existingReference;
             }
 
@@ -357,7 +356,7 @@ namespace AsmResolver.DotNet.Signatures.Parsing
         private TypeNameToken Expect(TypeNameTerminal terminal)
         {
             return TryExpect(terminal)
-                   ?? throw new FormatException($"Expected {terminal}.");
+                ?? throw new FormatException($"Expected {terminal}.");
         }
 
         private TypeNameToken? TryExpect(TypeNameTerminal terminal)
@@ -371,18 +370,30 @@ namespace AsmResolver.DotNet.Signatures.Parsing
             return token;
         }
 
-        private TypeNameToken Expect(params TypeNameTerminal[] terminals)
+        private TypeNameToken Expect(TypeNameTerminal t1, TypeNameTerminal t2)
         {
-            return TryExpect(terminals)
-                ?? throw new FormatException(
-                    $"Expected one of {StringShim.Join(", ", terminals.Select(x => x.ToString()))}.");
+            return TryExpect(t1, t2) ?? throw new FormatException($"Expected {t1} or {t2}.");
         }
 
-        private TypeNameToken? TryExpect(params TypeNameTerminal[] terminals)
+        private TypeNameToken Expect(TypeNameTerminal t1, TypeNameTerminal t2, TypeNameTerminal t3)
+        {
+            return TryExpect(t1, t2, t3) ?? throw new FormatException($"Expected {t1}, {t2} or {t3}.");
+        }
+
+        private TypeNameToken? TryExpect(TypeNameTerminal t1, TypeNameTerminal t2)
         {
             var token = _lexer.Peek();
+            if (t1 != token.Terminal && t2 != token.Terminal)
+                return null;
 
-            if (!terminals.Contains(token.Terminal))
+            _lexer.Next();
+            return token;
+        }
+
+        private TypeNameToken? TryExpect(TypeNameTerminal t1, TypeNameTerminal t2, TypeNameTerminal t3)
+        {
+            var token = _lexer.Peek();
+            if (t1 != token.Terminal && t2 != token.Terminal && t3 != token.Terminal)
                 return null;
 
             _lexer.Next();
