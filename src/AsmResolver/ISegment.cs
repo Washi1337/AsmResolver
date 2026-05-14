@@ -182,7 +182,7 @@ namespace AsmResolver
         /// <returns>The resulting byte array.</returns>
         public static byte[] WriteIntoArray(this ISegment segment, MemoryStreamWriterPool pool)
         {
-            using var rentedWriter = pool.Rent();
+            using var rentedWriter = pool.Rent((int) segment.GetPhysicalSize());
             segment.Write(rentedWriter.Writer);
             return rentedWriter.GetData();
         }

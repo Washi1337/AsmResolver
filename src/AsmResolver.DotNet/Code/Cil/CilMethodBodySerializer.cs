@@ -153,7 +153,7 @@ namespace AsmResolver.DotNet.Code.Cil
             {
                 var codeReader = sourceBody.OriginalRawBody.Code.CreateReader();
 
-                using var rentedWriter = _writerPool.Rent();
+                using var rentedWriter = _writerPool.Rent((int) codeReader.Length);
                 FastCilReassembler.RewriteCode(
                     ref codeReader,
                     rentedWriter.Writer,
@@ -189,7 +189,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     try
                     {
                         var reader = new BinaryStreamReader(sectionData);
-                        using var rentedWriter = _writerPool.Rent();
+                        using var rentedWriter = _writerPool.Rent(sectionData.Length);
                         FastCilReassembler.RewriteExceptionHandlerSection(
                             ref reader,
                             rentedWriter.Writer,
@@ -298,7 +298,9 @@ namespace AsmResolver.DotNet.Code.Cil
 
             var bag = context.ErrorListener;
 
-            using var rentedWriter = _writerPool.Rent();
+            var lastInstruction = body.Instructions[body.Instructions.Count - 1];
+            using var rentedWriter = _writerPool.Rent(lastInstruction.Offset + lastInstruction.Size);
+
             var assembler = new CilAssembler(
                 rentedWriter.Writer,
                 new CilOperandBuilder(context.TokenProvider, bag, body.Owner),

@@ -28,6 +28,22 @@ namespace AsmResolver.IO
             return new RentedWriter(this, writer);
         }
 
+        /// <summary>
+        /// Rents a single binary stream writer.
+        /// </summary>
+        /// <param name="minimumCapacity">The minimum capacity of the backing stream.</param>
+        /// <returns>The writer.</returns>
+        public RentedWriter Rent(int minimumCapacity)
+        {
+            if (!_writers.TryDequeue(out var writer))
+                writer = new BinaryStreamWriter(new MemoryStream());
+
+            var baseStream = (MemoryStream) writer.BaseStream;
+            baseStream.SetLength(0);
+            baseStream.Capacity = Math.Max(baseStream.Capacity, minimumCapacity);
+            return new RentedWriter(this, writer);
+        }
+
         private void Return(BinaryStreamWriter writer) => _writers.Enqueue(writer);
 
         /// <summary>
