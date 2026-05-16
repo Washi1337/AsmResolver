@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.PortablePdbs;
+using AsmResolver.DotNet.PortablePdbs.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
 using AsmResolver.PE.Debug;
@@ -98,6 +101,14 @@ namespace AsmResolver.DotNet.Serialized
         {
             get;
         }
+
+        [LazyProperty]
+        public partial ISymbolReader SymbolReader
+        {
+            get;
+        }
+
+        private ISymbolReader GetSymbolReader() => ReaderContext.Parameters.SymbolReaderFactory.CreateSymbolReader(this);
 
         /// <inheritdoc />
         public override bool HasCustomAttributes => CustomAttributesInternal is null
@@ -298,6 +309,30 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReaderContext.Image.DebugData);
+
+        protected override IList<Document> GetDocuments()
+        {
+            var documents = SymbolReader.GetDocuments();
+            var ownedDocuments = new MemberCollection<ModuleDefinition, Document>(this);
+
+            foreach (var document in documents)
+            {
+                ownedDocuments.AddNoOwnerCheck(document);
+            }
+
+            return ownedDocuments;
+        }
+
+        protected override IList<CustomDebugInformation> GetCustomDebugInformations()
+        {
+            var cdis = SymbolReader.GetCustomDebugInformations(this);
+            var result = new MemberCollection<IHasCustomDebugInformation, CustomDebugInformation>(this);
+            foreach (var cdi in cdis)
+            {
+                result.AddNoOwnerCheck(cdi);
+            }
+            return result;
+        }
 
         private AssemblyDefinition? FindParentAssembly()
         {

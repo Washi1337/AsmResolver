@@ -30,7 +30,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public TableIndex TableIndex => TableIndex.Document;
+        public TableIndex TableIndex => TableIndex.LocalScope;
 
         /// <inheritdoc />
         public int Count => 6;
