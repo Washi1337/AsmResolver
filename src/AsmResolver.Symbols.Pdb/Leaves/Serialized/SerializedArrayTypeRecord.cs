@@ -35,18 +35,12 @@ public class SerializedArrayTypeRecord : ArrayTypeRecord
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetElementType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_elementTypeIndex, out CodeViewTypeRecord? type)
-            ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
-                $"Array type {TypeIndex:X8} contains an invalid element type index {_elementTypeIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<CodeViewTypeRecord>(_elementTypeIndex);
     }
 
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetIndexType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_indexTypeIndex, out CodeViewTypeRecord? type)
-            ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
-                $"Array type {TypeIndex:X8} contains an invalid index type index {_indexTypeIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<CodeViewTypeRecord>(_indexTypeIndex);
     }
 }

@@ -60,6 +60,8 @@ public class SerializedPdbImage : PdbImage
         Machine = DbiStream.Machine;
     }
 
+    private protected override IErrorListener ErrorListener => ReaderContext.Parameters.ErrorListener;
+
     internal PdbReaderContext ReaderContext
     {
         get;

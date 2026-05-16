@@ -47,14 +47,14 @@ public class PointerTypeRecordTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void ReadAttributes()
     {
-        var type = (PointerTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x1012);
+        var type = (PointerTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x1012)!;
         Assert.True(type.IsNear32);
     }
 
     [Fact]
     public void ReadBaseType()
     {
-        var type = (PointerTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x1012);
+        var type = (PointerTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x1012)!;
         Assert.Equal(CodeViewLeafKind.Modifier, type.BaseType.LeafKind);
     }
 }

@@ -22,14 +22,14 @@ public class ModifierTypeRecordTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void ReadAttributes()
     {
-        var type = (ModifierTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x1011);
+        var type = (ModifierTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x1011)!;
         Assert.True(type.IsConst);
     }
 
     [Fact]
     public void ReadBaseType()
     {
-        var type = (ModifierTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x1011);
+        var type = (ModifierTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x1011)!;
         Assert.Equal(CodeViewLeafKind.Structure, type.BaseType.LeafKind);
     }
 }
