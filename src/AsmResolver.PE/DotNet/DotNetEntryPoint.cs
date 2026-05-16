@@ -18,7 +18,7 @@ namespace AsmResolver.PE.DotNet
         /// </param>
         public DotNetEntryPoint(MetadataToken token)
         {
-            if (token != MetadataToken.Zero && token.Table is not TableIndex.Method or TableIndex.File)
+            if (token != MetadataToken.Zero && token.Table is not (TableIndex.Method or TableIndex.File))
                 throw new ArgumentException("Managed entry points can only be metadata tokens referencing a method or a file.");
 
             MetadataToken = token;

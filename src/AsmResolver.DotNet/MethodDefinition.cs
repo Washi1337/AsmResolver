@@ -571,7 +571,7 @@ namespace AsmResolver.DotNet
         public partial TypeDefinition? DeclaringType
         {
             get;
-            set;
+            private set;
         }
 
         ITypeDescriptor? IMemberDescriptor.DeclaringType => DeclaringType;

@@ -57,15 +57,15 @@ namespace AsmResolver.DotNet.Signatures.Parsing
             char currentChar = (char) c;
             return currentChar switch
             {
-                '*' => ReadSymbolToken(TypeNameTerminal.Star),
-                '+' => ReadSymbolToken(TypeNameTerminal.Plus),
-                '=' => ReadSymbolToken(TypeNameTerminal.Equals),
+                '*' => ReadSymbolToken(TypeNameTerminal.Star, "*"),
+                '+' => ReadSymbolToken(TypeNameTerminal.Plus, "+"),
+                '=' => ReadSymbolToken(TypeNameTerminal.Equals, "="),
                 '.' => ReadDotToken(),
-                ',' => ReadSymbolToken(TypeNameTerminal.Comma),
-                '&' => ReadSymbolToken(TypeNameTerminal.Ampersand),
-                '[' => ReadSymbolToken(TypeNameTerminal.OpenBracket),
-                ']' => ReadSymbolToken(TypeNameTerminal.CloseBracket),
-                '…' => ReadSymbolToken(TypeNameTerminal.Ellipsis),
+                ',' => ReadSymbolToken(TypeNameTerminal.Comma, ","),
+                '&' => ReadSymbolToken(TypeNameTerminal.Ampersand, "&"),
+                '[' => ReadSymbolToken(TypeNameTerminal.OpenBracket, "["),
+                ']' => ReadSymbolToken(TypeNameTerminal.CloseBracket, "]"),
+                '…' => ReadSymbolToken(TypeNameTerminal.Ellipsis, "…"),
                 _ => char.IsDigit(currentChar) ? ReadNumberOrIdentifierToken() : ReadIdentifierToken()
             };
         }
@@ -164,10 +164,10 @@ namespace AsmResolver.DotNet.Signatures.Parsing
             return new TypeNameToken(TypeNameTerminal.Identifier, _buffer.ToString().Trim(TrimCharacters));
         }
 
-        private TypeNameToken ReadSymbolToken(TypeNameTerminal terminal)
+        private TypeNameToken ReadSymbolToken(TypeNameTerminal terminal, string tokenString)
         {
-            string text = ((char) _reader.Read()).ToString();
-            return new TypeNameToken(terminal, text);
+            _ = _reader.Read();
+            return new TypeNameToken(terminal, tokenString);
         }
 
         private void SkipWhitespaces()

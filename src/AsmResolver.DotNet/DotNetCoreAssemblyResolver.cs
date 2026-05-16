@@ -64,7 +64,7 @@ namespace AsmResolver.DotNet
             if (options is not null)
             {
                 // Self-contained -> prefer the source directory.
-                if (options.Framework is not null && !string.IsNullOrEmpty(sourceDirectory))
+                if (options.Framework is null && options.Frameworks is null && !string.IsNullOrEmpty(sourceDirectory))
                     _runtimeDirectories.Add(sourceDirectory!);
 
                 // Order frameworks such that .NETCore.App is last.

@@ -10,15 +10,19 @@ namespace AsmResolver.DotNet.Tests.Config.Json
         [Fact]
         public void ReadSingleFramework()
         {
-            var config = RuntimeConfiguration.FromJson(@"{
-    ""runtimeOptions"": {
-        ""tfm"": ""netcoreapp3.1"",
-        ""framework"": {
-            ""name"": ""Microsoft.NETCore.App"",
-            ""version"": ""3.1.0""
-        }
-    }
-}");
+            var config = RuntimeConfiguration.FromJson(
+                """
+                {
+                    "runtimeOptions": {
+                        "tfm": "netcoreapp3.1",
+                        "framework": {
+                            "name": "Microsoft.NETCore.App",
+                            "version": "3.1.0"
+                        }
+                    }
+                }
+                """
+            );
 
             Assert.NotNull(config);
             Assert.NotNull(config.RuntimeOptions);
@@ -33,21 +37,56 @@ namespace AsmResolver.DotNet.Tests.Config.Json
         [Fact]
         public void ReadMultipleFrameworks()
         {
-            var config = RuntimeConfiguration.FromJson(@"{
-    ""runtimeOptions"": {
-        ""tfm"": ""net5.0"",
-        ""includedFrameworks"": [
-            {
-                ""name"": ""Microsoft.NETCore.App"",
-                ""version"": ""5.0.0""
-            },
-            {
-                ""name"": ""Microsoft.WindowsDesktop.App"",
-                ""version"": ""5.0.0""
-            }
-        ]
-    }
-}");
+            var config = RuntimeConfiguration.FromJson(
+                """
+                {
+                    "runtimeOptions": {
+                        "tfm": "net5.0",
+                        "frameworks": [
+                            {
+                                "name": "Microsoft.NETCore.App",
+                                "version": "5.0.0"
+                            },
+                            {
+                                "name": "Microsoft.WindowsDesktop.App",
+                                "version": "5.0.0"
+                            }
+                        ]
+                    }
+                }
+                """);
+
+            Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions);
+            Assert.Equal("net5.0", config.RuntimeOptions.TargetFrameworkMoniker);
+
+            var frameworks = config.RuntimeOptions.Frameworks;
+            Assert.NotNull(frameworks);
+            Assert.Contains(frameworks, framework => framework is { Name: "Microsoft.NETCore.App", Version: "5.0.0" });
+            Assert.Contains(frameworks, framework => framework is { Name: "Microsoft.WindowsDesktop.App", Version: "5.0.0" });
+        }
+
+        [Fact]
+        public void ReadMultipleIncludedFrameworks()
+        {
+            var config = RuntimeConfiguration.FromJson(
+                """
+                {
+                    "runtimeOptions": {
+                        "tfm": "net5.0",
+                        "includedFrameworks": [
+                            {
+                                "name": "Microsoft.NETCore.App",
+                                "version": "5.0.0"
+                            },
+                            {
+                                "name": "Microsoft.WindowsDesktop.App",
+                                "version": "5.0.0"
+                            }
+                        ]
+                    }
+                }
+                """);
 
             Assert.NotNull(config);
             Assert.NotNull(config.RuntimeOptions);
@@ -62,19 +101,23 @@ namespace AsmResolver.DotNet.Tests.Config.Json
         [Fact]
         public void ReadConfigurationProperties()
         {
-            var config = RuntimeConfiguration.FromJson(@"{
-    ""runtimeOptions"": {
-        ""tfm"": ""netcoreapp3.1"",
-        ""framework"": {
-            ""name"": ""Microsoft.NETCore.App"",
-            ""version"": ""3.1.0""
-        },
-        ""configProperties"": {
-            ""System.GC.Concurrent"": false,
-            ""System.Threading.ThreadPool.MinThreads"": 4
-        }
-    }
-}");
+            var config = RuntimeConfiguration.FromJson(
+                """
+                {
+                    "runtimeOptions": {
+                        "tfm": "netcoreapp3.1",
+                        "framework": {
+                            "name": "Microsoft.NETCore.App",
+                            "version": "3.1.0"
+                        },
+                        "configProperties": {
+                            "System.GC.Concurrent": false,
+                            "System.Threading.ThreadPool.MinThreads": 4
+                        }
+                    }
+                }
+                """
+            );
 
             Assert.NotNull(config);
             Assert.NotNull(config.RuntimeOptions.ConfigProperties);

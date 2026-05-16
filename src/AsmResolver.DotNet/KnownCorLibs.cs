@@ -45,6 +45,15 @@ namespace AsmResolver.DotNet
             ]);
 
         /// <summary>
+        /// References mscorlib.dll, Version=255.255.255.255, PublicKeyToken=B77A5C561934E089. This is used by .NET
+        /// assemblies targeting Windows Runtime (WinRT).
+        /// </summary>
+        public static readonly AssemblyReference MsCorLib_v255_255_255_255 = new("mscorlib",
+            new Version(255, 255, 255, 255), false, [
+                0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89
+            ]);
+
+        /// <summary>
         /// References System.Private.CoreLib.dll, Version=4.0.0.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by .NET
         /// assemblies targeting .NET Core 1.0 and later.
         /// </summary>
@@ -268,6 +277,7 @@ namespace AsmResolver.DotNet
                 NetStandard_v2_1_0_0,
                 MsCorLib_v2_0_0_0,
                 MsCorLib_v4_0_0_0,
+                MsCorLib_v255_255_255_255,
                 SystemRuntime_v4_0_0_0,
                 SystemRuntime_v4_0_10_0,
                 SystemRuntime_v4_0_20_0,

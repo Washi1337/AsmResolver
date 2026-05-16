@@ -201,10 +201,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
         {
             var assembly1 = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
             var assembly2 = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4));
+            var assembly3 = new AssemblyReference("SomeAssembly", new Version(1, 2, 3, 4), false, [1, 2, 3, 4, 5, 6, 7, 8]);
 
-            Assert.Equal(
-                _comparer.GetHashCode((AssemblyDescriptor) assembly1),
-                _comparer.GetHashCode((AssemblyDescriptor) assembly2));
+            var comparer = new SignatureComparer();
+            Assert.Equal(comparer.GetHashCode(assembly1), _comparer.GetHashCode(assembly2));
+            Assert.NotEqual(comparer.GetHashCode(assembly1), _comparer.GetHashCode(assembly3));
         }
 
         [Fact]
@@ -214,9 +215,29 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var assembly2 = new AssemblyReference("SomeAssembly", new Version(5, 6, 7, 8));
 
             var comparer = new SignatureComparer(SignatureComparisonFlags.VersionAgnostic);
+            Assert.Equal(comparer.GetHashCode(assembly1), comparer.GetHashCode(assembly2));
+        }
+
+        [Fact]
+        public void AssemblyHashCodeIgnoreStrongNames()
+        {
+            var assembly1 = new AssemblyReference(
+                "SomeAssembly",
+                new Version(1, 2, 3, 4),
+                false,
+                [1, 2, 3, 4, 5, 6, 7, 8]
+            );
+
+            var assembly2 = new AssemblyReference(
+                "SomeAssembly",
+                new Version(1, 2, 3, 4)
+            );
+
+            var comparer = new SignatureComparer(SignatureComparisonFlags.IgnoreStrongNames);
             Assert.Equal(
                 comparer.GetHashCode((AssemblyDescriptor) assembly1),
-                comparer.GetHashCode((AssemblyDescriptor) assembly2));
+                comparer.GetHashCode((AssemblyDescriptor) assembly2)
+            );
         }
 
         [Fact]

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.PE.DotNet.Metadata;
 
 namespace AsmResolver.DotNet.Collections
 {
@@ -12,6 +11,9 @@ namespace AsmResolver.DotNet.Collections
     /// </summary>
     public class Parameter : INameProvider
     {
+        internal const int ReturnParameterIndex = -2;
+        internal const int ThisParameterIndex = -1;
+
         private static readonly List<string> CachedArgNames = new();
 
         private ParameterCollection? _parentCollection;
@@ -42,7 +44,7 @@ namespace AsmResolver.DotNet.Collections
         /// <summary>
         /// Gets the sequence number of the parameter, as used in the parameter definition list of the method definition.
         /// </summary>
-        public ushort Sequence => (ushort) (Index + 1);
+        public ushort Sequence => Index == ReturnParameterIndex ? (ushort) 0 : (ushort) (Index + 1);
 
         /// <summary>
         /// Gets the index of the parameter within the method's signature.
@@ -60,8 +62,8 @@ namespace AsmResolver.DotNet.Collections
             get => _parameterType;
             set
             {
-                if (Index < 0)
-                    throw new InvalidOperationException("Cannot update parameter type of return or this parameters.");
+                if (Index == ThisParameterIndex)
+                    throw new InvalidOperationException("Cannot update parameter type of a this parameter.");
                 _parameterType = value;
                 _parentCollection?.PushParameterUpdateToSignature(this);
             }
@@ -89,6 +91,9 @@ namespace AsmResolver.DotNet.Collections
         [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
         private static string GetDummyArgumentName(int index)
         {
+            if (index == -1)
+                return "A_Return";
+
             if (index >= CachedArgNames.Count)
             {
                 lock (CachedArgNames)

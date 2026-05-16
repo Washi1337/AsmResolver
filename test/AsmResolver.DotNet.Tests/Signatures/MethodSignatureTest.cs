@@ -103,5 +103,69 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             Assert.Equal(module.CorLibTypeFactory.String, type, SignatureComparer.Default);
         }
+
+        [Fact]
+        public void GetTotalParameterCountStaticParameterless()
+        {
+            var signature = MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void);
+            Assert.Equal(0, signature.GetTotalParameterCount());
+        }
+
+        [Fact]
+        public void GetTotalParameterCountStaticParameters()
+        {
+            var signature = MethodSignature.CreateStatic(
+                _module.CorLibTypeFactory.Void,
+                [_module.CorLibTypeFactory.Int32, _module.CorLibTypeFactory.Int32]
+            );
+
+            Assert.Equal(2, signature.GetTotalParameterCount());
+        }
+
+        [Fact]
+        public void GetTotalParameterCountStaticParametersSentinels()
+        {
+            var signature = MethodSignature.CreateStatic(
+                _module.CorLibTypeFactory.Void,
+                [_module.CorLibTypeFactory.Int32, _module.CorLibTypeFactory.Int32]
+            );
+            signature.SentinelParameterTypes.Add(_module.CorLibTypeFactory.Int32);
+            signature.SentinelParameterTypes.Add(_module.CorLibTypeFactory.Int32);
+            signature.SentinelParameterTypes.Add(_module.CorLibTypeFactory.Int32);
+
+            Assert.Equal(5, signature.GetTotalParameterCount());
+        }
+
+        [Fact]
+        public void GetTotalParameterCountInstanceParameterless()
+        {
+            var signature = MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void);
+            Assert.Equal(1, signature.GetTotalParameterCount());
+        }
+
+        [Fact]
+        public void GetTotalParameterCountInstanceParameters()
+        {
+            var signature = MethodSignature.CreateInstance(
+                _module.CorLibTypeFactory.Void,
+                [_module.CorLibTypeFactory.Int32, _module.CorLibTypeFactory.Int32]
+            );
+
+            Assert.Equal(3, signature.GetTotalParameterCount());
+        }
+
+        [Fact]
+        public void GetTotalParameterCountInstanceParametersSentinels()
+        {
+            var signature = MethodSignature.CreateInstance(
+                _module.CorLibTypeFactory.Void,
+                [_module.CorLibTypeFactory.Int32, _module.CorLibTypeFactory.Int32]
+            );
+            signature.SentinelParameterTypes.Add(_module.CorLibTypeFactory.Int32);
+            signature.SentinelParameterTypes.Add(_module.CorLibTypeFactory.Int32);
+            signature.SentinelParameterTypes.Add(_module.CorLibTypeFactory.Int32);
+
+            Assert.Equal(6, signature.GetTotalParameterCount());
+        }
     }
 }

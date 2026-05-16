@@ -229,6 +229,12 @@ public static class TargetRuntimeProber
 
     private static DotNetRuntimeInfo ToDotNetRuntimeInfo(string name, int major, int minor, int build, int revision)
     {
+        // mscorlib v255.255.255.255 is used in WinRT (earliest supported framework is .NET FX 4.5).
+        // TODO: We may want to introduce a separate runtime info for this instead, as it will require some additional
+        //       changes to the resolver (i.e., include WinMetadata search dirs).
+        if (name == "mscorlib" && major == 255 && minor == 255 && build == 255 && revision == 255)
+            return DotNetRuntimeInfo.NetFramework(4, 5);
+
         // .NETCoreApp uses 1:1 version correspondence of corlib since .NET 5.
         if (major >= 5)
             return DotNetRuntimeInfo.NetCoreApp(major, minor);

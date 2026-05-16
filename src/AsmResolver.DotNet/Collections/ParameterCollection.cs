@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet.Collections
@@ -14,7 +13,7 @@ namespace AsmResolver.DotNet.Collections
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class ParameterCollection : IReadOnlyList<Parameter>
     {
-        private readonly List<Parameter> _parameters = new List<Parameter>();
+        private readonly List<Parameter> _parameters = [];
         private readonly MethodDefinition _owner;
         private bool _hasThis;
 
@@ -26,7 +25,7 @@ namespace AsmResolver.DotNet.Collections
         {
             _owner = owner ?? throw new ArgumentNullException(nameof(owner));
 
-            ReturnParameter = new Parameter(this, -1, -1);
+            ReturnParameter = new Parameter(this, Parameter.ReturnParameterIndex, -1);
             PullUpdatesFromMethodSignature();
         }
 
@@ -82,13 +81,9 @@ namespace AsmResolver.DotNet.Collections
         {
             // Update this parameter if necessary.
             if (!_hasThis)
-            {
                 ThisParameter = null;
-            }
             else
-            {
-                ThisParameter ??= new Parameter(this, -1, 0);
-            }
+                ThisParameter ??= new Parameter(this, Parameter.ThisParameterIndex, 0);
 
             int signatureCount = _owner.Signature?.ParameterTypes.Count ?? 0;
 
@@ -96,7 +91,7 @@ namespace AsmResolver.DotNet.Collections
             while (_parameters.Count < signatureCount)
             {
                 int index = _parameters.Count;
-                var parameter = new Parameter(this, index, index + MethodSignatureIndexBase);
+                var parameter = new Parameter(this, index, MethodSignatureIndexBase + index);
                 _parameters.Add(parameter);
             }
 
@@ -111,17 +106,17 @@ namespace AsmResolver.DotNet.Collections
         private void UpdateParameterTypes()
         {
             // Update implicit parameters.
-            if (_owner.Signature is null)
+            if (_owner.Signature is not { } signature)
                 return;
 
-            ReturnParameter.SetParameterTypeInternal(_owner.Signature.ReturnType);
+            ReturnParameter.SetParameterTypeInternal(signature.ReturnType);
 
-            if (GetThisParameterType() is { } thisType)
-                ThisParameter?.SetParameterTypeInternal(thisType);
+            if (ThisParameter is not null && GetThisParameterType() is { } thisType)
+                ThisParameter.SetParameterTypeInternal(thisType);
 
             // Update remaining parameter types.
             for (int i = 0; i < _parameters.Count; i++)
-                _parameters[i].SetParameterTypeInternal(_owner.Signature.ParameterTypes[i]);
+                _parameters[i].SetParameterTypeInternal(signature.ParameterTypes[i]);
         }
 
         private TypeSignature? GetThisParameterType()
@@ -151,7 +146,14 @@ namespace AsmResolver.DotNet.Collections
 
         internal ParameterDefinition? GetParameterDefinition(int sequence)
         {
-            return _owner.ParameterDefinitions.FirstOrDefault(p => p.Sequence == sequence);
+            for (int i = 0; i < _owner.ParameterDefinitions.Count; i++)
+            {
+                var definition = _owner.ParameterDefinitions[i];
+                if (definition.Sequence == sequence)
+                    return definition;
+            }
+
+            return null;
         }
 
         internal ParameterDefinition GetOrCreateParameterDefinition(Parameter parameter)
@@ -182,9 +184,9 @@ namespace AsmResolver.DotNet.Collections
             if (_owner.Signature is null)
                 return;
 
-            if (parameter.Index == -2)
+            if (parameter == ReturnParameter)
                 _owner.Signature.ReturnType = parameter.ParameterType;
-            else if (parameter.Index == -1)
+            else if (parameter == ThisParameter)
                 throw new InvalidOperationException("Cannot update the parameter type of the this parameter.");
             else
                 _owner.Signature.ParameterTypes[parameter.Index] = parameter.ParameterType;
@@ -213,7 +215,7 @@ namespace AsmResolver.DotNet.Collections
         public Parameter GetBySignatureIndex(int index)
         {
             int actualIndex = index - MethodSignatureIndexBase;
-            return actualIndex == -1 && _hasThis
+            return actualIndex == Parameter.ThisParameterIndex && _hasThis
                 ? ThisParameter ?? throw new IndexOutOfRangeException()
                 : this[actualIndex];
         }

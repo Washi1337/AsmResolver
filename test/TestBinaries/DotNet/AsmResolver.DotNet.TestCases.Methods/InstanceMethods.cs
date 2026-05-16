@@ -4,7 +4,12 @@ namespace AsmResolver.DotNet.TestCases.Methods
     {
         public InstanceMethods()
         {
-            
+
+        }
+
+        public int InstanceParameterlessInt32Method()
+        {
+            return 0;
         }
 
         public void InstanceParameterlessMethod()
