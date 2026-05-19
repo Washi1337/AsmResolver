@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.CommandLine;
-using System.CommandLine.Builder;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -35,22 +34,14 @@ namespace AsmResolver.Benchmarks
                 if (!string.IsNullOrEmpty(baselineVersion))
                 {
                     config.AddJob(job
-                        .WithNuGet(new NuGetReferenceList
-                        {
-                            new("AsmResolver", baselineVersion),
-                            new("AsmResolver.PE.File", baselineVersion),
-                            new("AsmResolver.PE", baselineVersion),
-                            new("AsmResolver.PE.Win32Resources", baselineVersion),
-                            new("AsmResolver.DotNet", baselineVersion),
-                            new("AsmResolver.DotNet.Dynamic", baselineVersion),
-                        }).WithId(baselineVersion)
+                        .WithMsBuildArguments($"/p:PackagesBaselineVersion={baselineVersion}").WithId(baselineVersion)
                         .AsBaseline());
                 }
 
                 config.AddExporter(DefaultConfig.Instance.GetExporters().ToArray());
                 config.AddLogger(DefaultConfig.Instance.GetLoggers().ToArray());
                 config.AddColumnProvider(DefaultConfig.Instance.GetColumnProviders().ToArray());
-                config.HideColumns("NuGetReferences");
+                config.HideColumns("Arguments");
                 config.AddJob(job);
 
                 if (string.IsNullOrEmpty(benchmarkType))

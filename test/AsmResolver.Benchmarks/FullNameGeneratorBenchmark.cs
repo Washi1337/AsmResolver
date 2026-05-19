@@ -1,6 +1,7 @@
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
 
 namespace AsmResolver.Benchmarks
 {

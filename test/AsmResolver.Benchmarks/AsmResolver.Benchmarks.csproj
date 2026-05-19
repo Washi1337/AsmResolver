@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -6,18 +6,30 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
-      <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+        <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+        <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(UsePackage)' != 'false'">
+        <ProjectReference Include="..\..\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
+        <ProjectReference Include="..\..\src\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
+        <ProjectReference Include="..\..\src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj" />
+        <ProjectReference Include="..\..\src\AsmResolver.PE\AsmResolver.PE.csproj" />
+        <ProjectReference Include="..\..\src\AsmResolver\AsmResolver.csproj" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(UsePackage)' == 'true'">
+        <PackageReference Include="AsmResolver" Version="$(PackagesBaselineVersion)" />
+        <PackageReference Include="AsmResolver.PE.File" Version="$(PackagesBaselineVersion)" />
+        <PackageReference Include="AsmResolver.PE" Version="$(PackagesBaselineVersion)" />
+        <PackageReference Include="AsmResolver.PE.Win32Resources" Version="$(PackagesBaselineVersion)" />
+        <PackageReference Include="AsmResolver.DotNet" Version="$(PackagesBaselineVersion)" />
+        <PackageReference Include="AsmResolver.DotNet.Dynamic" Version="$(PackagesBaselineVersion)" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
-      <ProjectReference Include="..\..\src\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
-      <ProjectReference Include="..\..\src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj" />
-      <ProjectReference Include="..\..\src\AsmResolver.PE\AsmResolver.PE.csproj" />
-      <ProjectReference Include="..\..\src\AsmResolver\AsmResolver.csproj" />
-      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Methods\AsmResolver.DotNet.TestCases.Methods.csproj" />
-      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Types\AsmResolver.DotNet.TestCases.Types.csproj" />
+        <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Methods\AsmResolver.DotNet.TestCases.Methods.csproj" />
+        <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Types\AsmResolver.DotNet.TestCases.Types.csproj" />
     </ItemGroup>
 
     <ItemGroup>
