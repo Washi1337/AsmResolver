@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Methods;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Signatures
@@ -275,6 +277,31 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var field = LookupField(nameof(Marshalling.CustomMarshallerWithCustomType));
             var customMarshaller = Assert.IsType<CustomMarshalDescriptor>(field.MarshalDescriptor, exactMatch: false);
             Assert.Equal(nameof(Marshalling), customMarshaller.MarshalType?.Name);
+        }
+
+        [Fact]
+        public void ReadCustomMarshallerTypeName()
+        {
+            var field = LookupField(nameof(Marshalling.CustomMarshallerWithCustomTypeName));
+            var customMarshaller = Assert.IsType<CustomMarshalDescriptor>(field.MarshalDescriptor, exactMatch: false);
+            Assert.Equal("NonExistingType", customMarshaller.MarshalType?.Name);
+        }
+
+        [Fact]
+        public void ReadCustomMarshallerEmptyTypeName()
+        {
+            var field = LookupField(nameof(Marshalling.CustomMarshallerWithEmptyCustomTypeName));
+            var customMarshaller = Assert.IsType<CustomMarshalDescriptor>(field.MarshalDescriptor, exactMatch: false);
+            Assert.Null(customMarshaller.MarshalType);
+        }
+
+        [Fact]
+        public void ReadCustomMarshallerInvalidTypeName()
+        {
+            var field = LookupField(nameof(Marshalling.CustomMarshallerWithInvalidCustomTypeName));
+            var customMarshaller = Assert.IsType<CustomMarshalDescriptor>(field.MarshalDescriptor, exactMatch: false);
+            Assert.Null(customMarshaller.MarshalType);
+            Assert.Equal("\\", customMarshaller.MarshalTypeName);
         }
 
         [Fact]
