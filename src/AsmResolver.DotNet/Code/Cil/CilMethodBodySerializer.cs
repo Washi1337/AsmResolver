@@ -195,6 +195,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     try
                     {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+                        sectionData = (byte[])sectionData.Clone();
                         FastCilReassembler.PatchExceptionHandlerSection(sectionData, tokenRewriter, section.IsFat);
 #else
                         var reader = new BinaryStreamReader(sectionData);

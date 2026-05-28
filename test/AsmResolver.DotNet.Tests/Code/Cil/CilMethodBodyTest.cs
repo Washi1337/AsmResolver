@@ -179,6 +179,23 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             Assert.Equal(newBody.ExceptionHandlers[1].ExceptionType!.FullName, newBody.ExceptionHandlers[1].ExceptionType!.FullName);
         }
 
+        [Fact]
+        public void FastPatchingShouldNotCorruptOriginalExceptionHandlerCatchType()
+        {
+            // https://github.com/Washi1337/AsmResolver/pull/747
+
+            var module = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location, TestReaderParameters);
+            var method = module.TopLevelTypes
+                .First(t => t.Name == nameof(MethodBodyTypes))
+                .Methods.First(m => m.Name == nameof(MethodBodyTypes.FatMethodWithCatch));
+
+            module.Write(new MemoryStream());
+
+            Assert.Equal(
+                ["System.IO.IOException", "System.Net.WebException"],
+                method.CilMethodBody!.ExceptionHandlers.Select(eh => eh.ExceptionType!.FullName));
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
