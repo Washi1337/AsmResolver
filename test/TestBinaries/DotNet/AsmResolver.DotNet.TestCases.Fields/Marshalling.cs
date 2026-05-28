@@ -18,6 +18,15 @@ namespace AsmResolver.DotNet.TestCases.Fields
         [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Marshalling))]
         public static byte[] CustomMarshallerWithCustomType;
 
+        [MarshalAs(UnmanagedType.CustomMarshaler, MarshalType = "NonExistingNamespace.NonExistingType, NonExistingAssembly, Version=1.0.0.0")]
+        public static byte[] CustomMarshallerWithCustomTypeName;
+
+        [MarshalAs(UnmanagedType.CustomMarshaler, MarshalType = "")]
+        public static byte[] CustomMarshallerWithEmptyCustomTypeName;
+
+        [MarshalAs(UnmanagedType.CustomMarshaler, MarshalType = "\\")]
+        public static byte[] CustomMarshallerWithInvalidCustomTypeName;
+
         [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Marshalling), MarshalCookie = "abc")]
         public static byte[] CustomMarshallerWithCustomTypeAndCookie;
 
