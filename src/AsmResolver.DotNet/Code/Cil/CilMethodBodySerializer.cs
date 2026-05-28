@@ -250,14 +250,34 @@ namespace AsmResolver.DotNet.Code.Cil
             if (body.ExceptionHandlers.Count > 0)
             {
                 fatBody.HasSections = true;
-                bool needsFatFormat = body.ExceptionHandlers.Any(e => e.IsFat);
 
+                // Determine if we can fit in the tiny format.
+                bool needsFatFormat;
+                if (body.ExceptionHandlers.Any(e => e.IsFat))
+                {
+                    needsFatFormat = true;
+                }
+                else
+                {
+                    const long tinyHeaderSize =
+                            sizeof(CilExtraSectionAttributes) // Flags
+                            + sizeof(byte)                    // Data size
+                            + sizeof(ushort)                  // Padding
+                        ;
+
+                    long expectedTinySectionSize = tinyHeaderSize + body.ExceptionHandlers.Count * CilExceptionHandler.TinyExceptionHandlerSize;
+                    needsFatFormat = expectedTinySectionSize > 0xFF;
+                }
+
+                // Create the section
                 var attributes = CilExtraSectionAttributes.EHTable;
                 if (needsFatFormat)
                     attributes |= CilExtraSectionAttributes.FatFormat;
 
                 byte[] rawSectionData = SerializeExceptionHandlers(context, body, needsFatFormat);
                 var section = new CilExtraSection(attributes, rawSectionData);
+
+                // Add it.
                 fatBody.ExtraSections.Add(section);
             }
 

@@ -8,6 +8,8 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.NestedClasses;
+using AsmResolver.PE;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -44,6 +46,17 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var type = newModule.TopLevelTypes.First(t => t.Name == methodBody.Owner.DeclaringType!.Name);
             return type.Methods.First(m => m.Name == methodBody.Owner.Name).CilMethodBody
                 ?? throw new ArgumentException($"Reconstructed method {methodBody.Owner!.Name} does not have a method body.");
+        }
+
+        private static CilMethodBody CreateDummyBody(bool isVoid)
+        {
+            var module = new ModuleDefinition("DummyModule");
+            var method = new MethodDefinition("Main",
+                MethodAttributes.Static,
+                MethodSignature.CreateStatic(isVoid ? module.CorLibTypeFactory.Void : module.CorLibTypeFactory.Int32));
+
+            module.GetOrCreateModuleType().Methods.Add(method);
+            return method.CilMethodBody = new CilMethodBody();
         }
 
         [Fact]
@@ -181,17 +194,6 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             Assert.True(body.IsFat);
             Assert.Equal(newBody.Owner!.DeclaringModule!.CorLibTypeFactory.Int32, Assert.Single(newBody.LocalVariables).VariableType);
-        }
-
-        private static CilMethodBody CreateDummyBody(bool isVoid)
-        {
-            var module = new ModuleDefinition("DummyModule");
-            var method = new MethodDefinition("Main",
-                MethodAttributes.Static,
-                MethodSignature.CreateStatic(isVoid ? module.CorLibTypeFactory.Void : module.CorLibTypeFactory.Int32));
-
-            module.GetOrCreateModuleType().Methods.Add(method);
-            return method.CilMethodBody = new CilMethodBody();
         }
 
         [Fact]
@@ -741,6 +743,73 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             body.ExceptionHandlers.Add(handler);
 
             Assert.True(handler.IsFat);
+        }
+
+        [Fact]
+        public void ManyTinyExceptionHandlersShouldUseFatFormat()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/746
+            
+            // Prepare method with 100 small EHs
+            var body = CreateDummyBody(true);
+            var il = body.Instructions;
+
+            for (int i = 0; i < 100; i++)
+            {
+                var exit = new CilInstructionLabel();
+                var tryStart = il.Add(CilOpCodes.Nop);
+                il.Add(CilOpCodes.Leave_S, exit);
+                var handlerStart = il.Add(CilOpCodes.Nop);
+                var handlerEnd = il.Add(CilOpCodes.Leave_S, exit);
+                exit.Instruction = il.Add(CilOpCodes.Nop);
+
+                body.ExceptionHandlers.Add(new CilExceptionHandler
+                {
+                    TryStart = tryStart.CreateLabel(),
+                    TryEnd = handlerStart.CreateLabel(),
+                    HandlerStart = handlerEnd.CreateLabel(),
+                    HandlerEnd = handlerEnd.CreateLabel(),
+                    HandlerType = CilExceptionHandlerType.Finally
+                });
+            }
+            il.Add(CilOpCodes.Ret);
+            il.CalculateOffsets();
+
+            // All handlers are tiny.
+            Assert.All(body.ExceptionHandlers, handler => Assert.False(handler.IsFat));
+
+            // Build
+            using var stream = new MemoryStream();
+            var builder = new ManagedPEImageBuilder();
+            var result = builder.CreateImage(body.Owner!.DeclaringModule!);
+            var newToken = result.TokenMapping[body.Owner];
+            result.ConstructedImage!.ToPEFile(new ManagedPEFileBuilder()).Write(stream);
+            var image = PEImage.FromBytes(stream.ToArray()); // Force serialization
+;
+            // Resulting body's EH section is still fat.
+            var bodyReader = image.DotNetDirectory!.Metadata!
+                .GetStream<TablesStream>()
+                .GetTable<MethodDefinitionRow>(TableIndex.Method)
+                .GetByRid(newToken.Rid)
+                .Body.CreateReader();
+
+            var rawBody = Assert.IsType<CilRawFatMethodBody>(
+                CilRawMethodBody.FromReader(ref bodyReader),
+                exactMatch: false
+            );
+            Assert.True(rawBody.ExtraSections[0].IsFat);
+
+            // Verify all EHs are there.
+            var module = ModuleDefinition.FromImage(image);
+            var newBody = module.LookupMember<MethodDefinition>(newToken).CilMethodBody;
+
+            Assert.Equal(body.ExceptionHandlers, newBody!.ExceptionHandlers, (a, b) =>
+            {
+                return a.TryStart?.Offset == b.TryStart?.Offset
+                    && a.TryEnd?.Offset == b.TryEnd?.Offset
+                    && a.HandlerStart?.Offset == b.HandlerStart?.Offset
+                    && a.HandlerEnd?.Offset == b.HandlerEnd?.Offset;
+            });
         }
 
         [Fact]
