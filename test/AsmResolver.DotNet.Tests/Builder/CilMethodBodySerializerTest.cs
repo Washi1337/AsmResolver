@@ -50,5 +50,27 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             Assert.Equal(expectedMaxStack, newModule.ManagedEntryPointMethod!.CilMethodBody!.MaxStack);
         }
+
+        [Fact]
+        public void SerializingZeroInstructionMethodBodyDoesNotThrow()
+        {
+            var module = new ModuleDefinition("SomeModule", KnownCorLibs.SystemPrivateCoreLib_v4_0_0_0);
+
+            module.GetOrCreateModuleType().Methods.Add(new MethodDefinition(
+                "Method",
+                MethodAttributes.Public | MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void))
+            {
+                CilMethodBody = new CilMethodBody()
+            });
+
+            var factory = new DotNetDirectoryFactory
+            {
+                MethodBodySerializer = new CilMethodBodySerializer()
+            };
+            var builder = new ManagedPEImageBuilder(factory, ThrowErrorListener.Instance);
+
+            builder.CreateImage(module);
+        }
     }
 }
