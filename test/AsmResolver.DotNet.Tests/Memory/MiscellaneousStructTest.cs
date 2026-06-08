@@ -118,7 +118,7 @@ namespace AsmResolver.DotNet.Tests.Memory
 
             var paramType = module.CorLibTypeFactory.FromElementType(elementType)!;
             var t = module.LookupMember<TypeDefinition>(type.MetadataToken)
-                .MakeGenericInstanceType(module.RuntimeContext, [paramType, paramType]);
+                .MakeGenericInstanceType(module.RuntimeContext, paramType, paramType);
 
             var layout = t.GetImpliedMemoryLayout(module.RuntimeContext, false);
             Assert.Equal(expected, layout.IsReferenceOrContainsReferences);

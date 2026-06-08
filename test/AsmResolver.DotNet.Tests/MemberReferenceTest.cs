@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet.Tests
 
             var genericType = module.CorLibTypeFactory.CorLibScope.CreateTypeReference("System", "Action`1");
 
-            var genericInstance = genericType.MakeGenericInstanceType(false, [freeFloatingTypeDef.ToTypeSignature(false)]);
+            var genericInstance = genericType.MakeGenericInstanceType(false, freeFloatingTypeDef.ToTypeSignature(false));
 
             var member = genericInstance.ToTypeDefOrRef().CreateMemberReference("SomeMethod",
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));

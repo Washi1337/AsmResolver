@@ -267,7 +267,7 @@ namespace AsmResolver.DotNet.Tests
             var field = new FieldDefinition("Field", FieldAttributes.Static,
                 targetModule.CorLibTypeFactory.CorLibScope
                     .CreateTypeReference("System", "Action`1")
-                    .MakeGenericInstanceType(isValueType: false, [sourceType.ToTypeSignature()])
+                    .MakeGenericInstanceType(isValueType: false, sourceType.ToTypeSignature())
             );
             targetModule.GetOrCreateModuleType().Fields.Add(field);
 

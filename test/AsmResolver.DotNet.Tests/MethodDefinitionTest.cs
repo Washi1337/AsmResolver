@@ -776,7 +776,7 @@ namespace AsmResolver.DotNet.Tests
 
             method.Signature.ReturnType = factory.CorLibScope
                 .CreateTypeReference("System", "Span`1")
-                .MakeGenericInstanceType(isValueType: true, [factory.Int32]);
+                .MakeGenericInstanceType(isValueType: true, factory.Int32);
 
             Assert.Throws<AggregateException>(() => method.VerifyMetadata(context));
         }

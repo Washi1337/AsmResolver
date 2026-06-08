@@ -163,7 +163,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 MethodSignature.CreateStatic(genericParameter, 1, [])
             );
 
-            var methodSpecification = method.MakeGenericInstanceMethod([_importer.ImportTypeSignature(typeof(int))]);
+            var methodSpecification = method.MakeGenericInstanceMethod(_importer.ImportTypeSignature(typeof(int)));
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);
@@ -189,7 +189,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 MethodSignature.CreateStatic(genericParameter, 1, [])
             );
 
-            var methodSpecification = method.MakeGenericInstanceMethod([_importer.ImportTypeSignature(typeof(int))]);
+            var methodSpecification = method.MakeGenericInstanceMethod(_importer.ImportTypeSignature(typeof(int)));
 
             var context = GenericContext.FromMethod(methodSpecification);
             var context2 = GenericContext.FromMember(methodSpecification);

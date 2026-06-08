@@ -272,7 +272,8 @@ namespace AsmResolver.DotNet.Tests
                 .CreateTypeReference("System.Collections.Generic", "KeyValuePair`2")
                 .MakeGenericInstanceType(
                     true,
-                    [factory.String.MakeSzArrayType(), factory.Int32.MakeSzArrayType()]
+                    factory.String.MakeSzArrayType(),
+                    factory.Int32.MakeSzArrayType()
                 );
 
             Assert.Equal(
@@ -296,7 +297,7 @@ namespace AsmResolver.DotNet.Tests
             var expected = factory.CorLibScope
                 .CreateTypeReference("System.Collections.Generic", "List`1")
                 .CreateTypeReference("Enumerator")
-                .MakeGenericInstanceType(true, [factory.Int32]);
+                .MakeGenericInstanceType(true, factory.Int32);
 
             var type = Assert.IsType<GenericInstanceTypeSignature>(argument.Element, exactMatch: false);
             Assert.Equal(expected, type, SignatureComparer.Default);
@@ -421,7 +422,7 @@ namespace AsmResolver.DotNet.Tests
 
             var module = attribute.Constructor!.ContextModule!;
             var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
-            var expected = nestedClass.MakeGenericInstanceType(false, [module.CorLibTypeFactory.Object]);
+            var expected = nestedClass.MakeGenericInstanceType(false, module.CorLibTypeFactory.Object);
 
             var element = Assert.IsType<TypeSignature>(argument.Element, exactMatch: false);
             Assert.Equal(expected, element, SignatureComparer.Default);
@@ -441,7 +442,7 @@ namespace AsmResolver.DotNet.Tests
             var module = attribute.Constructor!.ContextModule!;
             var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
             var expected = nestedClass
-                .MakeGenericInstanceType(false, [module.CorLibTypeFactory.Object])
+                .MakeGenericInstanceType(false, module.CorLibTypeFactory.Object)
                 .MakeSzArrayType();
 
             var element = Assert.IsType<TypeSignature>(argument.Element, exactMatch: false);

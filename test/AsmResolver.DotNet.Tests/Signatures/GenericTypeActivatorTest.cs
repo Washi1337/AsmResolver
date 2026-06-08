@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
             var newSignature = signature.InstantiateGenericTypes(context);
             Assert.Equal(
-                _dummyGenericType.MakeGenericInstanceType(false, [_module.CorLibTypeFactory.String]),
+                _dummyGenericType.MakeGenericInstanceType(false, _module.CorLibTypeFactory.String),
                 newSignature,
                 SignatureComparer.Default
             );
@@ -72,7 +72,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var signature = _dummyGenericType.MakeGenericInstanceType(
                 isValueType: false,
                 typeArguments: [
-                    _dummyGenericType.MakeGenericInstanceType(false, [new GenericParameterSignature(GenericParameterType.Type, 0)])
+                    _dummyGenericType.MakeGenericInstanceType(false, new GenericParameterSignature(GenericParameterType.Type, 0))
                 ]
             );
 
@@ -81,7 +81,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(
                 _dummyGenericType.MakeGenericInstanceType(
                     isValueType: false,
-                    typeArguments: [_dummyGenericType.MakeGenericInstanceType(false, [_module.CorLibTypeFactory.String])]
+                    typeArguments: [_dummyGenericType.MakeGenericInstanceType(false, _module.CorLibTypeFactory.String)]
                 ),
                 newSignature,
                 SignatureComparer.Default

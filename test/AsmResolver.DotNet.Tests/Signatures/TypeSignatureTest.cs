@@ -81,7 +81,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 typeArguments:
                 [
                     module.CorLibTypeFactory.Int32,
-                    _dummyType.MakeGenericInstanceType(isValueType: false, [module.CorLibTypeFactory.Object])
+                    _dummyType.MakeGenericInstanceType(isValueType: false, module.CorLibTypeFactory.Object)
                 ]
             );
 
@@ -495,7 +495,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var type1 = module.CorLibTypeFactory.FromElementType(elementType1)!.MakeSzArrayType();
             var type2 = module.CorLibTypeFactory.CorLibScope
                 .CreateTypeReference("System.Collections.Generic", "IList`1")
-                .MakeGenericInstanceType(isValueType: false, [module.CorLibTypeFactory.FromElementType(elementType2)!]);
+                .MakeGenericInstanceType(isValueType: false, module.CorLibTypeFactory.FromElementType(elementType2)!);
 
             Assert.Equal(expected, type1.IsCompatibleWith(type2, module.RuntimeContext));
         }
@@ -665,8 +665,8 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 .CreateTypeReference("System.Collections.Generic", "List`1")
                 .ImportWith(module.DefaultImporter);
 
-            var genericType1 = genericType.MakeGenericInstanceType(isValueType: false, [type1]);
-            var genericType2 = genericType.MakeGenericInstanceType(isValueType: false, [type2]);
+            var genericType1 = genericType.MakeGenericInstanceType(isValueType: false, type1);
+            var genericType2 = genericType.MakeGenericInstanceType(isValueType: false, type2);
 
             Assert.True(genericType1.IsCompatibleWith(genericType2, module.RuntimeContext));
             Assert.True(genericType2.IsCompatibleWith(genericType1, module.RuntimeContext));

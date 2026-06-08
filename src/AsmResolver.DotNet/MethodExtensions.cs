@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet
         /// <param name="arguments">The type arguments to use.</param>
         /// <returns>The instantiated method.</returns>
         /// <exception cref="ArgumentException">Occurs when <paramref name="arguments"/> has an incorrect number of elements.</exception>
-        public static MethodSpecification MakeGenericInstanceMethod(this IMethodDefOrRef self, IEnumerable<TypeSignature> arguments)
+        public static MethodSpecification MakeGenericInstanceMethod(this IMethodDefOrRef self, params IEnumerable<TypeSignature> arguments)
         {
             if (self.Signature is null)
                 throw new ArgumentException($"Method does not have a signature.");
