@@ -22,7 +22,7 @@ jobs:
       statuses: read
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download Event File
         uses: actions/download-artifact@v8
