@@ -41,21 +41,82 @@ namespace AsmResolver.PE.DotNet.StrongName
             ReadBlobHeader(ref reader, StrongNameKeyStructureType.PublicKeyBlob, 2, SignatureAlgorithm.RsaSign);
 
             // Read RSAPUBKEY
-            if ((RsaPublicKeyMagic) reader.ReadUInt32() != RsaPublicKeyMagic.Rsa1)
+            if ((RsaPublicKeyMagic)reader.ReadUInt32() != RsaPublicKeyMagic.Rsa1)
                 throw new FormatException("Input stream does not contain a valid RSA public key header magic.");
 
             uint bitLength = reader.ReadUInt32();
 
             var result = new StrongNamePublicKey(new byte[bitLength / 8], reader.ReadUInt32());
+            // CryptoAPI PUBLICKEYBLOB stores the modulus in little-endian; the
+            // in-memory representation here is big-endian (matching the
+            // RSAParameters constructor and ToRsaParameters), so reverse it.
             reader.ReadBytes(result.Modulus, 0, result.Modulus.Length);
+            Array.Reverse(result.Modulus);
             return result;
         }
 
-        private byte[] CopyReversed(byte[] data)
+        /// <summary>
+        /// Reverses the byte order of the provided byte array, returning a new
+        /// array. Used to translate between the little-endian on-disk CryptoAPI
+        /// key blob layout and the big-endian layout <see cref="RSAParameters"/>
+        /// expects.
+        /// </summary>
+        protected static byte[] Reverse(byte[] data)
         {
+            if (data is null)
+                return null!;
             var result = new byte[data.Length];
             for (int i = 0; i < data.Length; i++)
                 result[result.Length - i - 1] = data[i];
+            return result;
+        }
+
+        /// <summary>
+        /// Reads a big-endian byte array (as <see cref="RSAParameters.Exponent"/>
+        /// is encoded) into a <see cref="uint"/>.
+        /// </summary>
+        protected static uint BigEndianBytesToUInt(byte[] bytes)
+        {
+            if (bytes is null)
+                throw new ArgumentNullException(nameof(bytes));
+
+            uint value = 0;
+            int start = 0;
+            while (start < bytes.Length && bytes[start] == 0)
+                start++;
+
+            int significant = bytes.Length - start;
+            if (significant > sizeof(uint))
+                throw new ArgumentException("RSA exponent is too large to fit in a 32-bit CryptoAPI public exponent.");
+
+            for (int i = start; i < bytes.Length; i++)
+                value = (value << 8) | bytes[i];
+            return value;
+        }
+
+        /// <summary>
+        /// Converts a <see cref="uint"/> to the big-endian, no-leading-zero byte
+        /// array <see cref="RSAParameters.Exponent"/> expects (e.g. 65537 ->
+        /// <c>[01 00 01]</c>). A zero input yields a single zero byte.
+        /// </summary>
+        protected static byte[] UIntToBigEndianBytes(uint value)
+        {
+            if (value == 0)
+                return new byte[] { 0 };
+
+            int length = value <= 0xFF
+                ? 1
+                : value <= 0xFFFF
+                    ? 2
+                    : value <= 0xFFFFFF
+                        ? 3
+                        : 4;
+            var result = new byte[length];
+            for (int i = length - 1; i >= 0; i--)
+            {
+                result[i] = (byte)value;
+                value >>= 8;
+            }
             return result;
         }
 
@@ -81,11 +142,10 @@ namespace AsmResolver.PE.DotNet.StrongName
             if (parameters.Exponent is null)
                 throw new ArgumentException("RSA parameters does not define an exponent.");
 
-            Modulus = CopyReversed(parameters.Modulus);
-            uint exponent = 0;
-            for (int i = 0; i < Math.Min(sizeof(uint), parameters.Exponent.Length); i++)
-                exponent |= (uint) (parameters.Exponent[i] << (8 * i));
-            PublicExponent = exponent;
+            // RSAParameters stores integers big-endian; keep that as the
+            // in-memory representation and only reverse at the blob boundary.
+            Modulus = (byte[])parameters.Modulus.Clone();
+            PublicExponent = BigEndianBytesToUInt(parameters.Exponent);
         }
 
         /// <inheritdoc />
@@ -134,30 +194,35 @@ namespace AsmResolver.PE.DotNet.StrongName
         {
             using var tempStream = new MemoryStream();
             var writer = new BinaryStreamWriter(tempStream);
-            writer.WriteUInt32((uint) SignatureAlgorithm);
-            writer.WriteUInt32((uint) hashAlgorithm);
-            writer.WriteUInt32((uint) (0x14 + Modulus.Length));
-            writer.WriteByte((byte) StrongNameKeyStructureType.PublicKeyBlob);
+            writer.WriteUInt32((uint)SignatureAlgorithm);
+            writer.WriteUInt32((uint)hashAlgorithm);
+            writer.WriteUInt32((uint)(0x14 + Modulus.Length));
+            writer.WriteByte((byte)StrongNameKeyStructureType.PublicKeyBlob);
             writer.WriteByte(2);
             writer.WriteUInt16(0);
-            writer.WriteUInt32((uint) SignatureAlgorithm);
-            writer.WriteUInt32((uint) RsaPublicKeyMagic.Rsa1);
-            writer.WriteUInt32((uint) BitLength);
+            writer.WriteUInt32((uint)SignatureAlgorithm);
+            writer.WriteUInt32((uint)RsaPublicKeyMagic.Rsa1);
+            writer.WriteUInt32((uint)BitLength);
             writer.WriteUInt32(PublicExponent);
-            writer.WriteBytes(CopyReversed(Modulus));
+            // Modulus is stored big-endian internally; the on-disk CryptoAPI
+            // PUBLICKEYBLOB layout uses little-endian, so reverse on write.
+            writer.WriteBytes(Reverse(Modulus));
             return tempStream.ToArray();
         }
 
         /// <summary>
         /// Translates the strong name parameters to an instance of <see cref="RSAParameters"/>.
         /// </summary>
-        /// <returns>The converted RSA parameters.</returns>
+        /// <returns>The converted RSA parameters, with all integers in the
+        /// big-endian byte order <see cref="RSA.ImportParameters"/> expects.</returns>
         public virtual RSAParameters ToRsaParameters()
         {
             return new RSAParameters
             {
                 Modulus = Modulus,
-                Exponent = BitConverter.GetBytes(PublicExponent)
+                // RSAParameters.Exponent is big-endian with no leading zeros.
+                // BitConverter.GetBytes would emit little-endian 4 bytes (wrong).
+                Exponent = UIntToBigEndianBytes(PublicExponent)
             };
         }
 
@@ -168,7 +233,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                    + sizeof(RsaPublicKeyMagic) // magic
                    + sizeof(uint) // bitlen
                    + sizeof(uint) // pubexp
-                   + (uint) Modulus.Length / 8 // modulus
+                   + (uint)Modulus.Length // modulus
                 ;
         }
 
@@ -176,10 +241,13 @@ namespace AsmResolver.PE.DotNet.StrongName
         public override void Write(BinaryStreamWriter writer)
         {
             base.Write(writer);
-            writer.WriteUInt32((uint) Magic);
-            writer.WriteUInt32((uint) BitLength);
+            writer.WriteUInt32((uint)Magic);
+            writer.WriteUInt32((uint)BitLength);
             writer.WriteUInt32(PublicExponent);
-            writer.WriteBytes(Modulus);
+            // Modulus is stored big-endian internally; the on-disk CryptoAPI
+            // layout uses little-endian, so reverse on write (mirrors FromReader,
+            // which reverses the little-endian file bytes back into big-endian).
+            writer.WriteBytes(Reverse(Modulus));
         }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using AsmResolver.IO;
 
@@ -39,7 +38,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             ReadBlobHeader(ref reader, StrongNameKeyStructureType.PrivateKeyBlob, 2, SignatureAlgorithm.RsaSign);
 
             // Read RSAPUBKEY
-            if ((RsaPublicKeyMagic) reader.ReadUInt32() != RsaPublicKeyMagic.Rsa2)
+            if ((RsaPublicKeyMagic)reader.ReadUInt32() != RsaPublicKeyMagic.Rsa2)
                 throw new FormatException("Input stream does not contain a valid RSA private key header magic.");
 
             uint bitLength = reader.ReadUInt32();
@@ -49,9 +48,12 @@ namespace AsmResolver.PE.DotNet.StrongName
                 PublicExponent = reader.ReadUInt32(),
             };
 
+            // CryptoAPI PRIVATEKEYBLOB stores every RSA integer (Modulus, P, Q,
+            // DP, DQ, InverseQ, D) in little-endian. The in-memory representation
+            // here is big-endian (matching StrongNamePublicKey's storage and the
+            // big-endian RSAParameters that ToRsaParameters returns), so each
+            // integer is read as raw little-endian bytes and then reversed.
             reader.ReadBytes(result.Modulus, 0, result.Modulus.Length);
-
-            // Read private data.
             reader.ReadBytes(result.P, 0, result.P.Length);
             reader.ReadBytes(result.Q, 0, result.Q.Length);
             reader.ReadBytes(result.DP, 0, result.DP.Length);
@@ -90,16 +92,20 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <summary>
         /// Imports a public/private key pair from an instance of <see cref="RSAParameters"/>.
         /// </summary>
-        /// <param name="parameters">The RSA parameters to import.</param>
+        /// <param name="parameters">The RSA parameters to import. All integers
+        /// are expected in the big-endian byte order <see cref="RSA"/> uses and
+        /// are stored verbatim (big-endian) so <see cref="ToRsaParameters"/>
+        /// returns them unchanged.</param>
         public StrongNamePrivateKey(in RSAParameters parameters)
             : base(parameters.Modulus ?? throw new ArgumentException("The provided RSA parameters do not define a modulus."),
                 ByteSwap(parameters))
         {
-            Modulus = parameters.Modulus;
+            // base() set Modulus to a clone of the big-endian input - keep it
+            // big-endian (matches the on-disk reverse done in Write/FromReader).
             P = parameters.P ?? throw new ArgumentException("The provided RSA parameters do not define prime P.");
-            Q = parameters.Q ?? throw new ArgumentException("The provided RSA parameters do not define prime Q.");;
-            DP = parameters.DP ?? throw new ArgumentException("The provided RSA parameters do not define DP.");;
-            DQ = parameters.DQ ?? throw new ArgumentException("The provided RSA parameters do not define DQ.");;
+            Q = parameters.Q ?? throw new ArgumentException("The provided RSA parameters do not define prime Q.");
+            DP = parameters.DP ?? throw new ArgumentException("The provided RSA parameters do not define DP.");
+            DQ = parameters.DQ ?? throw new ArgumentException("The provided RSA parameters do not define DQ.");
 
             InverseQ = parameters.InverseQ
                        ?? throw new ArgumentException("The provided RSA parameters do not define InverseQ.");
@@ -171,23 +177,23 @@ namespace AsmResolver.PE.DotNet.StrongName
         }
 
         /// <inheritdoc />
+        /// <remarks>
+        /// All integers are stored internally big-endian (the byte order
+        /// <see cref="RSA.ImportParameters"/> expects), so they are returned
+        /// verbatim. The on-disk CryptoAPI little-endian layout is handled by
+        /// reversing in <see cref="Write"/> and <see cref="FromReader"/>.
+        /// </remarks>
         public override RSAParameters ToRsaParameters()
         {
-            var exponentBytes = new List<byte>(sizeof(uint))
-            {
-                (byte) (PublicExponent & 0xFF),
-                (byte) ((PublicExponent >> 8) & 0xFF),
-                (byte) ((PublicExponent >> 16) & 0xFF),
-                (byte) ((PublicExponent >> 24) & 0xFF),
-            };
-
-            for (int i = exponentBytes.Count - 1; i >= 0 && exponentBytes[i] == 0; i--)
-                exponentBytes.RemoveAt(i);
-
             return new RSAParameters
             {
                 Modulus = Modulus,
-                Exponent = exponentBytes.ToArray(),
+                // RSAParameters.Exponent is big-endian with no leading zeros
+                // (shared helper on StrongNamePublicKey; the old code built
+                // little-endian bytes and trimmed trailing zeros, which only
+                // produced the right big-endian bytes for palindromic exponents
+                // like 65537 = [01 00 01]).
+                Exponent = UIntToBigEndianBytes(PublicExponent),
                 P = P,
                 Q = Q,
                 DP = DP,
@@ -200,8 +206,8 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
-            uint length8 = (uint) (BitLength / 8);
-            uint length16 = (uint) (BitLength / 16);
+            uint length8 = (uint)(BitLength / 8);
+            uint length16 = (uint)(BitLength / 16);
             return base.GetPhysicalSize()
                    + length16 // p
                    + length16 // q
@@ -215,13 +221,18 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <inheritdoc />
         public override void Write(BinaryStreamWriter writer)
         {
+            // base.Write emits BLOBHEADER + RSAPUBKEY + Modulus. The base
+            // StrongNamePublicKey.Write reverses Modulus (big-endian storage ->
+            // little-endian on-disk). The private RSA integers (P, Q, DP, DQ,
+            // InverseQ, D) are likewise stored big-endian internally and must be
+            // reversed here to produce a valid CryptoAPI PRIVATEKEYBLOB.
             base.Write(writer);
-            writer.WriteBytes(P);
-            writer.WriteBytes(Q);
-            writer.WriteBytes(DP);
-            writer.WriteBytes(DQ);
-            writer.WriteBytes(InverseQ);
-            writer.WriteBytes(PrivateExponent);
+            writer.WriteBytes(Reverse(P));
+            writer.WriteBytes(Reverse(Q));
+            writer.WriteBytes(Reverse(DP));
+            writer.WriteBytes(Reverse(DQ));
+            writer.WriteBytes(Reverse(InverseQ));
+            writer.WriteBytes(Reverse(PrivateExponent));
         }
 
         private static uint ByteSwap(RSAParameters parameters)
@@ -229,10 +240,12 @@ namespace AsmResolver.PE.DotNet.StrongName
             if (parameters.Exponent is null)
                 throw new ArgumentException("The provided RSA parameters do not define an exponent.");
 
-            uint exponent = 0;
-            for (int i = 0; i < Math.Min(sizeof(uint), parameters.Exponent.Length); i++)
-                exponent |= (uint) (parameters.Exponent[i] << (8 * i));
-            return exponent;
+            // RSAParameters.Exponent is big-endian (no leading zeros). Read it
+            // as big-endian into the uint. (The previous little-endian read
+            // happened to work for the palindromic 65537 = [01 00 01] but produced
+            // the wrong uint for any other exponent, e.g. [01 00 02] would become
+            // 0x020001 instead of 0x010002.)
+            return BigEndianBytesToUInt(parameters.Exponent);
         }
     }
 }
