@@ -104,13 +104,13 @@ namespace AsmResolver.PE.DotNet.StrongName
             if (value == 0)
                 return new byte[] { 0 };
 
-            int length = value <= 0xFF
-                ? 1
-                : value <= 0xFFFF
-                    ? 2
-                    : value <= 0xFFFFFF
-                        ? 3
-                        : 4;
+            int length = value switch
+            {
+                <= 0xFF => 1,
+                <= 0xFFFF => 2,
+                <= 0xFFFFFF => 3,
+                _ => 4
+            };
             var result = new byte[length];
             for (int i = length - 1; i >= 0; i--)
             {
@@ -213,8 +213,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <summary>
         /// Translates the strong name parameters to an instance of <see cref="RSAParameters"/>.
         /// </summary>
-        /// <returns>The converted RSA parameters, with all integers in the
-        /// big-endian byte order <see cref="RSA.ImportParameters"/> expects.</returns>
+        /// <returns>The converted RSA parameters.</returns>
         public virtual RSAParameters ToRsaParameters()
         {
             return new RSAParameters

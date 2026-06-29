@@ -93,9 +93,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// Imports a public/private key pair from an instance of <see cref="RSAParameters"/>.
         /// </summary>
         /// <param name="parameters">The RSA parameters to import. All integers
-        /// are expected in the big-endian byte order <see cref="RSA"/> uses and
-        /// are stored verbatim (big-endian) so <see cref="ToRsaParameters"/>
-        /// returns them unchanged.</param>
+        /// are expected in the big-endian byte order <see cref="RSA"/> uses.</param>
         public StrongNamePrivateKey(in RSAParameters parameters)
             : base(parameters.Modulus ?? throw new ArgumentException("The provided RSA parameters do not define a modulus."),
                 ByteSwap(parameters))
@@ -177,22 +175,12 @@ namespace AsmResolver.PE.DotNet.StrongName
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        /// All integers are stored internally big-endian (the byte order
-        /// <see cref="RSA.ImportParameters"/> expects), so they are returned
-        /// verbatim. The on-disk CryptoAPI little-endian layout is handled by
-        /// reversing in <see cref="Write"/> and <see cref="FromReader"/>.
-        /// </remarks>
         public override RSAParameters ToRsaParameters()
         {
             return new RSAParameters
             {
                 Modulus = Modulus,
-                // RSAParameters.Exponent is big-endian with no leading zeros
-                // (shared helper on StrongNamePublicKey; the old code built
-                // little-endian bytes and trimmed trailing zeros, which only
-                // produced the right big-endian bytes for palindromic exponents
-                // like 65537 = [01 00 01]).
+                // RSAParameters.Exponent is big-endian with no leading zeros.
                 Exponent = UIntToBigEndianBytes(PublicExponent),
                 P = P,
                 Q = Q,
@@ -240,11 +228,6 @@ namespace AsmResolver.PE.DotNet.StrongName
             if (parameters.Exponent is null)
                 throw new ArgumentException("The provided RSA parameters do not define an exponent.");
 
-            // RSAParameters.Exponent is big-endian (no leading zeros). Read it
-            // as big-endian into the uint. (The previous little-endian read
-            // happened to work for the palindromic 65537 = [01 00 01] but produced
-            // the wrong uint for any other exponent, e.g. [01 00 02] would become
-            // 0x020001 instead of 0x010002.)
             return BigEndianBytesToUInt(parameters.Exponent);
         }
     }
