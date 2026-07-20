@@ -160,6 +160,7 @@ namespace AsmResolver.DotNet
             /// </exception>
             public TypeReference CreateTypeReference(Utf8String nestedTypeName)
             {
+                // Note: Runtime does not allow nesting with a TypeSpecification as parent.
                 var parent = type switch
                 {
                     TypeReference reference => reference,

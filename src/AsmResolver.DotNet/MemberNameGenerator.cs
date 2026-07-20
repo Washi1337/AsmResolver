@@ -261,7 +261,10 @@ namespace AsmResolver.DotNet
                 AppendTypeFullName(state, declaringType);
                 state.Append('+');
             }
-            else if (!string.IsNullOrEmpty(type.Namespace))
+
+            // Note: This is not an 'else if' because the runtime does allow nested types with namespaces,
+            // even though it is not supported by C# and similar.
+            if (!string.IsNullOrEmpty(type.Namespace))
             {
                 state.Append(type.Namespace);
                 state.Append('.');

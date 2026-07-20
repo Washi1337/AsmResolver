@@ -191,6 +191,16 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ReadNestedFullNameWithNamespace()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/748
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
+            var type = (TypeDefinition) module.LookupMember(typeof(TopLevelClass1.Nested1).MetadataToken);
+            type.Namespace = "NestedNamespace";
+            Assert.Equal("AsmResolver.DotNet.TestCases.NestedClasses.TopLevelClass1+NestedNamespace.Nested1", type.FullName);
+        }
+
+        [Fact]
         public void ReadNestedNestedFullName()
         {
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);

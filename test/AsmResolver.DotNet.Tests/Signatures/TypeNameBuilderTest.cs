@@ -15,11 +15,47 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
+        public void NestedType()
+        {
+            var type = _module
+                .CreateTypeReference("Company.ProductName", "Class")
+                .CreateTypeReference("NestedType");
+
+            string name = TypeNameBuilder.GetAssemblyQualifiedName(type.ToTypeSignature(false));
+            Assert.Contains("Company.ProductName.Class+NestedType", name);
+        }
+
+        [Fact]
+        public void NestedTypeWithNamespace()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/748
+
+            var type = _module
+                .CreateTypeReference("Company.ProductName", "Class")
+                .CreateTypeReference("NestedNamespace", "NestedType");
+
+            string name = TypeNameBuilder.GetAssemblyQualifiedName(type.ToTypeSignature(false));
+            Assert.Contains("Company.ProductName.Class+NestedNamespace.NestedType", name);
+        }
+
+        [Fact]
         public void NameWithDotShouldBeEscaped()
         {
-            var type = new TypeReference(_module, _module, "Company.ProductName", "Class.Name");
+            var type = _module.CreateTypeReference("Company.ProductName", "Class.Name");
             string name = TypeNameBuilder.GetAssemblyQualifiedName(type.ToTypeSignature(false));
             Assert.Contains("Class\\.Name", name);
+            Assert.DoesNotContain("Company\\.ProductName", name);
+        }
+
+        [Fact]
+        public void NestedNameWithDotShouldBeEscaped()
+        {
+            var type = _module
+                .CreateTypeReference("Company.ProductName", "Class")
+                .CreateTypeReference("Nested.Type");
+
+            string name = TypeNameBuilder.GetAssemblyQualifiedName(type.ToTypeSignature(false));
+            Assert.Contains("Company.ProductName.Class+Nested\\.Type", name);
         }
 
         [Fact]
