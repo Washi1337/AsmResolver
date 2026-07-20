@@ -29,9 +29,9 @@ namespace AsmResolver.DotNet.Tests.Signatures
             return type;
         }
 
-        private TypeDefinition CreateAndAddTypeDef(TypeDefinition declaringType, string name)
+        private TypeDefinition CreateAndAddTypeDef(TypeDefinition declaringType, string? ns, string? name)
         {
-            var type = new TypeDefinition(null, name, TypeAttributes.Class | TypeAttributes.NestedPublic, _module.CorLibTypeFactory.Object.Type);
+            var type = new TypeDefinition(ns, name, TypeAttributes.Class | TypeAttributes.NestedPublic, _module.CorLibTypeFactory.Object.Type);
             declaringType.NestedTypes.Add(type);
             return type;
         }
@@ -61,17 +61,23 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Theory]
-        [InlineData("MyNamespace", "MyType", "MyNestedType")]
-        [InlineData("MyNamespace", "#=abc", "#=def")]
-        [InlineData("\u0002\u2007\u2007", "\u0002\u2007\u2007", "\u0002\u2007\u2007")]
-        public void NestedType(string ns, string name, string nestedType)
+        [InlineData("MyNamespace", "MyType", null, "MyNestedType")]
+        [InlineData("MyNamespace", "MyType", "MyNestedNamespace", "MyNestedType")]
+        [InlineData("MyNamespace", "#=abc", null, "#=def")]
+        [InlineData("\u0002\u2007\u2007", "\u0002\u2007\u2007", null, "\u0002\u2007\u2007")]
+        public void NestedType(string ns, string name, string? nestedNs, string nestedType)
         {
             var expected = CreateAndAddTypeDef(
                     CreateAndAddTypeDef(ns, name),
-                    nestedType)
+                    nestedNs, nestedType)
                 .ToTypeSignature(false);
 
-            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}+{nestedType}, {_module}");
+            string enclosingName = $"{ns}.{name}";
+            string nestedName = nestedNs is not null
+                ? $"{nestedNs}.{nestedType}"
+                : nestedType;
+
+            var actual = TypeNameParser.Parse(_module, $"{enclosingName}+{nestedName}, {_module}");
             Assert.Equal(expected, actual, SignatureComparer.Default);
         }
 
@@ -82,8 +88,8 @@ namespace AsmResolver.DotNet.Tests.Signatures
         public void NestedTypeNoNamespace(string name, string nestedType)
         {
             var expected = CreateAndAddTypeDef(
-                    CreateAndAddTypeDef(default(string), name),
-                    nestedType)
+                    CreateAndAddTypeDef(null, name),
+                    null, nestedType)
                 .ToTypeSignature(false);
 
             var actual = TypeNameParser.Parse(_module, $"{name}+{nestedType}, {_module}");

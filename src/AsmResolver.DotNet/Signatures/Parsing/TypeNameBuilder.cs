@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using AsmResolver.Shims;
 
@@ -156,29 +155,21 @@ namespace AsmResolver.DotNet.Signatures.Parsing
         public object VisitFunctionPointerType(FunctionPointerTypeSignature signature) =>
             throw new NotSupportedException("Function pointer type signatures are not supported in type name building.");
 
-        private void WriteSimpleTypeName(ITypeDefOrRef? type)
+        private void WriteSimpleTypeName(ITypeDefOrRef type)
         {
-            var ancestors = new List<ITypeDefOrRef>();
-            while (type is not null)
+            if (type.DeclaringType is not null)
             {
-                ancestors.Add(type);
-                type = type.DeclaringType;
+                WriteSimpleTypeName(type.DeclaringType);
+                _writer.Write('+');
             }
 
-            string? ns = ancestors[ancestors.Count - 1].Namespace;
-            if (!string.IsNullOrEmpty(ns))
+            if (!Utf8String.IsNullOrEmpty(type.Namespace))
             {
-                WriteIdentifier(ns, true);
+                WriteIdentifier(type.Namespace, true);
                 _writer.Write('.');
             }
 
-            WriteIdentifier(ancestors[ancestors.Count - 1].Name);
-
-            for (int i = ancestors.Count - 2; i >= 0; i--)
-            {
-                _writer.Write('+');
-                WriteIdentifier(ancestors[i].Name);
-            }
+            WriteIdentifier(type.Name);
         }
 
         private void WriteAssemblySpec(AssemblyDescriptor assembly)

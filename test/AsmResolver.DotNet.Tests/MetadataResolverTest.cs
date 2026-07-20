@@ -126,6 +126,36 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ResolveNestedTypeWithNamespace()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/748
+
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
+
+            // Prepare nested types to have same name but different namespaces
+            var nested1Definition = module.LookupMember<TypeDefinition>(typeof(TopLevelClass1.Nested1).MetadataToken);
+            var nested2Definition = module.LookupMember<TypeDefinition>(typeof(TopLevelClass1.Nested2).MetadataToken);
+
+            Utf8String sharedName = "Nested";
+            nested1Definition.Name = sharedName;
+            nested2Definition.Name = sharedName;
+            nested1Definition.Namespace = "NestedNamespace1";
+            nested2Definition.Namespace = "NestedNamespace2";
+
+            // Create references
+            var topLevelClass1 = module.Assembly!
+                .ToAssemblyReference()
+                .CreateTypeReference(typeof(TopLevelClass1).Namespace, nameof(TopLevelClass1));
+
+            var nested1 = topLevelClass1.CreateTypeReference(nested1Definition.Namespace, sharedName);
+            var nested2 = topLevelClass1.CreateTypeReference(nested2Definition.Namespace, sharedName);
+
+            // Resolve and verify.
+            Assert.Same(nested1Definition, nested1.Resolve(module.RuntimeContext));
+            Assert.Same(nested2Definition, nested2.Resolve(module.RuntimeContext));
+        }
+
+        [Fact]
         public void ResolveNestedNestedType()
         {
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);

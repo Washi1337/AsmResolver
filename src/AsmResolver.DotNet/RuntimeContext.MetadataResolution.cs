@@ -264,7 +264,7 @@ namespace AsmResolver.DotNet
                     {
                         var status = ResolveTypeReference((TypeReference) scope, originModule, out var typeDefScope);
                         return status == ResolutionStatus.Success
-                            ? FindTypeInType(typeDefScope!, reference.Name, out definition)
+                            ? FindTypeInType(typeDefScope!, reference.Namespace, reference.Name, out definition)
                             : status;
                     }
 
@@ -309,7 +309,7 @@ namespace AsmResolver.DotNet
                         var exportedDeclaringType = (ExportedType) implementation;
                         var status = ResolveExportedType(exportedDeclaringType, originModule, out var declaringType);
                         return status == ResolutionStatus.Success
-                            ? FindTypeInType(declaringType!, exportedType.Name, out definition)
+                            ? FindTypeInType(declaringType!, exportedType.Namespace, exportedType.Name, out definition)
                             : status;
                     }
 
@@ -357,12 +357,12 @@ namespace AsmResolver.DotNet
                 return ResolutionStatus.TypeNotFound;
             }
 
-            private static ResolutionStatus FindTypeInType(TypeDefinition enclosingType, Utf8String name, out TypeDefinition? definition)
+            private static ResolutionStatus FindTypeInType(TypeDefinition enclosingType, Utf8String? ns, Utf8String name, out TypeDefinition? definition)
             {
                 for (int i = 0; i < enclosingType.NestedTypes.Count; i++)
                 {
                     var candidate = enclosingType.NestedTypes[i];
-                    if (candidate.Name == name)
+                    if (candidate.IsTypeOfUtf8(ns, name))
                     {
                         definition = candidate;
                         return ResolutionStatus.Success;
