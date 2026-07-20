@@ -131,7 +131,7 @@ namespace AsmResolver.DotNet
         /// <param name="assembly">The assembly descriptor to search.</param>
         /// <param name="directory">The path to the directory to probe.</param>
         /// <returns>The path to the assembly, or <c>null</c> if none was found.</returns>
-        protected static string? ProbeDirectory(AssemblyDescriptor assembly, string directory)
+        protected virtual string? ProbeDirectory(AssemblyDescriptor assembly, string directory)
         {
             if (assembly.Name is null)
                 return null;
