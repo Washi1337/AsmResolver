@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet.Code.Cil
 {
@@ -195,6 +196,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     try
                     {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+                        sectionData = (byte[])sectionData.Clone();
                         FastCilReassembler.PatchExceptionHandlerSection(sectionData, tokenRewriter, section.IsFat);
 #else
                         var reader = new BinaryStreamReader(sectionData);
@@ -250,14 +252,34 @@ namespace AsmResolver.DotNet.Code.Cil
             if (body.ExceptionHandlers.Count > 0)
             {
                 fatBody.HasSections = true;
-                bool needsFatFormat = body.ExceptionHandlers.Any(e => e.IsFat);
 
+                // Determine if we can fit in the tiny format.
+                bool needsFatFormat;
+                if (body.ExceptionHandlers.Any(e => e.IsFat))
+                {
+                    needsFatFormat = true;
+                }
+                else
+                {
+                    const long tinyHeaderSize =
+                            sizeof(CilExtraSectionAttributes) // Flags
+                            + sizeof(byte)                    // Data size
+                            + sizeof(ushort)                  // Padding
+                        ;
+
+                    long expectedTinySectionSize = tinyHeaderSize + body.ExceptionHandlers.Count * CilExceptionHandler.TinyExceptionHandlerSize;
+                    needsFatFormat = expectedTinySectionSize > 0xFF;
+                }
+
+                // Create the section
                 var attributes = CilExtraSectionAttributes.EHTable;
                 if (needsFatFormat)
                     attributes |= CilExtraSectionAttributes.FatFormat;
 
                 byte[] rawSectionData = SerializeExceptionHandlers(context, body, needsFatFormat);
                 var section = new CilExtraSection(attributes, rawSectionData);
+
+                // Add it.
                 fatBody.ExtraSections.Add(section);
             }
 
@@ -307,6 +329,9 @@ namespace AsmResolver.DotNet.Code.Cil
             }
 
             var bag = context.ErrorListener;
+
+            if (body.Instructions.Count == 0)
+                return ArrayShim.Empty<byte>();
 
             var lastInstruction = body.Instructions[body.Instructions.Count - 1];
             using var rentedWriter = _writerPool.Rent(lastInstruction.Offset + lastInstruction.Size);

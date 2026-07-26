@@ -4,7 +4,7 @@
     <Title>AsmResolver.DotNet.Dynamic</Title>
     <Description>Dynamic method support for the AsmResolver executable file inspection toolsuite.</Description>
     <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly dynamic</PackageTags>
-    <IsTrimmable>false</IsTrimmable>
+    <IsAotCompatible>false</IsAotCompatible>
   </PropertyGroup>
 
   <ItemGroup>

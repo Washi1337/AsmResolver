@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using AsmResolver.Shims;
@@ -9,6 +10,25 @@ namespace AsmResolver.DotNet.Signatures.Parsing
     {
         internal static readonly char[] ReservedChars = "*+.,&[]…".ToCharArray();
         private static readonly char[] TrimCharacters = " ".ToCharArray();
+
+        private static readonly Dictionary<char, char> EscapeChars = new()
+        {
+            ['e'] = '\e',
+            ['b'] = '\b',
+            ['r'] = '\r',
+            ['n'] = '\n',
+            ['t'] = '\t',
+            ['*'] = '*',
+            ['+'] = '+',
+            ['.'] = '.',
+            [','] = ',',
+            ['&'] = '&',
+            ['['] = '[',
+            [']'] = ']',
+            ['…'] = '…',
+            ['\\'] = '\\',
+            [' '] = ' ',
+        };
 
         private readonly TextReader _reader;
         private readonly StringBuilder _buffer = new();
@@ -94,12 +114,19 @@ namespace AsmResolver.DotNet.Signatures.Parsing
             {
                 int c = _reader.Peek();
                 if (c == -1)
+                {
+                    if (escape)
+                        throw new EndOfStreamException("Escape sequence ended unexpectedly.");
                     break;
+                }
 
                 char currentChar = (char) c;
 
                 if (escape)
                 {
+                    if (!EscapeChars.TryGetValue(currentChar, out char mappedChar))
+                        throw new FormatException($"Invalid escape sequence '\\{currentChar}'.");
+                    currentChar = mappedChar;
                     escape = false;
                 }
                 else
@@ -137,12 +164,19 @@ namespace AsmResolver.DotNet.Signatures.Parsing
             {
                 int c = _reader.Peek();
                 if (c == -1)
+                {
+                    if (escape)
+                        throw new EndOfStreamException("Escape sequence ended unexpectedly.");
                     break;
+                }
 
                 char currentChar = (char) c;
 
                 if (escape)
                 {
+                    if (!EscapeChars.TryGetValue(currentChar, out char mappedChar))
+                        throw new FormatException($"Invalid escape sequence '\\{currentChar}'.");
+                    currentChar = mappedChar;
                     escape = false;
                 }
                 else

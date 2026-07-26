@@ -222,28 +222,32 @@ namespace AsmResolver.DotNet.Signatures.Parsing
 
         private TypeName ParseTypeName()
         {
-            var names = ParseDottedExpression(TypeNameTerminal.Identifier);
-
-            // The namespace is every name concatenated except for the last one.
-            string? ns;
-            if (names.Count > 1)
-            {
-                ns = StringShim.Join(".", names.Take(names.Count - 1));
-                names.RemoveRange(0, names.Count - 1);
-            }
-            else
-            {
-                ns = null;
-            }
+            // Parse toplevel type name.
+            (string? ns, string name) = ParseSingleTypeName();
+            var result = new TypeName(null, ns, name);
 
             // Check if we have any nested identifiers.
             while (TryExpect(TypeNameTerminal.Plus).HasValue)
             {
-                var nextIdentifier = Expect(TypeNameTerminal.Identifier);
-                names.Add(nextIdentifier.Text);
+                (ns, name) = ParseSingleTypeName();
+                result = new TypeName(result, ns, name);
             }
 
-            return new TypeName(ns, names);
+            return result;
+        }
+
+        private (string? Namespace, string Name) ParseSingleTypeName()
+        {
+            var names = ParseDottedExpression(TypeNameTerminal.Identifier);
+
+            // The namespace is every name concatenated except for the last one.
+            string? ns = names.Count > 1
+                ? StringShim.Join(".", names.Take(names.Count - 1))
+                : null;
+
+            string name = names[names.Count - 1];
+
+            return (ns, name);
         }
 
         private List<string> ParseDottedExpression(TypeNameTerminal terminal)
