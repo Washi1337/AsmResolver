@@ -79,7 +79,7 @@ namespace AsmResolver.DotNet
         /// <param name="signature">The signature of the method</param>
         /// <param name="verify">
         /// Set to <c>true</c> if the value stored in <paramref name="attributes"/> and <paramref name="signature"/>
-        /// should be checked for consistency.
+        /// should be checked for consistency. The default value is <c>true</c>.
         /// </param>
         /// <remarks>
         /// For a valid .NET image, if <see cref="CallingConventionSignature.HasThis"/> of the signature referenced by
