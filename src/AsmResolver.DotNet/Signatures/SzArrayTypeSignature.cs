@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Signatures
         public override ElementType ElementType => ElementType.SzArray;
 
         /// <inheritdoc />
-        public override string Name => $"{BaseType.Name ?? NullTypeToString}[]";
+        public override string Name => $"{BaseType.Name}[]";
 
         /// <inheritdoc />
         public override int Rank => 1;

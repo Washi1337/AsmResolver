@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Signatures
         public override ElementType ElementType => ElementType.Ptr;
 
         /// <inheritdoc />
-        public override string Name => $"{BaseType?.Name ?? NullTypeToString}*";
+        public override string Name => $"{BaseType.Name}*";
 
         /// <inheritdoc />
         public override bool IsValueType => false;
