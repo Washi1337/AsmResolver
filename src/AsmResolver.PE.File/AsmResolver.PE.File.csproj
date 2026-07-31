@@ -6,16 +6,12 @@
     <PackageTags>exe pe headers sections inspection manipulation assembly disassembly</PackageTags>
     <NoWarn>1701;1702;NU5105</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
       <ProjectReference Include="..\AsmResolver\AsmResolver.csproj" />
-      <ProjectReference
-          Include="..\..\tools\AsmResolver.SourceGenerators\AsmResolver.SourceGenerators.csproj"
-          ReferenceOutputAssembly="false"
-          OutputItemType="Analyzer"
-          SetTargetFramework="TargetFramework=netstandard2.0"
-      />
+      <ProjectReference Include="..\..\tools\AsmResolver.SourceGenerators\AsmResolver.SourceGenerators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" SetTargetFramework="TargetFramework=netstandard2.0" />
   </ItemGroup>
 
 </Project>

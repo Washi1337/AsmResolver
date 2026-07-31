@@ -5,6 +5,7 @@
     <Description>Dynamic method support for the AsmResolver executable file inspection toolsuite.</Description>
     <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly dynamic</PackageTags>
     <IsAotCompatible>false</IsAotCompatible>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

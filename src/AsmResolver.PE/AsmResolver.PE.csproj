@@ -4,16 +4,12 @@
     <Title>AsmResolver.PE</Title>
     <Description>PE image models for the AsmResolver executable file inspection toolsuite.</Description>
     <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
-    <ProjectReference
-      Include="..\..\tools\AsmResolver.SourceGenerators\AsmResolver.SourceGenerators.csproj"
-      ReferenceOutputAssembly="false"
-      OutputItemType="Analyzer"
-      SetTargetFramework="TargetFramework=netstandard2.0"
-    />
+    <ProjectReference Include="..\..\tools\AsmResolver.SourceGenerators\AsmResolver.SourceGenerators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" SetTargetFramework="TargetFramework=netstandard2.0" />
   </ItemGroup>
 
 </Project>
