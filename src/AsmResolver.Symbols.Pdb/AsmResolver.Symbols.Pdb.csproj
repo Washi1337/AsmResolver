@@ -3,8 +3,6 @@
   <PropertyGroup>
     <Title>AsmResolver</Title>
     <Description>Windows PDB models for the AsmResolver executable file inspection toolsuite.</Description>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

@@ -5,7 +5,6 @@
     <Description>The base library for the AsmResolver executable file inspection toolsuite.</Description>
     <PackageTags>exe pe dotnet cil inspection manipulation assembly disassembly</PackageTags>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">

@@ -9,6 +9,8 @@
         <NoWarn>1701;1702;NU5105</NoWarn>
         <ArtifactsPath>$(MSBuildThisFileDirectory)..\artifacts\src</ArtifactsPath>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>

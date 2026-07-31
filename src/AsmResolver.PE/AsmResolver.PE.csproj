@@ -4,7 +4,6 @@
     <Title>AsmResolver.PE</Title>
     <Description>PE image models for the AsmResolver executable file inspection toolsuite.</Description>
     <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

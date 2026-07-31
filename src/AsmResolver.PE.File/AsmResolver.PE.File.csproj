@@ -6,7 +6,6 @@
     <PackageTags>exe pe headers sections inspection manipulation assembly disassembly</PackageTags>
     <NoWarn>1701;1702;NU5105</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

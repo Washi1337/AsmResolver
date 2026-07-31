@@ -3,7 +3,6 @@
   <PropertyGroup>
     <Title>AsmResolver.PE.Win32Resources</Title>
     <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
