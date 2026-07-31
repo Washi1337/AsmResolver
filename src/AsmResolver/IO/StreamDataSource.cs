@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.IO;
 
 namespace AsmResolver.IO
@@ -6,10 +7,7 @@ namespace AsmResolver.IO
     /// <summary>
     /// Provides a <see cref="IDataSource"/> wrapper around a raw <see cref="Stream"/>.
     /// </summary>
-    public sealed class StreamDataSource : IDataSource
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        , ISpanDataSource
-#endif
+    public sealed class StreamDataSource : IDataSource, ISpanDataSource
     {
         private readonly Stream _stream;
 
@@ -77,7 +75,6 @@ namespace AsmResolver.IO
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <inheritdoc />
         public int ReadBytes(ulong address, Span<byte> buffer)
         {
@@ -85,9 +82,27 @@ namespace AsmResolver.IO
             lock (_stream)
             {
                 _stream.Seek(offset, SeekOrigin.Begin);
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
                 return _stream.Read(buffer);
+#else
+                byte[] sharedBuffer = ArrayPool<byte>.Shared.Rent(buffer.Length);
+                try
+                {
+                    int numRead = _stream.Read(sharedBuffer, 0, buffer.Length);
+                    if ((uint)numRead > (uint)buffer.Length)
+                    {
+                        throw new IOException("Stream is too long");
+                    }
+
+                    new ReadOnlySpan<byte>(sharedBuffer, 0, numRead).CopyTo(buffer);
+                    return numRead;
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(sharedBuffer);
+                }
+#endif
             }
         }
-#endif
     }
 }

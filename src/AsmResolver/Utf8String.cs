@@ -124,7 +124,6 @@ namespace AsmResolver
         /// <param name="index">The character index.</param>
         public char this[int index] => Value[index];
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// Creates a new read-only span over the string.
         /// </summary>
@@ -154,7 +153,6 @@ namespace AsmResolver
         {
             return _data.AsSpan(start, length);
         }
-#endif
 
         /// <summary>
         /// Gets the raw UTF-8 bytes of the string.

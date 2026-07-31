@@ -1,7 +1,5 @@
 using System;
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP1_0_OR_GREATER
 using System.Buffers;
-#endif
 
 namespace AsmResolver.IO
 {
@@ -10,7 +8,6 @@ namespace AsmResolver.IO
     /// </summary>
     public static class DataSourceExtensions
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// Reads a block of data from the data source.
         /// </summary>
@@ -29,6 +26,5 @@ namespace AsmResolver.IO
             ArrayPool<byte>.Shared.Return(array);
             return bytesRead;
         }
-#endif
     }
 }
