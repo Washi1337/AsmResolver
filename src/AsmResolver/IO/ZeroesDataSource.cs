@@ -5,10 +5,7 @@ namespace AsmResolver.IO
     /// <summary>
     /// Implements a data source that reads zero bytes.
     /// </summary>
-    public sealed class ZeroesDataSource : IDataSource
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        , ISpanDataSource
-#endif
+    public sealed class ZeroesDataSource : IDataSource, ISpanDataSource
     {
         /// <summary>
         /// Creates a new zeroes data source.
@@ -58,14 +55,12 @@ namespace AsmResolver.IO
             return actualLength;
         }
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <inheritdoc />
         public int ReadBytes(ulong address, Span<byte> buffer)
         {
             int actualLength = (int) Math.Min(Length, (uint) buffer.Length);
-            buffer[..actualLength].Clear();
+            buffer.Slice(0, actualLength).Clear();
             return actualLength;
         }
-#endif
     }
 }

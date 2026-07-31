@@ -6,10 +6,7 @@ namespace AsmResolver.IO
     /// <summary>
     /// Represents a data source that obtains its data from a block of unmanaged memory.
     /// </summary>
-    public sealed unsafe class UnmanagedDataSource : IDataSource
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        , ISpanDataSource
-#endif
+    public sealed unsafe class UnmanagedDataSource : IDataSource, ISpanDataSource
     {
         private readonly void* _basePointer;
 
@@ -70,7 +67,6 @@ namespace AsmResolver.IO
             return actualLength;
         }
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <inheritdoc />
         public int ReadBytes(ulong address, Span<byte> buffer)
         {
@@ -82,6 +78,5 @@ namespace AsmResolver.IO
             new ReadOnlySpan<byte>((byte*) address, actualLength).CopyTo(buffer);
             return actualLength;
         }
-#endif
     }
 }

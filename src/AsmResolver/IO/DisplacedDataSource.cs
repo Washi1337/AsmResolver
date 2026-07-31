@@ -5,10 +5,7 @@ namespace AsmResolver.IO
     /// <summary>
     /// Represents a data source that was moved in memory to a different address.
     /// </summary>
-    public class DisplacedDataSource : IDataSource
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        , ISpanDataSource
-#endif
+    public class DisplacedDataSource : IDataSource, ISpanDataSource
     {
         private readonly IDataSource _dataSource;
         private readonly long _displacement;
@@ -26,29 +23,27 @@ namespace AsmResolver.IO
         }
 
         /// <inheritdoc />
-        public ulong BaseAddress => _dataSource.BaseAddress + (ulong) _displacement;
+        public ulong BaseAddress => _dataSource.BaseAddress + (ulong)_displacement;
 
         /// <inheritdoc />
-        public byte this[ulong address] => _dataSource[address - (ulong) _displacement];
+        public byte this[ulong address] => _dataSource[address - (ulong)_displacement];
 
         /// <inheritdoc />
         public ulong Length => _dataSource.Length;
 
         /// <inheritdoc />
-        public bool IsValidAddress(ulong address) => _dataSource.IsValidAddress(address - (ulong) _displacement);
+        public bool IsValidAddress(ulong address) => _dataSource.IsValidAddress(address - (ulong)_displacement);
 
         /// <inheritdoc />
         public int ReadBytes(ulong address, byte[] buffer, int index, int count)
         {
-            return _dataSource.ReadBytes(address - (ulong) _displacement, buffer, index, count);
+            return _dataSource.ReadBytes(address - (ulong)_displacement, buffer, index, count);
         }
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <inheritdoc />
         public int ReadBytes(ulong address, Span<byte> buffer)
         {
-            return _dataSource.ReadBytes(address - (ulong) _displacement, buffer);
+            return _dataSource.ReadBytes(address - (ulong)_displacement, buffer);
         }
-#endif
     }
 }

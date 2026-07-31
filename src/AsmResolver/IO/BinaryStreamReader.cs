@@ -3,10 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using AsmResolver.Shims;
-
-#if !NETSTANDARD2_0
 using System.Buffers;
-#endif
 
 namespace AsmResolver.IO
 {
@@ -42,7 +39,7 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="dataSource">The object to get the data from.</param>
         public BinaryStreamReader(IDataSource dataSource)
-            : this(dataSource, 0, 0, (uint) dataSource.Length)
+            : this(dataSource, 0, 0, (uint)dataSource.Length)
         {
         }
 
@@ -136,7 +133,7 @@ namespace AsmResolver.IO
         /// </summary>
         public uint RelativeOffset
         {
-            get => (uint) (Offset - StartOffset);
+            get => (uint)(Offset - StartOffset);
             set => Offset = value + StartOffset;
         }
 
@@ -197,7 +194,7 @@ namespace AsmResolver.IO
         public ushort ReadUInt16()
         {
             AssertCanRead(2);
-            ushort value = (ushort) (DataSource[Offset]
+            ushort value = (ushort)(DataSource[Offset]
                                      | (DataSource[Offset + 1] << 8));
             Offset += 2;
             return value;
@@ -210,7 +207,7 @@ namespace AsmResolver.IO
         public uint ReadUInt32()
         {
             AssertCanRead(4);
-            uint value = unchecked((uint) (DataSource[Offset]
+            uint value = unchecked((uint)(DataSource[Offset]
                                            | (DataSource[Offset + 1] << 8)
                                            | (DataSource[Offset + 2] << 16)
                                            | (DataSource[Offset + 3] << 24)));
@@ -225,14 +222,14 @@ namespace AsmResolver.IO
         public ulong ReadUInt64()
         {
             AssertCanRead(8);
-            ulong value = unchecked((ulong) (DataSource[Offset]
-                                             | ( (long) DataSource[Offset + 1] << 8)
-                                             | ( (long) DataSource[Offset + 2] << 16)
-                                             | ( (long) DataSource[Offset + 3] << 24)
-                                             | ( (long) DataSource[Offset + 4] << 32)
-                                             | ( (long) DataSource[Offset + 5] << 40)
-                                             | ( (long) DataSource[Offset + 6] << 48)
-                                             | ( (long) DataSource[Offset + 7] << 56)));
+            ulong value = unchecked((ulong)(DataSource[Offset]
+                                             | ((long)DataSource[Offset + 1] << 8)
+                                             | ((long)DataSource[Offset + 2] << 16)
+                                             | ((long)DataSource[Offset + 3] << 24)
+                                             | ((long)DataSource[Offset + 4] << 32)
+                                             | ((long)DataSource[Offset + 5] << 40)
+                                             | ((long)DataSource[Offset + 6] << 48)
+                                             | ((long)DataSource[Offset + 7] << 56)));
             Offset += 8;
             return value;
         }
@@ -244,7 +241,7 @@ namespace AsmResolver.IO
         public sbyte ReadSByte()
         {
             AssertCanRead(1);
-            return unchecked((sbyte) DataSource[Offset++]);
+            return unchecked((sbyte)DataSource[Offset++]);
         }
 
         /// <summary>
@@ -254,7 +251,7 @@ namespace AsmResolver.IO
         public short ReadInt16()
         {
             AssertCanRead(2);
-            short value = (short) (DataSource[Offset]
+            short value = (short)(DataSource[Offset]
                                    | (DataSource[Offset + 1] << 8));
             Offset += 2;
             return value;
@@ -283,13 +280,13 @@ namespace AsmResolver.IO
         {
             AssertCanRead(8);
             long value = DataSource[Offset]
-                         | ((long) DataSource[Offset + 1] << 8)
-                         | ((long) DataSource[Offset + 2] << 16)
-                         | ((long) DataSource[Offset + 3] << 24)
-                         | ((long) DataSource[Offset + 4] << 32)
-                         | ((long) DataSource[Offset + 5] << 40)
-                         | ((long) DataSource[Offset + 6] << 48)
-                         | ((long) DataSource[Offset + 7] << 56);
+                         | ((long)DataSource[Offset + 1] << 8)
+                         | ((long)DataSource[Offset + 2] << 16)
+                         | ((long)DataSource[Offset + 3] << 24)
+                         | ((long)DataSource[Offset + 4] << 32)
+                         | ((long)DataSource[Offset + 5] << 40)
+                         | ((long)DataSource[Offset + 6] << 48)
+                         | ((long)DataSource[Offset + 7] << 56);
             Offset += 8;
             return value;
         }
@@ -302,7 +299,7 @@ namespace AsmResolver.IO
         public unsafe float ReadSingle()
         {
             uint raw = ReadUInt32();
-            return *(float*) &raw;
+            return *(float*)&raw;
         }
 
         /// <summary>
@@ -313,7 +310,7 @@ namespace AsmResolver.IO
         public unsafe double ReadDouble()
         {
             ulong raw = ReadUInt64();
-            return *(double*) &raw;
+            return *(double*)&raw;
         }
 
         /// <summary>
@@ -348,7 +345,6 @@ namespace AsmResolver.IO
             return data;
         }
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// Attempts to read the provided amount of bytes from the input stream.
         /// </summary>
@@ -357,10 +353,9 @@ namespace AsmResolver.IO
         public int ReadBytes(Span<byte> buffer)
         {
             int actualLength = DataSource.ReadBytes(Offset, buffer);
-            Offset += (uint) actualLength;
+            Offset += (uint)actualLength;
             return actualLength;
         }
-#endif
 
         /// <summary>
         /// Attempts to read the provided amount of bytes from the input stream.
@@ -372,7 +367,7 @@ namespace AsmResolver.IO
         public int ReadBytes(byte[] buffer, int index, int count)
         {
             int actualLength = DataSource.ReadBytes(Offset, buffer, index, count);
-            Offset += (uint) actualLength;
+            Offset += (uint)actualLength;
             return actualLength;
         }
 
@@ -480,7 +475,7 @@ namespace AsmResolver.IO
 
             while (true)
             {
-                char nextChar = (char) ReadUInt16();
+                char nextChar = (char)ReadUInt16();
                 if (nextChar is '\0')
                     break;
                 builder.Append(nextChar);
@@ -522,7 +517,7 @@ namespace AsmResolver.IO
             if ((firstByte & 0x40) == 0)
                 return (uint)(((firstByte & 0x7F) << 8) | ReadByte());
 
-            return (uint) (((firstByte & 0x3F) << 0x18) |
+            return (uint)(((firstByte & 0x3F) << 0x18) |
                 (ReadByte() << 0x10) |
                 (ReadByte() << 0x08) |
                 ReadByte());
@@ -545,12 +540,12 @@ namespace AsmResolver.IO
             }
             else if ((firstByte & 0x40) == 0)
             {
-                rotated = (uint) ((firstByte & 0x3F) << 8 | ReadByte());
+                rotated = (uint)((firstByte & 0x3F) << 8 | ReadByte());
                 mask = (rotated & 1) != 0 ? -0x2000 : 0;
             }
             else
             {
-                rotated = (uint) (
+                rotated = (uint)(
                     (firstByte & 0x1F) << 0x18
                     | ReadByte() << 0x10
                     | ReadByte() << 0x08
@@ -559,7 +554,7 @@ namespace AsmResolver.IO
                 mask = (rotated & 1) != 0 ? -0x1000_0000 : 0;
             }
 
-            return (int) (rotated >> 1) | mask;
+            return (int)(rotated >> 1) | mask;
         }
 
         /// <summary>
@@ -674,7 +669,7 @@ namespace AsmResolver.IO
                 return null;
 
             byte[] data = new byte[length];
-            int actualLength = ReadBytes(data, 0, (int) length);
+            int actualLength = ReadBytes(data, 0, (int)length);
             return actualLength == length ? Utf8String.CreateUnsafe(data) : new Utf8String(data, 0, actualLength);
         }
 
@@ -737,7 +732,7 @@ namespace AsmResolver.IO
         /// <remarks>This method does not copy the underlying buffer.</remarks>
         public readonly BinaryStreamReader ForkAbsolute(ulong offset)
         {
-            return ForkAbsolute(offset, (uint) (Length - (offset - StartOffset)));
+            return ForkAbsolute(offset, (uint)(Length - (offset - StartOffset)));
         }
 
         /// <summary>
@@ -750,7 +745,7 @@ namespace AsmResolver.IO
         /// <remarks>This method does not copy the underlying buffer.</remarks>
         public readonly BinaryStreamReader ForkAbsolute(ulong offset, uint size)
         {
-            return new(DataSource, offset, (uint) (StartRva + (offset - StartOffset)), size);
+            return new(DataSource, offset, (uint)(StartRva + (offset - StartOffset)), size);
         }
 
         /// <summary>
@@ -798,28 +793,22 @@ namespace AsmResolver.IO
         /// <param name="writer">The output stream.</param>
         public void WriteToOutput(BinaryStreamWriter writer)
         {
-#if NETSTANDARD2_0
-            byte[] buffer = new byte[4096];
-#else
             byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
-#endif
 
             while (RelativeOffset < Length)
             {
-                int blockSize = (int) Math.Min(buffer.Length, Length - RelativeOffset);
+                int blockSize = (int)Math.Min(buffer.Length, Length - RelativeOffset);
                 int actualSize = ReadBytes(buffer, 0, blockSize);
                 if (actualSize == 0)
                 {
-                    writer.WriteZeroes((int) (Length - RelativeOffset));
+                    writer.WriteZeroes((int)(Length - RelativeOffset));
                     return;
                 }
 
                 writer.WriteBytes(buffer, 0, actualSize);
             }
 
-#if !NETSTANDARD2_0
             ArrayPool<byte>.Shared.Return(buffer);
-#endif
         }
     }
 }
