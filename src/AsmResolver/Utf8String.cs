@@ -56,7 +56,6 @@ namespace AsmResolver
         {
         }
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// Creates a new UTF-8 string from the provided raw data.
         /// </summary>
@@ -66,6 +65,7 @@ namespace AsmResolver
             _data = data.ToArray();
         }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// Creates a new UTF-8 string from the provided <see cref="System.ReadOnlySpan{Char}"/>.
         /// </summary>
@@ -457,7 +457,6 @@ namespace AsmResolver
             return new Utf8String(value);
         }
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// Converts a raw sequence of bytes into an <see cref="Utf8String"/>.
         /// </summary>
@@ -471,6 +470,7 @@ namespace AsmResolver
             return new Utf8String(data);
         }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// Converts a <see cref="System.ReadOnlySpan{Char}"/> into an <see cref="Utf8String"/>.
         /// </summary>
@@ -483,6 +483,7 @@ namespace AsmResolver
 
             return new Utf8String(data);
         }
+#endif
 
         /// <summary>
         /// Converts a <see cref="Utf8String"/> into a <see cref="System.ReadOnlySpan{Byte}"/>.
@@ -509,7 +510,6 @@ namespace AsmResolver
 
             return value.Value;
         }
-#endif
 
         /// <summary>
         /// Converts a raw sequence of bytes into an <see cref="Utf8String"/>.
