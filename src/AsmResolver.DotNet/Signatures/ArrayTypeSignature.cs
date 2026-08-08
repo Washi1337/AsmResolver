@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet.Signatures
         public override ElementType ElementType => ElementType.Array;
 
         /// <inheritdoc />
-        public override string Name => $"{BaseType.Name ?? NullTypeToString}{GetDimensionsString()}";
+        public override string Name => $"{BaseType.Name}{GetDimensionsString()}";
 
         /// <summary>
         /// Gets a collection of dimensions.
