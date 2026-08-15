@@ -52,7 +52,9 @@ public partial class RuntimeContext
         AddSearchDirectories(resolver, searchDirectories);
         AssemblyResolver = resolver;
 
-        RuntimeCorLib = TargetRuntime.GetAssumedImplCorLib();
+        var corLib = TargetRuntime.GetAssumedImplCorLib();
+        RuntimeCorLib = corLib;
+        CorLibTypeFactory = new CorLibTypeFactory(corLib ?? TargetRuntime.GetDefaultCorLib());
         SignatureComparer = CreateSignatureComparer(TargetRuntime);
         _loadedAssemblies = new Dictionary<AssemblyDescriptor, AssemblyDefinition>(SignatureComparer);
     }
@@ -132,7 +134,9 @@ public partial class RuntimeContext
             AssemblyResolver = CreateAssemblyResolver(TargetRuntime, is32Bit, DefaultReaderParameters, searchDirectories);
         }
 
-        RuntimeCorLib = TargetRuntime.GetAssumedImplCorLib();
+        var corLib = TargetRuntime.GetAssumedImplCorLib();
+        RuntimeCorLib = corLib;
+        CorLibTypeFactory = new CorLibTypeFactory(corLib ?? TargetRuntime.GetDefaultCorLib());
         SignatureComparer = CreateSignatureComparer(TargetRuntime);
         _loadedAssemblies = new Dictionary<AssemblyDescriptor, AssemblyDefinition>(SignatureComparer);
     }
@@ -156,7 +160,13 @@ public partial class RuntimeContext
 
         TargetRuntime = targetRuntime;
         AssemblyResolver = CreateAssemblyResolver(TargetRuntime, is32Bit, DefaultReaderParameters, searchDirectories);
-        RuntimeCorLib = corLibReference ?? targetRuntime.GetAssumedImplCorLib();
+
+        corLibReference ??= targetRuntime.GetAssumedImplCorLib();
+        RuntimeCorLib = corLibReference;
+        CorLibTypeFactory = new CorLibTypeFactory(
+            corLibReference?.ToAssemblyReference()
+            ?? targetRuntime.GetDefaultCorLib()
+        );
 
         SignatureComparer = CreateSignatureComparer(targetRuntime);
         _loadedAssemblies = new Dictionary<AssemblyDescriptor, AssemblyDefinition>(SignatureComparer);
@@ -178,7 +188,14 @@ public partial class RuntimeContext
         DefaultReaderParameters = readerParameters ?? new ModuleReaderParameters(new ByteArrayFileService());
         TargetRuntime = targetRuntime;
         AssemblyResolver = assemblyResolver;
-        RuntimeCorLib = corLibReference ?? targetRuntime.GetAssumedImplCorLib();
+
+        corLibReference ??= targetRuntime.GetAssumedImplCorLib();
+        RuntimeCorLib = corLibReference;
+        CorLibTypeFactory = new CorLibTypeFactory(
+            corLibReference?.ToAssemblyReference()
+            ?? targetRuntime.GetDefaultCorLib()
+        );
+
         SignatureComparer = CreateSignatureComparer(targetRuntime);
         _loadedAssemblies = new Dictionary<AssemblyDescriptor, AssemblyDefinition>(SignatureComparer);
     }
@@ -205,6 +222,12 @@ public partial class RuntimeContext
         {
             RuntimeCorLib = type.DeclaringModule?.Assembly;
         }
+
+        CorLibTypeFactory = new CorLibTypeFactory(
+            RuntimeCorLib?.ToAssemblyReference()
+            ?? TargetRuntime.GetAssumedImplCorLib()
+            ?? TargetRuntime.GetDefaultCorLib()
+        );
     }
 
     /// <summary>
@@ -235,6 +258,14 @@ public partial class RuntimeContext
     /// Gets the corlib for this runtime
     /// </summary>
     public AssemblyDescriptor? RuntimeCorLib
+    {
+        get;
+    }
+
+    /// <summary>
+    /// Gets the default corlib type factory for this runtime.
+    /// </summary>
+    public CorLibTypeFactory CorLibTypeFactory
     {
         get;
     }
