@@ -36,6 +36,11 @@ namespace AsmResolver.DotNet
         /// </summary>
         public const string NetPortableName = ".NETPortable";
 
+        /// <summary>
+        /// The target framework name used by applications targeting Microsoft Silverlight.
+        /// </summary>
+        public const string SilverlightName = "Silverlight";
+
         private static readonly Regex FormatRegex = new(@"([a-zA-Z.]+)\s*,\s*Version=v(\d+\.\d+)");
 
         private static readonly Regex NetFxMonikerRegex = new(@"net(\d)(\d)(\d?)");
@@ -102,6 +107,11 @@ namespace AsmResolver.DotNet
         public bool IsNetPortable => Name == NetPortableName;
 
         /// <summary>
+        /// Gets a value indicating whether the application targets the Microsoft Silverlight runtime or not.
+        /// </summary>
+        public bool IsSilverlight => Name == SilverlightName;
+
+        /// <summary>
         /// Constructs a runtime info record referencing legacy .NET Framework.
         /// </summary>
         /// <param name="major">The major version</param>
@@ -163,6 +173,21 @@ namespace AsmResolver.DotNet
         /// <param name="version">The version</param>
         /// <returns>The runtime info record.</returns>
         public static DotNetRuntimeInfo NetCoreApp(Version version) => new(NetCoreAppName, version);
+
+        /// <summary>
+        /// Constructs a runtime info record referencing Microsoft Silverlight.
+        /// </summary>
+        /// <param name="major">The major version</param>
+        /// <param name="minor">The minor version</param>
+        /// <returns>The runtime info record.</returns>
+        public static DotNetRuntimeInfo Silverlight(int major, int minor) => Silverlight(new Version(major, minor));
+
+        /// <summary>
+        /// Constructs a runtime info record referencing Microsoft Silverlight.
+        /// </summary>
+        /// <param name="version">The version</param>
+        /// <returns>The runtime info record.</returns>
+        public static DotNetRuntimeInfo Silverlight(Version version) => new(SilverlightName, version);
 
         /// <summary>
         /// Parses the framework name as provided in a <c>System.Runtime.Versioning.TargetFrameworkAttribute</c> attribute.

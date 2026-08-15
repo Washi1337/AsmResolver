@@ -280,6 +280,13 @@ public partial class RuntimeContext
                 );
                 break;
 
+            case DotNetRuntimeInfo.SilverlightName:
+                resolver = new SilverlightAssemblyResolver(
+                    runtime.Version,
+                    readerParameters: readerParameters
+                );
+                break;
+
             default:
                 resolver = new DotNetFxAssemblyResolver(
                     runtime.Version,

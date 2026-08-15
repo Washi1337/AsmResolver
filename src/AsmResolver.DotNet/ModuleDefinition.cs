@@ -354,6 +354,10 @@ namespace AsmResolver.DotNet
         public ModuleDefinition(Utf8String? name, DotNetRuntimeInfo targetRuntime)
             : this(name, targetRuntime.GetDefaultCorLib())
         {
+            // Silverlight corlib identities overlap with other legacy runtimes. Preserve the explicitly provided
+            // runtime instead of recomputing it from the corlib identity.
+            if (targetRuntime.IsSilverlight)
+                OriginalTargetRuntime = targetRuntime;
         }
 
         /// <summary>
