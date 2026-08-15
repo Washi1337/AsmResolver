@@ -343,6 +343,17 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
+        public void GetDirectBaseClassOfInterface()
+        {
+            var context = new RuntimeContext(DotNetRuntimeInfo.NetFramework(4, 0));
+            var interfaceType = context.RuntimeCorLib!.ToAssemblyReference()
+                .CreateTypeReference("System", "IDisposable")
+                .ToTypeSignature(isValueType: false);
+
+            Assert.Equal("System.Object", interfaceType.GetDirectBaseClass(context)!.FullName);
+        }
+
+        [Fact]
         public void GetDirectBaseClassOfGenericTypeInstanceWithGenericBaseClass()
         {
             var module = ModuleDefinition.FromFile(typeof(GenericDerivedType<,>).Assembly.Location, TestReaderParameters);
