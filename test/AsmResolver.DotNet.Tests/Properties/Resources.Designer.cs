@@ -58,6 +58,13 @@ namespace AsmResolver.DotNet.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        internal static byte[] HelloWorld_Silverlight5 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_Silverlight5", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
         
         internal static byte[] HelloWorld_InvalidMethodBody {
             get {

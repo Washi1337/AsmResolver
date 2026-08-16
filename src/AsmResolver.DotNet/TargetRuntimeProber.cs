@@ -191,8 +191,12 @@ public static class TargetRuntimeProber
             if (Utf8String.IsNullOrEmpty(element) || !DotNetRuntimeInfo.TryParse(element, out var info))
                 continue;
 
-            // Silverlight shares corlib identities with other legacy target frameworks. Only use explicit, unprofiled
-            // Silverlight target framework metadata to classify an image as Silverlight.
+            // Silverlight shares corlib identities with other legacy target frameworks. Target framework profiles
+            // also identify distinct platforms, such as `Silverlight,Version=v4.0,Profile=WindowsPhone`, rather than
+            // the full desktop framework:
+            // https://learn.microsoft.com/visualstudio/extensibility/creating-a-software-development-kit
+            // Only use explicit, unprofiled Silverlight target framework metadata to classify an image as desktop
+            // Silverlight.
             bool isSupportedSilverlight = info.IsSilverlight
                 && IsSupportedSilverlightVersion(info.Version)
                 && !HasNonEmptyProfile(element);

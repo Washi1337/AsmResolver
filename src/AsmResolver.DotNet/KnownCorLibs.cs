@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet
             ]);
 
         /// <summary>
-        /// References mscorlib.dll, Version=2.0.5.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by assemblies
+        /// References mscorlib.dll, Version=2.0.5.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by .NET assemblies
         /// targeting Microsoft Silverlight 4.0, as well as some other legacy profiles.
         /// </summary>
         public static readonly AssemblyReference MsCorLib_v2_0_5_0 = new("mscorlib",
@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet
             ]);
 
         /// <summary>
-        /// References mscorlib.dll, Version=5.0.5.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by assemblies
+        /// References mscorlib.dll, Version=5.0.5.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by .NET assemblies
         /// targeting Microsoft Silverlight 5.0.
         /// </summary>
         public static readonly AssemblyReference MsCorLib_v5_0_5_0 = new("mscorlib",
