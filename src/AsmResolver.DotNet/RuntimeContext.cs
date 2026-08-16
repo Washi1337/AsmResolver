@@ -283,6 +283,7 @@ public partial class RuntimeContext
             case DotNetRuntimeInfo.SilverlightName:
                 resolver = new SilverlightAssemblyResolver(
                     runtime.Version,
+                    is32Bit ?? IntPtr.Size == sizeof(uint),
                     readerParameters: readerParameters
                 );
                 break;

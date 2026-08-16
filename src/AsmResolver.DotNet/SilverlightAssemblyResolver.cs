@@ -5,7 +5,7 @@ using AsmResolver.IO;
 namespace AsmResolver.DotNet;
 
 /// <summary>
-/// Provides an implementation of an assembly resolver that includes Microsoft Silverlight runtime and reference
+/// Provides an implementation of an assembly resolver that includes Microsoft Silverlight runtime or reference
 /// libraries, as well as any custom search directories.
 /// </summary>
 public class SilverlightAssemblyResolver : AssemblyResolverBase
@@ -15,30 +15,21 @@ public class SilverlightAssemblyResolver : AssemblyResolverBase
     /// <summary>
     /// Creates a new Silverlight assembly resolver.
     /// </summary>
-    /// <param name="runtimeVersion">The version of Silverlight to target.</param>
-    /// <param name="pathProvider">
-    /// The assumed system installation provider of Silverlight, or <c>null</c> to use the default path provider.
-    /// </param>
-    /// <param name="readerParameters">
-    /// The parameters to use while reading assemblies, or <c>null</c> to use the default reader parameters.
-    /// </param>
     public SilverlightAssemblyResolver(
         Version runtimeVersion,
+        bool is32Bit,
         SilverlightPathProvider? pathProvider = null,
         ModuleReaderParameters? readerParameters = null)
         : base(readerParameters ?? new ModuleReaderParameters(UncachedFileService.Instance))
     {
         pathProvider ??= SilverlightPathProvider.Default;
-        pathProvider.TryGetCompatibleInstallation(runtimeVersion, out _installation);
+        if (!pathProvider.TryGetCompatibleRuntime(runtimeVersion, is32Bit, out _installation))
+            pathProvider.TryGetCompatibleReferenceRuntime(runtimeVersion, is32Bit, out _installation);
     }
 
     /// <summary>
-    /// Creates a new Silverlight assembly resolver using the provided installation.
+    /// Creates a new Silverlight assembly resolver.
     /// </summary>
-    /// <param name="installation">The Silverlight installation to use.</param>
-    /// <param name="readerParameters">
-    /// The parameters to use while reading assemblies, or <c>null</c> to use the default reader parameters.
-    /// </param>
     public SilverlightAssemblyResolver(
         SilverlightInstallation installation,
         ModuleReaderParameters? readerParameters = null)
@@ -59,17 +50,12 @@ public class SilverlightAssemblyResolver : AssemblyResolverBase
         if (_installation is null)
             return null;
 
-        if (_installation.ReferenceAssemblyDirectory is { } referenceAssemblyDirectory
-            && ProbeDirectory(assembly, referenceAssemblyDirectory) is { } referenceAssemblyPath)
-            return referenceAssemblyPath;
+        if (ProbeDirectory(assembly, _installation.InstallDirectory) is { } installationPath)
+            return installationPath;
 
         if (_installation.SdkLibraryDirectory is { } sdkLibraryDirectory
             && ProbeDirectory(assembly, sdkLibraryDirectory) is { } sdkLibraryPath)
             return sdkLibraryPath;
-
-        if (_installation.RuntimeDirectory is { } runtimeDirectory
-            && ProbeDirectory(assembly, runtimeDirectory) is { } runtimePath)
-            return runtimePath;
 
         return null;
     }

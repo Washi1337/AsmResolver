@@ -5,7 +5,7 @@ using AsmResolver.Shims;
 namespace AsmResolver.DotNet;
 
 /// <summary>
-/// Provides a mechanism for locating Silverlight runtime and reference assembly installations on a system.
+/// Provides a mechanism for locating Microsoft Silverlight runtime installation directories on a system.
 /// </summary>
 public abstract class SilverlightPathProvider
 {
@@ -25,26 +25,50 @@ public abstract class SilverlightPathProvider
     }
 
     /// <summary>
-    /// Attempts to obtain a compatible Silverlight installation present on the current system given a
-    /// Silverlight version.
+    /// Attempts to obtain the most compatible implementation runtime present on the current system given a Silverlight version.
     /// </summary>
-    /// <param name="version">The version of Silverlight the binary is targeting.</param>
-    /// <param name="installation">The located Silverlight installation, or <c>null</c> if none was found.</param>
-    /// <returns><c>true</c> if the installation was located successfully, <c>false</c> otherwise.</returns>
-    public abstract bool TryGetCompatibleInstallation(
+    /// <param name="version">The version of the runtime the Silverlight binary is targeting.</param>
+    /// <param name="is32Bit"><c>true</c> if the 32-bits version should be preferred.</param>
+    /// <param name="runtime">The located runtime installation, or <c>null</c> if none was found.</param>
+    /// <returns><c>true</c> if the runtime was located successfully, <c>false</c> otherwise.</returns>
+    public abstract bool TryGetCompatibleRuntime(
         Version version,
-        [NotNullWhen(true)] out SilverlightInstallation? installation
+        bool is32Bit,
+        [NotNullWhen(true)] out SilverlightInstallation? runtime
+    );
+
+    /// <summary>
+    /// Attempts to obtain the most compatible reference runtime present on the current system given a Silverlight version.
+    /// </summary>
+    /// <param name="version">The version of the runtime the Silverlight binary is targeting.</param>
+    /// <param name="is32Bit"><c>true</c> if the 32-bits version should be preferred.</param>
+    /// <param name="runtime">The located runtime installation, or <c>null</c> if none was found.</param>
+    /// <returns><c>true</c> if the runtime was located successfully, <c>false</c> otherwise.</returns>
+    public abstract bool TryGetCompatibleReferenceRuntime(
+        Version version,
+        bool is32Bit,
+        [NotNullWhen(true)] out SilverlightInstallation? runtime
     );
 
     private sealed class EmptySilverlightPathProvider : SilverlightPathProvider
     {
         public static EmptySilverlightPathProvider Instance { get; } = new();
 
-        public override bool TryGetCompatibleInstallation(
+        public override bool TryGetCompatibleRuntime(
             Version version,
-            [NotNullWhen(true)] out SilverlightInstallation? installation)
+            bool is32Bit,
+            [NotNullWhen(true)] out SilverlightInstallation? runtime)
         {
-            installation = null;
+            runtime = null;
+            return false;
+        }
+
+        public override bool TryGetCompatibleReferenceRuntime(
+            Version version,
+            bool is32Bit,
+            [NotNullWhen(true)] out SilverlightInstallation? runtime)
+        {
+            runtime = null;
             return false;
         }
     }

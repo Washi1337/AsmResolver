@@ -16,26 +16,40 @@ public sealed class MicrosoftSilverlightPathProvider : SilverlightPathProvider
         new(4, 0),
     ];
 
-    private readonly SilverlightInstallation[] _installations;
+    private readonly SilverlightInstallation[] _runtimes32;
+    private readonly SilverlightInstallation[] _runtimes64;
+    private readonly SilverlightInstallation[] _referenceRuntimes32;
+    private readonly SilverlightInstallation[] _referenceRuntimes64;
 
     /// <summary>
-    /// Creates a new Silverlight path provider using the default Program Files locations on the current system.
+    /// Creates a new Silverlight path provider using the default Program Files directories.
     /// </summary>
     public MicrosoftSilverlightPathProvider()
-        : this(GetDefaultProgramFilesDirectories())
+        : this(GetDefaultProgramFiles32BitDirectories(), GetDefaultProgramFiles64BitDirectories())
     {
     }
 
     /// <summary>
-    /// Creates a new Silverlight path provider using the provided Program Files roots.
+    /// Creates a new Silverlight path provider using the provided Program Files directories.
     /// </summary>
-    /// <param name="programFilesDirectories">The Program Files roots to inspect.</param>
-    public MicrosoftSilverlightPathProvider(IEnumerable<string> programFilesDirectories)
+    /// <param name="programFiles32BitDirectories">The collection of 32-bit Program Files directories to consider.</param>
+    /// <param name="programFiles64BitDirectories">The collection of 64-bit Program Files directories to consider.</param>
+    public MicrosoftSilverlightPathProvider(
+        IEnumerable<string> programFiles32BitDirectories,
+        IEnumerable<string> programFiles64BitDirectories)
     {
-        if (programFilesDirectories is null)
-            throw new ArgumentNullException(nameof(programFilesDirectories));
+        if (programFiles32BitDirectories is null)
+            throw new ArgumentNullException(nameof(programFiles32BitDirectories));
+        if (programFiles64BitDirectories is null)
+            throw new ArgumentNullException(nameof(programFiles64BitDirectories));
 
-        _installations = DetectInstallations(programFilesDirectories);
+        string[] roots32 = GetDistinctDirectories(programFiles32BitDirectories);
+        string[] roots64 = GetDistinctDirectories(programFiles64BitDirectories);
+
+        _runtimes32 = DetectRuntimeInstallations(roots32);
+        _runtimes64 = DetectRuntimeInstallations(roots64);
+        _referenceRuntimes32 = DetectReferenceInstallations(roots32);
+        _referenceRuntimes64 = DetectReferenceInstallations(roots64);
     }
 
     /// <summary>
@@ -44,115 +58,63 @@ public sealed class MicrosoftSilverlightPathProvider : SilverlightPathProvider
     public static MicrosoftSilverlightPathProvider Instance { get; } = new();
 
     /// <inheritdoc />
-    public override bool TryGetCompatibleInstallation(
+    public override bool TryGetCompatibleRuntime(
         Version version,
-        [NotNullWhen(true)] out SilverlightInstallation? installation)
+        bool is32Bit,
+        [NotNullWhen(true)] out SilverlightInstallation? runtime)
     {
-        for (int i = 0; i < _installations.Length; i++)
-        {
-            var candidate = _installations[i];
+        var candidates = is32Bit ? _runtimes32 : _runtimes64;
 
-            if (candidate.Version.Major != version.Major || candidate.Version.Minor != version.Minor)
+        for (int i = 0; i < candidates.Length; i++)
+        {
+            var candidate = candidates[i];
+            if (candidate.Version.Major != version.Major)
                 continue;
 
-            installation = candidate;
+            runtime = candidate;
             return true;
         }
 
-        installation = null;
+        runtime = null;
         return false;
     }
 
-    private static SilverlightInstallation[] DetectInstallations(IEnumerable<string> programFilesDirectories)
+    /// <inheritdoc />
+    public override bool TryGetCompatibleReferenceRuntime(
+        Version version,
+        bool is32Bit,
+        [NotNullWhen(true)] out SilverlightInstallation? runtime)
     {
-        string[] roots = GetDistinctDirectories(programFilesDirectories);
-        var result = new List<SilverlightInstallation>();
+        var preferredCandidates = is32Bit ? _referenceRuntimes32 : _referenceRuntimes64;
+        var fallbackCandidates = is32Bit ? _referenceRuntimes64 : _referenceRuntimes32;
 
-        for (int i = 0; i < KnownVersions.Length; i++)
+        return TryGetCompatibleReferenceRuntime(preferredCandidates, version, out runtime)
+            || TryGetCompatibleReferenceRuntime(fallbackCandidates, version, out runtime);
+    }
+
+    private static bool TryGetCompatibleReferenceRuntime(
+        IList<SilverlightInstallation> candidates,
+        Version version,
+        [NotNullWhen(true)] out SilverlightInstallation? runtime)
+    {
+        for (int i = 0; i < candidates.Count; i++)
         {
-            var version = KnownVersions[i];
-            string? referenceAssemblyDirectory = FindReferenceAssemblyDirectory(roots, version);
-            string? sdkLibraryDirectory = FindSdkLibraryDirectory(roots, version);
-            string? runtimeDirectory = FindRuntimeDirectory(roots, version);
-
-            if (referenceAssemblyDirectory is null
-                && sdkLibraryDirectory is null
-                && runtimeDirectory is null)
+            var candidate = candidates[i];
+            if (candidate.Version.Major != version.Major || candidate.Version.Minor != version.Minor)
                 continue;
 
-            result.Add(new SilverlightInstallation(
-                version,
-                referenceAssemblyDirectory,
-                sdkLibraryDirectory,
-                runtimeDirectory
-            ));
+            runtime = candidate;
+            return true;
         }
 
-        return result.ToArray();
+        runtime = null;
+        return false;
     }
 
-    private static string[] GetDistinctDirectories(IEnumerable<string> directories)
+    private static SilverlightInstallation[] DetectRuntimeInstallations(IList<string> roots)
     {
-        var result = new List<string>();
+        var result = new List<SilverlightInstallation>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (string directory in directories)
-        {
-            if (!string.IsNullOrEmpty(directory) && seen.Add(directory))
-                result.Add(directory);
-        }
-
-        return result.ToArray();
-    }
-
-    private static string? FindReferenceAssemblyDirectory(IList<string> roots, Version version)
-    {
-        string versionDirectory = $"v{version.Major}.{version.Minor}";
-
-        for (int i = 0; i < roots.Count; i++)
-        {
-            string path = PathShim.Combine(
-                PathShim.Combine(
-                    PathShim.Combine(roots[i], "Reference Assemblies", "Microsoft"),
-                    "Framework",
-                    "Silverlight"
-                ),
-                versionDirectory
-            );
-
-            if (File.Exists(Path.Combine(path, "mscorlib.dll")))
-                return path;
-        }
-
-        return null;
-    }
-
-    private static string? FindSdkLibraryDirectory(IList<string> roots, Version version)
-    {
-        string versionDirectory = $"v{version.Major}.{version.Minor}";
-
-        for (int i = 0; i < roots.Count; i++)
-        {
-            string path = PathShim.Combine(
-                PathShim.Combine(
-                    PathShim.Combine(roots[i], "Microsoft SDKs", "Silverlight"),
-                    versionDirectory,
-                    "Libraries"
-                ),
-                "Client"
-            );
-
-            if (Directory.Exists(path))
-                return path;
-        }
-
-        return null;
-    }
-
-    private static string? FindRuntimeDirectory(IList<string> roots, Version version)
-    {
-        Version? bestVersion = null;
-        string? bestDirectory = null;
 
         for (int i = 0; i < roots.Count; i++)
         {
@@ -180,42 +142,125 @@ public sealed class MicrosoftSilverlightPathProvider : SilverlightPathProvider
                 string directory = directories[j];
                 string directoryName = Path.GetFileName(directory);
 
-                if (!VersionShim.TryParse(directoryName, out var candidateVersion))
+                if (!VersionShim.TryParse(directoryName, out var version)
+                    || !IsKnownVersion(version)
+                    || !File.Exists(Path.Combine(directory, "mscorlib.dll"))
+                    || !seen.Add(directory))
                     continue;
 
-                if (candidateVersion.Major != version.Major)
-                    continue;
-
-                if (!File.Exists(Path.Combine(directory, "mscorlib.dll")))
-                    continue;
-
-                if (bestVersion is not null && candidateVersion <= bestVersion)
-                    continue;
-
-                bestVersion = candidateVersion;
-                bestDirectory = directory;
+                result.Add(new SilverlightInstallation(version, directory));
             }
         }
 
-        return bestDirectory;
+        result.Sort((x, y) => y.Version.CompareTo(x.Version));
+        return result.ToArray();
     }
 
-    private static IEnumerable<string> GetDefaultProgramFilesDirectories()
+    private static SilverlightInstallation[] DetectReferenceInstallations(IList<string> roots)
+    {
+        var result = new List<SilverlightInstallation>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        for (int i = 0; i < KnownVersions.Length; i++)
+        {
+            var version = KnownVersions[i];
+
+            for (int j = 0; j < roots.Count; j++)
+            {
+                string? referenceAssemblyDirectory = FindReferenceAssemblyDirectory(roots[j], version);
+                string? sdkLibraryDirectory = FindSdkLibraryDirectory(roots[j], version);
+
+                string? installDirectory = referenceAssemblyDirectory ?? sdkLibraryDirectory;
+                if (installDirectory is null || !seen.Add(installDirectory))
+                    continue;
+
+                result.Add(new SilverlightInstallation(
+                    version,
+                    installDirectory,
+                    referenceAssemblyDirectory is not null ? sdkLibraryDirectory : null
+                ));
+            }
+        }
+
+        result.Sort((x, y) => y.Version.CompareTo(x.Version));
+        return result.ToArray();
+    }
+
+    private static bool IsKnownVersion(Version version)
+    {
+        for (int i = 0; i < KnownVersions.Length; i++)
+        {
+            if (KnownVersions[i].Major == version.Major)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static string[] GetDistinctDirectories(IEnumerable<string> directories)
+    {
+        var result = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (string directory in directories)
+        {
+            if (!string.IsNullOrEmpty(directory) && seen.Add(directory))
+                result.Add(directory);
+        }
+
+        return result.ToArray();
+    }
+
+    private static string? FindReferenceAssemblyDirectory(string root, Version version)
+    {
+        string path = PathShim.Combine(
+            PathShim.Combine(
+                PathShim.Combine(root, "Reference Assemblies", "Microsoft"),
+                "Framework",
+                "Silverlight"
+            ),
+            $"v{version.Major}.{version.Minor}"
+        );
+
+        return File.Exists(Path.Combine(path, "mscorlib.dll")) ? path : null;
+    }
+
+    private static string? FindSdkLibraryDirectory(string root, Version version)
+    {
+        string path = PathShim.Combine(
+            PathShim.Combine(
+                PathShim.Combine(root, "Microsoft SDKs", "Silverlight"),
+                $"v{version.Major}.{version.Minor}",
+                "Libraries"
+            ),
+            "Client"
+        );
+
+        return Directory.Exists(path) ? path : null;
+    }
+
+    private static IEnumerable<string> GetDefaultProgramFiles32BitDirectories()
     {
         string? programFilesX86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
         if (!string.IsNullOrEmpty(programFilesX86))
             yield return programFilesX86;
 
+        if (string.IsNullOrEmpty(programFilesX86))
+        {
+            string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            if (!string.IsNullOrEmpty(programFiles))
+                yield return programFiles;
+
+            string? programFilesEnvironment = Environment.GetEnvironmentVariable("ProgramFiles");
+            if (!string.IsNullOrEmpty(programFilesEnvironment))
+                yield return programFilesEnvironment;
+        }
+    }
+
+    private static IEnumerable<string> GetDefaultProgramFiles64BitDirectories()
+    {
         string? programFilesNative = Environment.GetEnvironmentVariable("ProgramW6432");
         if (!string.IsNullOrEmpty(programFilesNative))
             yield return programFilesNative;
-
-        string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-        if (!string.IsNullOrEmpty(programFiles))
-            yield return programFiles;
-
-        string? programFilesEnvironment = Environment.GetEnvironmentVariable("ProgramFiles");
-        if (!string.IsNullOrEmpty(programFilesEnvironment))
-            yield return programFilesEnvironment;
     }
 }

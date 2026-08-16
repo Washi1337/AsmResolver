@@ -23,14 +23,14 @@ public class SilverlightPathProviderTest : IClassFixture<TemporaryDirectoryFixtu
         string root = CreateRoot($"sl{major}");
         string referenceDirectory = CreateReferenceDirectory(root, version);
         string sdkDirectory = CreateSdkDirectory(root, version);
-        var provider = new MicrosoftSilverlightPathProvider([root]);
+        var provider = CreateProvider(root, is32Bit: true);
 
-        var installation = GetInstallation(provider, version);
+        var installation = GetReferenceRuntime(provider, version, is32Bit: true);
 
         Assert.Equal(version, installation.Version);
-        Assert.Equal(referenceDirectory, installation.ReferenceAssemblyDirectory);
+        Assert.Equal(referenceDirectory, installation.InstallDirectory);
         Assert.Equal(sdkDirectory, installation.SdkLibraryDirectory);
-        Assert.Null(installation.RuntimeDirectory);
+        Assert.False(provider.TryGetCompatibleRuntime(version, is32Bit: true, out _));
     }
 
     [Fact]
@@ -38,13 +38,12 @@ public class SilverlightPathProviderTest : IClassFixture<TemporaryDirectoryFixtu
     {
         string root = CreateRoot("reference-only");
         string referenceDirectory = CreateReferenceDirectory(root, new Version(5, 0));
-        var provider = new MicrosoftSilverlightPathProvider([root]);
+        var provider = CreateProvider(root, is32Bit: true);
 
-        var installation = GetInstallation(provider, new Version(5, 0));
+        var installation = GetReferenceRuntime(provider, new Version(5, 0), is32Bit: true);
 
-        Assert.Equal(referenceDirectory, installation.ReferenceAssemblyDirectory);
+        Assert.Equal(referenceDirectory, installation.InstallDirectory);
         Assert.Null(installation.SdkLibraryDirectory);
-        Assert.Null(installation.RuntimeDirectory);
     }
 
     [Fact]
@@ -52,37 +51,40 @@ public class SilverlightPathProviderTest : IClassFixture<TemporaryDirectoryFixtu
     {
         string root = CreateRoot("sdk-only");
         string sdkDirectory = CreateSdkDirectory(root, new Version(5, 0));
-        var provider = new MicrosoftSilverlightPathProvider([root]);
+        var provider = CreateProvider(root, is32Bit: true);
 
-        var installation = GetInstallation(provider, new Version(5, 0));
+        var installation = GetReferenceRuntime(provider, new Version(5, 0), is32Bit: true);
 
-        Assert.Null(installation.ReferenceAssemblyDirectory);
-        Assert.Equal(sdkDirectory, installation.SdkLibraryDirectory);
-        Assert.Null(installation.RuntimeDirectory);
+        Assert.Equal(sdkDirectory, installation.InstallDirectory);
+        Assert.Null(installation.SdkLibraryDirectory);
     }
 
     [Fact]
     public void DetectRuntimeOnlyInstallation()
     {
         string root = CreateRoot("runtime-only");
-        string runtimeDirectory = CreateRuntimeDirectory(root, new Version(5, 1, 50918, 0));
-        var provider = new MicrosoftSilverlightPathProvider([root]);
+        var runtimeVersion = new Version(5, 1, 50918, 0);
+        string runtimeDirectory = CreateRuntimeDirectory(root, runtimeVersion);
+        var provider = CreateProvider(root, is32Bit: true);
 
-        var installation = GetInstallation(provider, new Version(5, 0));
+        var installation = GetRuntime(provider, new Version(5, 0), is32Bit: true);
 
-        Assert.Null(installation.ReferenceAssemblyDirectory);
+        Assert.Equal(runtimeVersion, installation.Version);
+        Assert.Equal(runtimeDirectory, installation.InstallDirectory);
         Assert.Null(installation.SdkLibraryDirectory);
-        Assert.Equal(runtimeDirectory, installation.RuntimeDirectory);
+        Assert.False(provider.TryGetCompatibleReferenceRuntime(new Version(5, 0), is32Bit: true, out _));
     }
 
     [Fact]
     public void MissingInstallationReturnsFalse()
     {
         string root = CreateRoot("missing");
-        var provider = new MicrosoftSilverlightPathProvider([root]);
+        var provider = CreateProvider(root, is32Bit: true);
 
-        Assert.False(provider.TryGetCompatibleInstallation(new Version(4, 0), out _));
-        Assert.False(provider.TryGetCompatibleInstallation(new Version(5, 0), out _));
+        Assert.False(provider.TryGetCompatibleRuntime(new Version(4, 0), is32Bit: true, out _));
+        Assert.False(provider.TryGetCompatibleRuntime(new Version(5, 0), is32Bit: true, out _));
+        Assert.False(provider.TryGetCompatibleReferenceRuntime(new Version(4, 0), is32Bit: true, out _));
+        Assert.False(provider.TryGetCompatibleReferenceRuntime(new Version(5, 0), is32Bit: true, out _));
     }
 
     [Fact]
@@ -95,11 +97,11 @@ public class SilverlightPathProviderTest : IClassFixture<TemporaryDirectoryFixtu
         Directory.CreateDirectory(Path.Combine(runtimeRoot, "5.x"));
 
         string expectedDirectory = CreateRuntimeDirectory(root, new Version(5, 1, 50918, 0));
-        var provider = new MicrosoftSilverlightPathProvider([root]);
+        var provider = CreateProvider(root, is32Bit: true);
 
-        var installation = GetInstallation(provider, new Version(5, 0));
+        var installation = GetRuntime(provider, new Version(5, 0), is32Bit: true);
 
-        Assert.Equal(expectedDirectory, installation.RuntimeDirectory);
+        Assert.Equal(expectedDirectory, installation.InstallDirectory);
     }
 
     [Fact]
@@ -108,75 +110,87 @@ public class SilverlightPathProviderTest : IClassFixture<TemporaryDirectoryFixtu
         string root = CreateRoot("runtime-major");
         string expectedVersion4 = CreateRuntimeDirectory(root, new Version(4, 1, 10329, 0));
         string expectedVersion5 = CreateRuntimeDirectory(root, new Version(5, 1, 50918, 0));
+        var provider = CreateProvider(root, is32Bit: true);
 
-        var provider = new MicrosoftSilverlightPathProvider([root]);
+        var installation4 = GetRuntime(provider, new Version(4, 0), is32Bit: true);
+        var installation5 = GetRuntime(provider, new Version(5, 0), is32Bit: true);
 
-        var installation4 = GetInstallation(provider, new Version(4, 0));
-        var installation5 = GetInstallation(provider, new Version(5, 0));
-
-        Assert.Equal(expectedVersion4, installation4.RuntimeDirectory);
-        Assert.Equal(expectedVersion5, installation5.RuntimeDirectory);
+        Assert.Equal(expectedVersion4, installation4.InstallDirectory);
+        Assert.Equal(expectedVersion5, installation5.InstallDirectory);
     }
 
     [Fact]
-    public void RejectNullProgramFilesRoots() => Assert.Throws<ArgumentNullException>(() => new MicrosoftSilverlightPathProvider(null!));
+    public void RejectNullProgramFilesRoots()
+    {
+        Assert.Throws<ArgumentNullException>(() => new MicrosoftSilverlightPathProvider(null!, []));
+        Assert.Throws<ArgumentNullException>(() => new MicrosoftSilverlightPathProvider([], null!));
+    }
 
     [Fact]
-    public void DoesNotRollSilverlight40ForwardTo50()
+    public void DoesNotRollSilverlight40ReferenceRuntimeForwardTo50()
     {
         string root = CreateRoot("no-roll-forward");
-
         CreateReferenceDirectory(root, new Version(5, 0));
+        var provider = CreateProvider(root, is32Bit: true);
 
-        var provider = new MicrosoftSilverlightPathProvider([root]);
+        Assert.False(provider.TryGetCompatibleReferenceRuntime(new Version(4, 0), is32Bit: true, out _));
+        Assert.True(provider.TryGetCompatibleReferenceRuntime(new Version(5, 0), is32Bit: true, out _));
+    }
 
-        Assert.False(provider.TryGetCompatibleInstallation(new Version(4, 0), out _));
-        Assert.True(provider.TryGetCompatibleInstallation(new Version(5, 0), out _));
+    [Theory]
+    [InlineData(4, 1)]
+    [InlineData(5, 1)]
+    public void ReferenceRuntimeRequiresExactMajorAndMinorVersion(int major, int minor)
+    {
+        string root = CreateRoot($"exact-reference-{major}-{minor}");
+        CreateReferenceDirectory(root, new Version(major, 0));
+        var provider = CreateProvider(root, is32Bit: true);
+
+        Assert.False(provider.TryGetCompatibleReferenceRuntime(new Version(major, minor), is32Bit: true, out _));
     }
 
     [Fact]
     public void DoesNotDetectUnsupportedSilverlightVersions()
     {
         string root = CreateRoot("unsupported");
-
         CreateReferenceDirectory(root, new Version(6, 0));
+        CreateRuntimeDirectory(root, new Version(6, 0, 1, 0));
+        var provider = CreateProvider(root, is32Bit: true);
 
-        var provider = new MicrosoftSilverlightPathProvider([root]);
-
-        Assert.False(provider.TryGetCompatibleInstallation(new Version(6, 0), out _));
+        Assert.False(provider.TryGetCompatibleRuntime(new Version(6, 0), is32Bit: true, out _));
+        Assert.False(provider.TryGetCompatibleReferenceRuntime(new Version(6, 0), is32Bit: true, out _));
     }
 
     [Fact]
-    public void CombinesLocationsFromDifferentProgramFilesRoots()
+    public void KeepsRuntimeAndReferenceInstallationsSeparate()
     {
-        string root1 = CreateRoot("root1");
-        string root2 = CreateRoot("root2");
+        string root = CreateRoot("separate-installations");
+        string referenceDirectory = CreateReferenceDirectory(root, new Version(5, 0));
+        string runtimeDirectory = CreateRuntimeDirectory(root, new Version(5, 1, 50918, 0));
+        var provider = CreateProvider(root, is32Bit: true);
 
-        string referenceDirectory = CreateReferenceDirectory(root1, new Version(5, 0));
-        string runtimeDirectory = CreateRuntimeDirectory(root2, new Version(5, 1, 50918, 0));
+        var runtime = GetRuntime(provider, new Version(5, 0), is32Bit: true);
+        var referenceRuntime = GetReferenceRuntime(provider, new Version(5, 0), is32Bit: true);
 
-        var provider = new MicrosoftSilverlightPathProvider([root1, root2]);
-
-        var installation = GetInstallation(provider, new Version(5, 0));
-
-        Assert.Equal(referenceDirectory, installation.ReferenceAssemblyDirectory);
-        Assert.Equal(runtimeDirectory, installation.RuntimeDirectory);
+        Assert.Equal(runtimeDirectory, runtime.InstallDirectory);
+        Assert.Equal(referenceDirectory, referenceRuntime.InstallDirectory);
+        Assert.NotSame(runtime, referenceRuntime);
     }
 
     [Fact]
     public void SelectNewestRuntimeDirectoryForTargetMajorVersion()
     {
         string root = CreateRoot("runtime-selection");
-        string expectedDirectory = CreateRuntimeDirectory(root, new Version(5, 1, 50918, 0));
 
         CreateRuntimeDirectory(root, new Version(5, 0, 61118, 0));
+        string expectedDirectory = CreateRuntimeDirectory(root, new Version(5, 1, 50918, 0));
         CreateRuntimeDirectory(root, new Version(4, 1, 10329, 0));
 
-        var provider = new MicrosoftSilverlightPathProvider([root]);
+        var provider = CreateProvider(root, is32Bit: true);
+        var installation = GetRuntime(provider, new Version(5, 0), is32Bit: true);
 
-        var installation = GetInstallation(provider, new Version(5, 0));
-
-        Assert.Equal(expectedDirectory, installation.RuntimeDirectory);
+        Assert.Equal(new Version(5, 1, 50918, 0), installation.Version);
+        Assert.Equal(expectedDirectory, installation.InstallDirectory);
     }
 
     [Fact]
@@ -188,11 +202,10 @@ public class SilverlightPathProviderTest : IClassFixture<TemporaryDirectoryFixtu
 
         CreateReferenceDirectory(root1, new Version(5, 0), includeCorLib: false);
 
-        var provider = new MicrosoftSilverlightPathProvider([root1, root2]);
+        var provider = new MicrosoftSilverlightPathProvider([root1, root2], []);
+        var installation = GetReferenceRuntime(provider, new Version(5, 0), is32Bit: true);
 
-        var installation = GetInstallation(provider, new Version(5, 0));
-
-        Assert.Equal(expectedDirectory, installation.ReferenceAssemblyDirectory);
+        Assert.Equal(expectedDirectory, installation.InstallDirectory);
     }
 
     [Fact]
@@ -203,19 +216,89 @@ public class SilverlightPathProviderTest : IClassFixture<TemporaryDirectoryFixtu
 
         CreateRuntimeDirectory(root, new Version(5, 1, 50918, 0), includeCorLib: false);
 
-        var provider = new MicrosoftSilverlightPathProvider([root]);
+        var provider = CreateProvider(root, is32Bit: true);
+        var installation = GetRuntime(provider, new Version(5, 0), is32Bit: true);
 
-        var installation = GetInstallation(provider, new Version(5, 0));
-
-        Assert.Equal(expectedDirectory, installation.RuntimeDirectory);
+        Assert.Equal(expectedDirectory, installation.InstallDirectory);
     }
 
-    private static SilverlightInstallation GetInstallation(
-        MicrosoftSilverlightPathProvider provider,
-        Version version)
+    [Fact]
+    public void SelectRuntimeForRequestedArchitecture()
     {
-        Assert.True(provider.TryGetCompatibleInstallation(version, out var installation));
-        return installation!;
+        string root32 = CreateRoot("runtime-x86");
+        string root64 = CreateRoot("runtime-x64");
+        string runtime32 = CreateRuntimeDirectory(root32, new Version(5, 0, 61118, 0));
+        string runtime64 = CreateRuntimeDirectory(root64, new Version(5, 1, 50918, 0));
+        var provider = new MicrosoftSilverlightPathProvider([root32], [root64]);
+
+        Assert.Equal(runtime32, GetRuntime(provider, new Version(5, 0), is32Bit: true).InstallDirectory);
+        Assert.Equal(runtime64, GetRuntime(provider, new Version(5, 0), is32Bit: false).InstallDirectory);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void DoesNotFallBackToOtherArchitectureForRuntime(bool installedIs32Bit)
+    {
+        string architecture = installedIs32Bit ? "x86" : "x64";
+        string root = CreateRoot($"runtime-no-fallback-{architecture}");
+        var version = new Version(5, 0);
+        CreateRuntimeDirectory(root, new Version(5, 1, 50918, 0));
+        var provider = CreateProvider(root, installedIs32Bit);
+
+        Assert.False(provider.TryGetCompatibleRuntime(version, !installedIs32Bit, out _));
+    }
+
+    [Fact]
+    public void PreferReferenceRuntimeForRequestedArchitecture()
+    {
+        string root32 = CreateRoot("reference-x86");
+        string root64 = CreateRoot("reference-x64");
+        string reference32 = CreateReferenceDirectory(root32, new Version(5, 0));
+        string reference64 = CreateReferenceDirectory(root64, new Version(5, 0));
+        var provider = new MicrosoftSilverlightPathProvider([root32], [root64]);
+
+        Assert.Equal(reference32, GetReferenceRuntime(provider, new Version(5, 0), is32Bit: true).InstallDirectory);
+        Assert.Equal(reference64, GetReferenceRuntime(provider, new Version(5, 0), is32Bit: false).InstallDirectory);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void FallBackToOtherArchitectureForReferenceRuntime(bool installedIs32Bit)
+    {
+        string architecture = installedIs32Bit ? "x86" : "x64";
+        string root = CreateRoot($"reference-fallback-{architecture}");
+        var version = new Version(5, 0);
+        string referenceDirectory = CreateReferenceDirectory(root, version);
+        var provider = CreateProvider(root, installedIs32Bit);
+
+        var installation = GetReferenceRuntime(provider, version, is32Bit: !installedIs32Bit);
+
+        Assert.Equal(referenceDirectory, installation.InstallDirectory);
+    }
+
+    private static MicrosoftSilverlightPathProvider CreateProvider(string root, bool is32Bit) =>
+        is32Bit
+            ? new MicrosoftSilverlightPathProvider([root], [])
+            : new MicrosoftSilverlightPathProvider([], [root]);
+
+    private static SilverlightInstallation GetRuntime(
+        MicrosoftSilverlightPathProvider provider,
+        Version version,
+        bool is32Bit)
+    {
+        Assert.True(provider.TryGetCompatibleRuntime(version, is32Bit, out var runtime));
+        return runtime!;
+    }
+
+    private static SilverlightInstallation GetReferenceRuntime(
+        MicrosoftSilverlightPathProvider provider,
+        Version version,
+        bool is32Bit)
+    {
+        Assert.True(provider.TryGetCompatibleReferenceRuntime(version, is32Bit, out var runtime));
+        return runtime!;
     }
 
     private static string CreateReferenceDirectory(string root, Version version, bool includeCorLib = true)

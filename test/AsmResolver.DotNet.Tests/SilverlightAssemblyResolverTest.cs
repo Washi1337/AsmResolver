@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Serialized;
@@ -22,13 +23,13 @@ public class SilverlightAssemblyResolverTest : IClassFixture<TemporaryDirectoryF
     }
 
     [Fact]
-    public void PreferReferenceAssembliesOverSdkRuntimeAndSearchDirectories()
+    public void PreferRuntimeAssembliesOverReferenceSdkAndSearchDirectories()
     {
         var directories = CreateResolverDirectories("priority");
-        string expectedPath = CreatePlaceholder(directories.ReferenceDirectory, "Dependency.dll");
+        string expectedPath = CreatePlaceholder(directories.RuntimeDirectory, "Dependency.dll");
 
+        CreatePlaceholder(directories.ReferenceDirectory, "Dependency.dll");
         CreatePlaceholder(directories.SdkDirectory, "Dependency.dll");
-        CreatePlaceholder(directories.RuntimeDirectory, "Dependency.dll");
         CreatePlaceholder(directories.SearchDirectory, "Dependency.dll");
 
         var resolver = CreateResolver(directories);
@@ -38,21 +39,35 @@ public class SilverlightAssemblyResolverTest : IClassFixture<TemporaryDirectoryF
     }
 
     [Fact]
-    public void FallsBackFromReferenceAssembliesToSdkThenRuntime()
+    public void FallsBackToReferenceAssembliesAndThenSdkWhenRuntimeIsUnavailable()
     {
         var directories = CreateResolverDirectories("fallback-order");
+        string referencePath = CreatePlaceholder(directories.ReferenceDirectory, "SharedDependency.dll");
+        CreatePlaceholder(directories.SdkDirectory, "SharedDependency.dll");
         string sdkPath = CreatePlaceholder(directories.SdkDirectory, "SdkDependency.dll");
-        string runtimePath = CreatePlaceholder(directories.RuntimeDirectory, "RuntimeDependency.dll");
-        var resolver = CreateResolver(directories);
+        var resolver = CreateResolver(directories, includeRuntime: false);
 
+        Assert.Equal(referencePath, ProbeAssembly(resolver, "SharedDependency"));
         Assert.Equal(sdkPath, ProbeAssembly(resolver, "SdkDependency"));
-        Assert.Equal(runtimePath, ProbeAssembly(resolver, "RuntimeDependency"));
     }
 
     [Fact]
     public void FallsBackToCustomSearchDirectories()
     {
         var directories = CreateResolverDirectories("search-directories");
+        string expectedPath = CreatePlaceholder(directories.SearchDirectory, "ApplicationDependency.dll");
+        var resolver = CreateResolver(directories);
+
+        resolver.SearchDirectories.Add(directories.SearchDirectory);
+
+        Assert.Equal(expectedPath, ProbeAssembly(resolver, "ApplicationDependency"));
+    }
+
+    [Fact]
+    public void DoesNotUseReferenceInstallationWhenRuntimeIsAvailable()
+    {
+        var directories = CreateResolverDirectories("runtime-with-reference");
+        CreatePlaceholder(directories.ReferenceDirectory, "ApplicationDependency.dll");
         string expectedPath = CreatePlaceholder(directories.SearchDirectory, "ApplicationDependency.dll");
         var resolver = CreateResolver(directories);
 
@@ -101,7 +116,7 @@ public class SilverlightAssemblyResolverTest : IClassFixture<TemporaryDirectoryF
         var directories = CreateResolverDirectories("file-service");
 
         WriteAssembly(
-            directories.ReferenceDirectory,
+            directories.RuntimeDirectory,
             "mscorlib",
             KnownCorLibs.MsCorLib_v5_0_5_0.Version,
             null
@@ -122,8 +137,8 @@ public class SilverlightAssemblyResolverTest : IClassFixture<TemporaryDirectoryF
         string emptyProgramFilesRoot = CreateDirectory("empty-program-files");
         string expectedPath = CreatePlaceholder(directories.SearchDirectory, "ApplicationDependency.dll");
 
-        var provider = new MicrosoftSilverlightPathProvider([emptyProgramFilesRoot]);
-        var resolver = new SilverlightAssemblyResolver(new Version(5, 0), provider);
+        var provider = new MicrosoftSilverlightPathProvider([emptyProgramFilesRoot], []);
+        var resolver = new SilverlightAssemblyResolver(new Version(5, 0), is32Bit: true, provider);
 
         resolver.SearchDirectories.Add(directories.SearchDirectory);
 
@@ -131,21 +146,64 @@ public class SilverlightAssemblyResolverTest : IClassFixture<TemporaryDirectoryF
     }
 
     [Theory]
+    [InlineData(4, 0, true)]
+    [InlineData(5, 0, false)]
+    public void RequestsRuntimeUsingTargetVersionAndArchitecture(int major, int minor, bool is32Bit)
+    {
+        var version = new Version(major, minor);
+        var runtime = new SilverlightInstallation(
+            new Version(major, 1),
+            CreateDirectory($"runtime-request-{major}-{is32Bit}")
+        );
+        var referenceRuntime = new SilverlightInstallation(
+            version,
+            CreateDirectory($"unused-reference-request-{major}-{is32Bit}")
+        );
+        var provider = new TestPathProvider(runtime, referenceRuntime);
+
+        _ = new SilverlightAssemblyResolver(version, is32Bit, provider);
+
+        Assert.Equal(version, provider.RuntimeRequest?.Version);
+        Assert.Equal(is32Bit, provider.RuntimeRequest?.Is32Bit);
+        Assert.Null(provider.ReferenceRuntimeRequest);
+    }
+
+    [Theory]
+    [InlineData(4, 0, true)]
+    [InlineData(5, 0, false)]
+    public void RequestsReferenceRuntimeUsingTargetVersionAndArchitecture(int major, int minor, bool is32Bit)
+    {
+        var version = new Version(major, minor);
+        var referenceRuntime = new SilverlightInstallation(
+            version,
+            CreateDirectory($"reference-request-{major}-{is32Bit}")
+        );
+        var provider = new TestPathProvider(null, referenceRuntime);
+
+        _ = new SilverlightAssemblyResolver(version, is32Bit, provider);
+
+        Assert.Equal(version, provider.RuntimeRequest?.Version);
+        Assert.Equal(is32Bit, provider.RuntimeRequest?.Is32Bit);
+        Assert.Equal(version, provider.ReferenceRuntimeRequest?.Version);
+        Assert.Equal(is32Bit, provider.ReferenceRuntimeRequest?.Is32Bit);
+    }
+
+    [Theory]
     [InlineData(4, 0)]
     [InlineData(5, 0)]
-    public void ResolveCorLibFromSyntheticReferenceInstallation(int major, int minor)
+    public void ResolveCorLibFromSyntheticRuntimeInstallation(int major, int minor)
     {
         var directories = CreateResolverDirectories($"resolve-sl{major}");
         var runtime = DotNetRuntimeInfo.Silverlight(major, minor);
         var corLib = runtime.GetDefaultCorLib();
 
-        WriteAssembly(directories.ReferenceDirectory, "mscorlib", corLib.Version, null);
+        WriteAssembly(directories.RuntimeDirectory, "mscorlib", corLib.Version, null);
 
         var resolver = CreateResolver(directories, runtime.Version);
         var status = resolver.Resolve(corLib, null, out var assembly);
 
         Assert.Equal(ResolutionStatus.Success, status);
-        Assert.Equal(directories.ReferenceDirectory, Path.GetDirectoryName(assembly!.ManifestModule!.FilePath));
+        Assert.Equal(directories.RuntimeDirectory, Path.GetDirectoryName(assembly!.ManifestModule!.FilePath));
     }
 
     [SkippableTheory]
@@ -156,10 +214,11 @@ public class SilverlightAssemblyResolverTest : IClassFixture<TemporaryDirectoryF
         Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
 
         var version = new Version(major, minor);
-        bool hasInstallation = MicrosoftSilverlightPathProvider.Instance.TryGetCompatibleInstallation(
+        bool hasInstallation = MicrosoftSilverlightPathProvider.Instance.TryGetCompatibleReferenceRuntime(
             version,
+            IntPtr.Size == sizeof(uint),
             out var installation
-        ) && installation?.ReferenceAssemblyDirectory is not null;
+        ) && File.Exists(Path.Combine(installation.InstallDirectory, "mscorlib.dll"));
 
         Skip.IfNot(hasInstallation, $"Silverlight {version} reference assemblies are not installed.");
 
@@ -210,16 +269,25 @@ public class SilverlightAssemblyResolverTest : IClassFixture<TemporaryDirectoryF
     private SilverlightAssemblyResolver CreateResolver(
         ResolverDirectories directories,
         Version? version = null,
-        ModuleReaderParameters? readerParameters = null)
+        ModuleReaderParameters? readerParameters = null,
+        bool includeRuntime = true,
+        bool is32Bit = true)
     {
-        var installation = new SilverlightInstallation(
-            version ?? new Version(5, 0),
+        version ??= new Version(5, 0);
+        var referenceRuntime = new SilverlightInstallation(
+            version,
             directories.ReferenceDirectory,
-            directories.SdkDirectory,
-            directories.RuntimeDirectory
+            directories.SdkDirectory
         );
+        var runtime = includeRuntime
+            ? new SilverlightInstallation(
+                new Version(version.Major, 1),
+                directories.RuntimeDirectory
+            )
+            : null;
+        var provider = new TestPathProvider(runtime, referenceRuntime);
 
-        return new SilverlightAssemblyResolver(installation, readerParameters);
+        return new SilverlightAssemblyResolver(version, is32Bit, provider, readerParameters);
     }
 
     private ResolverDirectories CreateResolverDirectories(string name)
@@ -271,4 +339,41 @@ public class SilverlightAssemblyResolverTest : IClassFixture<TemporaryDirectoryF
         string SdkDirectory,
         string RuntimeDirectory,
         string SearchDirectory);
+
+    private sealed class TestPathProvider(
+        SilverlightInstallation? runtime,
+        SilverlightInstallation? referenceRuntime) : SilverlightPathProvider
+    {
+        public (Version Version, bool Is32Bit)? RuntimeRequest
+        {
+            get;
+            private set;
+        }
+
+        public (Version Version, bool Is32Bit)? ReferenceRuntimeRequest
+        {
+            get;
+            private set;
+        }
+
+        public override bool TryGetCompatibleRuntime(
+            Version version,
+            bool is32Bit,
+            [NotNullWhen(true)] out SilverlightInstallation? installation)
+        {
+            RuntimeRequest = (version, is32Bit);
+            installation = runtime;
+            return installation is not null;
+        }
+
+        public override bool TryGetCompatibleReferenceRuntime(
+            Version version,
+            bool is32Bit,
+            [NotNullWhen(true)] out SilverlightInstallation? installation)
+        {
+            ReferenceRuntimeRequest = (version, is32Bit);
+            installation = referenceRuntime;
+            return installation is not null;
+        }
+    }
 }
