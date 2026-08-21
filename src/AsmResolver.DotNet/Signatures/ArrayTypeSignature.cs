@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.IO;
@@ -197,9 +197,11 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public override TypeSignature? GetDirectBaseClass(RuntimeContext? context)
-            => ContextModule?.CorLibTypeFactory.CorLibScope
+        {
+            return context?.CorLibTypeFactory.CorLibScope
                 .CreateTypeReference("System", "Array")
                 .ToTypeSignature(false);
+        }
 
         /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
