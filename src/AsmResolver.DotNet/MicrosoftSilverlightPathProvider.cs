@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using AsmResolver.Shims;
 
 namespace AsmResolver.DotNet;
@@ -43,8 +44,15 @@ public sealed class MicrosoftSilverlightPathProvider : SilverlightPathProvider
         if (programFiles64BitDirectories is null)
             throw new ArgumentNullException(nameof(programFiles64BitDirectories));
 
-        string[] roots32 = GetDistinctDirectories(programFiles32BitDirectories);
-        string[] roots64 = GetDistinctDirectories(programFiles64BitDirectories);
+        string[] roots32 = programFiles32BitDirectories
+            .Where(d => !string.IsNullOrEmpty(d))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        string[] roots64 = programFiles64BitDirectories
+            .Where(d => !string.IsNullOrEmpty(d))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
 
         _runtimes32 = DetectRuntimeInstallations(roots32);
         _runtimes64 = DetectRuntimeInstallations(roots64);
@@ -197,20 +205,6 @@ public sealed class MicrosoftSilverlightPathProvider : SilverlightPathProvider
         return false;
     }
 
-    private static string[] GetDistinctDirectories(IEnumerable<string> directories)
-    {
-        var result = new List<string>();
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (string directory in directories)
-        {
-            if (!string.IsNullOrEmpty(directory) && seen.Add(directory))
-                result.Add(directory);
-        }
-
-        return result.ToArray();
-    }
-
     private static string? FindReferenceAssemblyDirectory(string root, Version version)
     {
         string path = PathShim.Combine(
@@ -244,23 +238,12 @@ public sealed class MicrosoftSilverlightPathProvider : SilverlightPathProvider
         string? programFilesX86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
         if (!string.IsNullOrEmpty(programFilesX86))
             yield return programFilesX86;
-
-        if (string.IsNullOrEmpty(programFilesX86))
-        {
-            string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-            if (!string.IsNullOrEmpty(programFiles))
-                yield return programFiles;
-
-            string? programFilesEnvironment = Environment.GetEnvironmentVariable("ProgramFiles");
-            if (!string.IsNullOrEmpty(programFilesEnvironment))
-                yield return programFilesEnvironment;
-        }
     }
 
     private static IEnumerable<string> GetDefaultProgramFiles64BitDirectories()
     {
-        string? programFilesNative = Environment.GetEnvironmentVariable("ProgramW6432");
-        if (!string.IsNullOrEmpty(programFilesNative))
-            yield return programFilesNative;
+        string? programFilesX64 = Environment.GetEnvironmentVariable("ProgramW6432");
+        if (!string.IsNullOrEmpty(programFilesX64))
+            yield return programFilesX64;
     }
 }
