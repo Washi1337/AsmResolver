@@ -191,15 +191,14 @@ public static class TargetRuntimeProber
             if (Utf8String.IsNullOrEmpty(element) || !DotNetRuntimeInfo.TryParse(element, out var info))
                 continue;
 
-            // Silverlight shares corlib identities with other legacy target frameworks. Target framework profiles
-            // also identify distinct platforms, such as `Silverlight,Version=v4.0,Profile=WindowsPhone`, rather than
-            // the full desktop framework:
-            // https://learn.microsoft.com/visualstudio/extensibility/creating-a-software-development-kit
-            // Only use explicit, unprofiled Silverlight target framework metadata to classify an image as desktop
-            // Silverlight.
+            // Silverlight target framework profiles can identify a different set of reference assemblies, such as
+            // `Silverlight,Version=v4.0,Profile=WindowsPhone`, rather than the full desktop framework:
+            // https://learn.microsoft.com/en-us/visualstudio/extensibility/creating-a-software-development-kit
+            // Since the Silverlight resolver only probes the standard desktop Silverlight locations, only use explicit,
+            // unprofiled Silverlight target framework metadata to classify an image as desktop Silverlight.
             bool isSupportedSilverlight = info.IsSilverlight
                 && IsSupportedSilverlightVersion(info.Version)
-                && !HasNonEmptyProfile(element);
+                && string.IsNullOrEmpty(info.Profile);
 
             // Prefer explicit Silverlight metadata over the runtime inferred from the corlib.
             if (info.IsSilverlight)
@@ -262,28 +261,6 @@ public static class TargetRuntimeProber
     }
 
     private static bool IsSupportedSilverlightVersion(Version version) => version.Major is 4 or 5 && version.Minor == 0;
-
-    private static bool HasNonEmptyProfile(Utf8String frameworkName)
-    {
-        string[] components = frameworkName.ToString().Split(',');
-
-        for (int i = 1; i < components.Length; i++)
-        {
-            string component = components[i].Trim();
-            int separatorIndex = component.IndexOf('=');
-
-            if (separatorIndex < 0)
-                continue;
-
-            string key = component.Substring(0, separatorIndex).Trim();
-
-            if (string.Equals(key, "Profile", StringComparison.OrdinalIgnoreCase)
-                && component.Substring(separatorIndex + 1).Trim().Length > 0)
-                return true;
-        }
-
-        return false;
-    }
 
     private static DotNetRuntimeInfo ToDotNetRuntimeInfo(string name, int major, int minor, int build, int revision)
     {
