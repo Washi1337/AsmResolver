@@ -257,6 +257,17 @@ public static class TargetRuntimeProber
 
     private static DotNetRuntimeInfo ToDotNetRuntimeInfo(string name, int major, int minor, int build, int revision)
     {
+        // Silverlight corlib assemblies do not have a TargetFrameworkAttribute.
+        // Use the assembly version to identify the runtime.
+        if (name == "mscorlib")
+        {
+            if (major == 2 && minor == 0 && build == 5 && revision == 0)
+                return DotNetRuntimeInfo.Silverlight(4, 0);
+
+            if (major == 5 && minor == 0 && build == 5 && revision == 0)
+                return DotNetRuntimeInfo.Silverlight(5, 0);
+        }
+
         // mscorlib v255.255.255.255 is used in WinRT (earliest supported framework is .NET FX 4.5).
         // TODO: We may want to introduce a separate runtime info for this instead, as it will require some additional
         //       changes to the resolver (i.e., include WinMetadata search dirs).

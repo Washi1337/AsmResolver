@@ -15,12 +15,6 @@ public class SilverlightRuntimeTest
         { KnownCorLibs.MsCorLib_v5_0_5_0, DotNetRuntimeInfo.Silverlight(5, 0) },
     };
 
-    public static TheoryData<AssemblyReference, DotNetRuntimeInfo> SilverlightCorLibHeuristics => new()
-    {
-        { KnownCorLibs.MsCorLib_v2_0_5_0, DotNetRuntimeInfo.NetFramework(2, 0) },
-        { KnownCorLibs.MsCorLib_v5_0_5_0, DotNetRuntimeInfo.NetCoreApp(5, 0) },
-    };
-
     [Theory]
     [InlineData("Silverlight,Version=v4.0", 4, 0)]
     [InlineData("Silverlight,Version=v5.0", 5, 0)]
@@ -57,32 +51,38 @@ public class SilverlightRuntimeTest
     }
 
     [Theory]
-    [MemberData(nameof(SilverlightCorLibHeuristics))]
-    public void CorLibIdentityAloneDoesNotClassifyAsSilverlight(
+    [MemberData(nameof(SilverlightCorLibs))]
+    public void CorLibIdentityUsesBestEffortSilverlightClassification(
         AssemblyReference corLib,
         DotNetRuntimeInfo expectedRuntime)
     {
         var image = CreateImage(corLib);
         var detectedRuntime = GetTargetRuntime(image);
-        var module = new ModuleDefinition("AmbiguousCorLib.dll", corLib);
+        var module = new ModuleDefinition("Silverlight.dll", corLib);
 
         Assert.Equal(expectedRuntime, detectedRuntime);
-        Assert.False(detectedRuntime.IsSilverlight);
-        Assert.False(module.CorLibTypeFactory.ExtractDotNetRuntimeInfo().IsSilverlight);
+        Assert.Equal(expectedRuntime, module.OriginalTargetRuntime);
     }
 
-    [Fact]
-    public void RetargetablePortableCorLibIdentityDoesNotClassifyAsSilverlight()
+    [Theory]
+    [MemberData(nameof(SilverlightCorLibs))]
+    public void LoadingSilverlightCorLibSetsOriginalTargetRuntime(
+        AssemblyReference corLib,
+        DotNetRuntimeInfo expectedRuntime)
     {
-        var corLib = new AssemblyReference(KnownCorLibs.MsCorLib_v2_0_5_0)
-        {
-            IsRetargetable = true,
-        };
+        var assembly = new AssemblyDefinition(corLib.Name, corLib.Version);
+        var module = new ModuleDefinition("mscorlib.dll", null);
+        assembly.Modules.Add(module);
 
-        var detectedRuntime = GetTargetRuntime(CreateImage(corLib));
+        using var stream = new MemoryStream();
+        assembly.WriteManifest(stream);
 
-        Assert.Equal(DotNetRuntimeInfo.NetFramework(2, 0), detectedRuntime);
-        Assert.False(detectedRuntime.IsSilverlight);
+        var loadedModule = ModuleDefinition.FromImage(
+            PEImage.FromBytes(stream.ToArray(), TestReaderParameters.PEReaderParameters),
+            TestReaderParameters
+        );
+
+        Assert.Equal(expectedRuntime, loadedModule.OriginalTargetRuntime);
     }
 
     [Theory]
