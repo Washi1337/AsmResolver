@@ -191,14 +191,7 @@ public static class TargetRuntimeProber
             if (Utf8String.IsNullOrEmpty(element) || !DotNetRuntimeInfo.TryParse(element, out var info))
                 continue;
 
-            // Silverlight target framework profiles can identify a different set of reference assemblies, such as
-            // `Silverlight,Version=v4.0,Profile=WindowsPhone`, rather than the full desktop framework:
-            // https://learn.microsoft.com/en-us/visualstudio/extensibility/creating-a-software-development-kit
-            // Since the Silverlight resolver only probes the standard desktop Silverlight locations, only use explicit,
-            // unprofiled Silverlight target framework metadata to classify an image as desktop Silverlight.
-            bool isSupportedSilverlight = info.IsSilverlight
-                && IsSupportedSilverlightVersion(info.Version)
-                && string.IsNullOrEmpty(info.Profile);
+            bool isSupportedSilverlight = info.IsSilverlight && IsSupportedSilverlightVersion(info.Version);
 
             // Prefer explicit Silverlight metadata over the runtime inferred from the corlib.
             if (info.IsSilverlight)

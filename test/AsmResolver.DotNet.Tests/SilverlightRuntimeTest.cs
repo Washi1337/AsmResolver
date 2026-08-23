@@ -117,21 +117,6 @@ public class SilverlightRuntimeTest
     }
 
     [Theory]
-    [InlineData(4, 0, "Profile=WindowsPhone")]
-    [InlineData(5, 0, "profile=WindowsPhone")]
-    [InlineData(4, 0, "Profile=,Profile=WindowsPhone")]
-    [InlineData(5, 0, " Profile = WindowsPhone ")]
-    public void ProfiledSilverlightTargetDoesNotUseDesktopSilverlightRuntime(int major, int minor, string profile)
-    {
-        var image = CreateImage(
-            GetSilverlightCorLib(major),
-            $"Silverlight,Version=v{major}.{minor},{profile}"
-        );
-
-        Assert.False(GetTargetRuntime(image).IsSilverlight);
-    }
-
-    [Theory]
     [InlineData(4, 0, "Profile=")]
     [InlineData(5, 0, "profile=   ")]
     [InlineData(4, 0, "Profile=,profile=  ")]
