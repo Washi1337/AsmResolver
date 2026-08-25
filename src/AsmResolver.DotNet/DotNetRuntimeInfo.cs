@@ -36,6 +36,11 @@ namespace AsmResolver.DotNet
         /// </summary>
         public const string NetPortableName = ".NETPortable";
 
+        /// <summary>
+        /// The target framework name used by applications targeting Microsoft Silverlight.
+        /// </summary>
+        public const string SilverlightName = "Silverlight";
+
         private static readonly Regex FormatRegex = new(@"([a-zA-Z.]+)\s*,\s*Version=v(\d+\.\d+)");
 
         private static readonly Regex NetFxMonikerRegex = new(@"net(\d)(\d)(\d?)");
@@ -52,9 +57,21 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the runtime.</param>
         /// <param name="version">The version of the runtime.</param>
         public DotNetRuntimeInfo(string name, Version version)
+            : this(name, version, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="DotNetRuntimeInfo"/> structure.
+        /// </summary>
+        /// <param name="name">The name of the runtime.</param>
+        /// <param name="version">The version of the runtime.</param>
+        /// <param name="profile">The optional target framework profile.</param>
+        public DotNetRuntimeInfo(string name, Version version, string? profile)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Version = version ?? throw new ArgumentNullException(nameof(version));
+            Profile = profile;
         }
 
         /// <summary>
@@ -69,6 +86,14 @@ namespace AsmResolver.DotNet
         /// Gets the version of the runtime.
         /// </summary>
         public Version Version
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the target framework profile, if available.
+        /// </summary>
+        public string? Profile
         {
             get;
         }
@@ -100,6 +125,11 @@ namespace AsmResolver.DotNet
         /// Gets a value indicating whether the application targets the .NET Portable runtime or not.
         /// </summary>
         public bool IsNetPortable => Name == NetPortableName;
+
+        /// <summary>
+        /// Gets a value indicating whether the application targets the Microsoft Silverlight runtime or not.
+        /// </summary>
+        public bool IsSilverlight => Name == SilverlightName;
 
         /// <summary>
         /// Constructs a runtime info record referencing legacy .NET Framework.
@@ -165,6 +195,21 @@ namespace AsmResolver.DotNet
         public static DotNetRuntimeInfo NetCoreApp(Version version) => new(NetCoreAppName, version);
 
         /// <summary>
+        /// Constructs a runtime info record referencing Microsoft Silverlight.
+        /// </summary>
+        /// <param name="major">The major version</param>
+        /// <param name="minor">The minor version</param>
+        /// <returns>The runtime info record.</returns>
+        public static DotNetRuntimeInfo Silverlight(int major, int minor) => Silverlight(new Version(major, minor));
+
+        /// <summary>
+        /// Constructs a runtime info record referencing Microsoft Silverlight.
+        /// </summary>
+        /// <param name="version">The version</param>
+        /// <returns>The runtime info record.</returns>
+        public static DotNetRuntimeInfo Silverlight(Version version) => new(SilverlightName, version);
+
+        /// <summary>
         /// Parses the framework name as provided in a <c>System.Runtime.Versioning.TargetFrameworkAttribute</c> attribute.
         /// </summary>
         /// <param name="frameworkName">The full runtime name.</param>
@@ -191,8 +236,32 @@ namespace AsmResolver.DotNet
 
             string name = match.Groups[1].Value;
             var version = new Version(match.Groups[2].Value);
-            info = new DotNetRuntimeInfo(name, version);
+            info = new DotNetRuntimeInfo(name, version, ParseProfile(frameworkName));
             return true;
+        }
+
+        private static string? ParseProfile(string frameworkName)
+        {
+            string[] components = frameworkName.Split(',');
+
+            for (int i = 1; i < components.Length; i++)
+            {
+                string component = components[i].Trim();
+                int separatorIndex = component.IndexOf('=');
+
+                if (separatorIndex < 0)
+                    continue;
+
+                string key = component.Substring(0, separatorIndex).Trim();
+                if (!string.Equals(key, "Profile", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string profile = component.Substring(separatorIndex + 1).Trim();
+                if (profile.Length > 0)
+                    return profile;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -249,12 +318,17 @@ namespace AsmResolver.DotNet
         public AssemblyReference? GetAssumedImplCorLib() => KnownCorLibs.TryImplFromRuntimeInfo(this);
 
         /// <inheritdoc />
-        public override string ToString() => $"{Name},Version=v{Version}";
+        public override string ToString()
+        {
+            return Profile is null
+                ? $"{Name},Version=v{Version}"
+                : $"{Name},Version=v{Version},Profile={Profile}";
+        }
 
         /// <inheritdoc />
         public bool Equals(DotNetRuntimeInfo other)
         {
-            return Name == other.Name && Version.Equals(other.Version);
+            return Name == other.Name && Version.Equals(other.Version) && Profile == other.Profile;
         }
 
         /// <inheritdoc />
@@ -268,7 +342,7 @@ namespace AsmResolver.DotNet
         {
             unchecked
             {
-                return (Name.GetHashCode() * 397) ^ Version.GetHashCode();
+                return ((Name.GetHashCode() * 397) ^ Version.GetHashCode()) * 397 ^ (Profile?.GetHashCode() ?? 0);
             }
         }
     }

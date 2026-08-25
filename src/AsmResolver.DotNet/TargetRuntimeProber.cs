@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
@@ -187,17 +188,42 @@ public static class TargetRuntimeProber
             // Read first argument (target runtime string).
             var element = reader.ReadSerString();
 
-            // Check if it is a newer version (only update if runtime name is the same as previously found best match).
-            // We need to explicitly check for `null`, because Version::`operator <` throws on .NET FX when one of the
-            // operands is `null`. See also https://github.com/Washi1337/AsmResolver/issues/723
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            if (!Utf8String.IsNullOrEmpty(element)
-                && DotNetRuntimeInfo.TryParse(element, out var info)
-                && (bestMatch.Version is null || bestMatch.Name == info.Name && info.Version > bestMatch.Version))
+            if (Utf8String.IsNullOrEmpty(element) || !DotNetRuntimeInfo.TryParse(element, out var info))
+                continue;
+
+            bool isSupportedSilverlight = info.IsSilverlight && IsSupportedSilverlightVersion(info.Version);
+
+            // Prefer explicit Silverlight metadata over the runtime inferred from the corlib.
+            if (info.IsSilverlight)
             {
-                bestMatch = info;
-                updated = true;
+                if (!isSupportedSilverlight)
+                    continue;
+
+                // ReSharper disable once RedundantAlwaysMatchSubpattern
+                if (bestMatch is { IsSilverlight: true, Version: not null })
+                {
+                    if (info.Version <= bestMatch.Version)
+                        continue;
+                }
             }
+            else
+            {
+                // Check if it is a newer version (only update if runtime name is the same as previously found best match).
+                // We need to explicitly check for `null`, because Version::`operator <` throws on .NET FX when one of the
+                // operands is `null`. See also https://github.com/Washi1337/AsmResolver/issues/723
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+                if (bestMatch.Version is not null)
+                {
+                    if (bestMatch.Name != info.Name)
+                        continue;
+
+                    if (info.Version <= bestMatch.Version)
+                        continue;
+                }
+            }
+
+            bestMatch = info;
+            updated = true;
         }
 
         return updated;
@@ -227,8 +253,21 @@ public static class TargetRuntimeProber
         );
     }
 
+    private static bool IsSupportedSilverlightVersion(Version version) => version.Major is 4 or 5 && version.Minor == 0;
+
     private static DotNetRuntimeInfo ToDotNetRuntimeInfo(string name, int major, int minor, int build, int revision)
     {
+        // Silverlight corlib assemblies do not have a TargetFrameworkAttribute.
+        // Use the assembly version to identify the runtime.
+        if (name == "mscorlib")
+        {
+            if (major == 2 && minor == 0 && build == 5 && revision == 0)
+                return DotNetRuntimeInfo.Silverlight(4, 0);
+
+            if (major == 5 && minor == 0 && build == 5 && revision == 0)
+                return DotNetRuntimeInfo.Silverlight(5, 0);
+        }
+
         // mscorlib v255.255.255.255 is used in WinRT (earliest supported framework is .NET FX 4.5).
         // TODO: We may want to introduce a separate runtime info for this instead, as it will require some additional
         //       changes to the resolver (i.e., include WinMetadata search dirs).

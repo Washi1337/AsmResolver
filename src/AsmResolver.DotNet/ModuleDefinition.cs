@@ -354,6 +354,7 @@ namespace AsmResolver.DotNet
         public ModuleDefinition(Utf8String? name, DotNetRuntimeInfo targetRuntime)
             : this(name, targetRuntime.GetDefaultCorLib())
         {
+            OriginalTargetRuntime = targetRuntime;
         }
 
         /// <summary>
