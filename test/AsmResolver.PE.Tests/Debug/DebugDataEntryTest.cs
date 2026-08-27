@@ -73,5 +73,27 @@ namespace AsmResolver.PE.Tests.Debug
                 "UNICODE_RSDS_FIXTURE_OK\n"
             );
         }
+
+        [Fact]
+        public void PersistentPortablePdbEntries()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+
+            image.DebugData.Clear();
+            image.DebugData.Add(new DebugDataEntry(
+                new CustomDebugDataSegment(DebugDataType.EmbeddedPortablePdb, new DataSegment(new byte[] {1, 2, 3, 4}))));
+            image.DebugData.Add(new DebugDataEntry(
+                new CustomDebugDataSegment(DebugDataType.PdbChecksum, new DataSegment(new byte[] {5, 6, 7, 8}))));
+            image.DebugData.Add(new DebugDataEntry(new EmptyDebugDataSegment(DebugDataType.Repro)));
+
+            var newImage = RebuildAndReloadManagedPE(image);
+
+            Assert.Equal(new[]
+            {
+                DebugDataType.EmbeddedPortablePdb,
+                DebugDataType.PdbChecksum,
+                DebugDataType.Repro
+            }, newImage.DebugData.Select(d => d.Contents!.Type));
+        }
     }
 }
