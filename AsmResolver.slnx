@@ -60,6 +60,10 @@
       <Platform Solution="*|Any CPU" Project="Win32" />
       <Build Solution="*|Any CPU" Project="false" />
     </Project>
+    <Project Path="test/TestBinaries/Native/ResourceLibrary/ResourceLibrary.vcxproj">
+      <Platform Solution="*|Any CPU" Project="Win32" />
+      <Build Solution="*|Any CPU" Project="false" />
+    </Project>
     <Project Path="test/TestBinaries/Native/TlsTest/TlsTest.vcxproj">
       <Platform Solution="*|Any CPU" Project="Win32" />
       <Build Solution="*|Any CPU" Project="false" />

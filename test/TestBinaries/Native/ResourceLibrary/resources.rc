@@ -1,0 +1,29 @@
+#include <windows.h>
+
+// ============================================================
+// RT_STRING (type 6) - String table across multiple blocks
+// ============================================================
+// Block 1 (IDs 0-15)
+STRINGTABLE
+BEGIN
+    1,  "Hello"
+    2,  "World"
+    3,  "AsmResolver Test String"
+    4,  "String with ""quotes"" inside"
+    15, "Last in block one"
+END
+
+// Block 2 (IDs 16-31)
+STRINGTABLE
+BEGIN
+    16, "Second block string"
+    17, "Another in block two"
+    31, "Last in block two"
+END
+
+// Block 4 (IDs 48-63) - gap between blocks
+STRINGTABLE
+BEGIN
+    48, "Sparse block string"
+    50, "Non-contiguous ID"
+END
