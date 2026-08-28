@@ -19,6 +19,7 @@ namespace AsmResolver.PE.Debug
             return type switch
             {
                 DebugDataType.CodeView => CodeViewDataSegment.FromReader(context, ref reader),
+                DebugDataType.EmbeddedPortablePdb => PortablePdbDataSegment.FromReader(context, ref reader),
                 _ => new CustomDebugDataSegment(type, DataSegment.FromReader(ref reader))
             };
         }

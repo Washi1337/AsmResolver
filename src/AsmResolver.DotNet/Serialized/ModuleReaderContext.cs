@@ -51,6 +51,8 @@ namespace AsmResolver.DotNet.Serialized
         /// </summary>
         public MetadataDirectory Metadata => Image.DotNetDirectory!.Metadata!;
 
+        public ISymbolReader SymbolReader => ParentModule.SymbolReader;
+
         /// <summary>
         /// Gets the streams that are used to read the metadata.
         /// </summary>

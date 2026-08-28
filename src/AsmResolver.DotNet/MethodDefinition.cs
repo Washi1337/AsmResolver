@@ -7,6 +7,7 @@ using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.PortablePdbs;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -26,7 +27,8 @@ namespace AsmResolver.DotNet
         IHasGenericParameters,
         IMemberForwarded,
         IHasSecurityDeclaration,
-        IManagedEntryPoint
+        IManagedEntryPoint,
+        IHasCustomDebugInformation
     {
         private ParameterCollection? _parameters;
 
@@ -796,6 +798,25 @@ namespace AsmResolver.DotNet
             set;
         }
 
+        [LazyProperty]
+        public partial MethodDebugInformation? MethodDebugInformation
+        {
+            get;
+            set;
+        }
+
+        [LazyProperty]
+        public partial IList<LocalScope> LocalScopes { get; }
+
+        [LazyProperty(OwnerProperty = nameof(MoveNextMethod))]
+        public partial MethodDefinition? KickoffMethod { get; set; }
+
+        [LazyProperty(OwnerProperty = nameof(KickoffMethod))]
+        public partial MethodDefinition? MoveNextMethod { get; set; }
+
+        [LazyProperty]
+        public partial IList<CustomDebugInformation> CustomDebugInformations { get; }
+
         /// <summary>
         /// Creates a new private static constructor for a type that is executed when its declaring type is loaded by the CLR.
         /// </summary>
@@ -1058,6 +1079,16 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="ExportInfo"/> property.
         /// </remarks>
         protected virtual UnmanagedExportInfo? GetExportInfo() => null;
+
+        protected virtual MethodDebugInformation? GetMethodDebugInformation() => null;
+
+        protected virtual IList<LocalScope> GetLocalScopes() => new MemberCollection<MethodDefinition, LocalScope>(this);
+
+        protected virtual MethodDefinition? GetKickoffMethod() => null;
+
+        protected virtual MethodDefinition? GetMoveNextMethod() => null;
+
+        protected virtual IList<CustomDebugInformation> GetCustomDebugInformations() => new MemberCollection<IHasCustomDebugInformation, CustomDebugInformation>(this);
 
         /// <summary>
         /// Asserts whether the method's metadata is consistent with its signature.
