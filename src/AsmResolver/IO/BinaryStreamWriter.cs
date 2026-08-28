@@ -1,11 +1,8 @@
 using System;
 using System.IO;
 using System.Text;
-
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
 using System.Buffers;
 using System.Buffers.Binary;
-#endif
 
 #if NET10_0_OR_GREATER
 using System.Runtime.CompilerServices;
@@ -51,20 +48,20 @@ namespace AsmResolver.IO
         /// </summary>
         public ulong Offset
         {
-            get => (uint) BaseStream.Position;
+            get => (uint)BaseStream.Position;
             set
             {
                 // Check if position actually changed before actually setting. If we don't do this, this can cause
                 // performance issues on some systems. See https://github.com/Washi1337/AsmResolver/issues/232
-                if (BaseStream.Position != (long) value)
-                    BaseStream.Position = (long) value;
+                if (BaseStream.Position != (long)value)
+                    BaseStream.Position = (long)value;
             }
         }
 
         /// <summary>
         /// Gets or sets the current length of the stream.
         /// </summary>
-        public uint Length => (uint) BaseStream.Length;
+        public uint Length => (uint)BaseStream.Length;
 
         /// <summary>
         /// Writes a buffer of data to the stream.
@@ -77,16 +74,27 @@ namespace AsmResolver.IO
             BaseStream.Write(buffer, startIndex, count);
         }
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// Writes a buffer of data to the stream.
         /// </summary>
         /// <param name="buffer">The buffer to write to the stream.</param>
         public void WriteBytes(ReadOnlySpan<byte> buffer)
         {
+#if NETCOREAPP2_1_OR_GREATER
             BaseStream.Write(buffer);
-        }
+#else
+			byte[] array = ArrayPool<byte>.Shared.Rent(buffer.Length);
+			try
+			{
+				buffer.CopyTo(array);
+                BaseStream.Write(array, 0, buffer.Length);
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(array, false);
+			}
 #endif
+        }
 
         /// <summary>
         /// Writes a single byte to the stream.
@@ -103,12 +111,7 @@ namespace AsmResolver.IO
         /// <param name="value">The unsigned 16-bit integer to write.</param>
         public void WriteUInt16(ushort value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             BinaryPrimitives.WriteUInt16LittleEndian(_buffer, value);
-#else
-            _buffer[1] = (byte) ((value >> 8) & 0xFF);
-            _buffer[0] = (byte) (value & 0xFF);
-#endif
 #if NET10_0_OR_GREATER
             BaseStream.Write(_buffer[..2]);
 #else
@@ -122,14 +125,7 @@ namespace AsmResolver.IO
         /// <param name="value">The unsigned 32-bit integer to write.</param>
         public void WriteUInt32(uint value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             BinaryPrimitives.WriteUInt32LittleEndian(_buffer, value);
-#else
-            _buffer[3] = (byte) ((value >> 24) & 0xFF);
-            _buffer[2] = (byte) ((value >> 16) & 0xFF);
-            _buffer[1] = (byte) ((value >> 8) & 0xFF);
-            _buffer[0] = (byte) (value & 0xFF);
-#endif
 #if NET10_0_OR_GREATER
             BaseStream.Write(_buffer[..4]);
 #else
@@ -143,18 +139,7 @@ namespace AsmResolver.IO
         /// <param name="value">The unsigned 64-bit integer to write.</param>
         public void WriteUInt64(ulong value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             BinaryPrimitives.WriteUInt64LittleEndian(_buffer, value);
-#else
-            _buffer[7] = (byte) ((value >> 56) & 0xFF);
-            _buffer[6] = (byte) ((value >> 48) & 0xFF);
-            _buffer[5] = (byte) ((value >> 40) & 0xFF);
-            _buffer[4] = (byte) ((value >> 32) & 0xFF);
-            _buffer[3] = (byte) ((value >> 24) & 0xFF);
-            _buffer[2] = (byte) ((value >> 16) & 0xFF);
-            _buffer[1] = (byte) ((value >> 8) & 0xFF);
-            _buffer[0] = (byte) (value & 0xFF);
-#endif
 #if NET10_0_OR_GREATER
             BaseStream.Write(_buffer[..8]);
 #else
@@ -168,7 +153,7 @@ namespace AsmResolver.IO
         /// <param name="value">The signed byte to write.</param>
         public void WriteSByte(sbyte value)
         {
-            BaseStream.WriteByte(unchecked((byte) value));
+            BaseStream.WriteByte(unchecked((byte)value));
         }
 
         /// <summary>
@@ -177,12 +162,7 @@ namespace AsmResolver.IO
         /// <param name="value">The signed 16-bit integer to write.</param>
         public void WriteInt16(short value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             BinaryPrimitives.WriteInt16LittleEndian(_buffer, value);
-#else
-            _buffer[1] = (byte) ((value >> 8) & 0xFF);
-            _buffer[0] = (byte) (value & 0xFF);
-#endif
 #if NET10_0_OR_GREATER
             BaseStream.Write(_buffer[..2]);
 #else
@@ -196,14 +176,7 @@ namespace AsmResolver.IO
         /// <param name="value">The signed 32-bit integer to write.</param>
         public void WriteInt32(int value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             BinaryPrimitives.WriteInt32LittleEndian(_buffer, value);
-#else
-            _buffer[3] = (byte) ((value >> 24) & 0xFF);
-            _buffer[2] = (byte) ((value >> 16) & 0xFF);
-            _buffer[1] = (byte) ((value >> 8) & 0xFF);
-            _buffer[0] = (byte) (value & 0xFF);
-#endif
 #if NET10_0_OR_GREATER
             BaseStream.Write(_buffer[..4]);
 #else
@@ -217,18 +190,7 @@ namespace AsmResolver.IO
         /// <param name="value">The signed 64-bit integer to write.</param>
         public void WriteInt64(long value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             BinaryPrimitives.WriteInt64LittleEndian(_buffer, value);
-#else
-            _buffer[7] = (byte) ((value >> 56) & 0xFF);
-            _buffer[6] = (byte) ((value >> 48) & 0xFF);
-            _buffer[5] = (byte) ((value >> 40) & 0xFF);
-            _buffer[4] = (byte) ((value >> 32) & 0xFF);
-            _buffer[3] = (byte) ((value >> 24) & 0xFF);
-            _buffer[2] = (byte) ((value >> 16) & 0xFF);
-            _buffer[1] = (byte) ((value >> 8) & 0xFF);
-            _buffer[0] = (byte) (value & 0xFF);
-#endif
 #if NET10_0_OR_GREATER
             BaseStream.Write(_buffer[..8]);
 #else
@@ -242,7 +204,7 @@ namespace AsmResolver.IO
         /// <param name="value">The 32-bit floating point number to write.</param>
         public unsafe void WriteSingle(float value)
         {
-            WriteUInt32(*(uint*) &value);
+            WriteUInt32(*(uint*)&value);
         }
 
         /// <summary>
@@ -251,7 +213,7 @@ namespace AsmResolver.IO
         /// <param name="value">The 64-bit floating point number to write.</param>
         public unsafe void WriteDouble(double value)
         {
-            WriteUInt64(*(ulong*) &value);
+            WriteUInt64(*(ulong*)&value);
         }
 
         /// <summary>
@@ -276,7 +238,7 @@ namespace AsmResolver.IO
         public void WriteNativeInt(ulong value, bool is32Bit)
         {
             if (is32Bit)
-                WriteUInt32((uint) value);
+                WriteUInt32((uint)value);
             else
                 WriteUInt64(value);
         }
@@ -329,7 +291,7 @@ namespace AsmResolver.IO
         public void AlignRelative(uint align, ulong startOffset)
         {
             ulong currentPosition = Offset - startOffset;
-            WriteZeroes((int) (currentPosition.Align(align) - currentPosition));
+            WriteZeroes((int)(currentPosition.Align(align) - currentPosition));
         }
 
         /// <summary>
@@ -343,7 +305,7 @@ namespace AsmResolver.IO
             switch (size)
             {
                 case IndexSize.Short:
-                    WriteUInt16((ushort) value);
+                    WriteUInt16((ushort)value);
                     break;
 
                 case IndexSize.Long:
@@ -364,12 +326,12 @@ namespace AsmResolver.IO
             switch (value)
             {
                 case < 0x80:
-                    WriteByte((byte) value);
+                    WriteByte((byte)value);
                     break;
 
                 case < 0x4000:
-                    _buffer[1] = (byte) value;
-                    _buffer[0] = (byte) (0x80 | value >> 8);
+                    _buffer[1] = (byte)value;
+                    _buffer[0] = (byte)(0x80 | value >> 8);
 #if NET10_0_OR_GREATER
                     BaseStream.Write(_buffer[..2]);
 #else
@@ -378,10 +340,10 @@ namespace AsmResolver.IO
                     break;
 
                 default:
-                    _buffer[3] = (byte) value;
-                    _buffer[2] = (byte) (value >> 0x08);
-                    _buffer[1] = (byte) (value >> 0x10);
-                    _buffer[0] = (byte) (0x80 | 0x40 | value >> 0x18);
+                    _buffer[3] = (byte)value;
+                    _buffer[2] = (byte)(value >> 0x08);
+                    _buffer[1] = (byte)(value >> 0x10);
+                    _buffer[0] = (byte)(0x80 | 0x40 | value >> 0x18);
 #if NET10_0_OR_GREATER
                     BaseStream.Write(_buffer[..4]);
 #else
@@ -397,20 +359,20 @@ namespace AsmResolver.IO
         /// <param name="value">The value to write.</param>
         public void WriteCompressedInt32(int value)
         {
-            uint sign = (uint) value >> 31;
+            uint sign = (uint)value >> 31;
             uint rotated;
 
             switch (value)
             {
                 case >= -0x40 and < 0x40:
-                    rotated = ((uint) (value & 0x3F) << 1) | sign;
-                    WriteByte((byte) rotated);
+                    rotated = ((uint)(value & 0x3F) << 1) | sign;
+                    WriteByte((byte)rotated);
                     break;
 
                 case >= -0x2000 and < 0x2000:
-                    rotated = ((uint) (value & 0x1FFF) << 1) | sign;
-                    _buffer[1] = (byte) rotated;
-                    _buffer[0] = (byte) (0x80 | rotated >> 8);
+                    rotated = ((uint)(value & 0x1FFF) << 1) | sign;
+                    _buffer[1] = (byte)rotated;
+                    _buffer[0] = (byte)(0x80 | rotated >> 8);
 #if NET10_0_OR_GREATER
                     BaseStream.Write(_buffer[..2]);
 #else
@@ -419,10 +381,10 @@ namespace AsmResolver.IO
                     break;
 
                 default:
-                    rotated = ((uint) (value & 0x0FFF_FFFF) << 1) | sign;
-                    _buffer[3] = (byte) rotated;
-                    _buffer[2] = (byte) (rotated >> 0x08);
-                    _buffer[1] = (byte) (rotated >> 0x10);
+                    rotated = ((uint)(value & 0x0FFF_FFFF) << 1) | sign;
+                    _buffer[3] = (byte)rotated;
+                    _buffer[2] = (byte)(rotated >> 0x08);
+                    _buffer[1] = (byte)(rotated >> 0x10);
                     _buffer[0] = (byte)(0x80 | 0x40 | rotated >> 0x18);
 #if NET10_0_OR_GREATER
                     BaseStream.Write(_buffer[..4]);
@@ -439,10 +401,10 @@ namespace AsmResolver.IO
         /// <param name="value">The value to write.</param>
         public void Write7BitEncodedInt32(int value)
         {
-            uint x = unchecked((uint) value);
+            uint x = unchecked((uint)value);
             do
             {
-                byte b = (byte) (x & 0x7F);
+                byte b = (byte)(x & 0x7F);
 
                 if (x > 0x7F)
                     b |= 0x80;

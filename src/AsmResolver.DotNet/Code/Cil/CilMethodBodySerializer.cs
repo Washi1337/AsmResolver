@@ -154,20 +154,9 @@ namespace AsmResolver.DotNet.Code.Cil
             {
                 var codeReader = sourceBody.OriginalRawBody.Code.CreateReader();
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
                 byte[] code = codeReader.ReadToEnd();
                 FastCilReassembler.PatchCode(code, tokenRewriter);
                 return code;
-#else
-                using var rentedWriter = _writerPool.Rent((int) codeReader.Length);
-                FastCilReassembler.RewriteCode(
-                    ref codeReader,
-                    rentedWriter.Writer,
-                    tokenRewriter
-                );
-
-                return rentedWriter.GetData();
-#endif
             }
             catch (Exception ex)
             {
@@ -195,21 +184,8 @@ namespace AsmResolver.DotNet.Code.Cil
                 {
                     try
                     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
                         sectionData = (byte[])sectionData.Clone();
                         FastCilReassembler.PatchExceptionHandlerSection(sectionData, tokenRewriter, section.IsFat);
-#else
-                        var reader = new BinaryStreamReader(sectionData);
-                        using var rentedWriter = _writerPool.Rent(sectionData.Length);
-                        FastCilReassembler.RewriteExceptionHandlerSection(
-                            ref reader,
-                            rentedWriter.Writer,
-                            tokenRewriter,
-                            section.IsFat
-                        );
-
-                        sectionData = rentedWriter.GetData();
-#endif
                     }
                     catch (Exception ex)
                     {
