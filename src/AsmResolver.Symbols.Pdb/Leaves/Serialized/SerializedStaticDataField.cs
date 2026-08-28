@@ -37,9 +37,6 @@ public class SerializedStaticDataField : StaticDataField
         if (_dataTypeIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_dataTypeIndex, out CodeViewTypeRecord? type)
-            ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
-                $"Static data member {TypeIndex:X8} contains an invalid data type index {_dataTypeIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<CodeViewTypeRecord>(_dataTypeIndex);
     }
 }

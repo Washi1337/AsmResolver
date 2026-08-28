@@ -16,7 +16,7 @@ public class BuildInfoLeafTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void Entries()
     {
-        var info = _fixture.SimplePdb.GetIdLeafRecord<BuildInfoLeaf>(0x100d);
+        var info = _fixture.SimplePdb.GetIdLeafRecord<BuildInfoLeaf>(0x100d)!;
 
         Assert.Equal(new[]
         {

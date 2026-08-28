@@ -25,9 +25,6 @@ public class SerializedBuildInfoSymbol : BuildInfoSymbol
     /// <inheritdoc />
     protected override BuildInfoLeaf? GetInfo()
     {
-        return _context.ParentImage.TryGetIdLeafRecord(_idIndex, out BuildInfoLeaf? leaf)
-            ? leaf
-            : _context.Parameters.ErrorListener.BadImageAndReturn<BuildInfoLeaf>(
-                $"Build information symbol contains an invalid ID index {_idIndex:X8}.");
+        return _context.ParentImage.GetIdLeafRecord<BuildInfoLeaf>(_idIndex);
     }
 }

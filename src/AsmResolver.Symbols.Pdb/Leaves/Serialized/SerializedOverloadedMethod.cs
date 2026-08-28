@@ -37,9 +37,6 @@ public class SerializedOverloadedMethod : OverloadedMethod
         if (_methodListIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_methodListIndex, out MethodListLeaf? list)
-            ? list
-            : _context.Parameters.ErrorListener.BadImageAndReturn<MethodListLeaf>(
-                $"Overloaded method {TypeIndex:X8} contains an invalid field list index {_methodListIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<MethodListLeaf>(_methodListIndex);
     }
 }
