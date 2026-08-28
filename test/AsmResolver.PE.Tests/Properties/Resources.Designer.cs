@@ -185,6 +185,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
         
+        internal static byte[] HelloWorld_Utf8DebugPath {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_Utf8DebugPath", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
         internal static byte[] HelloWorldPortablePdb {
             get {
                 object obj = ResourceManager.GetObject("HelloWorldPortablePdb", resourceCulture);
