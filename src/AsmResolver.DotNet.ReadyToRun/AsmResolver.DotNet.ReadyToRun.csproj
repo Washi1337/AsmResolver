@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Title>AsmResolver.DotNet.ReadyToRun</Title>
+	<Description>ReadyToRun support for the AsmResolver executable file inspection toolsuite.</Description>
+	<PackageTags>r2r rtr readyotorun exe pe assembly disassembly native-images directories resources dotnet cil inspection manipulation</PackageTags>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
+  </ItemGroup>
+
+</Project>

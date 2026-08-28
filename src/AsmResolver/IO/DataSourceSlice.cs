@@ -5,10 +5,7 @@ namespace AsmResolver.IO
     /// <summary>
     /// Represents a data source that only exposes a part (slice) of another data source.
     /// </summary>
-    public class DataSourceSlice : IDataSource
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        , ISpanDataSource
-#endif
+    public class DataSourceSlice : IDataSource, ISpanDataSource
     {
         private readonly IDataSource _source;
 
@@ -64,17 +61,15 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public int ReadBytes(ulong address, byte[] buffer, int index, int count)
         {
-            int maxCount = Math.Max(0, (int) (Length - (address - BaseAddress)));
+            int maxCount = Math.Max(0, (int)(Length - (address - BaseAddress)));
             return _source.ReadBytes(address, buffer, index, Math.Min(maxCount, count));
         }
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <inheritdoc />
         public int ReadBytes(ulong address, Span<byte> buffer)
         {
-            int maxCount = Math.Max(0, (int) (Length - (address - BaseAddress)));
-            return _source.ReadBytes(address, buffer[..Math.Min(maxCount, buffer.Length)]);
+            int maxCount = Math.Max(0, (int)(Length - (address - BaseAddress)));
+            return _source.ReadBytes(address, buffer.Slice(0, Math.Min(maxCount, buffer.Length)));
         }
-#endif
     }
 }
