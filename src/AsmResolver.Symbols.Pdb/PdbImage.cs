@@ -8,7 +8,6 @@ using AsmResolver.IO;
 using AsmResolver.PE.File;
 using AsmResolver.Symbols.Pdb.Leaves;
 using AsmResolver.Symbols.Pdb.Metadata.Dbi;
-using AsmResolver.Symbols.Pdb.Metadata.Info;
 using AsmResolver.Symbols.Pdb.Msf;
 using AsmResolver.Symbols.Pdb.Records;
 
@@ -23,6 +22,8 @@ public class PdbImage : ICodeViewSymbolProvider
 
     private IList<ICodeViewSymbol>? _symbols;
     private IList<PdbModule>? _modules;
+
+    private protected virtual IErrorListener ErrorListener => ThrowErrorListener.Instance;
 
     /// <summary>
     /// Gets or sets the time-stamp of the PDB file.
@@ -256,11 +257,10 @@ public class PdbImage : ICodeViewSymbolProvider
     /// </summary>
     /// <param name="typeIndex">The type index.</param>
     /// <returns>The resolved type.</returns>
-    /// <exception cref="ArgumentException">Occurs when the type index is invalid.</exception>
-    public ITpiLeaf GetLeafRecord(uint typeIndex)
+    public ITpiLeaf? GetLeafRecord(uint typeIndex)
     {
         if (!TryGetLeafRecord(typeIndex, out var type))
-            throw new ArgumentException("Invalid type index.");
+            return ErrorListener.BadImageAndReturn<ITpiLeaf>($"The leaf index {typeIndex:X8} is invalid.");
         return type;
     }
 
@@ -269,11 +269,20 @@ public class PdbImage : ICodeViewSymbolProvider
     /// </summary>
     /// <param name="typeIndex">The type index.</param>
     /// <returns>The resolved type.</returns>
-    /// <exception cref="ArgumentException">Occurs when the type index is invalid.</exception>
-    public TLeaf GetLeafRecord<TLeaf>(uint typeIndex)
+    public TLeaf? GetLeafRecord<TLeaf>(uint typeIndex)
         where TLeaf : ITpiLeaf
     {
-        return (TLeaf) GetLeafRecord(typeIndex);
+        if (!TryGetLeafRecord(typeIndex, out var type))
+            return ErrorListener.BadImageAndReturn<TLeaf>($"The leaf index {typeIndex:X8} is invalid.");
+
+        return type switch
+        {
+            TLeaf resolved => resolved,
+            UnknownCodeViewLeaf => ErrorListener.BadImageAndReturn<TLeaf>(
+                $"The leaf index {typeIndex:X8} has an unknown type {type.LeafKind}."),
+            _ => ErrorListener.BadImageAndReturn<TLeaf>(
+                $"The leaf index {typeIndex:X8} has an unexpected type ({type.LeafKind}).")
+        };
     }
 
     /// <summary>
@@ -312,11 +321,10 @@ public class PdbImage : ICodeViewSymbolProvider
     /// </summary>
     /// <param name="idIndex">The ID index.</param>
     /// <returns>The resolved leaf</returns>
-    /// <exception cref="ArgumentException">Occurs when the ID index is invalid.</exception>
-    public IIpiLeaf GetIdLeafRecord(uint idIndex)
+    public IIpiLeaf? GetIdLeafRecord(uint idIndex)
     {
         if (!TryGetIdLeafRecord(idIndex, out var leaf))
-            throw new ArgumentException("Invalid ID index.");
+            return ErrorListener.BadImageAndReturn<IIpiLeaf>($"The ID index {idIndex:X8} is invalid.");
         return leaf;
     }
 
@@ -325,11 +333,20 @@ public class PdbImage : ICodeViewSymbolProvider
     /// </summary>
     /// <param name="idIndex">The ID index.</param>
     /// <returns>The resolved leaf</returns>
-    /// <exception cref="ArgumentException">Occurs when the ID index is invalid.</exception>
-    public TLeaf GetIdLeafRecord<TLeaf>(uint idIndex)
+    public TLeaf? GetIdLeafRecord<TLeaf>(uint idIndex)
         where TLeaf : CodeViewLeaf
     {
-        return (TLeaf) GetIdLeafRecord(idIndex);
+        if (!TryGetLeafRecord(idIndex, out var leaf))
+            return ErrorListener.BadImageAndReturn<TLeaf>($"The ID index {idIndex:X8} is invalid.");
+
+        return leaf switch
+        {
+            TLeaf resolved => resolved,
+            UnknownCodeViewLeaf => ErrorListener.BadImageAndReturn<TLeaf>(
+                $"The ID index {idIndex:X8} has an unknown type {leaf.LeafKind}."),
+            _ => ErrorListener.BadImageAndReturn<TLeaf>(
+                $"The ID index {idIndex:X8} has an unexpected type ({leaf.LeafKind}).")
+        };
     }
 
     /// <summary>
