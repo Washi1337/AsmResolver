@@ -1,14 +1,8 @@
 using System;
 using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-
-#if !NETSTANDARD2_0
 using System.Buffers;
-#endif
-
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
 using System.Buffers.Binary;
-#endif
 
 namespace AsmResolver.PE.DotNet.Cil;
 
@@ -21,7 +15,6 @@ public static class FastCilReassembler
     private const int FatExceptionHandlerSize = 6 * sizeof(uint);
     private const uint ExceptionHandlerType = 0;
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
     /// <summary>
     /// Patches the provided code stream.
     /// </summary>
@@ -94,7 +87,6 @@ public static class FastCilReassembler
             }
         }
     }
-#endif
 
     /// <summary>
     /// Patches the provided code stream.
@@ -107,11 +99,7 @@ public static class FastCilReassembler
         BinaryStreamWriter writer,
         Func<MetadataToken, MetadataToken> tokenRewriter)
     {
-#if NETSTANDARD2_0
-        byte[] operandBuffer = new byte[8];
-#else
         byte[] operandBuffer = ArrayPool<byte>.Shared.Rent(8);
-#endif
 
         while (reader.CanRead(sizeof(byte)))
         {
@@ -155,12 +143,8 @@ public static class FastCilReassembler
                     int labelsByteCount = count * sizeof(uint);
                     if (operandBuffer.Length < labelsByteCount)
                     {
-#if NETSTANDARD2_0
-                        operandBuffer = new byte[labelsByteCount];
-#else
                         ArrayPool<byte>.Shared.Return(operandBuffer);
                         operandBuffer = ArrayPool<byte>.Shared.Rent(labelsByteCount);
-#endif
                     }
 
                     reader.ReadBytes(operandBuffer, 0, labelsByteCount);
@@ -185,9 +169,7 @@ public static class FastCilReassembler
             }
         }
 
-#if !NETSTANDARD2_0
         ArrayPool<byte>.Shared.Return(operandBuffer);
-#endif
     }
 
     private static CilOpCode ReadWriteOpCode(ref BinaryStreamReader reader, BinaryStreamWriter writer)
@@ -204,8 +186,6 @@ public static class FastCilReassembler
 
         return CilOpCodes.SingleByteOpCodes[op];
     }
-
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
 
     /// <summary>
     /// Patches the provided raw extra section containing exception handlers.
@@ -266,8 +246,6 @@ public static class FastCilReassembler
         }
     }
 
-#endif
-
     /// <summary>
     /// Patches the provided raw extra section containing exception handlers.
     /// </summary>
@@ -285,11 +263,7 @@ public static class FastCilReassembler
             ? FatExceptionHandlerSize
             : TinyExceptionHandlerSize;
 
-#if NETSTANDARD2_0
-        byte[] rawEntry = new byte[entrySize];
-#else
         byte[] rawEntry = ArrayPool<byte>.Shared.Rent(entrySize);
-#endif
 
         while (reader.CanRead((uint) entrySize))
         {
@@ -323,8 +297,6 @@ public static class FastCilReassembler
             writer.WriteBytes(rawEntry, 0, entrySize);
         }
 
-#if !NETSTANDARD2_0
         ArrayPool<byte>.Shared.Return(rawEntry);
-#endif
     }
 }

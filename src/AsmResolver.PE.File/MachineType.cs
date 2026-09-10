@@ -304,6 +304,11 @@ namespace AsmResolver.PE.File
         Mips16 = 0x0266,
 
         /// <summary>
+        /// Indicates the DEC Alpha AXP 64-bit architecture.
+        /// </summary>
+        Alpha64 = 0x0284,
+
+        /// <summary>
         /// Indicates the MIPS architecture with FPU.
         /// </summary>
         MipsFpu = 0x0366,
@@ -312,6 +317,11 @@ namespace AsmResolver.PE.File
         /// Indicates the MIPS 16-bit architecture with FPU.
         /// </summary>
         MipsFpu16 = 0x0466,
+
+        /// <summary>
+        /// Indicates the Infineon TriCore architecture
+        /// </summary>
+        Tricore = 0x0520,
 
         /// <summary>
         /// Indicates the PowerPC little-endian architecture.
@@ -339,6 +349,11 @@ namespace AsmResolver.PE.File
         Sh3Dsp = 0x01A3,
 
         /// <summary>
+        /// Indicates the Hitachi SH-3E architecture.
+        /// </summary>
+        SH3E = 0x01A4,
+
+        /// <summary>
         /// Indicates the Hitachi SH4 architecture.
         /// </summary>
         Sh4 = 0x01A6,
@@ -359,6 +374,11 @@ namespace AsmResolver.PE.File
         WceMipsV2 = 0x0169,
 
         /// <summary>
+        /// Indicates the DEC Alpha AXP 32-bit architecture.
+        /// </summary>
+        Alpha = 0x0184,
+
+        /// <summary>
         /// Indicates the RISCV 32-bit architecture.
         /// </summary>
         RiscV32 = 0x5032,
@@ -372,5 +392,15 @@ namespace AsmResolver.PE.File
         /// Indicates the RISCV 128-bit architecture.
         /// </summary>
         RiscV128 = 0x5128,
+
+        /// <summary>
+        /// Indicates the LoongArch 32-bit architecture.
+        /// </summary>
+        LoongArch32 = 0x6232,
+
+        /// <summary>
+        /// Indicates the LoongArch 64-bit architecture.
+        /// </summary>
+        LoongArch64 = 0x6264,
     }
 }
