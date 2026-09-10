@@ -5,6 +5,7 @@ using System.Threading;
 using AsmResolver.IO;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.Certificates;
+using AsmResolver.PE.Configuration;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exceptions;
@@ -379,6 +380,16 @@ namespace AsmResolver.PE
         }
 
         /// <summary>
+        /// Gets or sets the data directory containing the PE loader configuration of this image.
+        /// </summary>
+        [LazyProperty]
+        public partial LoadConfiguration? LoadConfiguration
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Constructs a PE file from the image.
         /// </summary>
         /// <param name="builder">The builder to use for constructing the image.</param>
@@ -465,6 +476,16 @@ namespace AsmResolver.PE
         /// This method is called upon initialization of the <see cref="Certificates"/> property.
         /// </remarks>
         protected virtual CertificateCollection GetCertificates() => new();
+
+        /// <summary>
+        /// Obtains the data directory containing the loader configuration of this PE image.
+        /// </summary>
+        /// <returns>The data directory.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="LoadConfiguration"/> property.
+        /// </remarks>
+        protected virtual LoadConfiguration? GetLoadConfiguration() => null;
+
 
     }
 }

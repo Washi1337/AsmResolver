@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Tls
     /// <summary>
     /// Represents the data directory containing Thread-Local Storage (TLS) data.
     /// </summary>
-    public partial class TlsDirectory : SegmentBase
+    public partial class TlsDirectory : SegmentBase, IRelocatable
     {
         private ReferenceTable? _callbackFunctions;
         private ulong _imageBase = 0x00400000;
@@ -101,11 +101,7 @@ namespace AsmResolver.PE.Tls
         /// </remarks>
         protected virtual ReferenceTable GetCallbackFunctions() => new(ReferenceTableAttributes.Va | ReferenceTableAttributes.Adaptive | ReferenceTableAttributes.ZeroTerminated);
 
-        /// <summary>
-        /// Obtains a collection of base address relocations that need to be applied to the TLS data directory
-        /// after the image was loaded into memory.
-        /// </summary>
-        /// <returns>The required base relocations.</returns>
+        /// <inheritdoc />
         public IEnumerable<BaseRelocation> GetRequiredBaseRelocations()
         {
             int pointerSize = _is32Bit ? sizeof(uint) : sizeof(ulong);

@@ -1,6 +1,5 @@
 using AsmResolver.Collections;
 using AsmResolver.IO;
-using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Tls
 {
@@ -64,16 +63,13 @@ namespace AsmResolver.PE.Tls
         /// <inheritdoc />
         protected override ReferenceTable GetCallbackFunctions()
         {
-            var result = new ReferenceTable(
-                ReferenceTableAttributes.Va
+            var result = new ReferenceTable(ReferenceTableAttributes.Va
                 | ReferenceTableAttributes.Adaptive
                 | ReferenceTableAttributes.ZeroTerminated
             );
 
             var file = _context.File;
-            var optionalHeader = file.OptionalHeader;
-            ulong imageBase = optionalHeader.ImageBase;
-            bool is32Bit = optionalHeader.Magic == OptionalHeaderMagic.PE32;
+            ulong imageBase = file.OptionalHeader.ImageBase;
 
             if (!file.TryCreateReaderAtRva((uint) (_addressOfCallbacks - imageBase), out var reader))
             {
@@ -81,24 +77,7 @@ namespace AsmResolver.PE.Tls
                 return result;
             }
 
-            result.UpdateOffsets(_context.GetRelocation(reader.Offset, reader.Rva));
-
-            while (true)
-            {
-                if (!reader.CanRead((uint) (is32Bit ? sizeof(uint) : sizeof(ulong))))
-                {
-                    _context.BadImage($"TLS callback function table does not end with a zero entry.");
-                    break;
-                }
-
-                ulong address = reader.ReadNativeInt(is32Bit);
-                if (address == 0)
-                    break;
-
-                result.Add(file.GetReferenceToRva((uint) (address - imageBase)));
-            }
-
-            return result;
+            return reader.ReadReferenceTable(_context, result);
         }
     }
 }
