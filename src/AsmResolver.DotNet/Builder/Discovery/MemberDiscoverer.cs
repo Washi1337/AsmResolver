@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
@@ -13,17 +14,23 @@ namespace AsmResolver.DotNet.Builder.Discovery
     /// </summary>
     public sealed class MemberDiscoverer
     {
-        private const MethodAttributes MethodPlaceHolderAttributes = MethodAttributes.Public
-                                                                     | MethodAttributes.Abstract
-                                                                     | MethodAttributes.Virtual
-                                                                     | MethodAttributes.HideBySig
-                                                                     | MethodAttributes.NewSlot;
+        private const MethodAttributes MethodPlaceHolderAttributes =
+            MethodAttributes.Public
+            | MethodAttributes.Abstract
+            | MethodAttributes.Virtual
+            | MethodAttributes.HideBySig
+            | MethodAttributes.NewSlot;
 
         private const FieldAttributes FieldPlaceHolderAttributes = FieldAttributes.Public;
 
         private readonly ModuleDefinition _module;
-        private readonly MemberDiscoveryFlags _flags;
-        private readonly MemberDiscoveryResult _result = new();
+
+        private readonly MemberAllocation<TypeDefinition> _types;
+        private readonly MemberAllocation<FieldDefinition> _fields;
+        private readonly MemberAllocation<MethodDefinition> _methods;
+        private readonly MemberAllocation<ParameterDefinition> _parameters;
+        private readonly MemberAllocation<PropertyDefinition> _properties;
+        private readonly MemberAllocation<EventDefinition> _events;
 
         private readonly List<MethodDefinition> _allPlaceHolderMethods = new();
         private int _placeHolderParameterCounter;
@@ -31,38 +38,23 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private readonly TypeReference _eventHandlerTypeRef;
         private readonly TypeSignature _eventHandlerTypeSig;
 
-        private readonly Dictionary<TableIndex, List<uint>> _freeRids = new()
-        {
-            [TableIndex.TypeDef] = new List<uint>(),
-            [TableIndex.Field] = new List<uint>(),
-            [TableIndex.Method] = new List<uint>(),
-            [TableIndex.Param] = new List<uint>(),
-            [TableIndex.Property] = new List<uint>(),
-            [TableIndex.Event] = new List<uint>(),
-        };
-
-        private readonly Dictionary<TableIndex, List<IMetadataMember>> _floatingMembers = new()
-        {
-            [TableIndex.TypeDef] = new List<IMetadataMember>(),
-            [TableIndex.Field] = new List<IMetadataMember>(),
-            [TableIndex.Method] = new List<IMetadataMember>(),
-            [TableIndex.Param] = new List<IMetadataMember>(),
-            [TableIndex.Property] = new List<IMetadataMember>(),
-            [TableIndex.Event] = new List<IMetadataMember>(),
-        };
-
         private MemberDiscoverer(ModuleDefinition module, MemberDiscoveryFlags flags)
         {
             _module = module ?? throw new ArgumentNullException(nameof(module));
-            _flags = flags;
 
-            _eventHandlerTypeRef = new TypeReference(
-                module,
-                module.CorLibTypeFactory.CorLibScope,
+            _types = new(TableIndex.TypeDef, (flags & MemberDiscoveryFlags.PreserveTypeOrder) != 0);
+            _fields = new(TableIndex.Field, (flags & MemberDiscoveryFlags.PreserveFieldOrder) != 0);
+            _methods = new(TableIndex.Method, (flags & MemberDiscoveryFlags.PreserveMethodOrder) != 0);
+            _parameters = new(TableIndex.Param, (flags & MemberDiscoveryFlags.PreserveParameterOrder) != 0);
+            _properties = new(TableIndex.Property, (flags & MemberDiscoveryFlags.PreservePropertyOrder) != 0);
+            _events = new(TableIndex.Event, (flags & MemberDiscoveryFlags.PreserveEventOrder) != 0);
+
+            _eventHandlerTypeRef = module.CorLibTypeFactory.CorLibScope.CreateTypeReference(
                 "System",
-                nameof(EventHandler));
+                nameof(EventHandler)
+            );
 
-            _eventHandlerTypeSig = new TypeDefOrRefSignature(_eventHandlerTypeRef, false);
+            _eventHandlerTypeSig = _eventHandlerTypeRef.ToTypeSignature(isValueType: false);
         }
 
         /// <summary>
@@ -98,24 +90,23 @@ namespace AsmResolver.DotNet.Builder.Discovery
             context.AddFloatingMembers();
 
             if (flags != MemberDiscoveryFlags.None)
-                context.StuffFreeMemberSlots();
+                context.FillFreeRids();
 
-            return context._result;
-        }
+            Debug.Assert(context._types.Result.All(x => x is not null));
+            Debug.Assert(context._fields.Result.All(x => x is not null));
+            Debug.Assert(context._methods.Result.All(x => x is not null));
+            Debug.Assert(context._parameters.Result.All(x => x is not null));
+            Debug.Assert(context._properties.Result.All(x => x is not null));
+            Debug.Assert(context._events.Result.All(x => x is not null));
 
-        private IList<TMember?> GetResultList<TMember>(TableIndex tableIndex)
-            where TMember : IMetadataMember
-        {
-            return tableIndex switch
-            {
-                TableIndex.TypeDef => (IList<TMember?>) _result.Types,
-                TableIndex.Field => (IList<TMember?>) _result.Fields,
-                TableIndex.Method => (IList<TMember?>) _result.Methods,
-                TableIndex.Param => (IList<TMember?>) _result.Parameters,
-                TableIndex.Property => (IList<TMember?>) _result.Properties,
-                TableIndex.Event => (IList<TMember?>) _result.Events,
-                _ => throw new ArgumentOutOfRangeException(nameof(tableIndex))
-            };
+            return new MemberDiscoveryResult(
+                context._types.Result!,
+                context._fields.Result!,
+                context._methods.Result!,
+                context._parameters.Result!,
+                context._properties.Result!,
+                context._events.Result!
+            );
         }
 
         private void CollectExistingMembers()
@@ -123,49 +114,23 @@ namespace AsmResolver.DotNet.Builder.Discovery
             if (_module.DotNetDirectory?.Metadata is null)
                 return;
 
-            if ((_flags & MemberDiscoveryFlags.PreserveTypeOrder) != 0)
-                CollectMembersFromTable<TypeDefinition>(TableIndex.TypeDef);
-            if ((_flags & MemberDiscoveryFlags.PreserveFieldOrder) != 0)
-                CollectMembersFromTable<FieldDefinition>(TableIndex.Field);
-            if ((_flags & MemberDiscoveryFlags.PreserveMethodOrder) != 0)
-                CollectMembersFromTable<MethodDefinition>(TableIndex.Method);
-            if ((_flags & MemberDiscoveryFlags.PreserveParameterOrder) != 0)
-                CollectMembersFromTable<ParameterDefinition>(TableIndex.Param);
-            if ((_flags & MemberDiscoveryFlags.PreservePropertyOrder) != 0)
-                CollectMembersFromTable<PropertyDefinition>(TableIndex.Property);
-            if ((_flags & MemberDiscoveryFlags.PreserveEventOrder) != 0)
-                CollectMembersFromTable<EventDefinition>(TableIndex.Event);
-        }
+            var selection = _module.DotNetDirectory.Metadata.GetImpliedStreamSelection();
+            var stream = selection.TablesStream;
+            if (stream is null)
+                return;
 
-        private void CollectMembersFromTable<TMember>(TableIndex tableIndex)
-            where TMember: IMetadataMember, IModuleProvider
-        {
-            // Get original number of elements in the table.
-            int count = _module.DotNetDirectory!.Metadata!
-                .GetStream<TablesStream>()
-                .GetTable(tableIndex)
-                .Count;
-
-            var resultingList = GetResultList<TMember>(tableIndex);
-
-            // Traverse the table, look up the high-level metadata model, and see if it is still present.
-            for (uint rid = 1; rid <= count; rid++)
-            {
-                var token = new MetadataToken(tableIndex, rid);
-                var definition = (TMember) _module.LookupMember(token);
-
-                if (definition.ContextModule == _module)
-                {
-                    // Member is still present in the module.
-                    resultingList.Add(definition);
-                }
-                else
-                {
-                    // Member was removed from the module, mark current RID available.
-                    _freeRids[tableIndex].Add(rid);
-                    resultingList.Add(default);
-                }
-            }
+            if (_types.PreserveOrder)
+                _types.InsertFromTable(_module, stream);
+            if (_fields.PreserveOrder)
+                _fields.InsertFromTable(_module, stream);
+            if (_methods.PreserveOrder)
+                _methods.InsertFromTable(_module, stream);
+            if (_parameters.PreserveOrder)
+                _parameters.InsertFromTable(_module, stream);
+            if (_properties.PreserveOrder)
+                _properties.InsertFromTable(_module, stream);
+            if (_events.PreserveOrder)
+                _events.InsertFromTable(_module, stream);
         }
 
         private void CollectNewlyAddedFixedMembers()
@@ -175,13 +140,13 @@ namespace AsmResolver.DotNet.Builder.Discovery
 
             foreach (var type in _module.GetAllTypes())
             {
-                InsertOrAppendIfNew(type, true);
+                _types.InsertOrFloatIfNew(type);
 
                 // Try find new fields.
                 if (type.HasFields)
                 {
                     for (int i = 0; i < type.Fields.Count; i++)
-                        InsertOrAppendIfNew(type.Fields[i], true);
+                        _fields.InsertOrFloatIfNew(type.Fields[i]);
                 }
 
                 // Try find new methods.
@@ -190,13 +155,13 @@ namespace AsmResolver.DotNet.Builder.Discovery
                     for (int i = 0; i < type.Methods.Count; i++)
                     {
                         var method = type.Methods[i];
-                        InsertOrAppendIfNew(method, true);
+                        _methods.InsertOrFloatIfNew(method);
 
                         // Try find new parameters.
                         if (method.HasParameterDefinitions)
                         {
                             for (int j = 0; j < method.ParameterDefinitions.Count; j++)
-                                InsertOrAppendIfNew(method.ParameterDefinitions[j], true);
+                                _parameters.InsertOrFloatIfNew(method.ParameterDefinitions[j]);
                         }
                     }
                 }
@@ -205,160 +170,80 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 if (type.HasProperties)
                 {
                     for (int i = 0; i < type.Properties.Count; i++)
-                        InsertOrAppendIfNew(type.Properties[i], true);
+                        _properties.InsertOrFloatIfNew(type.Properties[i]);
                 }
 
                 // Try find new events.
                 if (type.HasEvents)
                 {
                     for (int i = 0; i < type.Events.Count; i++)
-                        InsertOrAppendIfNew(type.Events[i], true);
+                        _events.InsertOrFloatIfNew(type.Events[i]);
                 }
             }
         }
 
         private void AddFloatingMembers()
         {
-            // Yuck, but works.
-
-            foreach (var member in _floatingMembers[TableIndex.TypeDef])
-                InsertOrAppendIfNew((TypeDefinition) member, false);
-            foreach (var member in _floatingMembers[TableIndex.Field])
-                InsertOrAppendIfNew((FieldDefinition) member, false);
-            foreach (var member in _floatingMembers[TableIndex.Method])
-                InsertOrAppendIfNew((MethodDefinition) member, false);
-            foreach (var member in _floatingMembers[TableIndex.Param])
-                InsertOrAppendIfNew((ParameterDefinition) member, false);
-            foreach (var member in _floatingMembers[TableIndex.Property])
-                InsertOrAppendIfNew((PropertyDefinition) member, false);
-            foreach (var member in _floatingMembers[TableIndex.Event])
-                InsertOrAppendIfNew((EventDefinition) member, false);
+            _types.InsertAllFloating();
+            _fields.InsertAllFloating();
+            _methods.InsertAllFloating();
+            _parameters.InsertAllFloating();
+            _properties.InsertAllFloating();
+            _events.InsertAllFloating();
         }
 
-        private void InsertOrAppendIfNew<TMember>(TMember member, bool queueIfNoSlotsAvailable)
-            where TMember : class, IMetadataMember
-        {
-            var memberType = member.MetadataToken.Table;
-            var memberList = GetResultList<TMember>(memberType);
-
-            if (!IsNewMember(memberList, member))
-                return;
-
-            var freeRids = _freeRids[memberType];
-            var mask = member.MetadataToken.Table switch
-            {
-                TableIndex.TypeDef => MemberDiscoveryFlags.PreserveTypeOrder,
-                TableIndex.Field => MemberDiscoveryFlags.PreserveFieldOrder,
-                TableIndex.Method => MemberDiscoveryFlags.PreserveMethodOrder,
-                TableIndex.Param => MemberDiscoveryFlags.PreserveParameterOrder,
-                TableIndex.Property => MemberDiscoveryFlags.PreservePropertyOrder,
-                TableIndex.Event => MemberDiscoveryFlags.PreserveEventOrder,
-                _ => throw new ArgumentOutOfRangeException(nameof(member))
-            };
-
-            if (member.MetadataToken.Rid != 0 && (_flags & mask) == mask)
-            {
-                // Member is a new member but assigned a RID.
-                // Ensure enough rows are allocated, so that we can insert it in the right place.
-                while (memberList.Count < member.MetadataToken.Rid)
-                {
-                    memberList.Add(null);
-                    freeRids.Add((uint) memberList.Count);
-                }
-
-                // Check if the slot is available.
-                if (memberList[(int) member.MetadataToken.Rid - 1] is { } slot)
-                    throw new MetadataTokenConflictException(slot, member, member.MetadataToken.Rid);
-
-                memberList[(int) member.MetadataToken.Rid - 1] = member;
-                freeRids.Remove(member.MetadataToken.Rid);
-
-            }
-            else if (freeRids.Count > 0)
-            {
-                // Use any free RID if it is available.
-                uint nextFreeRid = freeRids[0];
-                freeRids.RemoveAt(0);
-                memberList[(int) (nextFreeRid - 1)] = member;
-            }
-            else if (queueIfNoSlotsAvailable)
-            {
-                _floatingMembers[memberType].Add(member);
-            }
-            else
-            {
-                // Fallback method: Just append to the end of the table.
-                memberList.Add(member);
-            }
-        }
-
-        private static bool IsNewMember<TMember>(IList<TMember?> existingMembers, TMember member)
-            where TMember : class, IMetadataMember
-        {
-            return member.MetadataToken.Rid == 0 // Member has not been assigned a RID.
-                   || member.MetadataToken.Rid > existingMembers.Count // Member's RID does not fall within the existing md range.
-                   || existingMembers[(int) (member.MetadataToken.Rid - 1)] != member; // Member's RID refers to a different member.
-        }
-
-        private void StuffFreeMemberSlots()
+        private void FillFreeRids()
         {
             // Check if we need to do this at all.
-            if (_freeRids.Values.All(static q => q.Count == 0))
+            if (!_types.HasFreeRids
+                && !_fields.HasFreeRids
+                && !_methods.HasFreeRids
+                && !_parameters.HasFreeRids
+                && !_properties.HasFreeRids
+                && !_events.HasFreeRids)
+            {
                 return;
+            }
 
             // Create a new randomly generated namespace.
             string placeHolderNamespace = Guid.NewGuid().ToString("B");
 
             // Ensure that at least one dummy type exists, so that we can use it to insert placeholder members.
             TypeDefinition placeHolderType;
-            if (_freeRids[TableIndex.TypeDef].Count == 0)
+            if (!_types.HasFreeRids)
             {
-                // There is no RID available for the dummy type, allocate a new one.
+                // No free RID means we do not need to stuff with dummy types. However, we still need at least one
+                // dummy type to insert the remaining placeholder fields, methods, parameters, properties and/or events.
                 placeHolderType = new PlaceHolderTypeDefinition(_module, placeHolderNamespace, new MetadataToken(TableIndex.TypeDef, 0));
-                _result.Types.Add(placeHolderType);
+                _types.InsertInNextAvailableSlot(placeHolderType);
             }
             else
             {
                 // There's at least one type RID free. Stuff free type slots and remember the first stuffed type.
-                uint placeHolderTypeRid = _freeRids[TableIndex.TypeDef][0];
-                StuffFreeMemberSlots<TypeDefinition>(null, TableIndex.TypeDef,
-                    (_, token) => new PlaceHolderTypeDefinition(_module, placeHolderNamespace, token));
-                placeHolderType = _result.Types[(int) placeHolderTypeRid - 1];
+                uint placeHolderTypeRid = _types.FreeRids[0];
+                _types.FillFreeRids(
+                    null,
+                    (_, token) => new PlaceHolderTypeDefinition(_module, placeHolderNamespace, token)
+                );
+                placeHolderType = _types.Result[(int) placeHolderTypeRid - 1]!;
             }
 
             // Stuff remaining RIDs.
-            StuffFreeMemberSlots(placeHolderType, TableIndex.Field, AddPlaceHolderField);
-            StuffFreeMemberSlots(placeHolderType, TableIndex.Method, AddPlaceHolderMethod);
-            StuffFreeMemberSlots(placeHolderType, TableIndex.Property, AddPlaceHolderProperty);
-            StuffFreeMemberSlots(placeHolderType, TableIndex.Event, AddPlaceHolderEvent);
-            StuffFreeMemberSlots(placeHolderType, TableIndex.Param, AddPlaceHolderParameter);
-        }
-
-        private void StuffFreeMemberSlots<TMember>(TypeDefinition? placeHolderType, TableIndex tableIndex,
-            Func<TypeDefinition, MetadataToken, TMember> createPlaceHolder)
-            where TMember : IMetadataMember
-        {
-            // Get resulting member lists and free RIDs.
-            var freeRids = _freeRids[tableIndex];
-            var members = GetResultList<TMember>(tableIndex);
-
-            while (freeRids.Count > 0)
-            {
-                // Stuff free RID with a place holder member.
-                uint rid = freeRids[0];
-                freeRids.RemoveAt(0);
-                var token = new MetadataToken(tableIndex, rid);
-                members[(int) (rid - 1)] = createPlaceHolder(placeHolderType!, token);
-            }
+            _fields.FillFreeRids(placeHolderType, AddPlaceHolderField);
+            _methods.FillFreeRids(placeHolderType, AddPlaceHolderMethod);
+            _parameters.FillFreeRids(placeHolderType, AddPlaceHolderParameter);
+            _properties.FillFreeRids(placeHolderType, AddPlaceHolderProperty);
+            _events.FillFreeRids(placeHolderType, AddPlaceHolderEvent);
         }
 
         private FieldDefinition AddPlaceHolderField(TypeDefinition placeHolderType, MetadataToken token)
         {
             // Create new placeholder field.
             var placeHolderField = new FieldDefinition(
-                $"PlaceHolderField_{token.Rid.ToString()}",
-                FieldPlaceHolderAttributes,
-                _module.CorLibTypeFactory.Object);
+                name: RidToName(token.Rid),
+                attributes: FieldPlaceHolderAttributes,
+                fieldType: _module.CorLibTypeFactory.Object
+            );
 
             // Add the field to the type.
             placeHolderType.Fields.Add(placeHolderField);
@@ -370,9 +255,10 @@ namespace AsmResolver.DotNet.Builder.Discovery
         {
             // Create new placeholder method.
             var placeHolderMethod = new MethodDefinition(
-                $"PlaceHolderMethod_{token.Rid.ToString()}",
-                MethodPlaceHolderAttributes,
-                MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void));
+                name: RidToName(token.Rid),
+                attributes: MethodPlaceHolderAttributes,
+                signature: MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void)
+            );
 
             // Add the method to the type.
             placeHolderType.Methods.Add(placeHolderMethod);
@@ -389,7 +275,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // contain our dummy parameters in.
 
             if (_allPlaceHolderMethods.Count == 0)
-                InsertOrAppendIfNew(AddPlaceHolderMethod(placeHolderType, token), false);
+                _methods.InsertInNextAvailableSlot(AddPlaceHolderMethod(placeHolderType, token));
 
             // Get current method to add the parameter def to.
             int methodIndex = _placeHolderParameterCounter % _allPlaceHolderMethods.Count;
@@ -403,7 +289,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 method.Signature!.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
 
 #if DEBUG
-            string? parameterName = method.ParameterDefinitions.Count == 0 ? null : $"placeholder{method.ParameterDefinitions.Count}";
+            string? parameterName = method.ParameterDefinitions.Count == 0 ? null : $"_{method.ParameterDefinitions.Count}";
 #else
             const string? parameterName = null;
 #endif
@@ -421,8 +307,11 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private PropertyDefinition AddPlaceHolderProperty(TypeDefinition placeHolderType, MetadataToken token)
         {
             // Define new property.
-            var property = new PropertyDefinition($"PlaceHolderProperty_{token.Rid.ToString()}", 0,
-                PropertySignature.CreateStatic(_module.CorLibTypeFactory.Object));
+            var property = new PropertyDefinition(
+                name: RidToName(token.Rid),
+                attributes: PropertyAttributes.None,
+                signature: PropertySignature.CreateStatic(_module.CorLibTypeFactory.Object)
+            );
 
             // Define getter.
             var getMethod = new MethodDefinition(
@@ -435,7 +324,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             placeHolderType.Methods.Add(getMethod);
             placeHolderType.Properties.Add(property);
             property.Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
-            InsertOrAppendIfNew(getMethod, false);
+            _methods.InsertInNextAvailableSlot(getMethod);
 
             return property;
         }
@@ -443,8 +332,11 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private EventDefinition AddPlaceHolderEvent(TypeDefinition placeHolderType, MetadataToken token)
         {
             // Define new event.
-            var @event = new EventDefinition($"PlaceHolderEvent_{token.Rid.ToString()}", 0,
-                _eventHandlerTypeRef);
+            var @event = new EventDefinition(
+                name: $"_{token.Rid}",
+                attributes: EventAttributes.None,
+                eventType: _eventHandlerTypeRef
+            );
 
             // Create signature for add/remove methods.
             var signature = MethodSignature.CreateStatic(
@@ -472,14 +364,165 @@ namespace AsmResolver.DotNet.Builder.Discovery
             @event.Semantics.Add(new MethodSemantics(addMethod, MethodSemanticsAttributes.AddOn));
             @event.Semantics.Add(new MethodSemantics(removeMethod, MethodSemanticsAttributes.RemoveOn));
 
-            InsertOrAppendIfNew(addMethod, false);
-            InsertOrAppendIfNew(removeMethod, false);
+            _methods.InsertInNextAvailableSlot(addMethod);
+            _methods.InsertInNextAvailableSlot(removeMethod);
 
             return @event;
         }
 
+        private class MemberAllocation<TMember>(TableIndex tableIndex, bool preserveOrder)
+            where TMember : class, IMetadataMember, IModuleProvider
+        {
+            public TableIndex TableIndex
+            {
+                get;
+            } = tableIndex;
+
+            public bool PreserveOrder
+            {
+                get;
+            } = preserveOrder;
+
+            public List<TMember?> Result
+            {
+                get;
+            } = [];
+
+            public List<TMember> Floating
+            {
+                get;
+            } = [];
+
+            public List<uint> FreeRids
+            {
+                get;
+            } = [];
+
+            public bool HasFreeRids => FreeRids.Count > 0;
+
+            private bool IsNewMember(TMember member)
+            {
+                return member.MetadataToken.Rid == 0 // Member has not been assigned a RID.
+                    || member.MetadataToken.Rid > Result.Count // Member's RID does not fall within the existing md range.
+                    || Result[(int) (member.MetadataToken.Rid - 1)] != member; // Member's RID refers to a different member.
+            }
+
+            public void InsertFromTable(ModuleDefinition module, TablesStream tablesStream)
+            {
+                // Get original number of elements in the table.
+                int count = tablesStream.GetTable(TableIndex).Count;
+
+                // Traverse the table, look up the high-level metadata model, and see if it is still present.
+                for (uint rid = 1; rid <= count; rid++)
+                {
+                    var token = new MetadataToken(TableIndex, rid);
+
+                    if (module.TryLookupMember(token, out TMember? definition) && definition.ContextModule == module)
+                    {
+                        // Member is still present in the module.
+                        Result.Add(definition);
+                    }
+                    else
+                    {
+                        // Member was removed from the module, mark current RID available.
+                        FreeRids.Add(rid);
+                        Result.Add(null);
+                    }
+                }
+            }
+
+            public void InsertOrFloatIfNew(TMember member)
+            {
+                if (!IsNewMember(member))
+                    return;
+
+                if (member.MetadataToken.Rid != 0 && PreserveOrder)
+                {
+                    // Member is a new member but assigned a RID.
+                    // Ensure enough rows are allocated, so that we can insert it in the right place.
+#if NET8_0_OR_GREATER
+                    Result.EnsureCapacity((int) member.MetadataToken.Rid);
+#else
+                    if (Result.Capacity < member.MetadataToken.Rid)
+                        Result.Capacity = (int) member.MetadataToken.Rid;
+#endif
+                    while (Result.Count < member.MetadataToken.Rid)
+                    {
+                        Result.Add(null);
+                        FreeRids.Add((uint) Result.Count);
+                    }
+
+                    // Check if the slot is available.
+                    if (Result[(int) member.MetadataToken.Rid - 1] is { } slot)
+                        throw new MetadataTokenConflictException(slot, member, member.MetadataToken.Rid);
+
+                    Result[(int) member.MetadataToken.Rid - 1] = member;
+                    FreeRids.Remove(member.MetadataToken.Rid);
+                }
+                else if (!TryInsertInNullSlot(member))
+                {
+                    Floating.Add(member);
+                }
+            }
+
+            private bool TryInsertInNullSlot(TMember member)
+            {
+                if (FreeRids.Count <= 0)
+                    return false;
+
+                uint nextFreeRid = FreeRids[0];
+                FreeRids.RemoveAt(0);
+                Result[(int) (nextFreeRid - 1)] = member;
+                return true;
+            }
+
+            public void FillFreeRids(
+                TypeDefinition? placeHolderType,
+                Func<TypeDefinition, MetadataToken, TMember> createPlaceHolder
+            )
+            {
+                foreach (uint rid in FreeRids)
+                {
+                    var token = new MetadataToken(TableIndex, rid);
+                    Result[(int) (rid - 1)] = createPlaceHolder(placeHolderType!, token);
+                }
+
+                FreeRids.Clear();
+            }
+
+            public void InsertAllFloating()
+            {
+                foreach (var floating in Floating)
+                    InsertInNextAvailableSlot(floating);
+                Floating.Clear();
+            }
+
+            public void InsertInNextAvailableSlot(TMember member)
+            {
+                if (!TryInsertInNullSlot(member))
+                    Result.Add(member);
+            }
+        }
+
+        private static Utf8String RidToName(uint rid)
+        {
+            const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+            int index = (int) rid;
+            int length = Math.Max(1, (int) Math.Ceiling(Math.Log(index, alphabet.Length)));
+
+            byte[] buffer = new byte[length];
+            for (int i = 0; i < length; i++)
+            {
+                index = Math.DivRem(index, alphabet.Length, out int remainder);
+                buffer[i] = (byte) alphabet[remainder];
+            }
+
+            return Utf8String.CreateUnsafe(buffer);
+        }
+
         /// <summary>
-        /// Represents a place holder type definition.
+        /// Represents a placeholder type definition.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -499,7 +542,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 : base(token)
             {
                 Namespace = ns;
-                Name =  $"PlaceHolderTypeDef_{token.Rid.ToString()}";
+                Name = RidToName(token.Rid);
                 Attributes = TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.NotPublic;
                 BaseType = module.CorLibTypeFactory.Object.Type;
 
