@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using AsmResolver.Shims;
 
@@ -169,16 +170,36 @@ namespace AsmResolver.IO
         private void AssertCanRead(uint count)
         {
             if (!CanRead(count))
-                throw new EndOfStreamException();
+                ThrowEndOfStream();
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowEndOfStream() => throw new EndOfStreamException();
 
         /// <summary>
         /// Peeks a single byte from the input stream.
         /// </summary>
         /// <returns>The read byte, or <c>-1</c> if no byte could be read.</returns>
-        public int PeekByte() => CanRead(1)
+        public int PeekByte() => CanRead(sizeof(byte))
             ? DataSource[Offset]
             : -1;
+
+        /// <summary>
+        /// Attempts to read a byte from the input stream.
+        /// </summary>
+        /// <param name="value">The read value</param>
+        /// <returns><c>true</c> if the read was successful, <c>false</c> otherwise.</returns>
+        public bool TryReadByte(out byte value)
+        {
+            if (!CanRead(sizeof(byte)))
+            {
+                value = 0;
+                return false;
+            }
+
+            value = DataSource[Offset++];
+            return true;
+        }
 
         /// <summary>
         /// Reads a single byte from the input stream, and advances the current offset by one.
@@ -191,16 +212,64 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
+        /// Attempts to read a single unsigned 16-bit integer from the input stream, and advances the current offset by two.
+        /// </summary>
+        /// <param name="value">The consumed value.</param>
+        /// <returns><c>true</c> if the value was consumed, <c>false</c> otherwise.</returns>
+        public bool TryReadUInt16(out ushort value)
+        {
+            if (!CanRead(sizeof(ushort)))
+            {
+                value = 0;
+                return false;
+            }
+
+            var dataSource = DataSource;
+            ulong offset = Offset;
+            value = (ushort) (
+                dataSource[offset]
+                | dataSource[offset + 1] << 8
+            );
+            Offset += sizeof(ushort);
+
+            return true;
+        }
+
+        /// <summary>
         /// Reads a single unsigned 16-bit integer from the input stream, and advances the current offset by two.
         /// </summary>
         /// <returns>The consumed value.</returns>
         public ushort ReadUInt16()
         {
-            AssertCanRead(2);
-            ushort value = (ushort) (DataSource[Offset]
-                                     | (DataSource[Offset + 1] << 8));
-            Offset += 2;
+            if (!TryReadUInt16(out ushort value))
+                ThrowEndOfStream();
             return value;
+        }
+
+        /// <summary>
+        /// Attempts to read a single unsigned 32-bit integer from the input stream, and advances the current offset by four.
+        /// </summary>
+        /// <param name="value">The consumed value.</param>
+        /// <returns><c>true</c> if the value was consumed, <c>false</c> otherwise.</returns>
+        public bool TryReadUInt32(out uint value)
+        {
+            if (!CanRead(sizeof(uint)))
+            {
+                value = 0;
+                return false;
+            }
+
+            var dataSource = DataSource;
+            ulong offset = Offset;
+            value = unchecked((uint) (
+                dataSource[offset]
+                | dataSource[offset + 1] << 8
+                | dataSource[offset + 2] << 16
+                | dataSource[offset + 3] << 24
+            ));
+            Offset += sizeof(uint);
+
+            return true;
         }
 
         /// <summary>
@@ -209,13 +278,38 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public uint ReadUInt32()
         {
-            AssertCanRead(4);
-            uint value = unchecked((uint) (DataSource[Offset]
-                                           | (DataSource[Offset + 1] << 8)
-                                           | (DataSource[Offset + 2] << 16)
-                                           | (DataSource[Offset + 3] << 24)));
-            Offset += 4;
+            if (!TryReadUInt32(out uint value))
+                ThrowEndOfStream();
             return value;
+        }
+
+        /// <summary>
+        /// Attempts to read a single unsigned 16-bit integer from the input stream, and advances the current offset by eight.
+        /// </summary>
+        /// <param name="value">The consumed value.</param>
+        /// <returns><c>true</c> if the value was consumed, <c>false</c> otherwise.</returns>
+        public bool TryReadUInt64(out ulong value)
+        {
+            if (!CanRead(sizeof(ulong)))
+            {
+                value = 0;
+                return false;
+            }
+
+            var dataSource = DataSource;
+            ulong offset = Offset;
+            value = unchecked(dataSource[offset]
+                | (ulong) dataSource[offset + 1] << 8
+                | (ulong) dataSource[offset + 2] << 16
+                | (ulong) dataSource[offset + 3] << 24
+                | (ulong) dataSource[offset + 4] << 32
+                | (ulong) dataSource[offset + 5] << 40
+                | (ulong) dataSource[offset + 6] << 48
+                | (ulong) dataSource[offset + 7] << 56
+            );
+            Offset += sizeof(ulong);
+
+            return true;
         }
 
         /// <summary>
@@ -224,17 +318,26 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public ulong ReadUInt64()
         {
-            AssertCanRead(8);
-            ulong value = unchecked((ulong) (DataSource[Offset]
-                                             | ( (long) DataSource[Offset + 1] << 8)
-                                             | ( (long) DataSource[Offset + 2] << 16)
-                                             | ( (long) DataSource[Offset + 3] << 24)
-                                             | ( (long) DataSource[Offset + 4] << 32)
-                                             | ( (long) DataSource[Offset + 5] << 40)
-                                             | ( (long) DataSource[Offset + 6] << 48)
-                                             | ( (long) DataSource[Offset + 7] << 56)));
-            Offset += 8;
+            if (!TryReadUInt64(out ulong value))
+                ThrowEndOfStream();
             return value;
+        }
+
+        /// <summary>
+        /// Attempts to read a signed byte from the input stream.
+        /// </summary>
+        /// <param name="value">The read value</param>
+        /// <returns><c>true</c> if the read was successful, <c>false</c> otherwise.</returns>
+        public bool TryReadSByte(out sbyte value)
+        {
+            if (!CanRead(sizeof(sbyte)))
+            {
+                value = 0;
+                return false;
+            }
+
+            value =  unchecked((sbyte) DataSource[Offset++]);
+            return true;
         }
 
         /// <summary>
@@ -243,21 +346,67 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public sbyte ReadSByte()
         {
-            AssertCanRead(1);
+            AssertCanRead(sizeof(sbyte));
             return unchecked((sbyte) DataSource[Offset++]);
         }
 
+        /// <summary>
+        /// Attempts to read a single signed 16-bit integer from the input stream, and advances the current offset by eight.
+        /// </summary>
+        /// <param name="value">The consumed value.</param>
+        /// <returns><c>true</c> if the value was consumed, <c>false</c> otherwise.</returns>
+        public bool TryReadInt16(out short value)
+        {
+            if (!CanRead(sizeof(short)))
+            {
+                value = 0;
+                return false;
+            }
+
+            var dataSource = DataSource;
+            ulong offset = Offset;
+            value = (short) (
+                dataSource[offset]
+                | dataSource[offset + 1] << 8
+            );
+            Offset += sizeof(short);
+
+            return true;
+        }
         /// <summary>
         /// Reads a single signed 16-bit integer from the input stream, and advances the current offset by two.
         /// </summary>
         /// <returns>The consumed value.</returns>
         public short ReadInt16()
         {
-            AssertCanRead(2);
-            short value = (short) (DataSource[Offset]
-                                   | (DataSource[Offset + 1] << 8));
-            Offset += 2;
+            if (!TryReadInt16(out short value))
+                ThrowEndOfStream();
             return value;
+        }
+
+        /// <summary>
+        /// Attempts to read a single signed 32-bit integer from the input stream, and advances the current offset by eight.
+        /// </summary>
+        /// <param name="value">The consumed value.</param>
+        /// <returns><c>true</c> if the value was consumed, <c>false</c> otherwise.</returns>
+        public bool TryReadInt32(out int value)
+        {
+            if (!CanRead(sizeof(int)))
+            {
+                value = 0;
+                return false;
+            }
+
+            var dataSource = DataSource;
+            ulong offset = Offset;
+            value = unchecked(dataSource[offset]
+                | dataSource[offset + 1] << 8
+                | dataSource[offset + 2] << 16
+                | dataSource[offset + 3] << 24
+            );
+            Offset += sizeof(int);
+
+            return true;
         }
 
         /// <summary>
@@ -266,31 +415,48 @@ namespace AsmResolver.IO
         /// <returns>The consumed value.</returns>
         public int ReadInt32()
         {
-            AssertCanRead(4);
-            int value = DataSource[Offset]
-                        | (DataSource[Offset + 1] << 8)
-                        | (DataSource[Offset + 2] << 16)
-                        | (DataSource[Offset + 3] << 24);
-            Offset += 4;
+            if (!TryReadInt32(out int value))
+                ThrowEndOfStream();
             return value;
         }
 
         /// <summary>
-        /// Reads a single signed 64-bit integer from the input stream, and advances the current offset by eight.
+        /// Attempts to read a single signed 64-bit integer from the input stream, and advances the current offset by eight.
+        /// </summary>
+        /// <param name="value">The consumed value.</param>
+        /// <returns><c>true</c> if the value was consumed, <c>false</c> otherwise.</returns>
+        public bool TryReadInt64(out long value)
+        {
+            if (!CanRead(sizeof(long)))
+            {
+                value = 0;
+                return false;
+            }
+
+            var dataSource = DataSource;
+            ulong offset = Offset;
+            value = unchecked(dataSource[offset]
+                | (long) dataSource[offset + 1] << 8
+                | (long) dataSource[offset + 2] << 16
+                | (long) dataSource[offset + 3] << 24
+                | (long) dataSource[offset + 4] << 32
+                | (long) dataSource[offset + 5] << 40
+                | (long) dataSource[offset + 6] << 48
+                | (long) dataSource[offset + 7] << 56
+            );
+            Offset += sizeof(long);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Reads a single signed 32-bit integer from the input stream, and advances the current offset by four.
         /// </summary>
         /// <returns>The consumed value.</returns>
         public long ReadInt64()
         {
-            AssertCanRead(8);
-            long value = DataSource[Offset]
-                         | ((long) DataSource[Offset + 1] << 8)
-                         | ((long) DataSource[Offset + 2] << 16)
-                         | ((long) DataSource[Offset + 3] << 24)
-                         | ((long) DataSource[Offset + 4] << 32)
-                         | ((long) DataSource[Offset + 5] << 40)
-                         | ((long) DataSource[Offset + 6] << 48)
-                         | ((long) DataSource[Offset + 7] << 56);
-            Offset += 8;
+            if (!TryReadInt64(out long value))
+                ThrowEndOfStream();
             return value;
         }
 
@@ -502,11 +668,34 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
+        /// Attempts to read either a 32-bit or a 64-bit number from the input stream.
+        /// </summary>
+        /// <param name="is32Bit">Indicates the integer to be read is 32-bit or 64-bit.</param>
+        /// <param name="value">The read number, zero extended if necessary.</param>
+        /// <returns><c>true</c> if reading succeeded, <c>false</c> otherwise.</returns>
+        public bool TryReadNativeInt(bool is32Bit, out ulong value)
+        {
+            if (is32Bit)
+            {
+                bool result = TryReadUInt32(out uint val);
+                value = val;
+                return result;
+            }
+
+            return TryReadUInt64(out value);
+        }
+
+        /// <summary>
         /// Reads either a 32-bit or a 64-bit number from the input stream.
         /// </summary>
         /// <param name="is32Bit">Indicates the integer to be read is 32-bit or 64-bit.</param>
         /// <returns>The read number, zero extended if necessary.</returns>
-        public ulong ReadNativeInt(bool is32Bit) => is32Bit ? ReadUInt32() : ReadUInt64();
+        public ulong ReadNativeInt(bool is32Bit)
+        {
+            if (!TryReadNativeInt(is32Bit, out ulong value))
+                ThrowEndOfStream();
+            return value;
+        }
 
         /// <summary>
         /// Reads a compressed unsigned integer from the stream.
@@ -514,18 +703,9 @@ namespace AsmResolver.IO
         /// <returns>The unsigned integer that was read from the stream.</returns>
         public uint ReadCompressedUInt32()
         {
-            byte firstByte = ReadByte();
-
-            if ((firstByte & 0x80) == 0)
-                return firstByte;
-
-            if ((firstByte & 0x40) == 0)
-                return (uint)(((firstByte & 0x7F) << 8) | ReadByte());
-
-            return (uint) (((firstByte & 0x3F) << 0x18) |
-                (ReadByte() << 0x10) |
-                (ReadByte() << 0x08) |
-                ReadByte());
+            if (!TryReadCompressedUInt32(out uint value))
+                ThrowEndOfStream();
+            return value;
         }
 
         /// <summary>
@@ -534,83 +714,109 @@ namespace AsmResolver.IO
         /// <returns>The signed integer that was read from the stream.</returns>
         public int ReadCompressedInt32()
         {
-            byte firstByte = ReadByte();
-            uint rotated;
-            int mask;
-
-            if ((firstByte & 0x80) == 0)
-            {
-                rotated = firstByte;
-                mask = (rotated & 1) != 0 ? -0x40 : 0;
-            }
-            else if ((firstByte & 0x40) == 0)
-            {
-                rotated = (uint) ((firstByte & 0x3F) << 8 | ReadByte());
-                mask = (rotated & 1) != 0 ? -0x2000 : 0;
-            }
-            else
-            {
-                rotated = (uint) (
-                    (firstByte & 0x1F) << 0x18
-                    | ReadByte() << 0x10
-                    | ReadByte() << 0x08
-                    | ReadByte()
-                );
-                mask = (rotated & 1) != 0 ? -0x1000_0000 : 0;
-            }
-
-            return (int) (rotated >> 1) | mask;
+            if (!TryReadCompressedInt32(out int value))
+                ThrowEndOfStream();
+            return value;
         }
 
         /// <summary>
-        /// Tries to reads a compressed unsigned integer from the stream.
+        /// Tries to read a compressed unsigned integer from the stream.
         /// </summary>
         /// <param name="value">The unsigned integer that was read from the stream.</param>
         /// <returns><c>True</c> if the method succeeded, false otherwise.</returns>
         public bool TryReadCompressedUInt32(out uint value)
         {
-            value = 0;
-            if (!CanRead(sizeof(byte)))
-                return false;
-
-            byte firstByte = ReadByte();
-            Offset--;
-
-            if ((firstByte & 0x80) == 0 && CanRead(sizeof(byte))
-                || (firstByte & 0x40) == 0 && CanRead(sizeof(ushort))
-                || CanRead(sizeof(uint)))
+            if (CanRead(sizeof(byte)))
             {
-                value = ReadCompressedUInt32();
-                return true;
+                var dataSource = DataSource;
+                ulong offset = Offset;
+
+                byte firstByte = dataSource[offset];
+                if ((firstByte & 0x80) == 0)
+                {
+                    value = firstByte;
+                    Offset++;
+                    return true;
+                }
+                else if ((firstByte & 0x40) == 0)
+                {
+                    if (CanRead(sizeof(ushort)))
+                    {
+                        value = (uint) (((firstByte & 0x7F) << 8) | dataSource[offset + 1]);
+                        Offset += sizeof(ushort);
+                        return true;
+                    }
+                }
+                else if (CanRead(sizeof(uint)))
+                {
+                    value = (uint) (
+                        ((firstByte & 0x3F) << 0x18)
+                        | (dataSource[offset + 1] << 0x10)
+                        | (dataSource[offset + 2] << 0x08)
+                        | dataSource[offset + 3]
+                    );
+                    Offset += sizeof(uint);
+                    return true;
+                }
             }
 
+            value = 0;
             return false;
         }
 
         /// <summary>
-        /// Tries to reads a compressed signed integer from the stream.
+        /// Tries to read a compressed signed integer from the stream.
         /// </summary>
         /// <param name="value">The signed integer that was read from the stream.</param>
         /// <returns><c>True</c> if the method succeeded, false otherwise.</returns>
         public bool TryReadCompressedInt32(out int value)
         {
-            value = 0;
-
-            if (!CanRead(sizeof(byte)))
-                return false;
-
-            byte firstByte = ReadByte();
-            Offset--;
-
-            if ((firstByte & 0x80) == 0 && CanRead(sizeof(byte))
-                || (firstByte & 0x40) == 0 && CanRead(sizeof(ushort))
-                || CanRead(sizeof(uint)))
+            if (CanRead(sizeof(byte)))
             {
-                value = ReadCompressedInt32();
+                var dataSource = DataSource;
+                ulong offset = Offset;
+
+                byte firstByte = dataSource[offset];
+                uint rotated;
+                int mask;
+
+                if ((firstByte & 0x80) == 0)
+                {
+                    rotated = firstByte;
+                    mask = (rotated & 1) != 0 ? -0x40 : 0;
+                    Offset++;
+                }
+                else if ((firstByte & 0x40) == 0)
+                {
+                    if (!CanRead(sizeof(ushort)))
+                        goto abort;
+
+                    rotated = (uint) ((firstByte & 0x3F) << 8 | dataSource[offset + 1]);
+                    mask = (rotated & 1) != 0 ? -0x2000 : 0;
+                    Offset += sizeof(ushort);
+                }
+                else
+                {
+                    if (!CanRead(sizeof(uint)))
+                        goto abort;
+
+                    rotated = (uint) (
+                        (firstByte & 0x1F) << 0x18
+                        | dataSource[offset + 1] << 0x10
+                        | dataSource[offset + 2] << 0x08
+                        | dataSource[offset + 3]
+                    );
+                    mask = (rotated & 1) != 0 ? -0x1000_0000 : 0;
+                    Offset += sizeof(uint);
+                }
+
+                value = (int) (rotated >> 1) | mask;
                 return true;
             }
 
-            return true;
+        abort:
+            value = 0;
+            return false;
         }
 
         /// <summary>
@@ -664,7 +870,11 @@ namespace AsmResolver.IO
         /// <returns>The string that was read from the stream.</returns>
         public Utf8String? ReadSerString()
         {
-            if (!CanRead(1) || DataSource[Offset] == 0xFF)
+            int b = PeekByte();
+            if (b < 0)
+                return null;
+
+            if (b == 0xFF)
             {
                 Offset++;
                 return null;
