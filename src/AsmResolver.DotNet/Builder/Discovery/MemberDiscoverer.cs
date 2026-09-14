@@ -412,6 +412,13 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 // Get original number of elements in the table.
                 int count = tablesStream.GetTable(TableIndex).Count;
 
+#if NET8_0_OR_GREATER
+                Result.EnsureCapacity(count);
+#else
+                if (Result.Capacity < count)
+                    Result.Capacity = count;
+#endif
+
                 // Traverse the table, look up the high-level metadata model, and see if it is still present.
                 for (uint rid = 1; rid <= count; rid++)
                 {
@@ -440,12 +447,6 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 {
                     // Member is a new member but assigned a RID.
                     // Ensure enough rows are allocated, so that we can insert it in the right place.
-#if NET8_0_OR_GREATER
-                    Result.EnsureCapacity((int) member.MetadataToken.Rid);
-#else
-                    if (Result.Capacity < member.MetadataToken.Rid)
-                        Result.Capacity = (int) member.MetadataToken.Rid;
-#endif
                     while (Result.Count < member.MetadataToken.Rid)
                     {
                         Result.Add(null);
