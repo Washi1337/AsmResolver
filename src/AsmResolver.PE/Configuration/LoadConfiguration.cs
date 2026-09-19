@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.Relocations;
@@ -257,7 +258,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// Gets or sets the sorted table of RVAs of each Control Flow Guard function in the image.
     /// </summary>
     [LazyProperty]
-    public partial ControlFlowGuardFunctionTable? GuardCFFunctionTable
+    public partial ControlFlowGuardFunctionTable GuardCFFunctionTable
     {
         get;
     }
@@ -591,15 +592,263 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// <inheritdoc />
     public override void Write(BinaryStreamWriter writer)
     {
-        throw new NotImplementedException();
+        if (Size <= sizeof(uint))
+            throw new ArgumentException("Size of loader configuration is below 4 bytes");
+
+        uint totalLength = 0;
+        bool @continue =
+            TryWriteUInt32(writer, Size, ref totalLength)
+            && TryWriteUInt32(writer, TimeDateStamp, ref totalLength)
+            && TryWriteUInt16(writer, MajorVersion, ref totalLength)
+            && TryWriteUInt16(writer, MinorVersion, ref totalLength)
+            && TryWriteUInt32(writer, GlobalFlagsClear, ref totalLength)
+            && TryWriteUInt32(writer, GlobalFlagsSet, ref totalLength)
+            && TryWriteUInt32(writer, CriticalSectionDefaultTimeout, ref totalLength)
+            && TryWriteNativeInt(writer, DeCommitFreeBlockThreshold, ref totalLength)
+            && TryWriteNativeInt(writer, DeCommitTotalFreeThreshold, ref totalLength)
+            && TryWriteNativeInt(writer, LockPrefixTable.Count > 0 ? _imageBase + LockPrefixTable.Rva : 0ul, ref totalLength)
+            && TryWriteNativeInt(writer, MaximumAllocationSize, ref totalLength)
+            && TryWriteNativeInt(writer, VirtualMemoryThreshold, ref totalLength)
+            ;
+
+        if (!@continue)
+            return;
+
+        // 32-bits/64-bits swap for some reason process affinity mask and heap flags.
+        if (Is32Bit)
+        {
+            @continue = TryWriteUInt32(writer, ProcessHeapFlags, ref totalLength)
+                && TryWriteUInt32(writer, (uint) ProcessAffinityMask , ref totalLength);
+        }
+        else
+        {
+            @continue = TryWriteUInt64(writer, ProcessAffinityMask, ref totalLength)
+                && TryWriteUInt32(writer, ProcessHeapFlags, ref totalLength);
+        }
+
+        if (!@continue)
+            return;
+
+        _ = TryWriteUInt16(writer, CsdVersion, ref totalLength)
+            && TryWriteUInt16(writer, DependentLoadFlags, ref totalLength)
+            && TryWriteVa(writer, EditList, ref totalLength)
+            && TryWriteNativeInt(writer, _imageBase + SecurityCookie?.Rva ?? 0ul, ref totalLength)
+            && TryWriteNativeInt(writer, SEHandlerTable.Count > 0 ? _imageBase + SEHandlerTable.Rva : 0ul, ref totalLength)
+            && TryWriteNativeInt(writer, (ulong) SEHandlerTable.Count, ref totalLength)
+            && TryWriteVa(writer, GuardCFCheckFunctionPointer, ref totalLength)
+            && TryWriteVa(writer, GuardCFDispatchFunctionPointer, ref totalLength)
+            && TryWriteNativeInt(writer, GuardCFFunctionTable.Count > 0 ? _imageBase + GuardCFFunctionTable.Rva : 0ul, ref totalLength)
+            && TryWriteNativeInt(writer, (ulong) GuardCFFunctionTable.Count, ref totalLength)
+            && TryWriteUInt32(writer, (uint) GuardFlags, ref totalLength)
+            && TryWriteUInt16(writer, CodeIntegrityFlags, ref totalLength)
+            && TryWriteUInt16(writer, CodeIntegrityCatalog, ref totalLength)
+            && TryWriteUInt32(writer, CodeIntegrityOffset, ref totalLength)
+            && TryWriteUInt32(writer, CodeIntegrityReserved, ref totalLength)
+            && TryWriteNativeInt(writer, GuardAddressTakenIatEntryTable.Count > 0 ? _imageBase + GuardAddressTakenIatEntryTable.Rva : 0ul, ref totalLength)
+            && TryWriteNativeInt(writer, (ulong) GuardAddressTakenIatEntryTable.Count, ref totalLength)
+            && TryWriteNativeInt(writer, GuardLongJumpTargetTable.Count > 0 ? _imageBase + GuardLongJumpTargetTable.Rva : 0ul, ref totalLength)
+            && TryWriteNativeInt(writer, (ulong) GuardLongJumpTargetTable.Count, ref totalLength)
+            && TryWriteVa(writer, DynamicValueRelocTable, ref totalLength)
+            && TryWriteVa(writer, GuardRFFailureRoutine, ref totalLength)
+            && TryWriteVa(writer, GuardRFFailureRoutineFunctionPointer, ref totalLength)
+            && TryWriteUInt32(writer, DynamicValueRelocTableOffset, ref totalLength)
+            && TryWriteUInt16(writer, DynamicValueRelocTableSection, ref totalLength)
+            && TryWriteUInt16(writer, Reserved2, ref totalLength)
+            && TryWriteVa(writer, GuardRFVerifyStackPointerFunctionPointer, ref totalLength)
+            && TryWriteUInt32(writer, HotPatchTableOffset, ref totalLength)
+            && TryWriteUInt32(writer, Reserved3, ref totalLength)
+            && TryWriteVa(writer, EnclaveConfigurationPointer, ref totalLength)
+            && TryWriteVa(writer, VolatileMetadataPointer, ref totalLength)
+            && TryWriteNativeInt(writer, GuardEHContinuationTable.Count > 0 ? _imageBase + GuardEHContinuationTable.Rva : 0ul, ref totalLength)
+            && TryWriteNativeInt(writer, (ulong) GuardEHContinuationTable.Count, ref totalLength)
+            && TryWriteVa(writer, GuardXFGCheckFunctionPointer, ref totalLength)
+            && TryWriteVa(writer, GuardXFGDispatchFunctionPointer, ref totalLength)
+            && TryWriteVa(writer, GuardXFGTableDispatchFunctionPointer, ref totalLength)
+            && TryWriteVa(writer, CastGuardOsDeterminedFailureMode, ref totalLength)
+            && TryWriteVa(writer, GuardMemcpyFunctionPointer, ref totalLength)
+            && TryWriteVa(writer, UmaFunctionPointers, ref totalLength)
+            ;
     }
 
     /// <inheritdoc />
     public IEnumerable<BaseRelocation> GetRequiredBaseRelocations()
     {
+        int pointerSize = Is32Bit ? sizeof(uint) : sizeof(ulong);
+
         var relocations = new List<BaseRelocation>();
-        // TODO: header relocs
+        relocations.AddRange(GetHeaderRelocations().Where(x =>
+            x.Location is not RelativeReference { Additive: int offset } || offset < Size - pointerSize
+        ));
         relocations.AddRange(LockPrefixTable.CreateBaseRelocations());
         return relocations;
+    }
+
+    private IEnumerable<BaseRelocation> GetHeaderRelocations() => Is32Bit
+        ? GetHeader32Relocations()
+        : GetHeader64Relocations();
+
+    private IEnumerable<BaseRelocation> GetHeader32Relocations()
+    {
+        if (LockPrefixTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x20));
+        if (EditList != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x38));
+        if (SecurityCookie is not null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x3C));
+        if (SEHandlerTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x40));
+        if (GuardCFCheckFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x48));
+        if (GuardCFDispatchFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x4C));
+        if (GuardCFFunctionTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x50));
+        if (GuardAddressTakenIatEntryTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x68));
+        if (GuardLongJumpTargetTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x70));
+        if (DynamicValueRelocTable != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x78));
+        if (ChpeMetadataPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x7C));
+        if (GuardRFFailureRoutine != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x80));
+        if (GuardRFFailureRoutineFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x84));
+        if (GuardRFVerifyStackPointerFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x90));
+        if (EnclaveConfigurationPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x9C));
+        if (VolatileMetadataPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xA0));
+        if (GuardEHContinuationTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xA4));
+        if (GuardXFGCheckFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xAC));
+        if (GuardXFGDispatchFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xB0));
+        if (GuardXFGTableDispatchFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xB4));
+        if (CastGuardOsDeterminedFailureMode != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xB8));
+        if (GuardMemcpyFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xBC));
+        if (UmaFunctionPointers != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xC0));
+    }
+
+    private IEnumerable<BaseRelocation> GetHeader64Relocations()
+    {
+        if (LockPrefixTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x28));
+        if (EditList != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x50));
+        if (SecurityCookie is not null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x58));
+        if (SEHandlerTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x60));
+        if (GuardCFCheckFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x70));
+        if (GuardCFDispatchFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x78));
+        if (GuardCFFunctionTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x80));
+        if (GuardAddressTakenIatEntryTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xA0));
+        if (GuardLongJumpTargetTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xB0));
+        if (DynamicValueRelocTable != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xC0));
+        if (ChpeMetadataPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xC8));
+        if (GuardRFFailureRoutine != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xD0));
+        if (GuardRFFailureRoutineFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xD8));
+        if (GuardRFVerifyStackPointerFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xE8));
+        if (EnclaveConfigurationPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xF8));
+        if (VolatileMetadataPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x100));
+        if (GuardEHContinuationTable.Count > 0)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x108));
+        if (GuardXFGCheckFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x118));
+        if (GuardXFGDispatchFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x120));
+        if (GuardXFGTableDispatchFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x128));
+        if (CastGuardOsDeterminedFailureMode != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x130));
+        if (GuardMemcpyFunctionPointer != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x138));
+        if (UmaFunctionPointers != SegmentReference.Null)
+            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x140));
+    }
+
+    private bool IsWithinSize(BinaryStreamWriter writer, uint fieldSize, ref uint totalLength)
+    {
+        if (totalLength + fieldSize > Size)
+        {
+            // We are passing the allocated size of the structure if we would write this field.
+            // Fill up anyways to ensure Size bytes are actually used (even if incorrect).
+            int count = Math.Max(0, (int) Size - (int) totalLength);
+            writer.WriteZeroes(count);
+
+            totalLength += (uint) count;
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool TryWriteUInt16(BinaryStreamWriter writer, ushort value, ref uint totalLength)
+    {
+        if (IsWithinSize(writer, sizeof(ushort), ref totalLength))
+        {
+            writer.WriteUInt16(value);
+            totalLength += sizeof(ushort);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TryWriteUInt32(BinaryStreamWriter writer, uint value, ref uint totalLength)
+    {
+        if (IsWithinSize(writer, sizeof(uint), ref totalLength))
+        {
+            writer.WriteUInt32(value);
+            totalLength += sizeof(uint);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TryWriteUInt64(BinaryStreamWriter writer, ulong value, ref uint totalLength)
+    {
+        if (IsWithinSize(writer, sizeof(ulong), ref totalLength))
+        {
+            writer.WriteUInt64(value);
+            totalLength += sizeof(ulong);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TryWriteNativeInt(BinaryStreamWriter writer, ulong value, ref uint totalLength)
+    {
+        return Is32Bit
+            ? TryWriteUInt32(writer, (uint) value, ref totalLength)
+            : TryWriteUInt64(writer, value, ref totalLength);
+
+    }
+
+    private bool TryWriteVa(BinaryStreamWriter writer, ISegmentReference value, ref uint totalLength)
+    {
+        return TryWriteNativeInt(writer, value != SegmentReference.Null ? _imageBase + value.Rva : 0, ref totalLength);
     }
 }

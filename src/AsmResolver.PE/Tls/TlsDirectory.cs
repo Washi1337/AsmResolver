@@ -116,9 +116,13 @@ namespace AsmResolver.PE.Tls
                 result.Add(new BaseRelocation(type, this.ToReference(1 * pointerSize)));
             }
 
-            // TLS index and callback table addresses.
-            result.Add(new BaseRelocation(type, this.ToReference(2 * pointerSize)));
-            result.Add(new BaseRelocation(type, this.ToReference(3 * pointerSize)));
+            // TLS index
+            if (Index != SegmentReference.Null)
+                result.Add(new BaseRelocation(type, this.ToReference(2 * pointerSize)));
+
+            // Callback table addresses.
+            if (CallbackFunctions.Count > 0)
+                result.Add(new BaseRelocation(type, this.ToReference(3 * pointerSize)));
 
             // All callbacks are also VAs, so we need relocations for them as well.
             result.AddRange(CallbackFunctions.CreateBaseRelocations());
@@ -150,8 +154,8 @@ namespace AsmResolver.PE.Tls
                 writer.WriteNativeInt(0, is32Bit);
             }
 
-            writer.WriteNativeInt(imageBase + Index.Rva, is32Bit);
-            writer.WriteNativeInt(imageBase + CallbackFunctions.Rva, is32Bit);
+            writer.WriteNativeInt(Index != SegmentReference.Null ? imageBase + Index.Rva : 0, is32Bit);
+            writer.WriteNativeInt(CallbackFunctions.Count > 0 ? imageBase + CallbackFunctions.Rva : 0, is32Bit);
             writer.WriteUInt32(SizeOfZeroFill);
             writer.WriteUInt32((uint) Characteristics);
         }

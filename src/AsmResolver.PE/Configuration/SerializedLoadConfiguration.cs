@@ -41,10 +41,10 @@ public class SerializedLoadConfiguration : LoadConfiguration
 
         Size = reader.ReadUInt32();
 
-        uint actualSize = Math.Min(reader.RemainingLength, Size);
+        uint actualSize = Math.Min(reader.RemainingLength, Size - sizeof(uint));
 
         var boundedReader = reader.Fork();
-        boundedReader.ChangeSize(Math.Min(boundedReader.RemainingLength, Size));
+        boundedReader.ChangeSize(actualSize);
 
         reader.Offset += actualSize;
 

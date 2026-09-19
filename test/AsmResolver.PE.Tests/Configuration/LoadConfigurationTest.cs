@@ -1,4 +1,6 @@
+using System.IO;
 using System.Linq;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.Configuration;
 using Xunit;
 
@@ -6,45 +8,60 @@ namespace AsmResolver.PE.Tests.Configuration;
 
 public class LoadConfigurationTest
 {
-    [Fact]
-    public void SecurityCookie32Bit()
+    private static LoadConfiguration GetLoadConfiguration(byte[] imageBytes, bool rebuild)
     {
-        var image = PEImage.FromBytes(Properties.Resources.ControlFlowGuardTest_X86);
-        var config = image.LoadConfiguration;
+        var image = PEImage.FromBytes(imageBytes, TestReaderParameters);
+        if (rebuild)
+        {
+            using var stream = new MemoryStream();
+            new TemplatedPEFileBuilder().CreateFile(image).Write(stream);
+            stream.Position = 0;
+            image = PEImage.FromBytes(stream.ToArray());
+        }
 
-        Assert.NotNull(config);
+        Assert.NotNull(image.LoadConfiguration);
+        return image.LoadConfiguration;
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SecurityCookie32Bit(bool rebuild)
+    {
+        var config = GetLoadConfiguration(Properties.Resources.ControlFlowGuardTest_X86, rebuild);
+
         Assert.NotNull(config.SecurityCookie);
         Assert.Equal(4u, config.SecurityCookie.GetPhysicalSize());
     }
 
-    [Fact]
-    public void SecurityCookie64Bit()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SecurityCookie64Bit(bool rebuild)
     {
-        var image = PEImage.FromBytes(Properties.Resources.ControlFlowGuardTest_X64);
-        var config = image.LoadConfiguration;
+        var config = GetLoadConfiguration(Properties.Resources.ControlFlowGuardTest_X64, rebuild);
 
-        Assert.NotNull(config);
         Assert.NotNull(config.SecurityCookie);
         Assert.Equal(8u, config.SecurityCookie.GetPhysicalSize());
     }
 
-    [Fact]
-    public void SehHandlerTable32Bit()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SehHandlerTable32Bit(bool rebuild)
     {
-        var image = PEImage.FromBytes(Properties.Resources.ControlFlowGuardTest_X86);
-        var config = image.LoadConfiguration;
+        var config = GetLoadConfiguration(Properties.Resources.ControlFlowGuardTest_X86, rebuild);
 
-        Assert.NotNull(config);
         Assert.Equal([0x00004320u, 0x00004D50u], config.SEHandlerTable.Select(x => x.Rva));
     }
 
-    [Fact]
-    public void GuardFunctionTable32Bit()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GuardFunctionTable32Bit(bool rebuild)
     {
-        var image = PEImage.FromBytes(Properties.Resources.ControlFlowGuardTest_X86);
-        var config = image.LoadConfiguration;
+        var config = GetLoadConfiguration(Properties.Resources.ControlFlowGuardTest_X86, rebuild);
 
-        Assert.NotNull(config?.GuardCFFunctionTable);
         Assert.Equal(
             [
                 0x00001130u,
@@ -67,13 +84,13 @@ public class LoadConfigurationTest
         );
     }
 
-    [Fact]
-    public void GuardFunctionTable32BitWithFlags()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GuardFunctionTable32BitWithFlags(bool rebuild)
     {
-        var image = PEImage.FromBytes(Properties.Resources.ControlFlowGuardTest_X86_Flags);
-        var config = image.LoadConfiguration;
+        var config = GetLoadConfiguration(Properties.Resources.ControlFlowGuardTest_X86_Flags, rebuild);
 
-        Assert.NotNull(config?.GuardCFFunctionTable);
         Assert.Equal(
             [
                 (0x00001130u, 0),
@@ -96,13 +113,13 @@ public class LoadConfigurationTest
         );
     }
 
-    [Fact]
-    public void GuardFunctionTable64Bit()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GuardFunctionTable64Bit(bool rebuild)
     {
-        var image = PEImage.FromBytes(Properties.Resources.ControlFlowGuardTest_X64);
-        var config = image.LoadConfiguration;
+        var config = GetLoadConfiguration(Properties.Resources.ControlFlowGuardTest_X64, rebuild);
 
-        Assert.NotNull(config?.GuardCFFunctionTable);
         Assert.Equal(
             [
                 0x00001070u,

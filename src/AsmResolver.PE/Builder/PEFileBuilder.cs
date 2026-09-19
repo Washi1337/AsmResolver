@@ -275,7 +275,6 @@ namespace AsmResolver.PE.Builder
                 context.RelocationsDirectory.Add(relocations[i]);
         }
 
-
         /// <summary>
         /// Gets the required alignment of a field RVA, according to <see href="https://github.com/dotnet/runtime/blob/main/docs/design/specs/Ecma-335-Augments.md#rules-for-il-rewriters">the CoreCLR ECMA-335 augments</see>.
         /// </summary>
