@@ -18,4 +18,3 @@ public enum ControlFlowGuardFunctionFlags : byte
     /// </summary>
     ExportSuppressed = 2
 }
-`

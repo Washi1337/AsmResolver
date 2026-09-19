@@ -11,7 +11,6 @@ namespace AsmResolver.PE.Configuration;
 /// </summary>
 public partial class LoadConfiguration : SegmentBase, IRelocatable
 {
-    private bool _is32Bit;
     private ulong _imageBase;
 
     /// <summary>
@@ -38,8 +37,17 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// <param name="size">The size of the configuration. See also <see cref="LoadConfigurationSizes"/></param>
     public LoadConfiguration(bool is32Bit, uint size)
     {
-        _is32Bit = is32Bit;
+        Is32Bit = is32Bit;
         Size = size;
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether this configuration directory is using the 32-bit or 64-bit format.
+    /// </summary>
+    public bool Is32Bit
+    {
+        get;
+        private set;
     }
 
     /// <summary>
@@ -53,7 +61,9 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     }
 
     /// <summary>
-    /// Date and time stamp value. The value is represented in the number of seconds that have elapsed since midnight (00:00:00), January 1, 1970, Universal Coordinated Time, according to the system clock. The time stamp can be printed by using the C runtime (CRT) time function.
+    /// Date and time stamp value. The value is represented in the number of seconds that have elapsed since midnight
+    /// (00:00:00), January 1, 1970, Universal Coordinated Time, according to the system clock. The time stamp can be
+    /// printed by using the C runtime (CRT) time function.
     /// </summary>
     public uint TimeDateStamp
     {
@@ -198,21 +208,22 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// <summary>
     /// Reserved for use by the system.
     /// </summary>
-    public ulong EditList
+    public ISegmentReference EditList
     {
         get;
         set;
-    }
+    } = SegmentReference.Null;
 
     /// <summary>
     /// Gets or sets the cookie that is used by Visual C++ or GS implementation.
     /// </summary>
     /// <remarks>For valid PEs, this is always either pointing to a 32-bits or a 64-bits cookie.</remarks>
-    public ISegmentReference SecurityCookie
+    [LazyProperty]
+    public partial ISegment? SecurityCookie
     {
         get;
         set;
-    } = SegmentReference.Null;
+    }
 
     /// <summary>
     /// Gets the sorted table of RVAs of each valid, unique SE handler in the image.
@@ -227,7 +238,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// <summary>
     /// Gets or sets the address where the Control Flow Guard check-function pointer is stored.
     /// </summary>
-    public ISegmentReference GuardCFCheckFunction
+    public ISegmentReference GuardCFCheckFunctionPointer
     {
         get;
         set;
@@ -236,7 +247,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// <summary>
     /// Gets or sets the address where the Control Flow Guard dispatch-function pointer is stored.
     /// </summary>
-    public ISegmentReference GuardCFDispatchFunction
+    public ISegmentReference GuardCFDispatchFunctionPointer
     {
         get;
         set;
@@ -301,7 +312,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// Gets or sets the Control Flow Guard address taken IAT table.
     /// </summary>
     [LazyProperty]
-    public partial ReferenceTable GuardAddressTakenIatEntryTable
+    public partial ControlFlowGuardFunctionTable GuardAddressTakenIatEntryTable
     {
         get;
     }
@@ -310,7 +321,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// Gets or sets the Control Flow Guard long jump target table.
     /// </summary>
     [LazyProperty]
-    public partial ReferenceTable GuardLongJumpTargetTable
+    public partial ControlFlowGuardFunctionTable GuardLongJumpTargetTable
     {
         get;
     }
@@ -431,7 +442,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// protecting exception return points like catch blocks from ROP attacks).
     /// </summary>
     [LazyProperty]
-    public partial ReferenceTable GuardEHContinuationTable
+    public partial ControlFlowGuardFunctionTable GuardEHContinuationTable
     {
         get;
     }
@@ -506,6 +517,15 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     }
 
     /// <summary>
+    /// Obtains the security cookie table.
+    /// </summary>
+    /// <returns>The cookie.</returns>
+    /// <remarks>
+    /// This method is called upon initialization of the <see cref="SecurityCookie"/> property.
+    /// </remarks>
+    protected virtual ISegment? GetSecurityCookie() => null;
+
+    /// <summary>
     /// Obtains the SEH handler table.
     /// </summary>
     /// <returns>The function table.</returns>
@@ -514,7 +534,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// </remarks>
     protected virtual ReferenceTable GetSEHandlerTable()
     {
-        return new ReferenceTable(ReferenceTableAttributes.Rva);
+        return new ReferenceTable(ReferenceTableAttributes.Rva | ReferenceTableAttributes.Force32Bit);
     }
 
     /// <summary>
@@ -524,10 +544,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// <remarks>
     /// This method is called upon initialization of the <see cref="GuardCFFunctionTable"/> property.
     /// </remarks>
-    protected virtual ControlFlowGuardFunctionTable GetGuardCFFunctionTable()
-    {
-        return new ControlFlowGuardFunctionTable(this);
-    }
+    protected virtual ControlFlowGuardFunctionTable GetGuardCFFunctionTable() => new(this);
 
     /// <summary>
     /// Obtains the control flow guard IAT function table.
@@ -536,10 +553,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// <remarks>
     /// This method is called upon initialization of the <see cref="GuardAddressTakenIatEntryTable"/> property.
     /// </remarks>
-    protected virtual ReferenceTable GetGuardAddressTakenIatEntryTable()
-    {
-        return new ReferenceTable(ReferenceTableAttributes.Rva);
-    }
+    protected virtual ControlFlowGuardFunctionTable GetGuardAddressTakenIatEntryTable() => new(this);
 
     /// <summary>
     /// Obtains the control flow guard jump target table.
@@ -548,10 +562,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// <remarks>
     /// This method is called upon initialization of the <see cref="GuardLongJumpTargetTable"/> property.
     /// </remarks>
-    protected virtual ReferenceTable GetGuardLongJumpTargetTable()
-    {
-        return new ReferenceTable(ReferenceTableAttributes.Rva);
-    }
+    protected virtual ControlFlowGuardFunctionTable GetGuardLongJumpTargetTable() => new(this);
 
     /// <summary>
     /// Obtains the control flow guard contiuation table.
@@ -560,16 +571,16 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// <remarks>
     /// This method is called upon initialization of the <see cref="GuardEHContinuationTable"/> property.
     /// </remarks>
-    protected virtual ReferenceTable GetGuardEHContinuationTable()
-    {
-        return new ReferenceTable(ReferenceTableAttributes.Rva);
-    }
+    protected virtual ControlFlowGuardFunctionTable GetGuardEHContinuationTable() => new(this);
 
     /// <inheritdoc />
     public override void UpdateOffsets(in RelocationParameters parameters)
     {
-        _is32Bit = parameters.Is32Bit;
+        Is32Bit = parameters.Is32Bit;
         _imageBase = parameters.ImageBase;
+
+        // Propagate image-base and bitness to VA tables.
+        _lockPrefixTable?.UpdateOffsets(parameters.WithOffsetRva(_lockPrefixTable.Offset, _lockPrefixTable.Rva));
 
         base.UpdateOffsets(in parameters);
     }

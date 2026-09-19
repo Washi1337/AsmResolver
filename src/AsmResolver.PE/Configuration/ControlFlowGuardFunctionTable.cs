@@ -15,7 +15,10 @@ public class ControlFlowGuardFunctionTable : Collection<ControlFlowGuardFunction
         _owner = owner;
     }
 
-    private bool HasMetadata => (_owner.GuardFlags & GuardFlags.CfFunctionTableSizeMask) != 0;
+    /// <summary>
+    /// Gets a value indicating whether each entry in this table contains flags.
+    /// </summary>
+    public bool HasMetadata => (_owner.GuardFlags & GuardFlags.CfFunctionTableSizeMask) != 0;
 
     /// <inheritdoc />
     public ulong Offset
@@ -44,7 +47,8 @@ public class ControlFlowGuardFunctionTable : Collection<ControlFlowGuardFunction
     /// <inheritdoc />
     public uint GetPhysicalSize()
     {
-        return (sizeof(uint) + (HasMetadata ? sizeof(byte) : 0u)) * (uint) Count;
+        uint entrySize = sizeof(uint) + (HasMetadata ? sizeof(byte) : 0u);
+        return entrySize * (uint) Count;
     }
 
     /// <inheritdoc />
