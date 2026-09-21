@@ -37,7 +37,7 @@ namespace AsmResolver.PE.Relocations.Builder
                 var relocation = _relocations[i];
                 uint pageRva = GetPageRva(relocation);
                 var block = GetOrCreateBlock(blocks, pageRva);
-                block.Entries.Add(CreateEntry(relocation));
+                block.Add(CreateEntry(relocation), allowDuplicates: false);
             }
 
             return blocks

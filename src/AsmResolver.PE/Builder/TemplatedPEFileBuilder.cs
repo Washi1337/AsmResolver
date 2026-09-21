@@ -209,6 +209,7 @@ public class TemplatedPEFileBuilder : PEFileBuilder<TemplatedPEFileBuilder.Build
         header.SetDataDirectory(DataDirectoryIndex.ClrDirectory, context.Image.DotNetDirectory);
         header.SetDataDirectory(DataDirectoryIndex.TlsDirectory, context.TlsDirectory);
         header.SetDataDirectory(DataDirectoryIndex.BaseRelocationDirectory, !context.RelocationsDirectory.IsEmpty ? context.RelocationsDirectory : null);
+        header.SetDataDirectory(DataDirectoryIndex.LoadConfigDirectory, context.Image.LoadConfiguration);
     }
 
     /// <summary>
@@ -351,6 +352,30 @@ public class TemplatedPEFileBuilder : PEFileBuilder<TemplatedPEFileBuilder.Build
                 contents.Add(context.ExportDirectory, (uint) context.Platform.PointerSize);
         }
 
+        // Add load configuration directory
+        if (image.LoadConfiguration is { } loadConfiguration)
+        {
+            var originalDirectory = context.BaseImage?.LoadConfiguration;
+
+            if (!TryPatchDataDirectory(context, loadConfiguration, DataDirectoryIndex.LoadConfigDirectory))
+                contents.Add(loadConfiguration, (uint) context.Platform.PointerSize);
+
+            // Note: We do not add SecurityCookie as a typical compiler puts this in a writeable data section.
+
+            if (loadConfiguration.LockPrefixTable.Count > 0)
+                AddOrPatch(loadConfiguration.LockPrefixTable, originalDirectory?.LockPrefixTable);
+            if (loadConfiguration.SEHandlerTable.Count > 0)
+                AddOrPatch(loadConfiguration.SEHandlerTable, originalDirectory?.SEHandlerTable);
+            if (loadConfiguration.GuardCFFunctionTable.Count > 0)
+                AddOrPatch(loadConfiguration.GuardCFFunctionTable, originalDirectory?.GuardCFFunctionTable);
+            if (loadConfiguration.GuardAddressTakenIatEntryTable.Count > 0)
+                AddOrPatch(loadConfiguration.GuardAddressTakenIatEntryTable, originalDirectory?.GuardAddressTakenIatEntryTable);
+            if (loadConfiguration.GuardLongJumpTargetTable.Count > 0)
+                AddOrPatch(loadConfiguration.GuardLongJumpTargetTable, originalDirectory?.GuardLongJumpTargetTable);
+            if (loadConfiguration.GuardEHContinuationTable.Count > 0)
+                AddOrPatch(loadConfiguration.GuardEHContinuationTable, originalDirectory?.GuardEHContinuationTable);
+        }
+
         if (contents.Count == 0)
             return null;
 
@@ -387,9 +412,9 @@ public class TemplatedPEFileBuilder : PEFileBuilder<TemplatedPEFileBuilder.Build
                 contents.Add(fixups[i].Tokens, (uint) context.Platform.PointerSize);
         }
 
+        // Add TLS index segment.
         if (context.TlsDirectory is { } directory)
         {
-            // Add TLS index segment.
             if (directory.Index is not PESegmentReference
                 && directory.Index.IsBounded
                 && directory.Index.GetSegment() is { } indexSegment)
@@ -402,6 +427,12 @@ public class TemplatedPEFileBuilder : PEFileBuilder<TemplatedPEFileBuilder.Build
             }
         }
 
+        // Add writeable loader config data segments.
+        if (image.LoadConfiguration is { } loadConfiguration)
+        {
+            AddOrPatch(loadConfiguration.SecurityCookie, context.BaseImage?.LoadConfiguration?.SecurityCookie);
+        }
+
         if (contents.Count == 0)
             return null;
 
@@ -410,6 +441,15 @@ public class TemplatedPEFileBuilder : PEFileBuilder<TemplatedPEFileBuilder.Build
             SectionFlags.MemoryRead | SectionFlags.MemoryWrite | SectionFlags.ContentInitializedData,
             contents
         );
+
+        void AddOrPatch(ISegment? newSegment, ISegment? originalSegment)
+        {
+            if (newSegment is null)
+                return;
+
+            if (originalSegment is null || !TryPatchSegment(context, originalSegment, newSegment))
+                contents.Add(newSegment, (uint) context.Platform.PointerSize);
+        }
     }
 
     /// <summary>
@@ -527,14 +567,6 @@ public class TemplatedPEFileBuilder : PEFileBuilder<TemplatedPEFileBuilder.Build
                 tls.Index = new ZeroesSegment(sizeof(ulong)).ToReference();
 
             tls.CallbackFunctions.Insert(0, initializerSymbol.GetReference()!);
-
-            // Add the required relocs to the buffer if dynamic base is set.
-            if ((context.Image.DllCharacteristics & DllCharacteristics.DynamicBase) != 0)
-            {
-                // TODO: can we deduplicate existing relocs?
-                foreach (var reloc in tls.GetRequiredBaseRelocations())
-                    context.RelocationsDirectory.Add(reloc);
-            }
         }
 
         // Rebuild import directory as normal.
@@ -594,6 +626,23 @@ public class TemplatedPEFileBuilder : PEFileBuilder<TemplatedPEFileBuilder.Build
     protected override void CreateRelocationsDirectory(BuilderContext context)
     {
         base.CreateRelocationsDirectory(context);
+
+        if ((context.Image.DllCharacteristics & DllCharacteristics.DynamicBase) == 0)
+            return;
+
+        // Loader config relocs.
+        if (context.Image.LoadConfiguration is { } loadConfiguration)
+        {
+            foreach (var reloc in loadConfiguration.GetRequiredBaseRelocations())
+                context.RelocationsDirectory.Add(reloc);
+        }
+
+        // TLS relocs.
+        if (context.TlsDirectory is { } tlsDirectory)
+        {
+            foreach (var reloc in tlsDirectory.GetRequiredBaseRelocations())
+                context.RelocationsDirectory.Add(reloc);
+        }
 
         // We may have some extra relocations for the newly generated code of our trampolines initializers.
         foreach (var reloc in context.ImportTrampolines.GetRequiredBaseRelocations())
