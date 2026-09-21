@@ -43,10 +43,7 @@ public class SerializedFunctionListSymbol : FunctionListSymbol
                 ? countReader.ReadInt32()
                 : 0;
 
-            var function = _context.ParentImage.TryGetIdLeafRecord(typeIndex, out FunctionIdentifier? type)
-                ? type
-                : _context.Parameters.ErrorListener.BadImageAndReturn<FunctionIdentifier>(
-                    $"Function list contains an invalid type index {typeIndex:X8}.");
+            var function = _context.ParentImage.GetIdLeafRecord<FunctionIdentifier>(typeIndex);
 
             result.Add(new FunctionCountPair(function, count));
         }

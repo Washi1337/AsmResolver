@@ -33,10 +33,7 @@ public class SerializedBasePointerRelativeSymbol : BasePointerRelativeSymbol
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetVariableType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out CodeViewTypeRecord? type)
-            ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
-                $"Base-pointer relative symbol contains an invalid type index {_typeIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<CodeViewTypeRecord>(_typeIndex);
     }
 
 }

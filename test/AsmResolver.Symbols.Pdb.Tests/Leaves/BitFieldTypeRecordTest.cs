@@ -15,21 +15,21 @@ public class BitFieldTypeRecordTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void ReadBaseType()
     {
-        var type = (BitFieldTypeRecord) _fixture.MyTestApplication.GetLeafRecord(0x1060);
+        var type = (BitFieldTypeRecord) _fixture.MyTestApplication.GetLeafRecord(0x1060)!;
         Assert.Equal(SimpleTypeKind.UInt32Long, Assert.IsAssignableFrom<SimpleTypeRecord>(type.BaseType).Kind);
     }
 
     [Fact]
     public void ReadPosition()
     {
-        var type = (BitFieldTypeRecord) _fixture.MyTestApplication.GetLeafRecord(0x1060);
+        var type = (BitFieldTypeRecord) _fixture.MyTestApplication.GetLeafRecord(0x1060)!;
         Assert.Equal(2, type.Position);
     }
 
     [Fact]
     public void ReadLength()
     {
-        var type = (BitFieldTypeRecord) _fixture.MyTestApplication.GetLeafRecord(0x1060);
+        var type = (BitFieldTypeRecord) _fixture.MyTestApplication.GetLeafRecord(0x1060)!;
         Assert.Equal(30, type.Length);
     }
 }
