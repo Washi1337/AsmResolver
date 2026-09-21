@@ -74,6 +74,8 @@ public static class TargetRuntimeProber
             row.BuildNumber,
             row.RevisionNumber
         );
+        if (!KnownCorLibs.IsSupportedRuntime(newMatch))
+            return false;
 
         // We need to explicitly check for `null`, because Version::`operator <` throws on .NET FX when one of the
         // operands is `null`. See also https://github.com/Washi1337/AsmResolver/issues/723
@@ -108,6 +110,8 @@ public static class TargetRuntimeProber
                 row.BuildNumber,
                 row.RevisionNumber
             );
+            if (!KnownCorLibs.IsSupportedRuntime(newMatch))
+                continue;
 
             // We need to explicitly check for `null`, because Version::`operator <` throws on .NET FX when one of the
             // operands is `null`. See also https://github.com/Washi1337/AsmResolver/issues/723
@@ -188,7 +192,9 @@ public static class TargetRuntimeProber
             // Read first argument (target runtime string).
             var element = reader.ReadSerString();
 
-            if (Utf8String.IsNullOrEmpty(element) || !DotNetRuntimeInfo.TryParse(element, out var info))
+            if (Utf8String.IsNullOrEmpty(element)
+                || !DotNetRuntimeInfo.TryParse(element, out var info)
+                || !KnownCorLibs.IsSupportedRuntime(info))
                 continue;
 
             bool isSupportedSilverlight = info.IsSilverlight && IsSupportedSilverlightVersion(info.Version);
