@@ -74,6 +74,8 @@ public static class TargetRuntimeProber
             row.BuildNumber,
             row.RevisionNumber
         );
+        if (!KnownCorLibs.IsSupportedRuntime(newMatch))
+            return false;
 
         // We need to explicitly check for `null`, because Version::`operator <` throws on .NET FX when one of the
         // operands is `null`. See also https://github.com/Washi1337/AsmResolver/issues/723
@@ -108,6 +110,8 @@ public static class TargetRuntimeProber
                 row.BuildNumber,
                 row.RevisionNumber
             );
+            if (!KnownCorLibs.IsSupportedRuntime(newMatch))
+                continue;
 
             // We need to explicitly check for `null`, because Version::`operator <` throws on .NET FX when one of the
             // operands is `null`. See also https://github.com/Washi1337/AsmResolver/issues/723
@@ -188,7 +192,9 @@ public static class TargetRuntimeProber
             // Read first argument (target runtime string).
             var element = reader.ReadSerString();
 
-            if (Utf8String.IsNullOrEmpty(element) || !DotNetRuntimeInfo.TryParse(element, out var info))
+            if (Utf8String.IsNullOrEmpty(element)
+                || !DotNetRuntimeInfo.TryParse(element, out var info)
+                || !KnownCorLibs.IsSupportedRuntime(info))
                 continue;
 
             bool isSupportedSilverlight = info.IsSilverlight && IsSupportedSilverlightVersion(info.Version);
@@ -232,25 +238,41 @@ public static class TargetRuntimeProber
     /// <summary>
     /// Maps the corlib reference to the appropriate .NET or .NET Core version.
     /// </summary>
-    /// <returns>The runtime information.</returns>
+    /// <returns>The runtime information, or .NET Framework 4.0 if the runtime could not be determined.</returns>
     public static DotNetRuntimeInfo ExtractDotNetRuntimeInfo(IResolutionScope corLibScope)
     {
+        return TryExtractDotNetRuntimeInfo(corLibScope, out var runtimeInfo)
+            ? runtimeInfo
+            : DotNetRuntimeInfo.NetFramework(4, 0);
+    }
+
+    internal static bool TryExtractDotNetRuntimeInfo(IResolutionScope corLibScope, out DotNetRuntimeInfo runtimeInfo)
+    {
+        runtimeInfo = default;
+
         var assembly = corLibScope.GetAssembly();
 
         if (assembly is null)
-            return DotNetRuntimeInfo.NetFramework(4, 0);
+            return false;
 
         string? name = assembly.Name?.Value;
-        if (string.IsNullOrEmpty(name))
-            return DotNetRuntimeInfo.NetFramework(4, 0);
 
-        return ToDotNetRuntimeInfo(
+        if (string.IsNullOrEmpty(name))
+            return false;
+
+        var candidate = ToDotNetRuntimeInfo(
             name!,
             assembly.Version.Major,
             assembly.Version.Minor,
             assembly.Version.Build,
             assembly.Version.Revision
         );
+
+        if (!KnownCorLibs.IsSupportedRuntime(candidate))
+            return false;
+
+        runtimeInfo = candidate;
+        return true;
     }
 
     private static bool IsSupportedSilverlightVersion(Version version) => version.Major is 4 or 5 && version.Minor == 0;
