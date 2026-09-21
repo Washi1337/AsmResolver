@@ -13,6 +13,7 @@ namespace AsmResolver.PE.Exports.Builder
         private readonly NameTableBuffer _nameTableBuffer;
         private readonly List<ushort> _ordinals = new();
         private readonly List<ExportedSymbol> _namedEntries = new();
+        private bool _isSorted = true;
 
         /// <summary>
         /// Creates a new empty ordinal and name-pointer table buffer.
@@ -56,6 +57,7 @@ namespace AsmResolver.PE.Exports.Builder
             {
                 _namedEntries.Add(symbol);
                 _ordinals.Add((ushort) (symbol.Ordinal - symbol.ParentDirectory.BaseOrdinal));
+                _isSorted = false;
             }
         }
 
@@ -65,8 +67,51 @@ namespace AsmResolver.PE.Exports.Builder
         /// <inheritdoc />
         public override void Write(BinaryStreamWriter writer)
         {
+            SortNamedEntries();
+
             WriteOrdinalTable(writer);
             WriteNamePointerTable(writer);
+        }
+
+        /// <summary>
+        /// Sorts the name pointer table and the parallel ordinal table by the names of the exported symbols.
+        /// </summary>
+        /// <remarks>
+        /// The PE file format requires the name pointer table to be sorted in ascending lexicographical order,
+        /// so that the operating system can binary search it when resolving an export by name. Symbols may be
+        /// registered in any order (typically the order in which they appear in the export directory), so the
+        /// table is sorted lazily right before it is written.
+        /// </remarks>
+        private void SortNamedEntries()
+        {
+            if (_isSorted)
+                return;
+
+            _isSorted = true;
+
+            int count = _namedEntries.Count;
+            if (count <= 1)
+                return;
+
+            var indices = new int[count];
+            for (int i = 0; i < count; i++)
+                indices[i] = i;
+
+            var entries = _namedEntries;
+            Array.Sort(indices, (a, b) => string.CompareOrdinal(entries[a].Name, entries[b].Name));
+
+            var sortedEntries = new List<ExportedSymbol>(count);
+            var sortedOrdinals = new List<ushort>(count);
+            for (int i = 0; i < count; i++)
+            {
+                sortedEntries.Add(_namedEntries[indices[i]]);
+                sortedOrdinals.Add(_ordinals[indices[i]]);
+            }
+
+            _namedEntries.Clear();
+            _namedEntries.AddRange(sortedEntries);
+            _ordinals.Clear();
+            _ordinals.AddRange(sortedOrdinals);
         }
 
         private void WriteNamePointerTable(BinaryStreamWriter writer)

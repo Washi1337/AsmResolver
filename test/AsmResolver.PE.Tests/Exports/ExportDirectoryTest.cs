@@ -97,6 +97,63 @@ namespace AsmResolver.PE.Tests.Exports
             }, image.Exports.Entries.Select(e => e.Ordinal));
         }
 
+        [Fact]
+        public void RebuildShouldSortNamePointerTable()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
+
+            // Prepare mock with names registered out of lexicographical order.
+            var exportDirectory = new ExportDirectory("HelloWorld.dll");
+            exportDirectory.Entries.Add(new ExportedSymbol(new VirtualAddress(0x12345678), "Zeta"));
+            exportDirectory.Entries.Add(new ExportedSymbol(new VirtualAddress(0x11112222)));
+            exportDirectory.Entries.Add(new ExportedSymbol(new VirtualAddress(0xabcdef00), "Alpha"));
+            exportDirectory.Entries.Add(new ExportedSymbol(new VirtualAddress(0x1337c0de), "Mike"));
+            image.Exports = exportDirectory;
+
+            // Rebuild.
+            var newImage = RebuildAndReloadManagedPE(image);
+
+            // Verify: the PE format requires the name pointer table to be sorted, and the ordinal
+            // table to remain aligned with it.
+            Assert.Equal(new[] {"Alpha", "Mike", "Zeta"}, ReadNamePointerTableOrder(newImage));
+
+            var alpha = newImage.Exports!.Entries.Single(x => x.Name == "Alpha");
+            var mike = newImage.Exports.Entries.Single(x => x.Name == "Mike");
+            var zeta = newImage.Exports.Entries.Single(x => x.Name == "Zeta");
+            Assert.Equal(0xabcdef00u, alpha.Address.Rva);
+            Assert.Equal(0x1337c0deu, mike.Address.Rva);
+            Assert.Equal(0x12345678u, zeta.Address.Rva);
+        }
+
+        private static string[] ReadNamePointerTableOrder(PEImage image)
+        {
+            var file = image.PEFile!;
+            var directory = file.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ExportDirectory);
+
+            var reader = file.CreateReaderAtRva(directory.VirtualAddress);
+            reader.ReadUInt32(); // ExportFlags
+            reader.ReadUInt32(); // TimeDateStamp
+            reader.ReadUInt16(); // MajorVersion
+            reader.ReadUInt16(); // MinorVersion
+            reader.ReadUInt32(); // Name
+            reader.ReadUInt32(); // BaseOrdinal
+            reader.ReadUInt32(); // NumberOfFunctions
+            uint numberOfNames = reader.ReadUInt32();
+            reader.ReadUInt32(); // AddressOfFunctions
+            uint addressOfNames = reader.ReadUInt32();
+            reader.ReadUInt32(); // AddressOfNameOrdinals
+
+            var names = new string[numberOfNames];
+            var namePointerReader = file.CreateReaderAtRva(addressOfNames);
+            for (uint i = 0; i < numberOfNames; i++)
+            {
+                uint nameRva = namePointerReader.ReadUInt32();
+                names[i] = file.CreateReaderAtRva(nameRva).ReadAsciiString();
+            }
+
+            return names;
+        }
+
         private static PEImage RebuildAndReloadManagedPE(PEImage image)
         {
             // Build.
