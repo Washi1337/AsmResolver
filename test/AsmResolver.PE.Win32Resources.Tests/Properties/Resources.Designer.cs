@@ -58,5 +58,12 @@ namespace AsmResolver.PE.Win32Resources.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        internal static byte[] ResourceLibrary {
+            get {
+                object obj = ResourceManager.GetObject("ResourceLibrary", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
