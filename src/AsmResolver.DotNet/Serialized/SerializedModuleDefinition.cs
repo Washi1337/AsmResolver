@@ -330,7 +330,9 @@ namespace AsmResolver.DotNet.Serialized
             IResolutionScope? mostRecentCorLib = null;
             foreach (var reference in AssemblyReferences)
             {
-                if (reference.Name is not null && KnownCorLibs.KnownCorLibNames.Contains(reference.Name))
+                if (reference.Name is not null
+                    && KnownCorLibs.KnownCorLibNames.Contains(reference.Name)
+                    && TargetRuntimeProber.TryExtractSupportedDotNetRuntimeInfo(reference, out _))
                 {
                     if (mostRecentCorLib is null || reference.Version > mostRecentCorLib.GetAssembly()!.Version)
                         mostRecentCorLib = reference;

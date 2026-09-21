@@ -337,13 +337,19 @@ namespace AsmResolver.DotNet
                 return SelectFrameworkCorLib(runtimeInfo.Version);
 
             if (runtimeInfo.IsNetStandard)
-                return SelectNetStandardCorLib(runtimeInfo.Version);
+                return SelectNetStandardCorLib(runtimeInfo.Version)
+                    ?? throw new ArgumentException(
+                        $"Invalid or unsupported .NET standard version {runtimeInfo.Version}.");
 
             if (runtimeInfo.IsNetCoreApp)
-                return SelectNetCoreCorLib(runtimeInfo.Version);
+                return SelectNetCoreCorLib(runtimeInfo.Version)
+                    ?? throw new ArgumentException(
+                        $"Invalid or unsupported .NET or .NET Core version {runtimeInfo.Version}.");
 
             if (runtimeInfo.IsSilverlight)
-                return SelectSilverlightCorLib(runtimeInfo.Version);
+                return SelectSilverlightCorLib(runtimeInfo.Version)
+                    ?? throw new ArgumentException(
+                        $"Invalid or unsupported Silverlight version {runtimeInfo.Version}.");
 
             throw new ArgumentException($"Invalid or unsupported runtime version {runtimeInfo}.");
         }
@@ -363,10 +369,14 @@ namespace AsmResolver.DotNet
                 return SelectFrameworkCorLib(runtimeInfo.Version);
 
             if (runtimeInfo.IsNetCoreApp)
-                return SelectNetCoreImplCorLib(runtimeInfo.Version);
+                return SelectNetCoreImplCorLib(runtimeInfo.Version)
+                    ?? throw new ArgumentException(
+                        $"Invalid or unsupported .NET or .NET Core version {runtimeInfo.Version}.");
 
             if (runtimeInfo.IsSilverlight)
-                return SelectSilverlightCorLib(runtimeInfo.Version);
+                return SelectSilverlightCorLib(runtimeInfo.Version)
+                    ?? throw new ArgumentException(
+                        $"Invalid or unsupported Silverlight version {runtimeInfo.Version}.");
 
             if (runtimeInfo.IsNetCore || runtimeInfo.IsNetPortable)
                 return null;
@@ -374,21 +384,38 @@ namespace AsmResolver.DotNet
             throw new ArgumentException($"Invalid or unsupported runtime version {runtimeInfo}.");
         }
 
+        internal static bool IsSupportedRuntime(in DotNetRuntimeInfo runtimeInfo)
+        {
+            if (runtimeInfo.IsNetFramework)
+                return true;
+
+            if (runtimeInfo.IsNetStandard)
+                return SelectNetStandardCorLib(runtimeInfo.Version) is not null;
+
+            if (runtimeInfo.IsNetCoreApp)
+                return SelectNetCoreImplCorLib(runtimeInfo.Version) is not null;
+
+            if (runtimeInfo.IsSilverlight)
+                return SelectSilverlightCorLib(runtimeInfo.Version) is not null;
+
+            return false;
+        }
+
         private static AssemblyReference SelectFrameworkCorLib(Version version) => version.Major < 4
             ? MsCorLib_v2_0_0_0
             : MsCorLib_v4_0_0_0;
 
-        private static AssemblyReference SelectSilverlightCorLib(Version version)
+        private static AssemblyReference? SelectSilverlightCorLib(Version version)
         {
             return (version.Major, version.Minor) switch
             {
                 (4, 0) => MsCorLib_v2_0_5_0,
                 (5, 0) => MsCorLib_v5_0_5_0,
-                _ => throw new ArgumentException($"Invalid or unsupported Silverlight version {version}.")
+                _ => null
             };
         }
 
-        private static AssemblyReference SelectNetStandardCorLib(Version version)
+        private static AssemblyReference? SelectNetStandardCorLib(Version version)
         {
             return (version.Major, version.Minor) switch
             {
@@ -398,11 +425,11 @@ namespace AsmResolver.DotNet
                 (1, 5 or 6 or 7) => SystemRuntime_v4_1_0_0,
                 (2, 0) => NetStandard_v2_0_0_0,
                 (2, 1) => NetStandard_v2_1_0_0,
-                _ => throw new ArgumentException($"Invalid or unsupported .NET standard version {version}.")
+                _ => null
             };
         }
 
-        private static AssemblyReference SelectNetCoreCorLib(Version version)
+        private static AssemblyReference? SelectNetCoreCorLib(Version version)
         {
             return (version.Major, version.Minor) switch
             {
@@ -423,11 +450,11 @@ namespace AsmResolver.DotNet
                     false,
                     SystemRuntime_v11_0_0_0.GetPublicKeyToken() // Assuming pubkey token does not change.
                 )),
-                _ => throw new ArgumentException($"Invalid or unsupported .NET or .NET Core version {version}.")
+                _ => null
             };
         }
 
-        private static AssemblyReference SelectNetCoreImplCorLib(Version version)
+        private static AssemblyReference? SelectNetCoreImplCorLib(Version version)
         {
             return (version.Major, version.Minor) switch
             {
@@ -445,7 +472,7 @@ namespace AsmResolver.DotNet
                     false,
                     SystemPrivateCoreLib_v11_0_0_0.GetPublicKeyToken() // Assuming pubkey token does not change.
                 )),
-                _ => throw new ArgumentException($"Invalid or unsupported .NET or .NET Core version {version}.")
+                _ => null
             };
         }
 
