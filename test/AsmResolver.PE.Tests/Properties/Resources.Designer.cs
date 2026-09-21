@@ -311,6 +311,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
         
+        internal static byte[] FieldRvaEnum {
+            get {
+                object obj = ResourceManager.GetObject("FieldRvaEnum", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         internal static byte[] ReadyToRunTest {
             get {
                 object obj = ResourceManager.GetObject("ReadyToRunTest", resourceCulture);
