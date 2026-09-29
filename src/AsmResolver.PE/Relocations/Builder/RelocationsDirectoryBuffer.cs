@@ -9,13 +9,18 @@ namespace AsmResolver.PE.Relocations.Builder
     /// </summary>
     public class RelocationsDirectoryBuffer : SegmentBase
     {
-        private readonly List<BaseRelocation> _relocations = new();
-        private List<RelocationBlock>? _blocks = new();
+        private readonly List<BaseRelocation> _relocations = [];
+        private List<RelocationBlock>? _blocks = [];
 
         /// <summary>
         /// Gets a value indicating whether there is any data added to the buffer.
         /// </summary>
         public bool IsEmpty => _relocations.Count == 0;
+
+        /// <summary>
+        /// Gets or sets a value indicating duplicated entries should be preserved.
+        /// </summary>
+        public bool AllowDuplicates { get; set; } = false;
 
         /// <summary>
         /// Adds a single base relocation to the buffer.
@@ -32,12 +37,11 @@ namespace AsmResolver.PE.Relocations.Builder
         private List<RelocationBlock> CreateBlocks()
         {
             var blocks = new Dictionary<uint, RelocationBlock>();
-            for (int i = 0; i < _relocations.Count; i++)
+            foreach (var relocation in _relocations)
             {
-                var relocation = _relocations[i];
                 uint pageRva = GetPageRva(relocation);
                 var block = GetOrCreateBlock(blocks, pageRva);
-                block.Add(CreateEntry(relocation), allowDuplicates: false);
+                block.Add(CreateEntry(relocation), AllowDuplicates);
             }
 
             return blocks

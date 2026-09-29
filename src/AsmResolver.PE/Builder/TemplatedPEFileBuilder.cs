@@ -360,7 +360,7 @@ public class TemplatedPEFileBuilder : PEFileBuilder<TemplatedPEFileBuilder.Build
             if (!TryPatchDataDirectory(context, loadConfiguration, DataDirectoryIndex.LoadConfigDirectory))
                 contents.Add(loadConfiguration, (uint) context.Platform.PointerSize);
 
-            // Note: We do not add SecurityCookie as a typical compiler puts this in a writeable data section.
+            // Note: We do not add SecurityCookie here as a typical compiler puts this in a writeable data section.
 
             if (loadConfiguration.LockPrefixTable.Count > 0)
                 AddOrPatch(loadConfiguration.LockPrefixTable, originalDirectory?.LockPrefixTable);
