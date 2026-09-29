@@ -429,5 +429,26 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        internal static byte[] ControlFlowGuardTest_X64 {
+            get {
+                object obj = ResourceManager.GetObject("ControlFlowGuardTest_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        internal static byte[] ControlFlowGuardTest_X86 {
+            get {
+                object obj = ResourceManager.GetObject("ControlFlowGuardTest_X86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        internal static byte[] ControlFlowGuardTest_X86_Flags {
+            get {
+                object obj = ResourceManager.GetObject("ControlFlowGuardTest_X86_Flags", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

@@ -7,7 +7,7 @@ namespace AsmResolver.PE.Relocations.Builder
     /// Represents one entry in a base relocation block, containing the offset within the page, as well as the type of relocation
     /// to apply after the PE image was loaded by the OS.
     /// </summary>
-    public readonly struct RelocationEntry : IWritable
+    public readonly struct RelocationEntry : IWritable, IEquatable<RelocationEntry>, IComparable<RelocationEntry>
     {
         private readonly ushort _value;
 
@@ -57,5 +57,17 @@ namespace AsmResolver.PE.Relocations.Builder
 
         /// <inheritdoc />
         public void Write(BinaryStreamWriter writer) => writer.WriteUInt16(_value);
+
+        /// <inheritdoc />
+        public bool Equals(RelocationEntry other) => _value == other._value;
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj) => obj is RelocationEntry other && Equals(other);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => _value.GetHashCode();
+
+        /// <inheritdoc />
+        public int CompareTo(RelocationEntry other) => _value.CompareTo(other._value);
     }
 }

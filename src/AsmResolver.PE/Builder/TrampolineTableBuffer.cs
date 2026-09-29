@@ -14,7 +14,7 @@ namespace AsmResolver.PE.Builder;
 /// Represents a buffer of code trampolines used to redirect functions stored in address tables such as import
 /// address tables and VTable fixups.
 /// </summary>
-public class TrampolineTableBuffer : SegmentBase
+public class TrampolineTableBuffer : SegmentBase, IRelocatable
 {
     // Reference: https://blog.washi.dev/posts/import-patching/
 
@@ -128,10 +128,7 @@ public class TrampolineTableBuffer : SegmentBase
         }
     }
 
-    /// <summary>
-    /// Obtains the base relocations that are required to be applied on all the generated trampoline code.
-    /// </summary>
-    /// <returns>The base relocations.</returns>
+    /// <inheritdoc />
     public IEnumerable<BaseRelocation> GetRequiredBaseRelocations()
     {
         foreach (var trampoline in _trampolines)
