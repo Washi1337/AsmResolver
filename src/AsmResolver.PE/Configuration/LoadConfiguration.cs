@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AsmResolver.Collections;
 using AsmResolver.IO;
 using AsmResolver.PE.Relocations;
@@ -566,7 +565,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     protected virtual ControlFlowGuardFunctionTable GetGuardLongJumpTargetTable() => new(this);
 
     /// <summary>
-    /// Obtains the control flow guard contiuation table.
+    /// Obtains the control flow guard continuation table.
     /// </summary>
     /// <returns>The table.</returns>
     /// <remarks>
@@ -580,7 +579,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
         Is32Bit = parameters.Is32Bit;
         _imageBase = parameters.ImageBase;
 
-        // Propagate image-base and bitness to VA tables.
+        // Propagate image-base and bitness to VA tables, but preserve its offset/rva (it's not part of the directory itself).
         _lockPrefixTable?.UpdateOffsets(parameters.WithOffsetRva(_lockPrefixTable.Offset, _lockPrefixTable.Rva));
 
         base.UpdateOffsets(in parameters);
@@ -674,117 +673,125 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     public IEnumerable<BaseRelocation> GetRequiredBaseRelocations()
     {
         int pointerSize = Is32Bit ? sizeof(uint) : sizeof(ulong);
+        var relocType = Is32Bit ? RelocationType.HighLow : RelocationType.Dir64;
 
-        var relocations = new List<BaseRelocation>();
-        relocations.AddRange(GetHeaderRelocations().Where(x =>
-            x.Location is not RelativeReference { Additive: int offset } || offset < Size - pointerSize
-        ));
-        relocations.AddRange(LockPrefixTable.CreateBaseRelocations());
-        return relocations;
+        foreach (int offset in GetRelocatableHeaderOffsets())
+        {
+            // `GetRelocatableHeaderOffsets` returns sorted offsets, so we can exit early when we surpass `Size`.
+            if (offset >= Size - pointerSize)
+                break;
+
+            yield return new BaseRelocation(relocType, this.ToReference(offset));
+        }
+
+        foreach (var reloc in LockPrefixTable.CreateBaseRelocations())
+        {
+            yield return reloc;
+        }
     }
 
-    private IEnumerable<BaseRelocation> GetHeaderRelocations() => Is32Bit
-        ? GetHeader32Relocations()
-        : GetHeader64Relocations();
+    private IEnumerable<int> GetRelocatableHeaderOffsets() => Is32Bit
+        ? GetRelocatableHeader32Offsets()
+        : GetRelocatableHeader64Offsets();
 
-    private IEnumerable<BaseRelocation> GetHeader32Relocations()
+    private IEnumerable<int> GetRelocatableHeader32Offsets()
     {
         if (LockPrefixTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x20));
+            yield return 0x20;
         if (EditList != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x38));
+            yield return 0x38;
         if (SecurityCookie is not null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x3C));
+            yield return 0x3C;
         if (SEHandlerTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x40));
+            yield return 0x40;
         if (GuardCFCheckFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x48));
+            yield return 0x48;
         if (GuardCFDispatchFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x4C));
+            yield return 0x4C;
         if (GuardCFFunctionTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x50));
+            yield return 0x50;
         if (GuardAddressTakenIatEntryTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x68));
+            yield return 0x68;
         if (GuardLongJumpTargetTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x70));
+            yield return 0x70;
         if (DynamicValueRelocTable != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x78));
+            yield return 0x78;
         if (ChpeMetadataPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x7C));
+            yield return 0x7C;
         if (GuardRFFailureRoutine != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x80));
+            yield return 0x80;
         if (GuardRFFailureRoutineFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x84));
+            yield return 0x84;
         if (GuardRFVerifyStackPointerFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x90));
+            yield return 0x90;
         if (EnclaveConfigurationPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0x9C));
+            yield return 0x9C;
         if (VolatileMetadataPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xA0));
+            yield return 0xA0;
         if (GuardEHContinuationTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xA4));
+            yield return 0xA4;
         if (GuardXFGCheckFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xAC));
+            yield return 0xAC;
         if (GuardXFGDispatchFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xB0));
+            yield return 0xB0;
         if (GuardXFGTableDispatchFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xB4));
+            yield return 0xB4;
         if (CastGuardOsDeterminedFailureMode != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xB8));
+            yield return 0xB8;
         if (GuardMemcpyFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xBC));
+            yield return 0xBC;
         if (UmaFunctionPointers != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.HighLow, this.ToReference(0xC0));
+            yield return 0xC0;
     }
 
-    private IEnumerable<BaseRelocation> GetHeader64Relocations()
+    private IEnumerable<int> GetRelocatableHeader64Offsets()
     {
         if (LockPrefixTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x28));
+            yield return 0x28;
         if (EditList != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x50));
+            yield return 0x50;
         if (SecurityCookie is not null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x58));
+            yield return 0x58;
         if (SEHandlerTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x60));
+            yield return 0x60;
         if (GuardCFCheckFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x70));
+            yield return 0x70;
         if (GuardCFDispatchFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x78));
+            yield return 0x78;
         if (GuardCFFunctionTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x80));
+            yield return 0x80;
         if (GuardAddressTakenIatEntryTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xA0));
+            yield return 0xA0;
         if (GuardLongJumpTargetTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xB0));
+            yield return 0xB0;
         if (DynamicValueRelocTable != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xC0));
+            yield return 0xC0;
         if (ChpeMetadataPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xC8));
+            yield return 0xC8;
         if (GuardRFFailureRoutine != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xD0));
+            yield return 0xD0;
         if (GuardRFFailureRoutineFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xD8));
+            yield return 0xD8;
         if (GuardRFVerifyStackPointerFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xE8));
+            yield return 0xE8;
         if (EnclaveConfigurationPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0xF8));
+            yield return 0xF8;
         if (VolatileMetadataPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x100));
+            yield return 0x100;
         if (GuardEHContinuationTable.Count > 0)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x108));
+            yield return 0x108;
         if (GuardXFGCheckFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x118));
+            yield return 0x118;
         if (GuardXFGDispatchFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x120));
+            yield return 0x120;
         if (GuardXFGTableDispatchFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x128));
+            yield return 0x128;
         if (CastGuardOsDeterminedFailureMode != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x130));
+            yield return 0x130;
         if (GuardMemcpyFunctionPointer != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x138));
+            yield return 0x138;
         if (UmaFunctionPointers != SegmentReference.Null)
-            yield return new BaseRelocation(RelocationType.Dir64, this.ToReference(0x140));
+            yield return 0x140;
     }
 
     private bool IsWithinSize(BinaryStreamWriter writer, uint fieldSize, ref uint totalLength)
