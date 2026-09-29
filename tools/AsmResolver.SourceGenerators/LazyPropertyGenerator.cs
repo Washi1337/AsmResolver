@@ -38,6 +38,12 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                 /// Use this to indicate the value of the property is exclusively owned by at most one instance of the enclosing class.
                 /// </remarks>
                 public string? OwnerProperty { get; set; }
+
+                /// <summary>
+                /// When non-null, names a parameterless method to call after assigning a value.
+                /// </summary>
+                /// <remarks>The method runs under the property's lock for explicit assignments, not lazy initialization.</remarks>
+                public string? OnSetMethod { get; set; }
             }
         }
         """;
@@ -80,6 +86,9 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                     string? ownerProperty = syntaxContext.Attributes[0]
                         .NamedArguments.FirstOrDefault(x => x.Key == "OwnerProperty")
                         .Value.Value?.ToString();
+                    string? onSetMethod = syntaxContext.Attributes[0]
+                        .NamedArguments.FirstOrDefault(x => x.Key == "OnSetMethod")
+                        .Value.Value?.ToString();
 
                     // Wrap all info in an equatable instance.
                     return new LazyPropertyInfo(
@@ -90,6 +99,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                         RequiresNullableSpecifier: propertySymbol.Type.IsReferenceType && propertySymbol.Type.NullableAnnotation != NullableAnnotation.Annotated,
                         PropertyName: propertySymbol.Name,
                         OwnerPropertyName: ownerProperty,
+                        OnSetMethodName: onSetMethod,
                         Getter: GetAccessor(propertySyntax, false),
                         Setter: GetAccessor(propertySyntax, true)
                     );
@@ -160,6 +170,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
         bool RequiresNullableSpecifier,
         string PropertyName,
         string? OwnerPropertyName,
+        string? OnSetMethodName,
         PropertyAccessor? Getter,
         PropertyAccessor? Setter) : Entry(Namespace, TypeName)
     {
@@ -261,6 +272,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
             PropertyAccessor setter,
             string fieldName)
         {
+            // Emit the notification after assignment (and ownership updates) but not in the lazy getter.
             if (!string.IsNullOrEmpty(setter.Modifiers))
             {
                 writer.Write(setter.Modifiers);
@@ -277,6 +289,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                           {
                               {{fieldName}} = value;
                               _initialized[{{PropertyName}}InitMask] = true;
+                              {{(OnSetMethodName is not null ? OnSetMethodName + "();" : "")}}
                           }
                       }
                       """
@@ -302,6 +315,7 @@ public class LazyPropertyGenerator : IIncrementalGenerator
                                   value.{{OwnerPropertyName}} = this;
 
                               _initialized[{{PropertyName}}InitMask] = true;
+                              {{(OnSetMethodName is not null ? OnSetMethodName + "();" : "")}}
                           }
                       }
                       """

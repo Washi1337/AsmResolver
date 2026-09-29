@@ -153,6 +153,8 @@ switch (reference.Resolve(context, out var definition))
 Resolving references will result in the runtime context getting populated with the declaring assemblies, and will be directly reflected in the output of `RuntimeContext.GetLoadedAssemblies()`.
 Furthermore, the runtime context will ensure the same member definition instance is returned even if the same reference is requested twice.
 
+For modules with many top-level types, local type-name lookups use a lazily built, module-owned index. It preserves the first matching definition in collection order; exported types and assembly resolution are still considered when no local type matches. Adding, removing, reordering, or renaming top-level types invalidates the index, so a fresh reference sees those changes. Modules that supply a custom top-level type collection continue to use an ordered scan. As with other metadata collections, synchronize writes externally if other threads are resolving types at the same time. Replacing a `Name` or `Namespace` property is supported; modifying the bytes returned by `Utf8String.GetBytesUnsafe()` or retained after `Utf8String.CreateUnsafe()` bypasses mutation tracking. The runtime context also caches successful results for individual reference objects; use a fresh reference when resolving after a metadata change.
+
 > [!NOTE]
 > Any functionality provided by AsmResolver that may require metadata resolution requires a `RuntimeContext` to be specified.
 >

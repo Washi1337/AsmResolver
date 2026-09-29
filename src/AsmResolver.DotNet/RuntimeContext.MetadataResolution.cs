@@ -336,14 +336,10 @@ namespace AsmResolver.DotNet
 
             private ResolutionStatus FindTypeInModule(ModuleDefinition module, Utf8String? ns, Utf8String name, out TypeDefinition? definition)
             {
-                for (int i = 0; i < module.TopLevelTypes.Count; i++)
+                if (module.FindTopLevelType(ns, name) is { } localType)
                 {
-                    var candidate = module.TopLevelTypes[i];
-                    if (candidate.IsTypeOfUtf8(ns, name))
-                    {
-                        definition = candidate;
-                        return ResolutionStatus.Success;
-                    }
+                    definition = localType;
+                    return ResolutionStatus.Success;
                 }
 
                 for (int i = 0; i < module.ExportedTypes.Count; i++)

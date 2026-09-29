@@ -11,7 +11,7 @@
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     </ItemGroup>
 
-    <ItemGroup Condition="'$(UsePackage)' != 'false'">
+    <ItemGroup Condition="'$(UsePackage)' != 'true'">
         <ProjectReference Include="..\..\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
         <ProjectReference Include="..\..\src\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
         <ProjectReference Include="..\..\src\AsmResolver.PE.Win32Resources\AsmResolver.PE.Win32Resources.csproj" />
