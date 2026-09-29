@@ -11,31 +11,149 @@ namespace AsmResolver.PE.Configuration;
 /// </summary>
 public partial class LoadConfiguration : SegmentBase, IRelocatable
 {
+    private static readonly uint[] FieldOffsets32 =
+    [
+        0x00,  // Size
+        0x04,  // TimeDateStamp
+        0x08,  // MajorVersion
+        0x0a,  // MinorVersion
+        0x0c,  // GlobalFlagsClear
+        0x10,  // GlobalFlagsSet
+        0x14,  // CriticalSectionDefaultTimeout
+        0x18,  // DeCommitFreeBlockThreshold
+        0x1c,  // DeCommitTotalFreeThreshold
+        0x20,  // LockPrefixTable
+        0x24,  // MaximumAllocationSize
+        0x28,  // VirtualMemoryThreshold
+        0x2c,  // ProcessHeapFlags
+        0x30,  // ProcessAffinityMask
+        0x34,  // CSDVersion
+        0x36,  // DependentLoadFlags
+        0x38,  // EditList
+        0x3c,  // SecurityCookie
+        0x40,  // SEHandlerTable
+        0x44,  // SEHandlerCount
+        0x48,  // GuardCFCheckFunctionPointer
+        0x4c,  // GuardCFDispatchFunctionPointer
+        0x50,  // GuardCFFunctionTable
+        0x54,  // GuardCFFunctionCount
+        0x58,  // GuardFlags
+        0x5c,  // CodeIntegrityCatalog
+        0x5e,  // CodeIntegrityOffset
+        0x62,  // CodeIntegrityFlags
+        0x64,  // CodeIntegrityReserved
+        0x68,  // GuardAddressTakenIatEntryTable
+        0x6c,  // GuardAddressTakenIatEntryCount
+        0x70,  // GuardLongJumpTargetTable
+        0x74,  // GuardLongJumpTargetCount
+        0x78,  // DynamicValueRelocTable
+        0x7c,  // CHPEMetadataPointer
+        0x80,  // GuardRFFailureRoutine
+        0x84,  // GuardRFFailureRoutineFunctionPointer
+        0x88,  // DynamicValueRelocTableOffset
+        0x8c,  // DynamicValueRelocTableSection
+        0x8e,  // Reserved2
+        0x90,  // GuardRFVerifyStackPointerFunctionPointer
+        0x94,  // HotPatchTableOffset
+        0x98,  // Reserved3
+        0x9c,  // EnclaveConfigurationPointer
+        0xa0,  // VolatileMetadataPointer
+        0xa4,  // GuardEHContinuationTable
+        0xa8,  // GuardEHContinuationCount
+        0xac,  // GuardXFGCheckFunctionPointer
+        0xb0,  // GuardXFGDispatchFunctionPointer
+        0xb4,  // GuardXFGTableDispatchFunctionPointer
+        0xb8,  // CastGuardOsDeterminedFailureMode
+        0xbc,  // GuardMemcpyFunctionPointer
+        0xc0,  // UmaFunctionPointers
+        0xc4,  // <end>
+    ];
+
+    private static readonly uint[] FieldOffsets64 =
+    [
+        0x00,  // Size
+        0x04,  // TimeDateStamp
+        0x08,  // MajorVersion
+        0x0a,  // MinorVersion
+        0x0c,  // GlobalFlagsClear
+        0x10,  // GlobalFlagsSet
+        0x14,  // CriticalSectionDefaultTimeout
+        0x18,  // DeCommitFreeBlockThreshold
+        0x20,  // DeCommitTotalFreeThreshold
+        0x28,  // LockPrefixTable
+        0x30,  // MaximumAllocationSize
+        0x38,  // VirtualMemoryThreshold
+        0x40,  // ProcessAffinityMask
+        0x48,  // ProcessHeapFlags
+        0x4c,  // CSDVersion
+        0x4e,  // DependentLoadFlags
+        0x50,  // EditList
+        0x58,  // SecurityCookie
+        0x60,  // SEHandlerTable
+        0x68,  // SEHandlerCount
+        0x70,  // GuardCFCheckFunctionPointer
+        0x78,  // GuardCFDispatchFunctionPointer
+        0x80,  // GuardCFFunctionTable
+        0x88,  // GuardCFFunctionCount
+        0x90,  // GuardFlags
+        0x94,  // CodeIntegrityCatalog
+        0x96,  // CodeIntegrityOffset
+        0x9a,  // CodeIntegrityFlags
+        0x9c,  // CodeIntegrityReserved
+        0xa0,  // GuardAddressTakenIatEntryTable
+        0xa8,  // GuardAddressTakenIatEntryCount
+        0xb0,  // GuardLongJumpTargetTable
+        0xb8,  // GuardLongJumpTargetCount
+        0xc0,  // DynamicValueRelocTable
+        0xc8,  // CHPEMetadataPointer
+        0xd0,  // GuardRFFailureRoutine
+        0xd8,  // GuardRFFailureRoutineFunctionPointer
+        0xe0,  // DynamicValueRelocTableOffset
+        0xe4,  // DynamicValueRelocTableSection
+        0xe6,  // Reserved2
+        0xe8,  // GuardRFVerifyStackPointerFunctionPointer
+        0xf0,  // HotPatchTableOffset
+        0xf4,  // Reserved3
+        0xf8,  // EnclaveConfigurationPointer
+        0x100, // VolatileMetadataPointer
+        0x108, // GuardEHContinuationTable
+        0x110, // GuardEHContinuationCount
+        0x118, // GuardXFGCheckFunctionPointer
+        0x120, // GuardXFGDispatchFunctionPointer
+        0x128, // GuardXFGTableDispatchFunctionPointer
+        0x130, // CastGuardOsDeterminedFailureMode
+        0x138, // GuardMemcpyFunctionPointer
+        0x140, // UmaFunctionPointers
+        0x148, // <end>
+    ];
+
     private ulong _imageBase;
 
     /// <summary>
-    /// Creates a new empty 32-bit load configuration.
+    /// Creates a new empty minimal 32-bit load configuration.
     /// </summary>
     public LoadConfiguration()
-        : this(true, LoadConfigurationSizes.X86.WinXP)
-    {
-    }
-
-    /// <summary>
-    /// Creates a new empty load configuration.
-    /// </summary>
-    /// <param name="is32Bit"><c>true</c> if a 32-bit directory is to be created, <c>false</c> for 64-bit.</param>
-    public LoadConfiguration(bool is32Bit)
-        : this(is32Bit, is32Bit ? LoadConfigurationSizes.X86.WinXP : LoadConfigurationSizes.X64.WinXP)
+        : this(LoadConfigurationField.SecurityCookie, true)
     {
     }
 
     /// <summary>
     /// Creates a new empty load configuration with the provided size.
     /// </summary>
+    /// <param name="lastIncludedField">Specifies the last field that is to be included in the new configuration.</param>
     /// <param name="is32Bit"><c>true</c> if a 32-bit directory is to be created, <c>false</c> for 64-bit.</param>
-    /// <param name="size">The size of the configuration. See also <see cref="LoadConfigurationSizes"/></param>
-    public LoadConfiguration(bool is32Bit, uint size)
+    public LoadConfiguration(LoadConfigurationField lastIncludedField, bool is32Bit = true)
+    {
+        Is32Bit = is32Bit;
+        Size = GetFieldEndOffset(lastIncludedField);
+    }
+
+    /// <summary>
+    /// Creates a new empty load configuration with the provided size.
+    /// </summary>
+    /// <param name="is32Bit"><c>true</c> if a 32-bit directory is to be created, <c>false</c> for 64-bit.</param>
+    /// <param name="size">The size of the configuration</param>
+    public LoadConfiguration(uint size, bool is32Bit)
     {
         Is32Bit = is32Bit;
         Size = size;
@@ -53,7 +171,11 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// <summary>
     /// Gets or sets the size in bytes of the load configuration that is persisted.
     /// </summary>
-    /// <remarks>For known values, see <see cref="LoadConfigurationSizes"/>.</remarks>
+    /// <remarks>
+    /// This value determines which fields are included in the configuration.
+    /// Use <see cref="HasField"/> and <see cref="GetFieldOffset"/> to inspect which fields are included based on
+    /// this value.
+    /// </remarks>
     public uint Size
     {
         get;
@@ -576,6 +698,18 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
     /// <inheritdoc />
     public override void UpdateOffsets(in RelocationParameters parameters)
     {
+        // Auto adjust size property.
+        if (Is32Bit != parameters.Is32Bit)
+        {
+            (uint[] sourceOffsets, uint[] targetOffsets) = Is32Bit
+                ? (FieldOffsets32, FieldOffsets64)
+                : (FieldOffsets64, FieldOffsets32);
+
+            int fieldIndex = GetLastFittingFieldIndex(sourceOffsets);
+            uint extraPadding = Size - sourceOffsets[fieldIndex];
+            Size = targetOffsets[fieldIndex] + extraPadding;
+        }
+
         Is32Bit = parameters.Is32Bit;
         _imageBase = parameters.ImageBase;
 
@@ -583,6 +717,60 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
         _lockPrefixTable?.UpdateOffsets(parameters.WithOffsetRva(_lockPrefixTable.Offset, _lockPrefixTable.Rva));
 
         base.UpdateOffsets(in parameters);
+    }
+
+    private uint[] GetFieldOffsets() => Is32Bit ? FieldOffsets32 : FieldOffsets64;
+
+    /// <summary>
+    /// Gets the offset of the provided field, relative to the start of the directory.
+    /// </summary>
+    /// <param name="field">The field</param>
+    /// <returns>The offset</returns>
+    public uint GetFieldOffset(LoadConfigurationField field) => GetFieldOffsets()[(int) field];
+
+    /// <summary>
+    /// Gets the end offset of the provided field, relative to the start of the directory.
+    /// </summary>
+    /// <param name="field">The field</param>
+    /// <returns>The end offset</returns>
+    public uint GetFieldEndOffset(LoadConfigurationField field) => GetFieldOffset(field + 1);
+
+    /// <summary>
+    /// Gets a value indicating whether the field is captured by the load configuration based on its <see cref="Size"/>.
+    /// </summary>
+    /// <param name="field">The field</param>
+    /// <returns><c>true</c> if the field was defined by this configuration, <c>false</c> otherwise.</returns>
+    public bool HasField(LoadConfigurationField field) => GetFieldOffset(field + 1) <= Size;
+
+    /// <summary>
+    /// Ensures the directory <see cref="Size"/> is large enough to include the provided field in the configuration.
+    /// </summary>
+    /// <param name="field">The field to include.</param>
+    public void EnsureFieldIsIncluded(LoadConfigurationField field)
+    {
+        Size = Math.Max(Size, GetFieldEndOffset(field));
+    }
+
+    /// <summary>
+    /// Resizes the directory to include exactly up to the provided field in the configuration.
+    /// </summary>
+    /// <param name="lastIncludedField">The last field to include in the configuration.</param>
+    public void Resize(LoadConfigurationField lastIncludedField)
+    {
+        Size = GetFieldEndOffset(lastIncludedField);
+    }
+
+    private int GetLastFittingFieldIndex(uint[] fieldOffsets)
+    {
+        uint size = Size;
+
+        for (int i = 0; i < fieldOffsets.Length; i++)
+        {
+            if (size < fieldOffsets[i])
+                return i - 1;
+        }
+
+        return fieldOffsets.Length - 1;
     }
 
     /// <inheritdoc />
@@ -628,7 +816,7 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
         if (!@continue)
             return;
 
-        _ = TryWriteUInt16(writer, CsdVersion, ref totalLength)
+        @continue = TryWriteUInt16(writer, CsdVersion, ref totalLength)
             && TryWriteUInt16(writer, DependentLoadFlags, ref totalLength)
             && TryWriteVa(writer, EditList, ref totalLength)
             && TryWriteNativeInt(writer, _imageBase + SecurityCookie?.Rva ?? 0ul, ref totalLength)
@@ -667,6 +855,10 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
             && TryWriteVa(writer, GuardMemcpyFunctionPointer, ref totalLength)
             && TryWriteVa(writer, UmaFunctionPointers, ref totalLength)
             ;
+
+        // Write any remaining (invalid) padding.
+        if (@continue)
+            writer.WriteZeroes((int) (Size - totalLength));
     }
 
     /// <inheritdoc />
@@ -675,13 +867,13 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
         int pointerSize = Is32Bit ? sizeof(uint) : sizeof(ulong);
         var relocType = Is32Bit ? RelocationType.HighLow : RelocationType.Dir64;
 
-        foreach (int offset in GetRelocatableHeaderOffsets())
+        foreach (uint offset in GetRelocatableHeaderOffsets())
         {
             // `GetRelocatableHeaderOffsets` returns sorted offsets, so we can exit early when we surpass `Size`.
             if (offset >= Size - pointerSize)
                 break;
 
-            yield return new BaseRelocation(relocType, this.ToReference(offset));
+            yield return new BaseRelocation(relocType, this.ToReference((int) offset));
         }
 
         foreach (var reloc in LockPrefixTable.CreateBaseRelocations())
@@ -690,108 +882,56 @@ public partial class LoadConfiguration : SegmentBase, IRelocatable
         }
     }
 
-    private IEnumerable<int> GetRelocatableHeaderOffsets() => Is32Bit
-        ? GetRelocatableHeader32Offsets()
-        : GetRelocatableHeader64Offsets();
-
-    private IEnumerable<int> GetRelocatableHeader32Offsets()
+    private IEnumerable<uint> GetRelocatableHeaderOffsets()
     {
-        if (LockPrefixTable.Count > 0)
-            yield return 0x20;
-        if (EditList != SegmentReference.Null)
-            yield return 0x38;
-        if (SecurityCookie is not null)
-            yield return 0x3C;
-        if (SEHandlerTable.Count > 0)
-            yield return 0x40;
-        if (GuardCFCheckFunctionPointer != SegmentReference.Null)
-            yield return 0x48;
-        if (GuardCFDispatchFunctionPointer != SegmentReference.Null)
-            yield return 0x4C;
-        if (GuardCFFunctionTable.Count > 0)
-            yield return 0x50;
-        if (GuardAddressTakenIatEntryTable.Count > 0)
-            yield return 0x68;
-        if (GuardLongJumpTargetTable.Count > 0)
-            yield return 0x70;
-        if (DynamicValueRelocTable != SegmentReference.Null)
-            yield return 0x78;
-        if (ChpeMetadataPointer != SegmentReference.Null)
-            yield return 0x7C;
-        if (GuardRFFailureRoutine != SegmentReference.Null)
-            yield return 0x80;
-        if (GuardRFFailureRoutineFunctionPointer != SegmentReference.Null)
-            yield return 0x84;
-        if (GuardRFVerifyStackPointerFunctionPointer != SegmentReference.Null)
-            yield return 0x90;
-        if (EnclaveConfigurationPointer != SegmentReference.Null)
-            yield return 0x9C;
-        if (VolatileMetadataPointer != SegmentReference.Null)
-            yield return 0xA0;
-        if (GuardEHContinuationTable.Count > 0)
-            yield return 0xA4;
-        if (GuardXFGCheckFunctionPointer != SegmentReference.Null)
-            yield return 0xAC;
-        if (GuardXFGDispatchFunctionPointer != SegmentReference.Null)
-            yield return 0xB0;
-        if (GuardXFGTableDispatchFunctionPointer != SegmentReference.Null)
-            yield return 0xB4;
-        if (CastGuardOsDeterminedFailureMode != SegmentReference.Null)
-            yield return 0xB8;
-        if (GuardMemcpyFunctionPointer != SegmentReference.Null)
-            yield return 0xBC;
-        if (UmaFunctionPointers != SegmentReference.Null)
-            yield return 0xC0;
-    }
+        uint[] fieldOffsets = Is32Bit ? FieldOffsets32 : FieldOffsets64;
 
-    private IEnumerable<int> GetRelocatableHeader64Offsets()
-    {
         if (LockPrefixTable.Count > 0)
-            yield return 0x28;
+            yield return fieldOffsets[(int) LoadConfigurationField.LockPrefixTable];
         if (EditList != SegmentReference.Null)
-            yield return 0x50;
+            yield return fieldOffsets[(int) LoadConfigurationField.EditList];
         if (SecurityCookie is not null)
-            yield return 0x58;
+            yield return fieldOffsets[(int) LoadConfigurationField.SecurityCookie];
         if (SEHandlerTable.Count > 0)
-            yield return 0x60;
+            yield return fieldOffsets[(int) LoadConfigurationField.SEHandlerTable];
         if (GuardCFCheckFunctionPointer != SegmentReference.Null)
-            yield return 0x70;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardCFCheckFunctionPointer];
         if (GuardCFDispatchFunctionPointer != SegmentReference.Null)
-            yield return 0x78;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardCFDispatchFunctionPointer];
         if (GuardCFFunctionTable.Count > 0)
-            yield return 0x80;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardCFFunctionTable];
         if (GuardAddressTakenIatEntryTable.Count > 0)
-            yield return 0xA0;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardAddressTakenIatEntryTable];
         if (GuardLongJumpTargetTable.Count > 0)
-            yield return 0xB0;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardLongJumpTargetTable];
         if (DynamicValueRelocTable != SegmentReference.Null)
-            yield return 0xC0;
+            yield return fieldOffsets[(int) LoadConfigurationField.DynamicValueRelocTable];
         if (ChpeMetadataPointer != SegmentReference.Null)
-            yield return 0xC8;
+            yield return fieldOffsets[(int) LoadConfigurationField.ChpeMetadataPointer];
         if (GuardRFFailureRoutine != SegmentReference.Null)
-            yield return 0xD0;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardRFFailureRoutine];
         if (GuardRFFailureRoutineFunctionPointer != SegmentReference.Null)
-            yield return 0xD8;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardRFFailureRoutineFunctionPointer];
         if (GuardRFVerifyStackPointerFunctionPointer != SegmentReference.Null)
-            yield return 0xE8;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardRFVerifyStackPointerFunctionPointer];
         if (EnclaveConfigurationPointer != SegmentReference.Null)
-            yield return 0xF8;
+            yield return fieldOffsets[(int) LoadConfigurationField.EnclaveConfigurationPointer];
         if (VolatileMetadataPointer != SegmentReference.Null)
-            yield return 0x100;
+            yield return fieldOffsets[(int) LoadConfigurationField.VolatileMetadataPointer];
         if (GuardEHContinuationTable.Count > 0)
-            yield return 0x108;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardEHContinuationTable];
         if (GuardXFGCheckFunctionPointer != SegmentReference.Null)
-            yield return 0x118;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardXFGCheckFunctionPointer];
         if (GuardXFGDispatchFunctionPointer != SegmentReference.Null)
-            yield return 0x120;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardXFGDispatchFunctionPointer];
         if (GuardXFGTableDispatchFunctionPointer != SegmentReference.Null)
-            yield return 0x128;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardXFGTableDispatchFunctionPointer];
         if (CastGuardOsDeterminedFailureMode != SegmentReference.Null)
-            yield return 0x130;
+            yield return fieldOffsets[(int) LoadConfigurationField.CastGuardOsDeterminedFailureMode];
         if (GuardMemcpyFunctionPointer != SegmentReference.Null)
-            yield return 0x138;
+            yield return fieldOffsets[(int) LoadConfigurationField.GuardMemcpyFunctionPointer];
         if (UmaFunctionPointers != SegmentReference.Null)
-            yield return 0x140;
+            yield return fieldOffsets[(int) LoadConfigurationField.UmaFunctionPointers];
     }
 
     private bool IsWithinSize(BinaryStreamWriter writer, uint fieldSize, ref uint totalLength)

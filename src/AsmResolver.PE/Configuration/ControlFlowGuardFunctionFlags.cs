@@ -9,6 +9,11 @@ namespace AsmResolver.PE.Configuration;
 public enum ControlFlowGuardFunctionFlags : byte
 {
     /// <summary>
+    /// Indicates no control flow guard-specific flags were attached to the call target.
+    /// </summary>
+    None = 0,
+
+    /// <summary>
     /// Indicates the call target is explicitly suppressed (do not treat it as valid for purposes of CFG).
     /// </summary>
     FidSuppressed = 1,

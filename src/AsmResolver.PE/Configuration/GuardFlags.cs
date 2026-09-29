@@ -55,6 +55,11 @@ public enum GuardFlags : uint
     CfLongJumpTablePresent = 0x00010000,
 
     /// <summary>
+    /// Indicates each field in control flow guard function tables contains additional flags.
+    /// </summary>
+    CfFunctionTableSizeHasFlags = 0x10000000,
+
+    /// <summary>
     /// Mask for the subfield that contains the stride of Control Flow Guard function table entries
     /// (that is, the additional count of bytes per table entry).
     /// </summary>
