@@ -709,7 +709,6 @@ namespace AsmResolver.DotNet
         /// <param name="ns">The namespace to match.</param>
         /// <param name="name">The name to match.</param>
         /// <returns>The matching type, or <c>null</c> if none exists.</returns>
-        /// <remarks>Custom top-level collections use an ordered scan because their mutations cannot be tracked.</remarks>
         internal TypeDefinition? FindTopLevelType(Utf8String? ns, Utf8String name)
         {
             var types = TopLevelTypes;
@@ -730,7 +729,6 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Invalidates the top-level name index, if the indexed collection has already been initialized.
         /// </summary>
-        /// <remarks>Called by name setters without forcing the top-level collection to initialize.</remarks>
         internal void InvalidateTopLevelTypeIndex()
         {
             if (_topLevelTypes is TopLevelTypeCollection types)
@@ -1173,8 +1171,6 @@ namespace AsmResolver.DotNet
         /// <returns>The types.</returns>
         /// <remarks>
         /// This method is called upon initialization of the <see cref="TopLevelTypes"/> property.
-        /// Its default collection indexes repeated name lookups without changing the ordered-scan behavior of
-        /// derived modules that supply a different collection.
         /// </remarks>
         protected virtual IList<TypeDefinition> GetTopLevelTypes() =>
             new TopLevelTypeCollection(this);

@@ -6,15 +6,12 @@ namespace AsmResolver.DotNet.Collections
     /// <summary>
     /// Stores a module's top-level types and supports repeated lookups by namespace and name.
     /// </summary>
-    /// <remarks>
-    /// Type-name parsing creates a new reference for each name, so the runtime context's reference-identity cache
-    /// cannot prevent repeated ordered scans of this collection. A lookup index is built only for larger modules
-    /// and is discarded when the collection or a top-level type's name changes. The collection retains the ownership
-    /// and mutation behavior of <see cref="MemberCollection{TOwner, TMember}"/>.
-    /// </remarks>
     internal sealed class TopLevelTypeCollection : MemberCollection<ITypeOwner, TypeDefinition>
     {
-        // Scanning small modules avoids allocating a dictionary for one or two resolutions.
+        // Type-name parsing creates fresh references, so the runtime context's identity cache
+        // cannot avoid repeated scans. Keep this index local to the module that owns the types.
+        // Repeated indexed lookups become faster around 32 types in small-module probes;
+        // below that, scanning avoids the dictionary's up-front allocation.
         private const int IndexThreshold = 32;
         private int _version;
         private Index? _index;

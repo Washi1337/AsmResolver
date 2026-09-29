@@ -137,7 +137,11 @@ namespace AsmResolver.DotNet
             set;
         }
 
-        private void InvalidateTopLevelTypeIndex() => _module?.InvalidateTopLevelTypeIndex();
+        private void InvalidateTopLevelTypeIndex()
+        {
+            // Nested definitions belong to a different collection, which is still scanned in order.
+            _module?.InvalidateTopLevelTypeIndex();
+        }
 
         string? INameProvider.Name => Name;
 

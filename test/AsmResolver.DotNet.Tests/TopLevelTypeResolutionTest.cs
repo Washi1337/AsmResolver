@@ -108,6 +108,27 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void NestedRenameKeepsTopLevelIndexAndNestedScanCurrent()
+        {
+            var module = CreateModule();
+            var outer = AddType(module, "Outer");
+            var nested = new TypeDefinition(null, "Nested", TypeAttributes.NestedPublic);
+            outer.NestedTypes.Add(nested);
+
+            Assert.Same(outer, Resolve(module, "N", "Outer").Definition);
+            Assert.Same(nested, module.CreateTypeReference("N", "Outer")
+                .CreateTypeReference("Nested").Resolve(module.RuntimeContext));
+
+            nested.Name = "Renamed";
+
+            Assert.Same(outer, Resolve(module, "N", "Outer").Definition);
+            Assert.Equal(ResolutionStatus.TypeNotFound, module.CreateTypeReference("N", "Outer")
+                .CreateTypeReference("Nested").Resolve(module.RuntimeContext, out _));
+            Assert.Same(nested, module.CreateTypeReference("N", "Outer")
+                .CreateTypeReference("Renamed").Resolve(module.RuntimeContext));
+        }
+
+        [Fact]
         public void MissingLocalTypeStillUsesOrderedExportedTypes()
         {
             var module = CreateModule();
