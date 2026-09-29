@@ -51,11 +51,27 @@
     {
       "src": [
         {
-          "files": [ "AsmResolver.DotNet/*.csproj", "AsmResolver.DotNet.Dynamic/*.csproj" ],
+          "files": [ "AsmResolver.DotNet/*.csproj" ],
           "src": "../src"
         }
       ],
       "dest": "api/dotnet",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    },
+    {
+      "src": [
+        {
+          "files": [ "AsmResolver.DotNet.Dynamic/*.csproj" ],
+          "src": "../src"
+        }
+      ],
+      "dest": "api/dotnet-dynamic",
       "includePrivateMembers": false,
       "disableGitFeatures": false,
       "disableDefaultFilter": false,
