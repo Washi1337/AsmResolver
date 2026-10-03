@@ -114,6 +114,6 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"({StringShim.Join(", ", VariableTypes)})";
+        public override string ToString() => $".locals ({StringShim.Join(", ", VariableTypes)})";
     }
 }

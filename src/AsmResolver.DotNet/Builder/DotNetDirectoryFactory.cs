@@ -238,13 +238,13 @@ namespace AsmResolver.DotNet.Builder
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveAssemblyReferenceIndices) != 0)
             {
                 ImportTables<AssemblyReference>(module, TableIndex.AssemblyRef,
-                    r => buffer.AddAssemblyReference(r, true, true));
+                    r => buffer.AddAssemblyReference(r, true, true, r));
             }
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveModuleReferenceIndices) != 0)
             {
                 ImportTables<ModuleReference>(module, TableIndex.ModuleRef,
-                    r => buffer.AddModuleReference(r, true, true));
+                    r => buffer.AddModuleReference(r, true, true, r));
             }
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeReferenceIndices) != 0)
@@ -259,7 +259,7 @@ namespace AsmResolver.DotNet.Builder
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeSpecificationIndices) != 0)
             {
                 ImportTables<TypeSpecification>(module, TableIndex.TypeSpec,
-                    s => buffer.AddTypeSpecification(s, true));
+                    s => buffer.AddTypeSpecification(s, true, s));
             }
         }
 
@@ -268,7 +268,7 @@ namespace AsmResolver.DotNet.Builder
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveMemberReferenceIndices) != 0)
             {
                 ImportTables<MemberReference>(module, TableIndex.MemberRef,
-                    r => buffer.AddMemberReference(r, true));
+                    r => buffer.AddMemberReference(r, true, r));
             }
         }
 
@@ -277,13 +277,13 @@ namespace AsmResolver.DotNet.Builder
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStandAloneSignatureIndices) != 0)
             {
                 ImportTables<StandAloneSignature>(module, TableIndex.StandAloneSig,
-                    s => buffer.AddStandAloneSignature(s, true));
+                    s => buffer.AddStandAloneSignature(s, true, s));
             }
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveMethodSpecificationIndices) != 0)
             {
                 ImportTables<MethodSpecification>(module, TableIndex.MethodSpec,
-                    s => buffer.AddMethodSpecification(s, true));
+                    s => buffer.AddMethodSpecification(s, true, s));
             }
         }
 
