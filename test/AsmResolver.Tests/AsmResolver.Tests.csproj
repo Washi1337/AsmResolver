@@ -24,6 +24,8 @@
 
     <ItemGroup>
       <EmbeddedResource Include="Resources\RuntimeConfigTemplate.txt" />
+      <None Remove="Resources\GetProcAddress.exe" />
+      <EmbeddedResource Include="Resources\GetProcAddress.exe" />
     </ItemGroup>
 
 </Project>

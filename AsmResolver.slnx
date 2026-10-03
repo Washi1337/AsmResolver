@@ -48,6 +48,7 @@
     <Project Path="test/TestBinaries/DotNet/AsmResolver.DotNet.TestCases.Resources/AsmResolver.DotNet.TestCases.Resources.csproj" />
     <Project Path="test/TestBinaries/DotNet/AsmResolver.DotNet.TestCases.Types/AsmResolver.DotNet.TestCases.Types.csproj" />
     <Project Path="test/TestBinaries/DotNet/ClassLibraryVB/ClassLibraryVB.vbproj" />
+    <Project Path="test/TestBinaries/DotNet/GetProcAddress/GetProcAddress.csproj" />
     <Project Path="test/TestBinaries/DotNet/HelloWorld/HelloWorld.csproj" />
     <Project Path="test/TestBinaries/DotNet/HelloWorldVB/HelloWorldVB.vbproj" />
     <Project Path="test/TestBinaries/DotNet/TheAnswer/TheAnswer.csproj" />
