@@ -38,18 +38,12 @@ public class SerializedVBaseClassField : VBaseClassField
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetBaseType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_baseTypeIndex, out CodeViewTypeRecord? type)
-            ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
-                $"Virtual base class {TypeIndex:X8} contains an invalid base type index {_baseTypeIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<CodeViewTypeRecord>(_baseTypeIndex);
     }
 
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetBasePointerType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_basePointerIndex, out CodeViewTypeRecord? type)
-            ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
-                $"Virtual base class {TypeIndex:X8} contains an invalid base pointer type index {_basePointerIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<CodeViewTypeRecord>(_basePointerIndex);
     }
 }
