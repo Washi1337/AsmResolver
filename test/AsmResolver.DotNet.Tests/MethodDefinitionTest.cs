@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Xml.Linq;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Events;
@@ -9,6 +10,8 @@ using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.DotNet.TestCases.Properties;
+using AsmResolver.PE;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -561,6 +564,42 @@ namespace AsmResolver.DotNet.Tests
             }
 
             Assert.Equal(ordinal1, image.Exports.BaseOrdinal);
+        }
+
+        [Fact]
+        public void UnorderedOrdinalNamePointerTableIsSortedByBuilder()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/792
+
+            var module = CreateDummyLibraryWithExport(3, false).ManifestModule!;
+
+            var methods = module.GetModuleType()!.Methods;
+            var method1 = methods.First(m => m.Name == "MyMethod0");
+            var method2 = methods.First(m => m.Name == "MyMethod1");
+            var method3 = methods.First(m => m.Name == "MyMethod2");
+
+            // Create unsorted array of exports.
+            method1.ExportInfo = new UnmanagedExportInfo("BBBB", VTableType.VTable32Bit | VTableType.VTableFromUnmanaged);
+            method2.ExportInfo = new UnmanagedExportInfo( "AAAA", VTableType.VTable32Bit | VTableType.VTableFromUnmanaged);
+            method3.ExportInfo = new UnmanagedExportInfo( "CCCC", VTableType.VTable32Bit | VTableType.VTableFromUnmanaged);
+
+            // Build
+            var runner = _fixture.GetRunner<NativePERunner>();
+            string path = runner.Rebuild(module.ToPEImage().ToPEFile(new ManagedPEFileBuilder()), "Test.dll");
+
+            // Verify name table is sorted but function table is not.
+            var image = PEImage.FromFile(path);
+            Assert.NotNull(image.Exports);
+            Assert.Equal(["AAAA", "BBBB", "CCCC"], image.Exports.OriginalOrdinalNameTable.Select(x => x.Name));
+            Assert.Equal(["BBBB", "AAAA", "CCCC"], image.Exports.Entries.Select(x => x.Name));
+
+            // Verify native PE loader accepts the functions:
+            string getProcAddress = runner.GetTestExecutablePath("GetProcAddress.exe");
+            File.WriteAllBytes(getProcAddress, TemporaryDirectoryFixture.GetProcAddressHelper);
+
+            Assert.Contains("Test+0x", runner.RunAndCaptureOutput(getProcAddress, [path, "AAAA"]));
+            Assert.Contains("Test+0x", runner.RunAndCaptureOutput(getProcAddress, [path, "BBBB"]));
+            Assert.Contains("Test+0x", runner.RunAndCaptureOutput(getProcAddress, [path, "CCCC"]));
         }
 
         [Theory]

@@ -11,8 +11,7 @@ namespace AsmResolver.PE.Exports.Builder
     public class OrdinalNamePointerTableBuffer : SegmentBase
     {
         private readonly NameTableBuffer _nameTableBuffer;
-        private readonly List<ushort> _ordinals = new();
-        private readonly List<ExportedSymbol> _namedEntries = new();
+        private readonly List<OrdinalNamePair> _entries = [];
 
         /// <summary>
         /// Creates a new empty ordinal and name-pointer table buffer.
@@ -24,6 +23,14 @@ namespace AsmResolver.PE.Exports.Builder
         }
 
         /// <summary>
+        /// Gets or sets a value whether the ordinal name table should be sorted before writing.
+        /// </summary>
+        /// <remarks>
+        /// The Windows PE Loader uses binary-search when binding symbols, and thus expects sorted ordinal-name tables.
+        /// </remarks>
+        public bool IsSorted { get; set; } = true;
+
+        /// <summary>
         /// Gets the relative virtual address (RVA) to the ordinal table.
         /// </summary>
         public uint OrdinalTableRva => Rva;
@@ -31,7 +38,7 @@ namespace AsmResolver.PE.Exports.Builder
         /// <summary>
         /// Gets the raw size in bytes of the ordinal table.
         /// </summary>
-        public uint OrdinalTableSize => (uint) (_ordinals.Count * sizeof(ushort));
+        public uint OrdinalTableSize => (uint) (_entries.Count * sizeof(ushort));
 
         /// <summary>
         /// Gets the relative virtual address (RVA) to the name pointer table.
@@ -41,7 +48,7 @@ namespace AsmResolver.PE.Exports.Builder
         /// <summary>
         /// Gets the raw size in bytes of the name pointer.
         /// </summary>
-        public uint NamePointerTableSize => (uint) (_namedEntries.Count * sizeof(uint));
+        public uint NamePointerTableSize => (uint) (_entries.Count * sizeof(uint));
 
         /// <summary>
         /// When the symbol is exported by name, adds the ordinal and name pointer pair to the buffer.
@@ -54,8 +61,10 @@ namespace AsmResolver.PE.Exports.Builder
 
             if (symbol.IsByName)
             {
-                _namedEntries.Add(symbol);
-                _ordinals.Add((ushort) (symbol.Ordinal - symbol.ParentDirectory.BaseOrdinal));
+                _entries.Add(new OrdinalNamePair(
+                    (ushort) (symbol.Ordinal - symbol.ParentDirectory.BaseOrdinal),
+                    symbol.Name
+                ));
             }
         }
 
@@ -65,20 +74,23 @@ namespace AsmResolver.PE.Exports.Builder
         /// <inheritdoc />
         public override void Write(BinaryStreamWriter writer)
         {
+            if (IsSorted)
+                _entries.Sort();
+
             WriteOrdinalTable(writer);
             WriteNamePointerTable(writer);
         }
 
         private void WriteNamePointerTable(BinaryStreamWriter writer)
         {
-            foreach (var entry in _namedEntries)
+            foreach (var entry in _entries)
                 writer.WriteUInt32(_nameTableBuffer.GetNameRva(entry.Name));
         }
 
         private void WriteOrdinalTable(BinaryStreamWriter writer)
         {
-            foreach (ushort ordinal in _ordinals)
-                writer.WriteUInt16(ordinal);
+            foreach (var entry in _entries)
+                writer.WriteUInt16(entry.RelativeOrdinal);
         }
     }
 }
