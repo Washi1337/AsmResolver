@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using AsmResolver.IO;
 using AsmResolver.PE.File;
 
@@ -79,7 +80,7 @@ namespace AsmResolver.PE.Exports
                 if (!_context.File.TryCreateReaderAtRva(_ordinalTableRva, out var ordinalReader))
                     _context.BadImage("Export directory contains an invalid ordinal table RVA.");
 
-                if (namePointerReader.IsValid || ordinalReader.IsValid)
+                if (namePointerReader.IsValid && ordinalReader.IsValid)
                     ordinalNameTable = ReadOrdinalNameTable(ref namePointerReader, ref ordinalReader);
             }
 
@@ -120,6 +121,41 @@ namespace AsmResolver.PE.Exports
             }
 
             return result;
+        }
+
+        /// <inheritdoc />
+        protected override IList<OrdinalNamePair> GetOriginalOrdinalNameTable()
+        {
+            var result = new OrdinalNamePair[_numberOfNames];
+
+            if (_namePointerRva == 0 && _ordinalTableRva == 0)
+                return result;
+
+            if (!_context.File.TryCreateReaderAtRva(_namePointerRva, out var namePointerReader))
+            {
+                _context.BadImage("Export directory contains an invalid name pointer table RVA.");
+                return result;
+            }
+
+            if (!_context.File.TryCreateReaderAtRva(_ordinalTableRva, out var ordinalReader))
+            {
+                _context.BadImage("Export directory contains an invalid ordinal table RVA.");
+                return result;
+            }
+
+            if (!namePointerReader.IsValid || !ordinalReader.IsValid)
+                return result;
+
+            for (int i = 0; i < _numberOfNames; i++)
+            {
+                ushort ordinal = ordinalReader.ReadUInt16();
+                uint nameRva = namePointerReader.ReadUInt32();
+
+                if (_context.File.TryCreateReaderAtRva(nameRva, out var nameReader))
+                    result[i] = new OrdinalNamePair(ordinal, nameReader.ReadAsciiString());
+            }
+
+            return new ReadOnlyCollection<OrdinalNamePair>(result);
         }
     }
 }
