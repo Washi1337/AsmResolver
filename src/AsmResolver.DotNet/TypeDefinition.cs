@@ -114,7 +114,11 @@ namespace AsmResolver.DotNet
         public Utf8String? Namespace
         {
             get => _namespace.GetValue(this);
-            set => _namespace.SetValue(Utf8String.IsNullOrEmpty(value) ? null : value);
+            set
+            {
+                _namespace.SetValue(Utf8String.IsNullOrEmpty(value) ? null : value);
+                InvalidateTopLevelTypeIndex();
+            }
             // According to the specification, the namespace should always be null or non-empty.
         }
 
@@ -126,11 +130,17 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the type definition table.
         /// </remarks>
-        [LazyProperty]
+        [LazyProperty(OnSetMethod = nameof(InvalidateTopLevelTypeIndex))]
         public partial Utf8String? Name
         {
             get;
             set;
+        }
+
+        private void InvalidateTopLevelTypeIndex()
+        {
+            // Nested definitions belong to a different collection, which is still scanned in order.
+            _module?.InvalidateTopLevelTypeIndex();
         }
 
         string? INameProvider.Name => Name;

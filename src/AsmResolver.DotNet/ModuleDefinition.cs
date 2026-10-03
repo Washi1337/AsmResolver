@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
@@ -703,6 +704,38 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Finds the first matching top-level type, using the indexed collection when available.
+        /// </summary>
+        /// <param name="ns">The namespace to match.</param>
+        /// <param name="name">The name to match.</param>
+        /// <returns>The matching type, or <c>null</c> if none exists.</returns>
+        internal TypeDefinition? FindTopLevelType(Utf8String? ns, Utf8String name)
+        {
+            var types = TopLevelTypes;
+            // Overridden GetTopLevelTypes methods can return arbitrary lists whose mutations cannot be tracked.
+            if (types is TopLevelTypeCollection indexed)
+                return indexed.TryFind(ns, name, out var definition) ? definition : null;
+
+            for (int i = 0; i < types.Count; i++)
+            {
+                var candidate = types[i];
+                if (candidate.IsTypeOfUtf8(ns, name))
+                    return candidate;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Invalidates the top-level name index, if the indexed collection has already been initialized.
+        /// </summary>
+        internal void InvalidateTopLevelTypeIndex()
+        {
+            if (_topLevelTypes is TopLevelTypeCollection types)
+                types.Invalidate();
+        }
+
+        /// <summary>
         /// Gets a collection of references to .NET assemblies that the module uses.
         /// </summary>
         public IList<AssemblyReference> AssemblyReferences
@@ -1140,7 +1173,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="TopLevelTypes"/> property.
         /// </remarks>
         protected virtual IList<TypeDefinition> GetTopLevelTypes() =>
-            new OwnedCollection<ITypeOwner, TypeDefinition>(this);
+            new TopLevelTypeCollection(this);
 
         IList<TypeDefinition> ITypeOwner.OwnedTypes => TopLevelTypes;
 
