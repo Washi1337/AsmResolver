@@ -105,7 +105,7 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<TypeDefinition> GetNestedTypes()
         {
             var rids = _context.ParentModule.GetNestedTypeRids(MetadataToken.Rid);
-            var result = new MemberCollection<ITypeOwner, TypeDefinition>(this, rids.Count);
+            var result = new TypeDefinitionCollection(this, rids.Count);
 
             foreach (uint rid in rids)
             {

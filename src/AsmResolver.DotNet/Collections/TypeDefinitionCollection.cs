@@ -4,63 +4,64 @@ using System.Threading;
 namespace AsmResolver.DotNet.Collections
 {
     /// <summary>
-    /// Stores a module's top-level types and supports repeated lookups by namespace and name.
+    /// Stores types belonging to a module or declaring type and supports lookups by namespace and name.
     /// </summary>
-    internal sealed class TopLevelTypeCollection : MemberCollection<ITypeOwner, TypeDefinition>
+    internal sealed class TypeDefinitionCollection : MemberCollection<ITypeOwner, TypeDefinition>
     {
-        // Type-name parsing creates fresh references, so the runtime context's identity cache
-        // cannot avoid repeated scans. Keep this index local to the module that owns the types.
-        // Repeated indexed lookups become faster around 32 types in small-module probes;
-        // below that, scanning avoids the dictionary's up-front allocation.
+        // Scan small collections to avoid the dictionary's up-front allocation.
         private const int IndexThreshold = 32;
         private int _version;
         private Index? _index;
 
         /// <summary>
-        /// Creates an empty collection owned by the specified module.
+        /// Creates an empty collection owned by the specified type owner.
         /// </summary>
-        /// <param name="module">The module defining the types.</param>
-        internal TopLevelTypeCollection(ModuleDefinition module)
-            : base(module)
+        /// <param name="owner">The module or declaring type defining the types.</param>
+        internal TypeDefinitionCollection(ITypeOwner owner)
+            : base(owner)
         {
         }
 
         /// <summary>
         /// Creates an empty collection with the specified initial capacity.
         /// </summary>
-        /// <param name="module">The module defining the types.</param>
+        /// <param name="owner">The module or declaring type defining the types.</param>
         /// <param name="capacity">The initial capacity.</param>
-        internal TopLevelTypeCollection(ModuleDefinition module, int capacity)
-            : base(module, capacity)
+        internal TypeDefinitionCollection(ITypeOwner owner, int capacity)
+            : base(owner, capacity)
         {
         }
 
         /// <summary>
-        /// Finds the first top-level type matching a namespace and name.
+        /// Finds the first type in a collection matching a namespace and name.
         /// </summary>
+        /// <param name="types">The collection to search.</param>
         /// <param name="ns">The namespace to match.</param>
         /// <param name="name">The name to match.</param>
-        /// <param name="definition">The matching type, or <c>null</c> if none exists.</param>
-        /// <returns><c>true</c> if a matching type was found; otherwise, <c>false</c>.</returns>
-        internal bool TryFind(Utf8String? ns, Utf8String name, out TypeDefinition? definition)
+        /// <returns>The matching type, or <c>null</c> if none exists.</returns>
+        internal static TypeDefinition? FindFirst(IList<TypeDefinition> types, Utf8String? ns, Utf8String name)
         {
-            if (Count < IndexThreshold)
+            // Custom lists returned by virtual collection factories cannot be tracked for mutations.
+            if (types is TypeDefinitionCollection indexed && types.Count >= IndexThreshold)
             {
-                for (int i = 0; i < Count; i++)
-                {
-                    var candidate = this[i];
-
-                    if (candidate.IsTypeOfUtf8(ns, name))
-                    {
-                        definition = candidate;
-                        return true;
-                    }
-                }
-
-                definition = null;
-                return false;
+                return indexed.TryFind(ns, name, out var definition)
+                    ? definition
+                    : null;
             }
 
+            for (int i = 0; i < types.Count; i++)
+            {
+                var candidate = types[i];
+
+                if (candidate.IsTypeOfUtf8(ns, name))
+                    return candidate;
+            }
+
+            return null;
+        }
+
+        private bool TryFind(Utf8String? ns, Utf8String name, out TypeDefinition? definition)
+        {
             // Published snapshots are read without locking; the version rejects snapshots invalidated by a setter.
             var index = Interlocked.CompareExchange(ref _index, null, null);
 
@@ -92,7 +93,7 @@ namespace AsmResolver.DotNet.Collections
                             }
                         }
 
-                        // Name setters invalidate without taking Items; retry if one ran during construction.
+                        // Name and namespace setters do not lock Items; retry if either ran during construction.
                         if (version == Interlocked.CompareExchange(ref _version, 0, 0))
                         {
                             index = new Index(version, definitions);
@@ -106,7 +107,7 @@ namespace AsmResolver.DotNet.Collections
         }
 
         /// <summary>
-        /// Discards the indexed snapshot after a collection or top-level type name change.
+        /// Discards the indexed snapshot after a collection, type name, or namespace change.
         /// </summary>
         internal void Invalidate()
         {
