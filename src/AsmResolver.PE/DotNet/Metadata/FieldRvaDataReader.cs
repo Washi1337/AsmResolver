@@ -89,7 +89,8 @@ namespace AsmResolver.PE.DotNet.Metadata
             Platform platform,
             DotNetDirectoryFlags directoryFlags,
             in MetadataStreamSelection streams,
-            in FieldDefinitionRow field)
+            in FieldDefinitionRow field,
+            bool isEnumUnderlyingType = false)
         {
             // Follow field signature index.
             if (!streams.BlobStream!.TryGetBlobReaderByIndex(field.Signature, out var reader))
@@ -147,13 +148,13 @@ namespace AsmResolver.PE.DotNet.Metadata
                     case ElementType.R8:
                         return sizeof(double);
 
-                    case ElementType.ValueType:
-                        return GetCustomTypeSize(listener, streams.TablesStream!, ref reader);
+                    case ElementType.ValueType when !isEnumUnderlyingType:
+                        return GetCustomTypeSize(listener, platform, directoryFlags, in streams, ref reader);
 
                     case ElementType.I:
                     case ElementType.U:
-                    case ElementType.Ptr:
-                    case ElementType.FnPtr:
+                    case ElementType.Ptr when !isEnumUnderlyingType:
+                    case ElementType.FnPtr when !isEnumUnderlyingType:
                         return directoryFlags.IsLoadedAs32Bit(platform) ? sizeof(uint) : sizeof(ulong);
 
                     case ElementType.CModReqD:
@@ -168,8 +169,15 @@ namespace AsmResolver.PE.DotNet.Metadata
             }
         }
 
-        private static int GetCustomTypeSize(IErrorListener listener, TablesStream tablesStream, ref BinaryStreamReader reader)
+        private int GetCustomTypeSize(
+            IErrorListener listener,
+            Platform platform,
+            DotNetDirectoryFlags directoryFlags,
+            in MetadataStreamSelection streams,
+            ref BinaryStreamReader reader)
         {
+            var tablesStream = streams.TablesStream!;
+
             // Read and decode the TypeDefOrRef index.
             if (!reader.TryReadCompressedUInt32(out uint codedIndex))
                 return listener.BadImageAndReturn<int>($"Expected a TypeDefOrRef coded index at blob signature offset {reader.RelativeOffset}.");
@@ -182,13 +190,77 @@ namespace AsmResolver.PE.DotNet.Metadata
             if (typeToken.Table != TableIndex.TypeDef)
                 return listener.BadImageAndReturn<int>($"Decoded TypeDefOrRef token {typeToken} at blob signature offset {reader.RelativeOffset} does not reference a type definition.");
 
+            var typeDefinitionTable = tablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+            if (!typeDefinitionTable.TryGetByRid(typeToken.Rid, out var typeDefinition))
+                return listener.BadImageAndReturn<int>($"Field type {typeToken} is invalid.");
+
             // Find a class layout that is associated to the type.
             var classLayoutTable = tablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);
-            if (!classLayoutTable.TryGetRowByKey(2, typeToken.Rid, out var row))
+            if (classLayoutTable.TryGetRowByKey(2, typeToken.Rid, out var row))
+            {
+                // Get the size.
+                return (int) row.ClassSize;
+            }
+
+            if (!IsEnumType(tablesStream, streams.StringsStream, in typeDefinition))
                 return listener.BadImageAndReturn<int>($"Field type {typeToken} does not have a class layout attached to it.");
 
-            // Get the size.
-            return (int) row.ClassSize;
+            var fieldTable = tablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
+            var fieldRange = tablesStream.GetFieldRange(typeToken.Rid);
+
+            // An enum's size comes from its single instance field, even without a ClassLayout row.
+            FieldDefinitionRow? underlyingField = null;
+            foreach (var fieldToken in fieldRange)
+            {
+                if (!fieldTable.TryGetByRid(fieldToken.Rid, out var field))
+                    return listener.BadImageAndReturn<int>($"Enum type {typeToken} has an invalid field list.");
+
+                if ((field.Attributes & FieldAttributes.Static) != 0)
+                    continue;
+
+                if (underlyingField.HasValue)
+                    return listener.BadImageAndReturn<int>($"Enum type {typeToken} does not define exactly one instance field.");
+
+                underlyingField = field;
+            }
+
+            if (underlyingField is { } fieldDefinition)
+            {
+                return DetermineFieldSize(
+                    listener,
+                    platform,
+                    directoryFlags,
+                    in streams,
+                    in fieldDefinition,
+                    isEnumUnderlyingType: true
+                );
+            }
+
+            return listener.BadImageAndReturn<int>($"Enum type {typeToken} does not define exactly one instance field.");
+        }
+
+        private static bool IsEnumType(
+            TablesStream tablesStream,
+            StringsStream? stringsStream,
+            in TypeDefinitionRow typeDefinition)
+        {
+            if (stringsStream is null)
+                return false;
+
+            var baseTypeToken = tablesStream
+                .GetIndexEncoder(CodedIndex.TypeDefOrRef)
+                .DecodeIndex(typeDefinition.Extends);
+
+            if (baseTypeToken.Table is not (TableIndex.TypeDef or TableIndex.TypeRef))
+                return false;
+
+            var baseTypeTable = tablesStream.GetTable(baseTypeToken.Table);
+
+            // TypeDef and TypeRef both store the name and namespace in columns 1 and 2.
+            return baseTypeTable.TryGetCell(baseTypeToken.Rid, 1, out uint name)
+                   && baseTypeTable.TryGetCell(baseTypeToken.Rid, 2, out uint @namespace)
+                   && stringsStream.GetStringByIndex(name)?.Equals("Enum") is true
+                   && stringsStream.GetStringByIndex(@namespace)?.Equals("System") is true;
         }
     }
 }

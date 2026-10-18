@@ -74,7 +74,7 @@ namespace AsmResolver
         /// </summary>
         /// <param name="offset">The new offset.</param>
         /// <param name="rva">The new relative virtual address.</param>
-        public RelocationParameters WithOffsetRva(ulong offset, uint rva)
+        public readonly RelocationParameters WithOffsetRva(ulong offset, uint rva)
         {
             return new RelocationParameters(ImageBase, offset, rva, Is32Bit);
         }

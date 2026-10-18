@@ -8,12 +8,37 @@ namespace AsmResolver.DotNet.Builder.Discovery
     public class MemberDiscoveryResult
     {
         /// <summary>
+        /// Creates a new empty discovery result.
+        /// </summary>
+        public MemberDiscoveryResult()
+            : this([], [], [], [], [], [])
+        {
+        }
+
+        internal MemberDiscoveryResult(
+            List<TypeDefinition> types,
+            List<FieldDefinition> fields,
+            List<MethodDefinition> methods,
+            List<ParameterDefinition> parameters,
+            List<PropertyDefinition> properties,
+            List<EventDefinition> events
+        )
+        {
+            Types = types;
+            Fields = fields;
+            Methods = methods;
+            Parameters = parameters;
+            Properties = properties;
+            Events = events;
+        }
+
+        /// <summary>
         /// Gets a list of types that are discovered during the traversal of the module.
         /// </summary>
         public List<TypeDefinition> Types
         {
             get;
-        } = new();
+        }
 
         /// <summary>
         /// Gets a list of fields that are discovered during the traversal of the module.
@@ -21,7 +46,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         public List<FieldDefinition> Fields
         {
             get;
-        } = new();
+        }
 
         /// <summary>
         /// Gets a list of modules that are discovered during the traversal of the module.
@@ -29,7 +54,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         public List<MethodDefinition> Methods
         {
             get;
-        } = new();
+        }
 
         /// <summary>
         /// Gets a list of parameters that are discovered during the traversal of the module.
@@ -37,7 +62,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         public List<ParameterDefinition> Parameters
         {
             get;
-        } = new();
+        }
 
         /// <summary>
         /// Gets a list of properties that are discovered during the traversal of the module.
@@ -45,7 +70,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         public List<PropertyDefinition> Properties
         {
             get;
-        } = new();
+        }
 
         /// <summary>
         /// Gets a list of events that are discovered during the traversal of the module.
@@ -53,6 +78,6 @@ namespace AsmResolver.DotNet.Builder.Discovery
         public List<EventDefinition> Events
         {
             get;
-        } = new();
+        }
     }
 }
