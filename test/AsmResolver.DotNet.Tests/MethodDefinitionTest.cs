@@ -580,8 +580,8 @@ namespace AsmResolver.DotNet.Tests
 
             // Create unsorted array of exports.
             method1.ExportInfo = new UnmanagedExportInfo("BBBB", VTableType.VTable32Bit | VTableType.VTableFromUnmanaged);
-            method2.ExportInfo = new UnmanagedExportInfo( "AAAA", VTableType.VTable32Bit | VTableType.VTableFromUnmanaged);
-            method3.ExportInfo = new UnmanagedExportInfo( "CCCC", VTableType.VTable32Bit | VTableType.VTableFromUnmanaged);
+            method2.ExportInfo = new UnmanagedExportInfo("AAAA", VTableType.VTable32Bit | VTableType.VTableFromUnmanaged);
+            method3.ExportInfo = new UnmanagedExportInfo("CCCC", VTableType.VTable32Bit | VTableType.VTableFromUnmanaged);
 
             // Build
             var runner = _fixture.GetRunner<NativePERunner>();
