@@ -129,22 +129,22 @@ namespace AsmResolver.PE.Exports
             var result = new OrdinalNamePair[_numberOfNames];
 
             if (_namePointerRva == 0 && _ordinalTableRva == 0)
-                return result;
+                return new ReadOnlyCollection<OrdinalNamePair>(result);
 
             if (!_context.File.TryCreateReaderAtRva(_namePointerRva, out var namePointerReader))
             {
                 _context.BadImage("Export directory contains an invalid name pointer table RVA.");
-                return result;
+                return new ReadOnlyCollection<OrdinalNamePair>(result);
             }
 
             if (!_context.File.TryCreateReaderAtRva(_ordinalTableRva, out var ordinalReader))
             {
                 _context.BadImage("Export directory contains an invalid ordinal table RVA.");
-                return result;
+                return new ReadOnlyCollection<OrdinalNamePair>(result);
             }
 
             if (!namePointerReader.IsValid || !ordinalReader.IsValid)
-                return result;
+                return new ReadOnlyCollection<OrdinalNamePair>(result);
 
             for (int i = 0; i < _numberOfNames; i++)
             {
