@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.IO;
@@ -703,6 +704,15 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Invalidates the top-level name index, if the indexed collection has already been initialized.
+        /// </summary>
+        internal void InvalidateTopLevelTypeIndex()
+        {
+            if (_topLevelTypes is TypeDefinitionCollection types)
+                types.Invalidate();
+        }
+
+        /// <summary>
         /// Gets a collection of references to .NET assemblies that the module uses.
         /// </summary>
         public IList<AssemblyReference> AssemblyReferences
@@ -1140,7 +1150,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="TopLevelTypes"/> property.
         /// </remarks>
         protected virtual IList<TypeDefinition> GetTopLevelTypes() =>
-            new OwnedCollection<ITypeOwner, TypeDefinition>(this);
+            new TypeDefinitionCollection(this);
 
         IList<TypeDefinition> ITypeOwner.OwnedTypes => TopLevelTypes;
 
