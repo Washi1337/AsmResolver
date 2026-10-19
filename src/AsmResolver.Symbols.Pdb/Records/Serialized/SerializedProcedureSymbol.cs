@@ -52,18 +52,9 @@ public class SerializedProcedureSymbol : ProcedureSymbol
         if (_typeIndex == 0)
             return null;
 
-        if (_isId)
-        {
-            return !_context.ParentImage.TryGetIdLeafRecord(_typeIndex, out FunctionIdentifier? id)
-                ? _context.Parameters.ErrorListener.BadImageAndReturn<FunctionIdentifier>(
-                    $"Procedure symbol contains an invalid ID index {_typeIndex:X8}.")
-                : id;
-        }
-
-        return !_context.ParentImage.TryGetLeafRecord(_typeIndex, out ProcedureTypeRecord? procedure)
-            ? _context.Parameters.ErrorListener.BadImageAndReturn<ProcedureTypeRecord>(
-                $"Procedure symbol contains an invalid type index {_typeIndex:X8}.")
-            : procedure;
+        return _isId
+            ? _context.ParentImage.GetIdLeafRecord<FunctionIdentifier>(_typeIndex)
+            : _context.ParentImage.GetLeafRecord<ProcedureTypeRecord>(_typeIndex);
     }
 
 }

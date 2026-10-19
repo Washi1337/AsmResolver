@@ -16,7 +16,7 @@ public class ArgumentListLeafTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void ReadMultipleTypes()
     {
-        var list = (ArgumentListLeaf) _fixture.SimplePdb.GetLeafRecord(0x2391);
+        var list = (ArgumentListLeaf) _fixture.SimplePdb.GetLeafRecord(0x2391)!;
         Assert.IsAssignableFrom<PointerTypeRecord>(list.Types[0]);
         Assert.IsAssignableFrom<SimpleTypeRecord>(list.Types[1]);
     }
