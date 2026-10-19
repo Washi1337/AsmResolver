@@ -1,7 +1,6 @@
-using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading;
-using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Exports
 {
@@ -11,6 +10,7 @@ namespace AsmResolver.PE.Exports
     public partial class ExportDirectory
     {
         private IList<ExportedSymbol>? _exports;
+        private IList<OrdinalNamePair>? _ordinalNameTable;
 
         /// <summary>
         /// Initializes a new empty symbol export directory.
@@ -100,6 +100,19 @@ namespace AsmResolver.PE.Exports
         }
 
         /// <summary>
+        /// Gets the original ordinal-name table that the export directory was based on (if available).
+        /// </summary>
+        public IList<OrdinalNamePair> OriginalOrdinalNameTable
+        {
+            get
+            {
+                if (_ordinalNameTable is null)
+                    Interlocked.CompareExchange(ref _ordinalNameTable, GetOriginalOrdinalNameTable(), null);
+                return _ordinalNameTable;
+            }
+        }
+
+        /// <summary>
         /// Obtains the name of the library that is exporting symbols.
         /// </summary>
         /// <returns>The name.</returns>
@@ -115,7 +128,15 @@ namespace AsmResolver.PE.Exports
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Entries"/> property.
         /// </remarks>
-        protected virtual IList<ExportedSymbol> GetExports() =>
-            new ExportedSymbolCollection(this);
+        protected virtual IList<ExportedSymbol> GetExports() => new ExportedSymbolCollection(this);
+
+        /// <summary>
+        /// Obtains the list of exported symbols defined by the export directory.
+        /// </summary>
+        /// <returns>The exported symbols..</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Entries"/> property.
+        /// </remarks>
+        protected virtual IList<OrdinalNamePair> GetOriginalOrdinalNameTable() => new ReadOnlyCollection<OrdinalNamePair>([]);
     }
 }

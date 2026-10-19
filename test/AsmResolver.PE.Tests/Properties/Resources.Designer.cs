@@ -317,7 +317,7 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
-
+        
         internal static byte[] ReadyToRunTest {
             get {
                 object obj = ResourceManager.GetObject("ReadyToRunTest", resourceCulture);

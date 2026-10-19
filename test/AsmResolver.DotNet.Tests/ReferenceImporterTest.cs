@@ -561,9 +561,11 @@ namespace AsmResolver.DotNet.Tests
 #if NET8_0_OR_GREATER
         private static unsafe class DelegatePointerHolder
         {
+#pragma warning disable CS0414 // Field is assigned but its value is never used
             public static delegate*unmanaged[Cdecl, SuppressGCTransition]<int, uint> Complex = null;
             public static delegate*unmanaged[Stdcall]<int, uint> StdcallOnly = null;
             public static delegate*unmanaged[SuppressGCTransition]<int, uint> GcOnly = null;
+#pragma warning restore CS0414 // Field is assigned but its value is never used
         }
 
         [Fact]
