@@ -25,7 +25,7 @@ namespace AsmResolver.PE.Debug
         /// Indicates frame pointer omission (FPO) information. This information tells the debugger how to
         /// interpret nonstandard stack frames, which use the EBP register for a purpose other than as a frame pointer. 
         /// </summary>
-        Fpo = 0,
+        Fpo = 3,
         
         /// <summary>
         /// Indicates the location of a DBG file. 
@@ -91,6 +91,16 @@ namespace AsmResolver.PE.Debug
         /// Indicates PE determinism or reproducibility.
         /// </summary>
         Repro = 16,
+        
+        /// <summary>
+        /// Indicates that the debug directory entry stores a portable PDB that is embedded in the image itself.
+        /// </summary>
+        EmbeddedPortablePdb = 17,
+        
+        /// <summary>
+        /// Indicates a cryptographic hash of the content of the symbol file the image was compiled with.
+        /// </summary>
+        PdbChecksum = 19,
         
         /// <summary>
         /// Indicates extended DLL characteristics bits.

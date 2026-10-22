@@ -30,6 +30,18 @@ public class TargetRuntimeProberTest
     }
 
     [Fact]
+    public void DetectTargetSilverlight5()
+    {
+        var image = PEImage.FromBytes(
+            Properties.Resources.HelloWorld_Silverlight5,
+            TestReaderParameters.PEReaderParameters
+        );
+
+        Assert.True(TargetRuntimeProber.TryGetLikelyTargetRuntime(image, out var targetRuntime));
+        Assert.Equal(DotNetRuntimeInfo.Silverlight(5, 0), targetRuntime);
+    }
+
+    [Fact]
     public void DetectTargetStandard()
     {
         var image = PEImage.FromFile(typeof(TestCases.Types.Class).Assembly.Location, TestReaderParameters.PEReaderParameters);

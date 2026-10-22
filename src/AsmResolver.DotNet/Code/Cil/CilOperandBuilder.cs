@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -65,11 +66,20 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <inheritdoc />
         public uint GetStringToken(object? operand) => operand switch
         {
-            string value => 0x70000000 | _provider.GetUserStringIndex(value),
+            string value => GetStringToken(value),
             MetadataToken token => token.ToUInt32(),
             uint raw => raw,
             _ => _errorListener.NotSupportedAndReturn<uint>($"{DiagnosticPrefix}Invalid or unsupported string operand ({operand.SafeToString()}).")
         };
+
+        private uint GetStringToken(string value)
+        {
+            uint index = _provider.GetUserStringIndex(value);
+            return index <= 0x00FFFFFF
+                ? 0x70000000 | index
+                : _errorListener.RegisterExceptionAndReturnDefault<uint>(new MetadataBuilderException(
+                    $"{DiagnosticPrefix}User string index 0x{index:X8} does not fit in a 24-bit metadata token."));
+        }
 
         /// <inheritdoc />
         public MetadataToken GetMemberToken(object? operand) => operand switch

@@ -41,6 +41,8 @@
   href: peimage/debug.md
 - name: TLS Directory
   href: peimage/tls.md
+- name: Load Configuration Directory
+  href: peimage/loadconfig.md
 - name: .NET Data Directories
   href: peimage/dotnet.md
 - name: .NET ReadyToRun Directory

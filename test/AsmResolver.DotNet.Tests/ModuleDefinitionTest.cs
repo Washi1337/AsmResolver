@@ -82,6 +82,15 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ExplicitTargetRuntimeIsPreserved()
+        {
+            var targetRuntime = DotNetRuntimeInfo.NetFramework(4, 8);
+            var module = new ModuleDefinition("TestModule.dll", targetRuntime);
+
+            Assert.Equal(targetRuntime, module.OriginalTargetRuntime);
+        }
+
+        [Fact]
         public void ReadNameTest()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld, TestReaderParameters);
