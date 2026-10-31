@@ -746,7 +746,7 @@ namespace AsmResolver.DotNet
         public partial MethodSemantics? Semantics
         {
             get;
-            set;
+            internal set;
         }
 
         /// <summary>

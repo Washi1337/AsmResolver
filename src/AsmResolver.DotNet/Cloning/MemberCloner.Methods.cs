@@ -227,8 +227,8 @@ namespace AsmResolver.DotNet.Cloning
             return instruction.Operand switch
             {
                 ITypeDefOrRef type => context.Importer.ImportType(type),
-                MemberReference {IsField: true} method => context.Importer.ImportField(method),
-                MemberReference {IsMethod: true} field => context.Importer.ImportMethod(field),
+                MemberReference {IsField: true} field => context.Importer.ImportField(field),
+                MemberReference {IsMethod: true} method => context.Importer.ImportMethod(method),
                 MethodDefinition method => context.Importer.ImportMethod(method),
                 FieldDefinition field => context.Importer.ImportField(field),
                 _ => throw new NotSupportedException()

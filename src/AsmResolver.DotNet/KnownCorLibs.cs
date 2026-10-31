@@ -45,6 +45,24 @@ namespace AsmResolver.DotNet
             ]);
 
         /// <summary>
+        /// References mscorlib.dll, Version=2.0.5.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by .NET assemblies
+        /// targeting Microsoft Silverlight 4.0, as well as some other legacy profiles.
+        /// </summary>
+        public static readonly AssemblyReference MsCorLib_v2_0_5_0 = new("mscorlib",
+            new Version(2, 0, 5, 0), false, [
+                0x7C, 0xEC, 0x85, 0xD7, 0xBE, 0xA7, 0x79, 0x8E
+            ]);
+
+        /// <summary>
+        /// References mscorlib.dll, Version=5.0.5.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by .NET assemblies
+        /// targeting Microsoft Silverlight 5.0.
+        /// </summary>
+        public static readonly AssemblyReference MsCorLib_v5_0_5_0 = new("mscorlib",
+            new Version(5, 0, 5, 0), false, [
+                0x7C, 0xEC, 0x85, 0xD7, 0xBE, 0xA7, 0x79, 0x8E
+            ]);
+
+        /// <summary>
         /// References mscorlib.dll, Version=255.255.255.255, PublicKeyToken=B77A5C561934E089. This is used by .NET
         /// assemblies targeting Windows Runtime (WinRT).
         /// </summary>
@@ -276,7 +294,9 @@ namespace AsmResolver.DotNet
                 NetStandard_v2_0_0_0,
                 NetStandard_v2_1_0_0,
                 MsCorLib_v2_0_0_0,
+                MsCorLib_v2_0_5_0,
                 MsCorLib_v4_0_0_0,
+                MsCorLib_v5_0_5_0,
                 MsCorLib_v255_255_255_255,
                 SystemRuntime_v4_0_0_0,
                 SystemRuntime_v4_0_10_0,
@@ -317,10 +337,19 @@ namespace AsmResolver.DotNet
                 return SelectFrameworkCorLib(runtimeInfo.Version);
 
             if (runtimeInfo.IsNetStandard)
-                return SelectNetStandardCorLib(runtimeInfo.Version);
+                return SelectNetStandardCorLib(runtimeInfo.Version)
+                    ?? throw new ArgumentException(
+                        $"Invalid or unsupported .NET standard version {runtimeInfo.Version}.");
 
             if (runtimeInfo.IsNetCoreApp)
-                return SelectNetCoreCorLib(runtimeInfo.Version);
+                return SelectNetCoreCorLib(runtimeInfo.Version)
+                    ?? throw new ArgumentException(
+                        $"Invalid or unsupported .NET or .NET Core version {runtimeInfo.Version}.");
+
+            if (runtimeInfo.IsSilverlight)
+                return SelectSilverlightCorLib(runtimeInfo.Version)
+                    ?? throw new ArgumentException(
+                        $"Invalid or unsupported Silverlight version {runtimeInfo.Version}.");
 
             throw new ArgumentException($"Invalid or unsupported runtime version {runtimeInfo}.");
         }
@@ -340,7 +369,14 @@ namespace AsmResolver.DotNet
                 return SelectFrameworkCorLib(runtimeInfo.Version);
 
             if (runtimeInfo.IsNetCoreApp)
-                return SelectNetCoreImplCorLib(runtimeInfo.Version);
+                return SelectNetCoreImplCorLib(runtimeInfo.Version)
+                    ?? throw new ArgumentException(
+                        $"Invalid or unsupported .NET or .NET Core version {runtimeInfo.Version}.");
+
+            if (runtimeInfo.IsSilverlight)
+                return SelectSilverlightCorLib(runtimeInfo.Version)
+                    ?? throw new ArgumentException(
+                        $"Invalid or unsupported Silverlight version {runtimeInfo.Version}.");
 
             if (runtimeInfo.IsNetCore || runtimeInfo.IsNetPortable)
                 return null;
@@ -348,11 +384,38 @@ namespace AsmResolver.DotNet
             throw new ArgumentException($"Invalid or unsupported runtime version {runtimeInfo}.");
         }
 
+        internal static bool IsSupportedRuntime(in DotNetRuntimeInfo runtimeInfo)
+        {
+            if (runtimeInfo.IsNetFramework)
+                return true;
+
+            if (runtimeInfo.IsNetStandard)
+                return SelectNetStandardCorLib(runtimeInfo.Version) is not null;
+
+            if (runtimeInfo.IsNetCoreApp)
+                return SelectNetCoreImplCorLib(runtimeInfo.Version) is not null;
+
+            if (runtimeInfo.IsSilverlight)
+                return SelectSilverlightCorLib(runtimeInfo.Version) is not null;
+
+            return false;
+        }
+
         private static AssemblyReference SelectFrameworkCorLib(Version version) => version.Major < 4
             ? MsCorLib_v2_0_0_0
             : MsCorLib_v4_0_0_0;
 
-        private static AssemblyReference SelectNetStandardCorLib(Version version)
+        private static AssemblyReference? SelectSilverlightCorLib(Version version)
+        {
+            return (version.Major, version.Minor) switch
+            {
+                (4, 0) => MsCorLib_v2_0_5_0,
+                (5, 0) => MsCorLib_v5_0_5_0,
+                _ => null
+            };
+        }
+
+        private static AssemblyReference? SelectNetStandardCorLib(Version version)
         {
             return (version.Major, version.Minor) switch
             {
@@ -362,11 +425,11 @@ namespace AsmResolver.DotNet
                 (1, 5 or 6 or 7) => SystemRuntime_v4_1_0_0,
                 (2, 0) => NetStandard_v2_0_0_0,
                 (2, 1) => NetStandard_v2_1_0_0,
-                _ => throw new ArgumentException($"Invalid or unsupported .NET standard version {version}.")
+                _ => null
             };
         }
 
-        private static AssemblyReference SelectNetCoreCorLib(Version version)
+        private static AssemblyReference? SelectNetCoreCorLib(Version version)
         {
             return (version.Major, version.Minor) switch
             {
@@ -387,11 +450,11 @@ namespace AsmResolver.DotNet
                     false,
                     SystemRuntime_v11_0_0_0.GetPublicKeyToken() // Assuming pubkey token does not change.
                 )),
-                _ => throw new ArgumentException($"Invalid or unsupported .NET or .NET Core version {version}.")
+                _ => null
             };
         }
 
-        private static AssemblyReference SelectNetCoreImplCorLib(Version version)
+        private static AssemblyReference? SelectNetCoreImplCorLib(Version version)
         {
             return (version.Major, version.Minor) switch
             {
@@ -409,7 +472,7 @@ namespace AsmResolver.DotNet
                     false,
                     SystemPrivateCoreLib_v11_0_0_0.GetPublicKeyToken() // Assuming pubkey token does not change.
                 )),
-                _ => throw new ArgumentException($"Invalid or unsupported .NET or .NET Core version {version}.")
+                _ => null
             };
         }
 

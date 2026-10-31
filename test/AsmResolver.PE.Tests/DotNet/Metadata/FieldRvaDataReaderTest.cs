@@ -93,5 +93,29 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             Assert.Equal("well-hidden secret key"u8.ToArray(), segment.ToArray());
         }
 
+        [Fact]
+        public void ReadEnumWithoutClassLayout()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/786
+
+            var image = PEImage.FromBytes(Properties.Resources.FieldRvaEnum, TestReaderParameters);
+            var directory = image.DotNetDirectory!;
+            var tablesStream = directory.Metadata!.GetStream<TablesStream>();
+
+            Assert.Empty(tablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout));
+            var row = tablesStream.GetTable<FieldRvaRow>(TableIndex.FieldRva).GetByRid(1u);
+
+            var dataReader = new FieldRvaDataReader();
+            var segment = dataReader.ResolveFieldData(
+                ThrowErrorListener.Instance,
+                Platform.Get(image.MachineType),
+                directory,
+                row
+            ) as IReadableSegment;
+
+            Assert.NotNull(segment);
+            Assert.Equal(new byte[] {0x2A, 0x00, 0x00, 0x00}, segment.ToArray());
+        }
+
     }
 }

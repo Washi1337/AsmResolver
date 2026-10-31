@@ -169,7 +169,7 @@ namespace AsmResolver.DotNet.Serialized
             var typeDefTable = ReaderContext.Streams.TablesStream!.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
             int nestedTypeCount = ReaderContext.Streams.TablesStream.GetTable(TableIndex.NestedClass).Count;
 
-            var types = new MemberCollection<ITypeOwner, TypeDefinition>(this,
+            var types = new TypeDefinitionCollection(this,
                 typeDefTable.Count - nestedTypeCount);
 
             for (int i = 0; i < typeDefTable.Count; i++)
@@ -330,7 +330,9 @@ namespace AsmResolver.DotNet.Serialized
             IResolutionScope? mostRecentCorLib = null;
             foreach (var reference in AssemblyReferences)
             {
-                if (reference.Name is not null && KnownCorLibs.KnownCorLibNames.Contains(reference.Name))
+                if (reference.Name is not null
+                    && KnownCorLibs.KnownCorLibNames.Contains(reference.Name)
+                    && TargetRuntimeProber.TryExtractDotNetRuntimeInfo(reference, out _))
                 {
                     if (mostRecentCorLib is null || reference.Version > mostRecentCorLib.GetAssembly()!.Version)
                         mostRecentCorLib = reference;

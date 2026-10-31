@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Signatures
         internal const string NullTypeToString = "<<???>>";
 
         /// <inheritdoc />
-        public abstract string? Name
+        public abstract string Name
         {
             get;
         }

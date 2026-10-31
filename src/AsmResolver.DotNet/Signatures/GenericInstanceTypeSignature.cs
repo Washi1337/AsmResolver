@@ -143,7 +143,7 @@ namespace AsmResolver.DotNet.Signatures
 
             // Interfaces have System.Object as direct base class.
             if (genericType.IsInterface)
-                return ContextModule!.CorLibTypeFactory.Object;
+                return context?.CorLibTypeFactory.Object;
 
             if (genericType.BaseType is not { } baseType)
                 return null;

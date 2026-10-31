@@ -5,7 +5,7 @@ namespace AsmResolver.PE.Relocations
     /// <summary>
     /// Pairs a segment with relocation information.
     /// </summary>
-    public readonly struct RelocatableSegment
+    public readonly struct RelocatableSegment : IRelocatable
     {
         /// <summary>
         /// Creates a new pairing between a segment and relocation information.
@@ -33,5 +33,7 @@ namespace AsmResolver.PE.Relocations
         {
             get;
         }
+
+        IEnumerable<BaseRelocation> IRelocatable.GetRequiredBaseRelocations() => Relocations;
     }
 }

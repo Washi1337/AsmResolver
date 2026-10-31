@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.PE.Certificates;
+using AsmResolver.PE.Configuration;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exceptions;
@@ -180,6 +181,20 @@ namespace AsmResolver.PE
             }
 
             return result;
+        }
+
+        /// <inheritdoc />
+        protected override LoadConfiguration? GetLoadConfiguration()
+        {
+            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.LoadConfigDirectory);
+
+            // NOTE: we do NOT create a bounded reader with `TryCreateDataDirectoryReader` because some PEs observed
+            // in the wild have loader configs that are larger than what is specified by the data directory, yet are
+            // still considered valid by Windows. See also test binaries.
+            if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateReaderAtRva(dataDirectory.VirtualAddress, out var reader))
+                return null;
+
+            return new SerializedLoadConfiguration(ReaderContext, ref reader);
         }
     }
 }
