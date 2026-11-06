@@ -38,7 +38,7 @@ namespace AsmResolver.PE.Debug
             reader.ReadBytes(buffer, 0, 16);
             result.Guid = new Guid(buffer);
             result.Age = reader.ReadUInt32();
-            result.Path = Encoding.UTF8.GetString(reader.ReadBytesUntil(0x00, false));
+            result.Path = reader.ReadUtf8String();
 
             return result;
         }
@@ -78,11 +78,11 @@ namespace AsmResolver.PE.Debug
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
-            return sizeof(uint)                 //Signature
-                   + 16                         //Guid
-                   + sizeof(uint)               //Age
-                   + (uint) (Path?.Length ?? 0) //Path
-                   + sizeof(byte)               //Zero byte for null terminated string
+            return sizeof(uint)                                               // Signature
+                   + 16                                                       // Guid
+                   + sizeof(uint)                                             // Age
+                   + (uint) Encoding.UTF8.GetByteCount(Path ?? string.Empty)  // Path
+                   + sizeof(byte)                                             // Zero byte for null terminated string
                 ;
         }
 

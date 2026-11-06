@@ -8,6 +8,9 @@ namespace AsmResolver.PE.Relocations.Builder
     /// </summary>
     public sealed class RelocationBlock : SegmentBase
     {
+        private readonly HashSet<RelocationEntry> _entrySet = [];
+        private readonly List<RelocationEntry> _entries = [];
+
         /// <summary>
         /// Creates a new base relocation block for the provided page.
         /// </summary>
@@ -15,7 +18,6 @@ namespace AsmResolver.PE.Relocations.Builder
         public RelocationBlock(uint pageRva)
         {
             PageRva = pageRva;
-            Entries =  new List<RelocationEntry>();
         }
 
         /// <summary>
@@ -29,9 +31,23 @@ namespace AsmResolver.PE.Relocations.Builder
         /// <summary>
         /// Gets the list of entries added to this page.
         /// </summary>
-        public IList<RelocationEntry> Entries
+        public IList<RelocationEntry> Entries => _entries;
+
+        /// <summary>
+        /// Adds a relocation entry to the block.
+        /// </summary>
+        /// <param name="entry">The entry to add.</param>
+        /// <param name="allowDuplicates"><c>true</c> if the entry should be ignored if it already exists, <c>false</c> otherwise.</param>
+        /// <returns><c>true</c> if the entry was added, <c>false</c> otherwise.</returns>
+        public bool Add(RelocationEntry entry, bool allowDuplicates = false)
         {
-            get;
+            if (_entrySet.Add(entry) || allowDuplicates)
+            {
+                Entries.Add(entry);
+                return true;
+            }
+
+            return false;
         }
 
         /// <inheritdoc />
@@ -45,6 +61,8 @@ namespace AsmResolver.PE.Relocations.Builder
         /// <inheritdoc />
         public override void Write(BinaryStreamWriter writer)
         {
+            _entries.Sort();
+
             // Block header.
             writer.WriteUInt32(PageRva);
             writer.WriteUInt32(GetPhysicalSize());

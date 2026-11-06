@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 
 namespace AsmResolver.IO
 {
@@ -18,12 +18,14 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public IInputFile OpenFile(string filePath)
         {
+            filePath = Path.GetFullPath(filePath);
             return _files.GetOrAdd(filePath, x => new MemoryMappedInputFile(x));
         }
 
         /// <inheritdoc />
         public void InvalidateFile(string filePath)
         {
+            filePath = Path.GetFullPath(filePath);
             if (_files.TryRemove(filePath, out var file))
                 file.Dispose();
         }

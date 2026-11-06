@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -336,14 +337,10 @@ namespace AsmResolver.DotNet
 
             private ResolutionStatus FindTypeInModule(ModuleDefinition module, Utf8String? ns, Utf8String name, out TypeDefinition? definition)
             {
-                for (int i = 0; i < module.TopLevelTypes.Count; i++)
+                if (TypeDefinitionCollection.FindFirst(module.TopLevelTypes, ns, name) is { } localType)
                 {
-                    var candidate = module.TopLevelTypes[i];
-                    if (candidate.IsTypeOfUtf8(ns, name))
-                    {
-                        definition = candidate;
-                        return ResolutionStatus.Success;
-                    }
+                    definition = localType;
+                    return ResolutionStatus.Success;
                 }
 
                 for (int i = 0; i < module.ExportedTypes.Count; i++)
@@ -359,18 +356,10 @@ namespace AsmResolver.DotNet
 
             private static ResolutionStatus FindTypeInType(TypeDefinition enclosingType, Utf8String? ns, Utf8String name, out TypeDefinition? definition)
             {
-                for (int i = 0; i < enclosingType.NestedTypes.Count; i++)
-                {
-                    var candidate = enclosingType.NestedTypes[i];
-                    if (candidate.IsTypeOfUtf8(ns, name))
-                    {
-                        definition = candidate;
-                        return ResolutionStatus.Success;
-                    }
-                }
-
-                definition = null;
-                return ResolutionStatus.TypeNotFound;
+                definition = TypeDefinitionCollection.FindFirst(enclosingType.NestedTypes, ns, name);
+                return definition is not null
+                    ? ResolutionStatus.Success
+                    : ResolutionStatus.TypeNotFound;
             }
 
             private static ResolutionStatus FindModuleInAssembly(AssemblyDefinition assembly, Utf8String name, out ModuleDefinition? definition)

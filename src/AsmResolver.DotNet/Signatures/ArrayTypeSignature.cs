@@ -57,7 +57,7 @@ namespace AsmResolver.DotNet.Signatures
         public override ElementType ElementType => ElementType.Array;
 
         /// <inheritdoc />
-        public override string Name => $"{BaseType.Name ?? NullTypeToString}{GetDimensionsString()}";
+        public override string Name => $"{BaseType.Name}{GetDimensionsString()}";
 
         /// <summary>
         /// Gets a collection of dimensions.
@@ -197,9 +197,11 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public override TypeSignature? GetDirectBaseClass(RuntimeContext? context)
-            => ContextModule?.CorLibTypeFactory.CorLibScope
+        {
+            return context?.CorLibTypeFactory.CorLibScope
                 .CreateTypeReference("System", "Array")
                 .ToTypeSignature(false);
+        }
 
         /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>

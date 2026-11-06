@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Tls
     /// <summary>
     /// Represents the data directory containing Thread-Local Storage (TLS) data.
     /// </summary>
-    public partial class TlsDirectory : SegmentBase
+    public partial class TlsDirectory : SegmentBase, IRelocatable
     {
         private ReferenceTable? _callbackFunctions;
         private ulong _imageBase = 0x00400000;
@@ -101,11 +101,7 @@ namespace AsmResolver.PE.Tls
         /// </remarks>
         protected virtual ReferenceTable GetCallbackFunctions() => new(ReferenceTableAttributes.Va | ReferenceTableAttributes.Adaptive | ReferenceTableAttributes.ZeroTerminated);
 
-        /// <summary>
-        /// Obtains a collection of base address relocations that need to be applied to the TLS data directory
-        /// after the image was loaded into memory.
-        /// </summary>
-        /// <returns>The required base relocations.</returns>
+        /// <inheritdoc />
         public IEnumerable<BaseRelocation> GetRequiredBaseRelocations()
         {
             int pointerSize = _is32Bit ? sizeof(uint) : sizeof(ulong);
@@ -120,9 +116,13 @@ namespace AsmResolver.PE.Tls
                 result.Add(new BaseRelocation(type, this.ToReference(1 * pointerSize)));
             }
 
-            // TLS index and callback table addresses.
-            result.Add(new BaseRelocation(type, this.ToReference(2 * pointerSize)));
-            result.Add(new BaseRelocation(type, this.ToReference(3 * pointerSize)));
+            // TLS index
+            if (Index != SegmentReference.Null)
+                result.Add(new BaseRelocation(type, this.ToReference(2 * pointerSize)));
+
+            // Callback table addresses.
+            if (CallbackFunctions.Count > 0)
+                result.Add(new BaseRelocation(type, this.ToReference(3 * pointerSize)));
 
             // All callbacks are also VAs, so we need relocations for them as well.
             result.AddRange(CallbackFunctions.CreateBaseRelocations());
@@ -154,8 +154,8 @@ namespace AsmResolver.PE.Tls
                 writer.WriteNativeInt(0, is32Bit);
             }
 
-            writer.WriteNativeInt(imageBase + Index.Rva, is32Bit);
-            writer.WriteNativeInt(imageBase + CallbackFunctions.Rva, is32Bit);
+            writer.WriteNativeInt(Index != SegmentReference.Null ? imageBase + Index.Rva : 0, is32Bit);
+            writer.WriteNativeInt(CallbackFunctions.Count > 0 ? imageBase + CallbackFunctions.Rva : 0, is32Bit);
             writer.WriteUInt32(SizeOfZeroFill);
             writer.WriteUInt32((uint) Characteristics);
         }

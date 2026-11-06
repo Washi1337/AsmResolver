@@ -205,6 +205,9 @@ namespace AsmResolver.DotNet
         /// <returns><c>true</c> if it is considered a facade corlib according to the provided runtime, <c>false</c> otherwise.</returns>
         public bool IsReferenceCorLib(in DotNetRuntimeInfo contextRuntime)
         {
+            if (contextRuntime.IsSilverlight)
+                return Name == "mscorlib";
+
             if (contextRuntime.IsNetFramework)
                 return Name?.Value is "mscorlib" or "netstandard";
             return Name?.Value is "mscorlib" or "System.Runtime"  or "netstandard";
@@ -218,7 +221,7 @@ namespace AsmResolver.DotNet
         /// <returns><c>true</c> if it is considered a implementation corlib according to the provided runtime, <c>false</c> otherwise.</returns>
         public bool IsImplementationCorLib(in DotNetRuntimeInfo contextRuntime)
         {
-            if (contextRuntime.IsNetFramework)
+            if (contextRuntime.IsNetFramework || contextRuntime.IsSilverlight)
                 return Name == "mscorlib";
             if (contextRuntime.IsNetCoreApp)
                 return Name == "System.Private.CoreLib";

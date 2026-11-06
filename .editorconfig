@@ -1,4 +1,3 @@
-
 [*]
 charset = utf-8
 end_of_line = crlf
@@ -8,6 +7,7 @@ indent_style = space
 indent_size = 4
 
 # Microsoft .NET properties
+csharp_space_after_cast = true
 csharp_new_line_before_members_in_object_initializers = false
 csharp_preferred_modifier_order = public, private, protected, internal, new, abstract, virtual, sealed, override, static, readonly, extern, unsafe, volatile, async:suggestion
 csharp_style_var_elsewhere = true:suggestion
@@ -65,11 +65,11 @@ resharper_web_config_module_not_resolved_highlighting = warning
 resharper_web_config_type_not_resolved_highlighting = warning
 resharper_web_config_wrong_module_highlighting = warning
 
-[{*.bash,*.sh,*.zsh}]
+[*.{bash,sh,zsh}]
 indent_style = space
 indent_size = 2
 
-[{*.yaml,*.yml}]
+[*.{yaml,yml}]
 indent_style = space
 indent_size = 2
 
@@ -77,3 +77,6 @@ indent_size = 2
 indent_style = space
 indent_size = 4
 tab_width = 4
+
+[*.{sln,slnx}]
+insert_final_newline = false

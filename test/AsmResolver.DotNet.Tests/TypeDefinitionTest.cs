@@ -832,6 +832,15 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ConstructorShouldNotInitializeLazyDeclaringType()
+        {
+            var outer = new TypeDefinition("N", "Outer", TypeAttributes.Public);
+            var nested = new LazyDeclaringTypeDefinition(outer);
+
+            Assert.Same(outer, nested.DeclaringType);
+        }
+
+        [Fact]
         public void NestedTypeRemovedFromOwnerShouldHaveNoModule()
         {
             var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location, TestReaderParameters);
@@ -856,6 +865,19 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.IsAssignableFrom<TypeReference>(newType.BaseType);
             Assert.Equal(type.BaseType, newType.BaseType, SignatureComparer.Default!);
+        }
+
+        private sealed class LazyDeclaringTypeDefinition : TypeDefinition
+        {
+            private readonly TypeDefinition _owner;
+
+            public LazyDeclaringTypeDefinition(TypeDefinition owner)
+                : base(null, "Nested", TypeAttributes.NestedPublic)
+            {
+                _owner = owner;
+            }
+
+            protected override TypeDefinition? GetDeclaringType() => _owner;
         }
     }
 }

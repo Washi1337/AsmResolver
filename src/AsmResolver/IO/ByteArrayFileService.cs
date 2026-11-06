@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 
 namespace AsmResolver.IO
 {
@@ -19,6 +20,7 @@ namespace AsmResolver.IO
         /// <inheritdoc />
         public IInputFile OpenFile(string filePath)
         {
+            filePath = Path.GetFullPath(filePath);
             return _files.GetOrAdd(filePath, x => new ByteArrayInputFile(x));
         }
 
@@ -30,11 +32,12 @@ namespace AsmResolver.IO
         /// <returns>The opened file.</returns>
         public IInputFile OpenBytesAsFile(string filePath, byte[] contents)
         {
+            filePath = Path.GetFullPath(filePath);
             return _files.GetOrAdd(filePath, p => new ByteArrayInputFile(p, contents, 0));
         }
 
         /// <inheritdoc />
-        public void InvalidateFile(string filePath) => _files.TryRemove(filePath, out _);
+        public void InvalidateFile(string filePath) => _files.TryRemove(Path.GetFullPath(filePath), out _);
 
         /// <inheritdoc />
         void IDisposable.Dispose() => _files.Clear();

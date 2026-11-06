@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.Shims;
@@ -114,7 +115,11 @@ namespace AsmResolver.DotNet
         public Utf8String? Namespace
         {
             get => _namespace.GetValue(this);
-            set => _namespace.SetValue(Utf8String.IsNullOrEmpty(value) ? null : value);
+            set
+            {
+                _namespace.SetValue(Utf8String.IsNullOrEmpty(value) ? null : value);
+                InvalidateOwnerTypeIndex();
+            }
             // According to the specification, the namespace should always be null or non-empty.
         }
 
@@ -126,11 +131,20 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This property corresponds to the Name column in the type definition table.
         /// </remarks>
-        [LazyProperty]
+        [LazyProperty(OnSetMethod = nameof(InvalidateOwnerTypeIndex))]
         public partial Utf8String? Name
         {
             get;
             set;
+        }
+
+        private void InvalidateOwnerTypeIndex()
+        {
+            // Setters also run during construction; do not force the lazy declaring type to initialize.
+            if (_initialized[DeclaringTypeInitMask] && DeclaringType is { } declaringType)
+                (declaringType.NestedTypesInternal as TypeDefinitionCollection)?.Invalidate();
+            else
+                _module?.InvalidateTopLevelTypeIndex();
         }
 
         string? INameProvider.Name => Name;
@@ -1151,7 +1165,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="NestedTypes"/> property.
         /// </remarks>
         protected virtual IList<TypeDefinition> GetNestedTypes() =>
-            new OwnedCollection<ITypeOwner, TypeDefinition>(this);
+            new TypeDefinitionCollection(this);
 
         /// <summary>
         /// Obtains the enclosing class of the type definition if available.

@@ -766,7 +766,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void ManyTinyExceptionHandlersShouldUseFatFormat()
         {
             // https://github.com/Washi1337/AsmResolver/issues/746
-            
+
             // Prepare method with 100 small EHs
             var body = CreateDummyBody(true);
             var il = body.Instructions;
@@ -930,9 +930,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         }
 
         [Fact]
-        public void AsyncTaskMethodAllowsEmptyStackReturn()
+        public void AsyncTaskMethodRequiresEmptyStackReturn()
         {
-            var module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemRuntime_v9_0_0_0);
+            var module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemRuntime_v11_0_0_0);
             var method = new MethodDefinition("DummyMethod", MethodAttributes.Static,
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.CorLibScope.CreateTypeReference("System.Threading.Tasks", "Task").ToTypeSignature(false)))
             {
@@ -942,6 +942,47 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             module.GetOrCreateModuleType().Methods.Add(method);
             var body = method.CilMethodBody = new CilMethodBody();
 
+            body.Instructions.Add(CilOpCodes.Ret);
+            body.ComputeMaxStack();
+
+            body.Instructions.Insert(0, CilOpCodes.Ldc_I4_0);
+            Assert.Throws<StackImbalanceException>(() => body.ComputeMaxStack());
+        }
+
+        [Fact]
+        public void AsyncVoidMethodRequiresEmptyStackReturn()
+        {
+            var module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemRuntime_v11_0_0_0);
+            var method = new MethodDefinition("DummyMethod", MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void))
+            {
+                IsRuntimeAsync = true,
+            };
+
+            module.GetOrCreateModuleType().Methods.Add(method);
+            var body = method.CilMethodBody = new CilMethodBody();
+
+            body.Instructions.Add(CilOpCodes.Ret);
+            body.ComputeMaxStack();
+
+            body.Instructions.Insert(0, CilOpCodes.Ldc_I4_0);
+            Assert.Throws<StackImbalanceException>(() => body.ComputeMaxStack());
+        }
+
+        [Fact]
+        public void AsyncNonVoidMethodRequiresNonEmptyStackReturn()
+        {
+            var module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemRuntime_v11_0_0_0);
+            var method = new MethodDefinition("DummyMethod", MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Int32))
+            {
+                IsRuntimeAsync = true,
+            };
+
+            module.GetOrCreateModuleType().Methods.Add(method);
+            var body = method.CilMethodBody = new CilMethodBody();
+
+            body.Instructions.Add(CilOpCodes.Ldc_I4_1);
             body.Instructions.Add(CilOpCodes.Ret);
             body.ComputeMaxStack();
 

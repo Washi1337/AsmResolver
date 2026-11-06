@@ -23,20 +23,27 @@ namespace AsmResolver.DotNet.Code.Cil
         public static int GetStackPopCount(this CilInstruction instruction, CilMethodBody? parent)
         {
             bool isVoidOrRuntimeAsyncTask = true;
-            // skip all of this extra processing if this isn't a Ret
-            if (instruction.OpCode.Code == CilCode.Ret && parent?.Owner?.Signature is MethodSignature sig)
+
+            if (instruction.OpCode.Code == CilCode.Ret && parent?.Owner?.Signature is { } sig)
             {
-                if (parent.Owner.IsRuntimeAsync)
-                {
-                    isVoidOrRuntimeAsyncTask = sig.ReturnType.IsTypeOf("System.Threading.Tasks", "Task") || sig.ReturnType.IsTypeOf("System.Threading.Tasks", "ValueTask");
-                }
-                else
-                {
-                    isVoidOrRuntimeAsyncTask = !sig.ReturnsValue;
-                }
+                // RuntimeAsync methods do not expect a value on the stack for `ret` instructions if their
+                // return type is Task or ValueTask (the non-generic version which implies no return value).
+                //
+                // Note that even in the case of RuntimeAsync methods we still need to check if the return type is void.
+                // This is because corlib is allowed by the runtime to define methods with non-Task/ValueTask return type.
+                // See e.g., methods defined in System.Runtime.CompilerServices.AsyncHelpers of .NET 11.
+
+                isVoidOrRuntimeAsyncTask =
+                    !sig.ReturnsValue
+                    || parent.Owner.IsRuntimeAsync && (
+                        sig.ReturnType.IsTypeOf("System.Threading.Tasks", "Task")
+                        || sig.ReturnType.IsTypeOf("System.Threading.Tasks", "ValueTask")
+                    );
             }
+
             return GetStackPopCount(instruction, isVoidOrRuntimeAsyncTask);
         }
+
 
         /// <summary>
         /// Determines the number of values that are popped from the stack by this instruction.

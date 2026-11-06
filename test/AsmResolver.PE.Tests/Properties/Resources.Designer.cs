@@ -185,6 +185,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
         
+        internal static byte[] HelloWorld_Utf8DebugPath {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_Utf8DebugPath", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
         internal static byte[] HelloWorldPortablePdb {
             get {
                 object obj = ResourceManager.GetObject("HelloWorldPortablePdb", resourceCulture);
@@ -304,6 +311,13 @@ namespace AsmResolver.PE.Tests.Properties {
             }
         }
         
+        internal static byte[] FieldRvaEnum {
+            get {
+                object obj = ResourceManager.GetObject("FieldRvaEnum", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
         internal static byte[] ReadyToRunTest {
             get {
                 object obj = ResourceManager.GetObject("ReadyToRunTest", resourceCulture);
@@ -412,6 +426,27 @@ namespace AsmResolver.PE.Tests.Properties {
         internal static byte[] HelloWorld_LowercaseJTDStream {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_LowercaseJTDStream", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        internal static byte[] ControlFlowGuardTest_X64 {
+            get {
+                object obj = ResourceManager.GetObject("ControlFlowGuardTest_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        internal static byte[] ControlFlowGuardTest_X86 {
+            get {
+                object obj = ResourceManager.GetObject("ControlFlowGuardTest_X86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        internal static byte[] ControlFlowGuardTest_X86_Flags {
+            get {
+                object obj = ResourceManager.GetObject("ControlFlowGuardTest_X86_Flags", resourceCulture);
                 return ((byte[])(obj));
             }
         }
