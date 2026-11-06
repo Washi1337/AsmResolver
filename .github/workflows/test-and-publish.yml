@@ -235,6 +235,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [test]
     if: ${{github.ref == 'refs/heads/development' || github.ref == 'refs/heads/master'}}
+    permissions:
+      id-token: write  # enable GitHub OIDC token issuance for this job
 
     steps:
     - uses: actions/checkout@v7
