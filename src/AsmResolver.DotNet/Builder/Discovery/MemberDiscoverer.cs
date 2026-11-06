@@ -333,7 +333,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         {
             // Define new event.
             var @event = new EventDefinition(
-                name: $"_{token.Rid}",
+                name: RidToName(token.Rid),
                 attributes: EventAttributes.None,
                 eventType: _eventHandlerTypeRef
             );
