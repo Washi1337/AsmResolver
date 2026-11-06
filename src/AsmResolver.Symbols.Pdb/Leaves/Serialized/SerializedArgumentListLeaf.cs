@@ -35,10 +35,10 @@ public class SerializedArgumentListLeaf : ArgumentListLeaf
         for (int i = 0; i < count; i++)
         {
             uint typeIndex = reader.ReadUInt32();
-            if (!_context.ParentImage.TryGetLeafRecord(typeIndex, out CodeViewTypeRecord? t))
+            var t = _context.ParentImage.GetLeafRecord<CodeViewTypeRecord>(typeIndex);
+            if (t is null)
             {
-                _context.Parameters.ErrorListener.BadImage(
-                    $"Argument list {TypeIndex:X8} contains an invalid argument type index {typeIndex:X8}.");
+                // The type index could not be resolved.
                 return result;
             }
 

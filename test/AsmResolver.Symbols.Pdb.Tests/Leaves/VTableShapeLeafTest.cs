@@ -17,7 +17,7 @@ public class VTableShapeLeafTest : IClassFixture<MockPdbFixture>
     [InlineData(0x239e, new[] { VTableShapeEntry.Near32,VTableShapeEntry.Near32 })]
     public void ReadEntries(uint typeIndex, VTableShapeEntry[] expectedEntries)
     {
-        var shape = (VTableShapeLeaf) _fixture.SimplePdb.GetLeafRecord(typeIndex);
+        var shape = (VTableShapeLeaf) _fixture.SimplePdb.GetLeafRecord(typeIndex)!;
         Assert.Equal(expectedEntries, shape.Entries);
     }
 }
