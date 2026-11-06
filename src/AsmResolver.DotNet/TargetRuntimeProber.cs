@@ -279,22 +279,24 @@ public static class TargetRuntimeProber
 
     private static DotNetRuntimeInfo ToDotNetRuntimeInfo(string name, int major, int minor, int build, int revision)
     {
-        // Silverlight corlib assemblies do not have a TargetFrameworkAttribute.
-        // Use the assembly version to identify the runtime.
         if (name == "mscorlib")
         {
-            if (major == 2 && minor == 0 && build == 5 && revision == 0)
-                return DotNetRuntimeInfo.Silverlight(4, 0);
+            switch (major, minor, build, revision)
+            {
+                // Silverlight uses mscorlib with unconventional assembly versions.
+                case (2, 0, 5, 0):
+                    return DotNetRuntimeInfo.Silverlight(4, 0);
 
-            if (major == 5 && minor == 0 && build == 5 && revision == 0)
-                return DotNetRuntimeInfo.Silverlight(5, 0);
+                case (5, 0, 5, 0):
+                    return DotNetRuntimeInfo.Silverlight(5, 0);
+
+                // mscorlib v255.255.255.255 is used in WinRT (earliest supported framework is .NET FX 4.5).
+                // TODO: We may want to introduce a separate runtime info for this instead, as it will require some additional
+                //       changes to the resolver (i.e., include WinMetadata search dirs).
+                case (255, 255, 255, 255):
+                    return DotNetRuntimeInfo.NetFramework(4, 5);
+            }
         }
-
-        // mscorlib v255.255.255.255 is used in WinRT (earliest supported framework is .NET FX 4.5).
-        // TODO: We may want to introduce a separate runtime info for this instead, as it will require some additional
-        //       changes to the resolver (i.e., include WinMetadata search dirs).
-        if (name == "mscorlib" && major == 255 && minor == 255 && build == 255 && revision == 255)
-            return DotNetRuntimeInfo.NetFramework(4, 5);
 
         // .NETCoreApp uses 1:1 version correspondence of corlib since .NET 5.
         if (major >= 5)
