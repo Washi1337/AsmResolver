@@ -15,21 +15,21 @@ public class ProcedureTypeRecordTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void ReadReturnType()
     {
-        var procedure = (ProcedureTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x18f7);
+        var procedure = (ProcedureTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x18f7)!;
         Assert.Equal(SimpleTypeKind.Void, Assert.IsAssignableFrom<SimpleTypeRecord>(procedure.ReturnType).Kind);
     }
 
     [Fact]
     public void ReadCallingConvention()
     {
-        var procedure = (ProcedureTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x18f7);
+        var procedure = (ProcedureTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x18f7)!;
         Assert.Equal(CodeViewCallingConvention.NearStd, procedure.CallingConvention);
     }
 
     [Fact]
     public void ReadArguments()
     {
-        var procedure = (ProcedureTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x18f7);
+        var procedure = (ProcedureTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x18f7)!;
         Assert.NotNull(procedure.Arguments);
         Assert.Equal(2, procedure.Arguments!.Types.Count);
     }

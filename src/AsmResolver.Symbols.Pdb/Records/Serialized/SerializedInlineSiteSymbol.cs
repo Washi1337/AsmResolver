@@ -32,10 +32,7 @@ public class SerializedInlineSiteSymbol : InlineSiteSymbol
     /// <inheritdoc />
     protected override FunctionIdentifier? GetInlinee()
     {
-        return _context.ParentImage.TryGetIdLeafRecord(_inlineeIndex, out FunctionIdentifier? id)
-            ? id
-            : _context.Parameters.ErrorListener.BadImageAndReturn<FunctionIdentifier>(
-                $"Inline Site symbol contains an invalid type index {_inlineeIndex:X8}.");
+        return _context.ParentImage.GetIdLeafRecord<FunctionIdentifier>(_inlineeIndex);
     }
 
     /// <inheritdoc />

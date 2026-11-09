@@ -52,10 +52,7 @@ public class SerializedClassTypeRecord : ClassTypeRecord
         if (_baseTypeIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_baseTypeIndex, out CodeViewTypeRecord? type)
-            ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
-                $"Class type {TypeIndex:X8} contains an invalid underlying enum type index {_baseTypeIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<CodeViewTypeRecord>(_baseTypeIndex);
     }
 
     /// <inheritdoc />
@@ -64,10 +61,7 @@ public class SerializedClassTypeRecord : ClassTypeRecord
         if (_fieldIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_fieldIndex, out SerializedFieldListLeaf? list)
-            ? list
-            : _context.Parameters.ErrorListener.BadImageAndReturn<FieldListLeaf>(
-                $"Class type {TypeIndex:X8} contains an invalid field list index {_fieldIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<FieldListLeaf>(_fieldIndex);
     }
 
     /// <inheritdoc />
@@ -76,9 +70,6 @@ public class SerializedClassTypeRecord : ClassTypeRecord
         if (_vTableShapeIndex == 0)
             return null;
 
-        return _context.ParentImage.TryGetLeafRecord(_vTableShapeIndex, out VTableShapeLeaf? shape)
-            ? shape
-            : _context.Parameters.ErrorListener.BadImageAndReturn<VTableShapeLeaf>(
-                $"Class type {TypeIndex:X8} contains an invalid VTable shape index {_fieldIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<VTableShapeLeaf>(_vTableShapeIndex);
     }
 }
