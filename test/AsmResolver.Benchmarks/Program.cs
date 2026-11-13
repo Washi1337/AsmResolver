@@ -18,24 +18,40 @@ namespace AsmResolver.Benchmarks
             var root = new RootCommand();
 
             var runCommand = new Command("run", "Run benchmarks");
-            root.AddCommand(runCommand);
+            root.Subcommands.Add(runCommand);
 
-            var baselineVersionOption = new Option<string?>("--baseline",
-                "Compare the results to a different nuget version of AsmResolver.");
-            var useProfilerOption = new Option<bool>("--profiler",
-                "Enable a profiler.");
-            var hardwareCountersOption = new Option<bool>("--counters",
-                "Include hardware counters in the benchmark (automatically enables the --profiler option).");
-            var onlyTypeOption = new Option<string?>("--type",
-                "Only run the benchmarks in the specified benchmark type.");
-
-            runCommand.AddOption(baselineVersionOption);
-            runCommand.AddOption(useProfilerOption);
-            runCommand.AddOption(hardwareCountersOption);
-            runCommand.AddOption(onlyTypeOption);
-
-            runCommand.SetHandler((baselineVersion, useProfiler, hardwareCounters, benchmarkType) =>
+            var baselineVersionOption = new Option<string?>("--baseline")
             {
+                Description = "Compare the results to a different nuget version of AsmResolver."
+            };
+
+            var useProfilerOption = new Option<bool>("--profiler")
+            {
+                Description = "Enable a profiler."
+            };
+
+            var hardwareCountersOption = new Option<bool>("--counters")
+            {
+                Description = "Include hardware counters in the benchmark (automatically enables the --profiler option)."
+            };
+
+            var onlyTypeOption = new Option<string?>("--type")
+            {
+                Description = "Only run the benchmarks in the specified benchmark type."
+            };
+
+            runCommand.Options.Add(baselineVersionOption);
+            runCommand.Options.Add(useProfilerOption);
+            runCommand.Options.Add(hardwareCountersOption);
+            runCommand.Options.Add(onlyTypeOption);
+
+            runCommand.SetAction(result =>
+            {
+                string? baselineVersion = result.GetValue(baselineVersionOption);
+                bool hardwareCounters = result.GetValue(hardwareCountersOption);
+                bool useProfiler = result.GetValue(useProfilerOption);
+                string? benchmarkType = result.GetValue(onlyTypeOption);
+
                 var config = new ManualConfig();
                 var job = Job.Default;
 
@@ -78,25 +94,25 @@ namespace AsmResolver.Benchmarks
                     Console.Error.WriteLine($"Could not find benchmark {benchmarkType}.");
                     Console.Error.WriteLine("Available benchmarks:");
                     var assemblyTypes = Assembly.GetExecutingAssembly().GetTypes();
-                    foreach (var asemblyType in assemblyTypes)
+                    foreach (var assemblyType in assemblyTypes)
                     {
-                        var typeMethods = asemblyType.GetMethods();
+                        var typeMethods = assemblyType.GetMethods();
                         foreach (var typeMethod in typeMethods)
                         {
                             var benchmarkAttribute = typeMethod.GetCustomAttribute<BenchmarkAttribute>();
                             if (benchmarkAttribute is not null)
                             {
-                                var typeName = asemblyType.Name;
+                                var typeName = assemblyType.Name;
                                 Console.Error.WriteLine($"  {typeName}");
                                 break;
                             }
                         }
                     }
                 }
+            });
 
-            }, baselineVersionOption, useProfilerOption, hardwareCountersOption, onlyTypeOption);
-
-            return await root.InvokeAsync(args);
+            var parseResult = root.Parse(args);
+            return await parseResult.InvokeAsync();
         }
     }
 }
