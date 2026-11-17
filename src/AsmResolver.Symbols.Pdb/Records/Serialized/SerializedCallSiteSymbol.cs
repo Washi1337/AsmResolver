@@ -28,9 +28,6 @@ public class SerializedCallSiteSymbol : CallSiteSymbol
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetFunctionType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_typeIndex, out CodeViewTypeRecord? type)
-        ? type
-        : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
-            $"Call site symbol contains an invalid type index {_typeIndex:X8}.");
+        return _context.ParentImage.GetLeafRecord<CodeViewTypeRecord>(_typeIndex);
     }
 }
