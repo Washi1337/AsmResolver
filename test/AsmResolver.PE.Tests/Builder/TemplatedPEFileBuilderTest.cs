@@ -287,9 +287,9 @@ public class TemplatedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
     {
         var image = PEImage.FromBytes(Properties.Resources.ControlFlowGuardTest_X86, TestReaderParameters);
         var config = image.LoadConfiguration!;
-        var originalRva = config.SEHandlerTable.Rva;
+        uint originalRva = config.SEHandlerTable.Rva;
         config.SEHandlerTable[0] = new VirtualAddress(0x1234);
-        var expected = config.SEHandlerTable.Select(entry => entry.Rva).ToArray();
+        uint[] expected = config.SEHandlerTable.Select(entry => entry.Rva).ToArray();
 
         var file = image.ToPEFile(new TemplatedPEFileBuilder());
         using var stream = new MemoryStream();
@@ -310,8 +310,8 @@ public class TemplatedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
             is32Bit ? Properties.Resources.ControlFlowGuardTest_X86 : Properties.Resources.ControlFlowGuardTest_X64,
             TestReaderParameters);
         var config = image.LoadConfiguration!;
-        var originalRva = config.SecurityCookie!.Rva;
-        var data = Enumerable.Repeat((byte) 0xA5, is32Bit ? 4 : 8).ToArray();
+        uint originalRva = config.SecurityCookie!.Rva;
+        byte[] data = Enumerable.Repeat((byte) 0xA5, is32Bit ? 4 : 8).ToArray();
         config.SecurityCookie = new DataSegment(data);
 
         var file = image.ToPEFile(new TemplatedPEFileBuilder());
@@ -328,7 +328,7 @@ public class TemplatedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
     public void PatchTlsDirectoryPreservesItsSize()
     {
         var image = PEImage.FromBytes(Properties.Resources.TlsTest_x64, TestReaderParameters);
-        var expectedSize = image.TlsDirectory!.GetPhysicalSize();
+        uint expectedSize = image.TlsDirectory!.GetPhysicalSize();
 
         var file = image.ToPEFile(new TemplatedPEFileBuilder());
 
