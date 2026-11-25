@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Tests
             [CallerMemberName] string testMethod = "Test")
         {
             testClass = Path.GetFileNameWithoutExtension(testClass);
-            string path = runner.GetTestExecutablePath(testClass, testMethod, fileName);
+            var path = runner.GetTestExecutablePath(fileName, testClass, testMethod);
             module.Write(path);
             string actualOutput = runner.RunAndCaptureOutput(path, null, timeout);
             Assert.Equal(expectedOutput.Replace("\r\n", "\n"), actualOutput);
