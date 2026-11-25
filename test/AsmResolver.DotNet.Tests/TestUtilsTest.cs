@@ -18,7 +18,7 @@ public class TestUtilsTest
         Assert.Throws<NotSupportedException>(() => runner.RebuildAndRun(
             module, "Rebuilt.dll", "", testClass: "Source.cs", testMethod: "Case"));
 
-        var expectedPath = Path.Combine(directory.BasePath, "Source", "Case", "Rebuilt.dll");
+        string expectedPath = Path.Combine(directory.BasePath, "Source", "Case", "Rebuilt.dll");
         Assert.Equal(expectedPath, runner.FilePath);
         Assert.True(File.Exists(expectedPath));
     }

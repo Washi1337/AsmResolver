@@ -13,12 +13,12 @@ namespace AsmResolver.DotNet.Tests
         // We want unit tests to always throw reader errors as opposed to ignore them.
         public static readonly ModuleReaderParameters TestReaderParameters = new(ThrowErrorListener.Instance);
 
-        public static void RebuildAndRun(this PERunner runner, ModuleDefinition module,  string fileName, string expectedOutput, int timeout = 30000,
+        public static void RebuildAndRun(this PERunner runner, ModuleDefinition module, string fileName, string expectedOutput, int timeout = 30000,
             [CallerFilePath] string testClass = "File",
             [CallerMemberName] string testMethod = "Test")
         {
             testClass = Path.GetFileNameWithoutExtension(testClass);
-            var path = runner.GetTestExecutablePath(fileName, testClass, testMethod);
+            string path = runner.GetTestExecutablePath(fileName, testClass, testMethod);
             module.Write(path);
             string actualOutput = runner.RunAndCaptureOutput(path, null, timeout);
             Assert.Equal(expectedOutput.Replace("\r\n", "\n"), actualOutput);
