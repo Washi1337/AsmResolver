@@ -283,6 +283,59 @@ public class TemplatedPEFileBuilderTest : IClassFixture<TemporaryDirectoryFixtur
     }
 
     [Fact]
+    public void PatchLoadConfigurationSehTable()
+    {
+        var image = PEImage.FromBytes(Properties.Resources.ControlFlowGuardTest_X86, TestReaderParameters);
+        var config = image.LoadConfiguration!;
+        var originalRva = config.SEHandlerTable.Rva;
+        config.SEHandlerTable[0] = new VirtualAddress(0x1234);
+        var expected = config.SEHandlerTable.Select(entry => entry.Rva).ToArray();
+
+        var file = image.ToPEFile(new TemplatedPEFileBuilder());
+        using var stream = new MemoryStream();
+        file.Write(stream);
+
+        var newImage = PEImage.FromStream(stream, TestReaderParameters);
+        Assert.NotNull(newImage.LoadConfiguration);
+        Assert.Equal(originalRva, newImage.LoadConfiguration.SEHandlerTable.Rva);
+        Assert.Equal(expected, newImage.LoadConfiguration.SEHandlerTable.Select(entry => entry.Rva));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void PatchLoadConfigurationSecurityCookie(bool is32Bit)
+    {
+        var image = PEImage.FromBytes(
+            is32Bit ? Properties.Resources.ControlFlowGuardTest_X86 : Properties.Resources.ControlFlowGuardTest_X64,
+            TestReaderParameters);
+        var config = image.LoadConfiguration!;
+        var originalRva = config.SecurityCookie!.Rva;
+        var data = Enumerable.Repeat((byte) 0xA5, is32Bit ? 4 : 8).ToArray();
+        config.SecurityCookie = new DataSegment(data);
+
+        var file = image.ToPEFile(new TemplatedPEFileBuilder());
+        using var stream = new MemoryStream();
+        file.Write(stream);
+
+        var newImage = PEImage.FromStream(stream, TestReaderParameters);
+        Assert.NotNull(newImage.LoadConfiguration?.SecurityCookie);
+        Assert.Equal(originalRva, newImage.LoadConfiguration.SecurityCookie.Rva);
+        Assert.Equal(data, newImage.LoadConfiguration.SecurityCookie.WriteIntoArray());
+    }
+
+    [Fact]
+    public void PatchTlsDirectoryPreservesItsSize()
+    {
+        var image = PEImage.FromBytes(Properties.Resources.TlsTest_x64, TestReaderParameters);
+        var expectedSize = image.TlsDirectory!.GetPhysicalSize();
+
+        var file = image.ToPEFile(new TemplatedPEFileBuilder());
+
+        Assert.Equal(expectedSize, file.OptionalHeader.DataDirectories[(int) DataDirectoryIndex.TlsDirectory].Size);
+    }
+
+    [Fact]
     public void RoundTripTlsShouldPreserveContents()
     {
         // https://github.com/Washi1337/AsmResolver/issues/706
