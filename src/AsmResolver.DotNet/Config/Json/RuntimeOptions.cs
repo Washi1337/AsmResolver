@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 #if NET5_0_OR_GREATER
 using System.Text.Json;
@@ -193,6 +194,8 @@ namespace AsmResolver.DotNet.Config.Json
             JSONNodeType.Number => InterpretNumber(node),
             JSONNodeType.NullValue => null,
             JSONNodeType.Boolean => node.AsBool,
+            JSONNodeType.Array => node.Linq.Select(item => InterpretValue(item.Value)).ToList(),
+            JSONNodeType.Object => node.Linq.ToDictionary(item => item.Key, item => InterpretValue(item.Value)),
             _ => null
         };
 

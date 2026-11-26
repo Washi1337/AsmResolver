@@ -281,6 +281,43 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             Assert.Equal(number, value.GetRawText());
         }
 
+        [Fact]
+        public void RoundTripNestedConfigurationProperties()
+        {
+            const string json = """
+                {
+                    "runtimeOptions": {
+                        "configProperties": {
+                            "Object": {"Enabled": true, "Threshold": 1.25, "Empty": {}},
+                            "Array": [1, "text", false, null, {"Nested": [2.5, []]}]
+                        }
+                    }
+                }
+                """;
+            var config = RuntimeConfiguration.FromJson(json);
+            Assert.NotNull(config);
+            AssertJsonEqual(json, config.ToJson());
+        }
+
+        [Theory]
+        [InlineData(61, true)]
+        [InlineData(62, false)]
+        public void RespectJsonDepthLimit(int arrayDepth, bool supported)
+        {
+            string json = "{\"runtimeOptions\":{\"configProperties\":{\"Deep\":"
+                + new string('[', arrayDepth) + "0" + new string(']', arrayDepth) + "}}}";
+            if (supported)
+            {
+                var config = RuntimeConfiguration.FromJson(json);
+                Assert.NotNull(config);
+                AssertJsonEqual(json, config.ToJson());
+            }
+            else
+            {
+                Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+            }
+        }
+
         private static void AssertJsonEqual(string expected, string actual)
         {
             using var expectedDocument = JsonDocument.Parse(expected);

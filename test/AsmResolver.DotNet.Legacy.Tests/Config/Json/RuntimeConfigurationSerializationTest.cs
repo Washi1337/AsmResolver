@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.Json;
@@ -123,5 +124,92 @@ public class RuntimeConfigurationSerializationTest
 
         var error = Assert.Throws<ArgumentException>(() => config.ToJson());
         Assert.Equal("Cannot serialize NaN or infinity as a JSON number.", error.Message);
+    }
+
+    [Theory]
+    [InlineData(61, true)]
+    [InlineData(62, false)]
+    public void ReportSerializationDepthLimit(int arrayDepth, bool supported)
+    {
+        object value = 0;
+
+        for (int i = 0; i < arrayDepth; i++)
+            value = new object[] { value };
+
+        var config = new RuntimeConfiguration(new RuntimeOptions
+        {
+            ConfigProperties = new Dictionary<string, object?>
+            {
+                ["Deep"] = value
+            }
+        });
+        if (supported)
+        {
+            using var document = JsonDocument.Parse(config.ToJson());
+            Assert.Equal(JsonValueKind.Object, document.RootElement.ValueKind);
+        }
+        else
+        {
+            var error = Assert.Throws<InvalidOperationException>(() => config.ToJson());
+            Assert.Equal("Cannot serialize configuration properties nested more than 64 levels deep.", error.Message);
+        }
+    }
+
+    [Fact]
+    public void WriteNestedTypedDictionaries()
+    {
+        var config = new RuntimeConfiguration(new RuntimeOptions
+        {
+            ConfigProperties = new Dictionary<string, object?>
+            {
+                ["Strings"] = new Dictionary<string, string> { ["Name"] = "value" },
+                ["Numbers"] = new Dictionary<string, long> { ["Maximum"] = long.MaxValue }
+            }
+        });
+
+        using var document = JsonDocument.Parse(config.ToJson());
+        var properties = document.RootElement.GetProperty("runtimeOptions").GetProperty("configProperties");
+        Assert.Equal("value", properties.GetProperty("Strings").GetProperty("Name").GetString());
+        Assert.Equal(long.MaxValue, properties.GetProperty("Numbers").GetProperty("Maximum").GetInt64());
+    }
+
+    [Fact]
+    public void RejectCyclicTypedDictionary()
+    {
+        var nested = new Dictionary<string, IDictionary>();
+        nested["Cycle"] = nested;
+        var config = new RuntimeConfiguration(new RuntimeOptions
+        {
+            ConfigProperties = new Dictionary<string, object?> { ["Nested"] = nested }
+        });
+
+        Assert.Throws<InvalidOperationException>(() => config.ToJson());
+    }
+
+    [Fact]
+    public void RejectDictionaryKeysThatAreNotStrings()
+    {
+        var config = new RuntimeConfiguration(new RuntimeOptions
+        {
+            ConfigProperties = new Dictionary<string, object?>
+            {
+                ["Nested"] = new Dictionary<int, string> { [1] = "value" }
+            }
+        });
+
+        Assert.Throws<NotSupportedException>(() => config.ToJson());
+    }
+
+    [Fact]
+    public void RejectCyclicConfigurationProperties()
+    {
+        var properties = new Dictionary<string, object?>();
+        properties["Cycle"] = properties;
+        var config = new RuntimeConfiguration(new RuntimeOptions
+        {
+            ConfigProperties = properties
+        });
+        var error = Assert.Throws<InvalidOperationException>(() => config.ToJson());
+        Assert.Equal("Cannot serialize configuration properties nested more than 64 levels deep.", error.Message);
     }
 }

@@ -67,6 +67,7 @@ namespace AsmResolver.DotNet.Config.Json
 
     internal abstract partial class JSONNode
     {
+        private const int MaximumDepth = 64;
         private static readonly Regex NumberRegex = new Regex(
             @"\A-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\z",
             RegexOptions.CultureInvariant);
@@ -567,6 +568,10 @@ namespace AsmResolver.DotNet.Config.Json
                             Token.Append(aJSON[i]);
                             break;
                         }
+                        if (stack.Count >= MaximumDepth)
+                        {
+                            throw new FormatException($"JSON nesting exceeds the maximum depth of {MaximumDepth}.");
+                        }
                         stack.Push(new JSONObject());
                         if (ctx != null)
                         {
@@ -585,6 +590,8 @@ namespace AsmResolver.DotNet.Config.Json
                             break;
                         }
 
+                        if (stack.Count >= MaximumDepth)
+                            throw new FormatException($"JSON nesting exceeds the maximum depth of {MaximumDepth}.");
                         stack.Push(new JSONArray());
                         if (ctx != null)
                         {

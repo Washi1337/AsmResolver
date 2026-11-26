@@ -1,12 +1,16 @@
 #if !NET5_0_OR_GREATER
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace AsmResolver.DotNet.Config.Json;
 
 internal static class RuntimeConfigurationJsonSerializer
 {
+    private const int MaximumDepth = 64;
+
     public static string Serialize(RuntimeConfiguration configuration)
     {
         var root = new JSONObject();
@@ -63,14 +67,7 @@ internal static class RuntimeConfigurationJsonSerializer
         }
 
         if (options.ConfigProperties is { } properties)
-        {
-            var node = new JSONObject();
-
-            foreach (var property in properties)
-                node[property.Key] = SerializeProperty(property.Value);
-
-            result["configProperties"] = node;
-        }
+            result["configProperties"] = SerializeProperties(properties, 2);
 
         return result;
     }
@@ -90,7 +87,7 @@ internal static class RuntimeConfigurationJsonSerializer
         return result;
     }
 
-    private static JSONNode SerializeProperty(object? value)
+    private static JSONNode SerializeProperty(object? value, int depth)
     {
         return value switch
         {
@@ -106,11 +103,60 @@ internal static class RuntimeConfigurationJsonSerializer
             float number => new JSONNumber(number.ToString("G9", CultureInfo.InvariantCulture)),
             sbyte or byte or short or ushort or int or uint or long or ulong or decimal =>
                 new JSONNumber(((IFormattable) value).ToString(null, CultureInfo.InvariantCulture)),
+            IDictionary<string, object?> properties => SerializeProperties(properties, depth),
+            IDictionary properties => SerializeProperties(GetDictionaryEntries(properties), depth),
+            IEnumerable values => SerializeArray(values, depth),
             _ => throw new NotSupportedException(
                 $"Cannot serialize configuration property value of type '{value.GetType()}'.")
         };
     }
 
+    private static IEnumerable<KeyValuePair<string, object?>> GetDictionaryEntries(IDictionary properties)
+    {
+        foreach (object? key in properties.Keys)
+        {
+            if (key is not string name)
+                throw new NotSupportedException("Configuration property dictionaries must have string keys.");
+
+            yield return new KeyValuePair<string, object?>(name, properties[key]);
+        }
+    }
+
+    private static JSONObject SerializeProperties(
+        IEnumerable<KeyValuePair<string, object?>>? properties,
+        int depth = 0)
+    {
+        if (depth >= MaximumDepth)
+        {
+            throw new InvalidOperationException(
+                $"Cannot serialize configuration properties nested more than {MaximumDepth} levels deep.");
+        }
+
+        var result = new JSONObject();
+        if (properties is null)
+            return result;
+
+        foreach (var property in properties)
+            result[property.Key] = SerializeProperty(property.Value, depth + 1);
+
+        return result;
+    }
+
+    private static JSONArray SerializeArray(IEnumerable values, int depth)
+    {
+        if (depth >= MaximumDepth)
+        {
+            throw new InvalidOperationException(
+                $"Cannot serialize configuration properties nested more than {MaximumDepth} levels deep.");
+        }
+
+        var result = new JSONArray();
+
+        foreach (object? value in values)
+            result.Add(SerializeProperty(value, depth + 1));
+
+        return result;
+    }
 }
 
 #endif
