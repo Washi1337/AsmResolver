@@ -425,7 +425,73 @@ namespace AsmResolver.DotNet.Tests.Config.Json
                 """;
             var config = RuntimeConfiguration.FromJson(json);
             Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions);
+            Assert.Equal("Major", config.RuntimeOptions.RollForward);
+            var frameworks = config.RuntimeOptions.Frameworks;
+            Assert.NotNull(frameworks);
+            var firstFramework = frameworks[0];
+            var secondFramework = frameworks[1];
+            Assert.NotNull(firstFramework);
+            Assert.NotNull(secondFramework);
+            Assert.Equal("Disable", firstFramework.RollForward);
+            Assert.False(secondFramework.ApplyPatches);
+            Assert.Equal(0, secondFramework.RollForwardOnNoCandidateFx);
             AssertJsonEqual(json, config.ToJson());
+        }
+
+        [Theory]
+        [InlineData("applyPatches", "\"invalid\"")]
+        [InlineData("applyPatches", "1")]
+        [InlineData("applyPatches", "[]")]
+        [InlineData("applyPatches", "{}")]
+        [InlineData("rollForwardOnNoCandidateFx", "1.5")]
+        [InlineData("rollForwardOnNoCandidateFx", "1e0")]
+        [InlineData("rollForwardOnNoCandidateFx", "2147483648")]
+        [InlineData("rollForwardOnNoCandidateFx", "-2147483649")]
+        [InlineData("rollForwardOnNoCandidateFx", "\"1\"")]
+        [InlineData("rollForwardOnNoCandidateFx", "true")]
+        public void RejectInvalidFrameworkPolicyTypes(string property, string value)
+        {
+            string json = "{\"runtimeOptions\":{\"framework\":{\"" + property + "\":" + value + "}}}";
+
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+        }
+
+        [Theory]
+        [InlineData("123")]
+        [InlineData("true")]
+        [InlineData("[]")]
+        [InlineData("{}")]
+        public void RejectInvalidRollForwardTypes(string value)
+        {
+            string optionsJson = "{\"runtimeOptions\":{\"rollForward\":" + value + "}}";
+            string frameworkJson = "{\"runtimeOptions\":{\"framework\":{\"rollForward\":" + value + "}}}";
+
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(optionsJson)));
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(frameworkJson)));
+        }
+
+        [Theory]
+        [InlineData("null")]
+        [InlineData("-2147483648")]
+        [InlineData("2147483647")]
+        public void ReadFrameworkPolicyIntegerLimits(string value)
+        {
+            string json = "{\"runtimeOptions\":{\"framework\":{\"rollForwardOnNoCandidateFx\":" + value + "}}}";
+            var config = RuntimeConfiguration.FromJson(json);
+
+            Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions);
+            Assert.NotNull(config.RuntimeOptions.Framework);
+            if (value == "null")
+            {
+                Assert.Null(config.RuntimeOptions.Framework.RollForwardOnNoCandidateFx);
+                AssertJsonEqual("{\"runtimeOptions\":{\"framework\":{}}}", config.ToJson());
+            }
+            else
+            {
+                AssertJsonEqual(json, config.ToJson());
+            }
         }
 
         [Theory]

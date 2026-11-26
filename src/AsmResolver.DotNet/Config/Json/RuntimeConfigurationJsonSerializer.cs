@@ -56,6 +56,9 @@ internal static class RuntimeConfigurationJsonSerializer
         if (options.RollForwardOnNoCandidateFx is { } rollForward)
             result["rollForwardOnNoCandidateFx"] = rollForward;
 
+        if (options.RollForward is { } policy)
+            result["rollForward"] = policy;
+
         if (options.AdditionalProbingPaths is { } paths)
         {
             var array = new JSONArray();
@@ -83,6 +86,15 @@ internal static class RuntimeConfigurationJsonSerializer
 
         if (framework.Version is { } version)
             result["version"] = version;
+
+        if (framework.RollForward is { } policy)
+            result["rollForward"] = policy;
+
+        if (framework.ApplyPatches is { } patches)
+            result["applyPatches"] = patches;
+
+        if (framework.RollForwardOnNoCandidateFx is { } legacyPolicy)
+            result["rollForwardOnNoCandidateFx"] = legacyPolicy;
 
         return result;
     }

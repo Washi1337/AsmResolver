@@ -161,6 +161,7 @@ namespace AsmResolver.DotNet.Config.Json
                 "includedFrameworks",
                 "applyPatches",
                 "rollForwardOnNoCandidateFx",
+                "rollForward",
                 "additionalProbingPaths",
                 "configProperties"
             );
@@ -170,7 +171,10 @@ namespace AsmResolver.DotNet.Config.Json
                 JsonExtensionData.Validate(
                     framework.AdditionalProperties,
                     "name",
-                    "version"
+                    "version",
+                    "rollForward",
+                    "applyPatches",
+                    "rollForwardOnNoCandidateFx"
                 );
             }
         }

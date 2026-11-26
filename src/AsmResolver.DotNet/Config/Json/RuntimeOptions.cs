@@ -144,6 +144,15 @@ namespace AsmResolver.DotNet.Config.Json
         }
 
         /// <summary>
+        /// Gets or sets the framework version roll-forward policy.
+        /// </summary>
+        public string? RollForward
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets additional properties to include in the runtime configuration.
         /// </summary>
         /// <remarks>
@@ -226,6 +235,15 @@ namespace AsmResolver.DotNet.Config.Json
                     result.ConfigProperties[item.Key] = InterpretValue(item.Value);
             }
 
+            if (node.HasKey("rollForward") && !node["rollForward"].IsNull)
+            {
+                var value = node["rollForward"];
+                if (!value.IsString)
+                    throw new FormatException("Expected a string for 'rollForward'.");
+
+                result.RollForward = value.Value;
+            }
+
             result.AdditionalProperties = JsonExtensionData.Read(
                 node,
                 "tfm",
@@ -234,6 +252,7 @@ namespace AsmResolver.DotNet.Config.Json
                 "includedFrameworks",
                 "applyPatches",
                 "rollForwardOnNoCandidateFx",
+                "rollForward",
                 "additionalProbingPaths",
                 "configProperties"
             );
