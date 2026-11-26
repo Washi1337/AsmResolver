@@ -558,8 +558,25 @@ namespace AsmResolver.DotNet.Config.Json
             bool QuoteMode = false;
             bool TokenIsQuoted = false;
             bool HasNewlineChar = false;
+            bool tokenEndedByComment = false;
             while (i < aJSON.Length)
             {
+                if (tokenEndedByComment && !QuoteMode && !char.IsWhiteSpace(aJSON[i]))
+                {
+                    char character = aJSON[i];
+                    bool startsComment = character == '/' && i + 1 < aJSON.Length
+                        && (aJSON[i + 1] == '/' || aJSON[i + 1] == '*');
+
+                    if (character is ':' or ',' or '}' or ']')
+                    {
+                        tokenEndedByComment = false;
+                    }
+                    else if (!startsComment)
+                    {
+                        throw new FormatException("Expected a separator after the JSON comment.");
+                    }
+                }
+
                 switch (aJSON[i])
                 {
                     case '{':
@@ -707,7 +724,17 @@ namespace AsmResolver.DotNet.Config.Json
                     case '/':
                         if (allowLineComments && !QuoteMode && i + 1 < aJSON.Length && aJSON[i + 1] == '/')
                         {
+                            tokenEndedByComment |= Token.Length > 0 || TokenIsQuoted;
                             while (++i < aJSON.Length && aJSON[i] != '\n' && aJSON[i] != '\r') ;
+                            break;
+                        }
+                        if (allowLineComments && !QuoteMode && i + 1 < aJSON.Length && aJSON[i + 1] == '*')
+                        {
+                            int end = aJSON.IndexOf("*/", i + 2, StringComparison.Ordinal);
+                            if (end < 0)
+                                throw new FormatException("Unterminated JSON comment.");
+                            tokenEndedByComment |= Token.Length > 0 || TokenIsQuoted;
+                            i = end + 1;
                             break;
                         }
                         Token.Append(aJSON[i]);

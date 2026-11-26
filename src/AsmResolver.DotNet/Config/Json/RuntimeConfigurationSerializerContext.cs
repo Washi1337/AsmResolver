@@ -1,5 +1,6 @@
 #if NET5_0_OR_GREATER
 
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace AsmResolver.DotNet.Config.Json
@@ -11,6 +12,18 @@ namespace AsmResolver.DotNet.Config.Json
     [JsonSerializable(typeof(RuntimeConfiguration))]
     internal partial class RuntimeConfigurationSerializerContext : JsonSerializerContext
     {
+        static RuntimeConfigurationSerializerContext()
+        {
+            Reader = new RuntimeConfigurationSerializerContext(new JsonSerializerOptions(Default.Options)
+            {
+                ReadCommentHandling = JsonCommentHandling.Skip
+            });
+        }
+
+        public static RuntimeConfigurationSerializerContext Reader
+        {
+            get;
+        }
     }
 }
 

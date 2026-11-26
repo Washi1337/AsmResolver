@@ -422,6 +422,16 @@ namespace AsmResolver.DotNet.Tests.Config.Json
         }
 
         [Theory]
+        [InlineData("// comment\n")]
+        [InlineData("/* comment */")]
+        public void ReadComments(string comment)
+        {
+            var config = RuntimeConfiguration.FromJson("{" + comment + "\"runtimeOptions\":{\"tfm\":\"net10.0\"}}");
+            Assert.NotNull(config);
+            Assert.Equal("net10.0", config.RuntimeOptions.TargetFrameworkMoniker);
+        }
+
+        [Theory]
         [InlineData("root", false)]
         [InlineData("root", true)]
         [InlineData("options", false)]
@@ -460,6 +470,42 @@ namespace AsmResolver.DotNet.Tests.Config.Json
 
             var error = Assert.Throws<ArgumentException>(() => config.ToJson());
             Assert.Contains(key, error.Message);
+        }
+
+        [Theory]
+        [InlineData("{/* unfinished")]
+        [InlineData("{\"runtimeOptions\":{/* unfinished}}")]
+        public void RejectUnterminatedBlockComments(string json)
+        {
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+        }
+
+        [Theory]
+        [InlineData("1/* comment */2")]
+        [InlineData("tr/* comment */ue")]
+        [InlineData("1/* comment */ 2")]
+        [InlineData("true/* comment */false")]
+        [InlineData("1// comment\n2")]
+        [InlineData("tr// comment\r\nue")]
+        [InlineData("1// comment\r 2")]
+        [InlineData("true// comment\nfalse")]
+        public void RejectCommentsSplittingTokens(string value)
+        {
+            string json = "{\"runtimeOptions\":{\"configProperties\":{\"Value\":" + value + "}}}";
+
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+        }
+
+        [Theory]
+        [InlineData("1/* comment */,\"Next\":2")]
+        [InlineData("/* comment */true")]
+        [InlineData("1// comment\n,\"Next\":2")]
+        [InlineData("// comment\r\ntrue")]
+        public void AcceptCommentsBetweenTokens(string value)
+        {
+            string json = "{\"runtimeOptions\":{\"configProperties\":{\"Value\":" + value + "}}}";
+
+            Assert.NotNull(RuntimeConfiguration.FromJson(json));
         }
 
         private static void AssertJsonEqual(string expected, string actual)

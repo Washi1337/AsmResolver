@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet.Config.Json
         public static RuntimeConfiguration? FromJson(string json)
         {
 #if NET5_0_OR_GREATER
-            return JsonSerializer.Deserialize(json, RuntimeConfigurationSerializerContext.Default.RuntimeConfiguration);
+            return JsonSerializer.Deserialize(json, RuntimeConfigurationSerializerContext.Reader.RuntimeConfiguration);
 #else
             var result = new RuntimeConfiguration();
 
