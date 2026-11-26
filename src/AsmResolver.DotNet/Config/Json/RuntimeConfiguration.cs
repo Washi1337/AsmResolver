@@ -72,12 +72,15 @@ namespace AsmResolver.DotNet.Config.Json
         /// Serializes the configuration to a JSON string.
         /// </summary>
         /// <returns>The JSON string.</returns>
+        /// <exception cref="NotSupportedException">
+        /// Occurs when a property value cannot be serialized on legacy targets.
+        /// </exception>
         public string ToJson()
         {
 #if NET5_0_OR_GREATER
             return JsonSerializer.Serialize(this, RuntimeConfigurationSerializerContext.Default.RuntimeConfiguration);
 #else
-            throw new NotSupportedException();
+            return RuntimeConfigurationJsonSerializer.Serialize(this);
 #endif
         }
 
