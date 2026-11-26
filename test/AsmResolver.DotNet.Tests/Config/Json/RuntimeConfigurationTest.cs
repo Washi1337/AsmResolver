@@ -251,6 +251,36 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             }
         }
 
+        [Theory]
+        [InlineData("-0")]
+        [InlineData("-0.0")]
+        [InlineData("1.25")]
+        [InlineData("1.2500")]
+        [InlineData("2147483648")]
+        [InlineData("-2147483649")]
+        [InlineData("-9223372036854775808")]
+        [InlineData("9223372036854775807")]
+        [InlineData("18446744073709551615")]
+        [InlineData("1234567890.1234567890123456789")]
+        [InlineData("0.123456789012345678901234567890123456789")]
+        [InlineData("1e-100")]
+        [InlineData("1e300")]
+        [InlineData("1e-1000")]
+        [InlineData("1e1000")]
+        public void RoundTripNumericConfigurationProperty(string number)
+        {
+            string json = "{\"runtimeOptions\":{\"configProperties\":{\"Value\":" + number + "}}}";
+            var config = RuntimeConfiguration.FromJson(json);
+            Assert.NotNull(config);
+
+            using var document = JsonDocument.Parse(config.ToJson());
+            var value = document.RootElement
+                .GetProperty("runtimeOptions")
+                .GetProperty("configProperties")
+                .GetProperty("Value");
+            Assert.Equal(number, value.GetRawText());
+        }
+
         private static void AssertJsonEqual(string expected, string actual)
         {
             using var expectedDocument = JsonDocument.Parse(expected);

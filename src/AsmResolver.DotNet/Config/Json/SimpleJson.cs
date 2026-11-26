@@ -44,6 +44,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AsmResolver.DotNet.Config.Json
 {
@@ -66,6 +67,10 @@ namespace AsmResolver.DotNet.Config.Json
 
     internal abstract partial class JSONNode
     {
+        private static readonly Regex NumberRegex = new Regex(
+            @"\A-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\z",
+            RegexOptions.CultureInvariant);
+
         #region Enumerators
         public struct Enumerator
         {
@@ -536,9 +541,8 @@ namespace AsmResolver.DotNet.Config.Json
                 if (tmp == "null")
                     return JSONNull.CreateOrGet();
             }
-            double val;
-            if (double.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out val))
-                return val;
+            if (NumberRegex.IsMatch(token))
+                return new JSONNumber(token);
             else
                 return token;
         }
@@ -1080,6 +1084,7 @@ namespace AsmResolver.DotNet.Config.Json
     internal partial class JSONNumber : JSONNode
     {
         private double m_Data;
+        private string _rawValue;
 
         public override JSONNodeType Tag { get { return JSONNodeType.Number; } }
         public override bool IsNumber { get { return true; } }
@@ -1087,29 +1092,36 @@ namespace AsmResolver.DotNet.Config.Json
 
         public override string Value
         {
-            get { return m_Data.ToString(CultureInfo.InvariantCulture); }
+            get { return _rawValue ?? m_Data.ToString("R", CultureInfo.InvariantCulture); }
             set
             {
                 double v;
                 if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out v))
+                {
                     m_Data = v;
+                    _rawValue = value;
+                }
             }
         }
 
         public override double AsDouble
         {
             get { return m_Data; }
-            set { m_Data = value; }
+            set
+            {
+                m_Data = value;
+                _rawValue = null;
+            }
         }
         public override long AsLong
         {
             get { return (long)m_Data; }
-            set { m_Data = value; }
+            set { Value = value.ToString(CultureInfo.InvariantCulture); }
         }
         public override ulong AsULong
         {
             get { return (ulong)m_Data; }
-            set { m_Data = value; }
+            set { Value = value.ToString(CultureInfo.InvariantCulture); }
         }
 
         public JSONNumber(double aData)
@@ -1119,12 +1131,13 @@ namespace AsmResolver.DotNet.Config.Json
 
         public JSONNumber(string aData)
         {
-            Value = aData;
+            double.TryParse(aData, NumberStyles.Float, CultureInfo.InvariantCulture, out m_Data);
+            _rawValue = aData;
         }
 
         public override JSONNode Clone()
         {
-            return new JSONNumber(m_Data);
+            return new JSONNumber(Value);
         }
 
         internal override void WriteToStringBuilder(StringBuilder aSB, int aIndent, int aIndentInc, JSONTextMode aMode)
@@ -1160,6 +1173,7 @@ namespace AsmResolver.DotNet.Config.Json
         public override void Clear()
         {
             m_Data = 0;
+            _rawValue = null;
         }
     }
     // End of JSONNumber

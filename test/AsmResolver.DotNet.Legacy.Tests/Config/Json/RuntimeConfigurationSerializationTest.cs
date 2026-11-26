@@ -92,6 +92,19 @@ public class RuntimeConfigurationSerializationTest
     }
 
     [Theory]
+    [InlineData("1e0")]
+    [InlineData("1e1000")]
+    public void ReadRawNumericLiteral(string number)
+    {
+        string json = "{\"runtimeOptions\":{\"configProperties\":{\"Value\":" + number + "}}}";
+        var config = RuntimeConfiguration.FromJson(json);
+
+        Assert.NotNull(config);
+        Assert.NotNull(config.RuntimeOptions.ConfigProperties);
+        Assert.Equal(number, config.RuntimeOptions.ConfigProperties["Value"]!.ToString());
+    }
+
+    [Theory]
     [InlineData(double.NaN)]
     [InlineData(double.PositiveInfinity)]
     [InlineData(double.NegativeInfinity)]

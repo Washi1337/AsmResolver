@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 #if NET5_0_OR_GREATER
 using System.Text.Json;
@@ -46,6 +47,11 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Indicates configuration properties to configure the runtime and the framework
         /// </summary>
+        /// <remarks>
+        /// On legacy targets, JSON values are represented by their corresponding CLR types.
+        /// Numbers that cannot be represented without losing precision or changing their original
+        /// representation are stored as objects whose <see cref="object.ToString"/> returns the raw JSON value.
+        /// </remarks>
 #if NET5_0_OR_GREATER
         public Dictionary<string, JsonElement>? ConfigProperties
 #else
@@ -55,6 +61,7 @@ namespace AsmResolver.DotNet.Config.Json
             get;
             set;
         }
+
         /// <summary>
         /// Gets or sets the optional string value which specifies the Target Framework Moniker.
         /// </summary>
@@ -183,11 +190,34 @@ namespace AsmResolver.DotNet.Config.Json
         private static object? InterpretValue(JSONNode node) => node.Tag switch
         {
             JSONNodeType.String => node.Value,
-            JSONNodeType.Number => node.AsInt,
+            JSONNodeType.Number => InterpretNumber(node),
             JSONNodeType.NullValue => null,
             JSONNodeType.Boolean => node.AsBool,
             _ => null
         };
+
+        private static object InterpretNumber(JSONNode node)
+        {
+            string value = node.Value;
+            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int intValue)
+                && intValue.ToString(CultureInfo.InvariantCulture) == value)
+                return intValue;
+
+            if (long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long longValue)
+                && longValue.ToString(CultureInfo.InvariantCulture) == value)
+                return longValue;
+
+            if (ulong.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out ulong ulongValue)
+                && ulongValue.ToString(CultureInfo.InvariantCulture) == value)
+                return ulongValue;
+
+            if (decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal decimalValue)
+                && decimalValue.ToString(CultureInfo.InvariantCulture) == value)
+                return decimalValue;
+
+            // Preserve the original JSON literal if none of the conversions round-trip.
+            return node;
+        }
 #endif
 
         /// <summary>

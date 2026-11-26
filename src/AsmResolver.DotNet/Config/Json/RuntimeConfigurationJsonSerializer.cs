@@ -2,7 +2,6 @@
 
 using System;
 using System.Globalization;
-using System.Text;
 
 namespace AsmResolver.DotNet.Config.Json;
 
@@ -96,42 +95,22 @@ internal static class RuntimeConfigurationJsonSerializer
         return value switch
         {
             null => JSONNull.CreateOrGet(),
+            JSONNode node => node,
             string text => new JSONString(text),
             bool boolean => new JSONBool(boolean),
             double number when double.IsNaN(number) || double.IsInfinity(number) =>
                 throw new ArgumentException("Cannot serialize NaN or infinity as a JSON number."),
             float number when float.IsNaN(number) || float.IsInfinity(number) =>
                 throw new ArgumentException("Cannot serialize NaN or infinity as a JSON number."),
-            sbyte or byte or short or ushort or int or uint or long or ulong or float or double or decimal =>
-                new ConfigurationNumber((IFormattable) value),
+            double number => new JSONNumber(number.ToString("G17", CultureInfo.InvariantCulture)),
+            float number => new JSONNumber(number.ToString("G9", CultureInfo.InvariantCulture)),
+            sbyte or byte or short or ushort or int or uint or long or ulong or decimal =>
+                new JSONNumber(((IFormattable) value).ToString(null, CultureInfo.InvariantCulture)),
             _ => throw new NotSupportedException(
                 $"Cannot serialize configuration property value of type '{value.GetType()}'.")
         };
     }
 
-    private sealed class ConfigurationNumber : JSONNumber
-    {
-        private readonly string _value;
-
-        internal ConfigurationNumber(IFormattable value)
-            : base(0)
-        {
-            // SimpleJSON stores numbers as doubles. Preserve the original numeric representation when writing.
-            string? format = value is double
-                ? "G17"
-                : value is float ? "G9" : null;
-            _value = value.ToString(format, CultureInfo.InvariantCulture);
-        }
-
-        internal override void WriteToStringBuilder(
-            StringBuilder builder,
-            int indent,
-            int indentIncrement,
-            JSONTextMode mode)
-        {
-            builder.Append(_value);
-        }
-    }
 }
 
 #endif
