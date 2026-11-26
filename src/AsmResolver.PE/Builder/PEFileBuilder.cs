@@ -124,6 +124,7 @@ namespace AsmResolver.PE.Builder
             var header = outputFile.OptionalHeader;
 
             header.ImageBase = GetImageBase(context, outputFile);
+            header.Magic = image.PEKind;
             header.SectionAlignment = GetSectionAlignment(context, outputFile);
             header.FileAlignment = GetFileAlignment(context, outputFile);
 
@@ -132,7 +133,6 @@ namespace AsmResolver.PE.Builder
 
             outputFile.UpdateHeaders();
 
-            header.Magic = image.PEKind;
             header.MajorLinkerVersion = 0x30;
             header.MinorLinkerVersion = 0;
 

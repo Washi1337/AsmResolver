@@ -390,8 +390,10 @@ public class TemplatedPEFileBuilder : PEFileBuilder<TemplatedPEFileBuilder.Build
             if (newSegment is null)
                 return;
 
-            if (originalSegment is null || !TryPatchSegment(context, originalSegment, newSegment))
+            if (originalSegment is null || !TryPatchSegment(context, newSegment, originalSegment))
+            {
                 contents.Add(newSegment, (uint) context.Platform.PointerSize);
+            }
         }
     }
 
@@ -447,8 +449,10 @@ public class TemplatedPEFileBuilder : PEFileBuilder<TemplatedPEFileBuilder.Build
             if (newSegment is null)
                 return;
 
-            if (originalSegment is null || !TryPatchSegment(context, originalSegment, newSegment))
+            if (originalSegment is null || !TryPatchSegment(context, newSegment, originalSegment))
+            {
                 contents.Add(newSegment, (uint) context.Platform.PointerSize);
+            }
         }
     }
 
