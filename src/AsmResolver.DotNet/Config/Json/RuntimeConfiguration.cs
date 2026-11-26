@@ -96,6 +96,11 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Serializes the configuration to a JSON string.
         /// </summary>
+        /// <remarks>
+        /// The original formatting and comments of a configuration are not preserved during serialization.
+        /// Known properties with a value of <c>null</c> are omitted, and additional probing paths
+        /// are always represented by an array of strings.
+        /// </remarks>
         /// <returns>The JSON string.</returns>
         /// <exception cref="NotSupportedException">
         /// Occurs when a property value cannot be serialized on legacy targets.

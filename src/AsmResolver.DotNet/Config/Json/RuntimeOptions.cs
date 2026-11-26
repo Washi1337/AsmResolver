@@ -134,6 +134,9 @@ namespace AsmResolver.DotNet.Config.Json
         /// Optional property which specifies additional paths to consider when looking for dependencies.
         /// The value is either a single string, or an array of strings.
         /// </summary>
+#if NET5_0_OR_GREATER
+        [JsonConverter(typeof(ProbingPathsConverter))]
+#endif
         public List<string?>? AdditionalProbingPaths
         {
             get;
@@ -195,8 +198,25 @@ namespace AsmResolver.DotNet.Config.Json
             if (node.HasKey("additionalProbingPaths") && !node["additionalProbingPaths"].IsNull)
             {
                 result.AdditionalProbingPaths = new List<string?>();
-                foreach (var item in node["additionalProbingPaths"].Values)
-                    result.AdditionalProbingPaths.Add(item.IsNull ? null : item.Value);
+                var paths = node["additionalProbingPaths"];
+                if (paths.IsString)
+                {
+                    result.AdditionalProbingPaths.Add(paths.Value);
+                }
+                else if (paths.IsArray)
+                {
+                    foreach (var item in paths.Values)
+                    {
+                        if (!item.IsString && !item.IsNull)
+                            throw new FormatException("Expected a string or null in 'additionalProbingPaths'.");
+
+                        result.AdditionalProbingPaths.Add(item.IsNull ? null : item.Value);
+                    }
+                }
+                else
+                {
+                    throw new FormatException("Expected a string or an array of strings for 'additionalProbingPaths'.");
+                }
             }
 
             if (node.HasKey("configProperties") && !node["configProperties"].IsNull)

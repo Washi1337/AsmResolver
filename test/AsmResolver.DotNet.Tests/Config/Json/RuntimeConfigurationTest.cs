@@ -432,6 +432,33 @@ namespace AsmResolver.DotNet.Tests.Config.Json
         }
 
         [Theory]
+        [InlineData("\"/packages\"")]
+        [InlineData("""["/packages"]""")]
+        public void ReadStringOrArrayProbingPaths(string paths)
+        {
+            var config = RuntimeConfiguration.FromJson(
+                "{\"runtimeOptions\":{\"additionalProbingPaths\":" + paths + "}}");
+            Assert.NotNull(config);
+            Assert.Equal(new[] { "/packages" }, config.RuntimeOptions.AdditionalProbingPaths);
+        }
+
+        [Theory]
+        [InlineData("123")]
+        [InlineData("true")]
+        [InlineData("{}")]
+        [InlineData("[123]")]
+        [InlineData("[true]")]
+        [InlineData("[{}]")]
+        [InlineData("[[]]")]
+        [InlineData("[\"/packages\",123]")]
+        public void RejectInvalidProbingPathTypes(string paths)
+        {
+            string json = "{\"runtimeOptions\":{\"additionalProbingPaths\":" + paths + "}}";
+
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+        }
+
+        [Theory]
         [InlineData("root", false)]
         [InlineData("root", true)]
         [InlineData("options", false)]
