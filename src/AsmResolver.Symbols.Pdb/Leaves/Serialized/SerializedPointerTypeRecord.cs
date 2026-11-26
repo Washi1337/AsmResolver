@@ -29,10 +29,6 @@ public class SerializedPointerTypeRecord : PointerTypeRecord
     /// <inheritdoc />
     protected override CodeViewTypeRecord? GetBaseType()
     {
-        return _context.ParentImage.TryGetLeafRecord(_baseTypeIndex, out CodeViewTypeRecord? type)
-            ? type
-            : _context.Parameters.ErrorListener.BadImageAndReturn<CodeViewTypeRecord>(
-                $"Pointer {TypeIndex:X8} contains an invalid underlying base type index {_baseTypeIndex:X8}.");
-
+        return _context.ParentImage.GetLeafRecord<CodeViewTypeRecord>(_baseTypeIndex);
     }
 }

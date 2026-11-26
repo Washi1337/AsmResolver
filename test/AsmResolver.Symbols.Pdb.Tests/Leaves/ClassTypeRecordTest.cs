@@ -43,14 +43,14 @@ public class ClassTypeRecordTest : IClassFixture<MockPdbFixture>
     [Fact]
     public void ReadFieldList()
     {
-        var type = (ClassTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x101b);
+        var type = (ClassTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x101b)!;
         Assert.NotNull(type.Fields);
     }
 
     [Fact]
     public void ReadVTableShape()
     {
-        var type = (ClassTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x239f);
+        var type = (ClassTypeRecord) _fixture.SimplePdb.GetLeafRecord(0x239f)!;
         Assert.NotNull(type.VTableShape);
         Assert.Equal(new[]
         {
