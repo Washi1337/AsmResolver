@@ -95,7 +95,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// The presence of this section (or another framework in the new "framework" section) indicates
         /// that the application is a framework-dependent app.
         /// </remarks>
-        public List<RuntimeFramework>? Frameworks
+        public List<RuntimeFramework?>? Frameworks
         {
             get;
             set;
@@ -104,7 +104,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Gets an optional array (added in .NET Core 3.0) that allows multiple frameworks to be specified.
         /// </summary>
-        public List<RuntimeFramework>? IncludedFrameworks
+        public List<RuntimeFramework?>? IncludedFrameworks
         {
             get;
             set;
@@ -134,7 +134,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// Optional property which specifies additional paths to consider when looking for dependencies.
         /// The value is either a single string, or an array of strings.
         /// </summary>
-        public List<string>? AdditionalProbingPaths
+        public List<string?>? AdditionalProbingPaths
         {
             get;
             set;
@@ -145,40 +145,40 @@ namespace AsmResolver.DotNet.Config.Json
         {
             var result = new RuntimeOptions();
 
-            if (node.HasKey("tfm"))
+            if (node.HasKey("tfm") && !node["tfm"].IsNull)
                 result.TargetFrameworkMoniker = node["tfm"].Value;
 
-            if (node.HasKey("framework"))
+            if (node.HasKey("framework") && !node["framework"].IsNull)
                 result.Framework = RuntimeFramework.FromJsonNode(node["framework"]);
 
-            if (node.HasKey("frameworks"))
+            if (node.HasKey("frameworks") && !node["frameworks"].IsNull)
             {
-                result.Frameworks = new List<RuntimeFramework>();
+                result.Frameworks = new List<RuntimeFramework?>();
                 foreach (var item in node["frameworks"].Values)
-                    result.Frameworks.Add(RuntimeFramework.FromJsonNode(item));
+                    result.Frameworks.Add(item.IsNull ? null : RuntimeFramework.FromJsonNode(item));
             }
 
-            if (node.HasKey("includedFrameworks"))
+            if (node.HasKey("includedFrameworks") && !node["includedFrameworks"].IsNull)
             {
-                result.IncludedFrameworks = new List<RuntimeFramework>();
+                result.IncludedFrameworks = new List<RuntimeFramework?>();
                 foreach (var item in node["includedFrameworks"].Values)
-                    result.IncludedFrameworks.Add(RuntimeFramework.FromJsonNode(item));
+                    result.IncludedFrameworks.Add(item.IsNull ? null : RuntimeFramework.FromJsonNode(item));
             }
 
-            if (node.HasKey("applyPatches"))
+            if (node.HasKey("applyPatches") && !node["applyPatches"].IsNull)
                 result.ApplyPatches = node["applyPatches"].AsBool;
 
-            if (node.HasKey("rollForwardOnNoCandidateFx"))
+            if (node.HasKey("rollForwardOnNoCandidateFx") && !node["rollForwardOnNoCandidateFx"].IsNull)
                 result.RollForwardOnNoCandidateFx = node["rollForwardOnNoCandidateFx"].AsInt;
 
-            if (node.HasKey("additionalProbingPaths"))
+            if (node.HasKey("additionalProbingPaths") && !node["additionalProbingPaths"].IsNull)
             {
-                result.AdditionalProbingPaths = new List<string>();
+                result.AdditionalProbingPaths = new List<string?>();
                 foreach (var item in node["additionalProbingPaths"].Values)
-                    result.AdditionalProbingPaths.Add(item.Value);
+                    result.AdditionalProbingPaths.Add(item.IsNull ? null : item.Value);
             }
 
-            if (node.HasKey("configProperties"))
+            if (node.HasKey("configProperties") && !node["configProperties"].IsNull)
             {
                 result.ConfigProperties = new Dictionary<string, object?>();
                 foreach (var item in node["configProperties"])
@@ -234,13 +234,19 @@ namespace AsmResolver.DotNet.Config.Json
             if (Frameworks is { } frameworks)
             {
                 foreach (var includedFramework in frameworks)
-                    yield return includedFramework;
+                {
+                    if (includedFramework is not null)
+                        yield return includedFramework;
+                }
             }
 
             if (IncludedFrameworks is { } includedFrameworks)
             {
                 foreach (var includedFramework in includedFrameworks)
-                    yield return includedFramework;
+                {
+                    if (includedFramework is not null)
+                        yield return includedFramework;
+                }
             }
         }
     }

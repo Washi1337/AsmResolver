@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using AsmResolver.DotNet.Config.Json;
 using Xunit;
@@ -211,9 +212,9 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             var config = new RuntimeConfiguration(new RuntimeOptions
             {
                 Framework = new RuntimeFramework(),
-                Frameworks = new List<RuntimeFramework>(),
-                IncludedFrameworks = new List<RuntimeFramework>(),
-                AdditionalProbingPaths = new List<string>()
+                Frameworks = new List<RuntimeFramework?>(),
+                IncludedFrameworks = new List<RuntimeFramework?>(),
+                AdditionalProbingPaths = new List<string?>()
             });
 
             AssertJsonEqual(
@@ -316,6 +317,81 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             {
                 Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
             }
+        }
+
+        [Fact]
+        public void ReadNullOptionsAsUnset()
+        {
+            var config = RuntimeConfiguration.FromJson("""
+                {
+                    "runtimeOptions": {
+                        "tfm": null,
+                        "framework": null,
+                        "frameworks": null,
+                        "includedFrameworks": null,
+                        "applyPatches": null,
+                        "rollForwardOnNoCandidateFx": null,
+                        "additionalProbingPaths": null,
+                        "configProperties": null
+                    }
+                }
+                """);
+            Assert.NotNull(config);
+
+            var options = config.RuntimeOptions;
+            Assert.Null(options.TargetFrameworkMoniker);
+            Assert.Null(options.Framework);
+            Assert.Null(options.Frameworks);
+            Assert.Null(options.IncludedFrameworks);
+            Assert.Null(options.ApplyPatches);
+            Assert.Null(options.RollForwardOnNoCandidateFx);
+            Assert.Null(options.AdditionalProbingPaths);
+            Assert.Null(options.ConfigProperties);
+            AssertJsonEqual("""{"runtimeOptions":{}}""", config.ToJson());
+        }
+
+        [Theory]
+        [InlineData("frameworks", "[null,{},null]")]
+        [InlineData("includedFrameworks", "[null,{},null]")]
+        [InlineData("additionalProbingPaths", "[null,\"/packages\",null]")]
+        public void RoundTripNullArrayEntries(string property, string values)
+        {
+            string json = "{\"runtimeOptions\":{\"" + property + "\":" + values + "}}";
+            var config = RuntimeConfiguration.FromJson(json);
+
+            Assert.NotNull(config);
+            AssertJsonEqual(json, config.ToJson());
+        }
+
+        [Theory]
+        [InlineData("[null]", "[null]", 1)]
+        [InlineData("[null,{},null]", "[{},null]", 3)]
+        public void EnumerateFrameworksWithoutNullEntries(string frameworks, string includedFrameworks, int count)
+        {
+            string json = "{\"runtimeOptions\":{\"framework\":{},\"frameworks\":" + frameworks
+                + ",\"includedFrameworks\":" + includedFrameworks + "}}";
+            var config = RuntimeConfiguration.FromJson(json);
+
+            Assert.NotNull(config);
+            var options = config.RuntimeOptions;
+            var actual = options.GetAllFrameworks().ToArray();
+            Assert.Equal(count, actual.Length);
+            Assert.All(actual, framework => Assert.NotNull(framework));
+            Assert.Same(options.Framework, actual[0]);
+            AssertJsonEqual(json, config.ToJson());
+        }
+
+        [Fact]
+        public void ReadNullFrameworkFieldsAsUnset()
+        {
+            var config = RuntimeConfiguration.FromJson("""
+                {"runtimeOptions":{"framework":{"name":null,"version":null}}}
+                """);
+            Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions.Framework);
+            Assert.Null(config.RuntimeOptions.Framework.Name);
+            Assert.Null(config.RuntimeOptions.Framework.Version);
+            AssertJsonEqual("""{"runtimeOptions":{"framework":{}}}""", config.ToJson());
         }
 
         private static void AssertJsonEqual(string expected, string actual)

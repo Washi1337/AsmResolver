@@ -42,7 +42,13 @@ namespace AsmResolver.DotNet.Config.Json
 #if !NET5_0_OR_GREATER
         internal static RuntimeFramework FromJsonNode(JSONNode node)
         {
-            return new RuntimeFramework(node["name"].Value, node["version"].Value);
+            var result = new RuntimeFramework
+            {
+                Name = node.HasKey("name") && !node["name"].IsNull ? node["name"].Value : null,
+                Version = node.HasKey("version") && !node["version"].IsNull ? node["version"].Value : null
+            };
+
+            return result;
         }
 #endif
 
