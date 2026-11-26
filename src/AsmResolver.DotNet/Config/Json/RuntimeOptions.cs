@@ -140,6 +140,27 @@ namespace AsmResolver.DotNet.Config.Json
             set;
         }
 
+        /// <summary>
+        /// Gets or sets additional properties to include in the runtime configuration.
+        /// </summary>
+        /// <remarks>
+        /// The dictionary must not contain keys matching known JSON property names.
+        /// </remarks>
+#if NET5_0_OR_GREATER
+        [JsonExtensionData]
+        public IDictionary<string, JsonElement>? AdditionalProperties
+        {
+            get;
+            set;
+        }
+#else
+        public IDictionary<string, object?>? AdditionalProperties
+        {
+            get;
+            set;
+        }
+#endif
+
 #if !NET5_0_OR_GREATER
         internal static RuntimeOptions FromJsonNode(JSONNode node)
         {
@@ -185,10 +206,22 @@ namespace AsmResolver.DotNet.Config.Json
                     result.ConfigProperties[item.Key] = InterpretValue(item.Value);
             }
 
+            result.AdditionalProperties = JsonExtensionData.Read(
+                node,
+                "tfm",
+                "framework",
+                "frameworks",
+                "includedFrameworks",
+                "applyPatches",
+                "rollForwardOnNoCandidateFx",
+                "additionalProbingPaths",
+                "configProperties"
+            );
+
             return result;
         }
 
-        private static object? InterpretValue(JSONNode node) => node.Tag switch
+        internal static object? InterpretValue(JSONNode node) => node.Tag switch
         {
             JSONNodeType.String => node.Value,
             JSONNodeType.Number => InterpretNumber(node),

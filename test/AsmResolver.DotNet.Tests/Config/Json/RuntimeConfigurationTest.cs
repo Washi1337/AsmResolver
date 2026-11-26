@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -392,6 +394,72 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             Assert.Null(config.RuntimeOptions.Framework.Name);
             Assert.Null(config.RuntimeOptions.Framework.Version);
             AssertJsonEqual("""{"runtimeOptions":{"framework":{}}}""", config.ToJson());
+        }
+
+        [Fact]
+        public void PreserveUnknownSettingsAndConflictingPolicies()
+        {
+            const string json = """
+                {
+                    "rootSetting": {"array": [1, true, null]},
+                    "runtimeOptions": {
+                        "tfm": "net10.0",
+                        "rollForward": "Major",
+                        "futureSetting": {"number": 1e1000},
+                        "frameworks": [
+                            {"name":"Microsoft.NETCore.App","version":"10.0.0","rollForward":"Disable"},
+                            {
+                                "name":"Microsoft.AspNetCore.App","version":"10.0.0",
+                                "applyPatches":false,"rollForwardOnNoCandidateFx":0,"futureFrameworkSetting":[1,2]
+                            }
+                        ]
+                    }
+                }
+                """;
+            var config = RuntimeConfiguration.FromJson(json);
+            Assert.NotNull(config);
+            AssertJsonEqual(json, config.ToJson());
+        }
+
+        [Theory]
+        [InlineData("root", false)]
+        [InlineData("root", true)]
+        [InlineData("options", false)]
+        [InlineData("options", true)]
+        [InlineData("framework", false)]
+        [InlineData("framework", true)]
+        public void RejectExtensionDataCollisions(string location, bool unset)
+        {
+            var framework = new RuntimeFramework(KnownRuntimeNames.NetCoreApp, unset ? null! : "10.0.0");
+            var config = new RuntimeConfiguration(new RuntimeOptions
+            {
+                TargetFrameworkMoniker = unset ? null : "net10.0",
+                Framework = framework
+            });
+            object model = location switch
+            {
+                "root" => config,
+                "options" => config.RuntimeOptions,
+                _ => framework
+            };
+            string key = location switch
+            {
+                "root" => "runtimeOptions",
+                "options" => "tfm",
+                _ => "version"
+            };
+            var property = model.GetType().GetProperty("AdditionalProperties")!;
+            var valueType = property.PropertyType.GetGenericArguments()[1];
+            var dictionaryType = typeof(Dictionary<,>).MakeGenericType(typeof(string), valueType);
+            var properties = (IDictionary) Activator.CreateInstance(dictionaryType)!;
+            using var value = JsonDocument.Parse("\"extension\"");
+            properties.Add(key, valueType == typeof(JsonElement) ? value.RootElement.Clone() : (object) "extension");
+            property.SetValue(model, properties);
+            if (location == "root" && unset)
+                config.RuntimeOptions = null!;
+
+            var error = Assert.Throws<ArgumentException>(() => config.ToJson());
+            Assert.Contains(key, error.Message);
         }
 
         private static void AssertJsonEqual(string expected, string actual)

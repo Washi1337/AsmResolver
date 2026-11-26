@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 #if NET5_0_OR_GREATER
 using System.Text.Json;
+using System.Text.Json.Serialization;
 #endif
 
 namespace AsmResolver.DotNet.Config.Json
@@ -35,6 +37,8 @@ namespace AsmResolver.DotNet.Config.Json
             var result = new RuntimeConfiguration();
 
             var root = JSON.Parse(json);
+            result.AdditionalProperties = JsonExtensionData.Read(root, "runtimeOptions");
+
             if (!root.HasKey("runtimeOptions"))
                 return result;
 
@@ -69,6 +73,27 @@ namespace AsmResolver.DotNet.Config.Json
         }
 
         /// <summary>
+        /// Gets or sets additional properties to include in the runtime configuration.
+        /// </summary>
+        /// <remarks>
+        /// The dictionary must not contain keys matching known JSON property names.
+        /// </remarks>
+#if NET5_0_OR_GREATER
+        [JsonExtensionData]
+        public IDictionary<string, JsonElement>? AdditionalProperties
+        {
+            get;
+            set;
+        }
+#else
+        public IDictionary<string, object?>? AdditionalProperties
+        {
+            get;
+            set;
+        }
+#endif
+
+        /// <summary>
         /// Serializes the configuration to a JSON string.
         /// </summary>
         /// <returns>The JSON string.</returns>
@@ -77,6 +102,8 @@ namespace AsmResolver.DotNet.Config.Json
         /// </exception>
         public string ToJson()
         {
+            ValidateAdditionalProperties();
+
 #if NET5_0_OR_GREATER
             return JsonSerializer.Serialize(this, RuntimeConfigurationSerializerContext.Default.RuntimeConfiguration);
 #else
@@ -103,6 +130,35 @@ namespace AsmResolver.DotNet.Config.Json
             targetRuntime = default;
             return !string.IsNullOrEmpty(RuntimeOptions.TargetFrameworkMoniker)
                 && DotNetRuntimeInfo.TryParseMoniker(RuntimeOptions.TargetFrameworkMoniker!, out targetRuntime);
+        }
+
+        private void ValidateAdditionalProperties()
+        {
+            JsonExtensionData.Validate(AdditionalProperties, "runtimeOptions");
+            var options = RuntimeOptions;
+            if (options is null)
+                return;
+
+            JsonExtensionData.Validate(
+                options.AdditionalProperties,
+                "tfm",
+                "framework",
+                "frameworks",
+                "includedFrameworks",
+                "applyPatches",
+                "rollForwardOnNoCandidateFx",
+                "additionalProbingPaths",
+                "configProperties"
+            );
+
+            foreach (var framework in options.GetAllFrameworks())
+            {
+                JsonExtensionData.Validate(
+                    framework.AdditionalProperties,
+                    "name",
+                    "version"
+                );
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ internal static class RuntimeConfigurationJsonSerializer
 
     public static string Serialize(RuntimeConfiguration configuration)
     {
-        var root = new JSONObject();
+        var root = SerializeProperties(configuration.AdditionalProperties);
         if (configuration.RuntimeOptions is { } options)
             root["runtimeOptions"] = SerializeOptions(options);
 
@@ -22,7 +22,7 @@ internal static class RuntimeConfigurationJsonSerializer
 
     private static JSONObject SerializeOptions(RuntimeOptions options)
     {
-        var result = new JSONObject();
+        var result = SerializeProperties(options.AdditionalProperties, 1);
 
         if (options.TargetFrameworkMoniker is { } moniker)
             result["tfm"] = moniker;
@@ -35,7 +35,7 @@ internal static class RuntimeConfigurationJsonSerializer
             var array = new JSONArray();
 
             for (int i = 0; i < frameworks.Count; i++)
-                array.Add(SerializeFramework(frameworks[i]));
+                array.Add(SerializeFramework(frameworks[i], 3));
 
             result["frameworks"] = array;
         }
@@ -45,7 +45,7 @@ internal static class RuntimeConfigurationJsonSerializer
             var array = new JSONArray();
 
             for (int i = 0; i < includedFrameworks.Count; i++)
-                array.Add(SerializeFramework(includedFrameworks[i]));
+                array.Add(SerializeFramework(includedFrameworks[i], 3));
 
             result["includedFrameworks"] = array;
         }
@@ -72,12 +72,12 @@ internal static class RuntimeConfigurationJsonSerializer
         return result;
     }
 
-    private static JSONNode SerializeFramework(RuntimeFramework? framework)
+    private static JSONNode SerializeFramework(RuntimeFramework? framework, int depth = 2)
     {
         if (framework is null)
             return JSONNull.CreateOrGet();
 
-        var result = new JSONObject();
+        var result = SerializeProperties(framework.AdditionalProperties, depth);
         if (framework.Name is { } name)
             result["name"] = name;
 

@@ -1,3 +1,10 @@
+using System.Collections.Generic;
+
+#if NET5_0_OR_GREATER
+using System.Text.Json;
+using System.Text.Json.Serialization;
+#endif
+
 namespace AsmResolver.DotNet.Config.Json
 {
     /// <summary>
@@ -39,6 +46,27 @@ namespace AsmResolver.DotNet.Config.Json
             set;
         }
 
+        /// <summary>
+        /// Gets or sets additional properties to include in the runtime configuration.
+        /// </summary>
+        /// <remarks>
+        /// The dictionary must not contain keys matching known JSON property names.
+        /// </remarks>
+#if NET5_0_OR_GREATER
+        [JsonExtensionData]
+        public IDictionary<string, JsonElement>? AdditionalProperties
+        {
+            get;
+            set;
+        }
+#else
+        public IDictionary<string, object?>? AdditionalProperties
+        {
+            get;
+            set;
+        }
+#endif
+
 #if !NET5_0_OR_GREATER
         internal static RuntimeFramework FromJsonNode(JSONNode node)
         {
@@ -47,6 +75,12 @@ namespace AsmResolver.DotNet.Config.Json
                 Name = node.HasKey("name") && !node["name"].IsNull ? node["name"].Value : null,
                 Version = node.HasKey("version") && !node["version"].IsNull ? node["version"].Value : null
             };
+
+            result.AdditionalProperties = JsonExtensionData.Read(
+                node,
+                "name",
+                "version"
+            );
 
             return result;
         }
