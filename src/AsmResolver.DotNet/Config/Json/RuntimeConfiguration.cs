@@ -37,12 +37,17 @@ namespace AsmResolver.DotNet.Config.Json
             var result = new RuntimeConfiguration();
 
             var root = JSON.Parse(json);
+            if (root.IsNull)
+                return null;
+
             result.AdditionalProperties = JsonExtensionData.Read(root, "runtimeOptions");
 
             if (!root.HasKey("runtimeOptions"))
                 return result;
 
-            result.RuntimeOptions = RuntimeOptions.FromJsonNode(root["runtimeOptions"]);
+            result.RuntimeOptions = root["runtimeOptions"].IsNull
+                ? null
+                : RuntimeOptions.FromJsonNode(root["runtimeOptions"]);
             return result;
 #endif
         }
@@ -58,15 +63,16 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Creates a new runtime configuration with the provided options.
         /// </summary>
-        public RuntimeConfiguration(RuntimeOptions options)
+        /// <param name="options">The runtime options, or <c>null</c> if no options are specified.</param>
+        public RuntimeConfiguration(RuntimeOptions? options)
         {
             RuntimeOptions = options;
         }
 
         /// <summary>
-        /// Gets or sets the runtime options.
+        /// Gets or sets the runtime options, or <c>null</c> if the configuration specifies no options.
         /// </summary>
-        public RuntimeOptions RuntimeOptions
+        public RuntimeOptions? RuntimeOptions
         {
             get;
             set;
@@ -133,8 +139,11 @@ namespace AsmResolver.DotNet.Config.Json
         public bool TryGetTargetRuntime(out DotNetRuntimeInfo targetRuntime)
         {
             targetRuntime = default;
-            return !string.IsNullOrEmpty(RuntimeOptions.TargetFrameworkMoniker)
-                && DotNetRuntimeInfo.TryParseMoniker(RuntimeOptions.TargetFrameworkMoniker!, out targetRuntime);
+
+            var options = RuntimeOptions;
+
+            return options is not null && !string.IsNullOrEmpty(options.TargetFrameworkMoniker)
+                && DotNetRuntimeInfo.TryParseMoniker(options.TargetFrameworkMoniker!, out targetRuntime);
         }
 
         private void ValidateAdditionalProperties()

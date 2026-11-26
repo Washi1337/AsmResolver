@@ -124,6 +124,7 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             );
 
             Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions);
             Assert.NotNull(config.RuntimeOptions.ConfigProperties);
 
             var properties = JsonSerializer.SerializeToElement(config.RuntimeOptions.ConfigProperties);
@@ -140,6 +141,7 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             var config = RuntimeConfiguration.FromJson(json);
 
             Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions);
             Assert.Equal(expected, config.RuntimeOptions.ApplyPatches);
         }
 
@@ -199,11 +201,13 @@ namespace AsmResolver.DotNet.Tests.Config.Json
 
             var config = RuntimeConfiguration.FromJson(json);
             Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions);
             Assert.Equal(applyPatches, config.RuntimeOptions.ApplyPatches);
             AssertJsonEqual(json, config.ToJson());
 
             var roundTrip = RuntimeConfiguration.FromJson(config.ToJson());
             Assert.NotNull(roundTrip);
+            Assert.NotNull(roundTrip.RuntimeOptions);
             Assert.Equal(applyPatches, roundTrip.RuntimeOptions.ApplyPatches);
             AssertJsonEqual(json, roundTrip.ToJson());
         }
@@ -339,6 +343,7 @@ namespace AsmResolver.DotNet.Tests.Config.Json
                 }
                 """);
             Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions);
 
             var options = config.RuntimeOptions;
             Assert.Null(options.TargetFrameworkMoniker);
@@ -375,6 +380,7 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             var config = RuntimeConfiguration.FromJson(json);
 
             Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions);
             var options = config.RuntimeOptions;
             var actual = options.GetAllFrameworks().ToArray();
             Assert.Equal(count, actual.Length);
@@ -390,6 +396,7 @@ namespace AsmResolver.DotNet.Tests.Config.Json
                 {"runtimeOptions":{"framework":{"name":null,"version":null}}}
                 """);
             Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions);
             Assert.NotNull(config.RuntimeOptions.Framework);
             Assert.Null(config.RuntimeOptions.Framework.Name);
             Assert.Null(config.RuntimeOptions.Framework.Version);
@@ -428,6 +435,7 @@ namespace AsmResolver.DotNet.Tests.Config.Json
         {
             var config = RuntimeConfiguration.FromJson("{" + comment + "\"runtimeOptions\":{\"tfm\":\"net10.0\"}}");
             Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions);
             Assert.Equal("net10.0", config.RuntimeOptions.TargetFrameworkMoniker);
         }
 
@@ -439,7 +447,52 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             var config = RuntimeConfiguration.FromJson(
                 "{\"runtimeOptions\":{\"additionalProbingPaths\":" + paths + "}}");
             Assert.NotNull(config);
+            Assert.NotNull(config.RuntimeOptions);
             Assert.Equal(new[] { "/packages" }, config.RuntimeOptions.AdditionalProbingPaths);
+        }
+
+        [Theory]
+        [InlineData("{\"runtimeOptions\":null}")]
+        [InlineData("{}")]
+        public void RuntimeInferenceRejectsInvalidInputWithoutThrowing(string json)
+        {
+            var config = RuntimeConfiguration.FromJson(json);
+            Assert.NotNull(config);
+            Assert.False(config.TryGetTargetRuntime(out _));
+        }
+
+        [Fact]
+        public void ReadNullRuntimeOptions()
+        {
+            var config = RuntimeConfiguration.FromJson("{\"runtimeOptions\":null}");
+
+            Assert.NotNull(config);
+            Assert.Null(config.RuntimeOptions);
+            Assert.False(config.TryGetTargetRuntime(out _));
+            AssertJsonEqual("{}", config.ToJson());
+        }
+
+        [Fact]
+        public void WriteConfigurationWithoutRuntimeOptions()
+        {
+            var config = new RuntimeConfiguration(null);
+
+            Assert.Null(config.RuntimeOptions);
+            Assert.False(config.TryGetTargetRuntime(out _));
+            AssertJsonEqual("{}", config.ToJson());
+
+            var roundTrip = RuntimeConfiguration.FromJson(config.ToJson());
+
+            Assert.NotNull(roundTrip);
+            Assert.NotNull(roundTrip.RuntimeOptions);
+            Assert.False(roundTrip.TryGetTargetRuntime(out _));
+            AssertJsonEqual("{\"runtimeOptions\":{}}", roundTrip.ToJson());
+        }
+
+        [Fact]
+        public void ReadNullConfiguration()
+        {
+            Assert.Null(RuntimeConfiguration.FromJson("null"));
         }
 
         [Theory]
@@ -473,6 +526,7 @@ namespace AsmResolver.DotNet.Tests.Config.Json
                 TargetFrameworkMoniker = unset ? null : "net10.0",
                 Framework = framework
             });
+            Assert.NotNull(config.RuntimeOptions);
             object model = location switch
             {
                 "root" => config,
@@ -493,7 +547,7 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             properties.Add(key, valueType == typeof(JsonElement) ? value.RootElement.Clone() : (object) "extension");
             property.SetValue(model, properties);
             if (location == "root" && unset)
-                config.RuntimeOptions = null!;
+                config.RuntimeOptions = null;
 
             var error = Assert.Throws<ArgumentException>(() => config.ToJson());
             Assert.Contains(key, error.Message);

@@ -101,6 +101,7 @@ public class RuntimeConfigurationSerializationTest
         var config = RuntimeConfiguration.FromJson(json);
 
         Assert.NotNull(config);
+        Assert.NotNull(config.RuntimeOptions);
         Assert.NotNull(config.RuntimeOptions.ConfigProperties);
         Assert.Equal(number, config.RuntimeOptions.ConfigProperties["Value"]!.ToString());
     }
