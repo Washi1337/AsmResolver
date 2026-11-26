@@ -158,7 +158,7 @@ namespace AsmResolver.DotNet.Config.Json
             }
 
             if (node.HasKey("applyPatches"))
-                result.ApplyPatches = node["ApplyPatches"].AsBool;
+                result.ApplyPatches = node["applyPatches"].AsBool;
 
             if (node.HasKey("rollForwardOnNoCandidateFx"))
                 result.RollForwardOnNoCandidateFx = node["rollForwardOnNoCandidateFx"].AsInt;

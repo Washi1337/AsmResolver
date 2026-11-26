@@ -122,20 +122,21 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             Assert.NotNull(config);
             Assert.NotNull(config.RuntimeOptions.ConfigProperties);
 
-#if NET5_0_OR_GREATER
-            var value = Assert.Contains("System.GC.Concurrent", config.RuntimeOptions.ConfigProperties);
-            Assert.Equal(JsonValueKind.False, value.ValueKind);
+            var properties = JsonSerializer.SerializeToElement(config.RuntimeOptions.ConfigProperties);
+            Assert.False(properties.GetProperty("System.GC.Concurrent").GetBoolean());
+            Assert.Equal(4, properties.GetProperty("System.Threading.ThreadPool.MinThreads").GetInt32());
+        }
 
-            value = Assert.Contains("System.Threading.ThreadPool.MinThreads", config.RuntimeOptions.ConfigProperties);
-            Assert.Equal(JsonValueKind.Number, value.ValueKind);
-            Assert.Equal(4, value.GetInt32());
-#else
-            object value = Assert.Contains("System.GC.Concurrent", config.RuntimeOptions.ConfigProperties);
-            Assert.Equal(false, value);
+        [Theory]
+        [InlineData("""{"runtimeOptions":{"applyPatches":true}}""", true)]
+        [InlineData("""{"runtimeOptions":{"applyPatches":false}}""", false)]
+        [InlineData("""{"runtimeOptions":{}}""", null)]
+        public void ReadApplyPatches(string json, bool? expected)
+        {
+            var config = RuntimeConfiguration.FromJson(json);
 
-            value = Assert.Contains("System.Threading.ThreadPool.MinThreads", config.RuntimeOptions.ConfigProperties);
-            Assert.Equal(4, value);
-#endif
+            Assert.NotNull(config);
+            Assert.Equal(expected, config.RuntimeOptions.ApplyPatches);
         }
     }
 }

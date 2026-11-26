@@ -27,6 +27,7 @@
     <File Path="test/Directory.Build.props" />
     <Project Path="test/AsmResolver.Benchmarks/AsmResolver.Benchmarks.csproj" />
     <Project Path="test/AsmResolver.DotNet.Dynamic.Tests/AsmResolver.DotNet.Dynamic.Tests.csproj" />
+    <Project Path="test/AsmResolver.DotNet.Legacy.Tests/AsmResolver.DotNet.Legacy.Tests.csproj" />
     <Project Path="test/AsmResolver.DotNet.Tests/AsmResolver.DotNet.Tests.csproj" />
     <Project Path="test/AsmResolver.PE.File.Tests/AsmResolver.PE.File.Tests.csproj" />
     <Project Path="test/AsmResolver.PE.Tests/AsmResolver.PE.Tests.csproj" />
