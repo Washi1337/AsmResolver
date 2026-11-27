@@ -1183,15 +1183,6 @@ namespace AsmResolver.DotNet.Config.Json
         {
             aSB.Append(Value.ToString(CultureInfo.InvariantCulture));
         }
-        private static bool IsNumeric(object value)
-        {
-            return value is int || value is uint
-                || value is float || value is double
-                || value is decimal
-                || value is long || value is ulong
-                || value is short || value is ushort
-                || value is sbyte || value is byte;
-        }
         public override bool Equals(object obj)
         {
             if (obj == null)
@@ -1200,14 +1191,12 @@ namespace AsmResolver.DotNet.Config.Json
                 return true;
             JSONNumber s2 = obj as JSONNumber;
             if (s2 != null)
-                return m_Data == s2.m_Data;
-            if (IsNumeric(obj))
-                return Convert.ToDouble(obj) == m_Data;
+                return string.Equals(Value, s2.Value, StringComparison.Ordinal);
             return false;
         }
         public override int GetHashCode()
         {
-            return m_Data.GetHashCode();
+            return Value.GetHashCode();
         }
         public override void Clear()
         {

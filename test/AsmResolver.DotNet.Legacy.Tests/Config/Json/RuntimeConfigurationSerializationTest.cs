@@ -107,6 +107,35 @@ public class RuntimeConfigurationSerializationTest
     }
 
     [Theory]
+    [InlineData("1e1000", "2e1000")]
+    [InlineData("1.234567890123456789012345678901", "1.234567890123456789012345678902")]
+    [InlineData("1e0", "1E0")]
+    public void CompareRawNumbersByLiteral(string first, string second)
+    {
+        string json = "{\"runtimeOptions\":{\"configProperties\":{\"A\":" + first + ",\"B\":" + second + "}}}";
+        var config = RuntimeConfiguration.FromJson(json)!;
+        var properties = config.RuntimeOptions!.ConfigProperties!;
+        object a = properties["A"]!;
+        object b = properties["B"]!;
+        object copy = RuntimeConfiguration.FromJson(json)!.RuntimeOptions!.ConfigProperties!["A"]!;
+
+        Assert.False(a.Equals(b));
+        Assert.Equal(2, new HashSet<object> { a, b }.Count);
+        Assert.True(a.Equals(copy));
+        Assert.Equal(a.GetHashCode(), copy.GetHashCode());
+    }
+
+    [Fact]
+    public void RawNumberEqualityDoesNotConvertClrNumbers()
+    {
+        var config = RuntimeConfiguration.FromJson("{\"runtimeOptions\":{\"configProperties\":{\"Value\":1e0}}}")!;
+        object value = config.RuntimeOptions!.ConfigProperties!["Value"]!;
+
+        Assert.False(value.Equals(1d));
+        Assert.False(1d.Equals(value));
+    }
+
+    [Theory]
     [InlineData(double.NaN)]
     [InlineData(double.PositiveInfinity)]
     [InlineData(double.NegativeInfinity)]
