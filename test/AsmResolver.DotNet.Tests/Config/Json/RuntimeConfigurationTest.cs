@@ -450,11 +450,31 @@ namespace AsmResolver.DotNet.Tests.Config.Json
         [InlineData("rollForwardOnNoCandidateFx", "-2147483649")]
         [InlineData("rollForwardOnNoCandidateFx", "\"1\"")]
         [InlineData("rollForwardOnNoCandidateFx", "true")]
-        public void RejectInvalidFrameworkPolicyTypes(string property, string value)
+        public void RejectInvalidPolicyTypes(string property, string value)
         {
-            string json = "{\"runtimeOptions\":{\"framework\":{\"" + property + "\":" + value + "}}}";
+            string settings = "{\"" + property + "\":" + value + "}";
+            string optionsJson = "{\"runtimeOptions\":" + settings + "}";
+            string frameworkJson = "{\"runtimeOptions\":{\"framework\":" + settings + "}}";
 
-            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(optionsJson)));
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(frameworkJson)));
+        }
+
+        [Theory]
+        [InlineData("applyPatches", "true")]
+        [InlineData("applyPatches", "false")]
+        [InlineData("applyPatches", "null")]
+        [InlineData("rollForwardOnNoCandidateFx", "-2147483648")]
+        [InlineData("rollForwardOnNoCandidateFx", "2147483647")]
+        [InlineData("rollForwardOnNoCandidateFx", "0")]
+        [InlineData("rollForwardOnNoCandidateFx", "null")]
+        public void RoundTripRuntimePolicies(string property, string value)
+        {
+            string json = "{\"runtimeOptions\":{\"" + property + "\":" + value + "}}";
+            var config = RuntimeConfiguration.FromJson(json);
+
+            Assert.NotNull(config);
+            AssertJsonEqual(value == "null" ? "{\"runtimeOptions\":{}}" : json, config.ToJson());
         }
 
         [Theory]

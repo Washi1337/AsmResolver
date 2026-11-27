@@ -199,10 +199,25 @@ namespace AsmResolver.DotNet.Config.Json
             }
 
             if (node.HasKey("applyPatches") && !node["applyPatches"].IsNull)
-                result.ApplyPatches = node["applyPatches"].AsBool;
+            {
+                var value = node["applyPatches"];
+                if (!value.IsBoolean)
+                    throw new FormatException("Expected a boolean for 'applyPatches'.");
+
+                result.ApplyPatches = value.AsBool;
+            }
 
             if (node.HasKey("rollForwardOnNoCandidateFx") && !node["rollForwardOnNoCandidateFx"].IsNull)
-                result.RollForwardOnNoCandidateFx = node["rollForwardOnNoCandidateFx"].AsInt;
+            {
+                var value = node["rollForwardOnNoCandidateFx"];
+                if (!value.IsNumber
+                    || !int.TryParse(value.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int policy))
+                {
+                    throw new FormatException("Expected a 32-bit integer for 'rollForwardOnNoCandidateFx'.");
+                }
+
+                result.RollForwardOnNoCandidateFx = policy;
+            }
 
             if (node.HasKey("additionalProbingPaths") && !node["additionalProbingPaths"].IsNull)
             {
