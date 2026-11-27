@@ -1,0 +1,236 @@
+#include <windows.h>
+
+// ============================================================
+// RT_ICON + RT_GROUP_ICON (type 3 + 14)
+// ============================================================
+1 ICON "../../DotNet/HelloWorld/Resources/Icon.ico"
+
+// ============================================================
+// RT_CURSOR + RT_GROUP_CURSOR (type 1 + 12)
+// ============================================================
+1 CURSOR "test.cur"
+
+// ============================================================
+// RT_BITMAP (type 2) - Two bitmaps: 16x16 24bpp and 32x32 24bpp
+// ============================================================
+101 BITMAP "test.bmp"
+102 BITMAP "test8bit.bmp"
+
+// ============================================================
+// RT_MENU (type 4) - Standard MENU (version 0)
+// ============================================================
+201 MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New",        40001
+        MENUITEM "&Open",       40002
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",       40003
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo",       40010
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t",        40011
+        MENUITEM "&Copy",       40012
+        MENUITEM "&Paste",      40013
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About",      40020
+    END
+END
+
+// ============================================================
+// RT_MENU (type 4) - Extended MENUEX (version 1)
+// ============================================================
+202 MENUEX
+BEGIN
+    POPUP "&File", 50000
+    BEGIN
+        MENUITEM "&New",        50001
+        MENUITEM "&Open",       50002
+        MENUITEM "", -1, MFT_SEPARATOR
+        MENUITEM "E&xit",       50003
+    END
+    POPUP "&View", 50010
+    BEGIN
+        MENUITEM "&Toolbar",    50011, MFS_CHECKED
+        MENUITEM "&Status Bar", 50012, MFS_CHECKED
+        POPUP "Z&oom", 50020
+        BEGIN
+            MENUITEM "Zoom &In",  50021
+            MENUITEM "Zoom &Out", 50022
+        END
+    END
+END
+
+// ============================================================
+// RT_DIALOG (type 5) - Standard DIALOG
+// ============================================================
+301 DIALOG 10, 10, 180, 80
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Simple Dialog"
+BEGIN
+    DEFPUSHBUTTON  "OK",     IDOK,     120, 60, 50, 14
+    PUSHBUTTON     "Cancel", IDCANCEL, 65,  60, 50, 14
+    LTEXT          "Basic dialog without font.", -1, 10, 10, 160, 20
+END
+
+// ============================================================
+// RT_DIALOG (type 5) - Extended DIALOGEX with font and controls
+// ============================================================
+302 DIALOGEX 10, 10, 240, 140
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Extended Dialog"
+FONT 9, "Segoe UI"
+BEGIN
+    DEFPUSHBUTTON  "OK",         IDOK,       185, 120, 50, 14
+    PUSHBUTTON     "Cancel",     IDCANCEL,   130, 120, 50, 14
+    LTEXT          "Name:",      -1,         10,  10,  40, 10
+    EDITTEXT       1001,         55,  8,  180, 14, ES_AUTOHSCROLL
+    LTEXT          "Comment:",   -1,         10,  28,  40, 10
+    EDITTEXT       1002,         55,  26, 180, 40, ES_MULTILINE | ES_AUTOVSCROLL | WS_VSCROLL
+    CHECKBOX       "Active",     1003,       10,  75,  60, 14
+    CHECKBOX       "Read-only",  1004,       80,  75,  70, 14
+    COMBOBOX       1005,         10,  95, 100, 60, CBS_DROPDOWNLIST | WS_VSCROLL
+    GROUPBOX       "Options",    -1,         5,   65, 230, 50
+END
+
+// ============================================================
+// RT_STRING (type 6) - String table across multiple blocks
+// ============================================================
+// Block 1 (IDs 0-15)
+STRINGTABLE
+BEGIN
+    1,  "Hello"
+    2,  "World"
+    3,  "AsmResolver Test String"
+    4,  "String with ""quotes"" inside"
+    15, "Last in block one"
+END
+
+// Block 2 (IDs 16-31)
+STRINGTABLE
+BEGIN
+    16, "Second block string"
+    17, "Another in block two"
+    31, "Last in block two"
+END
+
+// Block 4 (IDs 48-63) - gap between blocks
+STRINGTABLE
+BEGIN
+    48, "Sparse block string"
+    50, "Non-contiguous ID"
+END
+
+// ============================================================
+// RT_ACCELERATOR (type 9) - Two tables with different modifiers
+// ============================================================
+401 ACCELERATORS
+BEGIN
+    VK_F1,     40001, VIRTKEY
+    VK_F5,     40002, VIRTKEY
+    "^S",      40003
+    "^Z",      40004
+    "^C",      40005
+    VK_DELETE, 40006, VIRTKEY, SHIFT
+END
+
+402 ACCELERATORS
+BEGIN
+    "^N",       50001
+    "^O",       50002
+    VK_F2,      50003, VIRTKEY, ALT
+    VK_F3,      50004, VIRTKEY, CONTROL, SHIFT
+    VK_F4,      50005, VIRTKEY, ALT, SHIFT
+    VK_ESCAPE,  50006, VIRTKEY, NOINVERT
+END
+
+// ============================================================
+// RT_MESSAGETABLE (type 11)
+// ============================================================
+1 MESSAGETABLE "MSG00409.bin"
+
+// ============================================================
+// RT_VERSION (type 16)
+// ============================================================
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION    1,2,3,4
+PRODUCTVERSION 1,0,0,0
+FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
+FILEFLAGS      0
+FILEOS         VOS__WINDOWS32
+FILETYPE       VFT_APP
+FILESUBTYPE    VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName",      "AsmResolver Tests"
+            VALUE "FileDescription",  "Resource Library Test"
+            VALUE "FileVersion",      "1.2.3.4"
+            VALUE "InternalName",     "ResourceLibrary.dll"
+            VALUE "LegalCopyright",   "Copyright (C) AsmResolver"
+            VALUE "OriginalFilename", "ResourceLibrary.dll"
+            VALUE "ProductName",      "AsmResolver"
+            VALUE "ProductVersion",   "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 0x04B0
+    END
+END
+
+// ============================================================
+// RT_HTML (type 23) - Two HTML resources
+// ============================================================
+501 HTML "test.html"
+502 HTML "test2.html"
+
+// ============================================================
+// RT_FONT (type 8) - Two fonts, windres auto-generates RT_FONTDIR (type 7)
+// ============================================================
+5 FONT "test.fnt"
+6 FONT "test2.fnt"
+
+// ============================================================
+// RT_DLGINCLUDE (type 17)
+// ============================================================
+1 DLGINCLUDE "resource.h"
+
+// ============================================================
+// RT_ANICURSOR (type 21)
+// ============================================================
+601 21 "test.ani"
+
+// ============================================================
+// RT_ANIICON (type 22)
+// ============================================================
+701 22 "test.ani"
+
+// ============================================================
+// RT_MANIFEST (type 24)
+// ============================================================
+1 RT_MANIFEST
+BEGIN
+    "<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>\r\n"
+    "<assembly xmlns=""urn:schemas-microsoft-com:asm.v1"" manifestVersion=""1.0"">\r\n"
+    "  <assemblyIdentity version=""1.0.0.0"" name=""ResourceLibrary""/>\r\n"
+    "</assembly>\r\n"
+END
+
+// ============================================================
+// RT_PLUGPLAY (type 19) - Obsolete, opaque test data
+// ============================================================
+1 19 { 0x0001, 0x0002, 0x0003, 0x0004 }
+
+// ============================================================
+// RT_VXD (type 20) - Obsolete, opaque test data
+// ============================================================
+1 20 { 0x00FF, 0x00FE, 0x00FD, 0x00FC }
