@@ -726,6 +726,74 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             AssertJsonEqual(json, config.ToJson());
         }
 
+        [Theory]
+        [InlineData("[]")]
+        [InlineData("1")]
+        [InlineData("true")]
+        [InlineData("\"text\"")]
+        public void RejectInvalidConfigurationRoots(string json)
+        {
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+        }
+
+        [Theory]
+        [InlineData("runtimeOptions", "[]")]
+        [InlineData("runtimeOptions", "1")]
+        [InlineData("runtimeOptions", "true")]
+        [InlineData("runtimeOptions", "\"text\"")]
+        [InlineData("framework", "[]")]
+        [InlineData("framework", "1")]
+        [InlineData("framework", "true")]
+        [InlineData("framework", "\"text\"")]
+        [InlineData("frameworks", "{}")]
+        [InlineData("frameworks", "1")]
+        [InlineData("frameworks", "true")]
+        [InlineData("frameworks", "\"text\"")]
+        [InlineData("frameworks", "[[]]")]
+        [InlineData("frameworks", "[1]")]
+        [InlineData("frameworks", "[true]")]
+        [InlineData("frameworks", "[\"text\"]")]
+        [InlineData("includedFrameworks", "{}")]
+        [InlineData("includedFrameworks", "1")]
+        [InlineData("includedFrameworks", "true")]
+        [InlineData("includedFrameworks", "\"text\"")]
+        [InlineData("includedFrameworks", "[[]]")]
+        [InlineData("includedFrameworks", "[1]")]
+        [InlineData("includedFrameworks", "[true]")]
+        [InlineData("includedFrameworks", "[\"text\"]")]
+        [InlineData("configProperties", "[]")]
+        [InlineData("configProperties", "1")]
+        [InlineData("configProperties", "true")]
+        [InlineData("configProperties", "\"text\"")]
+        public void RejectInvalidConfigurationContainers(string property, string value)
+        {
+            string settings = "{\"" + property + "\":" + value + "}";
+            string json = property == "runtimeOptions"
+                ? settings
+                : "{\"runtimeOptions\":" + settings + "}";
+
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+        }
+
+        [Theory]
+        [InlineData("tfm")]
+        [InlineData("name")]
+        [InlineData("version")]
+        public void RejectInvalidFrameworkStringTypes(string property)
+        {
+            string[] values = { "1", "true", "[]", "{}" };
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                string settings = "{\"" + property + "\":" + values[i] + "}";
+                string json = property == "tfm"
+                    ? "{\"runtimeOptions\":" + settings + "}"
+                    : "{\"runtimeOptions\":{\"framework\":" + settings + "}}";
+
+                Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+            }
+        }
+
         private static void AssertJsonEqual(string expected, string actual)
         {
             using var expectedDocument = JsonDocument.Parse(expected);

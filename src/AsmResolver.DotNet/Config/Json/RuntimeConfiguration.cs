@@ -40,6 +40,9 @@ namespace AsmResolver.DotNet.Config.Json
             if (root.IsNull)
                 return null;
 
+            if (!root.IsObject)
+                throw new FormatException("Expected an object for the runtime configuration.");
+
             result.AdditionalProperties = JsonExtensionData.Read(root, "runtimeOptions");
 
             if (!root.HasKey("runtimeOptions"))

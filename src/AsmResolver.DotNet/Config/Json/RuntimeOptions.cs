@@ -176,16 +176,28 @@ namespace AsmResolver.DotNet.Config.Json
 #if !NET5_0_OR_GREATER
         internal static RuntimeOptions FromJsonNode(JSONNode node)
         {
+            if (!node.IsObject)
+                throw new FormatException("Expected an object for 'runtimeOptions'.");
+
             var result = new RuntimeOptions();
 
             if (node.HasKey("tfm") && !node["tfm"].IsNull)
-                result.TargetFrameworkMoniker = node["tfm"].Value;
+            {
+                var value = node["tfm"];
+                if (!value.IsString)
+                    throw new FormatException("Expected a string for 'tfm'.");
+
+                result.TargetFrameworkMoniker = value.Value;
+            }
 
             if (node.HasKey("framework") && !node["framework"].IsNull)
                 result.Framework = RuntimeFramework.FromJsonNode(node["framework"]);
 
             if (node.HasKey("frameworks") && !node["frameworks"].IsNull)
             {
+                if (!node["frameworks"].IsArray)
+                    throw new FormatException("Expected an array for 'frameworks'.");
+
                 result.Frameworks = new List<RuntimeFramework?>();
                 foreach (var item in node["frameworks"].Values)
                     result.Frameworks.Add(item.IsNull ? null : RuntimeFramework.FromJsonNode(item));
@@ -193,6 +205,9 @@ namespace AsmResolver.DotNet.Config.Json
 
             if (node.HasKey("includedFrameworks") && !node["includedFrameworks"].IsNull)
             {
+                if (!node["includedFrameworks"].IsArray)
+                    throw new FormatException("Expected an array for 'includedFrameworks'.");
+
                 result.IncludedFrameworks = new List<RuntimeFramework?>();
                 foreach (var item in node["includedFrameworks"].Values)
                     result.IncludedFrameworks.Add(item.IsNull ? null : RuntimeFramework.FromJsonNode(item));
@@ -245,6 +260,9 @@ namespace AsmResolver.DotNet.Config.Json
 
             if (node.HasKey("configProperties") && !node["configProperties"].IsNull)
             {
+                if (!node["configProperties"].IsObject)
+                    throw new FormatException("Expected an object for 'configProperties'.");
+
                 result.ConfigProperties = new Dictionary<string, object?>();
                 foreach (var item in node["configProperties"])
                     result.ConfigProperties[item.Key] = InterpretValue(item.Value);

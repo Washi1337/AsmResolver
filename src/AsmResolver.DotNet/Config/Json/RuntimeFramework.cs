@@ -99,6 +99,15 @@ namespace AsmResolver.DotNet.Config.Json
 #if !NET5_0_OR_GREATER
         internal static RuntimeFramework FromJsonNode(JSONNode node)
         {
+            if (!node.IsObject)
+                throw new FormatException("Expected an object for a framework reference.");
+
+            if (node.HasKey("name") && !node["name"].IsNull && !node["name"].IsString)
+                throw new FormatException("Expected a string for 'name'.");
+
+            if (node.HasKey("version") && !node["version"].IsNull && !node["version"].IsString)
+                throw new FormatException("Expected a string for 'version'.");
+
             var result = new RuntimeFramework
             {
                 Name = node.HasKey("name") && !node["name"].IsNull ? node["name"].Value : null,
