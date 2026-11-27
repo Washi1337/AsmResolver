@@ -515,7 +515,7 @@ namespace AsmResolver.DotNet.Config.Json
                         sb.Append("\\f");
                         break;
                     default:
-                        if (c < ' ' || (forceASCII && c > 127))
+                        if (c < ' ' || char.IsSurrogate(c) || (forceASCII && c > 127))
                         {
                             ushort val = c;
                             sb.Append("\\u").Append(val.ToString("X4"));

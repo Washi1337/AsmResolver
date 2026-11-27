@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Text;
 using System.Text.Json;
 using AsmResolver.DotNet.Config.Json;
 using Xunit;
@@ -133,6 +135,38 @@ public class RuntimeConfigurationSerializationTest
 
         Assert.False(value.Equals(1d));
         Assert.False(1d.Equals(value));
+    }
+
+    [Theory]
+    [InlineData(0xD800)]
+    [InlineData(0xDC00)]
+    [InlineData(0x1F600)]
+    [InlineData(0x06CC)]
+    public void WriteUnicodeWithoutInvalidUtf8(int codePoint)
+    {
+        string value = codePoint <= char.MaxValue
+            ? ((char) codePoint).ToString()
+            : char.ConvertFromUtf32(codePoint);
+        var config = new RuntimeConfiguration(new RuntimeOptions
+        {
+            ConfigProperties = new Dictionary<string, object?> { [value] = value }
+        });
+        string json = config.ToJson();
+        var encoding = new UTF8Encoding(false, true);
+        Assert.Equal(json, encoding.GetString(encoding.GetBytes(json)));
+
+        string path = Path.GetTempFileName();
+        try
+        {
+            config.Write(path);
+            Assert.Equal(json, File.ReadAllText(path));
+            var roundTrip = RuntimeConfiguration.FromFile(path)!;
+            Assert.Equal(value, roundTrip.RuntimeOptions!.ConfigProperties![value]);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
     }
 
     [Theory]
