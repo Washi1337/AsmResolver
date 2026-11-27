@@ -676,6 +676,46 @@ namespace AsmResolver.DotNet.Tests.Config.Json
         }
 
         [Theory]
+        [InlineData("1 2")]
+        [InlineData("tr ue")]
+        [InlineData("nu ll")]
+        [InlineData("1e 2")]
+        [InlineData("1\t2")]
+        [InlineData("tr\rue")]
+        [InlineData("nu\nll")]
+        [InlineData("1e\r\n2")]
+        [InlineData("- 1")]
+        [InlineData("1 .5")]
+        [InlineData("\"one\" \"two\"")]
+        [InlineData("1 /* comment */ 2")]
+        public void RejectWhitespaceSplittingTokens(string value)
+        {
+            string json = "{\"runtimeOptions\":{\"configProperties\":{\"Value\":" + value + "}}}";
+
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+        }
+
+        [Theory]
+        [InlineData(" 1 ", "1")]
+        [InlineData("\ttrue\t", "true")]
+        [InlineData("\rfalse\r", "false")]
+        [InlineData("\nnull\n", "null")]
+        [InlineData("\r\n1e2\r\n", "1e2")]
+        [InlineData(" \"a b\\tc\" ", "\"a b\\tc\"")]
+        [InlineData(" /* before */ 1 /* after */ ", "1")]
+        [InlineData(" // before\r\n true // after\r\n", "true")]
+        public void AcceptWhitespaceBetweenTokens(string value, string expected)
+        {
+            string json = "{\"runtimeOptions\":{\"configProperties\":{\"Value\":" + value + "}}}";
+            var config = RuntimeConfiguration.FromJson(json);
+
+            Assert.NotNull(config);
+            AssertJsonEqual(
+                "{\"runtimeOptions\":{\"configProperties\":{\"Value\":" + expected + "}}}",
+                config.ToJson());
+        }
+
+        [Theory]
         [InlineData(false)]
         [InlineData(true)]
         public void PreserveByteOrderMarkInStrings(bool escaped)

@@ -554,10 +554,13 @@ namespace AsmResolver.DotNet.Config.Json
             bool QuoteMode = false;
             bool TokenIsQuoted = false;
             bool HasNewlineChar = false;
-            bool tokenEndedByComment = false;
+            bool tokenEnded = false;
             while (i < aJSON.Length)
             {
-                if (tokenEndedByComment && !QuoteMode && !char.IsWhiteSpace(aJSON[i]))
+                if (!QuoteMode && aJSON[i] is ' ' or '\t' or '\r' or '\n')
+                    tokenEnded |= Token.Length > 0 || TokenIsQuoted;
+
+                if (tokenEnded && !QuoteMode && !char.IsWhiteSpace(aJSON[i]))
                 {
                     char character = aJSON[i];
                     bool startsComment = character == '/' && i + 1 < aJSON.Length
@@ -565,11 +568,11 @@ namespace AsmResolver.DotNet.Config.Json
 
                     if (character is ':' or ',' or '}' or ']')
                     {
-                        tokenEndedByComment = false;
+                        tokenEnded = false;
                     }
                     else if (!startsComment)
                     {
-                        throw new FormatException("Expected a separator after the JSON comment.");
+                        throw new FormatException("Expected a separator after the JSON token.");
                     }
                 }
 
@@ -720,7 +723,7 @@ namespace AsmResolver.DotNet.Config.Json
                     case '/':
                         if (allowLineComments && !QuoteMode && i + 1 < aJSON.Length && aJSON[i + 1] == '/')
                         {
-                            tokenEndedByComment |= Token.Length > 0 || TokenIsQuoted;
+                            tokenEnded |= Token.Length > 0 || TokenIsQuoted;
                             while (++i < aJSON.Length && aJSON[i] != '\n' && aJSON[i] != '\r') ;
                             break;
                         }
@@ -729,7 +732,7 @@ namespace AsmResolver.DotNet.Config.Json
                             int end = aJSON.IndexOf("*/", i + 2, StringComparison.Ordinal);
                             if (end < 0)
                                 throw new FormatException("Unterminated JSON comment.");
-                            tokenEndedByComment |= Token.Length > 0 || TokenIsQuoted;
+                            tokenEnded |= Token.Length > 0 || TokenIsQuoted;
                             i = end + 1;
                             break;
                         }
