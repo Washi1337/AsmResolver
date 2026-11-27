@@ -44,6 +44,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AsmResolver.DotNet.Config.Json
 {
@@ -66,6 +67,11 @@ namespace AsmResolver.DotNet.Config.Json
 
     internal abstract partial class JSONNode
     {
+        private const int MaximumDepth = 64;
+        private static readonly Regex NumberRegex = new Regex(
+            @"\A-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\z",
+            RegexOptions.CultureInvariant);
+
         #region Enumerators
         public struct Enumerator
         {
@@ -509,7 +515,7 @@ namespace AsmResolver.DotNet.Config.Json
                         sb.Append("\\f");
                         break;
                     default:
-                        if (c < ' ' || (forceASCII && c > 127))
+                        if (c < ' ' || char.IsSurrogate(c) || (forceASCII && c > 127))
                         {
                             ushort val = c;
                             sb.Append("\\u").Append(val.ToString("X4"));
@@ -528,19 +534,14 @@ namespace AsmResolver.DotNet.Config.Json
         {
             if (quoted)
                 return token;
-            if (token.Length <= 5)
-            {
-                string tmp = token.ToLower();
-                if (tmp == "false" || tmp == "true")
-                    return tmp == "true";
-                if (tmp == "null")
-                    return JSONNull.CreateOrGet();
-            }
-            double val;
-            if (double.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out val))
-                return val;
-            else
-                return token;
+            if (token == "false" || token == "true")
+                return token == "true";
+            if (token == "null")
+                return JSONNull.CreateOrGet();
+            if (NumberRegex.IsMatch(token))
+                return new JSONNumber(token);
+
+            throw new FormatException("Invalid JSON value.");
         }
 
         public static JSONNode Parse(string aJSON)
@@ -553,8 +554,28 @@ namespace AsmResolver.DotNet.Config.Json
             bool QuoteMode = false;
             bool TokenIsQuoted = false;
             bool HasNewlineChar = false;
+            bool tokenEnded = false;
             while (i < aJSON.Length)
             {
+                if (!QuoteMode && aJSON[i] is ' ' or '\t' or '\r' or '\n')
+                    tokenEnded |= Token.Length > 0 || TokenIsQuoted;
+
+                if (tokenEnded && !QuoteMode && !char.IsWhiteSpace(aJSON[i]))
+                {
+                    char character = aJSON[i];
+                    bool startsComment = character == '/' && i + 1 < aJSON.Length
+                        && (aJSON[i + 1] == '/' || aJSON[i + 1] == '*');
+
+                    if (character is ':' or ',' or '}' or ']')
+                    {
+                        tokenEnded = false;
+                    }
+                    else if (!startsComment)
+                    {
+                        throw new FormatException("Expected a separator after the JSON token.");
+                    }
+                }
+
                 switch (aJSON[i])
                 {
                     case '{':
@@ -562,6 +583,10 @@ namespace AsmResolver.DotNet.Config.Json
                         {
                             Token.Append(aJSON[i]);
                             break;
+                        }
+                        if (stack.Count >= MaximumDepth)
+                        {
+                            throw new FormatException($"JSON nesting exceeds the maximum depth of {MaximumDepth}.");
                         }
                         stack.Push(new JSONObject());
                         if (ctx != null)
@@ -581,6 +606,8 @@ namespace AsmResolver.DotNet.Config.Json
                             break;
                         }
 
+                        if (stack.Count >= MaximumDepth)
+                            throw new FormatException($"JSON nesting exceeds the maximum depth of {MaximumDepth}.");
                         stack.Push(new JSONArray());
                         if (ctx != null)
                         {
@@ -696,12 +723,24 @@ namespace AsmResolver.DotNet.Config.Json
                     case '/':
                         if (allowLineComments && !QuoteMode && i + 1 < aJSON.Length && aJSON[i + 1] == '/')
                         {
+                            tokenEnded |= Token.Length > 0 || TokenIsQuoted;
                             while (++i < aJSON.Length && aJSON[i] != '\n' && aJSON[i] != '\r') ;
+                            break;
+                        }
+                        if (allowLineComments && !QuoteMode && i + 1 < aJSON.Length && aJSON[i + 1] == '*')
+                        {
+                            int end = aJSON.IndexOf("*/", i + 2, StringComparison.Ordinal);
+                            if (end < 0)
+                                throw new FormatException("Unterminated JSON comment.");
+                            tokenEnded |= Token.Length > 0 || TokenIsQuoted;
+                            i = end + 1;
                             break;
                         }
                         Token.Append(aJSON[i]);
                         break;
                     case '\uFEFF': // remove / ignore BOM (Byte Order Mark)
+                        if (QuoteMode)
+                            Token.Append(aJSON[i]);
                         break;
 
                     default:
@@ -714,6 +753,10 @@ namespace AsmResolver.DotNet.Config.Json
             {
                 throw new Exception("JSON Parse: Quotation marks seems to be messed up.");
             }
+
+            if (stack.Count > 0)
+                throw new FormatException("Unterminated JSON object or array.");
+
             if (ctx == null)
                 return ParseElement(Token.ToString(), TokenIsQuoted);
             return ctx;
@@ -1080,6 +1123,7 @@ namespace AsmResolver.DotNet.Config.Json
     internal partial class JSONNumber : JSONNode
     {
         private double m_Data;
+        private string _rawValue;
 
         public override JSONNodeType Tag { get { return JSONNodeType.Number; } }
         public override bool IsNumber { get { return true; } }
@@ -1087,29 +1131,36 @@ namespace AsmResolver.DotNet.Config.Json
 
         public override string Value
         {
-            get { return m_Data.ToString(CultureInfo.InvariantCulture); }
+            get { return _rawValue ?? m_Data.ToString("R", CultureInfo.InvariantCulture); }
             set
             {
                 double v;
                 if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out v))
+                {
                     m_Data = v;
+                    _rawValue = value;
+                }
             }
         }
 
         public override double AsDouble
         {
             get { return m_Data; }
-            set { m_Data = value; }
+            set
+            {
+                m_Data = value;
+                _rawValue = null;
+            }
         }
         public override long AsLong
         {
             get { return (long)m_Data; }
-            set { m_Data = value; }
+            set { Value = value.ToString(CultureInfo.InvariantCulture); }
         }
         public override ulong AsULong
         {
             get { return (ulong)m_Data; }
-            set { m_Data = value; }
+            set { Value = value.ToString(CultureInfo.InvariantCulture); }
         }
 
         public JSONNumber(double aData)
@@ -1119,26 +1170,18 @@ namespace AsmResolver.DotNet.Config.Json
 
         public JSONNumber(string aData)
         {
-            Value = aData;
+            double.TryParse(aData, NumberStyles.Float, CultureInfo.InvariantCulture, out m_Data);
+            _rawValue = aData;
         }
 
         public override JSONNode Clone()
         {
-            return new JSONNumber(m_Data);
+            return new JSONNumber(Value);
         }
 
         internal override void WriteToStringBuilder(StringBuilder aSB, int aIndent, int aIndentInc, JSONTextMode aMode)
         {
             aSB.Append(Value.ToString(CultureInfo.InvariantCulture));
-        }
-        private static bool IsNumeric(object value)
-        {
-            return value is int || value is uint
-                || value is float || value is double
-                || value is decimal
-                || value is long || value is ulong
-                || value is short || value is ushort
-                || value is sbyte || value is byte;
         }
         public override bool Equals(object obj)
         {
@@ -1148,18 +1191,17 @@ namespace AsmResolver.DotNet.Config.Json
                 return true;
             JSONNumber s2 = obj as JSONNumber;
             if (s2 != null)
-                return m_Data == s2.m_Data;
-            if (IsNumeric(obj))
-                return Convert.ToDouble(obj) == m_Data;
+                return string.Equals(Value, s2.Value, StringComparison.Ordinal);
             return false;
         }
         public override int GetHashCode()
         {
-            return m_Data.GetHashCode();
+            return Value.GetHashCode();
         }
         public override void Clear()
         {
             m_Data = 0;
+            _rawValue = null;
         }
     }
     // End of JSONNumber

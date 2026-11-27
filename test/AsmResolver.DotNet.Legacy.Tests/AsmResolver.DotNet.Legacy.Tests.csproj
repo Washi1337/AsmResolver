@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>AsmResolver.DotNet.Tests</RootNamespace>
+        <!-- Override with -p:LegacyTargetFramework=net35, net462, net472, netcoreapp3.1, or netstandard2.1. -->
+        <LegacyTargetFramework Condition="'$(LegacyTargetFramework)' == ''">netstandard2.0</LegacyTargetFramework>
+        <ArtifactsPivots>$(Configuration)_$(LegacyTargetFramework)</ArtifactsPivots>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
+        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.analyzers" Version="2.3.0" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj"
+                          SetTargetFramework="TargetFramework=$(LegacyTargetFramework)"
+                          SkipGetTargetFrameworkProperties="true" />
+        <Compile Include="..\AsmResolver.DotNet.Tests\Config\Json\RuntimeConfigurationTest.cs"
+                 Link="Config\Json\RuntimeConfigurationTest.cs" />
+    </ItemGroup>
+
+</Project>

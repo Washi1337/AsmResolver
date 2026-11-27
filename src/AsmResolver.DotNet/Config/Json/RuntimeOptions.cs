@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
 #if NET5_0_OR_GREATER
 using System.Text.Json;
@@ -46,6 +48,11 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Indicates configuration properties to configure the runtime and the framework
         /// </summary>
+        /// <remarks>
+        /// On legacy targets, JSON values are represented by their corresponding CLR types.
+        /// Numbers that cannot be represented without losing precision or changing their original
+        /// representation are stored as objects whose <see cref="object.ToString"/> returns the raw JSON value.
+        /// </remarks>
 #if NET5_0_OR_GREATER
         public Dictionary<string, JsonElement>? ConfigProperties
 #else
@@ -55,6 +62,7 @@ namespace AsmResolver.DotNet.Config.Json
             get;
             set;
         }
+
         /// <summary>
         /// Gets or sets the optional string value which specifies the Target Framework Moniker.
         /// </summary>
@@ -87,7 +95,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// The presence of this section (or another framework in the new "framework" section) indicates
         /// that the application is a framework-dependent app.
         /// </remarks>
-        public List<RuntimeFramework>? Frameworks
+        public List<RuntimeFramework?>? Frameworks
         {
             get;
             set;
@@ -96,7 +104,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Gets an optional array (added in .NET Core 3.0) that allows multiple frameworks to be specified.
         /// </summary>
-        public List<RuntimeFramework>? IncludedFrameworks
+        public List<RuntimeFramework?>? IncludedFrameworks
         {
             get;
             set;
@@ -126,68 +134,198 @@ namespace AsmResolver.DotNet.Config.Json
         /// Optional property which specifies additional paths to consider when looking for dependencies.
         /// The value is either a single string, or an array of strings.
         /// </summary>
-        public List<string>? AdditionalProbingPaths
+#if NET5_0_OR_GREATER
+        [JsonConverter(typeof(ProbingPathsConverter))]
+#endif
+        public List<string?>? AdditionalProbingPaths
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the framework version roll-forward policy.
+        /// </summary>
+        public string? RollForward
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets additional properties to include in the runtime configuration.
+        /// </summary>
+        /// <remarks>
+        /// The dictionary must not contain keys matching known JSON property names.
+        /// </remarks>
+#if NET5_0_OR_GREATER
+        [JsonExtensionData]
+        public IDictionary<string, JsonElement>? AdditionalProperties
+        {
+            get;
+            set;
+        }
+#else
+        public IDictionary<string, object?>? AdditionalProperties
+        {
+            get;
+            set;
+        }
+#endif
+
 #if !NET5_0_OR_GREATER
         internal static RuntimeOptions FromJsonNode(JSONNode node)
         {
+            if (!node.IsObject)
+                throw new FormatException("Expected an object for 'runtimeOptions'.");
+
             var result = new RuntimeOptions();
 
-            if (node.HasKey("tfm"))
-                result.TargetFrameworkMoniker = node["tfm"].Value;
+            if (node.HasKey("tfm") && !node["tfm"].IsNull)
+            {
+                var value = node["tfm"];
+                if (!value.IsString)
+                    throw new FormatException("Expected a string for 'tfm'.");
 
-            if (node.HasKey("framework"))
+                result.TargetFrameworkMoniker = value.Value;
+            }
+
+            if (node.HasKey("framework") && !node["framework"].IsNull)
                 result.Framework = RuntimeFramework.FromJsonNode(node["framework"]);
 
-            if (node.HasKey("frameworks"))
+            if (node.HasKey("frameworks") && !node["frameworks"].IsNull)
             {
-                result.Frameworks = new List<RuntimeFramework>();
+                if (!node["frameworks"].IsArray)
+                    throw new FormatException("Expected an array for 'frameworks'.");
+
+                result.Frameworks = new List<RuntimeFramework?>();
                 foreach (var item in node["frameworks"].Values)
-                    result.Frameworks.Add(RuntimeFramework.FromJsonNode(item));
+                    result.Frameworks.Add(item.IsNull ? null : RuntimeFramework.FromJsonNode(item));
             }
 
-            if (node.HasKey("includedFrameworks"))
+            if (node.HasKey("includedFrameworks") && !node["includedFrameworks"].IsNull)
             {
-                result.IncludedFrameworks = new List<RuntimeFramework>();
+                if (!node["includedFrameworks"].IsArray)
+                    throw new FormatException("Expected an array for 'includedFrameworks'.");
+
+                result.IncludedFrameworks = new List<RuntimeFramework?>();
                 foreach (var item in node["includedFrameworks"].Values)
-                    result.IncludedFrameworks.Add(RuntimeFramework.FromJsonNode(item));
+                    result.IncludedFrameworks.Add(item.IsNull ? null : RuntimeFramework.FromJsonNode(item));
             }
 
-            if (node.HasKey("applyPatches"))
-                result.ApplyPatches = node["ApplyPatches"].AsBool;
-
-            if (node.HasKey("rollForwardOnNoCandidateFx"))
-                result.RollForwardOnNoCandidateFx = node["rollForwardOnNoCandidateFx"].AsInt;
-
-            if (node.HasKey("additionalProbingPaths"))
+            if (node.HasKey("applyPatches") && !node["applyPatches"].IsNull)
             {
-                result.AdditionalProbingPaths = new List<string>();
-                foreach (var item in node["additionalProbingPaths"].Values)
-                    result.AdditionalProbingPaths.Add(item.Value);
+                var value = node["applyPatches"];
+                if (!value.IsBoolean)
+                    throw new FormatException("Expected a boolean for 'applyPatches'.");
+
+                result.ApplyPatches = value.AsBool;
             }
 
-            if (node.HasKey("configProperties"))
+            if (node.HasKey("rollForwardOnNoCandidateFx") && !node["rollForwardOnNoCandidateFx"].IsNull)
             {
+                var value = node["rollForwardOnNoCandidateFx"];
+                if (!value.IsNumber
+                    || !int.TryParse(value.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int policy))
+                {
+                    throw new FormatException("Expected a 32-bit integer for 'rollForwardOnNoCandidateFx'.");
+                }
+
+                result.RollForwardOnNoCandidateFx = policy;
+            }
+
+            if (node.HasKey("additionalProbingPaths") && !node["additionalProbingPaths"].IsNull)
+            {
+                result.AdditionalProbingPaths = new List<string?>();
+                var paths = node["additionalProbingPaths"];
+                if (paths.IsString)
+                {
+                    result.AdditionalProbingPaths.Add(paths.Value);
+                }
+                else if (paths.IsArray)
+                {
+                    foreach (var item in paths.Values)
+                    {
+                        if (!item.IsString && !item.IsNull)
+                            throw new FormatException("Expected a string or null in 'additionalProbingPaths'.");
+
+                        result.AdditionalProbingPaths.Add(item.IsNull ? null : item.Value);
+                    }
+                }
+                else
+                {
+                    throw new FormatException("Expected a string or an array of strings for 'additionalProbingPaths'.");
+                }
+            }
+
+            if (node.HasKey("configProperties") && !node["configProperties"].IsNull)
+            {
+                if (!node["configProperties"].IsObject)
+                    throw new FormatException("Expected an object for 'configProperties'.");
+
                 result.ConfigProperties = new Dictionary<string, object?>();
                 foreach (var item in node["configProperties"])
                     result.ConfigProperties[item.Key] = InterpretValue(item.Value);
             }
 
+            if (node.HasKey("rollForward") && !node["rollForward"].IsNull)
+            {
+                var value = node["rollForward"];
+                if (!value.IsString)
+                    throw new FormatException("Expected a string for 'rollForward'.");
+
+                result.RollForward = value.Value;
+            }
+
+            result.AdditionalProperties = JsonExtensionData.Read(
+                node,
+                "tfm",
+                "framework",
+                "frameworks",
+                "includedFrameworks",
+                "applyPatches",
+                "rollForwardOnNoCandidateFx",
+                "rollForward",
+                "additionalProbingPaths",
+                "configProperties"
+            );
+
             return result;
         }
 
-        private static object? InterpretValue(JSONNode node) => node.Tag switch
+        internal static object? InterpretValue(JSONNode node) => node.Tag switch
         {
             JSONNodeType.String => node.Value,
-            JSONNodeType.Number => node.AsInt,
+            JSONNodeType.Number => InterpretNumber(node),
             JSONNodeType.NullValue => null,
             JSONNodeType.Boolean => node.AsBool,
+            JSONNodeType.Array => node.Linq.Select(item => InterpretValue(item.Value)).ToList(),
+            JSONNodeType.Object => node.Linq.ToDictionary(item => item.Key, item => InterpretValue(item.Value)),
             _ => null
         };
+
+        private static object InterpretNumber(JSONNode node)
+        {
+            string value = node.Value;
+            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int intValue)
+                && intValue.ToString(CultureInfo.InvariantCulture) == value)
+                return intValue;
+
+            if (long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long longValue)
+                && longValue.ToString(CultureInfo.InvariantCulture) == value)
+                return longValue;
+
+            if (ulong.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out ulong ulongValue)
+                && ulongValue.ToString(CultureInfo.InvariantCulture) == value)
+                return ulongValue;
+
+            if (decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal decimalValue)
+                && decimalValue.ToString(CultureInfo.InvariantCulture) == value)
+                return decimalValue;
+
+            // Preserve the original JSON literal if none of the conversions round-trip.
+            return node;
+        }
 #endif
 
         /// <summary>
@@ -201,13 +339,19 @@ namespace AsmResolver.DotNet.Config.Json
             if (Frameworks is { } frameworks)
             {
                 foreach (var includedFramework in frameworks)
-                    yield return includedFramework;
+                {
+                    if (includedFramework is not null)
+                        yield return includedFramework;
+                }
             }
 
             if (IncludedFrameworks is { } includedFrameworks)
             {
                 foreach (var includedFramework in includedFrameworks)
-                    yield return includedFramework;
+                {
+                    if (includedFramework is not null)
+                        yield return includedFramework;
+                }
             }
         }
     }

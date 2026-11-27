@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 #if NET5_0_OR_GREATER
 using System.Text.Json;
+using System.Text.Json.Serialization;
 #endif
 
 namespace AsmResolver.DotNet.Config.Json
@@ -30,15 +32,25 @@ namespace AsmResolver.DotNet.Config.Json
         public static RuntimeConfiguration? FromJson(string json)
         {
 #if NET5_0_OR_GREATER
-            return JsonSerializer.Deserialize(json, RuntimeConfigurationSerializerContext.Default.RuntimeConfiguration);
+            return JsonSerializer.Deserialize(json, RuntimeConfigurationSerializerContext.Reader.RuntimeConfiguration);
 #else
             var result = new RuntimeConfiguration();
 
             var root = JSON.Parse(json);
+            if (root.IsNull)
+                return null;
+
+            if (!root.IsObject)
+                throw new FormatException("Expected an object for the runtime configuration.");
+
+            result.AdditionalProperties = JsonExtensionData.Read(root, "runtimeOptions");
+
             if (!root.HasKey("runtimeOptions"))
                 return result;
 
-            result.RuntimeOptions = RuntimeOptions.FromJsonNode(root["runtimeOptions"]);
+            result.RuntimeOptions = root["runtimeOptions"].IsNull
+                ? null
+                : RuntimeOptions.FromJsonNode(root["runtimeOptions"]);
             return result;
 #endif
         }
@@ -54,30 +66,62 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Creates a new runtime configuration with the provided options.
         /// </summary>
-        public RuntimeConfiguration(RuntimeOptions options)
+        /// <param name="options">The runtime options, or <c>null</c> if no options are specified.</param>
+        public RuntimeConfiguration(RuntimeOptions? options)
         {
             RuntimeOptions = options;
         }
 
         /// <summary>
-        /// Gets or sets the runtime options.
+        /// Gets or sets the runtime options, or <c>null</c> if the configuration specifies no options.
         /// </summary>
-        public RuntimeOptions RuntimeOptions
+        public RuntimeOptions? RuntimeOptions
         {
             get;
             set;
         }
 
         /// <summary>
+        /// Gets or sets additional properties to include in the runtime configuration.
+        /// </summary>
+        /// <remarks>
+        /// The dictionary must not contain keys matching known JSON property names.
+        /// </remarks>
+#if NET5_0_OR_GREATER
+        [JsonExtensionData]
+        public IDictionary<string, JsonElement>? AdditionalProperties
+        {
+            get;
+            set;
+        }
+#else
+        public IDictionary<string, object?>? AdditionalProperties
+        {
+            get;
+            set;
+        }
+#endif
+
+        /// <summary>
         /// Serializes the configuration to a JSON string.
         /// </summary>
+        /// <remarks>
+        /// The original formatting and comments of a configuration are not preserved during serialization.
+        /// Known properties with a value of <c>null</c> are omitted, and additional probing paths
+        /// are always represented by an array of strings.
+        /// </remarks>
         /// <returns>The JSON string.</returns>
+        /// <exception cref="NotSupportedException">
+        /// Occurs when a property value cannot be serialized on legacy targets.
+        /// </exception>
         public string ToJson()
         {
+            ValidateAdditionalProperties();
+
 #if NET5_0_OR_GREATER
             return JsonSerializer.Serialize(this, RuntimeConfigurationSerializerContext.Default.RuntimeConfiguration);
 #else
-            throw new NotSupportedException();
+            return RuntimeConfigurationJsonSerializer.Serialize(this);
 #endif
         }
 
@@ -98,8 +142,44 @@ namespace AsmResolver.DotNet.Config.Json
         public bool TryGetTargetRuntime(out DotNetRuntimeInfo targetRuntime)
         {
             targetRuntime = default;
-            return !string.IsNullOrEmpty(RuntimeOptions.TargetFrameworkMoniker)
-                && DotNetRuntimeInfo.TryParseMoniker(RuntimeOptions.TargetFrameworkMoniker!, out targetRuntime);
+
+            var options = RuntimeOptions;
+
+            return options is not null && !string.IsNullOrEmpty(options.TargetFrameworkMoniker)
+                && DotNetRuntimeInfo.TryParseMoniker(options.TargetFrameworkMoniker!, out targetRuntime);
+        }
+
+        private void ValidateAdditionalProperties()
+        {
+            JsonExtensionData.Validate(AdditionalProperties, "runtimeOptions");
+            var options = RuntimeOptions;
+            if (options is null)
+                return;
+
+            JsonExtensionData.Validate(
+                options.AdditionalProperties,
+                "tfm",
+                "framework",
+                "frameworks",
+                "includedFrameworks",
+                "applyPatches",
+                "rollForwardOnNoCandidateFx",
+                "rollForward",
+                "additionalProbingPaths",
+                "configProperties"
+            );
+
+            foreach (var framework in options.GetAllFrameworks())
+            {
+                JsonExtensionData.Validate(
+                    framework.AdditionalProperties,
+                    "name",
+                    "version",
+                    "rollForward",
+                    "applyPatches",
+                    "rollForwardOnNoCandidateFx"
+                );
+            }
         }
     }
 }
