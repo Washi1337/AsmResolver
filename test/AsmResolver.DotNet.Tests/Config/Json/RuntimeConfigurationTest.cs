@@ -655,6 +655,23 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             Assert.NotNull(RuntimeConfiguration.FromJson(json));
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PreserveByteOrderMarkInStrings(bool escaped)
+        {
+            const string value = "a\uFEFFb";
+            string properties = JsonSerializer.Serialize(new Dictionary<string, string> { [value] = value });
+            string json = "{\"runtimeOptions\":{\"configProperties\":" + properties + "}}";
+            if (!escaped)
+                json = json.Replace("\\uFEFF", "\uFEFF");
+
+            var config = RuntimeConfiguration.FromJson(json);
+
+            Assert.NotNull(config);
+            AssertJsonEqual(json, config.ToJson());
+        }
+
         private static void AssertJsonEqual(string expected, string actual)
         {
             using var expectedDocument = JsonDocument.Parse(expected);

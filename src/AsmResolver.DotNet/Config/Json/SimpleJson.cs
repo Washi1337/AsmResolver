@@ -740,6 +740,8 @@ namespace AsmResolver.DotNet.Config.Json
                         Token.Append(aJSON[i]);
                         break;
                     case '\uFEFF': // remove / ignore BOM (Byte Order Mark)
+                        if (QuoteMode)
+                            Token.Append(aJSON[i]);
                         break;
 
                     default:
