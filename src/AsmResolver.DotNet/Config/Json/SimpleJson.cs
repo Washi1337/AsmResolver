@@ -753,6 +753,10 @@ namespace AsmResolver.DotNet.Config.Json
             {
                 throw new Exception("JSON Parse: Quotation marks seems to be messed up.");
             }
+
+            if (stack.Count > 0)
+                throw new FormatException("Unterminated JSON object or array.");
+
             if (ctx == null)
                 return ParseElement(Token.ToString(), TokenIsQuoted);
             return ctx;

@@ -648,6 +648,34 @@ namespace AsmResolver.DotNet.Tests.Config.Json
         }
 
         [Theory]
+        [InlineData("{")]
+        [InlineData("{\"runtimeOptions\":{")]
+        [InlineData("{\"runtimeOptions\":{}")]
+        [InlineData("{\"runtimeOptions\":{\"configProperties\":{\"Value\":1}")]
+        [InlineData("{\"runtimeOptions\":{\"configProperties\":{\"Value\":1}}")]
+        [InlineData("{\"runtimeOptions\":{\"configProperties\":{\"Value\":[")]
+        [InlineData("{\"runtimeOptions\":{\"configProperties\":{\"Value\":[1,2")]
+        [InlineData("{\"runtimeOptions\":{\"configProperties\":{\"Value\":[\"text\"")]
+        [InlineData("{\"runtimeOptions\":{\"configProperties\":{\"Value\":[1,2]}")]
+        [InlineData("{\"runtimeOptions\":{} // comment")]
+        public void RejectUnclosedContainers(string json)
+        {
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+        }
+
+        [Theory]
+        [InlineData("// comment")]
+        [InlineData("/* comment */")]
+        public void AcceptCommentsAfterRoot(string comment)
+        {
+            const string json = "{\"runtimeOptions\":{}}";
+            var config = RuntimeConfiguration.FromJson(json + " " + comment);
+
+            Assert.NotNull(config);
+            AssertJsonEqual(json, config.ToJson());
+        }
+
+        [Theory]
         [InlineData("1/* comment */2")]
         [InlineData("tr/* comment */ue")]
         [InlineData("1/* comment */ 2")]
