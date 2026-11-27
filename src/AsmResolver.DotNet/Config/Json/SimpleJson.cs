@@ -534,18 +534,14 @@ namespace AsmResolver.DotNet.Config.Json
         {
             if (quoted)
                 return token;
-            if (token.Length <= 5)
-            {
-                string tmp = token.ToLower();
-                if (tmp == "false" || tmp == "true")
-                    return tmp == "true";
-                if (tmp == "null")
-                    return JSONNull.CreateOrGet();
-            }
+            if (token == "false" || token == "true")
+                return token == "true";
+            if (token == "null")
+                return JSONNull.CreateOrGet();
             if (NumberRegex.IsMatch(token))
                 return new JSONNumber(token);
-            else
-                return token;
+
+            throw new FormatException("Invalid JSON value.");
         }
 
         public static JSONNode Parse(string aJSON)

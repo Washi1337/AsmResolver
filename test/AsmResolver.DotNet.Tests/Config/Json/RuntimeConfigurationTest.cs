@@ -692,6 +692,40 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             AssertJsonEqual(json, config.ToJson());
         }
 
+        [Theory]
+        [InlineData("Major")]
+        [InlineData("01")]
+        [InlineData("+1")]
+        [InlineData(".1")]
+        [InlineData("1.")]
+        [InlineData("1e")]
+        [InlineData("0x1")]
+        [InlineData("NaN")]
+        [InlineData("Infinity")]
+        [InlineData("TRUE")]
+        [InlineData("FALSE")]
+        [InlineData("NULL")]
+        public void RejectUnquotedJsonValues(string value)
+        {
+            string json = "{\"runtimeOptions\":{\"configProperties\":{\"Value\":" + value + "}}}";
+
+            Assert.NotNull(Record.Exception(() => RuntimeConfiguration.FromJson(json)));
+        }
+
+        [Theory]
+        [InlineData("Major")]
+        [InlineData("01")]
+        [InlineData("NaN")]
+        [InlineData("TRUE")]
+        public void PreserveQuotedJsonValues(string value)
+        {
+            string json = "{\"runtimeOptions\":{\"configProperties\":{\"Value\":\"" + value + "\"}}}";
+            var config = RuntimeConfiguration.FromJson(json);
+
+            Assert.NotNull(config);
+            AssertJsonEqual(json, config.ToJson());
+        }
+
         private static void AssertJsonEqual(string expected, string actual)
         {
             using var expectedDocument = JsonDocument.Parse(expected);
